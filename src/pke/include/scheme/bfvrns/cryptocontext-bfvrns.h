@@ -32,7 +32,7 @@
 
 #include "scheme/bfvrns/gen-cryptocontext-bfvrns-internal.h"
 #include "scheme/bfvrns/cryptocontextparams-bfvrns.h"
-#include "lattice/backend.h"
+#include "lattice/lat-hal.h"
 
 namespace lbcrypto {
 // forward declarations. TODO (dsuponit): I would replace them with the following includes later:
