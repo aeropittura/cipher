@@ -44,12 +44,6 @@
 #include "cryptocontext-ser.h"
 #include "scheme/ckksrns/ckksrns-ser.h"
 #include "globals.h" // for SERIALIZE_PRECOMPUTE
- //====
-//#include "cryptocontext.h"
-//#include "cryptocontextgen.h"
-//#include "cryptocontexthelper.h"
-//#include "palisade.h"
-//#include "utils/testcasegen.h"
 
 
 using namespace lbcrypto;
@@ -221,16 +215,14 @@ protected:
                 std::stringstream s;
                 Serial::Serialize(kp.publicKey, s, sertype);
                 Serial::Deserialize(kpnew.publicKey, s, sertype);
-                EXPECT_EQ(*kp.publicKey, *kpnew.publicKey)
-                    << "Public key mismatch after ser/deser";
+                EXPECT_EQ(*kp.publicKey, *kpnew.publicKey) << "Public key mismatch after ser/deser";
             }
             DEBUG("step 2");
             {
                 std::stringstream s;
                 Serial::Serialize(kp.secretKey, s, sertype);
                 Serial::Deserialize(kpnew.secretKey, s, sertype);
-                EXPECT_EQ(*kp.secretKey, *kpnew.secretKey)
-                    << "Secret key mismatch after ser/deser";
+                EXPECT_EQ(*kp.secretKey, *kpnew.secretKey) << "Secret key mismatch after ser/deser";
             }
             DEBUG("step 3");
             vector<std::complex<double>> vals = { 1.0, 3.0, 5.0, 7.0, 9.0,
@@ -238,8 +230,7 @@ protected:
             Plaintext plaintextShort = cc->MakeCKKSPackedPlaintext(vals);
             Plaintext plaintextShortL2D2 = cc->MakeCKKSPackedPlaintext(vals, 2, 2);
             Ciphertext<DCRTPoly> ciphertext = cc->Encrypt(kp.publicKey, plaintextShort);
-            Ciphertext<DCRTPoly> ciphertextL2D2 =
-                cc->Encrypt(kp.publicKey, plaintextShortL2D2);
+            Ciphertext<DCRTPoly> ciphertextL2D2 = cc->Encrypt(kp.publicKey, plaintextShortL2D2);
 
             DEBUG("step 4");
             Ciphertext<DCRTPoly> newC;
@@ -277,35 +268,25 @@ protected:
             DEBUG("step 7");
             // serialize a bunch of mult keys
             std::stringstream ser0;
-            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::SerializeEvalMultKey(
-                ser0, sertype, kp.secretKey->GetKeyTag()),
-                true)
+            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::SerializeEvalMultKey(ser0, sertype, kp.secretKey->GetKeyTag()), true)
                 << "single eval mult key ser fails";
             std::stringstream ser2a;
-            EXPECT_EQ(
-                CryptoContextImpl<DCRTPoly>::SerializeEvalMultKey(ser2a, sertype, cc),
-                true)
+            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::SerializeEvalMultKey(ser2a, sertype, cc), true)
                 << "context 1 eval mult key ser fails";
             std::stringstream ser3;
-            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::SerializeEvalMultKey(ser3, sertype),
-                true)
+            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::SerializeEvalMultKey(ser3, sertype), true)
                 << "all context eval mult key ser fails";
 
             DEBUG("step 8");
             // serialize a bunch of sum keys
             std::stringstream aser0;
-            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::SerializeEvalSumKey(
-                aser0, sertype, kp.secretKey->GetKeyTag()),
-                true)
+            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::SerializeEvalSumKey(aser0, sertype, kp.secretKey->GetKeyTag()), true)
                 << "single eval sum key ser fails";
             std::stringstream aser2a;
-            EXPECT_EQ(
-                CryptoContextImpl<DCRTPoly>::SerializeEvalSumKey(aser2a, sertype, cc),
-                true)
+            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::SerializeEvalSumKey(aser2a, sertype, cc), true)
                 << "single ctx eval sum key ser fails";
             std::stringstream aser3;
-            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::SerializeEvalSumKey(aser3, sertype),
-                true)
+            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::SerializeEvalSumKey(aser3, sertype), true)
                 << "all eval sum key ser fails";
 
             DEBUG("step 9");
@@ -315,35 +296,28 @@ protected:
             CryptoContextImpl<DCRTPoly>::ClearEvalMultKeys();
             CryptoContextImpl<DCRTPoly>::ClearEvalSumKeys();
             CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
-            EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 0)
-                << "after release";
+            EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 0) << "after release";
 
             vector<EvalKey<DCRTPoly>> evalMultKeys;
             CryptoContextImpl<DCRTPoly>::DeserializeEvalMultKey(ser0, sertype);
-            EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 1)
-                << "one-key deser, context";
-            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::GetAllEvalMultKeys().size(), 1U)
-                << "one-key deser, keys";
+            EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 1) << "one-key deser, context";
+            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::GetAllEvalMultKeys().size(), 1U) << "one-key deser, keys";
 
             CryptoContextImpl<DCRTPoly>::ClearEvalMultKeys();
             CryptoContextImpl<DCRTPoly>::ClearEvalSumKeys();
             CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
 
             CryptoContextImpl<DCRTPoly>::DeserializeEvalMultKey(ser2a, sertype);
-            EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 1)
-                << "one-ctx deser, context";
-            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::GetAllEvalMultKeys().size(), 2U)
-                << "one-ctx deser, keys";
+            EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 1) << "one-ctx deser, context";
+            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::GetAllEvalMultKeys().size(), 2U) << "one-ctx deser, keys";
 
             CryptoContextImpl<DCRTPoly>::ClearEvalMultKeys();
             CryptoContextImpl<DCRTPoly>::ClearEvalSumKeys();
             CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
 
             CryptoContextImpl<DCRTPoly>::DeserializeEvalMultKey(ser3, sertype);
-            EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 1)
-                << "all-key deser, context";
-            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::GetAllEvalMultKeys().size(), 2U)
-                << "all-key deser, keys";
+            EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 1) << "all-key deser, context";
+            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::GetAllEvalMultKeys().size(), 2U) << "all-key deser, keys";
 
             DEBUG("step 10");
             // test sum deserialize
@@ -353,30 +327,24 @@ protected:
             CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
 
             CryptoContextImpl<DCRTPoly>::DeserializeEvalSumKey(aser0, sertype);
-            EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 1)
-                << "one-key deser, context";
-            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::GetAllEvalSumKeys().size(), 1U)
-                << "one-key deser, keys";
+            EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 1) << "one-key deser, context";
+            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::GetAllEvalSumKeys().size(), 1U) << "one-key deser, keys";
 
             CryptoContextImpl<DCRTPoly>::ClearEvalMultKeys();
             CryptoContextImpl<DCRTPoly>::ClearEvalSumKeys();
             CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
 
             CryptoContextImpl<DCRTPoly>::DeserializeEvalSumKey(aser2a, sertype);
-            EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 1)
-                << "one-ctx deser, context";
-            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::GetAllEvalSumKeys().size(), 2U)
-                << "one-ctx deser, keys";
+            EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 1) << "one-ctx deser, context";
+            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::GetAllEvalSumKeys().size(), 2U) << "one-ctx deser, keys";
 
             CryptoContextImpl<DCRTPoly>::ClearEvalMultKeys();
             CryptoContextImpl<DCRTPoly>::ClearEvalSumKeys();
             CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
 
             CryptoContextImpl<DCRTPoly>::DeserializeEvalSumKey(aser3, sertype);
-            EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 1)
-                << "all-key deser, context";
-            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::GetAllEvalSumKeys().size(), 2U)
-                << "all-key deser, keys";
+            EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 1) << "all-key deser, context";
+            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::GetAllEvalSumKeys().size(), 2U) << "all-key deser, keys";
 
             // ending cleanup
             CryptoContextImpl<DCRTPoly>::ClearEvalMultKeys();
