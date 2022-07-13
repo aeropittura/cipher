@@ -39,6 +39,7 @@
 #include "schemerns/rns-parametergeneration.h"
 #include "schemerns/rns-pke.h"
 #include "schemerns/rns-pre.h"
+#include "schemerns/rns-fhe.h"
 #include "schemerns/rns-scheme.h"
 
 #endif
