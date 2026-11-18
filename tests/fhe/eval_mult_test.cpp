@@ -280,7 +280,7 @@ class UTGENERAL_EVALMULT : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_E
     }
 
     void unit_test_eval_mult_many_error_handling(const TEST_CASE_UTGENERAL_EVALMULT& test_data,
-                                            const std::string& failmsg = std::string()) {
+                                                 const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> crypto_context(unit_test_generate_context(test_data.params));
 
@@ -334,11 +334,11 @@ class UTGENERAL_EVALMULT : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_E
             ////////////////////////////////////////////////////////////
             // Perform consecutive multiplications and do a keyswtiching at the end.
             auto ciphertext_mul12 = (INVALID_CIPHERTEXT_ERROR1 == test_data.error) ?
-                                           crypto_context->eval_mult_no_relin(nullptr, ciphertext2) :
-                                           crypto_context->eval_mult_no_relin(ciphertext1, ciphertext2);
+                                            crypto_context->eval_mult_no_relin(nullptr, ciphertext2) :
+                                            crypto_context->eval_mult_no_relin(ciphertext1, ciphertext2);
             auto ciphertext_mul123 = (INVALID_CIPHERTEXT_ERROR2 == test_data.error) ?
-                                            crypto_context->eval_mult_no_relin(ciphertext_mul12, nullptr) :
-                                            crypto_context->eval_mult_no_relin(ciphertext_mul12, ciphertext3);
+                                             crypto_context->eval_mult_no_relin(ciphertext_mul12, nullptr) :
+                                             crypto_context->eval_mult_no_relin(ciphertext_mul12, ciphertext3);
             Ciphertext<Element> ciphertext_mul1234 = nullptr;
             if (INVALID_CIPHERTEXT_ERROR3 == test_data.error)
                 ciphertext_mul1234 = crypto_context->eval_mult_and_relinearize(nullptr, ciphertext4);
@@ -374,8 +374,8 @@ class UTGENERAL_EVALMULT : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_E
             // Compute eval_mult_many
             ////////////////////////////////////////////////////////////
             auto ciphertext_mul12345 = (INVALID_CIPHER_TEXT_LIST_MANY == test_data.error) ?
-                                              crypto_context->eval_mult_many(std::vector<Ciphertext<Element>>()) :
-                                              crypto_context->eval_mult_many(cipher_text_list);
+                                               crypto_context->eval_mult_many(std::vector<Ciphertext<Element>>()) :
+                                               crypto_context->eval_mult_many(cipher_text_list);
 
             ////////////////////////////////////////////////////////////
             // Decrypt eval_mult_many
@@ -388,16 +388,20 @@ class UTGENERAL_EVALMULT : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_E
             plaintext_result3->set_length(plaintext_mul3->get_length());
 
             std::string err_msg("EvalMult gives incorrect results");
-            check_equality(plaintext_mul1->get_coef_packed_value(), plaintext_result1->get_coef_packed_value(), eps, err_msg);
+            check_equality(plaintext_mul1->get_coef_packed_value(), plaintext_result1->get_coef_packed_value(), eps,
+                           err_msg);
 
             err_msg = "EvalMultAndRelinearize gives incorrect results";
-            check_equality(plaintext_mul2->get_coef_packed_value(), plaintext_result2->get_coef_packed_value(), eps, err_msg);
+            check_equality(plaintext_mul2->get_coef_packed_value(), plaintext_result2->get_coef_packed_value(), eps,
+                           err_msg);
 
             err_msg = "EvalMultAndRelinearize gives incorrect results";
-            check_equality(plaintext_mul3->get_coef_packed_value(), plaintext_result3->get_coef_packed_value(), eps, err_msg);
+            check_equality(plaintext_mul3->get_coef_packed_value(), plaintext_result3->get_coef_packed_value(), eps,
+                           err_msg);
 
             err_msg = "EvalMultAndRelinearize gives incorrect results";
-            check_equality(plaintext_mul_many->get_coef_packed_value(), plaintext_result3->get_coef_packed_value(), eps, err_msg);
+            check_equality(plaintext_mul_many->get_coef_packed_value(), plaintext_result3->get_coef_packed_value(), eps,
+                           err_msg);
 
             if (SUCCESS != test_data.error) {
                 // make it fail
@@ -416,7 +420,7 @@ class UTGENERAL_EVALMULT : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_E
     }
 
     void unit_test_eval_mult_error_handling(const TEST_CASE_UTGENERAL_EVALMULT& test_data,
-                                        const std::string& failmsg = std::string()) {
+                                            const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> crypto_context(unit_test_generate_context(test_data.params));
 
@@ -484,8 +488,8 @@ class UTGENERAL_EVALMULT : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_E
                 ciphertext_mul12 = crypto_context->eval_mult_no_relin(ciphertext1, ciphertext2);
 
             Ciphertext<Element> ciphertext_mult = (INVALID_CIPHERTEXT_ERROR3 == test_data.error) ?
-                                                         crypto_context->relinearize(nullptr) :
-                                                         crypto_context->relinearize(ciphertext_mul12);
+                                                          crypto_context->relinearize(nullptr) :
+                                                          crypto_context->relinearize(ciphertext_mul12);
 
             ////////////////////////////////////////////////////////////
             // Decryption of multiplicative results with and without keyswtiching (depends
@@ -505,7 +509,8 @@ class UTGENERAL_EVALMULT : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_E
 
             std::string err_msg(failmsg);
             if (CKKSRNS_SCHEME == test_data.params.scheme_id_value)
-                check_equality(plaintext_mult->get_ckks_packed_value(), plaintext_result->get_ckks_packed_value(), eps, err_msg);
+                check_equality(plaintext_mult->get_ckks_packed_value(), plaintext_result->get_ckks_packed_value(), eps,
+                               err_msg);
             else
                 check_equality(plaintext_mult->get_packed_value(), plaintext_result->get_packed_value(), eps, err_msg);
 
@@ -526,7 +531,7 @@ class UTGENERAL_EVALMULT : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_E
     }
 
     void unit_test_relinearization(const TEST_CASE_UTGENERAL_EVALMULT& test_data,
-                                  const std::string& failmsg = std::string()) {
+                                   const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> crypto_context(unit_test_generate_context(test_data.params));
 
@@ -594,7 +599,8 @@ class UTGENERAL_EVALMULT : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_E
 
             std::string err_msg = failmsg + " Relinearization after one multiplication failed.";
             if (CKKSRNS_SCHEME == test_data.params.scheme_id_value)
-                check_equality(plaintext_mult->get_ckks_packed_value(), plaintext_result->get_ckks_packed_value(), eps, err_msg);
+                check_equality(plaintext_mult->get_ckks_packed_value(), plaintext_result->get_ckks_packed_value(), eps,
+                               err_msg);
             else
                 check_equality(plaintext_mult->get_packed_value(), plaintext_result->get_packed_value(), eps, err_msg);
 
@@ -605,7 +611,8 @@ class UTGENERAL_EVALMULT : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_E
 
             err_msg = failmsg + " In-place relinearization after one multiplication failed.";
             if (CKKSRNS_SCHEME == test_data.params.scheme_id_value)
-                check_equality(plaintext_mult->get_ckks_packed_value(), plaintext_result->get_ckks_packed_value(), eps, err_msg);
+                check_equality(plaintext_mult->get_ckks_packed_value(), plaintext_result->get_ckks_packed_value(), eps,
+                               err_msg);
             else
                 check_equality(plaintext_mult->get_packed_value(), plaintext_result->get_packed_value(), eps, err_msg);
 
@@ -623,10 +630,11 @@ class UTGENERAL_EVALMULT : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_E
 
             err_msg = failmsg + " Relinearization after two multiplications failed.";
             if (CKKSRNS_SCHEME == test_data.params.scheme_id_value)
-                check_equality(plaintext_mult2->get_ckks_packed_value(), plaintext_result2->get_ckks_packed_value(), eps,
-                              err_msg);
+                check_equality(plaintext_mult2->get_ckks_packed_value(), plaintext_result2->get_ckks_packed_value(),
+                               eps, err_msg);
             else
-                check_equality(plaintext_mult2->get_packed_value(), plaintext_result2->get_packed_value(), eps, err_msg);
+                check_equality(plaintext_mult2->get_packed_value(), plaintext_result2->get_packed_value(), eps,
+                               err_msg);
 
             ciphertext_mult2 = ciphertext_mul123;
             crypto_context->relinearize(ciphertext_mult2);
@@ -635,10 +643,11 @@ class UTGENERAL_EVALMULT : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_E
 
             err_msg = failmsg + " In-place relinearization after two multiplications failed.";
             if (CKKSRNS_SCHEME == test_data.params.scheme_id_value)
-                check_equality(plaintext_mult2->get_ckks_packed_value(), plaintext_result2->get_ckks_packed_value(), eps,
-                              err_msg);
+                check_equality(plaintext_mult2->get_ckks_packed_value(), plaintext_result2->get_ckks_packed_value(),
+                               eps, err_msg);
             else
-                check_equality(plaintext_mult2->get_packed_value(), plaintext_result2->get_packed_value(), eps, err_msg);
+                check_equality(plaintext_mult2->get_packed_value(), plaintext_result2->get_packed_value(), eps,
+                               err_msg);
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail

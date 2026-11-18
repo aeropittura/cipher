@@ -54,9 +54,9 @@ class CkksRnsContext {
 
   public:
     using ContextType = CryptoContext<Element>;       ///< the generated context type; required by make_crypto_context()
-    using Factory = ContextFactory<Element>;    ///< the factory that creates and caches the contexts
+    using Factory = ContextFactory<Element>;          ///< the factory that creates and caches the contexts
     using PublicKeyEncryptionScheme = CkksRnsScheme;  ///< the scheme instantiated in the context
-    using CryptoParams = CkksRnsCryptoParams;     ///< the crypto parameters instantiated in the context
+    using CryptoParams = CkksRnsCryptoParams;         ///< the crypto parameters instantiated in the context
 
     /**
      * Validates the parameters and generates a CKKS cryptocontext from them.

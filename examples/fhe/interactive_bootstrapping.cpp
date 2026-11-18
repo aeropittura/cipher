@@ -200,8 +200,8 @@ void chebyshev(enum ScalingTechnique rescale_tech) {
 
     // Generate evalsum key part for A
     cc->eval_sum_key_gen(kp1.secret_key);
-    auto eval_sum_keys =
-            std::make_shared<std::map<uint32_t, EvalKey<RnsPoly>>>(cc->get_eval_sum_key_map(kp1.secret_key->get_key_tag()));
+    auto eval_sum_keys = std::make_shared<std::map<uint32_t, EvalKey<RnsPoly>>>(
+            cc->get_eval_sum_key_map(kp1.secret_key->get_key_tag()));
 
     std::cout << "Round 1 of key generation completed." << std::endl;
 
@@ -225,7 +225,8 @@ void chebyshev(enum ScalingTechnique rescale_tech) {
     auto eval_sum_keys_b = cc->multi_eval_sum_key_gen(kp2.secret_key, eval_sum_keys, kp2.public_key->get_key_tag());
 
     std::cout << "Joint evaluation summation key for (s_a + s_b) is generated..." << std::endl;
-    auto eval_sum_keys_join = cc->multi_add_eval_sum_keys(eval_sum_keys, eval_sum_keys_b, kp2.public_key->get_key_tag());
+    auto eval_sum_keys_join =
+            cc->multi_add_eval_sum_keys(eval_sum_keys, eval_sum_keys_b, kp2.public_key->get_key_tag());
 
     cc->insert_eval_sum_key(eval_sum_keys_join);
 

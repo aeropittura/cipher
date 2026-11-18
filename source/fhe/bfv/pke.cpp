@@ -242,9 +242,10 @@ DecryptResult BfvRnsPke::decrypt(ConstCiphertext<RnsPoly> ciphertext, const Priv
             crypto_params->get_multiplication_technique() == HPSPOVERQLEVELED) {
             *plaintext = b.scale_and_round(
                     crypto_params->get_plaintext_modulus(), crypto_params->get_t_q_hat_inv_modq_divq_modt(),
-                    crypto_params->get_t_q_hat_inv_modq_divq_modt_precon(), crypto_params->get_t_q_hat_inv_modq_b_divq_modt(),
-                    crypto_params->get_t_q_hat_inv_modq_b_divq_modt_precon(), crypto_params->get_t_q_hat_inv_modq_divq_frac(),
-                    crypto_params->get_t_q_hat_inv_modq_b_divq_frac());
+                    crypto_params->get_t_q_hat_inv_modq_divq_modt_precon(),
+                    crypto_params->get_t_q_hat_inv_modq_b_divq_modt(),
+                    crypto_params->get_t_q_hat_inv_modq_b_divq_modt_precon(),
+                    crypto_params->get_t_q_hat_inv_modq_divq_frac(), crypto_params->get_t_q_hat_inv_modq_b_divq_frac());
         } else {
             *plaintext = b.scale_and_round(
                     crypto_params->get_moduli_q(), crypto_params->get_plaintext_modulus(), crypto_params->get_tgamma(),

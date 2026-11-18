@@ -41,7 +41,7 @@ using namespace cipher;
 
 template <typename ST, typename PS>
 void unit_test_fhew_serial(const ST& sertype, const PS& sec_level, BINFHE_METHOD variant, BINFHE_OUTPUT ct_type,
-                        const std::string& err_msg) {
+                           const std::string& err_msg) {
     const LwePlaintext val(1);
     auto cc1 = BooleanContext();
     cc1.generate_boolean_context(sec_level, variant);

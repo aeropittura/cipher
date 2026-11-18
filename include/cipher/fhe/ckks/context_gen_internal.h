@@ -80,14 +80,15 @@ typename ContextGeneratorType::ContextType gen_crypto_context_ckksrns_internal(
         flooding_noise_std = std::pow(2, logstd + parameters.get_noise_estimate());
 #if CIPHER_NATIVE_INT == 128
         scaling_mod_size = parameters.get_desired_precision() + parameters.get_noise_estimate() + logstd +
-                         0.5 * std::log2(parameters.get_ring_dim());
+                           0.5 * std::log2(parameters.get_ring_dim());
         first_mod_size_value = scaling_mod_size + 11;
 #else
         scaling_mod_size = MAX_MODULUS_SIZE - 1;
         first_mod_size_value = MAX_MODULUS_SIZE;
         if (logstd + parameters.get_noise_estimate() > scaling_mod_size - 3) {
             CIPHER_THROW("Precision of less than 3 bits is not supported. logstd " + std::to_string(logstd) +
-                          " + noiseEstimate " + std::to_string(parameters.get_noise_estimate()) + " must be 56 or less.");
+                         " + noiseEstimate " + std::to_string(parameters.get_noise_estimate()) +
+                         " must be 56 or less.");
         }
 #endif
     }

@@ -1017,7 +1017,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
             Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         ::cereal::size_type len;
         ar(::cereal::binary_data(&len, sizeof(len)));
@@ -1038,7 +1038,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
             Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         std::string s;
         ar(::cereal::make_nvp("v", s));

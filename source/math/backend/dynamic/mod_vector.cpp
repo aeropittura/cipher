@@ -536,6 +536,6 @@ mubintvec<ubint_el_t> mubintvec<ubint_el_t>::get_digit_at_index_for_base(uint32_
 
 template class mubintvec<BigInteger>;
 
-}  // namespace bigintdyn
+}  // namespace dynamic_int
 
 #endif

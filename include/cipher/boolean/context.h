@@ -59,16 +59,16 @@ struct BooleanContextParams {
     uint32_t number_bits;    ///< bit size of the intermediate prime Q, the RingGSW/RLWE modulus used in bootstrapping
     uint32_t cycl_order;     ///< cyclotomic order 2N of the RingGSW/RLWE ring
     uint32_t lattice_param;  ///< lattice parameter n (dimension) of the additive LWE scheme
-    uint32_t mod_value;           ///< modulus q for additive LWE
+    uint32_t mod_value;      ///< modulus q for additive LWE
     uint32_t mod_ks;         ///< modulus for key switching; zero selects the intermediate prime Q
     uint32_t base_ks;        ///< base for key switching
     uint32_t gadget_base;    ///< gadget base used in bootstrapping (also for the automorphism keys in LMKCDEY)
     uint32_t base_rk;        ///< base for the refreshing key (AP bootstrapping)
-    uint32_t num_auto_keys;   ///< number of automorphism keys for LMKCDEY (> 0)
+    uint32_t num_auto_keys;  ///< number of automorphism keys for LMKCDEY (> 0)
     SecretKeyDist key_dist;  ///< secret key distribution
-    double std_dev_value;          ///< standard deviation of the error distribution
+    double std_dev_value;    ///< standard deviation of the error distribution
     std::map<uint32_t, uint32_t> gadget_base_map;  ///< number of LWE secret-key coefficients assigned to each gadget
-                                                 ///< base, in ascending base order; empty means gadget_base for all
+                                                   ///< base, in ascending base order; empty means gadget_base for all
 };
 
 /**
@@ -97,9 +97,10 @@ class BooleanContext : public Serializable {
      * @param method the bootstrapping method (DM or CGGI or LMKCDEY)
      * @param num_auto_keys number of automorphism keys in LMKCDEY bootstrapping
      */
-    void generate_boolean_context(uint32_t n, uint32_t N, NativeInteger q, NativeInteger Q, double std, uint32_t base_ks,
-                               uint32_t base_g, uint32_t base_r, SecretKeyDist key_dist = UNIFORM_TERNARY,
-                               BINFHE_METHOD method = GINX, uint32_t num_auto_keys = 10);
+    void generate_boolean_context(uint32_t n, uint32_t N, NativeInteger q, NativeInteger Q, double std,
+                                  uint32_t base_ks, uint32_t base_g, uint32_t base_r,
+                                  SecretKeyDist key_dist = UNIFORM_TERNARY, BINFHE_METHOD method = GINX,
+                                  uint32_t num_auto_keys = 10);
 
     /**
      * Creates a crypto context using custom parameters.
@@ -114,7 +115,7 @@ class BooleanContext : public Serializable {
      * @param time_optimization whether to use dynamic bootstrapping technique
      */
     void generate_boolean_context(BINFHE_PARAMSET set, bool arb_func, uint32_t log_q = 11, uint32_t N = 0,
-                               BINFHE_METHOD method = GINX, bool time_optimization = false);
+                                  BINFHE_METHOD method = GINX, bool time_optimization = false);
 
     /**
      * Creates a crypto context using predefined parameters sets. Recommended for
@@ -375,7 +376,7 @@ class BooleanContext : public Serializable {
      * @return a shared pointer to the resulting ciphertext
      */
     LweCiphertext eval_bin_gate(BINGATE gate, ConstLweCiphertext& ct1, ConstLweCiphertext& ct2,
-                              bool extended = false) const;
+                                bool extended = false) const;
 
     /**
      * Evaluates a binary gate on vector of ciphertexts (calls bootstrapping as a subroutine)
@@ -413,7 +414,7 @@ class BooleanContext : public Serializable {
      * @return the look-up table (vector of function values) for the function
      */
     std::vector<NativeInteger> generate_lut_via_function(NativeInteger (*f)(NativeInteger m, NativeInteger p),
-                                                      NativeInteger p);
+                                                         NativeInteger p);
 
     /**
      * Evaluate a round down function
@@ -490,7 +491,7 @@ class BooleanContext : public Serializable {
     void load(Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         ar(::cereal::make_nvp("params", params_));
         binfhescheme_ = std::make_shared<BooleanScheme>(params_->get_ring_gsw_params()->get_method());

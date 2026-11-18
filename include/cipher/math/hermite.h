@@ -58,7 +58,7 @@ namespace cipher {
 
 // TODO: templatize this
 std::vector<std::complex<double>> get_hermite_trig_coefficients(std::function<int64_t(int64_t)> func, uint32_t p,
-                                                             size_t order, double scale);
+                                                                size_t order, double scale);
 
 }  // namespace cipher
 

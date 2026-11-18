@@ -155,7 +155,7 @@ class UTGENERAL_ENCRYPT_DECRYPT : public ::testing::TestWithParam<TEST_CASE_UTGE
     }
 
     void encryption_string(const TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT& test_data,
-                          const std::string& failmsg = std::string()) {
+                           const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -179,7 +179,7 @@ class UTGENERAL_ENCRYPT_DECRYPT : public ::testing::TestWithParam<TEST_CASE_UTGE
     }
 
     void encryption_coef_packed(const TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT& test_data,
-                              const std::string& failmsg = std::string()) {
+                                const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 

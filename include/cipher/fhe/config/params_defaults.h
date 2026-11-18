@@ -39,9 +39,9 @@
 #include <cstdint>
 
 #include "cipher/fhe/constants.h"
-#include "cipher/ring/ring_constants.h"  // SecretKeyDist
-#include "cipher/ring/standard_params.h"    // SecurityLevel
-#include "cipher/fhe/config/scheme_id.h"           // SCHEME
+#include "cipher/ring/ring_constants.h"   // SecretKeyDist
+#include "cipher/ring/standard_params.h"  // SecurityLevel
+#include "cipher/fhe/config/scheme_id.h"  // SCHEME
 #include "cipher/util/inttypes.h"
 
 namespace cipher {

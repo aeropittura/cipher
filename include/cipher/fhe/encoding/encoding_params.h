@@ -72,9 +72,9 @@ class EncodingParamsImpl : public cipher::Serializable {
      * @param plaintext_big_modulus big plaintext modulus used for arbitrary cyclotomics (used by packed encoding)
      * @param plaintext_big_root_of_unity root of unity for the big plaintext modulus (used by packed encoding)
      */
-    EncodingParamsImpl(PlaintextModulus plaintext_modulus = 0, uint32_t batch_size = 0, uint32_t plaintext_generator = 0,
-                       NativeInteger plaintext_root_of_unity = 0, NativeInteger plaintext_big_modulus = 0,
-                       NativeInteger plaintext_big_root_of_unity = 0)
+    EncodingParamsImpl(PlaintextModulus plaintext_modulus = 0, uint32_t batch_size = 0,
+                       uint32_t plaintext_generator = 0, NativeInteger plaintext_root_of_unity = 0,
+                       NativeInteger plaintext_big_modulus = 0, NativeInteger plaintext_big_root_of_unity = 0)
         : plaintext_modulus_(plaintext_modulus),
           plaintext_root_of_unity_(plaintext_root_of_unity),
           plaintext_big_modulus_(plaintext_big_modulus),
@@ -278,7 +278,7 @@ class EncodingParamsImpl : public cipher::Serializable {
     void load(Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         ar(::cereal::make_nvp("m", plaintext_modulus_));
         ar(::cereal::make_nvp("ru", plaintext_root_of_unity_));
@@ -302,9 +302,9 @@ class EncodingParamsImpl : public cipher::Serializable {
      * @return the output stream
      */
     std::ostream& doprint(std::ostream& out) const {
-        out << "[p=" << plaintext_modulus_ << " rootP =" << plaintext_root_of_unity_ << " bigP =" << plaintext_big_modulus_
-            << " rootBigP =" << plaintext_big_root_of_unity_ << " g=" << plaintext_generator_ << " L=" << batch_size_
-            << "]";
+        out << "[p=" << plaintext_modulus_ << " rootP =" << plaintext_root_of_unity_
+            << " bigP =" << plaintext_big_modulus_ << " rootBigP =" << plaintext_big_root_of_unity_
+            << " g=" << plaintext_generator_ << " L=" << batch_size_ << "]";
         return out;
     }
 

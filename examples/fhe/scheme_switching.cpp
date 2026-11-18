@@ -114,7 +114,8 @@ void switch_ckks_to_fhew() {
     cc->enable(SCHEMESWITCH);
 
     std::cout << "CKKS scheme is using ring dimension " << cc->get_ring_dimension();
-    std::cout << ", number of slots " << slots << ", and supports a multiplicative depth of " << mult_depth_value << std::endl
+    std::cout << ", number of slots " << slots << ", and supports a multiplicative depth of " << mult_depth_value
+              << std::endl
               << std::endl;
 
     // Generate encryption keys
@@ -278,7 +279,8 @@ void switch_fhew_to_ckks() {
     cc->enable(SCHEMESWITCH);
 
     std::cout << "CKKS scheme is using ring dimension " << cc->get_ring_dimension();
-    std::cout << ", number of slots " << slots << ", and supports a multiplicative depth of " << mult_depth_value << std::endl
+    std::cout << ", number of slots " << slots << ", and supports a multiplicative depth of " << mult_depth_value
+              << std::endl
               << std::endl;
 
     // Generate encryption keys.
@@ -315,7 +317,7 @@ void switch_fhew_to_ckks() {
     uint32_t modulus_lwe = 1 << log_q_cc_lwe;
 
     uint32_t p_lwe1 = cc_lwe->get_max_plaintext_space().convert_to_int();  // Small precision
-    uint32_t p_lwe2 = 256;                                           // Medium precision
+    uint32_t p_lwe2 = 256;                                                 // Medium precision
 
     // Messages encoded as [0000000MMMMM0000000EEEEE]
     // High level idea is to have enough 0's both before and after message for CKKS-bootstrapped result to achieve reasonable accuracy.
@@ -438,7 +440,8 @@ void floor_via_scheme_switching() {
     cc->enable(SCHEMESWITCH);
 
     std::cout << "CKKS scheme is using ring dimension " << cc->get_ring_dimension();
-    std::cout << ", number of slots " << slots << ", and supports a multiplicative depth of " << mult_depth_value << std::endl
+    std::cout << ", number of slots " << slots << ", and supports a multiplicative depth of " << mult_depth_value
+              << std::endl
               << std::endl;
 
     // Generate encryption keys.
@@ -578,8 +581,8 @@ void func_via_scheme_switching() {
     std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
     // Set the scaling factor to be able to decrypt; under the hood, the LWE mod switch will be performed on the ciphertext at the last level
-    auto p_lwe =
-            cc_lwe->get_max_plaintext_space().convert_to_int();  // Small precision because generate_lut_via_function needs p < q
+    auto p_lwe = cc_lwe->get_max_plaintext_space()
+                         .convert_to_int();  // Small precision because generate_lut_via_function needs p < q
     double scale_cf = 1.0 / p_lwe;
 
     cc->eval_ckks_to_fhew_precompute(scale_cf);
@@ -702,7 +705,8 @@ void comparison_via_scheme_switching() {
     cc->enable(SCHEMESWITCH);
 
     std::cout << "CKKS scheme is using ring dimension " << cc->get_ring_dimension();
-    std::cout << ", number of slots " << slots << ", and supports a multiplicative depth of " << mult_depth_value << std::endl
+    std::cout << ", number of slots " << slots << ", and supports a multiplicative depth of " << mult_depth_value
+              << std::endl
               << std::endl;
 
     // Generate encryption keys
@@ -778,7 +782,8 @@ void comparison_via_scheme_switching() {
     std::cout << "\nExpected sign result in FHEW with plaintext modulus " << NativeInteger(p_lwe2) << " and scale "
               << scale_sign_fhew << ": ";
     for (uint32_t i = 0; i < slots; ++i) {
-        std::cout << (static_cast<int>(std::round(p_diff_rpv[i] * scale_sign_fhew)) % p_lwe2 - p_lwe2 / 2.0 >= 0) << " ";
+        std::cout << (static_cast<int>(std::round(p_diff_rpv[i] * scale_sign_fhew)) % p_lwe2 - p_lwe2 / 2.0 >= 0)
+                  << " ";
     }
     std::cout << "\n";
 
@@ -807,8 +812,8 @@ void comparison_via_scheme_switching() {
     // Step 4': CKKS to FHEW switching and sign evaluation to test correctness
     lwe_ciphertexts = cc->eval_ckks_to_fhew(c_diff, slots);
 
-    std::cout << "\nFHEW decryption with plaintext modulus " << NativeInteger(p_lwe2) << " and scale " << scale_sign_fhew
-              << ": ";
+    std::cout << "\nFHEW decryption with plaintext modulus " << NativeInteger(p_lwe2) << " and scale "
+              << scale_sign_fhew << ": ";
     for (uint32_t i = 0; i < lwe_ciphertexts.size(); ++i) {
         cc_lwe->decrypt(private_key_fhew, lwe_ciphertexts[i], &plain_lwe, p_lwe2);
         std::cout << plain_lwe << " ";
@@ -816,7 +821,8 @@ void comparison_via_scheme_switching() {
     std::cout << "\nExpected sign result in FHEW with plaintext modulus " << NativeInteger(p_lwe2) << " and scale "
               << scale_sign_fhew << ": ";
     for (uint32_t i = 0; i < slots; ++i) {
-        std::cout << (static_cast<int>(std::round(p_diff_rpv[i] * scale_sign_fhew)) % p_lwe2 - p_lwe2 / 2.0 >= 0) << " ";
+        std::cout << (static_cast<int>(std::round(p_diff_rpv[i] * scale_sign_fhew)) % p_lwe2 - p_lwe2 / 2.0 >= 0)
+                  << " ";
     }
     std::cout << "\n";
     std::cout << "Obtained sign result in FHEW with plaintext modulus " << NativeInteger(p_lwe2) << " and scale "
@@ -853,7 +859,8 @@ void comparison_via_scheme_switching() {
     std::cout << "\nExpected sign result in FHEW with plaintext modulus " << NativeInteger(p_lwe1) << " and scale "
               << scale_sign_fhew << ": ";
     for (uint32_t i = 0; i < slots; ++i) {
-        std::cout << (static_cast<int>(std::round(p_diff_rpv[i] * scale_sign_fhew)) % p_lwe1 - p_lwe1 / 2.0 >= 0) << " ";
+        std::cout << (static_cast<int>(std::round(p_diff_rpv[i] * scale_sign_fhew)) % p_lwe1 - p_lwe1 / 2.0 >= 0)
+                  << " ";
     }
     std::cout << "\n";
     std::cout << "Obtained sign result in FHEW with plaintext modulus " << NativeInteger(p_lwe1) << " and scale "
@@ -958,10 +965,10 @@ void argmin_via_scheme_switching() {
         x1.insert(x1.end(), zeros.begin(), zeros.end());
     }
 
-    std::cout << "Expected minimum value " << *(std::min_element(x1.begin(), x1.begin() + num_values)) << " at location "
-              << std::min_element(x1.begin(), x1.begin() + num_values) - x1.begin() << std::endl;
-    std::cout << "Expected maximum value " << *(std::max_element(x1.begin(), x1.begin() + num_values)) << " at location "
-              << std::max_element(x1.begin(), x1.begin() + num_values) - x1.begin() << std::endl
+    std::cout << "Expected minimum value " << *(std::min_element(x1.begin(), x1.begin() + num_values))
+              << " at location " << std::min_element(x1.begin(), x1.begin() + num_values) - x1.begin() << std::endl;
+    std::cout << "Expected maximum value " << *(std::max_element(x1.begin(), x1.begin() + num_values))
+              << " at location " << std::max_element(x1.begin(), x1.begin() + num_values) - x1.begin() << std::endl
               << std::endl;
 
     // Encoding as plaintexts
@@ -1090,10 +1097,10 @@ void argmin_via_scheme_switching_alt() {
         x1.insert(x1.end(), zeros.begin(), zeros.end());
     }
 
-    std::cout << "Expected minimum value " << *(std::min_element(x1.begin(), x1.begin() + num_values)) << " at location "
-              << std::min_element(x1.begin(), x1.begin() + num_values) - x1.begin() << std::endl;
-    std::cout << "Expected maximum value " << *(std::max_element(x1.begin(), x1.begin() + num_values)) << " at location "
-              << std::max_element(x1.begin(), x1.begin() + num_values) - x1.begin() << std::endl
+    std::cout << "Expected minimum value " << *(std::min_element(x1.begin(), x1.begin() + num_values))
+              << " at location " << std::min_element(x1.begin(), x1.begin() + num_values) - x1.begin() << std::endl;
+    std::cout << "Expected maximum value " << *(std::max_element(x1.begin(), x1.begin() + num_values))
+              << " at location " << std::max_element(x1.begin(), x1.begin() + num_values) - x1.begin() << std::endl
               << std::endl;
 
     // Encoding as plaintexts
@@ -1225,10 +1232,10 @@ void argmin_via_scheme_switching_unit() {
     std::transform(x1.begin(), x1.end(), x1.begin(), [&](const double& elem) { return elem / (2 * p); });
 
     std::cout << "Input scaled: " << x1 << std::endl;
-    std::cout << "Expected minimum value " << *(std::min_element(x1.begin(), x1.begin() + num_values)) << " at location "
-              << std::min_element(x1.begin(), x1.begin() + num_values) - x1.begin() << std::endl;
-    std::cout << "Expected maximum value " << *(std::max_element(x1.begin(), x1.begin() + num_values)) << " at location "
-              << std::max_element(x1.begin(), x1.begin() + num_values) - x1.begin() << std::endl
+    std::cout << "Expected minimum value " << *(std::min_element(x1.begin(), x1.begin() + num_values))
+              << " at location " << std::min_element(x1.begin(), x1.begin() + num_values) - x1.begin() << std::endl;
+    std::cout << "Expected maximum value " << *(std::max_element(x1.begin(), x1.begin() + num_values))
+              << " at location " << std::max_element(x1.begin(), x1.begin() + num_values) - x1.begin() << std::endl
               << std::endl;
 
     // Encoding as plaintexts
@@ -1360,10 +1367,10 @@ void argmin_via_scheme_switching_alt_unit() {
     std::transform(x1.begin(), x1.end(), x1.begin(), [&](const double& elem) { return elem / (2 * p); });
 
     std::cout << "Input scaled: " << x1 << std::endl;
-    std::cout << "Expected minimum value " << *(std::min_element(x1.begin(), x1.begin() + num_values)) << " at location "
-              << std::min_element(x1.begin(), x1.begin() + num_values) - x1.begin() << std::endl;
-    std::cout << "Expected maximum value " << *(std::max_element(x1.begin(), x1.begin() + num_values)) << " at location "
-              << std::max_element(x1.begin(), x1.begin() + num_values) - x1.begin() << std::endl
+    std::cout << "Expected minimum value " << *(std::min_element(x1.begin(), x1.begin() + num_values))
+              << " at location " << std::min_element(x1.begin(), x1.begin() + num_values) - x1.begin() << std::endl;
+    std::cout << "Expected maximum value " << *(std::max_element(x1.begin(), x1.begin() + num_values))
+              << " at location " << std::max_element(x1.begin(), x1.begin() + num_values) - x1.begin() << std::endl
               << std::endl;
 
     // Encoding as plaintexts
@@ -1444,7 +1451,8 @@ void poly_via_scheme_switching() {
     cc->enable(SCHEMESWITCH);
 
     std::cout << "CKKS scheme is using ring dimension " << cc->get_ring_dimension();
-    std::cout << ", number of slots " << slots << ", and supports a multiplicative depth of " << mult_depth_value << std::endl
+    std::cout << ", number of slots " << slots << ", and supports a multiplicative depth of " << mult_depth_value
+              << std::endl
               << std::endl;
 
     // Generate encryption keys.

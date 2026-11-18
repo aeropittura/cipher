@@ -74,7 +74,7 @@ std::vector<double> eval_chebyshev_coefficients(std::function<double(double)> f,
  * @return Evaluation of the approximated function over the plaintexts.
  */
 std::vector<double> eval_chebyshev_function_ptxt(std::function<double(double)> f, const std::vector<double>& ptxt,
-                                              double a, double b, size_t d);
+                                                 double a, double b, size_t d);
 
 }  // namespace cipher
 

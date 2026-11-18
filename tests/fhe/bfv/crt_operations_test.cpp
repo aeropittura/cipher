@@ -61,7 +61,7 @@ class UTBFVRNS_CRT : public ::testing::Test {
 };
 
 void bfv_rns_test_multiplicative_depth_limitation(MultiplicationTechnique multiplication_technique,
-                                              uint32_t multiplicative_depth) {
+                                                  uint32_t multiplicative_depth) {
     ContextParams<BfvRnsContext> parameters;
     const uint64_t ptm = 786433;
 
@@ -246,9 +246,10 @@ TEST_F(UTBFVRNS_CRT, BFVrns_FastBaseConvqToBskMontgomery) {
     a.fast_base_convq_to_bsk_montgomery(
             crypto_params->get_params_q_bsk(), crypto_params->get_moduli_q(), crypto_params->get_moduli_bsk(),
             crypto_params->get_modbsk_barrett_mu(), crypto_params->get_mtilde_q_hat_inv_modq(),
-            crypto_params->get_mtilde_q_hat_inv_modq_precon(), crypto_params->get_q_hat_modbsk(), crypto_params->get_q_hat_modmtilde(),
-            crypto_params->get_q_modbsk(), crypto_params->get_q_modbsk_precon(), crypto_params->get_neg_q_inv_modmtilde(),
-            crypto_params->get_mtilde_inv_modbsk(), crypto_params->get_mtilde_inv_modbsk_precon());
+            crypto_params->get_mtilde_q_hat_inv_modq_precon(), crypto_params->get_q_hat_modbsk(),
+            crypto_params->get_q_hat_modmtilde(), crypto_params->get_q_modbsk(), crypto_params->get_q_modbsk_precon(),
+            crypto_params->get_neg_q_inv_modmtilde(), crypto_params->get_mtilde_inv_modbsk(),
+            crypto_params->get_mtilde_inv_modbsk_precon());
 
     NativeInteger modulus2 = 1152921504606845777;
     NativeInteger modulus3 = 1152921504606845473;
@@ -412,10 +413,10 @@ TEST_F(UTBFVRNS_CRT, BFVrns_SwitchCRTBasis) {
 
     Poly result_a = a.crt_interpolate();
 
-    const RnsPoly b = a.switch_crt_basis(params_r, crypto_params_bfv_rns->get_ql_hat_inv_modq(),
-                                        crypto_params_bfv_rns->get_ql_hat_inv_modq_precon(), crypto_params_bfv_rns->get_ql_hat_modr(),
-                                        crypto_params_bfv_rns->get_alpha_ql_modr(), crypto_params_bfv_rns->get_modr_barrett_mu(),
-                                        crypto_params_bfv_rns->get_q_inv());
+    const RnsPoly b = a.switch_crt_basis(
+            params_r, crypto_params_bfv_rns->get_ql_hat_inv_modq(), crypto_params_bfv_rns->get_ql_hat_inv_modq_precon(),
+            crypto_params_bfv_rns->get_ql_hat_modr(), crypto_params_bfv_rns->get_alpha_ql_modr(),
+            crypto_params_bfv_rns->get_modr_barrett_mu(), crypto_params_bfv_rns->get_q_inv());
 
     Poly result_b = b.crt_interpolate();
 
@@ -442,7 +443,8 @@ TEST_F(UTBFVRNS_CRT, BFVrns_Mult_by_Constant) {
 
     CryptoContext<RnsPoly> crypto_context = make_crypto_context(parameters);
 
-    const std::shared_ptr<RnsParams<BigInteger>> params_q = crypto_context->get_crypto_parameters()->get_element_params();
+    const std::shared_ptr<RnsParams<BigInteger>> params_q =
+            crypto_context->get_crypto_parameters()->get_element_params();
 
     const auto crypto_params_bfv_rns =
             std::dynamic_pointer_cast<BfvRnsCryptoParams>(crypto_context->get_crypto_parameters());
@@ -466,14 +468,14 @@ TEST_F(UTBFVRNS_CRT, BFVrns_Mult_by_Constant) {
     Poly b_poly = b.crt_interpolate();
 
     a.expand_crt_basis(params_qr, params_r, crypto_params_bfv_rns->get_ql_hat_inv_modq(),
-                     crypto_params_bfv_rns->get_ql_hat_inv_modq_precon(), crypto_params_bfv_rns->get_ql_hat_modr(),
-                     crypto_params_bfv_rns->get_alpha_ql_modr(), crypto_params_bfv_rns->get_modr_barrett_mu(),
-                     crypto_params_bfv_rns->get_q_inv(), Format::EVALUATION);
+                       crypto_params_bfv_rns->get_ql_hat_inv_modq_precon(), crypto_params_bfv_rns->get_ql_hat_modr(),
+                       crypto_params_bfv_rns->get_alpha_ql_modr(), crypto_params_bfv_rns->get_modr_barrett_mu(),
+                       crypto_params_bfv_rns->get_q_inv(), Format::EVALUATION);
 
     b.expand_crt_basis(params_qr, params_r, crypto_params_bfv_rns->get_ql_hat_inv_modq(),
-                     crypto_params_bfv_rns->get_ql_hat_inv_modq_precon(), crypto_params_bfv_rns->get_ql_hat_modr(),
-                     crypto_params_bfv_rns->get_alpha_ql_modr(), crypto_params_bfv_rns->get_modr_barrett_mu(),
-                     crypto_params_bfv_rns->get_q_inv(), Format::EVALUATION);
+                       crypto_params_bfv_rns->get_ql_hat_inv_modq_precon(), crypto_params_bfv_rns->get_ql_hat_modr(),
+                       crypto_params_bfv_rns->get_alpha_ql_modr(), crypto_params_bfv_rns->get_modr_barrett_mu(),
+                       crypto_params_bfv_rns->get_q_inv(), Format::EVALUATION);
 
     auto tmp{b};
     tmp.set_format(Format::COEFFICIENT);
@@ -533,14 +535,14 @@ TEST_F(UTBFVRNS_CRT, BFVrns_Mult_by_Constant) {
 
     EXPECT_EQ(A0, B0) << "Results of multiprecision and CRT multiplication do not match";
 
-    RnsPoly rounded =
-            c.scale_and_round(params_r, crypto_params_bfv_rns->get_t_rs_hat_inv_mods_divs_modr(),
-                            crypto_params_bfv_rns->get_t_rs_hat_inv_mods_divs_frac(), crypto_params_bfv_rns->get_modr_barrett_mu());
+    RnsPoly rounded = c.scale_and_round(params_r, crypto_params_bfv_rns->get_t_rs_hat_inv_mods_divs_modr(),
+                                        crypto_params_bfv_rns->get_t_rs_hat_inv_mods_divs_frac(),
+                                        crypto_params_bfv_rns->get_modr_barrett_mu());
 
-    RnsPoly rounded_q = rounded.switch_crt_basis(params_q, crypto_params_bfv_rns->get_rl_hat_inv_modr(),
-                                               crypto_params_bfv_rns->get_rl_hat_inv_modr_precon(),
-                                               crypto_params_bfv_rns->get_rl_hat_modq(), crypto_params_bfv_rns->get_alpha_rl_modq(),
-                                               crypto_params_bfv_rns->get_modq_barrett_mu(), crypto_params_bfv_rns->get_r_inv());
+    RnsPoly rounded_q = rounded.switch_crt_basis(
+            params_q, crypto_params_bfv_rns->get_rl_hat_inv_modr(), crypto_params_bfv_rns->get_rl_hat_inv_modr_precon(),
+            crypto_params_bfv_rns->get_rl_hat_modq(), crypto_params_bfv_rns->get_alpha_rl_modq(),
+            crypto_params_bfv_rns->get_modq_barrett_mu(), crypto_params_bfv_rns->get_r_inv());
 
     Poly result_rounded_q = rounded_q.crt_interpolate();
 
@@ -572,7 +574,8 @@ TEST_F(UTBFVRNS_CRT, BFVrns_Mult_by_Gaussian) {
 
     CryptoContext<RnsPoly> crypto_context = make_crypto_context(parameters);
 
-    const std::shared_ptr<RnsParams<BigInteger>> params_q = crypto_context->get_crypto_parameters()->get_element_params();
+    const std::shared_ptr<RnsParams<BigInteger>> params_q =
+            crypto_context->get_crypto_parameters()->get_element_params();
 
     const auto crypto_params_bfv_rns =
             std::dynamic_pointer_cast<BfvRnsCryptoParams>(crypto_context->get_crypto_parameters());
@@ -597,14 +600,14 @@ TEST_F(UTBFVRNS_CRT, BFVrns_Mult_by_Gaussian) {
     Poly b_poly = b.crt_interpolate();
 
     a.expand_crt_basis(params_qr, params_r, crypto_params_bfv_rns->get_ql_hat_inv_modq(),
-                     crypto_params_bfv_rns->get_ql_hat_inv_modq_precon(), crypto_params_bfv_rns->get_ql_hat_modr(),
-                     crypto_params_bfv_rns->get_alpha_ql_modr(), crypto_params_bfv_rns->get_modr_barrett_mu(),
-                     crypto_params_bfv_rns->get_q_inv(), Format::EVALUATION);
+                       crypto_params_bfv_rns->get_ql_hat_inv_modq_precon(), crypto_params_bfv_rns->get_ql_hat_modr(),
+                       crypto_params_bfv_rns->get_alpha_ql_modr(), crypto_params_bfv_rns->get_modr_barrett_mu(),
+                       crypto_params_bfv_rns->get_q_inv(), Format::EVALUATION);
 
     b.expand_crt_basis(params_qr, params_r, crypto_params_bfv_rns->get_ql_hat_inv_modq(),
-                     crypto_params_bfv_rns->get_ql_hat_inv_modq_precon(), crypto_params_bfv_rns->get_ql_hat_modr(),
-                     crypto_params_bfv_rns->get_alpha_ql_modr(), crypto_params_bfv_rns->get_modr_barrett_mu(),
-                     crypto_params_bfv_rns->get_q_inv(), Format::EVALUATION);
+                       crypto_params_bfv_rns->get_ql_hat_inv_modq_precon(), crypto_params_bfv_rns->get_ql_hat_modr(),
+                       crypto_params_bfv_rns->get_alpha_ql_modr(), crypto_params_bfv_rns->get_modr_barrett_mu(),
+                       crypto_params_bfv_rns->get_q_inv(), Format::EVALUATION);
 
     auto tmp{b};
     tmp.set_format(Format::COEFFICIENT);
@@ -666,14 +669,14 @@ TEST_F(UTBFVRNS_CRT, BFVrns_Mult_by_Gaussian) {
     //  EXPECT_EQ(A0, B0)
     //      << "Results of multiprecision and CRT multiplication do not match";
 
-    RnsPoly rounded =
-            c.scale_and_round(params_r, crypto_params_bfv_rns->get_t_rs_hat_inv_mods_divs_modr(),
-                            crypto_params_bfv_rns->get_t_rs_hat_inv_mods_divs_frac(), crypto_params_bfv_rns->get_modr_barrett_mu());
+    RnsPoly rounded = c.scale_and_round(params_r, crypto_params_bfv_rns->get_t_rs_hat_inv_mods_divs_modr(),
+                                        crypto_params_bfv_rns->get_t_rs_hat_inv_mods_divs_frac(),
+                                        crypto_params_bfv_rns->get_modr_barrett_mu());
 
-    RnsPoly rounded_q = rounded.switch_crt_basis(params_q, crypto_params_bfv_rns->get_rl_hat_inv_modr(),
-                                               crypto_params_bfv_rns->get_rl_hat_inv_modr_precon(),
-                                               crypto_params_bfv_rns->get_rl_hat_modq(), crypto_params_bfv_rns->get_alpha_rl_modq(),
-                                               crypto_params_bfv_rns->get_modq_barrett_mu(), crypto_params_bfv_rns->get_r_inv());
+    RnsPoly rounded_q = rounded.switch_crt_basis(
+            params_q, crypto_params_bfv_rns->get_rl_hat_inv_modr(), crypto_params_bfv_rns->get_rl_hat_inv_modr_precon(),
+            crypto_params_bfv_rns->get_rl_hat_modq(), crypto_params_bfv_rns->get_alpha_rl_modq(),
+            crypto_params_bfv_rns->get_modq_barrett_mu(), crypto_params_bfv_rns->get_r_inv());
 
     Poly result_rounded_q = rounded_q.crt_interpolate();
 

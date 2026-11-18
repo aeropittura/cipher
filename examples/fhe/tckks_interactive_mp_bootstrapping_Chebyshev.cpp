@@ -54,7 +54,7 @@ using namespace std;
 using namespace cipher;
 
 static void check_approximate_equality(const std::vector<std::complex<double>>& a,
-                                     const std::vector<std::complex<double>>& b, int vector_size, double epsilon) {
+                                       const std::vector<std::complex<double>>& b, int vector_size, double epsilon) {
     std::vector<std::complex<double>> all_true(vector_size);
     std::vector<std::complex<double>> tmp(vector_size);
     for (int i = 0; i < vector_size; i++) {
@@ -209,28 +209,41 @@ void tckks_collective_boot(enum ScalingTechnique scale_tech) {
     // Round 2 (party B)
     kp2 = crypto_context->multiparty_key_gen(kp1.public_key);
     auto eval_mult_key2 = crypto_context->multi_key_switch_gen(kp2.secret_key, kp2.secret_key, eval_mult_key);
-    auto eval_mult_ab = crypto_context->multi_add_eval_keys(eval_mult_key, eval_mult_key2, kp2.public_key->get_key_tag());
-    auto eval_mult_bab = crypto_context->multi_mult_eval_key(kp2.secret_key, eval_mult_ab, kp2.public_key->get_key_tag());
-    auto eval_sum_keys_b = crypto_context->multi_eval_sum_key_gen(kp2.secret_key, eval_sum_keys, kp2.public_key->get_key_tag());
-    auto eval_sum_keys_join = crypto_context->multi_add_eval_sum_keys(eval_sum_keys, eval_sum_keys_b, kp2.public_key->get_key_tag());
+    auto eval_mult_ab =
+            crypto_context->multi_add_eval_keys(eval_mult_key, eval_mult_key2, kp2.public_key->get_key_tag());
+    auto eval_mult_bab =
+            crypto_context->multi_mult_eval_key(kp2.secret_key, eval_mult_ab, kp2.public_key->get_key_tag());
+    auto eval_sum_keys_b =
+            crypto_context->multi_eval_sum_key_gen(kp2.secret_key, eval_sum_keys, kp2.public_key->get_key_tag());
+    auto eval_sum_keys_join =
+            crypto_context->multi_add_eval_sum_keys(eval_sum_keys, eval_sum_keys_b, kp2.public_key->get_key_tag());
     crypto_context->insert_eval_sum_key(eval_sum_keys_join);
-    auto eval_mult_aab = crypto_context->multi_mult_eval_key(kp1.secret_key, eval_mult_ab, kp2.public_key->get_key_tag());
-    auto eval_mult_final = crypto_context->multi_add_eval_mult_keys(eval_mult_aab, eval_mult_bab, eval_mult_ab->get_key_tag());
+    auto eval_mult_aab =
+            crypto_context->multi_mult_eval_key(kp1.secret_key, eval_mult_ab, kp2.public_key->get_key_tag());
+    auto eval_mult_final =
+            crypto_context->multi_add_eval_mult_keys(eval_mult_aab, eval_mult_bab, eval_mult_ab->get_key_tag());
     crypto_context->insert_eval_mult_key({eval_mult_final});
 
     /////////////////////
     // Round 3 (party C) - Lead Party (who encrypts and finalizes the bootstrapping protocol)
     kp3 = crypto_context->multiparty_key_gen(kp2.public_key);
     auto eval_mult_key3 = crypto_context->multi_key_switch_gen(kp3.secret_key, kp3.secret_key, eval_mult_key);
-    auto eval_mult_abc = crypto_context->multi_add_eval_keys(eval_mult_ab, eval_mult_key3, kp3.public_key->get_key_tag());
-    auto eval_mult_babc = crypto_context->multi_mult_eval_key(kp2.secret_key, eval_mult_abc, kp3.public_key->get_key_tag());
-    auto eval_mult_aabc = crypto_context->multi_mult_eval_key(kp1.secret_key, eval_mult_abc, kp3.public_key->get_key_tag());
-    auto eval_mult_cabc = crypto_context->multi_mult_eval_key(kp3.secret_key, eval_mult_abc, kp3.public_key->get_key_tag());
-    auto eval_mult_ababc = crypto_context->multi_add_eval_mult_keys(eval_mult_babc, eval_mult_aabc, eval_mult_babc->get_key_tag());
-    auto eval_mult_final2 = crypto_context->multi_add_eval_mult_keys(eval_mult_ababc, eval_mult_cabc, eval_mult_cabc->get_key_tag());
+    auto eval_mult_abc =
+            crypto_context->multi_add_eval_keys(eval_mult_ab, eval_mult_key3, kp3.public_key->get_key_tag());
+    auto eval_mult_babc =
+            crypto_context->multi_mult_eval_key(kp2.secret_key, eval_mult_abc, kp3.public_key->get_key_tag());
+    auto eval_mult_aabc =
+            crypto_context->multi_mult_eval_key(kp1.secret_key, eval_mult_abc, kp3.public_key->get_key_tag());
+    auto eval_mult_cabc =
+            crypto_context->multi_mult_eval_key(kp3.secret_key, eval_mult_abc, kp3.public_key->get_key_tag());
+    auto eval_mult_ababc =
+            crypto_context->multi_add_eval_mult_keys(eval_mult_babc, eval_mult_aabc, eval_mult_babc->get_key_tag());
+    auto eval_mult_final2 =
+            crypto_context->multi_add_eval_mult_keys(eval_mult_ababc, eval_mult_cabc, eval_mult_cabc->get_key_tag());
     crypto_context->insert_eval_mult_key({eval_mult_final2});
 
-    auto eval_sum_keys_c = crypto_context->multi_eval_sum_key_gen(kp3.secret_key, eval_sum_keys, kp3.public_key->get_key_tag());
+    auto eval_sum_keys_c =
+            crypto_context->multi_eval_sum_key_gen(kp3.secret_key, eval_sum_keys, kp3.public_key->get_key_tag());
     auto eval_sum_keys_join2 =
             crypto_context->multi_add_eval_sum_keys(eval_sum_keys_join, eval_sum_keys_c, kp3.public_key->get_key_tag());
     crypto_context->insert_eval_sum_key(eval_sum_keys_join2);
@@ -322,7 +335,7 @@ void tckks_collective_boot(enum ScalingTechnique scale_tech) {
     std::cout << "Computed Res: \n\t" << plaintext_multiparty->get_ckks_packed_value() << std::endl;
 
     check_approximate_equality(plaintext_result->get_ckks_packed_value(), plaintext_multiparty->get_ckks_packed_value(),
-                             encoded_length, eps);
+                               encoded_length, eps);
 
     std::cout << "\n============================ INTERACTIVE DECRYPTION ENDED ============================\n";
 

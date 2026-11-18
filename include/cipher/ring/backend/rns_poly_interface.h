@@ -172,8 +172,8 @@ class RnsPolyInterface : public RingElement<DerivedType, BigVecType> {
      * @param stddev standard deviation for the discrete gaussian generator.
      * @return a lambda that generates a discrete Gaussian element.
      */
-    static std::function<DerivedType()> make_discrete_gaussian_coefficient_allocator(const std::shared_ptr<Params>& params,
-                                                                                 Format result_format, double stddev) {
+    static std::function<DerivedType()> make_discrete_gaussian_coefficient_allocator(
+            const std::shared_ptr<Params>& params, Format result_format, double stddev) {
         return [=]() {
             DggType dgg(stddev);
             return DerivedType(dgg, params, result_format);
@@ -188,7 +188,7 @@ class RnsPolyInterface : public RingElement<DerivedType, BigVecType> {
      * @return a lambda that generates a discrete uniform element.
      */
     static std::function<DerivedType()> make_discrete_uniform_allocator(const std::shared_ptr<Params>& params,
-                                                                     Format format) {
+                                                                        Format format) {
         return [=]() {
             DugType dug;
             return DerivedType(dug, params, format);
@@ -245,7 +245,8 @@ class RnsPolyInterface : public RingElement<DerivedType, BigVecType> {
      * coefficients and then converted to this format.
      * @return the new element.
      */
-    DerivedType clone_with_noise(const DiscreteGaussianGeneratorImpl<BigVecType>& dgg, Format format) const override = 0;
+    DerivedType clone_with_noise(const DiscreteGaussianGeneratorImpl<BigVecType>& dgg,
+                                 Format format) const override = 0;
 
     /**
      * @brief Get method of the format.
@@ -937,9 +938,9 @@ class RnsPolyInterface : public RingElement<DerivedType, BigVecType> {
      * @param ql_inv_modq_precon NTL-specific precomputations for [q_{l}^{-1}]_{q_i}
      */
     virtual void mod_reduce(const NativeInteger& t, const std::vector<NativeInteger>& t_modq_precon,
-                           const NativeInteger& negt_inv_modq, const NativeInteger& negt_inv_modq_precon,
-                           const std::vector<NativeInteger>& ql_inv_modq,
-                           const std::vector<NativeInteger>& ql_inv_modq_precon) = 0;
+                            const NativeInteger& negt_inv_modq, const NativeInteger& negt_inv_modq_precon,
+                            const std::vector<NativeInteger>& ql_inv_modq,
+                            const std::vector<NativeInteger>& ql_inv_modq_precon) = 0;
 
     /**
      * @brief Interpolates the RnsPoly to a Poly based on the Chinese Remainder
@@ -1012,8 +1013,8 @@ class RnsPolyInterface : public RingElement<DerivedType, BigVecType> {
      * @param neg_q_modt_precon NTL-specific precomputation for neg_q_modt.
      */
     virtual void times_qovert(const std::shared_ptr<Params>& params_q, const std::vector<NativeInteger>& t_inv_modq,
-                             const NativeInteger& t, const NativeInteger& neg_q_modt,
-                             const NativeInteger& neg_q_modt_precon) = 0;
+                              const NativeInteger& t, const NativeInteger& neg_q_modt,
+                              const NativeInteger& neg_q_modt_precon) = 0;
 
     /**
      * @brief Performs approximate CRT basis switching:
@@ -1037,11 +1038,11 @@ class RnsPolyInterface : public RingElement<DerivedType, BigVecType> {
      * @return the representation of {X + alpha*Q} in basis {P}.
      */
     virtual DerivedType approx_switch_crt_basis(const std::shared_ptr<Params>& params_q,
-                                             const std::shared_ptr<Params>& params_p,
-                                             const std::vector<NativeInteger>& q_hat_inv_modq,
-                                             const std::vector<NativeInteger>& q_hat_inv_modq_precon,
-                                             const std::vector<std::vector<NativeInteger>>& q_hat_modp,
-                                             const std::vector<DoubleNativeInt>& modp_barrett_mu) const = 0;
+                                                const std::shared_ptr<Params>& params_p,
+                                                const std::vector<NativeInteger>& q_hat_inv_modq,
+                                                const std::vector<NativeInteger>& q_hat_inv_modq_precon,
+                                                const std::vector<std::vector<NativeInteger>>& q_hat_modp,
+                                                const std::vector<DoubleNativeInt>& modp_barrett_mu) const = 0;
 
     /**
      * @brief Performs approximate modulus raising:
@@ -1068,10 +1069,11 @@ class RnsPolyInterface : public RingElement<DerivedType, BigVecType> {
      * The element is replaced in place by the representation of {X + alpha*Q} in basis {Q,P}.
      */
     virtual void approx_mod_up(const std::shared_ptr<Params>& params_q, const std::shared_ptr<Params>& params_p,
-                             const std::shared_ptr<Params>& params_qp, const std::vector<NativeInteger>& q_hat_inv_modq,
-                             const std::vector<NativeInteger>& q_hat_inv_modq_precon,
-                             const std::vector<std::vector<NativeInteger>>& q_hat_modp,
-                             const std::vector<DoubleNativeInt>& modp_barrett_mu) = 0;
+                               const std::shared_ptr<Params>& params_qp,
+                               const std::vector<NativeInteger>& q_hat_inv_modq,
+                               const std::vector<NativeInteger>& q_hat_inv_modq_precon,
+                               const std::vector<std::vector<NativeInteger>>& q_hat_modp,
+                               const std::vector<DoubleNativeInt>& modp_barrett_mu) = 0;
 
     /**
      * @brief Performs approximate modulus reduction:
@@ -1107,9 +1109,10 @@ class RnsPolyInterface : public RingElement<DerivedType, BigVecType> {
             const std::shared_ptr<Params>& params_q, const std::shared_ptr<Params>& params_p,
             const std::vector<NativeInteger>& P_inv_modq, const std::vector<NativeInteger>& p_inv_modq_precon,
             const std::vector<NativeInteger>& p_hat_inv_modp, const std::vector<NativeInteger>& p_hat_inv_modp_precon,
-            const std::vector<std::vector<NativeInteger>>& p_hat_modq, const std::vector<DoubleNativeInt>& modq_barrett_mu,
-            const std::vector<NativeInteger>& t_inv_modp, const std::vector<NativeInteger>& t_inv_modp_precon,
-            const NativeInteger& t, const std::vector<NativeInteger>& t_modq_precon) const = 0;
+            const std::vector<std::vector<NativeInteger>>& p_hat_modq,
+            const std::vector<DoubleNativeInt>& modq_barrett_mu, const std::vector<NativeInteger>& t_inv_modp,
+            const std::vector<NativeInteger>& t_inv_modp_precon, const NativeInteger& t,
+            const std::vector<NativeInteger>& t_modq_precon) const = 0;
 
     /**
      * @brief Performs CRT basis switching:
@@ -1137,12 +1140,12 @@ class RnsPolyInterface : public RingElement<DerivedType, BigVecType> {
      * @return the representation of {X}_{P}
      */
     virtual DerivedType switch_crt_basis(const std::shared_ptr<Params>& params_p,
-                                       const std::vector<NativeInteger>& q_hat_inv_modq,
-                                       const std::vector<NativeInteger>& q_hat_inv_modq_precon,
-                                       const std::vector<std::vector<NativeInteger>>& q_hat_modp,
-                                       const std::vector<std::vector<NativeInteger>>& alpha_q_modp,
-                                       const std::vector<DoubleNativeInt>& modp_barrett_mu,
-                                       const std::vector<double>& q_inv) const = 0;
+                                         const std::vector<NativeInteger>& q_hat_inv_modq,
+                                         const std::vector<NativeInteger>& q_hat_inv_modq_precon,
+                                         const std::vector<std::vector<NativeInteger>>& q_hat_modp,
+                                         const std::vector<std::vector<NativeInteger>>& alpha_q_modp,
+                                         const std::vector<DoubleNativeInt>& modp_barrett_mu,
+                                         const std::vector<double>& q_inv) const = 0;
 
     /**
      * @brief Performs modulus raising:
@@ -1172,12 +1175,12 @@ class RnsPolyInterface : public RingElement<DerivedType, BigVecType> {
      *
      */
     virtual void expand_crt_basis(const std::shared_ptr<Params>& params_qp, const std::shared_ptr<Params>& params_p,
-                                const std::vector<NativeInteger>& q_hat_inv_modq,
-                                const std::vector<NativeInteger>& q_hat_inv_modq_precon,
-                                const std::vector<std::vector<NativeInteger>>& q_hat_modp,
-                                const std::vector<std::vector<NativeInteger>>& alpha_q_modp,
-                                const std::vector<DoubleNativeInt>& modp_barrett_mu, const std::vector<double>& q_inv,
-                                Format result_format) = 0;
+                                  const std::vector<NativeInteger>& q_hat_inv_modq,
+                                  const std::vector<NativeInteger>& q_hat_inv_modq_precon,
+                                  const std::vector<std::vector<NativeInteger>>& q_hat_modp,
+                                  const std::vector<std::vector<NativeInteger>>& alpha_q_modp,
+                                  const std::vector<DoubleNativeInt>& modp_barrett_mu, const std::vector<double>& q_inv,
+                                  Format result_format) = 0;
 
     /**
      * @brief Performs modulus raising in reverse order:
@@ -1194,13 +1197,13 @@ class RnsPolyInterface : public RingElement<DerivedType, BigVecType> {
      * @param result_format Specifies the format we want the result to be in
      */
     virtual void expand_crt_basis_reverse_order(const std::shared_ptr<Params>& params_qp,
-                                            const std::shared_ptr<Params>& params_p,
-                                            const std::vector<NativeInteger>& q_hat_inv_modq,
-                                            const std::vector<NativeInteger>& q_hat_inv_modq_precon,
-                                            const std::vector<std::vector<NativeInteger>>& q_hat_modp,
-                                            const std::vector<std::vector<NativeInteger>>& alpha_q_modp,
-                                            const std::vector<DoubleNativeInt>& modp_barrett_mu,
-                                            const std::vector<double>& q_inv, Format result_format) = 0;
+                                                const std::shared_ptr<Params>& params_p,
+                                                const std::vector<NativeInteger>& q_hat_inv_modq,
+                                                const std::vector<NativeInteger>& q_hat_inv_modq_precon,
+                                                const std::vector<std::vector<NativeInteger>>& q_hat_modp,
+                                                const std::vector<std::vector<NativeInteger>>& alpha_q_modp,
+                                                const std::vector<DoubleNativeInt>& modp_barrett_mu,
+                                                const std::vector<double>& q_inv, Format result_format) = 0;
 
     /**
      * @brief Precomputed constants for fast_expand_crt_basis_plover_q, the switch of an element from its current basis
@@ -1316,8 +1319,9 @@ class RnsPolyInterface : public RingElement<DerivedType, BigVecType> {
      * @param size_q the number of towers L in the full basis {Q}.
      */
     virtual void expand_crt_basis_ql_hat(const std::shared_ptr<Params>& params_q,
-                                     const std::vector<NativeInteger>& ql_hat_modq,
-                                     const std::vector<NativeInteger>& ql_hat_modq_precon, const uint32_t size_q) = 0;
+                                         const std::vector<NativeInteger>& ql_hat_modq,
+                                         const std::vector<NativeInteger>& ql_hat_modq_precon,
+                                         const uint32_t size_q) = 0;
 
     /**
      * @brief Performs scale and round:
@@ -1346,12 +1350,13 @@ class RnsPolyInterface : public RingElement<DerivedType, BigVecType> {
      * @return the result of computation as a polynomial with native 64-bit
      * coefficients
      */
-    virtual TowerType scale_and_round(const NativeInteger& t, const std::vector<NativeInteger>& t_q_hat_inv_modq_divq_modt,
-                                    const std::vector<NativeInteger>& t_q_hat_inv_modq_divq_modt_precon,
-                                    const std::vector<NativeInteger>& t_q_hat_inv_modq_b_divq_modt,
-                                    const std::vector<NativeInteger>& t_q_hat_inv_modq_b_divq_modt_precon,
-                                    const std::vector<double>& t_q_hat_inv_modq_divq_frac,
-                                    const std::vector<double>& t_q_hat_inv_modq_b_divq_frac) const = 0;
+    virtual TowerType scale_and_round(const NativeInteger& t,
+                                      const std::vector<NativeInteger>& t_q_hat_inv_modq_divq_modt,
+                                      const std::vector<NativeInteger>& t_q_hat_inv_modq_divq_modt_precon,
+                                      const std::vector<NativeInteger>& t_q_hat_inv_modq_b_divq_modt,
+                                      const std::vector<NativeInteger>& t_q_hat_inv_modq_b_divq_modt_precon,
+                                      const std::vector<double>& t_q_hat_inv_modq_divq_frac,
+                                      const std::vector<double>& t_q_hat_inv_modq_b_divq_frac) const = 0;
 
     /**
      * @brief Computes approximate scale and round:
@@ -1375,9 +1380,10 @@ class RnsPolyInterface : public RingElement<DerivedType, BigVecType> {
      * p_j
      * @return the result {approximately t/Q * X}_{P}
      */
-    virtual DerivedType approx_scale_and_round(const std::shared_ptr<Params>& params_p,
-                                            const std::vector<std::vector<NativeInteger>>& t_ps_hat_inv_mods_divs_modp,
-                                            const std::vector<DoubleNativeInt>& modp_barret_mu) const = 0;
+    virtual DerivedType approx_scale_and_round(
+            const std::shared_ptr<Params>& params_p,
+            const std::vector<std::vector<NativeInteger>>& t_ps_hat_inv_mods_divs_modp,
+            const std::vector<DoubleNativeInt>& modp_barret_mu) const = 0;
 
     /**
      * @brief Computes scale and round:
@@ -1406,9 +1412,9 @@ class RnsPolyInterface : public RingElement<DerivedType, BigVecType> {
      * @return the result {t/I * X}_{O}
      */
     virtual DerivedType scale_and_round(const std::shared_ptr<Params>& params_output,
-                                      const std::vector<std::vector<NativeInteger>>& t_os_hat_inv_mods_divs_modo,
-                                      const std::vector<double>& t_os_hat_inv_mods_divs_frac,
-                                      const std::vector<DoubleNativeInt>& modo_barret_mu) const = 0;
+                                        const std::vector<std::vector<NativeInteger>>& t_os_hat_inv_mods_divs_modo,
+                                        const std::vector<double>& t_os_hat_inv_mods_divs_frac,
+                                        const std::vector<DoubleNativeInt>& modo_barret_mu) const = 0;
 
     /**
      * @brief Computes scale and round for fast rounding:
@@ -1432,10 +1438,10 @@ class RnsPolyInterface : public RingElement<DerivedType, BigVecType> {
      * @return the result of computation as a polynomial with native 64-bit coefficients
      */
     virtual TowerType scale_and_round(const std::vector<NativeInteger>& moduli_q, const NativeInteger& t,
-                                    const NativeInteger& tgamma, const std::vector<NativeInteger>& tgamma_q_hat_modq,
-                                    const std::vector<NativeInteger>& tgamma_q_hat_modq_precon,
-                                    const std::vector<NativeInteger>& neg_invq_modtgamma,
-                                    const std::vector<NativeInteger>& neg_invq_modtgamma_precon) const = 0;
+                                      const NativeInteger& tgamma, const std::vector<NativeInteger>& tgamma_q_hat_modq,
+                                      const std::vector<NativeInteger>& tgamma_q_hat_modq_precon,
+                                      const std::vector<NativeInteger>& neg_invq_modtgamma,
+                                      const std::vector<NativeInteger>& neg_invq_modtgamma_precon) const = 0;
 
     /**
      * @brief Computes scale and round for BFV encryption mode EXTENDED:
@@ -1450,7 +1456,7 @@ class RnsPolyInterface : public RingElement<DerivedType, BigVecType> {
      * @param p_inv_modq p^{-1}_{q_i}
      */
     virtual void scale_and_round_p_over_q(const std::shared_ptr<Params>& params_q,
-                                     const std::vector<NativeInteger>& p_inv_modq) = 0;
+                                          const std::vector<NativeInteger>& p_inv_modq) = 0;
 
     /**
      * @brief Expands basis:
@@ -1516,14 +1522,14 @@ class RnsPolyInterface : public RingElement<DerivedType, BigVecType> {
      * @param t_q_inv_modbsk_precon: NTL-specific precomputations
      */
     virtual void fast_rns_floorq(const NativeInteger& t, const std::vector<NativeInteger>& moduli_q,
-                               const std::vector<NativeInteger>& moduli_bsk,
-                               const std::vector<DoubleNativeInt>& modbsk_barrett_mu,
-                               const std::vector<NativeInteger>& t_q_hat_inv_modq,
-                               const std::vector<NativeInteger>& t_q_hat_inv_modq_precon,
-                               const std::vector<std::vector<NativeInteger>>& q_hat_modbsk,
-                               const std::vector<std::vector<NativeInteger>>& q_inv_modbsk,
-                               const std::vector<NativeInteger>& t_q_inv_modbsk,
-                               const std::vector<NativeInteger>& t_q_inv_modbsk_precon) = 0;
+                                 const std::vector<NativeInteger>& moduli_bsk,
+                                 const std::vector<DoubleNativeInt>& modbsk_barrett_mu,
+                                 const std::vector<NativeInteger>& t_q_hat_inv_modq,
+                                 const std::vector<NativeInteger>& t_q_hat_inv_modq_precon,
+                                 const std::vector<std::vector<NativeInteger>>& q_hat_modbsk,
+                                 const std::vector<std::vector<NativeInteger>>& q_inv_modbsk,
+                                 const std::vector<NativeInteger>& t_q_inv_modbsk,
+                                 const std::vector<NativeInteger>& t_q_inv_modbsk_precon) = 0;
 
     /**
      * @brief Converts basis:
@@ -1589,7 +1595,7 @@ class RnsPolyInterface : public RingElement<DerivedType, BigVecType> {
      * root_of_unity_value for the modulus
      */
     void switch_modulus(const BigIntType& modulus, const BigIntType& root_of_unity_value, const BigIntType& modulus_arb,
-                       const BigIntType& root_of_unity_arb) final {
+                        const BigIntType& root_of_unity_arb) final {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
 
@@ -1602,7 +1608,8 @@ class RnsPolyInterface : public RingElement<DerivedType, BigVecType> {
      * ASSUMPTION: This method assumes that the caller provides the correct
      * root_of_unity_value for the modulus
      */
-    virtual void switch_modulus_at_index(size_t index, const BigIntType& modulus, const BigIntType& root_of_unity_value) = 0;
+    virtual void switch_modulus_at_index(size_t index, const BigIntType& modulus,
+                                         const BigIntType& root_of_unity_value) = 0;
 
     /**
      * @brief Determines if inverse exists

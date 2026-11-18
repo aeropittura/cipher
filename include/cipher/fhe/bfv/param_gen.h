@@ -70,8 +70,8 @@ class BfvRnsParamGen : public RnsParamGen {
      * @return true on success (an exception is thrown otherwise).
      */
     bool params_gen_bfvrns_internal(std::shared_ptr<BaseCryptoParams<RnsPoly>> crypto_params, uint32_t eval_add_count,
-                                 uint32_t multiplicative_depth, uint32_t key_switch_count, size_t dcr_bits, uint32_t n,
-                                 uint32_t num_part_q) const override;
+                                    uint32_t multiplicative_depth, uint32_t key_switch_count, size_t dcr_bits,
+                                    uint32_t n, uint32_t num_part_q) const override;
 
     /////////////////////////////////////
     // SERIALIZATION

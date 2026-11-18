@@ -70,7 +70,7 @@
 
 #ifdef CIPHER_HAVE_BUILTIN_INFO
 
-    #define CALLER_INFO_ARGS_HDR                                                                  \
+    #define CALLER_INFO_ARGS_HDR                                                                    \
         const char *caller_file = __builtin_FILE(), const char *caller_func = __builtin_FUNCTION(), \
                    size_t caller_line = __builtin_LINE()
 

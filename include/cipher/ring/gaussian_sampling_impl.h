@@ -56,8 +56,8 @@ namespace cipher {
 
 template <class Element>
 void LatticeGaussSampUtility<Element>::gauss_samp_gq(const Element& syndrome, double stddev, size_t k,
-                                                   const typename Element::Integer& q, int64_t base,
-                                                   typename Element::DggType& dgg, Matrix<int64_t>* z) {
+                                                     const typename Element::Integer& q, int64_t base,
+                                                     typename Element::DggType& dgg, Matrix<int64_t>* z) {
     // If DCRT is used, the polynomial is first converted from DCRT to large
     // polynomial (in COEFFICIENT representation)
     typename Element::PolyLargeType u = syndrome.crt_interpolate();
@@ -132,8 +132,8 @@ void LatticeGaussSampUtility<Element>::gauss_samp_gq(const Element& syndrome, do
 
 template <class Element>
 void LatticeGaussSampUtility<Element>::gauss_samp_gq_arb_base(const Element& syndrome, double stddev, size_t k,
-                                                          const typename Element::Integer& q, int64_t base,
-                                                          typename Element::DggType& dgg, Matrix<int64_t>* z) {
+                                                              const typename Element::Integer& q, int64_t base,
+                                                              typename Element::DggType& dgg, Matrix<int64_t>* z) {
     // If DCRT is used, the polynomial is first converted from DCRT to large
     // polynomial (in Format::COEFFICIENT representation)
     typename Element::PolyLargeType u = syndrome.crt_interpolate();
@@ -230,8 +230,8 @@ void LatticeGaussSampUtility<Element>::perturb(double sigma, size_t k, size_t n,
 
 template <class Element>
 void LatticeGaussSampUtility<Element>::perturb_float(double sigma, size_t k, size_t n, const std::vector<double>& l,
-                                                    const std::vector<double>& h, int64_t base,
-                                                    typename Element::DggType& dgg, std::vector<double>* p) {
+                                                     const std::vector<double>& h, int64_t base,
+                                                     typename Element::DggType& dgg, std::vector<double>* p) {
     std::normal_distribution<> d(0, sigma);
 
     PRNG& g = PseudoRandomNumberGenerator::get_prng();
@@ -255,8 +255,8 @@ void LatticeGaussSampUtility<Element>::perturb_float(double sigma, size_t k, siz
 
 template <class Element>
 void LatticeGaussSampUtility<Element>::sample_c(const Matrix<double>& c, size_t k, size_t n, double sigma,
-                                               typename Element::DggType& dgg, Matrix<double>* a,
-                                               std::vector<int64_t>* z) {
+                                                typename Element::DggType& dgg, Matrix<double>* a,
+                                                std::vector<int64_t>* z) {
     (*z)[k - 1] = dgg.generate_integer_karney(-(*a)(k - 1, 0) / c(k - 1, 0), sigma / c(k - 1, 0));
     *a = *a + (static_cast<double>((*z)[k - 1])) * c;
 
@@ -271,8 +271,8 @@ void LatticeGaussSampUtility<Element>::sample_c(const Matrix<double>& c, size_t 
 // field elements in Format::COEFFICIENT format
 template <class Element>
 void LatticeGaussSampUtility<Element>::z_sample_sigma2x2(const Field2n& a, const Field2n& b, const Field2n& d,
-                                                       const Matrix<Field2n>& c, const typename Element::DggType& dgg,
-                                                       std::shared_ptr<Matrix<int64_t>> q) {
+                                                         const Matrix<Field2n>& c, const typename Element::DggType& dgg,
+                                                         std::shared_ptr<Matrix<int64_t>> q) {
     // size of the the lattice
     size_t n = a.Size();
 
@@ -311,9 +311,9 @@ void LatticeGaussSampUtility<Element>::z_sample_sigma2x2(const Field2n& a, const
 
 template <class Element>
 void LatticeGaussSampUtility<Element>::sample_mat(const Matrix<Field2n>& A, const Matrix<Field2n>& B,
-                                                 const Matrix<Field2n>& D, const Matrix<Field2n>& C,
-                                                 const typename Element::DggType& dgg,
-                                                 std::shared_ptr<Matrix<int64_t>> p) {
+                                                  const Matrix<Field2n>& D, const Matrix<Field2n>& C,
+                                                  const typename Element::DggType& dgg,
+                                                  std::shared_ptr<Matrix<int64_t>> p) {
     size_t d = C.get_rows();
 
     if (d == 2) {
@@ -441,8 +441,8 @@ void LatticeGaussSampUtility<Element>::sample_mat(const Matrix<Field2n>& A, cons
 // representation c is in Format::COEFFICIENT representation
 template <class Element>
 std::shared_ptr<Matrix<int64_t>> LatticeGaussSampUtility<Element>::z_sample_f(const Field2n& f, const Field2n& c,
-                                                                            const typename Element::DggType& dgg,
-                                                                            size_t n) {
+                                                                              const typename Element::DggType& dgg,
+                                                                              size_t n) {
     if (f.Size() == 1) {
         auto p = std::make_shared<Matrix<int64_t>>([]() { return 0; }, 1, 1);
         (*p)(0, 0) = dgg.generate_integer_karney(c[0].real(), std::sqrt(f[0].real()));

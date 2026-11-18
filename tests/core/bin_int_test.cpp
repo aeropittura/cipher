@@ -134,7 +134,8 @@ void basic_math_test(const std::string& msg) {
         calculated_result = a.add(b);
         expected_result = 205484;
 
-        EXPECT_EQ(expected_result, calculated_result.convert_to_int()) << msg << " Failure testing add_a_greater_than_b";
+        EXPECT_EQ(expected_result, calculated_result.convert_to_int())
+                << msg << " Failure testing add_a_greater_than_b";
     }
     // TEST_F CASE WHEN FIRST NUMBER IS LESS THAN SECOND NUMBER AND MSB
     // HAS NO OVERFLOW
@@ -156,7 +157,8 @@ void basic_math_test(const std::string& msg) {
         calculated_result = a.add(b);
         expected_result = 17292308;
 
-        EXPECT_EQ(expected_result, calculated_result.convert_to_int()) << msg << " Failure testing overflow_to_next_byte";
+        EXPECT_EQ(expected_result, calculated_result.convert_to_int())
+                << msg << " Failure testing overflow_to_next_byte";
     }
     // TEST_F CASE WHEN MSB OF THE RESULT HAS BIT-OVERFLOW IN THE SAME
     // BYTE
@@ -265,7 +267,8 @@ void basic_math_test(const std::string& msg) {
         calculated_result = a.sub(b);
         expected_result = 2046922112;
 
-        EXPECT_EQ(expected_result, calculated_result.convert_to_int()) << msg << " Failure testing sub_a_greater_than_b";
+        EXPECT_EQ(expected_result, calculated_result.convert_to_int())
+                << msg << " Failure testing sub_a_greater_than_b";
     }
     // TEST_F CASE WHEN SUBTRACTION NEEDS BORROW FROM NEXT BYTE
     {
@@ -382,7 +385,8 @@ void basic_math_test(const std::string& msg) {
         calculated_result = a.divided_by(b);
         expected_result = 1;
 
-        EXPECT_EQ(expected_result, calculated_result.convert_to_int()) << msg << " Failure testing divided_by_a_equals_b";
+        EXPECT_EQ(expected_result, calculated_result.convert_to_int())
+                << msg << " Failure testing divided_by_a_equals_b";
     }
 
     // TEST_F CASE WHEN FIRST NUMBER IS GREATER THAN THE SECOND NUMBER
@@ -575,7 +579,8 @@ void mod_test(const std::string& msg) {
         calculated_result = m.mod(p);
         expected_result = 0;
 
-        EXPECT_EQ(expected_result, calculated_result.convert_to_int()) << msg << " Failure testing number_equal_to_modulus";
+        EXPECT_EQ(expected_result, calculated_result.convert_to_int())
+                << msg << " Failure testing number_equal_to_modulus";
     }
 
 #ifdef OUT
@@ -866,7 +871,8 @@ void mod_arithmetic(const std::string& msg) {
         calculated_result = m.mod_mul(n, q);
         expected_result = 0;
 
-        EXPECT_EQ(expected_result, calculated_result.convert_to_int()) << msg << " Failure testing ModMul second == mod";
+        EXPECT_EQ(expected_result, calculated_result.convert_to_int())
+                << msg << " Failure testing ModMul second == mod";
     }
 
     // BOTH > MOD
@@ -902,7 +908,8 @@ void mod_arithmetic(const std::string& msg) {
         calculated_result = m.mod_mul(n, q);
         expected_result = 3;
 
-        EXPECT_EQ(expected_result, calculated_result.convert_to_int()) << msg << " Failure testing ModMul product > mod";
+        EXPECT_EQ(expected_result, calculated_result.convert_to_int())
+                << msg << " Failure testing ModMul product > mod";
     }
 
     // PRODUCT == MOD
@@ -914,7 +921,8 @@ void mod_arithmetic(const std::string& msg) {
         calculated_result = m.mod_mul(n, q);
         expected_result = 0;
 
-        EXPECT_EQ(expected_result, calculated_result.convert_to_int()) << msg << " Failure testing ModMul product == mod";
+        EXPECT_EQ(expected_result, calculated_result.convert_to_int())
+                << msg << " Failure testing ModMul product == mod";
     }
 
     /************************************************/

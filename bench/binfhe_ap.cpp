@@ -152,7 +152,8 @@ void FHEW_KEYSWITCH(benchmark::State& state, ParamSet param_set) {
     auto key_switch_hint = cc.key_switch_gen(sk, sk_n);
 
     for (auto _ : state) {
-        LweCiphertext e_q1 = cc.get_lwe_scheme()->key_switch(cc.get_params()->get_lwe_params(), key_switch_hint, ct_qn1);
+        LweCiphertext e_q1 =
+                cc.get_lwe_scheme()->key_switch(cc.get_params()->get_lwe_params(), key_switch_hint, ct_qn1);
     }
 }
 

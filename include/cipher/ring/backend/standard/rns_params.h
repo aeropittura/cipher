@@ -133,7 +133,7 @@ class RnsParams final : public ElementParams<IntType> {
      * polynomials.
      */
     RnsParams(uint32_t corder, const std::vector<NativeInteger>& moduli,
-                 const std::vector<NativeInteger>& roots_of_unity_value)
+              const std::vector<NativeInteger>& roots_of_unity_value)
         : ElementParams<IntType>(corder, 0) {
         size_t limbs{moduli.size()};
         if (limbs != roots_of_unity_value.size())
@@ -160,8 +160,8 @@ class RnsParams final : public ElementParams<IntType> {
      * @param roots_of_unity_big the big roots of unity of the component polynomials.
      */
     RnsParams(uint32_t corder, const std::vector<NativeInteger>& moduli,
-                 const std::vector<NativeInteger>& roots_of_unity_value, const std::vector<NativeInteger>& moduli_big,
-                 const std::vector<NativeInteger>& roots_of_unity_big)
+              const std::vector<NativeInteger>& roots_of_unity_value, const std::vector<NativeInteger>& moduli_big,
+              const std::vector<NativeInteger>& roots_of_unity_big)
         : ElementParams<IntType>(corder, 0) {
         size_t limbs{moduli.size()};
         if (limbs != roots_of_unity_value.size() || limbs != moduli_big.size() || limbs != roots_of_unity_big.size())
@@ -170,8 +170,8 @@ class RnsParams final : public ElementParams<IntType> {
         params_.reserve(limbs);
         IntType composite_modulus(1);
         for (size_t i = 0; i < limbs; ++i) {
-            params_.push_back(std::make_shared<NativePolyParams>(corder, moduli[i], roots_of_unity_value[i], moduli_big[i],
-                                                                roots_of_unity_big[i]));
+            params_.push_back(std::make_shared<NativePolyParams>(corder, moduli[i], roots_of_unity_value[i],
+                                                                 moduli_big[i], roots_of_unity_big[i]));
             composite_modulus *= IntType(moduli[i].template convert_to_int<BasicInteger>());
         }
         ElementParams<IntType>::ciphertext_modulus_ = composite_modulus;
@@ -210,8 +210,7 @@ class RnsParams final : public ElementParams<IntType> {
 
     RnsParams(const RnsParams& rhs) : ElementParams<IntType>(rhs), params_(rhs.params_) {}
 
-    RnsParams(RnsParams&& rhs) noexcept
-        : ElementParams<IntType>(std::move(rhs)), params_(std::move(rhs.params_)) {}
+    RnsParams(RnsParams&& rhs) noexcept : ElementParams<IntType>(std::move(rhs)), params_(std::move(rhs.params_)) {}
 
     /**
      * Assignment Operator.
@@ -250,7 +249,7 @@ class RnsParams final : public ElementParams<IntType> {
     std::vector<std::shared_ptr<NativePolyParams>> get_param_partition(uint32_t start, uint32_t end) const {
         if (end < start || end >= params_.size())
             CIPHER_THROW("Incorrect parameters for GetParamPartition - (start: " + std::to_string(start) +
-                          ", end:" + std::to_string(end) + ")");
+                         ", end:" + std::to_string(end) + ")");
         return std::vector<std::shared_ptr<NativePolyParams>>(params_.begin() + start, params_.begin() + end + 1);
     }
 
@@ -359,7 +358,7 @@ class RnsParams final : public ElementParams<IntType> {
     void load(Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         ar(::cereal::base_class<ElementParams<IntType>>(this));
         ar(::cereal::make_nvp("p", params_));

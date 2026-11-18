@@ -55,7 +55,7 @@
 namespace cipher {
 
 EvalKey<RnsPoly> KeySwitchBv::key_switch_gen_internal(const PrivateKey<RnsPoly> old_key,
-                                                    const PrivateKey<RnsPoly> new_key) const {
+                                                      const PrivateKey<RnsPoly> new_key) const {
     const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(new_key->get_crypto_parameters());
 
     DugType dug;
@@ -110,8 +110,8 @@ EvalKey<RnsPoly> KeySwitchBv::key_switch_gen_internal(const PrivateKey<RnsPoly> 
 }
 
 EvalKey<RnsPoly> KeySwitchBv::key_switch_gen_internal(const PrivateKey<RnsPoly> old_key,
-                                                    const PrivateKey<RnsPoly> new_key,
-                                                    const EvalKey<RnsPoly> ek) const {
+                                                      const PrivateKey<RnsPoly> new_key,
+                                                      const EvalKey<RnsPoly> ek) const {
     const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(old_key->get_crypto_parameters());
 
     DugType dug;
@@ -166,7 +166,7 @@ EvalKey<RnsPoly> KeySwitchBv::key_switch_gen_internal(const PrivateKey<RnsPoly> 
 }
 
 EvalKey<RnsPoly> KeySwitchBv::key_switch_gen_internal(const PrivateKey<RnsPoly> old_sk,
-                                                    const PublicKey<RnsPoly> new_pk) const {
+                                                      const PublicKey<RnsPoly> new_pk) const {
     const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(new_pk->get_crypto_parameters());
 
     TugType tug;
@@ -200,7 +200,7 @@ EvalKey<RnsPoly> KeySwitchBv::key_switch_gen_internal(const PrivateKey<RnsPoly> 
                 bv[j].set_element_at_index(i, std::move(s_old_decomposed[k]));
                 bv[j] += RnsPoly(dgg, ep, Format::EVALUATION) * ns;
                 RnsPoly u = (crypto_params->get_secret_key_dist() == GAUSSIAN) ? RnsPoly(dgg, ep, Format::EVALUATION) :
-                                                                              RnsPoly(tug, ep, Format::EVALUATION);
+                                                                                 RnsPoly(tug, ep, Format::EVALUATION);
                 bv[j] += newp0 * u;
                 av[j] = newp1 * u;
                 av[j] += RnsPoly(dgg, ep, Format::EVALUATION) * ns;
@@ -215,7 +215,7 @@ EvalKey<RnsPoly> KeySwitchBv::key_switch_gen_internal(const PrivateKey<RnsPoly> 
             bv[i].set_element_at_index(i, s_old.get_element_at_index(i));
             bv[i] += RnsPoly(dgg, ep, Format::EVALUATION) * ns;
             RnsPoly u = (crypto_params->get_secret_key_dist() == GAUSSIAN) ? RnsPoly(dgg, ep, Format::EVALUATION) :
-                                                                          RnsPoly(tug, ep, Format::EVALUATION);
+                                                                             RnsPoly(tug, ep, Format::EVALUATION);
             bv[i] += newp0 * u;
             av[i] = newp1 * u;
             av[i] += RnsPoly(dgg, ep, Format::EVALUATION) * ns;
@@ -245,7 +245,7 @@ void KeySwitchBv::key_switch_in_place(Ciphertext<RnsPoly>& ciphertext, const Eva
 
 std::vector<RnsPoly> KeySwitchBv::key_switch_core(const RnsPoly& a, const EvalKey<RnsPoly> eval_key) const {
     return eval_fast_key_switch_core(eval_key_switch_precompute_core(a, eval_key->get_crypto_parameters()), eval_key,
-                                 a.get_params());
+                                     a.get_params());
 }
 
 std::shared_ptr<std::vector<RnsPoly>> KeySwitchBv::eval_key_switch_precompute_core(
@@ -255,8 +255,8 @@ std::shared_ptr<std::vector<RnsPoly>> KeySwitchBv::eval_key_switch_precompute_co
 }
 
 std::vector<RnsPoly> KeySwitchBv::eval_fast_key_switch_core(const std::shared_ptr<std::vector<RnsPoly>> digits,
-                                                         const EvalKey<RnsPoly> eval_key,
-                                                         const std::shared_ptr<ParmType> params_ql) const {
+                                                            const EvalKey<RnsPoly> eval_key,
+                                                            const std::shared_ptr<ParmType> params_ql) const {
     const std::vector<RnsPoly>& bref = eval_key->get_b_vector();
     const std::vector<RnsPoly>& aref = eval_key->get_a_vector();
     const uint32_t size_ql = params_ql->get_params().size();

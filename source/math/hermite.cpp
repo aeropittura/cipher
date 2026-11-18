@@ -52,7 +52,7 @@ static bool is_not_equal_zero(std::complex<double> v) {
 namespace cipher {
 
 std::vector<std::complex<double>> get_hermite_trig_coefficients(std::function<int64_t(int64_t)> func, uint32_t p,
-                                                             size_t order, double scale) {
+                                                                size_t order, double scale) {
     using namespace std::complex_literals;
     if (p == 0)
         CIPHER_THROW("The degree of approximation can not be zero");

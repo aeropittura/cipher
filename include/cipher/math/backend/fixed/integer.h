@@ -635,7 +635,7 @@ class BigIntegerFixedT : public cipher::BigIntegerInterface<BigIntegerFixedT<uin
      * @return is the result of the modulus addition operation.
      */
     BigIntegerFixedT mod_add(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
-                            const BigIntegerFixedT& mu) const;
+                             const BigIntegerFixedT& mu) const;
 
     /**
      * Barrett modulus addition operation. In-place variant.
@@ -645,7 +645,8 @@ class BigIntegerFixedT : public cipher::BigIntegerInterface<BigIntegerFixedT<uin
      * @param mu is the Barrett value.
      * @return is the result of the modulus addition operation.
      */
-    BigIntegerFixedT& mod_add_eq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus, const BigIntegerFixedT& mu);
+    BigIntegerFixedT& mod_add_eq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
+                                 const BigIntegerFixedT& mu);
 
     /**
      * Modulus subtraction operation.
@@ -692,7 +693,7 @@ class BigIntegerFixedT : public cipher::BigIntegerInterface<BigIntegerFixedT<uin
      * @return is the result of the modulus subtraction operation.
      */
     BigIntegerFixedT mod_sub(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
-                            const BigIntegerFixedT& mu) const;
+                             const BigIntegerFixedT& mu) const;
 
     /**
      * Barrett modulus subtraction operation. In-place variant.
@@ -702,7 +703,8 @@ class BigIntegerFixedT : public cipher::BigIntegerInterface<BigIntegerFixedT<uin
      * @param mu is the Barrett value.
      * @return is the result of the modulus subtraction operation.
      */
-    BigIntegerFixedT& mod_sub_eq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus, const BigIntegerFixedT& mu);
+    BigIntegerFixedT& mod_sub_eq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
+                                 const BigIntegerFixedT& mu);
 
     /**
      * Modulus multiplication operation.
@@ -731,7 +733,7 @@ class BigIntegerFixedT : public cipher::BigIntegerInterface<BigIntegerFixedT<uin
      * @return is the result of the modulus multiplication operation.
      */
     BigIntegerFixedT mod_mul(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
-                            const BigIntegerFixedT& mu) const;
+                             const BigIntegerFixedT& mu) const;
 
     /**
      * Barrett modulus multiplication. In-place variant.
@@ -741,7 +743,8 @@ class BigIntegerFixedT : public cipher::BigIntegerInterface<BigIntegerFixedT<uin
      * @param mu is the Barrett value.
      * @return is the result of the modulus multiplication operation.
      */
-    BigIntegerFixedT& mod_mul_eq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus, const BigIntegerFixedT& mu);
+    BigIntegerFixedT& mod_mul_eq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
+                                 const BigIntegerFixedT& mu);
 
     /**
      * Modulus multiplication that assumes the operands are < modulus.
@@ -771,7 +774,7 @@ class BigIntegerFixedT : public cipher::BigIntegerInterface<BigIntegerFixedT<uin
      * @return is the result of the modulus multiplication operation.
      */
     BigIntegerFixedT mod_mul_fast(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
-                                const BigIntegerFixedT& mu) const;
+                                  const BigIntegerFixedT& mu) const;
 
     /**
      * Barrett modulus multiplication that assumes the operands are < modulus.
@@ -783,15 +786,15 @@ class BigIntegerFixedT : public cipher::BigIntegerInterface<BigIntegerFixedT<uin
      * @return is the result of the modulus multiplication operation.
      */
     BigIntegerFixedT& mod_mul_fast_eq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
-                                   const BigIntegerFixedT& mu);
+                                      const BigIntegerFixedT& mu);
 
     BigIntegerFixedT mod_mul_fast_const(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
-                                     const BigIntegerFixedT& b_inv) const {
+                                        const BigIntegerFixedT& b_inv) const {
         CIPHER_THROW("ModMulFastConst is not implemented for backend 2");
     }
 
     BigIntegerFixedT& mod_mul_fast_const_eq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
-                                        const BigIntegerFixedT& b_inv) {
+                                            const BigIntegerFixedT& b_inv) {
         CIPHER_THROW("ModMulFastConstEq is not implemented for backend 2");
     }
 
@@ -1081,7 +1084,7 @@ class BigIntegerFixedT : public cipher::BigIntegerInterface<BigIntegerFixedT<uin
             Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         ar(::cereal::binary_data(value_, sizeof(value_)));
         ar(::cereal::binary_data(&msb_, sizeof(msb_)));
@@ -1092,7 +1095,7 @@ class BigIntegerFixedT : public cipher::BigIntegerInterface<BigIntegerFixedT<uin
             Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         ar(::cereal::make_nvp("v", value_));
         ar(::cereal::make_nvp("m", msb_));
@@ -1216,7 +1219,7 @@ class BigIntegerFixedT : public cipher::BigIntegerInterface<BigIntegerFixedT<uin
     static void add_bit_val(uint8_t* a, uint8_t b);
 };
 
-}  // namespace bigintfxd
+}  // namespace fixed_int
 
 #endif
 

@@ -69,7 +69,7 @@ void BaseLeveledShe<Element>::eval_negate_in_place(Ciphertext<Element>& cipherte
 
 template <class Element>
 Ciphertext<Element> BaseLeveledShe<Element>::eval_add(ConstCiphertext<Element>& ciphertext1,
-                                                     ConstCiphertext<Element>& ciphertext2) const {
+                                                      ConstCiphertext<Element>& ciphertext2) const {
     auto result = ciphertext1->clone();
     eval_add_in_place(result, ciphertext2);
     return result;
@@ -77,13 +77,13 @@ Ciphertext<Element> BaseLeveledShe<Element>::eval_add(ConstCiphertext<Element>& 
 
 template <class Element>
 void BaseLeveledShe<Element>::eval_add_in_place(Ciphertext<Element>& ciphertext1,
-                                             ConstCiphertext<Element>& ciphertext2) const {
+                                                ConstCiphertext<Element>& ciphertext2) const {
     eval_add_core_in_place(ciphertext1, ciphertext2);
 }
 
 template <class Element>
 Ciphertext<Element> BaseLeveledShe<Element>::eval_add(ConstCiphertext<Element>& ciphertext,
-                                                     ConstPlaintext& plaintext) const {
+                                                      ConstPlaintext& plaintext) const {
     auto result = ciphertext->clone();
     eval_add_in_place(result, plaintext);
     return result;
@@ -107,7 +107,7 @@ void BaseLeveledShe<Element>::eval_add_in_place(Ciphertext<Element>& ciphertext,
 
 template <class Element>
 Ciphertext<Element> BaseLeveledShe<Element>::eval_sub(ConstCiphertext<Element>& ciphertext1,
-                                                     ConstCiphertext<Element>& ciphertext2) const {
+                                                      ConstCiphertext<Element>& ciphertext2) const {
     auto result = ciphertext1->clone();
     eval_sub_in_place(result, ciphertext2);
     return result;
@@ -115,13 +115,13 @@ Ciphertext<Element> BaseLeveledShe<Element>::eval_sub(ConstCiphertext<Element>& 
 
 template <class Element>
 void BaseLeveledShe<Element>::eval_sub_in_place(Ciphertext<Element>& ciphertext1,
-                                             ConstCiphertext<Element>& ciphertext2) const {
+                                                ConstCiphertext<Element>& ciphertext2) const {
     eval_sub_core_in_place(ciphertext1, ciphertext2);
 }
 
 template <class Element>
 Ciphertext<Element> BaseLeveledShe<Element>::eval_sub(ConstCiphertext<Element>& ciphertext,
-                                                     ConstPlaintext& plaintext) const {
+                                                      ConstPlaintext& plaintext) const {
     auto result = ciphertext->clone();
     eval_sub_in_place(result, plaintext);
     return result;
@@ -175,7 +175,7 @@ std::vector<EvalKey<Element>> BaseLeveledShe<Element>::eval_mult_keys_gen(const 
 
 template <class Element>
 Ciphertext<Element> BaseLeveledShe<Element>::eval_mult(ConstCiphertext<Element>& ciphertext,
-                                                      ConstPlaintext& plaintext) const {
+                                                       ConstPlaintext& plaintext) const {
     auto result = ciphertext->clone();
     eval_mult_in_place(result, plaintext);
     return result;
@@ -200,8 +200,8 @@ void BaseLeveledShe<Element>::eval_mult_in_place(Ciphertext<Element>& ciphertext
 
 template <class Element>
 Ciphertext<Element> BaseLeveledShe<Element>::eval_mult(ConstCiphertext<Element>& ciphertext1,
-                                                      ConstCiphertext<Element>& ciphertext2,
-                                                      const EvalKey<Element> eval_key) const {
+                                                       ConstCiphertext<Element>& ciphertext2,
+                                                       const EvalKey<Element> eval_key) const {
     auto ciphertext = eval_mult(ciphertext1, ciphertext2);
 
     auto& cv = ciphertext->get_elements();
@@ -214,8 +214,9 @@ Ciphertext<Element> BaseLeveledShe<Element>::eval_mult(ConstCiphertext<Element>&
 }
 
 template <class Element>
-void BaseLeveledShe<Element>::eval_mult_in_place(Ciphertext<Element>& ciphertext1, ConstCiphertext<Element>& ciphertext2,
-                                              const EvalKey<Element> eval_key) const {
+void BaseLeveledShe<Element>::eval_mult_in_place(Ciphertext<Element>& ciphertext1,
+                                                 ConstCiphertext<Element>& ciphertext2,
+                                                 const EvalKey<Element> eval_key) const {
     ciphertext1 = eval_mult(ciphertext1, ciphertext2);
 
     auto& cv = ciphertext1->get_elements();
@@ -228,8 +229,8 @@ void BaseLeveledShe<Element>::eval_mult_in_place(Ciphertext<Element>& ciphertext
 
 template <class Element>
 Ciphertext<Element> BaseLeveledShe<Element>::eval_mult_mutable(Ciphertext<Element>& ciphertext1,
-                                                             Ciphertext<Element>& ciphertext2,
-                                                             const EvalKey<Element> eval_key) const {
+                                                               Ciphertext<Element>& ciphertext2,
+                                                               const EvalKey<Element> eval_key) const {
     auto ciphertext = eval_mult_mutable(ciphertext1, ciphertext2);
 
     auto& cv = ciphertext->get_elements();
@@ -243,7 +244,7 @@ Ciphertext<Element> BaseLeveledShe<Element>::eval_mult_mutable(Ciphertext<Elemen
 
 template <class Element>
 Ciphertext<Element> BaseLeveledShe<Element>::eval_square(ConstCiphertext<Element>& ciphertext,
-                                                        const EvalKey<Element> eval_key) const {
+                                                         const EvalKey<Element> eval_key) const {
     auto csquare = eval_square(ciphertext);
 
     auto& cv = csquare->get_elements();
@@ -256,7 +257,8 @@ Ciphertext<Element> BaseLeveledShe<Element>::eval_square(ConstCiphertext<Element
 }
 
 template <class Element>
-void BaseLeveledShe<Element>::eval_square_in_place(Ciphertext<Element>& ciphertext, const EvalKey<Element> eval_key) const {
+void BaseLeveledShe<Element>::eval_square_in_place(Ciphertext<Element>& ciphertext,
+                                                   const EvalKey<Element> eval_key) const {
     ciphertext = eval_square(ciphertext);
 
     auto& cv = ciphertext->get_elements();
@@ -269,7 +271,7 @@ void BaseLeveledShe<Element>::eval_square_in_place(Ciphertext<Element>& cipherte
 
 template <class Element>
 Ciphertext<Element> BaseLeveledShe<Element>::eval_square_mutable(Ciphertext<Element>& ciphertext,
-                                                               const EvalKey<Element> eval_key) const {
+                                                                 const EvalKey<Element> eval_key) const {
     auto csquare = eval_square_mutable(ciphertext);
 
     auto& cv = csquare->get_elements();
@@ -282,8 +284,9 @@ Ciphertext<Element> BaseLeveledShe<Element>::eval_square_mutable(Ciphertext<Elem
 }
 
 template <class Element>
-void BaseLeveledShe<Element>::eval_mult_mutable_in_place(Ciphertext<Element>& ciphertext1, Ciphertext<Element>& ciphertext2,
-                                                     const EvalKey<Element> eval_key) const {
+void BaseLeveledShe<Element>::eval_mult_mutable_in_place(Ciphertext<Element>& ciphertext1,
+                                                         Ciphertext<Element>& ciphertext2,
+                                                         const EvalKey<Element> eval_key) const {
     ciphertext1 = eval_mult_mutable(ciphertext1, ciphertext2);
 
     auto& cv = ciphertext1->get_elements();
@@ -313,7 +316,7 @@ Ciphertext<Element> BaseLeveledShe<Element>::relinearize(ConstCiphertext<Element
 
 template <class Element>
 void BaseLeveledShe<Element>::relinearize_in_place(Ciphertext<Element>& ciphertext,
-                                                 const std::vector<EvalKey<Element>>& eval_key_vec) const {
+                                                   const std::vector<EvalKey<Element>>& eval_key_vec) const {
     auto& cv = ciphertext->get_elements();
     for (auto& c : cv)
         c.set_format(Format::EVALUATION);
@@ -380,8 +383,8 @@ std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> BaseLeveledShe<Element>::e
 
 template <class Element>
 Ciphertext<Element> BaseLeveledShe<Element>::eval_automorphism(ConstCiphertext<Element>& ciphertext, uint32_t i,
-                                                              const std::map<uint32_t, EvalKey<Element>>& eval_key_map,
-                                                              CALLER_INFO_ARGS_CPP) const {
+                                                               const std::map<uint32_t, EvalKey<Element>>& eval_key_map,
+                                                               CALLER_INFO_ARGS_CPP) const {
     // this operation can be performed on 2-element ciphertexts only
     if (ciphertext->number_ciphertext_elements() != 2)
         CIPHER_THROW("Ciphertext should be relinearized before.");
@@ -398,9 +401,9 @@ Ciphertext<Element> BaseLeveledShe<Element>::eval_automorphism(ConstCiphertext<E
 
 template <class Element>
 Ciphertext<Element> BaseLeveledShe<Element>::eval_automorphism_core(ConstCiphertext<Element>& ciphertext,
-                                                                  uint32_t auto_index,
-                                                                  const std::shared_ptr<std::vector<Element>>& digits,
-                                                                  const EvalKey<Element>& eval_key) const {
+                                                                    uint32_t auto_index,
+                                                                    const std::shared_ptr<std::vector<Element>>& digits,
+                                                                    const EvalKey<Element>& eval_key) const {
     const auto cc = ciphertext->get_crypto_context();
     const uint32_t N = cc->get_ring_dimension();
     std::vector<uint32_t> vec(N);
@@ -424,17 +427,19 @@ Ciphertext<Element> BaseLeveledShe<Element>::eval_automorphism_core(ConstCiphert
             ba[0].get_all_elements()[i].mult_acc_eq_no_check(cv0.get_all_elements()[i], crypto_params->get_p_modq()[i]);
 
         ba[0] = ba[0].automorphism_transform(auto_index, vec)
-                        .approx_mod_down(cv0.get_params(), crypto_params->get_params_p(), crypto_params->get_p_inv_modq(),
-                                       crypto_params->get_p_inv_modq_precon(), crypto_params->get_p_hat_inv_modp(),
-                                       crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
-                                       crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
-                                       crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon());
+                        .approx_mod_down(cv0.get_params(), crypto_params->get_params_p(),
+                                         crypto_params->get_p_inv_modq(), crypto_params->get_p_inv_modq_precon(),
+                                         crypto_params->get_p_hat_inv_modp(),
+                                         crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
+                                         crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
+                                         crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon());
         ba[1] = ba[1].automorphism_transform(auto_index, vec)
-                        .approx_mod_down(cv0.get_params(), crypto_params->get_params_p(), crypto_params->get_p_inv_modq(),
-                                       crypto_params->get_p_inv_modq_precon(), crypto_params->get_p_hat_inv_modp(),
-                                       crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
-                                       crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
-                                       crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon());
+                        .approx_mod_down(cv0.get_params(), crypto_params->get_params_p(),
+                                         crypto_params->get_p_inv_modq(), crypto_params->get_p_inv_modq_precon(),
+                                         crypto_params->get_p_hat_inv_modp(),
+                                         crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
+                                         crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
+                                         crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon());
 
         auto result = ciphertext->clone_empty();
         result->set_elements(std::move(ba));
@@ -486,8 +491,9 @@ std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> BaseLeveledShe<Element>::e
 }
 
 template <class Element>
-Ciphertext<Element> BaseLeveledShe<Element>::eval_at_index(ConstCiphertext<Element>& ciphertext, int32_t index,
-                                                         const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const {
+Ciphertext<Element> BaseLeveledShe<Element>::eval_at_index(
+        ConstCiphertext<Element>& ciphertext, int32_t index,
+        const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const {
     uint32_t M = ciphertext->get_crypto_parameters()->get_element_params()->get_cyclotomic_order();
     return eval_automorphism(ciphertext, find_automorphism_index(index, M), eval_key_map);
 }
@@ -498,8 +504,8 @@ Ciphertext<Element> BaseLeveledShe<Element>::eval_at_index(ConstCiphertext<Eleme
 
 template <class Element>
 Ciphertext<Element> BaseLeveledShe<Element>::composed_eval_mult(ConstCiphertext<Element>& ciphertext1,
-                                                              ConstCiphertext<Element>& ciphertext2,
-                                                              const EvalKey<Element> eval_key) const {
+                                                                ConstCiphertext<Element>& ciphertext2,
+                                                                const EvalKey<Element> eval_key) const {
     auto ciphertext = eval_mult(ciphertext1, ciphertext2);
     ciphertext->get_crypto_context()->get_scheme()->key_switch_in_place(ciphertext, eval_key);
     mod_reduce_in_place(ciphertext, BASE_NUM_LEVELS_TO_DROP);
@@ -512,7 +518,7 @@ Ciphertext<Element> BaseLeveledShe<Element>::composed_eval_mult(ConstCiphertext<
 
 template <class Element>
 Ciphertext<Element> BaseLeveledShe<Element>::level_reduce(ConstCiphertext<Element>& ciphertext,
-                                                         const EvalKey<Element> eval_key, size_t levels) const {
+                                                          const EvalKey<Element> eval_key, size_t levels) const {
     auto result = ciphertext->clone();
     level_reduce_in_place(result, eval_key, levels);
     return result;
@@ -520,7 +526,7 @@ Ciphertext<Element> BaseLeveledShe<Element>::level_reduce(ConstCiphertext<Elemen
 
 template <class Element>
 Ciphertext<Element> BaseLeveledShe<Element>::morph_plaintext(ConstPlaintext& plaintext,
-                                                            ConstCiphertext<Element>& ciphertext) const {
+                                                             ConstCiphertext<Element>& ciphertext) const {
     auto elem = plaintext->get_element<Element>();
     elem.set_format(EVALUATION);
 
@@ -540,32 +546,32 @@ Ciphertext<Element> BaseLeveledShe<Element>::morph_plaintext(ConstPlaintext& pla
 
 template <class Element>
 void BaseLeveledShe<Element>::verify_num_of_towers(ConstCiphertext<Element>& ciphertext1,
-                                                ConstCiphertext<Element>& ciphertext2, CALLER_INFO_ARGS_CPP) const {
+                                                   ConstCiphertext<Element>& ciphertext2, CALLER_INFO_ARGS_CPP) const {
     uint32_t num_towers1 = ciphertext1->get_elements()[0].get_num_of_elements();
     uint32_t num_towers2 = ciphertext2->get_elements()[0].get_num_of_elements();
     if (num_towers1 != num_towers2) {
         std::string error_msg(std::string("Number of towers is not the same for ciphertext1 [") +
-                             std::to_string(num_towers1) + "] and for ciphertext2 [" + std::to_string(num_towers2) +
-                             "] " + CALLER_INFO);
+                              std::to_string(num_towers1) + "] and for ciphertext2 [" + std::to_string(num_towers2) +
+                              "] " + CALLER_INFO);
         CIPHER_THROW(error_msg);
     }
 }
 template <class Element>
 void BaseLeveledShe<Element>::verify_num_of_towers(ConstCiphertext<Element>& ciphertext, const Element& plaintext,
-                                                CALLER_INFO_ARGS_CPP) const {
+                                                   CALLER_INFO_ARGS_CPP) const {
     uint32_t num_towers_ctxt = ciphertext->get_elements()[0].get_num_of_elements();
     uint32_t num_towers_ptxt = plaintext.get_num_of_elements();
     if (num_towers_ctxt != num_towers_ptxt) {
         std::string error_msg(std::string("Number of towers is not the same for ciphertext[") +
-                             std::to_string(num_towers_ctxt) + "] and for plaintext[" + std::to_string(num_towers_ptxt) +
-                             "]" + CALLER_INFO);
+                              std::to_string(num_towers_ctxt) + "] and for plaintext[" +
+                              std::to_string(num_towers_ptxt) + "]" + CALLER_INFO);
         CIPHER_THROW(error_msg);
     }
 }
 
 template <class Element>
 Ciphertext<Element> BaseLeveledShe<Element>::eval_add_core(ConstCiphertext<Element>& ciphertext1,
-                                                         ConstCiphertext<Element>& ciphertext2) const {
+                                                           ConstCiphertext<Element>& ciphertext2) const {
     auto result = ciphertext1->clone();
     eval_add_core_in_place(result, ciphertext2);
     return result;
@@ -573,7 +579,7 @@ Ciphertext<Element> BaseLeveledShe<Element>::eval_add_core(ConstCiphertext<Eleme
 
 template <class Element>
 void BaseLeveledShe<Element>::eval_add_core_in_place(Ciphertext<Element>& ciphertext1,
-                                                 ConstCiphertext<Element>& ciphertext2) const {
+                                                     ConstCiphertext<Element>& ciphertext2) const {
     verify_num_of_towers(ciphertext1, ciphertext2);
     auto& cv1 = ciphertext1->get_elements();
     auto& cv2 = ciphertext2->get_elements();
@@ -592,7 +598,7 @@ void BaseLeveledShe<Element>::eval_add_core_in_place(Ciphertext<Element>& cipher
 
 template <class Element>
 Ciphertext<Element> BaseLeveledShe<Element>::eval_sub_core(ConstCiphertext<Element>& ciphertext1,
-                                                         ConstCiphertext<Element>& ciphertext2) const {
+                                                           ConstCiphertext<Element>& ciphertext2) const {
     auto result = ciphertext1->clone();
     eval_sub_core_in_place(result, ciphertext2);
     return result;
@@ -600,7 +606,7 @@ Ciphertext<Element> BaseLeveledShe<Element>::eval_sub_core(ConstCiphertext<Eleme
 
 template <class Element>
 void BaseLeveledShe<Element>::eval_sub_core_in_place(Ciphertext<Element>& ciphertext1,
-                                                 ConstCiphertext<Element>& ciphertext2) const {
+                                                     ConstCiphertext<Element>& ciphertext2) const {
     verify_num_of_towers(ciphertext1, ciphertext2);
     auto& cv1 = ciphertext1->get_elements();
     auto& cv2 = ciphertext2->get_elements();
@@ -619,7 +625,7 @@ void BaseLeveledShe<Element>::eval_sub_core_in_place(Ciphertext<Element>& cipher
 
 template <class Element>
 Ciphertext<Element> BaseLeveledShe<Element>::eval_mult_core(ConstCiphertext<Element>& ctxt1,
-                                                          ConstCiphertext<Element>& ctxt2) const {
+                                                            ConstCiphertext<Element>& ctxt2) const {
     verify_num_of_towers(ctxt1, ctxt2);
     auto& cv1 = ctxt1->get_elements();
     auto& cv2 = ctxt2->get_elements();
@@ -704,14 +710,14 @@ Ciphertext<Element> BaseLeveledShe<Element>::eval_square_core(ConstCiphertext<El
     result->set_elements(std::move(cvr));
     result->set_noise_scale_deg(2 * ctxt->get_noise_scale_deg());
     result->set_scaling_factor(ctxt->get_scaling_factor() * ctxt->get_scaling_factor());
-    result->set_scaling_factor_int(ctxt->get_scaling_factor_int().mod_mul(ctxt->get_scaling_factor_int(),
-                                                                   ctxt->get_crypto_parameters()->get_plaintext_modulus()));
+    result->set_scaling_factor_int(ctxt->get_scaling_factor_int().mod_mul(
+            ctxt->get_scaling_factor_int(), ctxt->get_crypto_parameters()->get_plaintext_modulus()));
     return result;
 }
 
 template <class Element>
 Ciphertext<Element> BaseLeveledShe<Element>::eval_add_core(ConstCiphertext<Element>& ciphertext,
-                                                         const Element& pt) const {
+                                                           const Element& pt) const {
     auto result = ciphertext->clone();
     eval_add_core_in_place(result, pt);
     return result;
@@ -725,7 +731,7 @@ void BaseLeveledShe<Element>::eval_add_core_in_place(Ciphertext<Element>& cipher
 
 template <class Element>
 Ciphertext<Element> BaseLeveledShe<Element>::eval_sub_core(ConstCiphertext<Element>& ciphertext,
-                                                         const Element& pt) const {
+                                                           const Element& pt) const {
     auto result = ciphertext->clone();
     eval_sub_core_in_place(result, pt);
     return result;
@@ -739,7 +745,7 @@ void BaseLeveledShe<Element>::eval_sub_core_in_place(Ciphertext<Element>& cipher
 
 template <class Element>
 Ciphertext<Element> BaseLeveledShe<Element>::eval_mult_core(ConstCiphertext<Element>& ciphertext,
-                                                          const Element& pt) const {
+                                                            const Element& pt) const {
     auto result = ciphertext->clone();
     eval_mult_core_in_place(result, pt);
     return result;

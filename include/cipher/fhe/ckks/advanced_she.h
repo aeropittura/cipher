@@ -61,7 +61,7 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
     //------------------------------------------------------------------------------
 
     Ciphertext<RnsPoly> eval_linear_w_sum(std::vector<ReadOnlyCiphertext<RnsPoly>>& ciphertexts,
-                                        const std::vector<int64_t>& constants) const override;
+                                          const std::vector<int64_t>& constants) const override;
     /**
      * Computes the linear weighted sum of ciphertexts with real constants, leaving the inputs unchanged; the
      * products are accumulated and the sum is rescaled once at the end.
@@ -71,7 +71,7 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the weighted sum
      */
     Ciphertext<RnsPoly> eval_linear_w_sum(std::vector<ReadOnlyCiphertext<RnsPoly>>& ciphertexts,
-                                        const std::vector<double>& constants) const override;
+                                          const std::vector<double>& constants) const override;
     /**
      * Computes the linear weighted sum of ciphertexts with complex constants, leaving the inputs unchanged; the
      * products are accumulated and the sum is rescaled once at the end.
@@ -81,10 +81,10 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the weighted sum
      */
     Ciphertext<RnsPoly> eval_linear_w_sum(std::vector<ReadOnlyCiphertext<RnsPoly>>& ciphertexts,
-                                        const std::vector<std::complex<double>>& constants) const override;
+                                          const std::vector<std::complex<double>>& constants) const override;
 
     Ciphertext<RnsPoly> eval_linear_w_sum_mutable(std::vector<Ciphertext<RnsPoly>>& ciphertexts,
-                                               const std::vector<int64_t>& constants) const override;
+                                                  const std::vector<int64_t>& constants) const override;
     /**
      * Computes the linear weighted sum of ciphertexts with real constants; the inputs are first brought to the
      * same level and noise scale degree (they are modified) and the sum is rescaled once at the end.
@@ -94,7 +94,7 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the weighted sum
      */
     Ciphertext<RnsPoly> eval_linear_w_sum_mutable(std::vector<Ciphertext<RnsPoly>>& ciphertexts,
-                                               const std::vector<double>& constants) const override;
+                                                  const std::vector<double>& constants) const override;
     /**
      * Computes the linear weighted sum of ciphertexts with complex constants; the inputs are first brought to the
      * same level and noise scale degree (they are modified) and the sum is rescaled once at the end.
@@ -104,7 +104,7 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the weighted sum
      */
     Ciphertext<RnsPoly> eval_linear_w_sum_mutable(std::vector<Ciphertext<RnsPoly>>& ciphertexts,
-                                               const std::vector<std::complex<double>>& constants) const override;
+                                                  const std::vector<std::complex<double>>& constants) const override;
 
     //------------------------------------------------------------------------------
     // EVAL POLYNOMIAL
@@ -166,7 +166,7 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the value of the polynomial
      */
     Ciphertext<RnsPoly> eval_poly_with_precomp(std::shared_ptr<SeriesPowers<RnsPoly>> powers,
-                                             const std::vector<int64_t>& coefficients) const override;
+                                               const std::vector<int64_t>& coefficients) const override;
     /**
      * Evaluates a polynomial with real coefficients in the power basis using powers precomputed by eval_powers;
      * the powers are left unchanged so that several polynomials of the same shape can share them.
@@ -177,7 +177,7 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the value of the polynomial
      */
     Ciphertext<RnsPoly> eval_poly_with_precomp(std::shared_ptr<SeriesPowers<RnsPoly>> powers,
-                                             const std::vector<double>& coefficients) const override;
+                                               const std::vector<double>& coefficients) const override;
     /**
      * Evaluates a polynomial with complex coefficients in the power basis using powers precomputed by eval_powers;
      * the powers are left unchanged so that several polynomials of the same shape can share them.
@@ -188,10 +188,10 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the value of the polynomial
      */
     Ciphertext<RnsPoly> eval_poly_with_precomp(std::shared_ptr<SeriesPowers<RnsPoly>> powers,
-                                             const std::vector<std::complex<double>>& coefficients) const override;
+                                               const std::vector<std::complex<double>>& coefficients) const override;
 
     Ciphertext<RnsPoly> eval_poly_linear(ConstCiphertext<RnsPoly>& x,
-                                        const std::vector<int64_t>& coefficients) const override;
+                                         const std::vector<int64_t>& coefficients) const override;
     /**
      * Evaluates a polynomial with real coefficients in the power basis using a binary tree of powers (intended
      * for degrees below 5).
@@ -201,7 +201,7 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the value of the polynomial
      */
     Ciphertext<RnsPoly> eval_poly_linear(ConstCiphertext<RnsPoly>& x,
-                                        const std::vector<double>& coefficients) const override;
+                                         const std::vector<double>& coefficients) const override;
     /**
      * Evaluates a polynomial with complex coefficients in the power basis using a binary tree of powers (intended
      * for degrees below 5).
@@ -211,10 +211,10 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the value of the polynomial
      */
     Ciphertext<RnsPoly> eval_poly_linear(ConstCiphertext<RnsPoly>& x,
-                                        const std::vector<std::complex<double>>& coefficients) const override;
+                                         const std::vector<std::complex<double>>& coefficients) const override;
 
     Ciphertext<RnsPoly> eval_poly_ps(ConstCiphertext<RnsPoly>& x,
-                                    const std::vector<int64_t>& coefficients) const override;
+                                     const std::vector<int64_t>& coefficients) const override;
     /**
      * Evaluates a polynomial with real coefficients in the power basis using the Paterson-Stockmeyer algorithm.
      *
@@ -223,7 +223,7 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the value of the polynomial
      */
     Ciphertext<RnsPoly> eval_poly_ps(ConstCiphertext<RnsPoly>& x,
-                                    const std::vector<double>& coefficients) const override;
+                                     const std::vector<double>& coefficients) const override;
     /**
      * Evaluates a polynomial with complex coefficients in the power basis using the Paterson-Stockmeyer algorithm.
      *
@@ -232,15 +232,15 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the value of the polynomial
      */
     Ciphertext<RnsPoly> eval_poly_ps(ConstCiphertext<RnsPoly>& x,
-                                    const std::vector<std::complex<double>>& coefficients) const override;
+                                     const std::vector<std::complex<double>>& coefficients) const override;
 
     //------------------------------------------------------------------------------
     // EVAL CHEBYSHEV SERIES
     //------------------------------------------------------------------------------
 
     std::shared_ptr<SeriesPowers<RnsPoly>> eval_cheby_polys(ConstCiphertext<RnsPoly>& x,
-                                                           const std::vector<int64_t>& coefficients, double a,
-                                                           double b) const override;
+                                                            const std::vector<int64_t>& coefficients, double a,
+                                                            double b) const override;
     /**
      * Computes the Chebyshev polynomials of a ciphertext needed to evaluate a Chebyshev series with real
      * coefficients over [a, b]: a binary tree below degree 5, or the Paterson-Stockmeyer Chebyshev basis otherwise.
@@ -253,8 +253,8 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the Chebyshev polynomials of the mapped input
      */
     std::shared_ptr<SeriesPowers<RnsPoly>> eval_cheby_polys(ConstCiphertext<RnsPoly>& x,
-                                                           const std::vector<double>& coefficients, double a,
-                                                           double b) const override;
+                                                            const std::vector<double>& coefficients, double a,
+                                                            double b) const override;
     /**
      * Computes the Chebyshev polynomials of a ciphertext needed to evaluate a Chebyshev series with complex
      * coefficients over [a, b]: a binary tree below degree 5, or the Paterson-Stockmeyer Chebyshev basis otherwise.
@@ -267,12 +267,12 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the Chebyshev polynomials of the mapped input
      */
     std::shared_ptr<SeriesPowers<RnsPoly>> eval_cheby_polys(ConstCiphertext<RnsPoly>& x,
-                                                           const std::vector<std::complex<double>>& coefficients,
-                                                           double a, double b) const override;
+                                                            const std::vector<std::complex<double>>& coefficients,
+                                                            double a, double b) const override;
 
     Ciphertext<RnsPoly> eval_chebyshev_series(ConstCiphertext<RnsPoly>& ciphertext,
-                                             const std::vector<int64_t>& coefficients, double a,
-                                             double b) const override;
+                                              const std::vector<int64_t>& coefficients, double a,
+                                              double b) const override;
     /**
      * Evaluates a Chebyshev series with real coefficients over [a, b]: the input is mapped to [-1, 1] and the
      * series is evaluated with eval_chebyshev_series_linear below degree 5, eval_chebyshev_series_ps otherwise.
@@ -284,8 +284,8 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the value of the series
      */
     Ciphertext<RnsPoly> eval_chebyshev_series(ConstCiphertext<RnsPoly>& ciphertext,
-                                             const std::vector<double>& coefficients, double a,
-                                             double b) const override;
+                                              const std::vector<double>& coefficients, double a,
+                                              double b) const override;
     /**
      * Evaluates a Chebyshev series with complex coefficients over [a, b]: the input is mapped to [-1, 1] and the
      * series is evaluated with eval_chebyshev_series_linear below degree 5, eval_chebyshev_series_ps otherwise.
@@ -297,8 +297,8 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the value of the series
      */
     Ciphertext<RnsPoly> eval_chebyshev_series(ConstCiphertext<RnsPoly>& ciphertext,
-                                             const std::vector<std::complex<double>>& coefficients, double a,
-                                             double b) const override;
+                                              const std::vector<std::complex<double>>& coefficients, double a,
+                                              double b) const override;
 
     /**
      * Evaluates a Chebyshev series with integer coefficients using the Chebyshev polynomials precomputed by
@@ -310,7 +310,7 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the value of the series
      */
     Ciphertext<RnsPoly> eval_chebyshev_series_with_precomp(std::shared_ptr<SeriesPowers<RnsPoly>> polys,
-                                                        const std::vector<int64_t>& coefficients) const override;
+                                                           const std::vector<int64_t>& coefficients) const override;
     /**
      * Evaluates a Chebyshev series with real coefficients using the Chebyshev polynomials precomputed by
      * eval_cheby_polys; the polynomials are left unchanged so that several series of the same shape can share them.
@@ -321,7 +321,7 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the value of the series
      */
     Ciphertext<RnsPoly> eval_chebyshev_series_with_precomp(std::shared_ptr<SeriesPowers<RnsPoly>> polys,
-                                                        const std::vector<double>& coefficients) const override;
+                                                           const std::vector<double>& coefficients) const override;
     /**
      * Evaluates a Chebyshev series with complex coefficients using the Chebyshev polynomials precomputed by
      * eval_cheby_polys; the polynomials are left unchanged so that several series of the same shape can share them.
@@ -346,8 +346,8 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the value of the series
      */
     Ciphertext<RnsPoly> eval_chebyshev_series_linear(ConstCiphertext<RnsPoly>& ciphertext,
-                                                   const std::vector<int64_t>& coefficients, double a,
-                                                   double b) const override;
+                                                     const std::vector<int64_t>& coefficients, double a,
+                                                     double b) const override;
     /**
      * Evaluates a Chebyshev series with real coefficients over [a, b] using a binary tree of Chebyshev
      * polynomials (intended for degrees below 5).
@@ -359,8 +359,8 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the value of the series
      */
     Ciphertext<RnsPoly> eval_chebyshev_series_linear(ConstCiphertext<RnsPoly>& ciphertext,
-                                                   const std::vector<double>& coefficients, double a,
-                                                   double b) const override;
+                                                     const std::vector<double>& coefficients, double a,
+                                                     double b) const override;
     /**
      * Evaluates a Chebyshev series with complex coefficients over [a, b] using a binary tree of Chebyshev
      * polynomials (intended for degrees below 5).
@@ -372,8 +372,8 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the value of the series
      */
     Ciphertext<RnsPoly> eval_chebyshev_series_linear(ConstCiphertext<RnsPoly>& ciphertext,
-                                                   const std::vector<std::complex<double>>& coefficients, double a,
-                                                   double b) const override;
+                                                     const std::vector<std::complex<double>>& coefficients, double a,
+                                                     double b) const override;
 
     /**
      * Evaluates a Chebyshev series with integer coefficients over [a, b] using the Paterson-Stockmeyer algorithm
@@ -386,8 +386,8 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the value of the series
      */
     Ciphertext<RnsPoly> eval_chebyshev_series_ps(ConstCiphertext<RnsPoly>& ciphertext,
-                                               const std::vector<int64_t>& coefficients, double a,
-                                               double b) const override;
+                                                 const std::vector<int64_t>& coefficients, double a,
+                                                 double b) const override;
     /**
      * Evaluates a Chebyshev series with real coefficients over [a, b] using the Paterson-Stockmeyer algorithm
      * in the Chebyshev basis.
@@ -399,8 +399,8 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the value of the series
      */
     Ciphertext<RnsPoly> eval_chebyshev_series_ps(ConstCiphertext<RnsPoly>& ciphertext,
-                                               const std::vector<double>& coefficients, double a,
-                                               double b) const override;
+                                                 const std::vector<double>& coefficients, double a,
+                                                 double b) const override;
     /**
      * Evaluates a Chebyshev series with complex coefficients over [a, b] using the Paterson-Stockmeyer algorithm
      * in the Chebyshev basis.
@@ -412,8 +412,8 @@ class CkksRnsAdvancedShe : public RnsAdvancedShe {
      * @return the value of the series
      */
     Ciphertext<RnsPoly> eval_chebyshev_series_ps(ConstCiphertext<RnsPoly>& ciphertext,
-                                               const std::vector<std::complex<double>>& coefficients, double a,
-                                               double b) const override;
+                                                 const std::vector<std::complex<double>>& coefficients, double a,
+                                                 double b) const override;
 
     //------------------------------------------------------------------------------
     // EVAL LINEAR TRANSFORMATION

@@ -80,8 +80,9 @@ class BaseParamGen {
      * @return true if the parameters were generated successfully (errors are reported by throwing).
      */
     virtual bool params_gen_bfvrns_internal(std::shared_ptr<BaseCryptoParams<Element>> crypto_params,
-                                         uint32_t eval_add_count, uint32_t multiplicative_depth, uint32_t key_switch_count,
-                                         size_t dcrt_bits, uint32_t n, uint32_t num_part_q) const {
+                                            uint32_t eval_add_count, uint32_t multiplicative_depth,
+                                            uint32_t key_switch_count, size_t dcrt_bits, uint32_t n,
+                                            uint32_t num_part_q) const {
         CIPHER_THROW("Not supported for this scheme.");
     }
 
@@ -101,9 +102,9 @@ class BaseParamGen {
      * @return true if the parameters were generated successfully (errors are reported by throwing).
      */
     virtual bool params_gen_ckksrns_internal(std::shared_ptr<BaseCryptoParams<Element>> crypto_params,
-                                          uint32_t cycl_order, uint32_t num_primes_value, uint32_t scaling_mod_size,
-                                          uint32_t first_mod_size_value, uint32_t num_part_q,
-                                          CompressionLevel m_p_int_boot_ciphertext_compression_level) const {
+                                             uint32_t cycl_order, uint32_t num_primes_value, uint32_t scaling_mod_size,
+                                             uint32_t first_mod_size_value, uint32_t num_part_q,
+                                             CompressionLevel m_p_int_boot_ciphertext_compression_level) const {
         CIPHER_THROW("Not supported for this scheme.");
     }
 
@@ -123,9 +124,9 @@ class BaseParamGen {
      * @return true if the parameters were generated successfully (errors are reported by throwing).
      */
     virtual bool params_gen_bgvrns_internal(std::shared_ptr<BaseCryptoParams<RnsPoly>> crypto_params,
-                                         uint32_t eval_add_count, uint32_t key_switch_count, uint32_t cycl_order,
-                                         uint32_t num_primes_value, uint32_t first_mod_size_value, uint32_t dcrt_bits,
-                                         uint32_t num_part_q, uint32_t pre_num_hops) const {
+                                            uint32_t eval_add_count, uint32_t key_switch_count, uint32_t cycl_order,
+                                            uint32_t num_primes_value, uint32_t first_mod_size_value,
+                                            uint32_t dcrt_bits, uint32_t num_part_q, uint32_t pre_num_hops) const {
         CIPHER_THROW("Not supported for this scheme.");
     }
 

@@ -160,7 +160,7 @@ TEST_F(UTGENERAL_ENCODING, packed_int_ptxt_encoding_DCRTPoly_prime_cyclotomics) 
     }
 
     auto params_dcrt = std::make_shared<RnsParams<BigInteger>>(m, init_moduli, init_roots_of_unity, init_moduli_ntt,
-                                                                 init_roots_of_unity_ntt);
+                                                               init_roots_of_unity_ntt);
 
     EncodingParams ep(std::make_shared<EncodingParamsImpl>(p));
 
@@ -222,7 +222,7 @@ TEST_F(UTGENERAL_ENCODING, packed_int_ptxt_encoding_DCRTPoly_prime_cyclotomics_n
     }
 
     auto params_dcrt = std::make_shared<RnsParams<BigInteger>>(m, init_moduli, init_roots_of_unity, init_moduli_ntt,
-                                                                 init_roots_of_unity_ntt);
+                                                               init_roots_of_unity_ntt);
 
     EncodingParams ep(std::make_shared<EncodingParamsImpl>(p));
 

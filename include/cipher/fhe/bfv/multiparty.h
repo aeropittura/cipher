@@ -67,8 +67,8 @@ class BfvRnsMultiparty : public RnsMultiparty {
      * @return key pair including the joint private key and the joint public key.
      */
     KeyPair<RnsPoly> multiparty_key_gen(CryptoContext<RnsPoly> cc,
-                                       const std::vector<PrivateKey<RnsPoly>>& private_key_vec,
-                                       bool make_sparse_value) override;
+                                        const std::vector<PrivateKey<RnsPoly>>& private_key_vec,
+                                        bool make_sparse_value) override;
 
     /**
      * Threshold FHE: Generation of a public key derived from a previous joined public key (for prior secret
@@ -82,8 +82,8 @@ class BfvRnsMultiparty : public RnsMultiparty {
      * used (the prior b is then not added).
      * @return key pair including the secret share for the current party and joined public key.
      */
-    KeyPair<RnsPoly> multiparty_key_gen(CryptoContext<RnsPoly> cc, const PublicKey<RnsPoly> public_key, bool make_sparse_value,
-                                       bool fresh) override;
+    KeyPair<RnsPoly> multiparty_key_gen(CryptoContext<RnsPoly> cc, const PublicKey<RnsPoly> public_key,
+                                        bool make_sparse_value, bool fresh) override;
 
     /**
      * Threshold FHE: Combines the partial decryptions and scales the result by t/Q with rounding using the RNS
@@ -95,7 +95,7 @@ class BfvRnsMultiparty : public RnsMultiparty {
      * @return the decoding result.
      */
     DecryptResult multiparty_decrypt_fusion(const std::vector<Ciphertext<RnsPoly>>& ciphertext_vec,
-                                          NativePoly* plaintext) const override;
+                                            NativePoly* plaintext) const override;
 
     /////////////////////////////////////
     // SERIALIZATION

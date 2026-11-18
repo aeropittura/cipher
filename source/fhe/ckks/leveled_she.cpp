@@ -231,9 +231,9 @@ namespace {
 // (about 2^-33 for 50-bit primes) is a constant shift of T_2 = 2x^2 - 1 that the squaring chain of the
 // Paterson-Stockmeyer giant steps amplifies by roughly the square of the degree.
 std::vector<RnsPoly::Integer> scale_constant_to_degree(std::vector<RnsPoly::Integer> constant,
-                                                     const std::vector<RnsPoly::Integer>& crt_sc_factor,
-                                                     const std::vector<RnsPoly::Integer>& moduli,
-                                                     uint32_t noise_scale_deg, bool fixed_scaling) {
+                                                       const std::vector<RnsPoly::Integer>& crt_sc_factor,
+                                                       const std::vector<RnsPoly::Integer>& moduli,
+                                                       uint32_t noise_scale_deg, bool fixed_scaling) {
     const uint32_t num_towers = moduli.size();
     for (uint32_t i = 1; i < noise_scale_deg; ++i) {
         if (fixed_scaling && i < num_towers) {
@@ -266,7 +266,7 @@ RnsPoly::Integer mod_shift_left(const RnsPoly::Integer& value, int32_t shift, co
 }  // namespace
 
 std::vector<RnsPoly::Integer> CkksRnsLeveledShe::get_element_for_eval_add_or_sub(ConstCiphertext<RnsPoly>& ciphertext,
-                                                                            double operand) const {
+                                                                                 double operand) const {
     const auto crypto_params = std::dynamic_pointer_cast<CkksRnsCryptoParams>(ciphertext->get_crypto_parameters());
 
     uint32_t precision = 52;
@@ -296,7 +296,7 @@ std::vector<RnsPoly::Integer> CkksRnsLeveledShe::get_element_for_eval_add_or_sub
     if (p_remaining < 0) {
         // Discard scalars below the integer precision without an out-of-range shift.
         RnsPoly::Integer scaled_constant(p_remaining <= -64 ? static_cast<uint64_t>(0) :
-                                                             static_cast<uint64_t>(scaled64) >> (-p_remaining));
+                                                              static_cast<uint64_t>(scaled64) >> (-p_remaining));
         curr_pow_p.assign(num_towers, scaled_constant);
     } else {
         // scaled64 * 2^p_remaining needs more than 128 bits once the operand is large, so the
@@ -322,11 +322,11 @@ std::vector<RnsPoly::Integer> CkksRnsLeveledShe::get_element_for_eval_add_or_sub
     // multiply c*pow_p with the per-degree factor a total of (depth-1) times
     const auto scal_tech = crypto_params->get_scaling_technique();
     return scale_constant_to_degree(std::move(curr_pow_p), crt_pow_p, moduli, ciphertext->get_noise_scale_deg(),
-                                 scal_tech == FIXEDMANUAL || scal_tech == FIXEDAUTO);
+                                    scal_tech == FIXEDMANUAL || scal_tech == FIXEDAUTO);
 }
 #else  // CIPHER_NATIVE_INT == 64
 std::vector<RnsPoly::Integer> CkksRnsLeveledShe::get_element_for_eval_add_or_sub(ConstCiphertext<RnsPoly>& ciphertext,
-                                                                            double operand) const {
+                                                                                 double operand) const {
     const auto& polys = ciphertext->get_elements()[0].get_all_elements();
     const uint32_t size_ql = polys.size();
     std::vector<RnsPoly::Integer> moduli(size_ql);
@@ -367,8 +367,8 @@ std::vector<RnsPoly::Integer> CkksRnsLeveledShe::get_element_for_eval_add_or_sub
     if (res > 0) {
         int32_t log_sf = static_cast<int32_t>(std::ceil(std::log2(res)));
         int32_t log_valid = (log_sf <= LargeScalingFactorConstants::MAX_BITS_IN_WORD) ?
-                                   log_sf :
-                                   LargeScalingFactorConstants::MAX_BITS_IN_WORD;
+                                    log_sf :
+                                    LargeScalingFactorConstants::MAX_BITS_IN_WORD;
         log_approx = log_sf - log_valid;
     }
     int32_t log_approx_cp = log_approx;
@@ -380,16 +380,16 @@ std::vector<RnsPoly::Integer> CkksRnsLeveledShe::get_element_for_eval_add_or_sub
     // Scale back up by approx_factor within the CRT multiplications.
     if (log_approx > 0) {
         int32_t log_step = (log_approx <= LargeScalingFactorConstants::MAX_LOG_STEP) ?
-                                  log_approx :
-                                  LargeScalingFactorConstants::MAX_LOG_STEP;
+                                   log_approx :
+                                   LargeScalingFactorConstants::MAX_LOG_STEP;
         auto int_step = static_cast<RnsPoly::Integer>(1) << log_step;
         std::vector<RnsPoly::Integer> crt_approx(size_ql, int_step);
         log_approx -= log_step;
 
         while (log_approx > 0) {
             int32_t log_step = (log_approx <= LargeScalingFactorConstants::MAX_LOG_STEP) ?
-                                      log_approx :
-                                      LargeScalingFactorConstants::MAX_LOG_STEP;
+                                       log_approx :
+                                       LargeScalingFactorConstants::MAX_LOG_STEP;
             auto int_step = static_cast<RnsPoly::Integer>(1) << log_step;
             std::vector<RnsPoly::Integer> crt_sf(size_ql, int_step);
             crt_approx = CKKSPackedEncoding::crt_mult(crt_approx, crt_sf, moduli);
@@ -421,16 +421,16 @@ std::vector<RnsPoly::Integer> CkksRnsLeveledShe::get_element_for_eval_add_or_sub
                 crt_constant = CKKSPackedEncoding::crt_mult(crt_constant, crt_sc_factor, moduli);
             if (log_approx_cp > 0) {
                 int32_t log_step = (log_approx_cp <= LargeScalingFactorConstants::MAX_LOG_STEP) ?
-                                          log_approx_cp :
-                                          LargeScalingFactorConstants::MAX_LOG_STEP;
+                                           log_approx_cp :
+                                           LargeScalingFactorConstants::MAX_LOG_STEP;
                 auto int_step = RnsPoly::Integer(1) << log_step;
                 std::vector<RnsPoly::Integer> crt_approx(size_ql, int_step);
                 log_approx_cp -= log_step;
 
                 while (log_approx_cp > 0) {
                     int32_t log_step = (log_approx_cp <= LargeScalingFactorConstants::MAX_LOG_STEP) ?
-                                              log_approx_cp :
-                                              LargeScalingFactorConstants::MAX_LOG_STEP;
+                                               log_approx_cp :
+                                               LargeScalingFactorConstants::MAX_LOG_STEP;
                     auto int_step = RnsPoly::Integer(1) << log_step;
                     std::vector<RnsPoly::Integer> crt_sf(size_ql, int_step);
                     crt_approx = CKKSPackedEncoding::crt_mult(crt_approx, crt_sf, moduli);
@@ -444,8 +444,9 @@ std::vector<RnsPoly::Integer> CkksRnsLeveledShe::get_element_for_eval_add_or_sub
         RnsPoly::Integer int_sc_factor = static_cast<uint64_t>(sc_factor + 0.5);
         std::vector<RnsPoly::Integer> crt_sc_factor(size_ql, int_sc_factor);
         const auto scal_tech = crypto_params->get_scaling_technique();
-        crt_constant = scale_constant_to_degree(std::move(crt_constant), crt_sc_factor, moduli, ciphertext->get_noise_scale_deg(),
-                                            scal_tech == FIXEDMANUAL || scal_tech == FIXEDAUTO);
+        crt_constant = scale_constant_to_degree(std::move(crt_constant), crt_sc_factor, moduli,
+                                                ciphertext->get_noise_scale_deg(),
+                                                scal_tech == FIXEDMANUAL || scal_tech == FIXEDAUTO);
     }
 
     return crt_constant;
@@ -454,7 +455,7 @@ std::vector<RnsPoly::Integer> CkksRnsLeveledShe::get_element_for_eval_add_or_sub
 
 #if CIPHER_NATIVE_INT == 128
 std::vector<RnsPoly::Integer> CkksRnsLeveledShe::get_element_for_eval_mult(ConstCiphertext<RnsPoly>& ciphertext,
-                                                                        double operand) const {
+                                                                           double operand) const {
     const auto crypto_params = std::dynamic_pointer_cast<CkksRnsCryptoParams>(ciphertext->get_crypto_parameters());
 
     uint32_t precision = 52;
@@ -501,7 +502,7 @@ std::vector<RnsPoly::Integer> CkksRnsLeveledShe::get_element_for_eval_mult(Const
 }
 #else  // CIPHER_NATIVE_INT == 64
 std::vector<RnsPoly::Integer> CkksRnsLeveledShe::get_element_for_eval_mult(ConstCiphertext<RnsPoly>& ciphertext,
-                                                                        double operand) const {
+                                                                           double operand) const {
     const auto crypto_params = std::dynamic_pointer_cast<CkksRnsCryptoParams>(ciphertext->get_crypto_parameters());
 
     const std::vector<RnsPoly>& cv = ciphertext->get_elements();
@@ -569,16 +570,16 @@ std::vector<RnsPoly::Integer> CkksRnsLeveledShe::get_element_for_eval_mult(Const
     // Scale back up by approx_factor within the CRT multiplications.
     if (log_approx > 0) {
         int32_t log_step = (log_approx <= LargeScalingFactorConstants::MAX_LOG_STEP) ?
-                                  log_approx :
-                                  LargeScalingFactorConstants::MAX_LOG_STEP;
+                                   log_approx :
+                                   LargeScalingFactorConstants::MAX_LOG_STEP;
         RnsPoly::Integer int_step = static_cast<uint64_t>(1) << log_step;
         std::vector<RnsPoly::Integer> crt_approx(num_towers, int_step);
         log_approx -= log_step;
 
         while (log_approx > 0) {
             int32_t log_step = (log_approx <= LargeScalingFactorConstants::MAX_LOG_STEP) ?
-                                      log_approx :
-                                      LargeScalingFactorConstants::MAX_LOG_STEP;
+                                       log_approx :
+                                       LargeScalingFactorConstants::MAX_LOG_STEP;
             auto int_step = RnsPoly::Integer(1) << log_step;
             std::vector<RnsPoly::Integer> crt_sf(num_towers, int_step);
             crt_approx = CKKSPackedEncoding::crt_mult(crt_approx, crt_sf, moduli);
@@ -662,7 +663,7 @@ void CkksRnsLeveledShe::mult_by_integer_in_place(Ciphertext<RnsPoly>& ciphertext
 }
 
 void CkksRnsLeveledShe::adjust_levels_and_depth_in_place(Ciphertext<RnsPoly>& ciphertext1,
-                                                    Ciphertext<RnsPoly>& ciphertext2) const {
+                                                         Ciphertext<RnsPoly>& ciphertext2) const {
     const uint32_t c1lvl = ciphertext1->get_level();
     const uint32_t c2lvl = ciphertext2->get_level();
     const uint32_t c1depth = ciphertext1->get_noise_scale_deg();
@@ -702,7 +703,7 @@ void CkksRnsLeveledShe::adjust_levels_and_depth_in_place(Ciphertext<RnsPoly>& ci
                 element = element.Times(crt_q);
             ciphertext->set_noise_scale_deg(ciphertext->get_noise_scale_deg() + 1);
             ciphertext->set_scaling_factor(ciphertext->get_scaling_factor() *
-                                         crypto_params->get_scaling_factor_real(ciphertext->get_level()));
+                                           crypto_params->get_scaling_factor_real(ciphertext->get_level()));
         };
         if (c1lvl == c2lvl) {
             if (c1depth < c2depth)
@@ -834,12 +835,11 @@ void CkksRnsLeveledShe::adjust_levels_and_depth_in_place(Ciphertext<RnsPoly>& ci
 }
 
 void CkksRnsLeveledShe::adjust_levels_and_depth_to_one_in_place(Ciphertext<RnsPoly>& ciphertext1,
-                                                         Ciphertext<RnsPoly>& ciphertext2) const {
+                                                                Ciphertext<RnsPoly>& ciphertext2) const {
     adjust_levels_and_depth_in_place(ciphertext1, ciphertext2);
 
     if (ciphertext1->get_noise_scale_deg() == 2) {
-        const auto crypto_params =
-                std::dynamic_pointer_cast<CkksRnsCryptoParams>(ciphertext1->get_crypto_parameters());
+        const auto crypto_params = std::dynamic_pointer_cast<CkksRnsCryptoParams>(ciphertext1->get_crypto_parameters());
         mod_reduce_internal_in_place(ciphertext1, crypto_params->get_composite_degree());
         if (ciphertext2 != ciphertext1)
             mod_reduce_internal_in_place(ciphertext2, crypto_params->get_composite_degree());

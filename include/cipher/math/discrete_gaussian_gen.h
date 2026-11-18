@@ -172,7 +172,7 @@ class DiscreteGaussianGeneratorImpl {
      * @return A random value within this Discrete Gaussian Distribution.
      */
     typename VecType::Integer generate_integer(double mean, double stddev, size_t n,
-                                              const typename VecType::Integer& modulus) const;
+                                               const typename VecType::Integer& modulus) const;
 
     /**
      * @brief  Returns a generated integer. Uses rejection method.

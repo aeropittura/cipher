@@ -88,24 +88,26 @@ class CkksRnsSchemeSwitching : public RnsFhe {
     LwePrivateKey eval_ckks_to_fhew_setup(const SchSwchParams& params) override;
 
     std::shared_ptr<std::map<uint32_t, EvalKey<RnsPoly>>> eval_ckks_to_fhew_key_gen(const KeyPair<RnsPoly>& key_pair,
-                                                                                ConstLwePrivateKey& lwesk) override;
+                                                                                    ConstLwePrivateKey& lwesk) override;
 
     void eval_ckks_to_fhew_precompute(const CryptoContextImpl<RnsPoly>& cc, double scale) override;
 
     std::vector<std::shared_ptr<LweCiphertextImpl>> eval_ckks_to_fhew(ConstCiphertext<RnsPoly> ciphertext,
-                                                                   uint32_t num_ctxts) override;
+                                                                      uint32_t num_ctxts) override;
 
-    void eval_fhew_to_ckks_setup(const CryptoContextImpl<RnsPoly>& cc_ckks, const std::shared_ptr<BooleanContext>& cc_lwe,
-                             uint32_t num_slots_ckks, uint32_t log_q) override;
+    void eval_fhew_to_ckks_setup(const CryptoContextImpl<RnsPoly>& cc_ckks,
+                                 const std::shared_ptr<BooleanContext>& cc_lwe, uint32_t num_slots_ckks,
+                                 uint32_t log_q) override;
 
     std::shared_ptr<std::map<uint32_t, EvalKey<RnsPoly>>> eval_fhew_to_ckks_key_gen(const KeyPair<RnsPoly>& key_pair,
-                                                                                ConstLwePrivateKey& lwesk,
-                                                                                uint32_t num_slots, uint32_t num_ctxts,
-                                                                                uint32_t dim1, uint32_t L) override;
+                                                                                    ConstLwePrivateKey& lwesk,
+                                                                                    uint32_t num_slots,
+                                                                                    uint32_t num_ctxts, uint32_t dim1,
+                                                                                    uint32_t L) override;
 
     Ciphertext<RnsPoly> eval_fhew_to_ckks(std::vector<std::shared_ptr<LweCiphertextImpl>>& lwe_ciphertexts,
-                                        uint32_t num_ctxts, uint32_t num_slots, uint32_t p, double pmin, double pmax,
-                                        uint32_t dim1) const override;
+                                          uint32_t num_ctxts, uint32_t num_slots, uint32_t p, double pmin, double pmax,
+                                          uint32_t dim1) const override;
 
     LwePrivateKey eval_scheme_switching_setup(const SchSwchParams& params) override;
 
@@ -113,32 +115,32 @@ class CkksRnsSchemeSwitching : public RnsFhe {
             const KeyPair<RnsPoly>& key_pair, ConstLwePrivateKey& lwesk) override;
 
     void eval_compare_switch_precompute(const CryptoContextImpl<RnsPoly>& cc_ckks, uint32_t p_lwe, double scale_sign,
-                                     bool unit) override;
+                                        bool unit) override;
 
     Ciphertext<RnsPoly> eval_compare_scheme_switching(ConstCiphertext<RnsPoly> ciphertext1,
-                                                    ConstCiphertext<RnsPoly> ciphertext2, uint32_t num_ctxts,
-                                                    uint32_t num_slots, uint32_t p_lwe, double scale_sign,
-                                                    bool unit) override;
+                                                      ConstCiphertext<RnsPoly> ciphertext2, uint32_t num_ctxts,
+                                                      uint32_t num_slots, uint32_t p_lwe, double scale_sign,
+                                                      bool unit) override;
 
     std::vector<Ciphertext<RnsPoly>> eval_min_scheme_switching(ConstCiphertext<RnsPoly> ciphertext,
-                                                             PublicKey<RnsPoly> public_key, uint32_t num_values,
-                                                             uint32_t num_slots, uint32_t p_lwe,
-                                                             double scale_sign) override;
+                                                               PublicKey<RnsPoly> public_key, uint32_t num_values,
+                                                               uint32_t num_slots, uint32_t p_lwe,
+                                                               double scale_sign) override;
 
     std::vector<Ciphertext<RnsPoly>> eval_min_scheme_switching_alt(ConstCiphertext<RnsPoly> ciphertext,
-                                                                PublicKey<RnsPoly> public_key, uint32_t num_values,
-                                                                uint32_t num_slots, uint32_t p_lwe,
-                                                                double scale_sign) override;
+                                                                   PublicKey<RnsPoly> public_key, uint32_t num_values,
+                                                                   uint32_t num_slots, uint32_t p_lwe,
+                                                                   double scale_sign) override;
 
     std::vector<Ciphertext<RnsPoly>> eval_max_scheme_switching(ConstCiphertext<RnsPoly> ciphertext,
-                                                             PublicKey<RnsPoly> public_key, uint32_t num_values,
-                                                             uint32_t num_slots, uint32_t p_lwe,
-                                                             double scale_sign) override;
+                                                               PublicKey<RnsPoly> public_key, uint32_t num_values,
+                                                               uint32_t num_slots, uint32_t p_lwe,
+                                                               double scale_sign) override;
 
     std::vector<Ciphertext<RnsPoly>> eval_max_scheme_switching_alt(ConstCiphertext<RnsPoly> ciphertext,
-                                                                PublicKey<RnsPoly> public_key, uint32_t num_values,
-                                                                uint32_t num_slots, uint32_t p_lwe,
-                                                                double scale_sign) override;
+                                                                   PublicKey<RnsPoly> public_key, uint32_t num_values,
+                                                                   uint32_t num_slots, uint32_t p_lwe,
+                                                                   double scale_sign) override;
 
     /**
      * Gets the FHEW (binary FHE) cryptocontext used for scheme switching.
@@ -245,39 +247,39 @@ class CkksRnsSchemeSwitching : public RnsFhe {
 
   private:
     std::vector<ReadOnlyPlaintext> eval_lt_precompute_switch(const CryptoContextImpl<RnsPoly>& cc,
-                                                          const std::vector<std::vector<std::complex<double>>>& A,
-                                                          uint32_t dim1, uint32_t L, double scale) const;
+                                                             const std::vector<std::vector<std::complex<double>>>& A,
+                                                             uint32_t dim1, uint32_t L, double scale) const;
 
     std::vector<ReadOnlyPlaintext> eval_lt_precompute_switch(const CryptoContextImpl<RnsPoly>& cc,
-                                                          const std::vector<std::vector<std::complex<double>>>& A,
-                                                          const std::vector<std::vector<std::complex<double>>>& B,
-                                                          uint32_t dim1, uint32_t L, double scale) const;
+                                                             const std::vector<std::vector<std::complex<double>>>& A,
+                                                             const std::vector<std::vector<std::complex<double>>>& B,
+                                                             uint32_t dim1, uint32_t L, double scale) const;
 
     Ciphertext<RnsPoly> eval_lt_with_precompute_switch(const CryptoContextImpl<RnsPoly>& cc,
-                                                    ConstCiphertext<RnsPoly> ctxt,
-                                                    const std::vector<ReadOnlyPlaintext>& A, uint32_t dim1,
-                                                    bool ext = false) const;
+                                                       ConstCiphertext<RnsPoly> ctxt,
+                                                       const std::vector<ReadOnlyPlaintext>& A, uint32_t dim1,
+                                                       bool ext = false) const;
 
     Ciphertext<RnsPoly> eval_lt_rect_with_precompute_switch(const CryptoContextImpl<RnsPoly>& cc,
-                                                        const std::vector<std::vector<std::complex<double>>>& A,
-                                                        ConstCiphertext<RnsPoly> ct, bool wide, uint32_t dim1,
-                                                        uint32_t L) const;
+                                                            const std::vector<std::vector<std::complex<double>>>& A,
+                                                            ConstCiphertext<RnsPoly> ct, bool wide, uint32_t dim1,
+                                                            uint32_t L) const;
 
     Ciphertext<RnsPoly> eval_slots_to_coeffs_switch(const CryptoContextImpl<RnsPoly>& cc,
-                                                 ConstCiphertext<RnsPoly> ciphertext) const;
+                                                    ConstCiphertext<RnsPoly> ciphertext) const;
 
     Ciphertext<RnsPoly> eval_partial_hom_decryption(const CryptoContextImpl<RnsPoly>& cc,
-                                                  const std::vector<std::vector<std::complex<double>>>& A,
-                                                  ConstCiphertext<RnsPoly> ct, uint32_t dim1, double scale,
-                                                  uint32_t L) const;
+                                                    const std::vector<std::vector<std::complex<double>>>& A,
+                                                    ConstCiphertext<RnsPoly> ct, uint32_t dim1, double scale,
+                                                    uint32_t L) const;
 
     //------------------------------------------------------------------------------
     // Complex Plaintext Functions, copied from ckksrns-fhe. TODO: fix this
     //------------------------------------------------------------------------------
 
     Plaintext make_aux_plaintext(const CryptoContextImpl<RnsPoly>& cc, const std::shared_ptr<ParmType> params,
-                               const std::vector<std::complex<double>>& value, size_t noise_scale_deg, uint32_t level,
-                               uint32_t slots) const;
+                                 const std::vector<std::complex<double>>& value, size_t noise_scale_deg, uint32_t level,
+                                 uint32_t slots) const;
 
     Ciphertext<RnsPoly> eval_mult_ext(ConstCiphertext<RnsPoly> ciphertext, ConstPlaintext plaintext) const;
 
@@ -288,7 +290,7 @@ class CkksRnsSchemeSwitching : public RnsFhe {
     EvalKey<RnsPoly> conjugate_key_gen(const PrivateKey<RnsPoly> private_key) const;
 
     Ciphertext<RnsPoly> Conjugate(ConstCiphertext<RnsPoly> ciphertext,
-                                   const std::map<uint32_t, EvalKey<RnsPoly>>& eval_keys) const;
+                                  const std::map<uint32_t, EvalKey<RnsPoly>>& eval_keys) const;
 
 #if CIPHER_NATIVE_INT == 128
     /**
@@ -300,7 +302,7 @@ class CkksRnsSchemeSwitching : public RnsFhe {
      * @param native_vec output native vector (its modulus is used to fit the values).
      */
     void fit_to_native_vector(uint32_t ring_dim, const std::vector<__int128>& vec, __int128 big_bound,
-                           NativeVector* native_vec) const;
+                              NativeVector* native_vec) const;
 
 #else  // CIPHER_NATIVE_INT == 64
     /**
@@ -312,7 +314,7 @@ class CkksRnsSchemeSwitching : public RnsFhe {
      * @param native_vec output native vector (its modulus is used to fit the values).
      */
     void fit_to_native_vector(uint32_t ring_dim, const std::vector<int64_t>& vec, int64_t big_bound,
-                           NativeVector* native_vec) const;
+                              NativeVector* native_vec) const;
 #endif
 
     //------------------------------------------------------------------------------

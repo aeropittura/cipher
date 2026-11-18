@@ -46,7 +46,7 @@ using namespace cipher;
 
 void run_bfv_rns();
 void eval_noise_bfv(PrivateKey<RnsPoly> private_key, ConstCiphertext<RnsPoly> ciphertext, Plaintext ptxt, uint32_t ptm,
-                  double& noise, double& log_q, EncryptionTechnique enc_method);
+                    double& noise, double& log_q, EncryptionTechnique enc_method);
 
 int main(int argc, char* argv[]) {
     std::cout << "\n=================RUNNING FOR BFVrns=====================" << std::endl;
@@ -93,7 +93,8 @@ void run_bfv_rns() {
     // Output the generated parameters
     std::cout << "p = " << cc->get_crypto_parameters()->get_plaintext_modulus() << std::endl;
     std::cout << "n = " << cc->get_crypto_parameters()->get_element_params()->get_cyclotomic_order() / 2 << std::endl;
-    std::cout << "log2 q = " << std::log2(cc->get_crypto_parameters()->get_element_params()->get_modulus().convert_to_double())
+    std::cout << "log2 q = "
+              << std::log2(cc->get_crypto_parameters()->get_element_params()->get_modulus().convert_to_double())
               << std::endl;
 
     // Initialize Public Key Containers for two parties A and B
@@ -147,21 +148,25 @@ void run_bfv_rns() {
 
     auto eval_mult_aabcde = cc->multi_mult_eval_key(kp1.secret_key, eval_mult_abcde, kp5.public_key->get_key_tag());
 
-    auto eval_mult_deabcde = cc->multi_add_eval_mult_keys(eval_mult_eabcde, eval_mult_dabcde, eval_mult_eabcde->get_key_tag());
+    auto eval_mult_deabcde =
+            cc->multi_add_eval_mult_keys(eval_mult_eabcde, eval_mult_dabcde, eval_mult_eabcde->get_key_tag());
 
-    auto eval_mult_cdeabcde = cc->multi_add_eval_mult_keys(eval_mult_cabcde, eval_mult_deabcde, eval_mult_cabcde->get_key_tag());
+    auto eval_mult_cdeabcde =
+            cc->multi_add_eval_mult_keys(eval_mult_cabcde, eval_mult_deabcde, eval_mult_cabcde->get_key_tag());
 
-    auto eval_mult_bcdeabcde = cc->multi_add_eval_mult_keys(eval_mult_babcde, eval_mult_cdeabcde, eval_mult_babcde->get_key_tag());
+    auto eval_mult_bcdeabcde =
+            cc->multi_add_eval_mult_keys(eval_mult_babcde, eval_mult_cdeabcde, eval_mult_babcde->get_key_tag());
 
-    auto eval_mult_final = cc->multi_add_eval_mult_keys(eval_mult_aabcde, eval_mult_bcdeabcde, kp5.public_key->get_key_tag());
+    auto eval_mult_final =
+            cc->multi_add_eval_mult_keys(eval_mult_aabcde, eval_mult_bcdeabcde, kp5.public_key->get_key_tag());
     cc->insert_eval_mult_key({eval_mult_final});
 
     //---------------------------------------------------
     std::cout << "Running evalsum key generation (used for source data)..." << std::endl;
     // Generate evalsum key part for A
     cc->eval_sum_key_gen(kp1.secret_key);
-    auto eval_sum_keys =
-            std::make_shared<std::map<uint32_t, EvalKey<RnsPoly>>>(cc->get_eval_sum_key_map(kp1.secret_key->get_key_tag()));
+    auto eval_sum_keys = std::make_shared<std::map<uint32_t, EvalKey<RnsPoly>>>(
+            cc->get_eval_sum_key_map(kp1.secret_key->get_key_tag()));
 
     auto eval_sum_keys_b = cc->multi_eval_sum_key_gen(kp2.secret_key, eval_sum_keys, kp2.public_key->get_key_tag());
 
@@ -173,11 +178,14 @@ void run_bfv_rns() {
 
     auto eval_sum_keys_ab = cc->multi_add_eval_sum_keys(eval_sum_keys, eval_sum_keys_b, kp2.public_key->get_key_tag());
 
-    auto eval_sum_keys_abc = cc->multi_add_eval_sum_keys(eval_sum_keys_c, eval_sum_keys_ab, kp3.public_key->get_key_tag());
+    auto eval_sum_keys_abc =
+            cc->multi_add_eval_sum_keys(eval_sum_keys_c, eval_sum_keys_ab, kp3.public_key->get_key_tag());
 
-    auto eval_sum_keys_abcd = cc->multi_add_eval_sum_keys(eval_sum_keys_abc, eval_sum_keys_d, kp4.public_key->get_key_tag());
+    auto eval_sum_keys_abcd =
+            cc->multi_add_eval_sum_keys(eval_sum_keys_abc, eval_sum_keys_d, kp4.public_key->get_key_tag());
 
-    auto eval_sum_keys_join = cc->multi_add_eval_sum_keys(eval_sum_keys_e, eval_sum_keys_abcd, kp5.public_key->get_key_tag());
+    auto eval_sum_keys_join =
+            cc->multi_add_eval_sum_keys(eval_sum_keys_e, eval_sum_keys_abcd, kp5.public_key->get_key_tag());
 
     cc->insert_eval_sum_key(eval_sum_keys_join);
 

@@ -111,7 +111,7 @@ CryptoContext<RnsPoly> make_context(uint32_t multiplicative_depth, uint32_t firs
 }
 
 std::complex<double> first_slot(const CryptoContext<RnsPoly>& cc, const PrivateKey<RnsPoly>& secret_key,
-                               const Ciphertext<RnsPoly>& ciphertext) {
+                                const Ciphertext<RnsPoly>& ciphertext) {
     Plaintext decoded;
     cc->decrypt(secret_key, ciphertext, &decoded);
     return decoded->get_ckks_packed_value()[0];
@@ -235,11 +235,13 @@ TEST_F(UTCKKSRNS_SCALAR, LargeOperands) {
             expect_slot_near(first_slot(cc, keys.secret_key, complex_product), complex_operand);
 
             expect_slot_near(first_slot(cc, keys.secret_key, cc->eval_add(ciphertext, complex_operand)),
-                           1.0 + complex_operand);
+                             1.0 + complex_operand);
             expect_slot_near(first_slot(cc, keys.secret_key, cc->eval_sub(ciphertext, complex_operand)),
-                           1.0 - complex_operand);
-            expect_slot_near(first_slot(cc, keys.secret_key, cc->eval_add(scaled, complex_operand)), 2.0 + complex_operand);
-            expect_slot_near(first_slot(cc, keys.secret_key, cc->eval_sub(scaled, complex_operand)), 2.0 - complex_operand);
+                             1.0 - complex_operand);
+            expect_slot_near(first_slot(cc, keys.secret_key, cc->eval_add(scaled, complex_operand)),
+                             2.0 + complex_operand);
+            expect_slot_near(first_slot(cc, keys.secret_key, cc->eval_sub(scaled, complex_operand)),
+                             2.0 - complex_operand);
         }
     }
 }

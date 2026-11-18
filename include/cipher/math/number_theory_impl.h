@@ -337,7 +337,7 @@ IntType first_prime(uint32_t n_bits, uint64_t m) {
     if constexpr (std::is_same_v<IntType, NativeInteger>) {
         if (n_bits > MAX_MODULUS_SIZE)
             CIPHER_THROW("Requested bit length " + std::to_string(n_bits) + " exceeds maximum allowed length " +
-                          std::to_string(MAX_MODULUS_SIZE));
+                         std::to_string(MAX_MODULUS_SIZE));
     }
 
     IntType M(m);
@@ -358,7 +358,7 @@ IntType last_prime(uint32_t n_bits, uint64_t m) {
     if constexpr (std::is_same_v<IntType, NativeInteger>) {
         if (n_bits > MAX_MODULUS_SIZE)
             CIPHER_THROW("Requested bit length " + std::to_string(n_bits) + " exceeds maximum allowed length " +
-                          std::to_string(MAX_MODULUS_SIZE));
+                         std::to_string(MAX_MODULUS_SIZE));
     }
 
     IntType M(m);
@@ -374,7 +374,7 @@ IntType last_prime(uint32_t n_bits, uint64_t m) {
 
     if (q_new.get_msb() != n_bits)
         CIPHER_THROW("Requested " + std::to_string(n_bits) + " bits, but returned " + std::to_string(q_new.get_msb()) +
-                      ". Please adjust parameters.");
+                     ". Please adjust parameters.");
 
     return q_new;
 }
@@ -478,7 +478,7 @@ IntVector get_cyclotomic_polynomial(uint32_t m, const typename IntVector::Intege
 
 template <typename IntVector>
 typename IntVector::Integer synthetic_remainder(const IntVector& dividend, const typename IntVector::Integer& a,
-                                               const typename IntVector::Integer& modulus) {
+                                                const typename IntVector::Integer& modulus) {
     auto mu = modulus.compute_mu();
     auto val = dividend[dividend.get_length() - 1];
     for (int i = dividend.get_length() - 2; i >= 0; --i)
@@ -488,7 +488,7 @@ typename IntVector::Integer synthetic_remainder(const IntVector& dividend, const
 
 template <typename IntVector>
 IntVector synthetic_poly_remainder(const IntVector& dividend, const IntVector& a_list,
-                                 const typename IntVector::Integer& modulus) {
+                                   const typename IntVector::Integer& modulus) {
     IntVector result(a_list.get_length(), modulus);
     for (uint32_t i = 0; i < a_list.get_length(); ++i)
         result[i] = synthetic_remainder(dividend, a_list[i], modulus);
@@ -506,7 +506,7 @@ IntVector polynomial_power(const IntVector& input, uint32_t power) {
 
 template <typename IntVector>
 IntVector synthetic_polynomial_division(const IntVector& dividend, const typename IntVector::Integer& a,
-                                      const typename IntVector::Integer& modulus) {
+                                        const typename IntVector::Integer& modulus) {
     auto mu(modulus.compute_mu());
     uint32_t n(dividend.get_length() - 1);
     IntVector result(n, modulus);

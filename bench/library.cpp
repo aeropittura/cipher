@@ -202,7 +202,8 @@ static std::vector<NativeVector> make_ntt_pool(uint32_t n, const NativeInteger& 
 
     uint32_t i = 0;
     for (auto _ : state)
-        crt_ftt.inverse_transform_from_bit_reverse_in_place(root_of_unity_value, m, &pool[i = (i + 1) & (NTT_POOL - 1)]);
+        crt_ftt.inverse_transform_from_bit_reverse_in_place(root_of_unity_value, m,
+                                                            &pool[i = (i + 1) & (NTT_POOL - 1)]);
 
     state.SetComplexityN(state.range(0));
 }
@@ -1110,11 +1111,12 @@ static std::vector<NativeVector> make_ntt_pool(uint32_t n, const NativeInteger& 
     uint32_t i = 0;
     while (state.KeepRunning()) {
         i = (i + 1) & (KS_POOL - 1);
-        auto out = parts[i].approx_switch_crt_basis(
-                crypto_params->get_params_part_q(0), crypto_params->get_params_compl_part_q(size_ql - 1, 0),
-                crypto_params->get_part_ql_hat_inv_modq(0, size_part_ql - 1),
-                crypto_params->get_part_ql_hat_inv_modq_precon(0, size_part_ql - 1),
-                crypto_params->get_part_ql_hat_modp(size_ql - 1, 0), crypto_params->get_mod_compl_partq_barrett_mu(size_ql - 1, 0));
+        auto out = parts[i].approx_switch_crt_basis(crypto_params->get_params_part_q(0),
+                                                    crypto_params->get_params_compl_part_q(size_ql - 1, 0),
+                                                    crypto_params->get_part_ql_hat_inv_modq(0, size_part_ql - 1),
+                                                    crypto_params->get_part_ql_hat_inv_modq_precon(0, size_part_ql - 1),
+                                                    crypto_params->get_part_ql_hat_modp(size_ql - 1, 0),
+                                                    crypto_params->get_mod_compl_partq_barrett_mu(size_ql - 1, 0));
         auto sink = out.get_element_at_index(0)[0];
         benchmark::DoNotOptimize(sink);
     }
@@ -1145,11 +1147,12 @@ static std::vector<NativeVector> make_ntt_pool(uint32_t n, const NativeInteger& 
     uint32_t i = 0;
     while (state.KeepRunning()) {
         i = (i + 1) & (KS_POOL - 1);
-        auto out = ext[i].approx_mod_down(params_ql, crypto_params->get_params_p(), crypto_params->get_p_inv_modq(),
-                                        crypto_params->get_p_inv_modq_precon(), crypto_params->get_p_hat_inv_modp(),
-                                        crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
-                                        crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
-                                        crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon());
+        auto out =
+                ext[i].approx_mod_down(params_ql, crypto_params->get_params_p(), crypto_params->get_p_inv_modq(),
+                                       crypto_params->get_p_inv_modq_precon(), crypto_params->get_p_hat_inv_modp(),
+                                       crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
+                                       crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
+                                       crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon());
         auto sink = out.get_element_at_index(0)[0];
         benchmark::DoNotOptimize(sink);
     }
@@ -1158,8 +1161,8 @@ static std::vector<NativeVector> make_ntt_pool(uint32_t n, const NativeInteger& 
 BENCHMARK(ckks_rns_approx_switch_crt_basis)->Unit(benchmark::kMicrosecond)->Apply(depth_args);
 BENCHMARK(ckks_rns_approx_mod_down)->Unit(benchmark::kMicrosecond)->Apply(depth_args);
 
-BENCHMARK(native_ntt)->Unit(benchmark::kMicrosecond)->Apply(ring_args);          // ->Complexity(benchmark::oAuto);
-BENCHMARK(native_intt)->Unit(benchmark::kMicrosecond)->Apply(ring_args);         // ->Complexity(benchmark::oAuto);
+BENCHMARK(native_ntt)->Unit(benchmark::kMicrosecond)->Apply(ring_args);            // ->Complexity(benchmark::oAuto);
+BENCHMARK(native_intt)->Unit(benchmark::kMicrosecond)->Apply(ring_args);           // ->Complexity(benchmark::oAuto);
 BENCHMARK(native_ntt_in_place)->Unit(benchmark::kMicrosecond)->Apply(ring_args);   // ->Complexity(benchmark::oAuto);
 BENCHMARK(native_intt_in_place)->Unit(benchmark::kMicrosecond)->Apply(ring_args);  // ->Complexity(benchmark::oAuto);
 
@@ -1171,7 +1174,7 @@ BENCHMARK(bfv_rns_decryption)->Unit(benchmark::kMicrosecond);
 BENCHMARK(bfv_rns_add)->Unit(benchmark::kMicrosecond);
 BENCHMARK(bfv_rns_add_in_place)->Unit(benchmark::kMicrosecond);
 BENCHMARK(bfv_rns_mult_no_relin)->Unit(benchmark::kMicrosecond)->Apply(depth_args);  // ->Complexity(benchmark::oAuto);
-BENCHMARK(bfv_rns_mult_relin)->Unit(benchmark::kMicrosecond)->Apply(depth_args);    // ->Complexity(benchmark::oAuto);
+BENCHMARK(bfv_rns_mult_relin)->Unit(benchmark::kMicrosecond)->Apply(depth_args);     // ->Complexity(benchmark::oAuto);
 BENCHMARK(bfv_rns_eval_at_index)->Unit(benchmark::kMicrosecond);
 BENCHMARK(bfv_rns_eval_fast_rotation)->Unit(benchmark::kMicrosecond)->Apply(depth_args);
 
@@ -1183,7 +1186,7 @@ BENCHMARK(ckks_rns_decryption)->Unit(benchmark::kMicrosecond);
 BENCHMARK(ckks_rns_add)->Unit(benchmark::kMicrosecond);
 BENCHMARK(ckks_rns_add_in_place)->Unit(benchmark::kMicrosecond);
 BENCHMARK(ckks_rns_mult_no_relin)->Unit(benchmark::kMicrosecond)->Apply(depth_args);  // ->Complexity(benchmark::oAuto);
-BENCHMARK(ckks_rns_mult_relin)->Unit(benchmark::kMicrosecond)->Apply(depth_args);    // ->Complexity(benchmark::oAuto);
+BENCHMARK(ckks_rns_mult_relin)->Unit(benchmark::kMicrosecond)->Apply(depth_args);     // ->Complexity(benchmark::oAuto);
 BENCHMARK(ckks_rns_relin)->Unit(benchmark::kMicrosecond);
 BENCHMARK(ckks_rns_relin_in_place)->Unit(benchmark::kMicrosecond);
 BENCHMARK(ckks_rns_rescale)->Unit(benchmark::kMicrosecond);
@@ -1199,7 +1202,7 @@ BENCHMARK(bgv_rns_decryption)->Unit(benchmark::kMicrosecond);
 BENCHMARK(bgv_rns_add)->Unit(benchmark::kMicrosecond);
 BENCHMARK(bgv_rns_add_in_place)->Unit(benchmark::kMicrosecond);
 BENCHMARK(bgv_rns_mult_no_relin)->Unit(benchmark::kMicrosecond)->Apply(depth_args);  // ->Complexity(benchmark::oAuto);
-BENCHMARK(bgv_rns_mult_relin)->Unit(benchmark::kMicrosecond)->Apply(depth_args);    // ->Complexity(benchmark::oAuto);
+BENCHMARK(bgv_rns_mult_relin)->Unit(benchmark::kMicrosecond)->Apply(depth_args);     // ->Complexity(benchmark::oAuto);
 BENCHMARK(bgv_rns_relin)->Unit(benchmark::kMicrosecond);
 BENCHMARK(bgv_rns_relin_in_place)->Unit(benchmark::kMicrosecond);
 BENCHMARK(bgv_rns_mod_switch)->Unit(benchmark::kMicrosecond);

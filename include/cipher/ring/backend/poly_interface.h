@@ -134,7 +134,7 @@ class PolyInterface : public RingElement<DerivedType, VecType> {
      * @return a lambda that generates a discrete uniform element.
      */
     inline static std::function<DerivedType()> make_discrete_uniform_allocator(const std::shared_ptr<Params>& params,
-                                                                            Format format) {
+                                                                               Format format) {
         return [=]() {
             DugType dug;
             return DerivedType(dug, params, format);
@@ -504,7 +504,7 @@ class PolyInterface : public RingElement<DerivedType, VecType> {
      * root_of_unity_value for the modulus
      */
     void switch_modulus(const Integer& modulus, const Integer& root_of_unity_value, const Integer& modulus_arb,
-                       const Integer& root_of_unity_arb) override = 0;
+                        const Integer& root_of_unity_arb) override = 0;
     /**
      * @brief Switch modulus without centering: every value is reduced modulo the new modulus as a non-negative
      * integer (unlike switch_modulus, which maps values above half the old modulus to negative representatives), and
@@ -515,8 +515,8 @@ class PolyInterface : public RingElement<DerivedType, VecType> {
      * @param modulus_arb is the modulus used for arbitrary cyclotomics CRT
      * @param root_of_unity_arb is the corresponding root of unity for the modulus
      */
-    virtual void lazy_switch_modulus(const Integer& modulus, const Integer& root_of_unity_value, const Integer& modulus_arb,
-                                   const Integer& root_of_unity_arb) = 0;
+    virtual void lazy_switch_modulus(const Integer& modulus, const Integer& root_of_unity_value,
+                                     const Integer& modulus_arb, const Integer& root_of_unity_arb) = 0;
 
     /**
      * @brief Fused multiply-accumulate with a scalar: *this += V * I (mod the modulus), without parameter validation.

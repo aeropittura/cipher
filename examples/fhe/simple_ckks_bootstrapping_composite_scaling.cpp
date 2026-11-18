@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
 // base 2 logarithm of the average L1 norm between results from standard (cleartext) calculation
 // and those computed homomorphically.
 double calculate_approximation_error(const std::vector<std::complex<double>>& result,
-                                   const std::vector<std::complex<double>>& expected_result) {
+                                     const std::vector<std::complex<double>>& expected_result) {
     if (result.size() != expected_result.size())
         CIPHER_THROW("Cannot compare vectors with different numbers of elements");
 
@@ -181,7 +181,8 @@ void simple_bootstrap_example() {
     auto ciphertext_after = crypto_context->eval_bootstrap(ciph, 1);
 
     std::cout << "Number of levels remaining after bootstrapping: "
-              << depth - ciphertext_after->get_level() / composite_degree - (ciphertext_after->get_noise_scale_deg() - 1)
+              << depth - ciphertext_after->get_level() / composite_degree -
+                         (ciphertext_after->get_noise_scale_deg() - 1)
               << std::endl
               << std::endl;
 
@@ -258,7 +259,8 @@ void simple_bootstrap_st_c_first_example() {
     // will be levels_available_after_bootstrap - 1 because an additional level
     // is used for scaling the ciphertext before next bootstrapping (in 64-bit CKKS bootstrapping)
     uint32_t levels_available_after_bootstrap = 10 + level_budget[1];
-    uint32_t depth = levels_available_after_bootstrap + CkksRnsFhe::get_bootstrap_depth({level_budget[0], 0}, secret_key_dist);
+    uint32_t depth =
+            levels_available_after_bootstrap + CkksRnsFhe::get_bootstrap_depth({level_budget[0], 0}, secret_key_dist);
     parameters.set_multiplicative_depth(depth);
 
     // std::cout << "approx_bootstrap_depth = " << approx_bootstrap_depth << std::endl;
@@ -310,7 +312,8 @@ void simple_bootstrap_st_c_first_example() {
     auto ciphertext_after = crypto_context->eval_bootstrap(ciph);
 
     std::cout << "Number of levels remaining after bootstrapping: "
-              << depth - ciphertext_after->get_level() / composite_degree - (ciphertext_after->get_noise_scale_deg() - 1)
+              << depth - ciphertext_after->get_level() / composite_degree -
+                         (ciphertext_after->get_noise_scale_deg() - 1)
               << std::endl
               << std::endl;
 

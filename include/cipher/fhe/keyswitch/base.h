@@ -103,7 +103,7 @@ class KeySwitchBase {
      * @return the key switching key
      */
     virtual EvalKey<Element> key_switch_gen_internal(const PrivateKey<Element> old_private_key,
-                                                  const PrivateKey<Element> new_private_key) const {
+                                                     const PrivateKey<Element> new_private_key) const {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
@@ -118,8 +118,8 @@ class KeySwitchBase {
      * @return the key switching key
      */
     virtual EvalKey<Element> key_switch_gen_internal(const PrivateKey<Element> old_private_key,
-                                                  const PrivateKey<Element> new_private_key,
-                                                  const EvalKey<Element> eval_key) const {
+                                                     const PrivateKey<Element> new_private_key,
+                                                     const EvalKey<Element> eval_key) const {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
@@ -133,7 +133,7 @@ class KeySwitchBase {
      * @return the key switching key
      */
     virtual EvalKey<Element> key_switch_gen_internal(const PrivateKey<Element> old_private_key,
-                                                  const PublicKey<Element> new_public_key) const {
+                                                     const PublicKey<Element> new_public_key) const {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
@@ -237,8 +237,8 @@ class KeySwitchBase {
      * @return the pair (b', a') in basis Ql such that b' + a' * sB = a * sA + noise
      */
     virtual std::vector<Element> eval_fast_key_switch_core(const std::shared_ptr<std::vector<Element>> digits,
-                                                       const EvalKey<Element> eval_key,
-                                                       const std::shared_ptr<ParmType> params_ql) const {
+                                                           const EvalKey<Element> eval_key,
+                                                           const std::shared_ptr<ParmType> params_ql) const {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
@@ -254,8 +254,8 @@ class KeySwitchBase {
      * @return the pair (b', a') in basis QlP such that b' + a' * sB = P * a * sA + noise
      */
     virtual std::vector<Element> eval_fast_key_switch_core_ext(const std::shared_ptr<std::vector<Element>> digits,
-                                                          const EvalKey<Element> eval_key,
-                                                          const std::shared_ptr<ParmType> params_ql) const {
+                                                               const EvalKey<Element> eval_key,
+                                                               const std::shared_ptr<ParmType> params_ql) const {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 };

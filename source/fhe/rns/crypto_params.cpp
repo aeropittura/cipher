@@ -50,8 +50,8 @@ uint32_t size_p_estimate_global{};
 }  // namespace
 
 void RnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, ScalingTechnique scal_tech,
-                                              EncryptionTechnique enc_tech, MultiplicationTechnique mult_tech,
-                                              uint32_t num_part_q, uint32_t aux_bits, uint32_t extra_bits) {
+                                            EncryptionTechnique enc_tech, MultiplicationTechnique mult_tech,
+                                            uint32_t num_part_q, uint32_t aux_bits, uint32_t extra_bits) {
     // Set the key switching technique.
     ks_technique_ = ks_tech;
     // Set the scaling technique.
@@ -272,7 +272,8 @@ void RnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, ScalingT
                 BigInteger q_hati = modulus_q / BigInteger(moduli_q[i]);
                 BigInteger q_hat_inv_modqi = q_hati.mod_inverse(moduli_q[i]);
                 ql_hat_inv_modq_[size_q - l - 1][i] = q_hat_inv_modqi.convert_to_int();
-                ql_hat_inv_modq_precon_[size_q - l - 1][i] = ql_hat_inv_modq_[size_q - l - 1][i].prep_mod_mul_const(moduli_q[i]);
+                ql_hat_inv_modq_precon_[size_q - l - 1][i] =
+                        ql_hat_inv_modq_[size_q - l - 1][i].prep_mod_mul_const(moduli_q[i]);
             }
         }
 
@@ -339,7 +340,8 @@ void RnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, ScalingT
                     BigInteger q_hat_inv_modqi = q_hat.mod_inverse(params[i]->get_modulus());
                     part_ql_hat_inv_modq_[k][size_part_qk - l - 1][i] = q_hat_inv_modqi.convert_to_int();
                     part_ql_hat_inv_modq_precon_[k][size_part_qk - l - 1][i] =
-                            part_ql_hat_inv_modq_[k][size_part_qk - l - 1][i].prep_mod_mul_const(params[i]->get_modulus());
+                            part_ql_hat_inv_modq_[k][size_part_qk - l - 1][i].prep_mod_mul_const(
+                                    params[i]->get_modulus());
                 }
             }
         }
@@ -397,7 +399,8 @@ void RnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, ScalingT
                 BigInteger q_hati = modulus_q / BigInteger(moduli_q[i]);
                 BigInteger q_hat_inv_modqi = q_hati.mod_inverse(moduli_q[i]);
                 multiparty_q_hat_inv_modq_[m][i - 1] = q_hat_inv_modqi.convert_to_int();
-                multiparty_q_hat_inv_modq_precon_[m][i - 1] = multiparty_q_hat_inv_modq_[m][i - 1].prep_mod_mul_const(moduli_q[i]);
+                multiparty_q_hat_inv_modq_precon_[m][i - 1] =
+                        multiparty_q_hat_inv_modq_[m][i - 1].prep_mod_mul_const(moduli_q[i]);
                 multiparty_q_hat_modq0_[m][0][i - 1] = q_hati.mod(moduli_q[0]);
             }
         }
@@ -416,7 +419,8 @@ void RnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, ScalingT
 
         const auto barrett_base128_bit(BigInteger(1).l_shift_eq(128));
         multiparty_modq0_barrett_mu_.resize(1);
-        multiparty_modq0_barrett_mu_[0] = (barrett_base128_bit / BigInteger(moduli_q[0])).convert_to_int<DoubleNativeInt>();
+        multiparty_modq0_barrett_mu_[0] =
+                (barrett_base128_bit / BigInteger(moduli_q[0])).convert_to_int<DoubleNativeInt>();
 
         // Stores \frac{1/q_i}
         multiparty_q_inv_.resize(size_q - 1);
@@ -431,11 +435,11 @@ uint64_t RnsCryptoParams::find_aux_prime_step() const {
 }
 
 std::pair<double, uint32_t> RnsCryptoParams::estimate_log_p(uint32_t num_part_q, double first_modulus_size,
-                                                              double dcrt_bits, double extra_modulus_size,
-                                                              uint32_t num_primes_value, uint32_t aux_bits,
-                                                              ScalingTechnique scal_tech, bool add_one,
-                                                              bool is_noise_flooding_multiparty,
-                                                              uint32_t composite_degree) {
+                                                            double dcrt_bits, double extra_modulus_size,
+                                                            uint32_t num_primes_value, uint32_t aux_bits,
+                                                            ScalingTechnique scal_tech, bool add_one,
+                                                            bool is_noise_flooding_multiparty,
+                                                            uint32_t composite_degree) {
     // num_part_q can not be zero as there is a division by num_part_q
     if (num_part_q == 0)
         CIPHER_THROW("numPartQ is zero");

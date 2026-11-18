@@ -91,8 +91,9 @@ namespace cipher {
 
 namespace {
 
-static std::vector<RnsPoly> mod_switch_up(const std::vector<Poly>& input, const BigInteger& qfrom, const BigInteger& qto,
-                                         const std::shared_ptr<RnsParams<RnsPoly::Integer>>& ep) {
+static std::vector<RnsPoly> mod_switch_up(const std::vector<Poly>& input, const BigInteger& qfrom,
+                                          const BigInteger& qto,
+                                          const std::shared_ptr<RnsParams<RnsPoly::Integer>>& ep) {
     Poly b_poly = input[0];
     b_poly.switch_modulus(qto, 1, 0, 0);
 
@@ -100,7 +101,7 @@ static std::vector<RnsPoly> mod_switch_up(const std::vector<Poly>& input, const 
     a_poly.switch_modulus(qto, 1, 0, 0);
 
     std::vector<RnsPoly> output{RnsPoly(b_poly.multiply_and_round(qto, qfrom), ep),
-                                 RnsPoly(a_poly.multiply_and_round(qto, qfrom), ep)};
+                                RnsPoly(a_poly.multiply_and_round(qto, qfrom), ep)};
     output[0].set_format(Format::EVALUATION);
     output[1].set_format(Format::EVALUATION);
 
@@ -108,8 +109,8 @@ static std::vector<RnsPoly> mod_switch_up(const std::vector<Poly>& input, const 
 }
 
 static std::vector<RnsPoly> mod_switch_down(const std::vector<Poly>& input, const BigInteger& qfrom,
-                                           const BigInteger& qto,
-                                           const std::shared_ptr<RnsParams<RnsPoly::Integer>>& ep) {
+                                            const BigInteger& qto,
+                                            const std::shared_ptr<RnsParams<RnsPoly::Integer>>& ep) {
     Poly b_poly = input[0].multiply_and_round(qto, qfrom);
     b_poly.switch_modulus(qto, 1, 0, 0);
 
@@ -125,8 +126,8 @@ static std::vector<RnsPoly> mod_switch_down(const std::vector<Poly>& input, cons
 
 }  // namespace
 
-std::shared_ptr<RnsParams<RnsPoly::Integer>> SchemeletRlweMp::get_element_params(
-        const PrivateKey<RnsPoly>& private_key, uint32_t level) {
+std::shared_ptr<RnsParams<RnsPoly::Integer>> SchemeletRlweMp::get_element_params(const PrivateKey<RnsPoly>& private_key,
+                                                                                 uint32_t level) {
     const auto crypto_params =
             std::dynamic_pointer_cast<RlweCryptoParams<RnsPoly>>(private_key->get_crypto_parameters());
 
@@ -148,9 +149,9 @@ std::shared_ptr<RnsParams<RnsPoly::Integer>> SchemeletRlweMp::get_element_params
 }
 
 std::vector<Poly> SchemeletRlweMp::encrypt_coeff(std::vector<int64_t> input, const BigInteger& Q, const BigInteger& p,
-                                                const PrivateKey<RnsPoly>& private_key,
-                                                const std::shared_ptr<RnsParams<RnsPoly::Integer>>& ep,
-                                                bool bit_reverse) {
+                                                 const PrivateKey<RnsPoly>& private_key,
+                                                 const std::shared_ptr<RnsParams<RnsPoly::Integer>>& ep,
+                                                 bool bit_reverse) {
     const auto crypto_params =
             std::dynamic_pointer_cast<RlweCryptoParams<RnsPoly>>(private_key->get_crypto_parameters());
 
@@ -213,9 +214,9 @@ std::vector<Poly> SchemeletRlweMp::encrypt_coeff(std::vector<int64_t> input, con
 }
 
 std::vector<int64_t> SchemeletRlweMp::decrypt_coeff(const std::vector<Poly>& input, const BigInteger& Q,
-                                                   const BigInteger& p, const PrivateKey<RnsPoly>& private_key,
-                                                   const std::shared_ptr<RnsParams<RnsPoly::Integer>>& ep,
-                                                   uint32_t num_slots, uint32_t length, bool bit_reverse) {
+                                                    const BigInteger& p, const PrivateKey<RnsPoly>& private_key,
+                                                    const std::shared_ptr<RnsParams<RnsPoly::Integer>>& ep,
+                                                    uint32_t num_slots, uint32_t length, bool bit_reverse) {
     const auto& big_q_prime = ep->get_modulus();
 
     auto ba = (Q < big_q_prime) ? mod_switch_up(input, Q, big_q_prime, ep) : mod_switch_down(input, Q, big_q_prime, ep);
@@ -246,8 +247,8 @@ std::vector<int64_t> SchemeletRlweMp::decrypt_coeff(const std::vector<Poly>& inp
 
     std::vector<int64_t> output(length);
     for (uint32_t i = 0, idx = 0; i < length; ++i, idx += gap)
-        output[i] =
-                (m_poly[idx] > half) ? -(p - m_poly[idx]).convert_to_int<int64_t>() : m_poly[idx].convert_to_int<int64_t>();
+        output[i] = (m_poly[idx] > half) ? -(p - m_poly[idx]).convert_to_int<int64_t>() :
+                                           m_poly[idx].convert_to_int<int64_t>();
 
     if (bit_reverse) {
         if (num_slots < length) {
@@ -268,9 +269,9 @@ void SchemeletRlweMp::mod_switch(std::vector<Poly>& input, const BigInteger& Q1,
 }
 
 Ciphertext<RnsPoly> SchemeletRlweMp::convert_rlwe_to_ckks(const CryptoContextImpl<RnsPoly>& cc,
-                                                        const std::vector<Poly>& coeffs,
-                                                        const PublicKey<RnsPoly>& pub_key, const BigInteger& bigq,
-                                                        uint32_t slots, uint32_t level) {
+                                                          const std::vector<Poly>& coeffs,
+                                                          const PublicKey<RnsPoly>& pub_key, const BigInteger& bigq,
+                                                          uint32_t slots, uint32_t level) {
     const auto crypto_params_rns = std::dynamic_pointer_cast<RnsCryptoParams>(cc.get_crypto_parameters());
     if (crypto_params_rns != nullptr) {
         auto st = crypto_params_rns->get_scaling_technique();
@@ -292,7 +293,7 @@ Ciphertext<RnsPoly> SchemeletRlweMp::convert_rlwe_to_ckks(const CryptoContextImp
     auto& q_prime_ckks = ep->get_modulus();
 
     auto elements_ckks = (q_prime_ckks > bigq) ? mod_switch_up(coeffs, bigq, q_prime_ckks, ep) :
-                                              mod_switch_down(coeffs, bigq, q_prime_ckks, ep);
+                                                 mod_switch_down(coeffs, bigq, q_prime_ckks, ep);
     ctxt->set_elements(elements_ckks);
     return ctxt;
 }

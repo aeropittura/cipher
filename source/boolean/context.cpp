@@ -56,8 +56,8 @@ static void verify_gadget_base_map_coverage(const std::map<uint32_t, uint32_t>& 
 }
 
 void BooleanContext::generate_boolean_context(uint32_t n, uint32_t N, NativeInteger q, NativeInteger Q, double std,
-                                          uint32_t base_ks, uint32_t base_g, uint32_t base_r, SecretKeyDist key_dist,
-                                          BINFHE_METHOD method, uint32_t num_auto_keys) {
+                                              uint32_t base_ks, uint32_t base_g, uint32_t base_r,
+                                              SecretKeyDist key_dist, BINFHE_METHOD method, uint32_t num_auto_keys) {
     auto lweparams = std::make_shared<LweCryptoParams>(n, N, q, Q, Q, std, base_ks, key_dist);
     auto rgswparams =
             std::make_shared<RingGswCryptoParams>(N, Q, q, base_g, base_r, method, std, key_dist, true, num_auto_keys);
@@ -66,7 +66,7 @@ void BooleanContext::generate_boolean_context(uint32_t n, uint32_t N, NativeInte
 }
 
 void BooleanContext::generate_boolean_context(BINFHE_PARAMSET s, bool arb_func, uint32_t log_q, uint32_t N,
-                                          BINFHE_METHOD method, bool time_optimization) {
+                                              BINFHE_METHOD method, bool time_optimization) {
     if (method != GINX)
         CIPHER_THROW("CGGI is the only supported method");
     if (s != STD128 && s != TOY)
@@ -106,8 +106,8 @@ void BooleanContext::generate_boolean_context(BINFHE_PARAMSET s, bool arb_func, 
 
     uint32_t n = (s == TOY) ? 32 : 1305;
     auto lweparams = std::make_shared<LweCryptoParams>(n, ring_dim, q, Q, q_ks, STD_DEV, 32);
-    auto rgswparams = std::make_shared<RingGswCryptoParams>(ring_dim, Q, q, base_g, 23, method, STD_DEV, UNIFORM_TERNARY,
-                                                            ((log_q != 11) && time_optimization));
+    auto rgswparams = std::make_shared<RingGswCryptoParams>(ring_dim, Q, q, base_g, 23, method, STD_DEV,
+                                                            UNIFORM_TERNARY, ((log_q != 11) && time_optimization));
 
     params_ = std::make_shared<BooleanCryptoParams>(lweparams, rgswparams);
     binfhescheme_ = std::make_shared<BooleanScheme>(method);
@@ -246,13 +246,13 @@ void BooleanContext::generate_boolean_context(BINFHE_PARAMSET s, BINFHE_METHOD m
     auto Q = last_prime<NativeInteger>(params.number_bits, params.cycl_order);
     auto ring_dim = params.cycl_order >> 1;
     auto lweparams = std::make_shared<LweCryptoParams>(params.lattice_param, ring_dim, params.mod_value, Q,
-                                                       (params.mod_ks == PRIME ? Q : params.mod_ks), params.std_dev_value,
-                                                       params.base_ks, params.key_dist);
+                                                       (params.mod_ks == PRIME ? Q : params.mod_ks),
+                                                       params.std_dev_value, params.base_ks, params.key_dist);
     verify_gadget_base_map_coverage(params.gadget_base_map, params.lattice_param);
 
-    auto rgswparams = std::make_shared<RingGswCryptoParams>(ring_dim, Q, params.mod_value, params.gadget_base,
-                                                            params.gadget_base_map, params.base_rk, method, params.std_dev_value,
-                                                            params.key_dist, false, params.num_auto_keys);
+    auto rgswparams = std::make_shared<RingGswCryptoParams>(
+            ring_dim, Q, params.mod_value, params.gadget_base, params.gadget_base_map, params.base_rk, method,
+            params.std_dev_value, params.key_dist, false, params.num_auto_keys);
     params_ = std::make_shared<BooleanCryptoParams>(lweparams, rgswparams);
 
     binfhescheme_ = std::make_shared<BooleanScheme>(method);
@@ -264,19 +264,19 @@ void BooleanContext::generate_boolean_context(const BooleanContextParams& params
     auto Q = last_prime<NativeInteger>(params.number_bits, params.cycl_order);
     auto ring_dim = params.cycl_order >> 1;
     auto lweparams = std::make_shared<LweCryptoParams>(params.lattice_param, ring_dim, params.mod_value, Q,
-                                                       (params.mod_ks == PRIME ? Q : params.mod_ks), params.std_dev_value,
-                                                       params.base_ks, params.key_dist);
+                                                       (params.mod_ks == PRIME ? Q : params.mod_ks),
+                                                       params.std_dev_value, params.base_ks, params.key_dist);
     std::shared_ptr<RingGswCryptoParams> rgswparams;
     if (params.gadget_base_map.empty()) {
-        rgswparams =
-                std::make_shared<RingGswCryptoParams>(ring_dim, Q, params.mod_value, params.gadget_base, params.base_rk, method,
-                                                      params.std_dev_value, params.key_dist, false, params.num_auto_keys);
+        rgswparams = std::make_shared<RingGswCryptoParams>(ring_dim, Q, params.mod_value, params.gadget_base,
+                                                           params.base_rk, method, params.std_dev_value,
+                                                           params.key_dist, false, params.num_auto_keys);
     } else {
         verify_gadget_base_map_coverage(params.gadget_base_map, params.lattice_param);
 
-        rgswparams = std::make_shared<RingGswCryptoParams>(ring_dim, Q, params.mod_value, params.gadget_base,
-                                                           params.gadget_base_map, params.base_rk, method, params.std_dev_value,
-                                                           params.key_dist, false, params.num_auto_keys);
+        rgswparams = std::make_shared<RingGswCryptoParams>(
+                ring_dim, Q, params.mod_value, params.gadget_base, params.gadget_base_map, params.base_rk, method,
+                params.std_dev_value, params.key_dist, false, params.num_auto_keys);
     }
     params_ = std::make_shared<BooleanCryptoParams>(lweparams, rgswparams);
     binfhescheme_ = std::make_shared<BooleanScheme>(method);
@@ -307,7 +307,7 @@ LwePublicKey BooleanContext::pub_key_gen(ConstLwePrivateKey& sk) const {
 }
 
 LweCiphertext BooleanContext::encrypt(ConstLwePrivateKey& sk, LwePlaintext m, BINFHE_OUTPUT output,
-                                     LwePlaintextModulus p, NativeInteger mod_value) const {
+                                      LwePlaintextModulus p, NativeInteger mod_value) const {
     if (sk == nullptr)
         CIPHER_THROW("PrivateKey is empty");
     auto&& LWE_params = params_->get_lwe_params();
@@ -321,8 +321,8 @@ LweCiphertext BooleanContext::encrypt(ConstLwePrivateKey& sk, LwePlaintext m, BI
     return ct;
 }
 
-LweCiphertext BooleanContext::encrypt(ConstLwePublicKey& pk, LwePlaintext m, BINFHE_OUTPUT output, LwePlaintextModulus p,
-                                     NativeInteger mod_value) const {
+LweCiphertext BooleanContext::encrypt(ConstLwePublicKey& pk, LwePlaintext m, BINFHE_OUTPUT output,
+                                      LwePlaintextModulus p, NativeInteger mod_value) const {
     if (pk == nullptr)
         CIPHER_THROW("PublicKey is empty");
     auto&& LWE_params = params_->get_lwe_params();
@@ -355,7 +355,7 @@ LweCiphertext BooleanContext::switch_c_ttoqn(ConstLweSwitchingKey& ksk, ConstLwe
 }
 
 void BooleanContext::decrypt(ConstLwePrivateKey& sk, ConstLweCiphertext& ct, LwePlaintext* result,
-                            LwePlaintextModulus p) const {
+                             LwePlaintextModulus p) const {
     if (sk == nullptr)
         CIPHER_THROW("PrivateKey is empty");
     if (ct == nullptr)
@@ -398,7 +398,7 @@ void BooleanContext::bt_key_gen(ConstLwePrivateKey& sk, KEYGEN_MODE keygen_mode,
 }
 
 LweCiphertext BooleanContext::eval_bin_gate(const BINGATE gate, ConstLweCiphertext& ct1, ConstLweCiphertext& ct2,
-                                         bool extended) const {
+                                            bool extended) const {
     if (ct1 == nullptr)
         CIPHER_THROW("Ciphertext1 is empty");
     if (ct2 == nullptr)
@@ -407,7 +407,7 @@ LweCiphertext BooleanContext::eval_bin_gate(const BINGATE gate, ConstLweCipherte
 }
 
 LweCiphertext BooleanContext::eval_bin_gate(const BINGATE gate, const std::vector<LweCiphertext>& ctvector,
-                                         bool extended) const {
+                                            bool extended) const {
     return binfhescheme_->eval_bin_gate(params_, gate, bt_key_, ctvector, extended);
 }
 
@@ -459,8 +459,9 @@ std::vector<LweCiphertext> BooleanContext::eval_decomp(ConstLweCiphertext& ct) {
     return binfhescheme_->eval_decomp(params_, bt_key_map_, ct, get_beta());
 }
 
-std::vector<NativeInteger> BooleanContext::generate_lut_via_function(NativeInteger (*f)(NativeInteger m, NativeInteger p),
-                                                                 NativeInteger p) {
+std::vector<NativeInteger> BooleanContext::generate_lut_via_function(NativeInteger (*f)(NativeInteger m,
+                                                                                        NativeInteger p),
+                                                                     NativeInteger p) {
     if (!is_power_of_two(p.convert_to_int<BasicInteger>()))
         CIPHER_THROW("plaintext p not power of two");
 

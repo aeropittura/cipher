@@ -102,7 +102,8 @@ constexpr SecretKeyDist SK_DIST = UNIFORM_TERNARY;
 // Builds a CKKS context for the requested scaling technique. COMPOSITESCALINGAUTO additionally sets
 // the register word size; everything else is identical so FA and CS are a fair comparison.
 CryptoContext<RnsPoly> build_context(ScalingTechnique scal_tech, uint32_t ring_dim, uint32_t mult_depth_value,
-                                     uint32_t scaling_mod_size, uint32_t first_mod_size_value, uint32_t num_large_digits) {
+                                     uint32_t scaling_mod_size, uint32_t first_mod_size_value,
+                                     uint32_t num_large_digits) {
     ContextParams<CkksRnsContext> parameters;
     parameters.set_secret_key_dist(SK_DIST);
     parameters.set_security_level(HEStd_NotSet);
@@ -157,9 +158,9 @@ class CkksCompositeVsFlexibleTest : public ::testing::Test {
     // before returning: a test that takes two measurements would otherwise hold both bootstrapping key
     // sets at once, over 4 GB at ring 2^14.
     double bootstrap_precision_bits(ScalingTechnique scal_tech, uint32_t ring_dim, uint32_t scaling_mod_size,
-                                  uint32_t first_mod_size_value, const std::vector<uint32_t>& level_budget, uint32_t num_slots,
-                                  uint32_t levels_after_bootstrap, uint32_t num_large_digits, bool stc_first = false,
-                                  uint32_t extra_levels = 0) {
+                                    uint32_t first_mod_size_value, const std::vector<uint32_t>& level_budget,
+                                    uint32_t num_slots, uint32_t levels_after_bootstrap, uint32_t num_large_digits,
+                                    bool stc_first = false, uint32_t extra_levels = 0) {
         uint32_t depth = levels_after_bootstrap + CkksRnsFhe::get_bootstrap_depth(level_budget, SK_DIST);
         auto cc = build_context(scal_tech, ring_dim, depth, scaling_mod_size, first_mod_size_value, num_large_digits);
         auto cp = std::dynamic_pointer_cast<CkksRnsCryptoParams>(cc->get_crypto_parameters());
@@ -260,14 +261,14 @@ TEST_F(CkksCompositeVsFlexibleTest, FullPackingBootstrap_HybridKeySwitch) {
     const uint32_t levels_after_bootstrap = 10;
     const uint32_t num_large_digits = 3;
 
-    double fa_bits = bootstrap_precision_bits(FLEXIBLEAUTO, ring_dim, 59, 60, level_budget, num_slots, levels_after_bootstrap,
-                                           num_large_digits);
+    double fa_bits = bootstrap_precision_bits(FLEXIBLEAUTO, ring_dim, 59, 60, level_budget, num_slots,
+                                              levels_after_bootstrap, num_large_digits);
     double cs_bits = bootstrap_precision_bits(COMPOSITESCALINGAUTO, ring_dim, 59, 60, level_budget, num_slots,
-                                           levels_after_bootstrap, num_large_digits);
+                                              levels_after_bootstrap, num_large_digits);
 
     EXPECT_GT(cs_bits, 6.0) << "CS bootstrap precision unexpectedly low (" << cs_bits << " bits)";
-    EXPECT_GE(cs_bits, fa_bits - k_gap_tol) << "CS lags FA by >" << k_gap_tol << " bits (CS=" << cs_bits << ", FA=" << fa_bits
-                                        << ") - HYBRID key-switching regression";
+    EXPECT_GE(cs_bits, fa_bits - k_gap_tol) << "CS lags FA by >" << k_gap_tol << " bits (CS=" << cs_bits
+                                            << ", FA=" << fa_bits << ") - HYBRID key-switching regression";
 }
 
 //===========================================================================================================
@@ -281,14 +282,15 @@ TEST_F(CkksCompositeVsFlexibleTest, SparseBootstrapModRaiseHeadroom) {
     const uint32_t num_slots = 8;
     const uint32_t levels_after_bootstrap = 2;
 
-    double fa_bits =
-            bootstrap_precision_bits(FLEXIBLEAUTO, ring_dim, 56, 60, level_budget, num_slots, levels_after_bootstrap, 0);
+    double fa_bits = bootstrap_precision_bits(FLEXIBLEAUTO, ring_dim, 56, 60, level_budget, num_slots,
+                                              levels_after_bootstrap, 0);
     double cs_bits = bootstrap_precision_bits(COMPOSITESCALINGAUTO, ring_dim, 56, 60, level_budget, num_slots,
-                                           levels_after_bootstrap, 0);
+                                              levels_after_bootstrap, 0);
 
     EXPECT_GT(cs_bits, 6.0) << "CS 8-slot bootstrap precision unexpectedly low (" << cs_bits << " bits)";
-    EXPECT_GE(cs_bits, fa_bits - k_gap_tol) << "CS lags FA by >" << k_gap_tol << " bits (CS=" << cs_bits << ", FA=" << fa_bits
-                                        << ") - bootstrap pre/post scaling (deg>1) regression";
+    EXPECT_GE(cs_bits, fa_bits - k_gap_tol)
+            << "CS lags FA by >" << k_gap_tol << " bits (CS=" << cs_bits << ", FA=" << fa_bits
+            << ") - bootstrap pre/post scaling (deg>1) regression";
 }
 
 //===========================================================================================================
@@ -304,14 +306,14 @@ TEST_F(CkksCompositeVsFlexibleTest, SparseBootstrapLargeModRaiseHeadroom) {
     const uint32_t num_slots = 8;
     const uint32_t levels_after_bootstrap = 2;
 
-    double fa_bits =
-            bootstrap_precision_bits(FLEXIBLEAUTO, ring_dim, 54, 60, level_budget, num_slots, levels_after_bootstrap, 0);
+    double fa_bits = bootstrap_precision_bits(FLEXIBLEAUTO, ring_dim, 54, 60, level_budget, num_slots,
+                                              levels_after_bootstrap, 0);
     double cs_bits = bootstrap_precision_bits(COMPOSITESCALINGAUTO, ring_dim, 54, 60, level_budget, num_slots,
-                                           levels_after_bootstrap, 0);
+                                              levels_after_bootstrap, 0);
 
     EXPECT_GT(cs_bits, 12.0) << "CS 8-slot deg=6 bootstrap precision unexpectedly low (" << cs_bits << " bits)";
-    EXPECT_GE(cs_bits, fa_bits - k_gap_tol) << "CS lags FA by >" << k_gap_tol << " bits (CS=" << cs_bits << ", FA=" << fa_bits
-                                        << ") - large modraise headroom (deg=6) regression";
+    EXPECT_GE(cs_bits, fa_bits - k_gap_tol) << "CS lags FA by >" << k_gap_tol << " bits (CS=" << cs_bits
+                                            << ", FA=" << fa_bits << ") - large modraise headroom (deg=6) regression";
 }
 
 //===========================================================================================================
@@ -328,14 +330,14 @@ TEST_F(CkksCompositeVsFlexibleTest, StCFirstSparseBootstrap) {
     const uint32_t num_slots = 8;
     const uint32_t levels_after_bootstrap = 2;
 
-    double fa_bits =
-            bootstrap_precision_bits(FLEXIBLEAUTO, ring_dim, 59, 60, level_budget, num_slots, levels_after_bootstrap, 0, true);
+    double fa_bits = bootstrap_precision_bits(FLEXIBLEAUTO, ring_dim, 59, 60, level_budget, num_slots,
+                                              levels_after_bootstrap, 0, true);
     double cs_bits = bootstrap_precision_bits(COMPOSITESCALINGAUTO, ring_dim, 59, 60, level_budget, num_slots,
-                                           levels_after_bootstrap, 0, true);
+                                              levels_after_bootstrap, 0, true);
 
     EXPECT_GT(cs_bits, 12.0) << "CS StC-first 8-slot bootstrap precision unexpectedly low (" << cs_bits << " bits)";
-    EXPECT_GE(cs_bits, fa_bits - k_gap_tol) << "CS lags FA by >" << k_gap_tol << " bits (CS=" << cs_bits << ", FA=" << fa_bits
-                                        << ") - StC-first composite scaling regression";
+    EXPECT_GE(cs_bits, fa_bits - k_gap_tol) << "CS lags FA by >" << k_gap_tol << " bits (CS=" << cs_bits
+                                            << ", FA=" << fa_bits << ") - StC-first composite scaling regression";
 }
 
 TEST_F(CkksCompositeVsFlexibleTest, StCFirstSparseBootstrapLargeModRaiseHeadroom) {
@@ -345,14 +347,14 @@ TEST_F(CkksCompositeVsFlexibleTest, StCFirstSparseBootstrapLargeModRaiseHeadroom
     const uint32_t num_slots = 8;
     const uint32_t levels_after_bootstrap = 2;
 
-    double fa_bits =
-            bootstrap_precision_bits(FLEXIBLEAUTO, ring_dim, 54, 60, level_budget, num_slots, levels_after_bootstrap, 0, true);
+    double fa_bits = bootstrap_precision_bits(FLEXIBLEAUTO, ring_dim, 54, 60, level_budget, num_slots,
+                                              levels_after_bootstrap, 0, true);
     double cs_bits = bootstrap_precision_bits(COMPOSITESCALINGAUTO, ring_dim, 54, 60, level_budget, num_slots,
-                                           levels_after_bootstrap, 0, true);
+                                              levels_after_bootstrap, 0, true);
 
     EXPECT_GT(cs_bits, 12.0) << "CS StC-first deg=6 bootstrap precision unexpectedly low (" << cs_bits << " bits)";
-    EXPECT_GE(cs_bits, fa_bits - k_gap_tol) << "CS lags FA by >" << k_gap_tol << " bits (CS=" << cs_bits << ", FA=" << fa_bits
-                                        << ") - StC-first large modraise headroom regression";
+    EXPECT_GE(cs_bits, fa_bits - k_gap_tol) << "CS lags FA by >" << k_gap_tol << " bits (CS=" << cs_bits
+                                            << ", FA=" << fa_bits << ") - StC-first large modraise headroom regression";
 }
 
 TEST_F(CkksCompositeVsFlexibleTest, StCFirstBootstrap1024Slots) {
@@ -362,14 +364,14 @@ TEST_F(CkksCompositeVsFlexibleTest, StCFirstBootstrap1024Slots) {
     const uint32_t num_slots = 1024;
     const uint32_t levels_after_bootstrap = 2;
 
-    double fa_bits =
-            bootstrap_precision_bits(FLEXIBLEAUTO, ring_dim, 59, 60, level_budget, num_slots, levels_after_bootstrap, 0, true);
+    double fa_bits = bootstrap_precision_bits(FLEXIBLEAUTO, ring_dim, 59, 60, level_budget, num_slots,
+                                              levels_after_bootstrap, 0, true);
     double cs_bits = bootstrap_precision_bits(COMPOSITESCALINGAUTO, ring_dim, 59, 60, level_budget, num_slots,
-                                           levels_after_bootstrap, 0, true);
+                                              levels_after_bootstrap, 0, true);
 
     EXPECT_GT(cs_bits, 12.0) << "CS StC-first 1024-slot bootstrap precision unexpectedly low (" << cs_bits << " bits)";
-    EXPECT_GE(cs_bits, fa_bits - k_gap_tol) << "CS lags FA by >" << k_gap_tol << " bits (CS=" << cs_bits << ", FA=" << fa_bits
-                                        << ") - StC-first composite scaling regression";
+    EXPECT_GE(cs_bits, fa_bits - k_gap_tol) << "CS lags FA by >" << k_gap_tol << " bits (CS=" << cs_bits
+                                            << ", FA=" << fa_bits << ") - StC-first composite scaling regression";
 }
 
 // Input arrives with 2 more levels than the StC-first minimum, so the level adjustment before SlotsToCoeffs
@@ -382,15 +384,15 @@ TEST_F(CkksCompositeVsFlexibleTest, StCFirstSparseBootstrapWithExtraLevels) {
     const uint32_t levels_after_bootstrap = 2;
     const uint32_t extra_levels = 2;
 
-    double fa_bits = bootstrap_precision_bits(FLEXIBLEAUTO, ring_dim, 59, 60, level_budget, num_slots, levels_after_bootstrap,
-                                           0, true, extra_levels);
+    double fa_bits = bootstrap_precision_bits(FLEXIBLEAUTO, ring_dim, 59, 60, level_budget, num_slots,
+                                              levels_after_bootstrap, 0, true, extra_levels);
     double cs_bits = bootstrap_precision_bits(COMPOSITESCALINGAUTO, ring_dim, 59, 60, level_budget, num_slots,
-                                           levels_after_bootstrap, 0, true, extra_levels);
+                                              levels_after_bootstrap, 0, true, extra_levels);
 
     EXPECT_GT(cs_bits, 12.0) << "CS StC-first bootstrap precision with extra input levels unexpectedly low (" << cs_bits
-                            << " bits)";
-    EXPECT_GE(cs_bits, fa_bits - k_gap_tol) << "CS lags FA by >" << k_gap_tol << " bits (CS=" << cs_bits << ", FA=" << fa_bits
-                                        << ") - StC-first level adjustment regression";
+                             << " bits)";
+    EXPECT_GE(cs_bits, fa_bits - k_gap_tol) << "CS lags FA by >" << k_gap_tol << " bits (CS=" << cs_bits
+                                            << ", FA=" << fa_bits << ") - StC-first level adjustment regression";
 }
 
 //===========================================================================================================
@@ -412,9 +414,9 @@ TEST_F(CkksCompositeVsFlexibleTest, DeepComputationWithFillers) {
 
     // This scenario has the widest run-to-run spread in the file (sd 1.25 bits, ~2x the sparse
     // bootstrap tests), so it needs the widest tolerance; the pre-fix gap of ~18 bits leaves room.
-    EXPECT_GE(cs_bits, fa_bits - k_gap_tol) << "CS background leakage worse than FA by >" << k_gap_tol
-                                        << " bits at filler depth D=" << D << " (CS=" << cs_bits
-                                        << " bits, FA=" << fa_bits << " bits)";
+    EXPECT_GE(cs_bits, fa_bits - k_gap_tol)
+            << "CS background leakage worse than FA by >" << k_gap_tol << " bits at filler depth D=" << D
+            << " (CS=" << cs_bits << " bits, FA=" << fa_bits << " bits)";
 }
 //===========================================================================================================
 #endif  // CIPHER_NATIVE_INT == 64

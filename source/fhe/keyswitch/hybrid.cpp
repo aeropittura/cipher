@@ -51,13 +51,13 @@
 namespace cipher {
 
 EvalKey<RnsPoly> KeySwitchHybrid::key_switch_gen_internal(const PrivateKey<RnsPoly> old_key,
-                                                        const PrivateKey<RnsPoly> new_key) const {
+                                                          const PrivateKey<RnsPoly> new_key) const {
     return KeySwitchHybrid::key_switch_gen_internal(old_key, new_key, nullptr);
 }
 
 EvalKey<RnsPoly> KeySwitchHybrid::key_switch_gen_internal(const PrivateKey<RnsPoly> old_key,
-                                                        const PrivateKey<RnsPoly> new_key,
-                                                        const EvalKey<RnsPoly> ek_prev) const {
+                                                          const PrivateKey<RnsPoly> new_key,
+                                                          const EvalKey<RnsPoly> ek_prev) const {
     const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(new_key->get_crypto_parameters());
     const auto& params_q = crypto_params->get_element_params();
     const auto& params_qp = crypto_params->get_params_qp();
@@ -104,12 +104,13 @@ EvalKey<RnsPoly> KeySwitchHybrid::key_switch_gen_internal(const PrivateKey<RnsPo
 #pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(num_part_q)) private(dug, dgg)
     for (uint32_t part = 0; part < num_part_q; ++part) {
         auto a = (ek_prev == nullptr) ? RnsPoly(dug, params_qp, Format::EVALUATION) :  // single-key HE
-                                       ek_prev->get_a_vector()[part];                    // threshold HE
+                                        ek_prev->get_a_vector()[part];                 // threshold HE
         RnsPoly e(dgg, params_qp, Format::EVALUATION);
         RnsPoly b(params_qp, Format::EVALUATION, false);
 
         const uint32_t start_part_idx = num_per_part_q * part;
-        const uint32_t end_part_idx = (size_q > (start_part_idx + num_per_part_q)) ? (start_part_idx + num_per_part_q) : size_q;
+        const uint32_t end_part_idx =
+                (size_q > (start_part_idx + num_per_part_q)) ? (start_part_idx + num_per_part_q) : size_q;
 
         for (uint32_t i = 0; i < size_qp; ++i) {
             const auto& ai = a.get_element_at_index(i);
@@ -135,7 +136,7 @@ EvalKey<RnsPoly> KeySwitchHybrid::key_switch_gen_internal(const PrivateKey<RnsPo
 }
 
 EvalKey<RnsPoly> KeySwitchHybrid::key_switch_gen_internal(const PrivateKey<RnsPoly> old_key,
-                                                        const PublicKey<RnsPoly> new_key) const {
+                                                          const PublicKey<RnsPoly> new_key) const {
     const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(new_key->get_crypto_parameters());
     const auto& params_q = crypto_params->get_element_params();
     const auto& params_qp = crypto_params->get_params_qp();
@@ -161,7 +162,7 @@ EvalKey<RnsPoly> KeySwitchHybrid::key_switch_gen_internal(const PrivateKey<RnsPo
 #pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(num_part_q)) private(dgg, tug)
     for (uint32_t part = 0; part < num_part_q; ++part) {
         auto u = (crypto_params->get_secret_key_dist() == GAUSSIAN) ? RnsPoly(dgg, params_qp, Format::EVALUATION) :
-                                                                  RnsPoly(tug, params_qp, Format::EVALUATION);
+                                                                      RnsPoly(tug, params_qp, Format::EVALUATION);
         RnsPoly e0(dgg, params_qp, Format::EVALUATION);
         RnsPoly e1(dgg, params_qp, Format::EVALUATION);
         RnsPoly a(params_qp, Format::EVALUATION, false);
@@ -169,7 +170,8 @@ EvalKey<RnsPoly> KeySwitchHybrid::key_switch_gen_internal(const PrivateKey<RnsPo
 
         // starting and ending position of current part
         const uint32_t start_part_idx = num_per_part_q * part;
-        const uint32_t end_part_idx = (size_q > start_part_idx + num_per_part_q) ? (start_part_idx + num_per_part_q) : size_q;
+        const uint32_t end_part_idx =
+                (size_q > start_part_idx + num_per_part_q) ? (start_part_idx + num_per_part_q) : size_q;
 
         for (uint32_t i = 0; i < size_qp; ++i) {
             const auto& ui = u.get_element_at_index(i);
@@ -257,16 +259,18 @@ Ciphertext<RnsPoly> KeySwitchHybrid::key_switch_down(ConstCiphertext<RnsPoly> ci
 
     std::vector<RnsPoly> elements;
     elements.reserve(2);
-    elements.emplace_back(cv[0].approx_mod_down(params_ql, crypto_params->get_params_p(), crypto_params->get_p_inv_modq(),
-                                              crypto_params->get_p_inv_modq_precon(), crypto_params->get_p_hat_inv_modp(),
-                                              crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
-                                              crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
-                                              crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon()));
-    elements.emplace_back(cv[1].approx_mod_down(params_ql, crypto_params->get_params_p(), crypto_params->get_p_inv_modq(),
-                                              crypto_params->get_p_inv_modq_precon(), crypto_params->get_p_hat_inv_modp(),
-                                              crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
-                                              crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
-                                              crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon()));
+    elements.emplace_back(
+            cv[0].approx_mod_down(params_ql, crypto_params->get_params_p(), crypto_params->get_p_inv_modq(),
+                                  crypto_params->get_p_inv_modq_precon(), crypto_params->get_p_hat_inv_modp(),
+                                  crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
+                                  crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
+                                  crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon()));
+    elements.emplace_back(
+            cv[1].approx_mod_down(params_ql, crypto_params->get_params_p(), crypto_params->get_p_inv_modq(),
+                                  crypto_params->get_p_inv_modq_precon(), crypto_params->get_p_hat_inv_modp(),
+                                  crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
+                                  crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
+                                  crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon()));
 
     auto result = ciphertext->clone_empty();
     result->set_elements(std::move(elements));
@@ -286,15 +290,15 @@ RnsPoly KeySwitchHybrid::key_switch_down_first_element(ConstCiphertext<RnsPoly> 
     const PlaintextModulus t = (crypto_params->get_noise_scale() == 1) ? 0 : crypto_params->get_plaintext_modulus();
 
     return cv.approx_mod_down(params_ql, crypto_params->get_params_p(), crypto_params->get_p_inv_modq(),
-                            crypto_params->get_p_inv_modq_precon(), crypto_params->get_p_hat_inv_modp(),
-                            crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
-                            crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
-                            crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon());
+                              crypto_params->get_p_inv_modq_precon(), crypto_params->get_p_hat_inv_modp(),
+                              crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
+                              crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
+                              crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon());
 }
 
 std::vector<RnsPoly> KeySwitchHybrid::key_switch_core(const RnsPoly& a, const EvalKey<RnsPoly> eval_key) const {
     return eval_fast_key_switch_core(eval_key_switch_precompute_core(a, eval_key->get_crypto_parameters()), eval_key,
-                                 a.get_params());
+                                     a.get_params());
 }
 
 std::shared_ptr<std::vector<RnsPoly>> KeySwitchHybrid::eval_key_switch_precompute_core(
@@ -342,14 +346,15 @@ std::shared_ptr<std::vector<RnsPoly>> KeySwitchHybrid::eval_key_switch_precomput
         for (uint32_t i = 0, idx = start_part_idx; i < size_part_ql; ++i, ++idx)
             parts_ct.set_element_at_index(i, c.get_element_at_index(idx));
 
-        const uint32_t threads = RnsPoly::approx_switch_crt_basis_threads(ring_dim, size_part_ql, size_ql_p - size_part_ql);
+        const uint32_t threads =
+                RnsPoly::approx_switch_crt_basis_threads(ring_dim, size_part_ql, size_ql_p - size_part_ql);
         parts_ct.set_format(Format::COEFFICIENT, threads);
-        auto parts_ct_compl = parts_ct.approx_switch_crt_basis(crypto_params->get_params_part_q(part),
-                                                         crypto_params->get_params_compl_part_q(size_ql - 1, part),
-                                                         crypto_params->get_part_ql_hat_inv_modq(part, size_part_ql - 1),
-                                                         crypto_params->get_part_ql_hat_inv_modq_precon(part, size_part_ql - 1),
-                                                         crypto_params->get_part_ql_hat_modp(size_ql - 1, part),
-                                                         crypto_params->get_mod_compl_partq_barrett_mu(size_ql - 1, part));
+        auto parts_ct_compl = parts_ct.approx_switch_crt_basis(
+                crypto_params->get_params_part_q(part), crypto_params->get_params_compl_part_q(size_ql - 1, part),
+                crypto_params->get_part_ql_hat_inv_modq(part, size_part_ql - 1),
+                crypto_params->get_part_ql_hat_inv_modq_precon(part, size_part_ql - 1),
+                crypto_params->get_part_ql_hat_modp(size_ql - 1, part),
+                crypto_params->get_mod_compl_partq_barrett_mu(size_ql - 1, part));
         parts_ct_compl.set_format(Format::EVALUATION, threads);
 
         (*result)[part] = RnsPoly(params_ql_p, Format::EVALUATION, false);
@@ -366,29 +371,31 @@ std::shared_ptr<std::vector<RnsPoly>> KeySwitchHybrid::eval_key_switch_precomput
 }
 
 std::vector<RnsPoly> KeySwitchHybrid::eval_fast_key_switch_core(const std::shared_ptr<std::vector<RnsPoly>> digits,
-                                                             const EvalKey<RnsPoly> eval_key,
-                                                             const std::shared_ptr<ParmType> params_ql) const {
+                                                                const EvalKey<RnsPoly> eval_key,
+                                                                const std::shared_ptr<ParmType> params_ql) const {
     const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(eval_key->get_crypto_parameters());
 
     const PlaintextModulus t = (crypto_params->get_noise_scale() == 1) ? 0 : crypto_params->get_plaintext_modulus();
 
     auto result = eval_fast_key_switch_core_ext(digits, eval_key, params_ql);
-    result[0] = result[0].approx_mod_down(params_ql, crypto_params->get_params_p(), crypto_params->get_p_inv_modq(),
-                                        crypto_params->get_p_inv_modq_precon(), crypto_params->get_p_hat_inv_modp(),
-                                        crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
-                                        crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
-                                        crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon());
-    result[1] = result[1].approx_mod_down(params_ql, crypto_params->get_params_p(), crypto_params->get_p_inv_modq(),
-                                        crypto_params->get_p_inv_modq_precon(), crypto_params->get_p_hat_inv_modp(),
-                                        crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
-                                        crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
-                                        crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon());
+    result[0] =
+            result[0].approx_mod_down(params_ql, crypto_params->get_params_p(), crypto_params->get_p_inv_modq(),
+                                      crypto_params->get_p_inv_modq_precon(), crypto_params->get_p_hat_inv_modp(),
+                                      crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
+                                      crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
+                                      crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon());
+    result[1] =
+            result[1].approx_mod_down(params_ql, crypto_params->get_params_p(), crypto_params->get_p_inv_modq(),
+                                      crypto_params->get_p_inv_modq_precon(), crypto_params->get_p_hat_inv_modp(),
+                                      crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
+                                      crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
+                                      crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon());
     return result;
 }
 
 std::vector<RnsPoly> KeySwitchHybrid::eval_fast_key_switch_core_ext(const std::shared_ptr<std::vector<RnsPoly>> digits,
-                                                                const EvalKey<RnsPoly> eval_key,
-                                                                const std::shared_ptr<ParmType> params_ql) const {
+                                                                    const EvalKey<RnsPoly> eval_key,
+                                                                    const std::shared_ptr<ParmType> params_ql) const {
     const auto params_ql_p = (*digits)[0].get_params();
     const uint32_t size_ql_p = params_ql_p->get_params().size();
 

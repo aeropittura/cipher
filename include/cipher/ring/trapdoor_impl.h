@@ -53,9 +53,10 @@ namespace cipher {
 
 template <class Element>
 Matrix<Element> RlweTrapdoorUtility<Element>::gauss_samp_online(size_t n, size_t k, const Matrix<Element>& A,
-                                                              const RlweTrapdoorPair<Element>& T, const Element& u,
-                                                              DggType& dgg, const std::shared_ptr<Matrix<Element>> p_hat,
-                                                              int64_t base) {
+                                                                const RlweTrapdoorPair<Element>& T, const Element& u,
+                                                                DggType& dgg,
+                                                                const std::shared_ptr<Matrix<Element>> p_hat,
+                                                                int64_t base) {
     const std::shared_ptr<ParmType> params = u.get_params();
     auto zero_alloc = Element::allocator(params, Format::EVALUATION);
 
@@ -95,10 +96,8 @@ Matrix<Element> RlweTrapdoorUtility<Element>::gauss_samp_online(size_t n, size_t
 // Offline stage of pre-image sampling (perturbation sampling)
 
 template <class Element>
-std::shared_ptr<Matrix<Element>> RlweTrapdoorUtility<Element>::gauss_samp_offline(size_t n, size_t k,
-                                                                                const RlweTrapdoorPair<Element>& T,
-                                                                                DggType& dgg, DggType& dgg_large_sigma,
-                                                                                int64_t base) {
+std::shared_ptr<Matrix<Element>> RlweTrapdoorUtility<Element>::gauss_samp_offline(
+        size_t n, size_t k, const RlweTrapdoorPair<Element>& T, DggType& dgg, DggType& dgg_large_sigma, int64_t base) {
     const std::shared_ptr<ParmType> params = T.e_(0, 0).get_params();
     auto zero_alloc = Element::allocator(params, Format::EVALUATION);
 
@@ -129,10 +128,10 @@ std::shared_ptr<Matrix<Element>> RlweTrapdoorUtility<Element>::gauss_samp_offlin
  */
 template <>
 inline void RlweTrapdoorUtility<RnsPoly>::z_sample_sigma_p(size_t n, double s, double sigma,
-                                                         const RlweTrapdoorPair<RnsPoly>& tprime,
-                                                         const RnsPoly::DggType& dgg,
-                                                         const RnsPoly::DggType& dgg_large_sigma,
-                                                         std::shared_ptr<Matrix<RnsPoly>> perturbation_vector) {
+                                                           const RlweTrapdoorPair<RnsPoly>& tprime,
+                                                           const RnsPoly::DggType& dgg,
+                                                           const RnsPoly::DggType& dgg_large_sigma,
+                                                           std::shared_ptr<Matrix<RnsPoly>> perturbation_vector) {
     CIPHER_DEBUG_FLAG(false);
     TimeVar t1, t1_tot;
 

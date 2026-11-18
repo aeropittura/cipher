@@ -51,60 +51,61 @@ const BigInteger QBFVINIT(BigInteger(1) << 60);
 const BigInteger QBFVINITLARGE(BigInteger(1) << 80);
 
 void arbitrary_lut(BigInteger qbfv_init, BigInteger p_input, BigInteger p_output, BigInteger Q, BigInteger bigq,
-                  uint64_t scale_thi, size_t order, uint32_t num_slots, uint32_t ring_dim,
-                  std::function<int64_t(int64_t)> func);
-void multi_value_bootstrapping(BigInteger qbfv_init, BigInteger p_input, BigInteger p_output, BigInteger Q, BigInteger bigq,
-                             uint64_t scale_thi, size_t order, uint32_t num_slots, uint32_t ring_dim,
-                             uint32_t level_computation);
+                   uint64_t scale_thi, size_t order, uint32_t num_slots, uint32_t ring_dim,
+                   std::function<int64_t(int64_t)> func);
+void multi_value_bootstrapping(BigInteger qbfv_init, BigInteger p_input, BigInteger p_output, BigInteger Q,
+                               BigInteger bigq, uint64_t scale_thi, size_t order, uint32_t num_slots, uint32_t ring_dim,
+                               uint32_t level_computation);
 void multi_precision_sign(BigInteger qbfv_init, BigInteger p_input, BigInteger p_digit, BigInteger Q, BigInteger bigq,
-                        uint64_t scale_thi, uint64_t scale_step_thi, size_t order, uint32_t num_slots, uint32_t ring_dim);
+                          uint64_t scale_thi, uint64_t scale_step_thi, size_t order, uint32_t num_slots,
+                          uint32_t ring_dim);
 
 int main() {
     std::cerr << "\n*1.* Compute the function (x % PInput - POutput / 2) % POutput." << std::endl << std::endl;
     // Boolean LUT
     std::cerr << "=====Boolean LUT order 1 sparsely packed=====" << std::endl << std::endl;
     arbitrary_lut(QBFVINIT, BigInteger(2), BigInteger(2), (BigInteger(1) << 33), (BigInteger(1) << 33), 1, 1, 8, 4096,
-                 [](int64_t x) { return (x % 2 - 2 / 2) % 2; });
+                  [](int64_t x) { return (x % 2 - 2 / 2) % 2; });
     std::cerr << "=====Boolean LUT order 2 sparsely packed=====" << std::endl << std::endl;
     arbitrary_lut(QBFVINIT, BigInteger(2), BigInteger(2), (BigInteger(1) << 33), (BigInteger(1) << 33), 1, 2, 8, 4096,
-                 [](int64_t x) { return (x % 2 - 2 / 2) % 2; });
+                  [](int64_t x) { return (x % 2 - 2 / 2) % 2; });
     std::cerr << "=====Boolean LUT order 1 fully packed=====" << std::endl << std::endl;
-    arbitrary_lut(QBFVINIT, BigInteger(2), BigInteger(2), (BigInteger(1) << 33), (BigInteger(1) << 33), 1, 1, 1024, 4096,
-                 [](int64_t x) { return (x % 2 - 2 / 2) % 2; });
+    arbitrary_lut(QBFVINIT, BigInteger(2), BigInteger(2), (BigInteger(1) << 33), (BigInteger(1) << 33), 1, 1, 1024,
+                  4096, [](int64_t x) { return (x % 2 - 2 / 2) % 2; });
     // LUT with 8-bit input and 4-bit output
     std::cerr << "=====8-to-4 bit LUT order 1 sparsely packed=====" << std::endl << std::endl;
     arbitrary_lut(QBFVINIT, BigInteger(256), BigInteger(16), (BigInteger(1) << 47), (BigInteger(1) << 47), 32, 1, 8,
-                 4096, [](int64_t x) { return (x % 256 - 16 / 2) % 16; });
+                  4096, [](int64_t x) { return (x % 256 - 16 / 2) % 16; });
 
     std::cerr << "\n\n*2.* Compute multiple functions over the same ciphertext." << std::endl << std::endl;
     // Two LUTs with 8-bit input and 8-bit output and intermediate leveled computations
     std::cerr << "=====Multivalue bootstrapping for two 8-to-8 bit LUTs order 1 fully packed=====" << std::endl
               << std::endl;
     multi_value_bootstrapping(QBFVINIT, BigInteger(256), BigInteger(256), (BigInteger(1) << 47), (BigInteger(1) << 47),
-                            32, 1, 256, 2048, 1);
+                              32, 1, 256, 2048, 1);
 
     std::cerr << "\n\n*3.* Homomorphically evaluate the sign." << std::endl << std::endl;
     // Compute the sign of a 12-bit input using 1-bit and 4-bit digits
     // The following needs to hold true: log2(p_input) - log2(p_digit) = log2(Q) - log2(Bigq)
     std::cerr << "=====Sign evaluation of a 12-bit input using 1-bit digits order 1 sparsely packed=====" << std::endl
               << std::endl;
-    multi_precision_sign(QBFVINIT, BigInteger(4096), BigInteger(2), (BigInteger(1) << 46), (BigInteger(1) << 35), 1, 1, 1,
-                       32, 2048);
+    multi_precision_sign(QBFVINIT, BigInteger(4096), BigInteger(2), (BigInteger(1) << 46), (BigInteger(1) << 35), 1, 1,
+                         1, 32, 2048);
     std::cerr << "=====Sign evaluation of a 12-bit input using 4-bit digits order 1 fully packed=====" << std::endl
               << std::endl;
-    multi_precision_sign(QBFVINIT, BigInteger(4096), BigInteger(16), (BigInteger(1) << 48), (BigInteger(1) << 40), 32, 8,
-                       1, 64, 2048);
+    multi_precision_sign(QBFVINIT, BigInteger(4096), BigInteger(16), (BigInteger(1) << 48), (BigInteger(1) << 40), 32,
+                         8, 1, 64, 2048);
     std::cerr << "=====Sign evaluation of a 32-bit input using 8-bit digits order 1 fully packed=====" << std::endl
               << std::endl;
     multi_precision_sign(QBFVINITLARGE, BigInteger(1) << 32, BigInteger(256), BigInteger(1) << 71, BigInteger(1) << 47,
-                       256, 32, 1, 64, 2048);
+                         256, 32, 1, 64, 2048);
 
     return 0;
 }
 
 void arbitrary_lut(BigInteger qbfv_init, BigInteger p_input, BigInteger p_output, BigInteger Q, BigInteger bigq,
-                  uint64_t scale_thi, size_t order, uint32_t num_slots, uint32_t ring_dim,
-                  std::function<int64_t(int64_t)> func) {
+                   uint64_t scale_thi, size_t order, uint32_t num_slots, uint32_t ring_dim,
+                   std::function<int64_t(int64_t)> func) {
     /* 1. Figure out whether sparse packing or full packing should be used.
      * num_slots represents the number of values to be encrypted in BFV.
      * If this number is the same as the ring dimension, then the CKKS slots is half.
@@ -200,10 +201,10 @@ void arbitrary_lut(BigInteger qbfv_init, BigInteger p_input, BigInteger p_output
 
     if (binary_lut)
         cc->eval_fbt_setup(coeffint, num_slots_ckks, p_input, p_output, bigq, key_pair.public_key, {0, 0}, lvlb,
-                         levels_available_after_bootstrap, 0, order);
+                           levels_available_after_bootstrap, 0, order);
     else
         cc->eval_fbt_setup(coeffcomp, num_slots_ckks, p_input, p_output, bigq, key_pair.public_key, {0, 0}, lvlb,
-                         levels_available_after_bootstrap, 0, order);
+                           levels_available_after_bootstrap, 0, order);
 
     cc->eval_bootstrap_key_gen(key_pair.secret_key, num_slots_ckks);
     cc->eval_mult_key_gen(key_pair.secret_key);
@@ -220,7 +221,7 @@ void arbitrary_lut(BigInteger qbfv_init, BigInteger p_input, BigInteger p_output
     /* 7. Convert from the RLWE ciphertext to a CKKS ciphertext (both use the same secret key).
      */
     auto ctxt = SchemeletRlweMp::convert_rlwe_to_ckks(*cc, ctxt_bfv, key_pair.public_key, bigq, num_slots_ckks,
-                                                   depth - (levels_available_before_bootstrap > 0));
+                                                      depth - (levels_available_before_bootstrap > 0));
 
     /* 8. Apply the LUT over the ciphertext.
      */
@@ -234,7 +235,8 @@ void arbitrary_lut(BigInteger qbfv_init, BigInteger p_input, BigInteger p_output
      */
     auto polys = SchemeletRlweMp::convert_ckks_to_rlwe(ctxt_after_fbt, Q);
 
-    auto computed = SchemeletRlweMp::decrypt_coeff(polys, Q, p_output, key_pair.secret_key, ep, num_slots_ckks, num_slots);
+    auto computed =
+            SchemeletRlweMp::decrypt_coeff(polys, Q, p_output, key_pair.secret_key, ep, num_slots_ckks, num_slots);
 
     std::cerr << "First 8 elements of the obtained output % POutput: [";
     std::copy_n(computed.begin(), 8, std::ostream_iterator<int64_t>(std::cerr, " "));
@@ -252,9 +254,9 @@ void arbitrary_lut(BigInteger qbfv_init, BigInteger p_input, BigInteger p_output
     std::cerr << "Max absolute error obtained: " << *max_error_it << std::endl << std::endl;
 }
 
-void multi_value_bootstrapping(BigInteger qbfv_init, BigInteger p_input, BigInteger p_output, BigInteger Q, BigInteger bigq,
-                             uint64_t scale_thi, size_t order, uint32_t num_slots, uint32_t ring_dim,
-                             uint32_t levels_computation) {
+void multi_value_bootstrapping(BigInteger qbfv_init, BigInteger p_input, BigInteger p_output, BigInteger Q,
+                               BigInteger bigq, uint64_t scale_thi, size_t order, uint32_t num_slots, uint32_t ring_dim,
+                               uint32_t levels_computation) {
     /* 1. Figure out whether sparse packing or full packing should be used.
      * num_slots represents the number of values to be encrypted in BFV.
      * If this number is the same as the ring dimension, then the CKKS slots is half.
@@ -362,10 +364,10 @@ void multi_value_bootstrapping(BigInteger qbfv_init, BigInteger p_input, BigInte
 
     if (binary_lut)
         cc->eval_fbt_setup(coeffint1, num_slots_ckks, p_input, p_output, bigq, key_pair.public_key, {0, 0}, lvlb,
-                         levels_available_after_bootstrap, levels_computation, order);
+                           levels_available_after_bootstrap, levels_computation, order);
     else
         cc->eval_fbt_setup(coeffcomp1, num_slots_ckks, p_input, p_output, bigq, key_pair.public_key, {0, 0}, lvlb,
-                         levels_available_after_bootstrap, levels_computation, order);
+                           levels_available_after_bootstrap, levels_computation, order);
 
     cc->eval_bootstrap_key_gen(key_pair.secret_key, num_slots_ckks);
     cc->eval_mult_key_gen(key_pair.secret_key);
@@ -402,7 +404,7 @@ void multi_value_bootstrapping(BigInteger qbfv_init, BigInteger p_input, BigInte
     /* 9. Convert from the RLWE ciphertext to a CKKS ciphertext (both use the same secret key).
      */
     auto ctxt = SchemeletRlweMp::convert_rlwe_to_ckks(*cc, ctxt_bfv, key_pair.public_key, bigq, num_slots_ckks,
-                                                   depth - (levels_available_before_bootstrap > 0));
+                                                      depth - (levels_available_before_bootstrap > 0));
 
     /* 10. Apply the LUTs over the ciphertext.
      * First, compute the complex exponential and its powers to reuse.
@@ -414,19 +416,22 @@ void multi_value_bootstrapping(BigInteger qbfv_init, BigInteger p_input, BigInte
 
     auto exact(x);
     std::transform(x.begin(), x.end(), exact.begin(), [&](int64_t elem) {
-        return (func1(elem) > p_output.convert_to_double() / 2.) ? func1(elem) - p_output.convert_to_int() : func1(elem);
+        return (func1(elem) > p_output.convert_to_double() / 2.) ? func1(elem) - p_output.convert_to_int() :
+                                                                   func1(elem);
     });
 
     auto exact2(x);
     std::transform(x.begin(), x.end(), exact2.begin(), [&](int64_t elem) {
-        return (func2(elem) > p_output.convert_to_double() / 2.) ? func2(elem) - p_output.convert_to_int() : func2(elem);
+        return (func2(elem) > p_output.convert_to_double() / 2.) ? func2(elem) - p_output.convert_to_int() :
+                                                                   func2(elem);
     });
 
     if (binary_lut) {
-        auto complex_exp_powers = cc->eval_mvb_precompute(ctxt, coeffint1, p_input.get_msb() - 1, ep->get_modulus(), order);
+        auto complex_exp_powers =
+                cc->eval_mvb_precompute(ctxt, coeffint1, p_input.get_msb() - 1, ep->get_modulus(), order);
 
-        ctxt_after_fbt1 =
-                cc->eval_mvb(complex_exp_powers, coeffint1, p_input.get_msb() - 1, scale_thi, levels_computation, order);
+        ctxt_after_fbt1 = cc->eval_mvb(complex_exp_powers, coeffint1, p_input.get_msb() - 1, scale_thi,
+                                       levels_computation, order);
 
         ctxt_after_fbt2 = cc->eval_mvb_no_decoding(complex_exp_powers, coeffint2, p_input.get_msb() - 1, order);
 
@@ -443,10 +448,11 @@ void multi_value_bootstrapping(BigInteger qbfv_init, BigInteger p_input, BigInte
         // Back to coefficient encoding
         ctxt_after_fbt2 = cc->eval_hom_decoding(ctxt_after_fbt2, scale_thi, levels_computation - 1);
     } else {
-        auto complex_exp_powers = cc->eval_mvb_precompute(ctxt, coeffcomp1, p_input.get_msb() - 1, ep->get_modulus(), order);
+        auto complex_exp_powers =
+                cc->eval_mvb_precompute(ctxt, coeffcomp1, p_input.get_msb() - 1, ep->get_modulus(), order);
 
-        ctxt_after_fbt1 =
-                cc->eval_mvb(complex_exp_powers, coeffcomp1, p_input.get_msb() - 1, scale_thi, levels_computation, order);
+        ctxt_after_fbt1 = cc->eval_mvb(complex_exp_powers, coeffcomp1, p_input.get_msb() - 1, scale_thi,
+                                       levels_computation, order);
 
         ctxt_after_fbt2 = cc->eval_mvb_no_decoding(complex_exp_powers, coeffcomp2, p_input.get_msb() - 1, order);
 
@@ -469,8 +475,8 @@ void multi_value_bootstrapping(BigInteger qbfv_init, BigInteger p_input, BigInte
 
     /* 11. Convert the results back to RLWE.
      */
-    auto computed =
-            SchemeletRlweMp::decrypt_coeff(polys, Q, p_output, key_pair.secret_key, ep, num_slots_ckks, num_slots, flag_br);
+    auto computed = SchemeletRlweMp::decrypt_coeff(polys, Q, p_output, key_pair.secret_key, ep, num_slots_ckks,
+                                                   num_slots, flag_br);
 
     std::cerr << "First 8 elements of the obtained output = (input % PInput - POutput / 2) % POutput: [";
     std::copy_n(computed.begin(), 8, std::ostream_iterator<int64_t>(std::cerr, " "));
@@ -484,7 +490,8 @@ void multi_value_bootstrapping(BigInteger qbfv_init, BigInteger p_input, BigInte
 
     polys = SchemeletRlweMp::convert_ckks_to_rlwe(ctxt_after_fbt2, Q);
 
-    computed = SchemeletRlweMp::decrypt_coeff(polys, Q, p_output, key_pair.secret_key, ep, num_slots_ckks, num_slots, flag_br);
+    computed = SchemeletRlweMp::decrypt_coeff(polys, Q, p_output, key_pair.secret_key, ep, num_slots_ckks, num_slots,
+                                              flag_br);
 
     std::cerr << "First 8 elements of the obtained output = (input % PInput) % POutput, rotated by -2 and masked: [";
     std::copy_n(computed.begin(), 8, std::ostream_iterator<int64_t>(std::cerr, " "));
@@ -498,7 +505,8 @@ void multi_value_bootstrapping(BigInteger qbfv_init, BigInteger p_input, BigInte
 }
 
 void multi_precision_sign(BigInteger qbfv_init, BigInteger p_input, BigInteger p_digit, BigInteger Q, BigInteger bigq,
-                        uint64_t scale_thi, uint64_t scale_step_thi, size_t order, uint32_t num_slots, uint32_t ring_dim) {
+                          uint64_t scale_thi, uint64_t scale_step_thi, size_t order, uint32_t num_slots,
+                          uint32_t ring_dim) {
     /* 1. Figure out whether sparse packing or full packing should be used.
      * num_slots represents the number of values to be encrypted in BFV.
      * If this number is the same as the ring dimension, then the CKKS slots is half.
@@ -552,9 +560,10 @@ void multi_precision_sign(BigInteger qbfv_init, BigInteger p_input, BigInteger p
     if (binary_lut) {
         coeffint_mod = {func_mod(1), func_mod(0) - func_mod(1)};
     } else {
-        coeffcomp_mod = get_hermite_trig_coefficients(func_mod, p_digit.convert_to_int(), order, scale_thi);  // divided by 2
+        coeffcomp_mod =
+                get_hermite_trig_coefficients(func_mod, p_digit.convert_to_int(), order, scale_thi);  // divided by 2
         coeffcomp_step = get_hermite_trig_coefficients(func_step, p_digit.convert_to_int(), order,
-                                                   scale_step_thi);  // divided by 2
+                                                       scale_step_thi);  // divided by 2
     }
 
     /* 5. Set up the cryptoparameters.
@@ -616,10 +625,10 @@ void multi_precision_sign(BigInteger qbfv_init, BigInteger p_input, BigInteger p
 
     if (binary_lut)
         cc->eval_fbt_setup(coeffint_mod, num_slots_ckks, p_digit, p_input, bigq, key_pair.public_key, {0, 0}, lvlb,
-                         levels_available_after_bootstrap, 0, order);
+                           levels_available_after_bootstrap, 0, order);
     else
         cc->eval_fbt_setup(coeffcomp_mod, num_slots_ckks, p_digit, p_input, bigq, key_pair.public_key, {0, 0}, lvlb,
-                         levels_available_after_bootstrap, 0, order);
+                           levels_available_after_bootstrap, 0, order);
 
     cc->eval_bootstrap_key_gen(key_pair.secret_key, num_slots_ckks);
 
@@ -664,17 +673,18 @@ void multi_precision_sign(BigInteger qbfv_init, BigInteger p_input, BigInteger p
         encrypted_digit[0].switch_modulus(bigq, 1, 0, 0);
         encrypted_digit[1].switch_modulus(bigq, 1, 0, 0);
 
-        auto ctxt = SchemeletRlweMp::convert_rlwe_to_ckks(*cc, encrypted_digit, key_pair.public_key, bigq, num_slots_ckks,
-                                                       depth - (levels_available_before_bootstrap > 0));
+        auto ctxt =
+                SchemeletRlweMp::convert_rlwe_to_ckks(*cc, encrypted_digit, key_pair.public_key, bigq, num_slots_ckks,
+                                                      depth - (levels_available_before_bootstrap > 0));
 
         /* 9.2 Bootstrap the digit.*/
         Ciphertext<RnsPoly> ctxt_after_fbt;
         if (binary_lut)
-            ctxt_after_fbt = cc->eval_fbt(ctxt, coeffint, p_digit_bits, ep->get_modulus(), scale_thi * (1 << post_scaling_bits),
-                                       levels_to_drop, order);
+            ctxt_after_fbt = cc->eval_fbt(ctxt, coeffint, p_digit_bits, ep->get_modulus(),
+                                          scale_thi * (1 << post_scaling_bits), levels_to_drop, order);
         else
-            ctxt_after_fbt = cc->eval_fbt(ctxt, coeffcomp, p_digit_bits, ep->get_modulus(), scale_thi * (1 << post_scaling_bits),
-                                       levels_to_drop, order);
+            ctxt_after_fbt = cc->eval_fbt(ctxt, coeffcomp, p_digit_bits, ep->get_modulus(),
+                                          scale_thi * (1 << post_scaling_bits), levels_to_drop, order);
 
         /* 9.3 Convert the result back to RLWE and update the
          * plaintext and ciphertext modulus of the ciphertext for the next iteration.
@@ -705,8 +715,8 @@ void multi_precision_sign(BigInteger qbfv_init, BigInteger p_input, BigInteger p
         /* 9.7 If in the last iteration, decrypt and assess correctness. */
         go = qbfv_bits > dcrt_bits;
         if (step || (checkeq2 && !go)) {
-            auto computed =
-                    SchemeletRlweMp::decrypt_coeff(ctxt_bfv, Q, p_input, key_pair.secret_key, ep, num_slots_ckks, num_slots);
+            auto computed = SchemeletRlweMp::decrypt_coeff(ctxt_bfv, Q, p_input, key_pair.secret_key, ep,
+                                                           num_slots_ckks, num_slots);
 
             std::cerr << "First 8 elements of the obtained sign: [";
             std::copy_n(computed.begin(), 8, std::ostream_iterator<int64_t>(std::cerr, " "));
@@ -727,9 +737,9 @@ void multi_precision_sign(BigInteger qbfv_init, BigInteger p_input, BigInteger p
             step = true;
             go = true;
             if (coeffcomp_mod.size() > 4 && get_multiplicative_depth_by_coeff_vector(coeffcomp_mod, true) >
-                                                   get_multiplicative_depth_by_coeff_vector(coeffcomp_step, true)) {
+                                                    get_multiplicative_depth_by_coeff_vector(coeffcomp_step, true)) {
                 levels_to_drop = get_multiplicative_depth_by_coeff_vector(coeffcomp_mod, true) -
-                               get_multiplicative_depth_by_coeff_vector(coeffcomp_step, true);
+                                 get_multiplicative_depth_by_coeff_vector(coeffcomp_step, true);
             }
         }
     }

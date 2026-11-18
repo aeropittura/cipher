@@ -76,7 +76,7 @@ static void generate_dcrt_parms(std::map<uint32_t, std::shared_ptr<P>>& parm_arr
 
 template <typename P, typename E>
 static void generate_polys(std::map<uint32_t, std::shared_ptr<P>>& parm_array,
-                          std::map<uint32_t, std::vector<E>>& poly_array) {
+                           std::map<uint32_t, std::vector<E>>& poly_array) {
     for (auto& pair : parm_array) {
         for (int i = 0; i < 16; i++)
             poly_array[pair.first].push_back(make_element<E>(parm_array[pair.first]));

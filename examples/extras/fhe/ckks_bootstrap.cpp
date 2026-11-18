@@ -210,15 +210,16 @@ void bootstrap_example(SecretKeyDist secret_key_dist, uint32_t n, uint32_t slots
 
         std::cerr << "ciphertext number of slots: " << ciphertext->get_slots() << std::endl;
 
-        std::cerr << "\nNumber of levels before bootstrapping: " << ciphertext->get_elements()[0].get_num_of_elements() - 1
-                  << std::endl;
+        std::cerr << "\nNumber of levels before bootstrapping: "
+                  << ciphertext->get_elements()[0].get_num_of_elements() - 1 << std::endl;
 
         TIC(t);
         auto ciphertext_after = cc->eval_bootstrap(ciphertext);
         time_bootstrap = TOC(t);
         std::cout << "\nBootstrapping time: " << time_bootstrap / 1000.0 << " s" << std::endl;
         std::cerr << "\nNumber of levels consumed: "
-                  << depth - ciphertext_after->get_elements()[0].get_num_of_elements() + ciphertext_after->get_noise_scale_deg()
+                  << depth - ciphertext_after->get_elements()[0].get_num_of_elements() +
+                             ciphertext_after->get_noise_scale_deg()
                   << std::endl;
         std::cerr << "\nNumber of levels remaining: "
                   << ciphertext_after->get_elements()[0].get_num_of_elements() - ciphertext_after->get_noise_scale_deg()
@@ -240,9 +241,9 @@ void bootstrap_example(SecretKeyDist secret_key_dist, uint32_t n, uint32_t slots
 
         double error = 0;
         for (size_t i = 0; i < encoded_length; i++) {
-            error = error +
-                    std::fabs((result->get_ckks_packed_value()[i].real() - plaintext->get_ckks_packed_value()[i].real()) /
-                              plaintext->get_ckks_packed_value()[i].real());
+            error = error + std::fabs((result->get_ckks_packed_value()[i].real() -
+                                       plaintext->get_ckks_packed_value()[i].real()) /
+                                      plaintext->get_ckks_packed_value()[i].real());
         }
 
         std::cout << "\nAverage error: " << error / static_cast<double>(encoded_length) << std::endl;

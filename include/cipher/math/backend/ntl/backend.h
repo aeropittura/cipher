@@ -45,8 +45,8 @@
 #ifdef CIPHER_WITH_NTL
 
     #include "cipher/math/backend/ntl/mod_vector.h"  // rings of such
-    #include "cipher/math/backend/ntl/transform.h"  // transforms for NTL
-    #include "cipher/math/backend/ntl/integer.h"      // experimental gmp unsigned big ints
+    #include "cipher/math/backend/ntl/transform.h"   // transforms for NTL
+    #include "cipher/math/backend/ntl/integer.h"     // experimental gmp unsigned big ints
 
 // Global alias for CIPHER_MATH_BACKEND 6 Integer
 using M6Integer = NTL::BigInteger;

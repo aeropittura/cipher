@@ -174,8 +174,8 @@ namespace cipher {
 //------------------------------------------------------------------------------
 
 static NativeInteger roundq_q_alter(NativeInteger v, NativeInteger q, NativeInteger Q) {
-    return NativeInteger(static_cast<BasicInteger>(
-                                 std::floor(0.5 + v.convert_to_double() * q.convert_to_double() / Q.convert_to_double())))
+    return NativeInteger(static_cast<BasicInteger>(std::floor(0.5 + v.convert_to_double() * q.convert_to_double() /
+                                                                            Q.convert_to_double())))
             .mod(q);
 }
 
@@ -260,8 +260,8 @@ EvalKey<RnsPoly> switching_key_gen(const PrivateKey<RnsPoly>& ckks_s_kto, const 
     return cc_ckks_to->key_switch_gen(old_tranformed_sk, ckks_s_kto);
 }
 
-EvalKey<RnsPoly> switching_key_gen_rlwe_cc(const PrivateKey<RnsPoly>& ckks_s_kto, const PrivateKey<RnsPoly>& ckks_s_kfrom,
-                                        ConstLwePrivateKey& LWE_sk) {
+EvalKey<RnsPoly> switching_key_gen_rlwe_cc(const PrivateKey<RnsPoly>& ckks_s_kto,
+                                           const PrivateKey<RnsPoly>& ckks_s_kfrom, ConstLwePrivateKey& LWE_sk) {
     auto sk_elements = ckks_s_kto->get_private_element();
     sk_elements.set_format(Format::COEFFICIENT);
     auto sk_elements_from = ckks_s_kfrom->get_private_element();
@@ -320,7 +320,7 @@ std::vector<std::vector<NativeInteger>> extract_lwe_packed(const Ciphertext<RnsP
 }
 
 std::shared_ptr<LweCiphertextImpl> extract_lwe_ciphertext(const std::vector<std::vector<NativeInteger>>& a_an_db,
-                                                        NativeInteger modulus, uint32_t n, uint32_t index = 0) {
+                                                          NativeInteger modulus, uint32_t n, uint32_t index = 0) {
     NativeVector a(n, modulus);
     for (uint32_t i = 0; i < n && i <= index; ++i)
         a[i] = modulus - a_an_db[1][index - i];
@@ -390,8 +390,8 @@ std::vector<ReadOnlyPlaintext> CkksRnsSchemeSwitching::eval_lt_precompute_switch
         auto vec = extract_shifted_diagonal(new_a, ji);
         for (auto& v : vec)
             v *= scale;
-        result[ji] = CkksRnsFhe::make_aux_plaintext(cc, element_params_ptr, Rotate(Fill(vec, M4), -step * (ji / step)), 1,
-                                                  towers_to_drop, M4);
+        result[ji] = CkksRnsFhe::make_aux_plaintext(cc, element_params_ptr, Rotate(Fill(vec, M4), -step * (ji / step)),
+                                                    1, towers_to_drop, M4);
     }
     return result;
 }
@@ -445,8 +445,8 @@ std::vector<ReadOnlyPlaintext> CkksRnsSchemeSwitching::eval_lt_precompute_switch
         auto vec = extract_shifted_diagonal(A, ji);
         for (auto& v : vec)
             v *= scale;
-        result[ji] = CkksRnsFhe::make_aux_plaintext(cc, element_params_ptr, Rotate(Fill(vec, M4), -step * (ji / step)), 1,
-                                                  towers_to_drop, M4);
+        result[ji] = CkksRnsFhe::make_aux_plaintext(cc, element_params_ptr, Rotate(Fill(vec, M4), -step * (ji / step)),
+                                                    1, towers_to_drop, M4);
     }
     return result;
 }
@@ -499,9 +499,9 @@ std::vector<std::vector<std::complex<double>>> eval_lt_rect_precompute_switch(
 }
 
 Ciphertext<RnsPoly> CkksRnsSchemeSwitching::eval_lt_with_precompute_switch(const CryptoContextImpl<RnsPoly>& cc,
-                                                               ConstCiphertext<RnsPoly> ctxt,
-                                                               const std::vector<ReadOnlyPlaintext>& A, uint32_t dim1,
-                                                               bool ext) const {
+                                                                           ConstCiphertext<RnsPoly> ctxt,
+                                                                           const std::vector<ReadOnlyPlaintext>& A,
+                                                                           uint32_t dim1, bool ext) const {
     // Computing the baby-step b_step and the giant-step g_step
     uint32_t slots = A.size();
     uint32_t b_step = dim1;
@@ -614,13 +614,13 @@ Ciphertext<RnsPoly> CkksRnsSchemeSwitching::eval_lt_rect_with_precompute_switch(
 
     const int32_t gtop = b_step * (g_step - 1);
     const int32_t off_top = (g_step == 1) ? 0 : -gtop;
-    auto temp_top =
-            cc.make_ckks_packed_plaintext(Rotate(Fill(A[gtop], N / 2), off_top), 1, towers_to_drop, element_params_ptr2, N / 2);
+    auto temp_top = cc.make_ckks_packed_plaintext(Rotate(Fill(A[gtop], N / 2), off_top), 1, towers_to_drop,
+                                                  element_params_ptr2, N / 2);
     Ciphertext<RnsPoly> result = CkksRnsFhe::eval_mult_ext(ct_ext, temp_top);
     for (uint32_t i = 1; i < b_step; ++i) {
         if (gtop + i < n) {
             auto tempi = cc.make_ckks_packed_plaintext(Rotate(Fill(A[gtop + i], N / 2), off_top), 1, towers_to_drop,
-                                                    element_params_ptr2, N / 2);
+                                                       element_params_ptr2, N / 2);
             CkksRnsFhe::eval_add_ext_in_place(result, CkksRnsFhe::eval_mult_ext(fast_rotation[i - 1], tempi));
         }
     }
@@ -629,12 +629,12 @@ Ciphertext<RnsPoly> CkksRnsSchemeSwitching::eval_lt_rect_with_precompute_switch(
         result = CkksRnsFhe::eval_horner_giant_rotate(result, auto_index, map, giant_key);
         const int32_t G = b_step * j;
         const int32_t offset = (j == 0) ? 0 : -G;
-        auto temp = cc.make_ckks_packed_plaintext(Rotate(Fill(A[G], N / 2), offset), 1, towers_to_drop, element_params_ptr2,
-                                               N / 2);
+        auto temp = cc.make_ckks_packed_plaintext(Rotate(Fill(A[G], N / 2), offset), 1, towers_to_drop,
+                                                  element_params_ptr2, N / 2);
         auto inner = CkksRnsFhe::eval_mult_ext(ct_ext, temp);
         for (uint32_t i = 1; i < b_step; ++i) {
             auto tempi = cc.make_ckks_packed_plaintext(Rotate(Fill(A[G + i], N / 2), offset), 1, towers_to_drop,
-                                                    element_params_ptr2, N / 2);
+                                                       element_params_ptr2, N / 2);
             CkksRnsFhe::eval_add_ext_in_place(inner, CkksRnsFhe::eval_mult_ext(fast_rotation[i - 1], tempi));
         }
         CkksRnsFhe::eval_add_ext_in_place(result, inner);
@@ -647,8 +647,9 @@ Ciphertext<RnsPoly> CkksRnsSchemeSwitching::eval_lt_rect_with_precompute_switch(
             uint32_t auto_index = 0;
             std::vector<uint32_t> map;
             auto eval_key = CkksRnsFhe::get_giant_step_rotation(result, static_cast<int32_t>(A.size() * (1 << (j - 1))),
-                                                            auto_index, map);
-            CkksRnsFhe::eval_add_ext_in_place(result, CkksRnsFhe::eval_horner_giant_rotate(result, auto_index, map, eval_key));
+                                                                auto_index, map);
+            CkksRnsFhe::eval_add_ext_in_place(result,
+                                              CkksRnsFhe::eval_horner_giant_rotate(result, auto_index, map, eval_key));
         }
     }
 
@@ -656,7 +657,7 @@ Ciphertext<RnsPoly> CkksRnsSchemeSwitching::eval_lt_rect_with_precompute_switch(
 }
 
 Ciphertext<RnsPoly> CkksRnsSchemeSwitching::eval_slots_to_coeffs_switch(const CryptoContextImpl<RnsPoly>& cc,
-                                                            ConstCiphertext<RnsPoly> ctxt) const {
+                                                                        ConstCiphertext<RnsPoly> ctxt) const {
     if (u0_pre_.size() == 0)
         CIPHER_THROW("Precomputations not generated. Call EvalCKKSToFHEWPrecompute to proceed.");
 
@@ -672,11 +673,12 @@ Ciphertext<RnsPoly> CkksRnsSchemeSwitching::eval_slots_to_coeffs_switch(const Cr
         crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT) {
         ctxt_to_decode = cc.compress(ctxt_to_decode, num_towers_to_keep + 1);
 
-        double target_sf = crypto_params->get_scaling_factor_real(crypto_params->get_element_params()->get_params().size() -
-                                                             num_towers_to_keep);
+        double target_sf = crypto_params->get_scaling_factor_real(
+                crypto_params->get_element_params()->get_params().size() - num_towers_to_keep);
         double source_sf = ctxt_to_decode->get_scaling_factor();
         uint32_t num_towers = ctxt_to_decode->get_elements()[0].get_num_of_elements();
-        double mod_to_drop = crypto_params->get_element_params()->get_params()[num_towers - 1]->get_modulus().convert_to_double();
+        double mod_to_drop =
+                crypto_params->get_element_params()->get_params()[num_towers - 1]->get_modulus().convert_to_double();
         double adjustment_factor = (target_sf / source_sf) * (mod_to_drop / source_sf);
 
         ctxt_to_decode = cc.eval_mult(ctxt_to_decode, adjustment_factor);
@@ -695,16 +697,16 @@ Ciphertext<RnsPoly> CkksRnsSchemeSwitching::eval_slots_to_coeffs_switch(const Cr
         uint32_t auto_index = 0;
         std::vector<uint32_t> map;
         auto eval_key = CkksRnsFhe::get_giant_step_rotation(ctxt_ext, num_slots_ckks_, auto_index, map);
-        CkksRnsFhe::eval_add_ext_in_place(ctxt_ext, CkksRnsFhe::eval_horner_giant_rotate(ctxt_ext, auto_index, map, eval_key));
+        CkksRnsFhe::eval_add_ext_in_place(ctxt_ext,
+                                          CkksRnsFhe::eval_horner_giant_rotate(ctxt_ext, auto_index, map, eval_key));
         ctxt_decoded = cc.key_switch_down(ctxt_ext);
     }
     return ctxt_decoded;
 }
 
-Ciphertext<RnsPoly> CkksRnsSchemeSwitching::eval_partial_hom_decryption(const CryptoContextImpl<RnsPoly>& cc,
-                                                             const std::vector<std::vector<std::complex<double>>>& A,
-                                                             ConstCiphertext<RnsPoly> ct, uint32_t dim1, double scale,
-                                                             uint32_t L) const {
+Ciphertext<RnsPoly> CkksRnsSchemeSwitching::eval_partial_hom_decryption(
+        const CryptoContextImpl<RnsPoly>& cc, const std::vector<std::vector<std::complex<double>>>& A,
+        ConstCiphertext<RnsPoly> ct, uint32_t dim1, double scale, uint32_t L) const {
     // Currently, by design, the # rows (# LWE ciphertexts to switch) is a power of two.
     // Ensure that # cols (LWE lattice parameter n) is padded up to a power of two
     auto acopy = A;
@@ -771,12 +773,12 @@ LwePrivateKey CkksRnsSchemeSwitching::eval_ckks_to_fhew_setup(const SchSwchParam
 
     // For arbitrary functions, the LWE ciphertext needs to be at most the ring dimension in FHEW bootstrapping
     modulus_lwe_ = (!params.get_arbitrary_function_evaluation()) ?
-                            1 << params.get_ctxt_mod_size_fhew_large_prec() :
-                            cc_lwe_->get_params()->get_lwe_params()->get_q().convert_to_int();
+                           1 << params.get_ctxt_mod_size_fhew_large_prec() :
+                           cc_lwe_->get_params()->get_lwe_params()->get_q().convert_to_int();
 
     // The baby-step and number of levels for the linear transformation associated to the homomorphic decoding
     dim1_cf_ = (params.get_b_step_l_tr_ckks_to_fhew() == 0) ? get_ratio_bsgslt(params.get_num_slots_ckks()) :
-                                                       params.get_b_step_l_tr_ckks_to_fhew();
+                                                              params.get_b_step_l_tr_ckks_to_fhew();
     lcf_ = params.get_level_l_tr_ckks_to_fhew();
 
     // Return LWE private key
@@ -792,7 +794,8 @@ std::shared_ptr<std::map<uint32_t, EvalKey<RnsPoly>>> CkksRnsSchemeSwitching::ev
     if (crypto_params->get_key_switch_technique() != HYBRID)
         CIPHER_THROW("CKKS to FHEW scheme switching is only supported for the Hybrid key switching method.");
 #if CIPHER_NATIVE_INT == 128
-    if (crypto_params->get_scaling_technique() == FLEXIBLEAUTO || crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT)
+    if (crypto_params->get_scaling_technique() == FLEXIBLEAUTO ||
+        crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT)
         CIPHER_THROW("128-bit CKKS to FHEW scheme switching is supported for FIXEDMANUAL and FIXEDAUTO methods only.");
 #endif
 
@@ -816,8 +819,10 @@ std::shared_ptr<std::map<uint32_t, EvalKey<RnsPoly>>> CkksRnsSchemeSwitching::ev
 
     // Remove possible duplicates and zero
     sort(index_rotation_s2_c.begin(), index_rotation_s2_c.end());
-    index_rotation_s2_c.erase(unique(index_rotation_s2_c.begin(), index_rotation_s2_c.end()), index_rotation_s2_c.end());
-    index_rotation_s2_c.erase(std::remove(index_rotation_s2_c.begin(), index_rotation_s2_c.end(), 0), index_rotation_s2_c.end());
+    index_rotation_s2_c.erase(unique(index_rotation_s2_c.begin(), index_rotation_s2_c.end()),
+                              index_rotation_s2_c.end());
+    index_rotation_s2_c.erase(std::remove(index_rotation_s2_c.begin(), index_rotation_s2_c.end(), 0),
+                              index_rotation_s2_c.end());
 
     auto algo = cc_ckks->get_scheme();
 
@@ -870,7 +875,8 @@ void CkksRnsSchemeSwitching::eval_ckks_to_fhew_precompute(const CryptoContextImp
 
     // Obtain the right scaling for encoded messages in FHEW coming from encoded messages in CKKS
     const auto crypto_params = std::dynamic_pointer_cast<CkksRnsCryptoParams>(cc.get_crypto_parameters());
-    double sc_factor = crypto_params->get_scaling_factor_real(crypto_params->get_element_params()->get_params().size() - 1);
+    double sc_factor =
+            crypto_params->get_scaling_factor_real(crypto_params->get_element_params()->get_params().size() - 1);
     scale *= modulus_ckks_initial_.convert_to_double() / sc_factor;
 
     if (!is_sparse) {  // fully packed
@@ -880,8 +886,8 @@ void CkksRnsSchemeSwitching::eval_ckks_to_fhew_precompute(const CryptoContextImp
     }
 }
 
-std::vector<std::shared_ptr<LweCiphertextImpl>> CkksRnsSchemeSwitching::eval_ckks_to_fhew(ConstCiphertext<RnsPoly> ciphertext,
-                                                                              uint32_t num_ctxts) {
+std::vector<std::shared_ptr<LweCiphertextImpl>> CkksRnsSchemeSwitching::eval_ckks_to_fhew(
+        ConstCiphertext<RnsPoly> ciphertext, uint32_t num_ctxts) {
     if (num_ctxts == 0 || num_ctxts > num_slots_ckks_)
         num_ctxts = num_slots_ckks_;
 
@@ -933,8 +939,8 @@ std::vector<std::shared_ptr<LweCiphertextImpl>> CkksRnsSchemeSwitching::eval_ckk
 // Scheme switching Wrapper
 //------------------------------------------------------------------------------
 void CkksRnsSchemeSwitching::eval_fhew_to_ckks_setup(const CryptoContextImpl<RnsPoly>& cc_ckks,
-                                        const std::shared_ptr<BooleanContext>& cc_lwe, uint32_t num_slots_ckks,
-                                        uint32_t log_q) {
+                                                     const std::shared_ptr<BooleanContext>& cc_lwe,
+                                                     uint32_t num_slots_ckks, uint32_t log_q) {
     if (cc_lwe->get_params()->get_lwe_params()->get_n() * 2 > cc_ckks.get_ring_dimension())
         CIPHER_THROW("The lattice parameter in LWE cannot be larger than half the RLWE ring dimension.");
     cc_lwe_ = cc_lwe;
@@ -948,7 +954,8 @@ void CkksRnsSchemeSwitching::eval_fhew_to_ckks_setup(const CryptoContextImpl<Rns
         num_slots_ckks_ = num_slots_ckks;
     }
 
-    modulus_lwe_ = (log_q != 0) ? uint64_t{1} << log_q : cc_lwe_->get_params()->get_lwe_params()->get_q().convert_to_int();
+    modulus_lwe_ =
+            (log_q != 0) ? uint64_t{1} << log_q : cc_lwe_->get_params()->get_lwe_params()->get_q().convert_to_int();
 }
 
 std::shared_ptr<std::map<uint32_t, EvalKey<RnsPoly>>> CkksRnsSchemeSwitching::eval_fhew_to_ckks_key_gen(
@@ -976,16 +983,18 @@ std::shared_ptr<std::map<uint32_t, EvalKey<RnsPoly>>> CkksRnsSchemeSwitching::ev
     // Check encoding and specify the number of slots, otherwise, if batchsize is set and is smaller, it will throw an error.
     Plaintext sk_lwe_plainswk;
     if (crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT)
-        sk_lwe_plainswk = cc_ckks->make_ckks_packed_plaintext(Fill(sk_lwe_double, ring_dim / 2), 1, BASE_NUM_LEVELS_TO_DROP,
-                                                        nullptr, ring_dim / 2);
+        sk_lwe_plainswk = cc_ckks->make_ckks_packed_plaintext(Fill(sk_lwe_double, ring_dim / 2), 1,
+                                                              BASE_NUM_LEVELS_TO_DROP, nullptr, ring_dim / 2);
     else
-        sk_lwe_plainswk = cc_ckks->make_ckks_packed_plaintext(Fill(sk_lwe_double, ring_dim / 2), 1, 0, nullptr, ring_dim / 2);
+        sk_lwe_plainswk =
+                cc_ckks->make_ckks_packed_plaintext(Fill(sk_lwe_double, ring_dim / 2), 1, 0, nullptr, ring_dim / 2);
 
     fhew_to_ckks_swk_ = cc_ckks->encrypt(public_key, sk_lwe_plainswk);
 
     // Compute automorphism keys for CKKS for baby-step giant-step
     if (num_ctxts == 0)
-        num_ctxts = num_slots_ckks_;  // If no value is specified, default to the column size of the linear transformation
+        num_ctxts =
+                num_slots_ckks_;  // If no value is specified, default to the column size of the linear transformation
     uint32_t M = cc_ckks->get_cyclotomic_order();
     if (dim1 == 0)
         dim1 = get_ratio_bsgslt(num_ctxts);
@@ -1017,9 +1026,9 @@ std::shared_ptr<std::map<uint32_t, EvalKey<RnsPoly>>> CkksRnsSchemeSwitching::ev
     // Remove possible duplicates and zero
     sort(index_rotation_hom_dec.begin(), index_rotation_hom_dec.end());
     index_rotation_hom_dec.erase(unique(index_rotation_hom_dec.begin(), index_rotation_hom_dec.end()),
-                              index_rotation_hom_dec.end());
+                                 index_rotation_hom_dec.end());
     index_rotation_hom_dec.erase(std::remove(index_rotation_hom_dec.begin(), index_rotation_hom_dec.end(), 0),
-                              index_rotation_hom_dec.end());
+                                 index_rotation_hom_dec.end());
 
     auto algo = cc_ckks->get_scheme();
     auto eval_keys = algo->eval_at_index_key_gen(private_key, index_rotation_hom_dec);
@@ -1030,9 +1039,9 @@ std::shared_ptr<std::map<uint32_t, EvalKey<RnsPoly>>> CkksRnsSchemeSwitching::ev
     return eval_keys;
 }
 
-Ciphertext<RnsPoly> CkksRnsSchemeSwitching::eval_fhew_to_ckks(std::vector<std::shared_ptr<LweCiphertextImpl>>& lwe_ciphertexts,
-                                                   uint32_t num_ctxts, uint32_t num_slots, uint32_t p, double pmin,
-                                                   double pmax, uint32_t dim1) const {
+Ciphertext<RnsPoly> CkksRnsSchemeSwitching::eval_fhew_to_ckks(
+        std::vector<std::shared_ptr<LweCiphertextImpl>>& lwe_ciphertexts, uint32_t num_ctxts, uint32_t num_slots,
+        uint32_t p, double pmin, double pmax, uint32_t dim1) const {
     if (lwe_ciphertexts.empty())
         CIPHER_THROW("Empty input FHEW ciphertext vector");
 
@@ -1093,7 +1102,8 @@ Ciphertext<RnsPoly> CkksRnsSchemeSwitching::eval_fhew_to_ckks(std::vector<std::s
     auto adot_s = eval_partial_hom_decryption(*cc_ckks, A, fhew_to_ckks_swk_, dim1, prescale, 0);
 
     // Step 3. Get the ciphertext of B - A*s
-    Plaintext b_plain = cc_ckks->make_ckks_packed_plaintext(b, adot_s->get_noise_scale_deg(), adot_s->get_level(), nullptr, N / 2);
+    Plaintext b_plain =
+            cc_ckks->make_ckks_packed_plaintext(b, adot_s->get_noise_scale_deg(), adot_s->get_level(), nullptr, N / 2);
     auto bminus_adot_s = cc_ckks->eval_add(cc_ckks->eval_negate(adot_s), b_plain);
     if (crypto_params_ckks->get_scaling_technique() == FIXEDMANUAL)
         cc_ckks->mod_reduce_in_place(bminus_adot_s);
@@ -1153,7 +1163,7 @@ Ciphertext<RnsPoly> CkksRnsSchemeSwitching::eval_fhew_to_ckks(std::vector<std::s
 
     // Add the plaintext for bias at the correct level and depth
     auto post_bias_plain = cc_ckks->make_ckks_packed_plaintext(post_bias_vec, bminus_adot_sres->get_noise_scale_deg(),
-                                                         bminus_adot_sres->get_level(), nullptr, N / 2);
+                                                               bminus_adot_sres->get_level(), nullptr, N / 2);
 
     cc_ckks->eval_add_in_place(bminus_adot_sres, post_bias_plain);
 
@@ -1185,7 +1195,8 @@ LwePrivateKey CkksRnsSchemeSwitching::eval_scheme_switching_setup(const SchSwchP
     }
 
     // There are multiple dim1's required in argmin, but they are specified individually in eval_scheme_switching_key_gen
-    dim1_fc_ = (params.get_b_step_l_tr_fhew_to_ckks() == 0) ? get_ratio_bsgslt(num_ctxts_) : params.get_b_step_l_tr_fhew_to_ckks();
+    dim1_fc_ = (params.get_b_step_l_tr_fhew_to_ckks() == 0) ? get_ratio_bsgslt(num_ctxts_) :
+                                                              params.get_b_step_l_tr_fhew_to_ckks();
     lfc_ = params.get_level_l_tr_fhew_to_ckks();
 
     // CKKS to FHEW
@@ -1202,7 +1213,8 @@ std::shared_ptr<std::map<uint32_t, EvalKey<RnsPoly>>> CkksRnsSchemeSwitching::ev
     if (crypto_params->get_key_switch_technique() != HYBRID)
         CIPHER_THROW("CKKS to FHEW scheme switching is only supported for the Hybrid key switching method.");
 #if CIPHER_NATIVE_INT == 128
-    if (crypto_params->get_scaling_technique() == FLEXIBLEAUTO || crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT)
+    if (crypto_params->get_scaling_technique() == FLEXIBLEAUTO ||
+        crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT)
         CIPHER_THROW("128-bit CKKS to FHEW scheme switching is supported for FIXEDMANUAL and FIXEDAUTO methods only.");
 #endif
 
@@ -1235,10 +1247,11 @@ std::shared_ptr<std::map<uint32_t, EvalKey<RnsPoly>>> CkksRnsSchemeSwitching::ev
     // Check encoding and specify the number of slots, otherwise, if batchsize is set and is smaller, it will throw an error.
     Plaintext sk_lwe_plainswk;
     if (crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT)
-        sk_lwe_plainswk = cc_ckks->make_ckks_packed_plaintext(Fill(sk_lwe_double, ring_dim / 2), 1, BASE_NUM_LEVELS_TO_DROP,
-                                                        nullptr, ring_dim / 2);
+        sk_lwe_plainswk = cc_ckks->make_ckks_packed_plaintext(Fill(sk_lwe_double, ring_dim / 2), 1,
+                                                              BASE_NUM_LEVELS_TO_DROP, nullptr, ring_dim / 2);
     else
-        sk_lwe_plainswk = cc_ckks->make_ckks_packed_plaintext(Fill(sk_lwe_double, ring_dim / 2), 1, 0, nullptr, ring_dim / 2);
+        sk_lwe_plainswk =
+                cc_ckks->make_ckks_packed_plaintext(Fill(sk_lwe_double, ring_dim / 2), 1, 0, nullptr, ring_dim / 2);
 
     fhew_to_ckks_swk_ = cc_ckks->encrypt(public_key, sk_lwe_plainswk);
 
@@ -1309,14 +1322,17 @@ std::shared_ptr<std::map<uint32_t, EvalKey<RnsPoly>>> CkksRnsSchemeSwitching::ev
     }
 
     // Combine the indices lists
-    index_rotation_s2_c.reserve(index_rotation_s2_c.size() + index_rotation_hom_dec.size() + index_rotation_argmin.size());
+    index_rotation_s2_c.reserve(index_rotation_s2_c.size() + index_rotation_hom_dec.size() +
+                                index_rotation_argmin.size());
     index_rotation_s2_c.insert(index_rotation_s2_c.end(), index_rotation_hom_dec.begin(), index_rotation_hom_dec.end());
     index_rotation_s2_c.insert(index_rotation_s2_c.end(), index_rotation_argmin.begin(), index_rotation_argmin.end());
 
     // Remove possible duplicates and zero
     sort(index_rotation_s2_c.begin(), index_rotation_s2_c.end());
-    index_rotation_s2_c.erase(unique(index_rotation_s2_c.begin(), index_rotation_s2_c.end()), index_rotation_s2_c.end());
-    index_rotation_s2_c.erase(std::remove(index_rotation_s2_c.begin(), index_rotation_s2_c.end(), 0), index_rotation_s2_c.end());
+    index_rotation_s2_c.erase(unique(index_rotation_s2_c.begin(), index_rotation_s2_c.end()),
+                              index_rotation_s2_c.end());
+    index_rotation_s2_c.erase(std::remove(index_rotation_s2_c.begin(), index_rotation_s2_c.end(), 0),
+                              index_rotation_s2_c.end());
 
     auto algo = cc_ckks->get_scheme();
     auto eval_keys = algo->eval_at_index_key_gen(private_key, index_rotation_s2_c);
@@ -1341,7 +1357,7 @@ std::shared_ptr<std::map<uint32_t, EvalKey<RnsPoly>>> CkksRnsSchemeSwitching::ev
 }
 
 void CkksRnsSchemeSwitching::eval_compare_switch_precompute(const CryptoContextImpl<RnsPoly>& cc_ckks, uint32_t p_lwe,
-                                                double scale_sign, bool unit) {
+                                                            double scale_sign, bool unit) {
     double scale_cf = 1.0;
     if ((p_lwe != 0) && (!unit)) {  // The messages are already scaled between 0 and 1, no need to divide by p_lwe
         scale_cf = 1.0 / p_lwe;
@@ -1353,9 +1369,10 @@ void CkksRnsSchemeSwitching::eval_compare_switch_precompute(const CryptoContextI
 }
 
 Ciphertext<RnsPoly> CkksRnsSchemeSwitching::eval_compare_scheme_switching(ConstCiphertext<RnsPoly> ciphertext1,
-                                                               ConstCiphertext<RnsPoly> ciphertext2, uint32_t num_ctxts,
-                                                               uint32_t num_slots, uint32_t p_lwe, double scale_sign,
-                                                               bool unit) {
+                                                                          ConstCiphertext<RnsPoly> ciphertext2,
+                                                                          uint32_t num_ctxts, uint32_t num_slots,
+                                                                          uint32_t p_lwe, double scale_sign,
+                                                                          bool unit) {
     auto cc_ckks = ciphertext1->get_crypto_context();
 
     const auto crypto_params = std::dynamic_pointer_cast<CkksRnsCryptoParams>(cc_ckks->get_crypto_parameters());
@@ -1391,9 +1408,10 @@ Ciphertext<RnsPoly> CkksRnsSchemeSwitching::eval_compare_scheme_switching(ConstC
 }
 
 std::vector<Ciphertext<RnsPoly>> CkksRnsSchemeSwitching::eval_min_scheme_switching(ConstCiphertext<RnsPoly> ciphertext,
-                                                                        PublicKey<RnsPoly> public_key,
-                                                                        uint32_t num_values, uint32_t num_slots,
-                                                                        uint32_t p_lwe, double scale_sign) {
+                                                                                   PublicKey<RnsPoly> public_key,
+                                                                                   uint32_t num_values,
+                                                                                   uint32_t num_slots, uint32_t p_lwe,
+                                                                                   double scale_sign) {
     auto cc = ciphertext->get_crypto_context();
 
     const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(ciphertext->get_crypto_parameters());
@@ -1465,10 +1483,9 @@ std::vector<Ciphertext<RnsPoly>> CkksRnsSchemeSwitching::eval_min_scheme_switchi
     return std::vector<Ciphertext<RnsPoly>>{new_ciphertext, c_ind};
 }
 
-std::vector<Ciphertext<RnsPoly>> CkksRnsSchemeSwitching::eval_min_scheme_switching_alt(ConstCiphertext<RnsPoly> ciphertext,
-                                                                           PublicKey<RnsPoly> public_key,
-                                                                           uint32_t num_values, uint32_t num_slots,
-                                                                           uint32_t p_lwe, double scale_sign) {
+std::vector<Ciphertext<RnsPoly>> CkksRnsSchemeSwitching::eval_min_scheme_switching_alt(
+        ConstCiphertext<RnsPoly> ciphertext, PublicKey<RnsPoly> public_key, uint32_t num_values, uint32_t num_slots,
+        uint32_t p_lwe, double scale_sign) {
     auto cc = ciphertext->get_crypto_context();
 
     const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(ciphertext->get_crypto_parameters());
@@ -1509,7 +1526,8 @@ std::vector<Ciphertext<RnsPoly>> CkksRnsSchemeSwitching::eval_min_scheme_switchi
         for (uint32_t j = 0; j < n; ++j) {
             LweCiphertext temp_sign = cc_lwe_->eval_sign(c_temp[j], true);
             LweCiphertext neg_temp_sign = std::make_shared<LweCiphertextImpl>(*temp_sign);
-            cc_lwe_->get_lwe_scheme()->eval_add_const_eq(neg_temp_sign, neg_temp_sign->get_modulus() >> 1);  // "negated" temp_sign
+            cc_lwe_->get_lwe_scheme()->eval_add_const_eq(neg_temp_sign,
+                                                         neg_temp_sign->get_modulus() >> 1);  // "negated" temp_sign
             for (uint32_t i = 0; i < 2 * M; i += 2) {
                 lwe_sign[i * n + j] = temp_sign;
                 lwe_sign[(i + 1) * n + j] = neg_temp_sign;
@@ -1541,9 +1559,10 @@ std::vector<Ciphertext<RnsPoly>> CkksRnsSchemeSwitching::eval_min_scheme_switchi
 
 // TODO: used anywhere?
 std::vector<Ciphertext<RnsPoly>> CkksRnsSchemeSwitching::eval_max_scheme_switching(ConstCiphertext<RnsPoly> ciphertext,
-                                                                        PublicKey<RnsPoly> public_key,
-                                                                        uint32_t num_values, uint32_t num_slots,
-                                                                        uint32_t p_lwe, double scale_sign) {
+                                                                                   PublicKey<RnsPoly> public_key,
+                                                                                   uint32_t num_values,
+                                                                                   uint32_t num_slots, uint32_t p_lwe,
+                                                                                   double scale_sign) {
     auto cc = ciphertext->get_crypto_context();
 
     const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(ciphertext->get_crypto_parameters());
@@ -1590,7 +1609,8 @@ std::vector<Ciphertext<RnsPoly>> CkksRnsSchemeSwitching::eval_max_scheme_switchi
 
         std::vector<std::complex<double>> ones_value(n, 1.0);
         Plaintext ptxt_ones = cc->make_ckks_packed_plaintext(ones_value, 1, 0, nullptr, slots);
-        c_select = cc->eval_add(cc->eval_sub(ptxt_ones, c_select), cc->eval_at_index(c_select, -static_cast<int32_t>(n)));
+        c_select =
+                cc->eval_add(cc->eval_sub(ptxt_ones, c_select), cc->eval_at_index(c_select, -static_cast<int32_t>(n)));
 
         if (M > 1) {
             for (uint32_t j = num_values / M; j < num_values; j <<= 1)
@@ -1617,10 +1637,9 @@ std::vector<Ciphertext<RnsPoly>> CkksRnsSchemeSwitching::eval_max_scheme_switchi
 }
 
 // TODO: used anywhere?
-std::vector<Ciphertext<RnsPoly>> CkksRnsSchemeSwitching::eval_max_scheme_switching_alt(ConstCiphertext<RnsPoly> ciphertext,
-                                                                           PublicKey<RnsPoly> public_key,
-                                                                           uint32_t num_values, uint32_t num_slots,
-                                                                           uint32_t p_lwe, double scale_sign) {
+std::vector<Ciphertext<RnsPoly>> CkksRnsSchemeSwitching::eval_max_scheme_switching_alt(
+        ConstCiphertext<RnsPoly> ciphertext, PublicKey<RnsPoly> public_key, uint32_t num_values, uint32_t num_slots,
+        uint32_t p_lwe, double scale_sign) {
     auto cc = ciphertext->get_crypto_context();
 
     const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(ciphertext->get_crypto_parameters());
@@ -1661,7 +1680,8 @@ std::vector<Ciphertext<RnsPoly>> CkksRnsSchemeSwitching::eval_max_scheme_switchi
         for (uint32_t j = 0; j < n; ++j) {
             LweCiphertext temp_sign = cc_lwe_->eval_sign(c_temp[j], true);
             LweCiphertext neg_temp_sign = std::make_shared<LweCiphertextImpl>(*temp_sign);
-            cc_lwe_->get_lwe_scheme()->eval_add_const_eq(neg_temp_sign, neg_temp_sign->get_modulus() >> 1);  // "negated" temp_sign
+            cc_lwe_->get_lwe_scheme()->eval_add_const_eq(neg_temp_sign,
+                                                         neg_temp_sign->get_modulus() >> 1);  // "negated" temp_sign
             for (uint32_t i = 0; i < 2 * M; i += 2) {
                 lwe_sign[i * n + j] = neg_temp_sign;
                 lwe_sign[(i + 1) * n + j] = temp_sign;

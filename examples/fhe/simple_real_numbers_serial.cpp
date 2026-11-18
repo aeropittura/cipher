@@ -105,8 +105,8 @@ void demarcate(const std::string& msg) {
  * @param batch_size - batch size to use
  * @return Tuple<crypto_context, key_pair>
  */
-std::tuple<CryptoContext<RnsPoly>, KeyPair<RnsPoly>, int> server_setup_and_write(int mult_depth_value, int scale_mod_size,
-                                                                                int batch_size) {
+std::tuple<CryptoContext<RnsPoly>, KeyPair<RnsPoly>, int> server_setup_and_write(int mult_depth_value,
+                                                                                 int scale_mod_size, int batch_size) {
     ContextParams<CkksRnsContext> parameters;
     parameters.set_multiplicative_depth(mult_depth_value);
     parameters.set_scaling_mod_size(scale_mod_size);
@@ -316,19 +316,24 @@ void client_process() {
  */
 
 std::tuple<Plaintext, Plaintext, Plaintext, Plaintext, Plaintext> server_verification(CryptoContext<RnsPoly>& cc,
-                                                                                     KeyPair<RnsPoly>& kp,
-                                                                                     int vector_size) {
+                                                                                      KeyPair<RnsPoly>& kp,
+                                                                                      int vector_size) {
     Ciphertext<RnsPoly> server_ciphertext_from_client_mult;
     Ciphertext<RnsPoly> server_ciphertext_from_client_add;
     Ciphertext<RnsPoly> server_ciphertext_from_client_rot;
     Ciphertext<RnsPoly> server_ciphertext_from_client_rog_neg;
     Ciphertext<RnsPoly> server_ciphertext_from_client_vec;
 
-    serialization::deserialize_from_file(DATAFOLDER + cipher_mult_location, server_ciphertext_from_client_mult, SerType::BINARY);
-    serialization::deserialize_from_file(DATAFOLDER + cipher_add_location, server_ciphertext_from_client_add, SerType::BINARY);
-    serialization::deserialize_from_file(DATAFOLDER + cipher_rot_location, server_ciphertext_from_client_rot, SerType::BINARY);
-    serialization::deserialize_from_file(DATAFOLDER + cipher_rot_neg_location, server_ciphertext_from_client_rog_neg, SerType::BINARY);
-    serialization::deserialize_from_file(DATAFOLDER + client_vector_location, server_ciphertext_from_client_vec, SerType::BINARY);
+    serialization::deserialize_from_file(DATAFOLDER + cipher_mult_location, server_ciphertext_from_client_mult,
+                                         SerType::BINARY);
+    serialization::deserialize_from_file(DATAFOLDER + cipher_add_location, server_ciphertext_from_client_add,
+                                         SerType::BINARY);
+    serialization::deserialize_from_file(DATAFOLDER + cipher_rot_location, server_ciphertext_from_client_rot,
+                                         SerType::BINARY);
+    serialization::deserialize_from_file(DATAFOLDER + cipher_rot_neg_location, server_ciphertext_from_client_rog_neg,
+                                         SerType::BINARY);
+    serialization::deserialize_from_file(DATAFOLDER + client_vector_location, server_ciphertext_from_client_vec,
+                                         SerType::BINARY);
     std::cout << "Deserialized all data from client on server" << '\n' << std::endl;
 
     demarcate("Part 5: Correctness verification");
@@ -351,8 +356,9 @@ std::tuple<Plaintext, Plaintext, Plaintext, Plaintext, Plaintext> server_verific
     server_plaintext_from_client_rot->set_length(vector_size + 1);
     server_plaintext_from_client_rot_neg->set_length(vector_size + 1);
 
-    return std::make_tuple(server_plaintext_from_client_mult, server_plaintext_from_client_add, server_plaintext_from_client_vec,
-                           server_plaintext_from_client_rot, server_plaintext_from_client_rot_neg);
+    return std::make_tuple(server_plaintext_from_client_mult, server_plaintext_from_client_add,
+                           server_plaintext_from_client_vec, server_plaintext_from_client_rot,
+                           server_plaintext_from_client_rot_neg);
 }
 int main() {
     std::cout << "This program requres the subdirectory `" << DATAFOLDER << "' to exist, otherwise you will get "
@@ -402,6 +408,6 @@ int main() {
     std::cout << vec_res << std::endl;   // EXPECT:  {1,2,3,4}
 
     std::cout << "Displaying 5 elements of a 4-element vector to illustrate rotation" << '\n';
-    std::cout << rot_res << std::endl;     // EXPECT: {2, 3, 4, noise, noise}
+    std::cout << rot_res << std::endl;      // EXPECT: {2, 3, 4, noise, noise}
     std::cout << rot_neg_res << std::endl;  // EXPECT: {noise, 1, 2, 3, 4}
 }

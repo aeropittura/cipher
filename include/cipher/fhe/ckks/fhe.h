@@ -107,7 +107,7 @@ class CkksBootstrapPrecomputation {
     /// coefficients corresponding to conj(U0^T); used in encoding
     std::vector<std::vector<ReadOnlyPlaintext>> u0hat_t_pre_fft_;
 
-    Ciphertext<RnsPoly> precomp_exp_;   ///< first cached complex exponential of eval_hermite_trig_series
+    Ciphertext<RnsPoly> precomp_exp_;    ///< first cached complex exponential of eval_hermite_trig_series
     Ciphertext<RnsPoly> precomp_exp_i_;  ///< second cached complex exponential of eval_hermite_trig_series
 
     /// flag indicating whether we perform StC before ModRaise
@@ -196,11 +196,11 @@ class CkksRnsFhe : public RnsFhe {
      * approximate modular reduction is applied to the message values themselves; false for the regular variant
      */
     void eval_bootstrap_setup(const CryptoContextImpl<RnsPoly>& cc, std::vector<uint32_t> level_budget,
-                            std::vector<uint32_t> dim1, uint32_t slots, uint32_t correction_factor, bool precompute,
-                            bool bt_slots_encoding) override;
+                              std::vector<uint32_t> dim1, uint32_t slots, uint32_t correction_factor, bool precompute,
+                              bool bt_slots_encoding) override;
 
     std::shared_ptr<std::map<uint32_t, EvalKey<RnsPoly>>> eval_bootstrap_key_gen(const PrivateKey<RnsPoly> private_key,
-                                                                               uint32_t slots) override;
+                                                                                 uint32_t slots) override;
 
     std::vector<uint32_t> eval_bootstrap_key_map_indices(const CryptoContext<RnsPoly>& cc, uint32_t slots) override;
 
@@ -237,7 +237,7 @@ class CkksRnsFhe : public RnsFhe {
      * @return the refreshed ciphertext
      */
     Ciphertext<RnsPoly> eval_bootstrap_st_c_first(ConstCiphertext<RnsPoly>& ciphertext, uint32_t num_iterations,
-                                               uint32_t precision) const override;
+                                                  uint32_t precision) const override;
 
     /**
      * Sets up FE (Fourier extension) functional bootstrapping for a given number of slots and precomputes the
@@ -251,7 +251,7 @@ class CkksRnsFhe : public RnsFhe {
      * @param num_slots number of slots to be bootstrapped (0 = full packing, N/2 slots)
      */
     void eval_fe_func_bootstrap_setup(const CryptoContextImpl<RnsPoly>& cc, const std::vector<uint32_t>& level_budget,
-                                  const std::vector<uint32_t>& dim1, uint32_t num_slots) override;
+                                      const std::vector<uint32_t>& dim1, uint32_t num_slots) override;
 
     /**
      * Refreshes a ciphertext and evaluates a function on it in one pass by evaluating the Fourier extension of
@@ -265,7 +265,7 @@ class CkksRnsFhe : public RnsFhe {
      * @return the refreshed ciphertext holding the function values
      */
     Ciphertext<RnsPoly> eval_fe_func_bootstrap(ConstCiphertext<RnsPoly>& ciphertext,
-                                             const std::vector<std::complex<double>>& coefficients) const override;
+                                               const std::vector<std::complex<double>>& coefficients) const override;
 
     /**
      * Runs the function-independent part of FE functional bootstrapping (SlotsToCoeffs, modulus raise,
@@ -278,8 +278,7 @@ class CkksRnsFhe : public RnsFhe {
      * @return the powers of the complex exponential
      */
     std::shared_ptr<SeriesPowers<RnsPoly>> eval_fe_func_bootstrap_precompute(
-            ConstCiphertext<RnsPoly>& ciphertext,
-            const std::vector<std::complex<double>>& coefficients) const override;
+            ConstCiphertext<RnsPoly>& ciphertext, const std::vector<std::complex<double>>& coefficients) const override;
 
     /**
      * Evaluates one function's Fourier series against the powers of the complex exponential returned by
@@ -318,10 +317,10 @@ class CkksRnsFhe : public RnsFhe {
      * @param order order of the trigonometric Hermite interpolation (1, 2 or 3)
      */
     void eval_fbt_setup(const CryptoContextImpl<RnsPoly>& cc, const std::vector<std::complex<double>>& coefficients,
-                      uint32_t num_slots, const BigInteger& p_in, const BigInteger& P_out, const BigInteger& bigq,
-                      const PublicKey<RnsPoly>& pub_key, const std::vector<uint32_t>& dim1,
-                      const std::vector<uint32_t>& level_budget, uint32_t lvls_after_boot = 0,
-                      uint32_t depth_leveled_computation = 0, size_t order = 1) override;
+                        uint32_t num_slots, const BigInteger& p_in, const BigInteger& P_out, const BigInteger& bigq,
+                        const PublicKey<RnsPoly>& pub_key, const std::vector<uint32_t>& dim1,
+                        const std::vector<uint32_t>& level_budget, uint32_t lvls_after_boot = 0,
+                        uint32_t depth_leveled_computation = 0, size_t order = 1) override;
 
     /**
      * Sets up CKKS functional bootstrapping of a look-up table for a given number of slots: computes the depth of
@@ -348,10 +347,10 @@ class CkksRnsFhe : public RnsFhe {
      * @param order order of the trigonometric Hermite interpolation (1, 2 or 3)
      */
     void eval_fbt_setup(const CryptoContextImpl<RnsPoly>& cc, const std::vector<int64_t>& coefficients,
-                      uint32_t num_slots, const BigInteger& p_in, const BigInteger& P_out, const BigInteger& bigq,
-                      const PublicKey<RnsPoly>& pub_key, const std::vector<uint32_t>& dim1,
-                      const std::vector<uint32_t>& level_budget, uint32_t lvls_after_boot = 0,
-                      uint32_t depth_leveled_computation = 0, size_t order = 1) override;
+                        uint32_t num_slots, const BigInteger& p_in, const BigInteger& P_out, const BigInteger& bigq,
+                        const PublicKey<RnsPoly>& pub_key, const std::vector<uint32_t>& dim1,
+                        const std::vector<uint32_t>& level_budget, uint32_t lvls_after_boot = 0,
+                        uint32_t depth_leveled_computation = 0, size_t order = 1) override;
 
     /**
      * Functional bootstrapping of a look-up table: modulus raise, CoeffsToSlots, approximation of the complex
@@ -413,8 +412,9 @@ class CkksRnsFhe : public RnsFhe {
      * @return CKKS ciphertext holding the look-up table outputs in its slots
      */
     Ciphertext<RnsPoly> eval_fbt_no_decoding(ConstCiphertext<RnsPoly>& ciphertext,
-                                           const std::vector<std::complex<double>>& coefficients, uint32_t digit_bit_size,
-                                           const BigInteger& initial_scaling, size_t order = 1) override;
+                                             const std::vector<std::complex<double>>& coefficients,
+                                             uint32_t digit_bit_size, const BigInteger& initial_scaling,
+                                             size_t order = 1) override;
     /**
      * Functional bootstrapping of a look-up table without the final homomorphic decoding: the output stays in
      * the slots, so a leveled computation can be applied to it before eval_hom_decoding. Equivalent to
@@ -429,8 +429,8 @@ class CkksRnsFhe : public RnsFhe {
      * @return CKKS ciphertext holding the look-up table outputs in its slots
      */
     Ciphertext<RnsPoly> eval_fbt_no_decoding(ConstCiphertext<RnsPoly>& ciphertext,
-                                           const std::vector<int64_t>& coefficients, uint32_t digit_bit_size,
-                                           const BigInteger& initial_scaling, size_t order = 1) override;
+                                             const std::vector<int64_t>& coefficients, uint32_t digit_bit_size,
+                                             const BigInteger& initial_scaling, size_t order = 1) override;
 
     /**
      * Homomorphic decoding step of functional bootstrapping: optionally drops levels, applies SlotsToCoeffs (with
@@ -444,7 +444,7 @@ class CkksRnsFhe : public RnsFhe {
      * @return CKKS ciphertext holding the look-up table outputs in its coefficients, at noise scale degree 1
      */
     Ciphertext<RnsPoly> eval_hom_decoding(ConstCiphertext<RnsPoly>& ciphertext, uint64_t post_scaling,
-                                         uint32_t level_to_reduce = 0) override;
+                                          uint32_t level_to_reduce = 0) override;
 
     /**
      * Function-independent part of functional bootstrapping, shared by all look-up tables evaluated on the same
@@ -463,9 +463,10 @@ class CkksRnsFhe : public RnsFhe {
      * @return the powers of the complex exponential (real and imaginary parts for full packing)
      */
     std::shared_ptr<SeriesPowers<RnsPoly>> eval_mvb_precompute(ConstCiphertext<RnsPoly>& ciphertext,
-                                                              const std::vector<std::complex<double>>& coeffs,
-                                                              uint32_t digit_bit_size, const BigInteger& initial_scaling,
-                                                              size_t order = 1) override;
+                                                               const std::vector<std::complex<double>>& coeffs,
+                                                               uint32_t digit_bit_size,
+                                                               const BigInteger& initial_scaling,
+                                                               size_t order = 1) override;
     /**
      * Function-independent part of functional bootstrapping, shared by all look-up tables evaluated on the same
      * input (multi-value bootstrapping): modulus raise, CoeffsToSlots, approximation of the complex exponential
@@ -483,9 +484,10 @@ class CkksRnsFhe : public RnsFhe {
      * @return the powers of the complex exponential (real and imaginary parts for full packing)
      */
     std::shared_ptr<SeriesPowers<RnsPoly>> eval_mvb_precompute(ConstCiphertext<RnsPoly>& ciphertext,
-                                                              const std::vector<int64_t>& coeffs, uint32_t digit_bit_size,
-                                                              const BigInteger& initial_scaling,
-                                                              size_t order = 1) override;
+                                                               const std::vector<int64_t>& coeffs,
+                                                               uint32_t digit_bit_size,
+                                                               const BigInteger& initial_scaling,
+                                                               size_t order = 1) override;
 
     /**
      * Multi-value bootstrapping: evaluates the trigonometric Hermite series of a look-up table on the powers of
@@ -517,8 +519,8 @@ class CkksRnsFhe : public RnsFhe {
      * @return CKKS ciphertext holding the look-up table outputs in its coefficients, at noise scale degree 1
      */
     Ciphertext<RnsPoly> eval_mvb(const std::shared_ptr<SeriesPowers<RnsPoly>> ciphertexts,
-                                 const std::vector<int64_t>& coeffs, uint32_t digit_bit_size, const uint64_t post_scaling,
-                                 uint32_t level_to_reduce = 0, size_t order = 1) override;
+                                 const std::vector<int64_t>& coeffs, uint32_t digit_bit_size,
+                                 const uint64_t post_scaling, uint32_t level_to_reduce = 0, size_t order = 1) override;
 
     /**
      * Multi-value bootstrapping without the final homomorphic decoding: evaluates the trigonometric Hermite series
@@ -533,8 +535,8 @@ class CkksRnsFhe : public RnsFhe {
      * @return CKKS ciphertext holding the look-up table outputs in its slots
      */
     Ciphertext<RnsPoly> eval_mvb_no_decoding(const std::shared_ptr<SeriesPowers<RnsPoly>> ciphertexts,
-                                           const std::vector<std::complex<double>>& coefficients, uint32_t digit_bit_size,
-                                           size_t order = 1) override;
+                                             const std::vector<std::complex<double>>& coefficients,
+                                             uint32_t digit_bit_size, size_t order = 1) override;
     /**
      * Multi-value bootstrapping without the final homomorphic decoding: evaluates the trigonometric Hermite series
      * of a look-up table on the powers of the complex exponential from eval_mvb_precompute and leaves the outputs in
@@ -548,8 +550,8 @@ class CkksRnsFhe : public RnsFhe {
      * @return CKKS ciphertext holding the look-up table outputs in its slots
      */
     Ciphertext<RnsPoly> eval_mvb_no_decoding(const std::shared_ptr<SeriesPowers<RnsPoly>> ciphertexts,
-                                           const std::vector<int64_t>& coefficients, uint32_t digit_bit_size,
-                                           size_t order = 1) override;
+                                             const std::vector<int64_t>& coefficients, uint32_t digit_bit_size,
+                                             size_t order = 1) override;
 
     /**
      * Evaluates a trigonometric Hermite series on a ciphertext: approximates exp(i*Pi/2*x) by the Chebyshev
@@ -569,9 +571,9 @@ class CkksRnsFhe : public RnsFhe {
      * @return the real part of the evaluated series
      */
     Ciphertext<RnsPoly> eval_hermite_trig_series(ConstCiphertext<RnsPoly>& ciphertext,
-                                               const std::vector<std::complex<double>>& coefficients_cheb, double a,
-                                               double b, const std::vector<std::complex<double>>& coefficients_herm,
-                                               size_t precomp) override;
+                                                 const std::vector<std::complex<double>>& coefficients_cheb, double a,
+                                                 double b, const std::vector<std::complex<double>>& coefficients_herm,
+                                                 size_t precomp) override;
     /**
      * Evaluates a trigonometric Hermite series on a ciphertext: approximates exp(i*Pi/2*x) by the Chebyshev
      * series given over [a, b], squares the result twice (with rescaling) to obtain exp(2*Pi*i*x), evaluates the
@@ -590,9 +592,9 @@ class CkksRnsFhe : public RnsFhe {
      * @return the real part of the evaluated series
      */
     Ciphertext<RnsPoly> eval_hermite_trig_series(ConstCiphertext<RnsPoly>& ciphertext,
-                                               const std::vector<std::complex<double>>& coefficients_cheb, double a,
-                                               double b, const std::vector<int64_t>& coefficients_herm,
-                                               size_t precomp) override;
+                                                 const std::vector<std::complex<double>>& coefficients_cheb, double a,
+                                                 double b, const std::vector<int64_t>& coefficients_herm,
+                                                 size_t precomp) override;
 
     //------------------------------------------------------------------------------
     // Precomputations for CoeffsToSlots and SlotsToCoeffs
@@ -647,12 +649,10 @@ class CkksRnsFhe : public RnsFhe {
      * message (slots-encoding bootstrapping of complex data)
      * @return the encoded plaintexts, one inner vector per level of the transform
      */
-    std::vector<std::vector<ReadOnlyPlaintext>> eval_coeffs_to_slots_precompute(const CryptoContextImpl<RnsPoly>& cc,
-                                                                            const std::vector<std::complex<double>>& A,
-                                                                            const std::vector<uint32_t>& rot_group,
-                                                                            bool flag_i, double scale = 1,
-                                                                            uint32_t L = 0,
-                                                                            bool flag_st_c_complex = false) const;
+    std::vector<std::vector<ReadOnlyPlaintext>> eval_coeffs_to_slots_precompute(
+            const CryptoContextImpl<RnsPoly>& cc, const std::vector<std::complex<double>>& A,
+            const std::vector<uint32_t>& rot_group, bool flag_i, double scale = 1, uint32_t L = 0,
+            bool flag_st_c_complex = false) const;
 
     /**
      * Precomputes the plaintexts of the FFT-like homomorphic decoding (SlotsToCoeffs): the layers of the FFT are
@@ -670,12 +670,10 @@ class CkksRnsFhe : public RnsFhe {
      * message (slots-encoding bootstrapping of complex data)
      * @return the encoded plaintexts, one inner vector per level of the transform
      */
-    std::vector<std::vector<ReadOnlyPlaintext>> eval_slots_to_coeffs_precompute(const CryptoContextImpl<RnsPoly>& cc,
-                                                                            const std::vector<std::complex<double>>& A,
-                                                                            const std::vector<uint32_t>& rot_group,
-                                                                            bool flag_i, double scale = 1,
-                                                                            uint32_t L = 0,
-                                                                            bool flag_st_c_complex = false) const;
+    std::vector<std::vector<ReadOnlyPlaintext>> eval_slots_to_coeffs_precompute(
+            const CryptoContextImpl<RnsPoly>& cc, const std::vector<std::complex<double>>& A,
+            const std::vector<uint32_t>& rot_group, bool flag_i, double scale = 1, uint32_t L = 0,
+            bool flag_st_c_complex = false) const;
 
     //------------------------------------------------------------------------------
     // EVALUATION: CoeffsToSlots and SlotsToCoeffs
@@ -694,7 +692,7 @@ class CkksRnsFhe : public RnsFhe {
      * @return the transformed ciphertext
      */
     Ciphertext<RnsPoly> eval_linear_transform(const std::vector<ReadOnlyPlaintext>& A,
-                                             ConstCiphertext<RnsPoly>& ct) const;
+                                              ConstCiphertext<RnsPoly>& ct) const;
 
     /**
      * Homomorphic encoding (CoeffsToSlots) over multiple BSGS levels, evaluated
@@ -704,7 +702,7 @@ class CkksRnsFhe : public RnsFhe {
      * @return the ciphertext with the coefficients of the input moved to its slots
      */
     Ciphertext<RnsPoly> eval_coeffs_to_slots(const std::vector<std::vector<ReadOnlyPlaintext>>& A,
-                                           ConstCiphertext<RnsPoly>& ctxt) const;
+                                             ConstCiphertext<RnsPoly>& ctxt) const;
 
     /**
      * Homomorphic decoding (SlotsToCoeffs); the inverse of eval_coeffs_to_slots,
@@ -714,7 +712,7 @@ class CkksRnsFhe : public RnsFhe {
      * @return the ciphertext with the slot values of the input moved to its coefficients
      */
     Ciphertext<RnsPoly> eval_slots_to_coeffs(const std::vector<std::vector<ReadOnlyPlaintext>>& A,
-                                           ConstCiphertext<RnsPoly>& ctxt) const;
+                                             ConstCiphertext<RnsPoly>& ctxt) const;
 
     /**
      * Bootstrapping PartialSum: raised += Rotate(raised, j * slots) for j = 1, 2, 4, ...
@@ -777,7 +775,7 @@ class CkksRnsFhe : public RnsFhe {
      * @return the multiplicative depth consumed by eval_bootstrap
      */
     static uint32_t get_bootstrap_depth(uint32_t approx_mod_depth, const std::vector<uint32_t>& level_budget,
-                                      SecretKeyDist secret_key_dist);
+                                        SecretKeyDist secret_key_dist);
 
     /**
      * Multiplicative depth consumed by CKKS bootstrapping: the approximate modular reduction (Chebyshev
@@ -808,8 +806,8 @@ class CkksRnsFhe : public RnsFhe {
      */
     template <typename VectorDataType>
     static uint32_t get_fbt_depth(const std::vector<uint32_t>& level_budget,
-                                const std::vector<VectorDataType>& coefficients, const BigInteger& p_input, size_t order,
-                                SecretKeyDist skd, uint32_t first_mod_size_value = 60);
+                                  const std::vector<VectorDataType>& coefficients, const BigInteger& p_input,
+                                  size_t order, SecretKeyDist skd, uint32_t first_mod_size_value = 60);
 
     /**
      * Multiplicative depth consumed by FE functional bootstrapping (eval_fe_func_bootstrap): the CoeffsToSlots and
@@ -825,8 +823,8 @@ class CkksRnsFhe : public RnsFhe {
      */
     template <typename VectorDataType>
     static uint32_t get_fefbt_depth(const std::vector<uint32_t>& level_budget,
-                                  const std::vector<VectorDataType>& coefficients, SecretKeyDist skd = SPARSE_TERNARY,
-                                  uint32_t first_mod_size_value = 60);
+                                    const std::vector<VectorDataType>& coefficients, SecretKeyDist skd = SPARSE_TERNARY,
+                                    uint32_t first_mod_size_value = 60);
 
     /**
      * Multiplicative depth of the look-up table evaluation in functional bootstrapping, excluding the linear
@@ -842,7 +840,8 @@ class CkksRnsFhe : public RnsFhe {
      */
     template <typename VectorDataType>
     static uint32_t adjust_depth_fbt(const std::vector<VectorDataType>& coefficients, const BigInteger& p_input,
-                                   size_t order, SecretKeyDist skd = SPARSE_TERNARY, uint32_t first_mod_size_value = 60);
+                                     size_t order, SecretKeyDist skd = SPARSE_TERNARY,
+                                     uint32_t first_mod_size_value = 60);
 
     /**
      * Same as adjust_depth_fbt, with the approximation tables of SPARSE_ENCAPSULATED selected directly by the Hamming
@@ -856,8 +855,9 @@ class CkksRnsFhe : public RnsFhe {
      * @return the multiplicative depth of the look-up table evaluation
      */
     template <typename VectorDataType>
-    static uint32_t adjust_depth_fbt_internal(const std::vector<VectorDataType>& coefficients, const BigInteger& p_input,
-                                           size_t order, SecretKeyDist skd, uint32_t sparse_ks_hamming_weight_value);
+    static uint32_t adjust_depth_fbt_internal(const std::vector<VectorDataType>& coefficients,
+                                              const BigInteger& p_input, size_t order, SecretKeyDist skd,
+                                              uint32_t sparse_ks_hamming_weight_value);
 
     /**
      * Generates the switching key of sparse secret encapsulation, going from a denser secret to a sparser one.
@@ -869,7 +869,7 @@ class CkksRnsFhe : public RnsFhe {
      * @return the switching key
      */
     static EvalKey<RnsPoly> key_switch_gen_sparse(const PrivateKey<RnsPoly>& old_private_key,
-                                                const PrivateKey<RnsPoly>& new_private_key);
+                                                  const PrivateKey<RnsPoly>& new_private_key);
 
     /**
      * Switches the bottom basis Ql of a ciphertext to the secret of a key generated by key_switch_gen_sparse: the
@@ -920,8 +920,8 @@ class CkksRnsFhe : public RnsFhe {
      * @return the encoded plaintext
      */
     static Plaintext make_aux_plaintext(const CryptoContextImpl<RnsPoly>& cc, const std::shared_ptr<ParmType> params,
-                                      const std::vector<std::complex<double>>& value, size_t noise_scale_deg,
-                                      uint32_t level, uint32_t slots);
+                                        const std::vector<std::complex<double>>& value, size_t noise_scale_deg,
+                                        uint32_t level, uint32_t slots);
 
     /**
      * Multiplies a ciphertext in the extended basis Ql*P (as produced by hoisted rotations) by a plaintext encoded
@@ -949,8 +949,7 @@ class CkksRnsFhe : public RnsFhe {
      * @param ciphertext2 the second addend
      * @return the sum
      */
-    static Ciphertext<RnsPoly> eval_add_ext(ConstCiphertext<RnsPoly> ciphertext1,
-                                           ConstCiphertext<RnsPoly> ciphertext2);
+    static Ciphertext<RnsPoly> eval_add_ext(ConstCiphertext<RnsPoly> ciphertext1, ConstCiphertext<RnsPoly> ciphertext2);
 
     /**
      * Loads the loop-invariant automorphism key, index and O(N) permutation map for a constant Horner giant
@@ -964,7 +963,7 @@ class CkksRnsFhe : public RnsFhe {
      * @return the automorphism key for auto_index
      */
     static EvalKey<RnsPoly> get_giant_step_rotation(ConstCiphertext<RnsPoly> ct, int32_t stride, uint32_t& auto_index,
-                                                  std::vector<uint32_t>& map);
+                                                    std::vector<uint32_t>& map);
 
     /**
      * Inlined giant-step rotation for the Horner accumulation: equivalent to
@@ -978,8 +977,8 @@ class CkksRnsFhe : public RnsFhe {
      * @return the rotated ciphertext in the extended basis
      */
     static Ciphertext<RnsPoly> eval_horner_giant_rotate(ConstCiphertext<RnsPoly> outer, uint32_t auto_index,
-                                                      const std::vector<uint32_t>& map,
-                                                      const EvalKey<RnsPoly>& giant_key);
+                                                        const std::vector<uint32_t>& map,
+                                                        const EvalKey<RnsPoly>& giant_key);
 
     /**
      * Generates the automorphism key for complex conjugation (automorphism index 2N - 1).
@@ -997,7 +996,7 @@ class CkksRnsFhe : public RnsFhe {
      * @return the conjugated ciphertext
      */
     static Ciphertext<RnsPoly> Conjugate(ConstCiphertext<RnsPoly> ciphertext,
-                                          const std::map<uint32_t, EvalKey<RnsPoly>>& eval_keys);
+                                         const std::map<uint32_t, EvalKey<RnsPoly>>& eval_keys);
 
   private:
     CkksBootstrapPrecomputation& get_boot_precom(uint32_t slots) const {
@@ -1010,14 +1009,15 @@ class CkksRnsFhe : public RnsFhe {
     // The bootstrapping variants fold different uniform-secret overflow bounds K into the
     // CoeffsToSlots matrix (K_UNIFORM, K_UNIFORM_FBT, K_UNIFORM_FEFBT), so a precomputation can
     // only be consumed by the variant whose setup generated it.
-    CkksBootstrapPrecomputation& get_boot_precom(uint32_t slots, CkksBootstrapPrecomputation::BootstrapVariant variant) const {
+    CkksBootstrapPrecomputation& get_boot_precom(uint32_t slots,
+                                                 CkksBootstrapPrecomputation::BootstrapVariant variant) const {
         auto& precom = get_boot_precom(slots);
         if (precom.variant_ != variant) {
             constexpr const char* setup_name[] = {"EvalBootstrapSetup", "EvalFBTSetup", "EvalFEFuncBootstrapSetup"};
             CIPHER_THROW("The bootstrapping precomputation for " + std::to_string(slots) + " slots was generated by " +
-                          setup_name[precom.variant_] + ", but this operation requires " + setup_name[variant] +
-                          ": regular, functional and FE functional bootstrapping fold different overflow bounds K "
-                          "into the CoeffsToSlots matrix and cannot share precomputations.");
+                         setup_name[precom.variant_] + ", but this operation requires " + setup_name[variant] +
+                         ": regular, functional and FE functional bootstrapping fold different overflow bounds K "
+                         "into the CoeffsToSlots matrix and cannot share precomputations.");
         }
         return precom;
     }
@@ -1038,15 +1038,15 @@ class CkksRnsFhe : public RnsFhe {
     // Auxiliary Bootstrap Functions
     //------------------------------------------------------------------------------
     uint32_t get_bootstrap_depth_internal(uint32_t approx_mod_depth, const std::vector<uint32_t>& level_budget,
-                                       const CryptoContextImpl<RnsPoly>& cc);
+                                          const CryptoContextImpl<RnsPoly>& cc);
     static uint32_t get_mod_depth_internal(SecretKeyDist secret_key_dist);
 
     void adjust_ciphertext(Ciphertext<RnsPoly>& ciphertext, double correction, uint32_t lvl,
-                          bool mod_reduce_value = true) const;
+                           bool mod_reduce_value = true) const;
     void adjust_ciphertext_fbt(Ciphertext<RnsPoly>& ciphertext, double correction) const;
 
     void extend_ciphertext(std::vector<RnsPoly>& ciphertext, const CryptoContextImpl<RnsPoly>& cc,
-                          const std::shared_ptr<RnsPoly::Params> params) const;
+                           const std::shared_ptr<RnsPoly::Params> params) const;
 
     /**
      * Raises the modulus of a depleted ciphertext (bottom level, noise degree 1) to the raised basis, i.e.,
@@ -1055,7 +1055,7 @@ class CkksRnsFhe : public RnsFhe {
      * and back to the dense secret after the modulus raise.
      */
     void mod_raise_in_place(Ciphertext<RnsPoly>& raised,
-                         const std::shared_ptr<RnsPoly::Params>& element_params_raised_ptr) const;
+                            const std::shared_ptr<RnsPoly::Params>& element_params_raised_ptr) const;
 
     void apply_double_angle_iterations(Ciphertext<RnsPoly>& ciphertext, uint32_t num_it) const;
 
@@ -1085,7 +1085,7 @@ class CkksRnsFhe : public RnsFhe {
      * @param native_vec output native vector (its modulus is used to fit the values).
      */
     static void fit_to_native_vector(uint32_t ring_dim, const std::vector<int64_t>& vec, int64_t big_bound,
-                                  NativeVector* native_vec);
+                                     NativeVector* native_vec);
 
 #if CIPHER_NATIVE_INT == 128
     /**
@@ -1097,34 +1097,35 @@ class CkksRnsFhe : public RnsFhe {
      * @param native_vec output native vector (its modulus is used to fit the values).
      */
     static void fit_to_native_vector(uint32_t ring_dim, const std::vector<int128_t>& vec, int128_t big_bound,
-                                  NativeVector* native_vec);
+                                     NativeVector* native_vec);
 #endif
 
     template <typename VectorDataType>
     void eval_fbt_setup_internal(const CryptoContextImpl<RnsPoly>& cc, const std::vector<VectorDataType>& coefficients,
-                              uint32_t num_slots, const BigInteger& p_in, const BigInteger& P_out, const BigInteger& bigq,
-                              const PublicKey<RnsPoly>& pub_key, const std::vector<uint32_t>& dim1,
-                              const std::vector<uint32_t>& level_budget, uint32_t lvls_after_boot = 0,
-                              uint32_t depth_leveled_computation = 0, size_t order = 1);
+                                 uint32_t num_slots, const BigInteger& p_in, const BigInteger& P_out,
+                                 const BigInteger& bigq, const PublicKey<RnsPoly>& pub_key,
+                                 const std::vector<uint32_t>& dim1, const std::vector<uint32_t>& level_budget,
+                                 uint32_t lvls_after_boot = 0, uint32_t depth_leveled_computation = 0,
+                                 size_t order = 1);
 
     template <typename VectorDataType>
     Ciphertext<RnsPoly> eval_hermite_trig_series_internal(ConstCiphertext<RnsPoly>& ciphertext,
-                                                       const std::vector<std::complex<double>>& coefficients_cheb,
-                                                       double a, double b,
-                                                       const std::vector<VectorDataType>& coefficients_herm,
-                                                       size_t precomp);
+                                                          const std::vector<std::complex<double>>& coefficients_cheb,
+                                                          double a, double b,
+                                                          const std::vector<VectorDataType>& coefficients_herm,
+                                                          size_t precomp);
 
     template <typename VectorDataType>
     std::shared_ptr<SeriesPowers<RnsPoly>> eval_mvb_precompute_internal(ConstCiphertext<RnsPoly>& ciphertext,
-                                                                      const std::vector<VectorDataType>& coefficients,
-                                                                      uint32_t digit_bit_size,
-                                                                      const BigInteger& initial_scaling,
-                                                                      size_t order = 1);
+                                                                        const std::vector<VectorDataType>& coefficients,
+                                                                        uint32_t digit_bit_size,
+                                                                        const BigInteger& initial_scaling,
+                                                                        size_t order = 1);
 
     template <typename VectorDataType>
     Ciphertext<RnsPoly> eval_mvb_no_decoding_internal(const std::shared_ptr<SeriesPowers<RnsPoly>>& ciphertext,
-                                                   const std::vector<VectorDataType>& coefficients,
-                                                   uint32_t digit_bit_size, size_t order = 1);
+                                                      const std::vector<VectorDataType>& coefficients,
+                                                      uint32_t digit_bit_size, size_t order = 1);
 
     // upper bounds for the number of overflows in the sparse secret cases; the failure probability depends only on
     // K and on the Hamming weight h of the sparse secret (equation (1) of https://eprint.iacr.org/2022/024)
@@ -1167,7 +1168,7 @@ class CkksRnsFhe : public RnsFhe {
      * @return the overflow bound K
      */
     static double get_mod_raise_overflow_bound(const std::shared_ptr<CkksRnsCryptoParams>& crypto_params,
-                                           double uniform_k);
+                                               double uniform_k);
     // number of double-angle iterations in CKKS bootstrapping. Must be static because it is used in a static function.
     static constexpr uint32_t R_UNIFORM = 6;
     // number of double-angle iterations in CKKS bootstrapping. Must be static because it is used in a static function.

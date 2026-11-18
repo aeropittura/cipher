@@ -44,7 +44,7 @@ namespace cipher {
 
 template <typename P>
 inline static void encode_vec(P& poly, const PlaintextModulus& mod_value, int64_t lb, int64_t ub,
-                             const std::vector<int64_t>& value, SCHEME scheme_id) {
+                              const std::vector<int64_t>& value, SCHEME scheme_id) {
     if (ub > INT32_MAX || lb < INT32_MIN)
         CIPHER_THROW("Cannot encode a coefficient larger than 32 bits");
 
@@ -52,7 +52,7 @@ inline static void encode_vec(P& poly, const PlaintextModulus& mod_value, int64_
     for (size_t i = 0; i < value.size() && i < poly.get_length(); i++) {
         if (value[i] <= lb || value[i] > ub)
             CIPHER_THROW("Cannot encode integer " + std::to_string(value[i]) + " at position " + std::to_string(i) +
-                          " because it is out of range of plaintext modulus " + std::to_string(mod_value));
+                         " because it is out of range of plaintext modulus " + std::to_string(mod_value));
 
         if (value[i] < 0) {
             if (is_bfvrns(scheme_id)) {
@@ -80,7 +80,8 @@ bool CoefPackedEncoding::encode() {
     }
 
     if (this->type_flag == IsNativePoly) {
-        encode_vec(this->encoded_native_vector, mod_value, low_bound(), high_bound(), this->value, this->get_scheme_id());
+        encode_vec(this->encoded_native_vector, mod_value, low_bound(), high_bound(), this->value,
+                   this->get_scheme_id());
         encoded_native_vector = encoded_native_vector.Times(scaling_factor_int);
     } else {
         encode_vec(this->encoded_vector, mod_value, low_bound(), high_bound(), this->value, this->get_scheme_id());

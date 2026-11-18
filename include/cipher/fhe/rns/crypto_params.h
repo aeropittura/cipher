@@ -104,18 +104,18 @@ class RnsCryptoParams : public RlweCryptoParams<RnsPoly> {
      * multi-party interactive bootstrapping
      */
     RnsCryptoParams(std::shared_ptr<ParmType> params, const PlaintextModulus& plaintext_modulus,
-                        float distribution_parameter, float assurance_measure, SecurityLevel security_level,
-                        uint32_t digit_size, SecretKeyDist secret_key_dist, int max_relin_sk_deg = 2,
-                        KeySwitchTechnique ks_tech = BV, ScalingTechnique scal_tech = FIXEDMANUAL,
-                        EncryptionTechnique enc_tech = STANDARD, MultiplicationTechnique mult_tech = HPS,
-                        MultipartyMode multiparty_mode = FIXED_NOISE_MULTIPARTY,
-                        ExecutionMode execution_mode = EXEC_EVALUATION,
-                        DecryptionNoiseMode decryption_noise_mode = FIXED_NOISE_DECRYPT,
-                        CompressionLevel m_p_int_boot_ciphertext_compression_level = CompressionLevel::SLACK)
+                    float distribution_parameter, float assurance_measure, SecurityLevel security_level,
+                    uint32_t digit_size, SecretKeyDist secret_key_dist, int max_relin_sk_deg = 2,
+                    KeySwitchTechnique ks_tech = BV, ScalingTechnique scal_tech = FIXEDMANUAL,
+                    EncryptionTechnique enc_tech = STANDARD, MultiplicationTechnique mult_tech = HPS,
+                    MultipartyMode multiparty_mode = FIXED_NOISE_MULTIPARTY,
+                    ExecutionMode execution_mode = EXEC_EVALUATION,
+                    DecryptionNoiseMode decryption_noise_mode = FIXED_NOISE_DECRYPT,
+                    CompressionLevel m_p_int_boot_ciphertext_compression_level = CompressionLevel::SLACK)
         : RlweCryptoParams<RnsPoly>(
                   std::move(params), EncodingParams(std::make_shared<EncodingParamsImpl>(plaintext_modulus)),
-                  distribution_parameter, assurance_measure, security_level, digit_size, max_relin_sk_deg, secret_key_dist,
-                  INDCPA, multiparty_mode, execution_mode, decryption_noise_mode) {
+                  distribution_parameter, assurance_measure, security_level, digit_size, max_relin_sk_deg,
+                  secret_key_dist, INDCPA, multiparty_mode, execution_mode, decryption_noise_mode) {
         ks_technique_ = ks_tech;
         scal_technique_ = scal_tech;
         enc_technique_ = enc_tech;
@@ -157,22 +157,22 @@ class RnsCryptoParams : public RlweCryptoParams<RnsPoly> {
      * @param ckks_data_type CKKS data type (REAL or COMPLEX).
      */
     RnsCryptoParams(std::shared_ptr<ParmType> params, EncodingParams encoding_params, float distribution_parameter,
-                        float assurance_measure, SecurityLevel security_level, uint32_t digit_size,
-                        SecretKeyDist secret_key_dist, int max_relin_sk_deg = 2, KeySwitchTechnique ks_tech = BV,
-                        ScalingTechnique scal_tech = FIXEDMANUAL, EncryptionTechnique enc_tech = STANDARD,
-                        MultiplicationTechnique mult_tech = HPS, ProxyReEncryptionMode pre_mode = INDCPA,
-                        MultipartyMode multiparty_mode = FIXED_NOISE_MULTIPARTY,
-                        ExecutionMode execution_mode = EXEC_EVALUATION,
-                        DecryptionNoiseMode decryption_noise_mode = FIXED_NOISE_DECRYPT, PlaintextModulus noise_scale_value = 1,
-                        uint32_t statistical_security = 30, uint32_t num_adversarial_queries = 1,
-                        uint32_t threshold_num_of_parties = 1,
-                        CompressionLevel m_p_int_boot_ciphertext_compression_level = CompressionLevel::SLACK,
-                        uint32_t composite_degree = BASE_NUM_LEVELS_TO_DROP, uint32_t register_word_size = CIPHER_NATIVE_INT,
-                        CkksDataType ckks_data_type = REAL)
+                    float assurance_measure, SecurityLevel security_level, uint32_t digit_size,
+                    SecretKeyDist secret_key_dist, int max_relin_sk_deg = 2, KeySwitchTechnique ks_tech = BV,
+                    ScalingTechnique scal_tech = FIXEDMANUAL, EncryptionTechnique enc_tech = STANDARD,
+                    MultiplicationTechnique mult_tech = HPS, ProxyReEncryptionMode pre_mode = INDCPA,
+                    MultipartyMode multiparty_mode = FIXED_NOISE_MULTIPARTY,
+                    ExecutionMode execution_mode = EXEC_EVALUATION,
+                    DecryptionNoiseMode decryption_noise_mode = FIXED_NOISE_DECRYPT,
+                    PlaintextModulus noise_scale_value = 1, uint32_t statistical_security = 30,
+                    uint32_t num_adversarial_queries = 1, uint32_t threshold_num_of_parties = 1,
+                    CompressionLevel m_p_int_boot_ciphertext_compression_level = CompressionLevel::SLACK,
+                    uint32_t composite_degree = BASE_NUM_LEVELS_TO_DROP,
+                    uint32_t register_word_size = CIPHER_NATIVE_INT, CkksDataType ckks_data_type = REAL)
         : RlweCryptoParams<RnsPoly>(std::move(params), std::move(encoding_params), distribution_parameter,
-                                         assurance_measure, security_level, digit_size, max_relin_sk_deg, secret_key_dist,
-                                         pre_mode, multiparty_mode, execution_mode, decryption_noise_mode, noise_scale_value,
-                                         statistical_security, num_adversarial_queries, threshold_num_of_parties) {
+                                    assurance_measure, security_level, digit_size, max_relin_sk_deg, secret_key_dist,
+                                    pre_mode, multiparty_mode, execution_mode, decryption_noise_mode, noise_scale_value,
+                                    statistical_security, num_adversarial_queries, threshold_num_of_parties) {
         ks_technique_ = ks_tech;
         scal_technique_ = scal_tech;
         enc_technique_ = enc_tech;
@@ -228,9 +228,9 @@ class RnsCryptoParams : public RlweCryptoParams<RnsPoly> {
      * @param aux_bits the number of bits in the auxiliary (special) prime moduli.
      * @param extra_bits the number of extra bits reserved for the auxiliary modulus in HYBRID key switching.
      */
-    virtual void precompute_crt_tables(KeySwitchTechnique ks_tech, ScalingTechnique scal_tech, EncryptionTechnique enc_tech,
-                                     MultiplicationTechnique mult_tech, uint32_t num_part_q, uint32_t aux_bits,
-                                     uint32_t extra_bits) = 0;
+    virtual void precompute_crt_tables(KeySwitchTechnique ks_tech, ScalingTechnique scal_tech,
+                                       EncryptionTechnique enc_tech, MultiplicationTechnique mult_tech,
+                                       uint32_t num_part_q, uint32_t aux_bits, uint32_t extra_bits) = 0;
 
     /**
      * Returns the step used when searching for the auxiliary (special) primes of HYBRID key switching: every
@@ -259,10 +259,10 @@ class RnsCryptoParams : public RlweCryptoParams<RnsPoly> {
      * @return log2 of the modulus and number of RNS limbs.
      */
     static std::pair<double, uint32_t> estimate_log_p(uint32_t num_part_q, double first_modulus_size, double dcrt_bits,
-                                                    double extra_modulus_size, uint32_t num_primes_value, uint32_t aux_bits,
-                                                    ScalingTechnique scal_tech, bool add_one = false,
-                                                    bool is_noise_flooding_multiparty = false,
-                                                    uint32_t composite_degree = 1);
+                                                      double extra_modulus_size, uint32_t num_primes_value,
+                                                      uint32_t aux_bits, ScalingTechnique scal_tech,
+                                                      bool add_one = false, bool is_noise_flooding_multiparty = false,
+                                                      uint32_t composite_degree = 1);
 
     /**
      * Estimates the extra modulus bitsize needed for threshold FHE noise flooding (only for BGV and BFV)
@@ -2077,7 +2077,7 @@ class RnsCryptoParams : public RlweCryptoParams<RnsPoly> {
     void load(Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             std::string err_msg("serialized object version " + std::to_string(version) +
-                               " is from a later version of the library");
+                                " is from a later version of the library");
             CIPHER_THROW(err_msg);
         }
         ar(cereal::base_class<RlweCryptoParams<RnsPoly>>(this));

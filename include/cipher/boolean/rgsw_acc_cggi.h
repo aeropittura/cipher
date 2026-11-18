@@ -60,7 +60,7 @@ class RingGswAccumulatorCggi final : public RingGswAccumulator {
      * @return a shared pointer to the resulting 32-bit keys, laid out as [1][2][n] like the 64-bit key
      */
     RingGswAccKey32 key_gen_acc32(const std::shared_ptr<RingGswCryptoParams>& params, const NativePoly& sk_ntt,
-                                ConstLwePrivateKey& LWE_sk) const override;
+                                  ConstLwePrivateKey& LWE_sk) const override;
 
     /**
      * Main accumulator function used in bootstrapping - GINX variant on the 32-bit internal key. The accumulator is
@@ -73,7 +73,7 @@ class RingGswAccumulatorCggi final : public RingGswAccumulator {
      * @param a value to update the accumulator with
      */
     void eval_acc32(const std::shared_ptr<RingGswCryptoParams>& params, ConstRingGswAccKey32& ek, RlweCiphertext& acc,
-                   const NativeVector& a) const override;
+                    const NativeVector& a) const override;
 #endif
 
     /**
@@ -85,7 +85,7 @@ class RingGswAccumulatorCggi final : public RingGswAccumulator {
      * @return a shared pointer to the resulting keys
      */
     RingGswAccKey key_gen_acc(const std::shared_ptr<RingGswCryptoParams>& params, const NativePoly& sk_ntt,
-                            ConstLwePrivateKey& LWE_sk) const override;
+                              ConstLwePrivateKey& LWE_sk) const override;
 
     /**
      * Main accumulator function used in bootstrapping - GINX variant
@@ -96,7 +96,7 @@ class RingGswAccumulatorCggi final : public RingGswAccumulator {
      * @param a value to update the accumulator with
      */
     void eval_acc(const std::shared_ptr<RingGswCryptoParams>& params, ConstRingGswAccKey& ek, RlweCiphertext& acc,
-                 const NativeVector& a) const override;
+                  const NativeVector& a) const override;
 
   private:
     /**
@@ -109,7 +109,7 @@ class RingGswAccumulatorCggi final : public RingGswAccumulator {
      * @return a shared pointer to the resulting keys
      */
     RingGswEvalKey key_gen_cggi(const std::shared_ptr<RingGswCryptoParams>& params, const NativePoly& sk_ntt,
-                              LwePlaintext m, uint32_t index) const;
+                                LwePlaintext m, uint32_t index) const;
 
     /**
      * CGGI Accumulation as described in https://eprint.iacr.org/2020/086
@@ -123,7 +123,7 @@ class RingGswAccumulatorCggi final : public RingGswAccumulator {
      * @param index LWE secret-key coefficient index
      */
     void add_to_acc_cggi(const std::shared_ptr<RingGswCryptoParams>& params, ConstRingGswEvalKey& ek1,
-                      ConstRingGswEvalKey& ek2, NativeInteger a, RlweCiphertext& acc, uint32_t index) const;
+                         ConstRingGswEvalKey& ek2, NativeInteger a, RlweCiphertext& acc, uint32_t index) const;
 };
 
 }  // namespace cipher

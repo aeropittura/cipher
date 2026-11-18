@@ -69,22 +69,22 @@ class PlaintextImpl {
      */
     enum PtxtPolyType { IsPoly, IsDCRTPoly, IsNativePoly };
 
-    bool is_encoded_{false};          ///< whether the values have been encoded into the polynomial
+    bool is_encoded_{false};         ///< whether the values have been encoded into the polynomial
     PtxtPolyType type_flag;          ///< which of the three polynomial members is in use
     EncodingParams encoding_params;  ///< encoding parameters (plaintext modulus, batch size, ...)
 
-    Poly encoded_vector;              ///< encoded polynomial (multiprecision)
+    Poly encoded_vector;               ///< encoded polynomial (multiprecision)
     NativePoly encoded_native_vector;  ///< encoded polynomial (native integers)
-    RnsPoly encoded_vector_dcrt;      ///< encoded polynomial (RNS/CRT representation)
+    RnsPoly encoded_vector_dcrt;       ///< encoded polynomial (RNS/CRT representation)
 
     PlaintextEncodings ptxt_encoding{INVALID_ENCODING};  ///< encoding type
     SCHEME scheme_id{SCHEME::INVALID_SCHEME};            ///< scheme the plaintext was created for
-    CkksDataType ckks_data_type{REAL};                    ///< CKKS data type (real or complex slots)
+    CkksDataType ckks_data_type{REAL};                   ///< CKKS data type (real or complex slots)
     double scaling_factor{1.0};                          ///< CKKS scaling factor
-    NativeInteger scaling_factor_int{1};                  ///< BGV scaling factor
-    size_t level{0};                                    ///< level (number of dropped RNS limbs) of the plaintext
-    size_t noise_scale_deg{1};                            ///< noise scale degree (power of the scaling factor)
-    uint32_t slots{0};                                  ///< number of slots (CKKS)
+    NativeInteger scaling_factor_int{1};                 ///< BGV scaling factor
+    size_t level{0};                                     ///< level (number of dropped RNS limbs) of the plaintext
+    size_t noise_scale_deg{1};                           ///< noise scale degree (power of the scaling factor)
+    uint32_t slots{0};                                   ///< number of slots (CKKS)
 
     /**
      * @brief print_value() is called by operator<<
@@ -321,8 +321,8 @@ class PlaintextImpl {
      */
     uint32_t get_element_ring_dimension() const {
         return type_flag == IsPoly ? encoded_vector.get_ring_dimension() :
-                                    (type_flag == IsNativePoly ? encoded_native_vector.get_ring_dimension() :
-                                                                encoded_vector_dcrt.get_ring_dimension());
+                                     (type_flag == IsNativePoly ? encoded_native_vector.get_ring_dimension() :
+                                                                  encoded_vector_dcrt.get_ring_dimension());
     }
 
     /**
@@ -331,8 +331,8 @@ class PlaintextImpl {
      */
     BigInteger get_element_modulus() const {
         return type_flag == IsPoly ? encoded_vector.get_modulus() :
-                                    (type_flag == IsNativePoly ? BigInteger(encoded_native_vector.get_modulus()) :
-                                                                encoded_vector_dcrt.get_modulus());
+                                     (type_flag == IsNativePoly ? BigInteger(encoded_native_vector.get_modulus()) :
+                                                                  encoded_vector_dcrt.get_modulus());
     }
 
     /**

@@ -43,8 +43,7 @@ extern template class cipher::CiphertextImpl<cipher::Poly>;
 extern template class cipher::CiphertextImpl<cipher::NativePoly>;
 extern template class cipher::CiphertextImpl<cipher::RnsPoly>;
 
-CEREAL_CLASS_VERSION(cipher::CiphertextImpl<cipher::Poly>,
-                     cipher::CiphertextImpl<cipher::Poly>::serialized_version());
+CEREAL_CLASS_VERSION(cipher::CiphertextImpl<cipher::Poly>, cipher::CiphertextImpl<cipher::Poly>::serialized_version());
 CEREAL_CLASS_VERSION(cipher::CiphertextImpl<cipher::NativePoly>,
                      cipher::CiphertextImpl<cipher::NativePoly>::serialized_version());
 CEREAL_CLASS_VERSION(cipher::CiphertextImpl<cipher::RnsPoly>,

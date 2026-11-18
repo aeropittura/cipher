@@ -458,7 +458,7 @@ class RingElement : public Serializable {
      * root_of_unity_value for the modulus.
      */
     virtual void switch_modulus(const IntType& modulus, const IntType& root_of_unity_value, const IntType& modulus_arb,
-                               const IntType& root_of_unity_arb) = 0;
+                                const IntType& root_of_unity_arb) = 0;
 
     /**
      * @brief Convert from Coefficient to CRT or vice versa; calls FFT and inverse FFT.

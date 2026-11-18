@@ -254,7 +254,8 @@ void tckks_collective_boot(enum ScalingTechnique scale_tech) {
     // P0 finalizes the protocol by aggregating the shares and reEncrypting the results
     auto aggregated_shares_pair = crypto_context->int_mp_boot_add(shares_pair_vec);
     // Make sure you provide the non-striped ciphertext (in_ctxt) in int_mp_boot_encrypt
-    auto out_ctxt = crypto_context->int_mp_boot_encrypt(parties[0].kp_shard.public_key, aggregated_shares_pair, a, in_ctxt);
+    auto out_ctxt =
+            crypto_context->int_mp_boot_encrypt(parties[0].kp_shard.public_key, aggregated_shares_pair, a, in_ctxt);
 
     // INTERACTIVE BOOTSTRAPPING ENDS
     std::cout << "\n============================ INTERACTIVE BOOTSTRAPPING ENDED ============================\n";
@@ -266,7 +267,8 @@ void tckks_collective_boot(enum ScalingTechnique scale_tech) {
     std::vector<Ciphertext<RnsPoly>> partial_ciphertext_vec;
 
     std::cout << "Party 0 started its part in the collective decryption protocol\n";
-    partial_ciphertext_vec.push_back(crypto_context->multiparty_decrypt_lead({out_ctxt}, parties[0].kp_shard.secret_key)[0]);
+    partial_ciphertext_vec.push_back(
+            crypto_context->multiparty_decrypt_lead({out_ctxt}, parties[0].kp_shard.secret_key)[0]);
 
     for (uint32_t i = 1; i < num_parties; i++) {
         std::cout << "Party " << i << " started its part in the collective decryption protocol\n";

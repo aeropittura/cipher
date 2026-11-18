@@ -98,7 +98,8 @@ void demarcate(const std::string& msg) {
 Plaintext server_verification(CryptoContext<RnsPoly>& cc, KeyPair<RnsPoly>& kp, int vector_size) {
     Ciphertext<RnsPoly> server_ciphertext_from_client_argmin;
 
-    serialization::deserialize_from_file(DATAFOLDER + cipher_argmin_location, server_ciphertext_from_client_argmin, SerType::BINARY);
+    serialization::deserialize_from_file(DATAFOLDER + cipher_argmin_location, server_ciphertext_from_client_argmin,
+                                         SerType::BINARY);
     std::cout << "Deserialized all data from client on server" << '\n' << std::endl;
 
     demarcate("Part 5: Correctness verification");
@@ -124,10 +125,10 @@ Plaintext server_verification(CryptoContext<RnsPoly>& cc, KeyPair<RnsPoly>& kp, 
  * @return Tuple<crypto_context, key_pair>
  */
 std::tuple<CryptoContext<RnsPoly>, KeyPair<RnsPoly>, int> server_setup_and_write(uint32_t ring_dim, uint32_t batch_size,
-                                                                                uint32_t mult_depth_value,
-                                                                                uint32_t scale_mod_size,
-                                                                                uint32_t first_mod_size_value,
-                                                                                uint32_t log_q_lwe, bool one_hot) {
+                                                                                 uint32_t mult_depth_value,
+                                                                                 uint32_t scale_mod_size,
+                                                                                 uint32_t first_mod_size_value,
+                                                                                 uint32_t log_q_lwe, bool one_hot) {
     SecurityLevel sl = HEStd_NotSet;
     BINFHE_PARAMSET sl_bin = TOY;
 
@@ -239,8 +240,8 @@ void client_process(uint32_t modulus_lwe) {
     std::cout << "Done with precomputations" << '\n' << std::endl;
 
     // Compute on the ciphertext
-    auto client_ciphertext_argmin =
-            client_cc->eval_min_scheme_switching(client_c, client_public_key, client_c->get_slots(), client_c->get_slots(), 0, 1);
+    auto client_ciphertext_argmin = client_cc->eval_min_scheme_switching(
+            client_c, client_public_key, client_c->get_slots(), client_c->get_slots(), 0, 1);
 
     std::cout << "Done with argmin computation" << '\n' << std::endl;
 
@@ -274,8 +275,8 @@ int main() {
             "Scheme switching Part 1: Cryptocontext generation, key generation, data encryption "
             "(server)");
 
-    auto tuple_crypto_context_key_pair =
-            server_setup_and_write(ring_dim, batch_size, mult_depth_value, scale_mod_size, first_mod_size_value, log_q_cc_lwe, one_hot);
+    auto tuple_crypto_context_key_pair = server_setup_and_write(ring_dim, batch_size, mult_depth_value, scale_mod_size,
+                                                                first_mod_size_value, log_q_cc_lwe, one_hot);
 
     auto cc = std::get<crypto_context_idx>(tuple_crypto_context_key_pair);
     auto kp = std::get<key_pair_idx>(tuple_crypto_context_key_pair);

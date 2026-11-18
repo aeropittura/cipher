@@ -529,11 +529,11 @@ class MatrixStrassen {  // TODO : public Serializable {
     mutable int NUM_THREADS = 1;
 
     void multiply_internal_caps(it_lineardata_t A, it_lineardata_t B, it_lineardata_t C, MatDescriptor desc,
-                              it_lineardata_t work) const;
+                                it_lineardata_t work) const;
     void strassen_dfscaps(it_lineardata_t A, it_lineardata_t B, it_lineardata_t C, MatDescriptor desc,
-                         it_lineardata_t work_pass_through) const;
+                          it_lineardata_t work_pass_through) const;
     void block_multiply_caps(it_lineardata_t A, it_lineardata_t B, it_lineardata_t C, MatDescriptor d,
-                            it_lineardata_t work_pass_through) const;
+                             it_lineardata_t work_pass_through) const;
     void linearize_data_caps(lineardata_t* lineardata_ptr) const;
     void unlinearize_data_caps(lineardata_t* lineardata_ptr) const;
     int get_rank() const;
@@ -541,26 +541,27 @@ class MatrixStrassen {  // TODO : public Serializable {
     long long num_entries_per_proc(MatDescriptor desc) const;  // NOLINT
     // deep copy of data - used for copy constructor
     void deep_copy_data(data_t const& src);
-    void get_data_impl(const data_t& adata, const data_t& bdata, const data_t& cdata, int row, int inner, int col) const;
+    void get_data_impl(const data_t& adata, const data_t& bdata, const data_t& cdata, int row, int inner,
+                       int col) const;
 
     void smart_subtraction_caps(it_lineardata_t result, it_lineardata_t A, it_lineardata_t B) const;
     void smart_addition_caps(it_lineardata_t result, it_lineardata_t A, it_lineardata_t B) const;
     void add_matrices_caps(int num_entries, it_lineardata_t C, it_lineardata_t A, it_lineardata_t B) const;
     void add_sub_matrices_caps(int num_entries, it_lineardata_t T1, it_lineardata_t S11, it_lineardata_t S12,
-                            it_lineardata_t T2, it_lineardata_t S21, it_lineardata_t S22) const;
+                               it_lineardata_t T2, it_lineardata_t S21, it_lineardata_t S22) const;
     void sub_matrices_caps(int num_entries, it_lineardata_t C, it_lineardata_t A, it_lineardata_t B) const;
     void triple_add_matrices_caps(int num_entries, it_lineardata_t T1, it_lineardata_t S11, it_lineardata_t S12,
-                               it_lineardata_t T2, it_lineardata_t S21, it_lineardata_t S22, it_lineardata_t T3,
-                               it_lineardata_t S31, it_lineardata_t S32) const;
+                                  it_lineardata_t T2, it_lineardata_t S21, it_lineardata_t S22, it_lineardata_t T3,
+                                  it_lineardata_t S31, it_lineardata_t S32) const;
     void triple_sub_matrices_caps(int num_entries, it_lineardata_t T1, it_lineardata_t S11, it_lineardata_t S12,
-                               it_lineardata_t T2, it_lineardata_t S21, it_lineardata_t S22, it_lineardata_t T3,
-                               it_lineardata_t S31, it_lineardata_t S32) const;
+                                  it_lineardata_t T2, it_lineardata_t S21, it_lineardata_t S22, it_lineardata_t T3,
+                                  it_lineardata_t S31, it_lineardata_t S32) const;
 
     void distribute_from1_proc_caps(MatDescriptor desc, it_lineardata_t O, it_lineardata_t I) const;
     void collect_to1_proc_caps(MatDescriptor desc, it_lineardata_t O, it_lineardata_t I) const;
     void send_block_caps(int rank, int target, it_lineardata_t O, int bs, int source, it_lineardata_t I, int ldi) const;
     void receive_block_caps(int rank, int target, it_lineardata_t O, int bs, int source, it_lineardata_t I,
-                          int ldo) const;
+                            int ldo) const;
     void distribute_from1_proc_rec_caps(MatDescriptor desc, it_lineardata_t O, it_lineardata_t I, int ldi) const;
     void collect_to1_proc_rec_caps(MatDescriptor desc, it_lineardata_t O, it_lineardata_t I, int ldo) const;
 };
@@ -651,7 +652,7 @@ inline MatrixStrassen<int32_t> convert_to_int32(const MatrixStrassen<BigVector>&
  * @return the resulting matrix of Poly
  */
 inline MatrixStrassen<Poly> split_int32_into_poly_elements(MatrixStrassen<int32_t> const& other, size_t n,
-                                                       const std::shared_ptr<PolyParams> params);
+                                                           const std::shared_ptr<PolyParams> params);
 
 /**
  * Another method for splitting a vector of int32_t into a vector of ring
@@ -663,7 +664,7 @@ inline MatrixStrassen<Poly> split_int32_into_poly_elements(MatrixStrassen<int32_
  * @return the resulting matrix of Poly
  */
 inline MatrixStrassen<Poly> split_int32_alt_into_poly_elements(MatrixStrassen<int32_t> const& other, size_t n,
-                                                          const std::shared_ptr<PolyParams> params);
+                                                               const std::shared_ptr<PolyParams> params);
 }  // namespace cipher
 
 #endif  // CIPHER_MATH_MATRIX_STRASSEN_H_

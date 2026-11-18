@@ -73,7 +73,7 @@ class PlaintextFactory {
                                                           std::is_same<T, RnsPoly::Params>::value,
                                                   bool>::type = true>
     static Plaintext make_plaintext(PlaintextEncodings encoding, std::shared_ptr<T> vp, EncodingParams ep,
-                                   SCHEME scheme_id = SCHEME::INVALID_SCHEME, CkksDataType cdt = REAL) {
+                                    SCHEME scheme_id = SCHEME::INVALID_SCHEME, CkksDataType cdt = REAL) {
         switch (encoding) {
             case COEF_PACKED_ENCODING:
                 return std::make_shared<CoefPackedEncoding>(vp, ep, scheme_id);
@@ -106,19 +106,19 @@ class PlaintextFactory {
                                                           std::is_same<T, RnsPoly::Params>::value,
                                                   bool>::type = true>
     static Plaintext make_plaintext(const std::vector<int64_t>& value, PlaintextEncodings encoding,
-                                   std::shared_ptr<T> vp, EncodingParams ep, SCHEME scheme_id = SCHEME::INVALID_SCHEME,
-                                   size_t noise_scale_deg = 1, uint32_t level = 0, NativeInteger scaling_factor = 1) {
+                                    std::shared_ptr<T> vp, EncodingParams ep, SCHEME scheme_id = SCHEME::INVALID_SCHEME,
+                                    size_t noise_scale_deg = 1, uint32_t level = 0, NativeInteger scaling_factor = 1) {
         // Check if plaintext has got enough slots for data (value)
         uint32_t ring_dim = vp->get_ring_dimension();
         size_t value_size = value.size();
         if (is_ckks(scheme_id) && value_size > ring_dim / 2) {
             CIPHER_THROW("The size [" + std::to_string(value_size) +
-                          "] of the vector with values should not be greater than ringDim/2 [" +
-                          std::to_string(ring_dim / 2) + "] if the scheme is CKKS");
+                         "] of the vector with values should not be greater than ringDim/2 [" +
+                         std::to_string(ring_dim / 2) + "] if the scheme is CKKS");
         } else if (value_size > ring_dim) {
             CIPHER_THROW("The size [" + std::to_string(value_size) +
-                          "] of the vector with values should not be greater than ringDim [" + std::to_string(ring_dim) +
-                          "] if the scheme is NOT CKKS");
+                         "] of the vector with values should not be greater than ringDim [" + std::to_string(ring_dim) +
+                         "] if the scheme is NOT CKKS");
         }
         Plaintext pt = make_plaintext(encoding, vp, ep, scheme_id);
         pt->set_int_vector_value(value);
@@ -147,19 +147,19 @@ class PlaintextFactory {
                                                           std::is_same<T, RnsPoly::Params>::value,
                                                   bool>::type = true>
     static Plaintext make_plaintext(const std::string& value, PlaintextEncodings encoding, std::shared_ptr<T> vp,
-                                   EncodingParams ep, SCHEME scheme_id = SCHEME::INVALID_SCHEME,
-                                   size_t noise_scale_deg = 1, uint32_t level = 0, NativeInteger scaling_factor = 1) {
+                                    EncodingParams ep, SCHEME scheme_id = SCHEME::INVALID_SCHEME,
+                                    size_t noise_scale_deg = 1, uint32_t level = 0, NativeInteger scaling_factor = 1) {
         // Check if plaintext has got enough slots for data (value)
         uint32_t ring_dim = vp->get_ring_dimension();
         size_t value_size = value.size();
         if (is_ckks(scheme_id) && value_size > ring_dim / 2) {
             CIPHER_THROW("The size [" + std::to_string(value_size) +
-                          "] of the vector with values should not be greater than ringDim/2 [" +
-                          std::to_string(ring_dim / 2) + "] if the scheme is CKKS");
+                         "] of the vector with values should not be greater than ringDim/2 [" +
+                         std::to_string(ring_dim / 2) + "] if the scheme is CKKS");
         } else if (value_size > ring_dim) {
             CIPHER_THROW("The size [" + std::to_string(value_size) +
-                          "] of the vector with values should not be greater than ringDim [" + std::to_string(ring_dim) +
-                          "] if the scheme is NOT CKKS");
+                         "] of the vector with values should not be greater than ringDim [" + std::to_string(ring_dim) +
+                         "] if the scheme is NOT CKKS");
         }
         Plaintext pt = make_plaintext(encoding, vp, ep, scheme_id);
         pt->set_string_value(value);

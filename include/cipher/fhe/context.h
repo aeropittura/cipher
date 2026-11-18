@@ -96,9 +96,9 @@ class CryptoContextImpl : public Serializable {
     inline void verify_ckks_scheme(const std::string& function_name) const {
         if (!is_ckks(scheme_id_)) {
             std::string err_msg = std::string(function_name) +
-                                 "() is available for the CKKS scheme only."
-                                 " The current scheme is " +
-                                 convert_to_string_impl(scheme_id_);
+                                  "() is available for the CKKS scheme only."
+                                  " The current scheme is " +
+                                  convert_to_string_impl(scheme_id_);
             CIPHER_THROW(err_msg);
         }
     }
@@ -137,7 +137,7 @@ class CryptoContextImpl : public Serializable {
      * @return new plaintext
      */
     Plaintext make_plaintext(const PlaintextEncodings encoding, const std::vector<int64_t>& value, size_t depth,
-                            uint32_t level) const {
+                             uint32_t level) const {
         const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(params_);
         if (!crypto_params)
             CIPHER_THROW("Invalid crypto parameters: expected CryptoParametersRNS");
@@ -149,14 +149,14 @@ class CryptoContextImpl : public Serializable {
                 // so the user can understand the error more easily.
                 if (level >= num_moduli) {
                     uint32_t multiplicative_depth = (crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT) ?
-                                                           (num_moduli - 2) :
-                                                           (num_moduli - 1);
+                                                            (num_moduli - 2) :
+                                                            (num_moduli - 1);
                     std::string error_msg{"The level value should be less than or equal to "};
-                    error_msg +=
-                            ((crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT) ? "(multiplicativeDepth + 1)." :
-                                                                                        "multiplicativeDepth.");
+                    error_msg += ((crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT) ?
+                                          "(multiplicativeDepth + 1)." :
+                                          "multiplicativeDepth.");
                     error_msg += " Currently: level is [" + std::to_string(level) + "] and multiplicativeDepth is [" +
-                                std::to_string(multiplicative_depth) + "]";
+                                 std::to_string(multiplicative_depth) + "]";
                     CIPHER_THROW(error_msg);
                 }
             } else {
@@ -174,7 +174,7 @@ class CryptoContextImpl : public Serializable {
                     std::string error_msg =
                             "The level value should be less the current number of RNS limbs in the cryptocontext.";
                     error_msg += " Currently: level is [" + std::to_string(level) + "] and number of RNS limbs is [" +
-                                std::to_string(num_moduli) + "]";
+                                 std::to_string(num_moduli) + "]";
                     CIPHER_THROW(error_msg);
                 }
             }
@@ -205,7 +205,7 @@ class CryptoContextImpl : public Serializable {
         }
 
         Plaintext p = PlaintextFactory::make_plaintext(value, encoding, elem_params_ptr, this->get_encoding_params(),
-                                                      get_scheme_id_impl(), depth, level, scf);
+                                                       get_scheme_id_impl(), depth, level, scf);
         if (set_noise_scale_deg_value)
             p->set_noise_scale_deg(2);
 
@@ -227,9 +227,9 @@ class CryptoContextImpl : public Serializable {
 
     template <typename Value1, typename Value2>
     static Plaintext make_plaintext(PlaintextEncodings encoding, CryptoContext<Element> cc, const Value1& value,
-                                   const Value2& value2) {
+                                    const Value2& value2) {
         return PlaintextFactory::make_plaintext(encoding, cc->get_element_params(), cc->get_encoding_params(), value,
-                                               value2);
+                                                value2);
     }
 
     /**
@@ -358,7 +358,7 @@ class CryptoContextImpl : public Serializable {
         }
         if (mismatched(ciphertext->get_crypto_context())) {
             std::string error_msg(std::string("Ciphertext was not generated with the same crypto context") +
-                                 CALLER_INFO);
+                                  CALLER_INFO);
             CIPHER_THROW(error_msg);
         }
     }
@@ -392,7 +392,7 @@ class CryptoContextImpl : public Serializable {
         }
         if (mismatched(powers->powers_re[0]->get_crypto_context())) {
             std::string error_msg(std::string("Power ciphertext was not generated with the same crypto context") +
-                                 CALLER_INFO);
+                                  CALLER_INFO);
             CIPHER_THROW(error_msg);
         }
     }
@@ -410,8 +410,9 @@ class CryptoContextImpl : public Serializable {
      * @return the encoded plaintext
      */
     virtual Plaintext make_ckks_packed_plaintext_internal(const std::vector<std::complex<double>>& value,
-                                                      size_t noise_scale_deg, uint32_t level,
-                                                      const std::shared_ptr<ParmType> params, uint32_t slots) const {
+                                                          size_t noise_scale_deg, uint32_t level,
+                                                          const std::shared_ptr<ParmType> params,
+                                                          uint32_t slots) const {
         verify_ckks_scheme(__func__);
         const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(params_);
         if (!crypto_params)
@@ -432,7 +433,7 @@ class CryptoContextImpl : public Serializable {
                     error_msg = "The level value should be less than or equal to multiplicativeDepth.";
 
                 error_msg += " Currently: level is [" + std::to_string(level) + "] and multiplicativeDepth is [" +
-                            std::to_string(multiplicative_depth) + "]";
+                             std::to_string(multiplicative_depth) + "]";
                 CIPHER_THROW(error_msg);
             }
         }
@@ -464,8 +465,8 @@ class CryptoContextImpl : public Serializable {
             size_t value_size = value.size();
             if (value_size > ring_dim / 2) {
                 CIPHER_THROW("The size [" + std::to_string(value_size) +
-                              "] of the vector with values should not be greater than ringDim/2 [" +
-                              std::to_string(ring_dim / 2) + "] if the scheme is CKKS");
+                             "] of the vector with values should not be greater than ringDim/2 [" +
+                             std::to_string(ring_dim / 2) + "] if the scheme is CKKS");
             }
             // TODO (dsuponit): we should call a version of make_plaintext instead of calling Plaintext() directly here
             p = Plaintext(std::make_shared<CKKSPackedEncoding>(elem_params_ptr, this->get_encoding_params(), value,
@@ -477,12 +478,13 @@ class CryptoContextImpl : public Serializable {
             size_t value_size = value.size();
             if (value_size > ring_dim / 2) {
                 CIPHER_THROW("The size [" + std::to_string(value_size) +
-                              "] of the vector with values should not be greater than ringDim/2 [" +
-                              std::to_string(ring_dim / 2) + "] if the scheme is CKKS");
+                             "] of the vector with values should not be greater than ringDim/2 [" +
+                             std::to_string(ring_dim / 2) + "] if the scheme is CKKS");
             }
             // TODO (dsuponit): we should call a version of make_plaintext instead of calling Plaintext() directly here
-            p = Plaintext(std::make_shared<CKKSPackedEncoding>(params, this->get_encoding_params(), value, noise_scale_deg,
-                                                               level, sc_fact, slots, this->get_ckks_data_type()));
+            p = Plaintext(std::make_shared<CKKSPackedEncoding>(params, this->get_encoding_params(), value,
+                                                               noise_scale_deg, level, sc_fact, slots,
+                                                               this->get_ckks_data_type()));
         }
         p->encode();
 
@@ -531,8 +533,8 @@ class CryptoContextImpl : public Serializable {
      */
     void SetPrivateKey(const PrivateKey<Element> private_key) {
         CIPHER_DIAGNOSTIC_ERR << "Warning - SetPrivateKey is only intended to be used for debugging "
-                                  "purposes - not for production systems."
-                               << std::endl;
+                                 "purposes - not for production systems."
+                              << std::endl;
         m_privateKey = private_key;
     }
 
@@ -583,8 +585,8 @@ class CryptoContextImpl : public Serializable {
      * @param scheme sharedpointer to Crypto Scheme object
      * @param scheme_id_value scheme identifier
      */
-    CryptoContextImpl(std::shared_ptr<BaseCryptoParams<Element>> params,
-                      std::shared_ptr<SchemeBase<Element>> scheme, SCHEME scheme_id_value = SCHEME::INVALID_SCHEME) {
+    CryptoContextImpl(std::shared_ptr<BaseCryptoParams<Element>> params, std::shared_ptr<SchemeBase<Element>> scheme,
+                      SCHEME scheme_id_value = SCHEME::INVALID_SCHEME) {
         params_ = params;
         scheme_ = scheme;
         key_gen_level_ = 0;
@@ -797,7 +799,8 @@ class CryptoContextImpl : public Serializable {
      * @param key_tag secret key tag
      * @attention Silently replaces any existing matching keys and if key_tag is empty, then the key tag is retrieved from eval_key_vec
      */
-    static void insert_eval_mult_key(const std::vector<EvalKey<Element>>& eval_key_vec, const std::string& key_tag = "");
+    static void insert_eval_mult_key(const std::vector<EvalKey<Element>>& eval_key_vec,
+                                     const std::string& key_tag = "");
 
     /**
      * @brief Serializes either all eval_sum keys (if key_tag is empty) or the eval_sum keys for key_tag
@@ -863,7 +866,7 @@ class CryptoContextImpl : public Serializable {
      * @attention Silently replaces any existing matching keys and if key_tag is empty, then the key tag is retrieved from map_to_insert
      */
     static void insert_eval_sum_key(const std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> map_to_insert,
-                                 std::string key_tag = "") {
+                                    std::string key_tag = "") {
         CryptoContextImpl<Element>::insert_eval_automorphism_key(map_to_insert, key_tag);
     }
 
@@ -926,7 +929,7 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename ST>
     static bool serialize_eval_automorphism_key(std::ostream& ser, const ST& sertype, const std::string& key_tag,
-                                             const std::vector<uint32_t>& index_list) {
+                                                const std::vector<uint32_t>& index_list) {
         std::map<std::string, std::shared_ptr<std::map<uint32_t, EvalKey<Element>>>> key_map = {
                 {key_tag, CryptoContextImpl<Element>::get_partial_eval_automorphism_key_map_ptr(key_tag, index_list)}};
 
@@ -945,7 +948,7 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename ST>
     static bool deserialize_eval_automorphism_key(std::istream& ser, const ST& sertype, const std::string& key_tag,
-                                               const std::vector<uint32_t>& index_list) {
+                                                  const std::vector<uint32_t>& index_list) {
         if (index_list.empty())
             CIPHER_THROW("indexList may not be empty");
         if (key_tag.empty())
@@ -965,7 +968,7 @@ class CryptoContextImpl : public Serializable {
             const auto& key = key_map_it->second->find(indx);
             if (key == key_map_it->second->end()) {
                 CIPHER_THROW("No automorphism key generated for index [" + std::to_string(indx) + "] within keyTag [" +
-                              key_tag + "].");
+                             key_tag + "].");
             }
             new_map[indx] = key->second;
         }
@@ -988,7 +991,7 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename ST>
     static bool serialize_eval_bootstrap_key(std::ostream& ser, const ST& sertype, const CryptoContext<Element>& cc,
-                                          const std::string& key_tag, uint32_t slots) {
+                                             const std::string& key_tag, uint32_t slots) {
         const auto index_list = cc->get_scheme()->eval_bootstrap_key_map_indices(cc, slots);
         std::map<std::string, std::shared_ptr<std::map<uint32_t, EvalKey<Element>>>> key_map = {
                 {key_tag, CryptoContextImpl<Element>::get_partial_eval_automorphism_key_map_ptr(key_tag, index_list)}};
@@ -1008,7 +1011,7 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename ST>
     static bool deserialize_eval_bootstrap_key(std::istream& ser, const ST& sertype, const std::string& key_tag,
-                                            const std::vector<uint32_t>& index_list) {
+                                               const std::vector<uint32_t>& index_list) {
         return CryptoContextImpl<Element>::deserialize_eval_automorphism_key(ser, sertype, key_tag, index_list);
     }
 
@@ -1024,7 +1027,7 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename ST>
     static bool deserialize_eval_bootstrap_key(std::istream& ser, const ST& sertype, const CryptoContext<Element>& cc,
-                                            const std::string& key_tag, uint32_t slots) {
+                                               const std::string& key_tag, uint32_t slots) {
         const auto index_list = cc->get_scheme()->eval_bootstrap_key_map_indices(cc, slots);
         return CryptoContextImpl<Element>::deserialize_eval_automorphism_key(ser, sertype, key_tag, index_list);
     }
@@ -1077,7 +1080,7 @@ class CryptoContextImpl : public Serializable {
      */
     // TODO (dsuponit): move insert_eval_automorphism_key() to the private section of the class
     static void insert_eval_automorphism_key(const std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> map_to_insert,
-                                          const std::string& key_tag = "");
+                                             const std::string& key_tag = "");
     //------------------------------------------------------------------------------
     // TURN FEATURES ON
     //------------------------------------------------------------------------------
@@ -1214,7 +1217,8 @@ class CryptoContextImpl : public Serializable {
      * @brief Gets a map of all eval_automorphism keys
      * @return std::map where the map key/data pair is "key_tag"/"shared_ptr to EvalMultKey map"
      */
-    static std::map<std::string, std::shared_ptr<std::map<uint32_t, EvalKey<Element>>>>& get_all_eval_automorphism_keys();
+    static std::map<std::string, std::shared_ptr<std::map<uint32_t, EvalKey<Element>>>>&
+    get_all_eval_automorphism_keys();
 
     /**
      * @brief Gets a map of eval_automorphism keys for the given key_tag
@@ -1259,7 +1263,7 @@ class CryptoContextImpl : public Serializable {
      */
     Plaintext make_string_plaintext(const std::string& str) const {
         return PlaintextFactory::make_plaintext(str, STRING_ENCODING, this->get_element_params(),
-                                               this->get_encoding_params());
+                                                this->get_encoding_params());
     }
 
     /**
@@ -1271,7 +1275,7 @@ class CryptoContextImpl : public Serializable {
      * @return Encoded plaintext.
      */
     Plaintext make_coef_packed_plaintext(const std::vector<int64_t>& value, size_t noise_scale_deg = 1,
-                                      uint32_t level = 0) const {
+                                         uint32_t level = 0) const {
         if (value.empty())
             CIPHER_THROW("Cannot encode an empty value vector");
 
@@ -1287,7 +1291,7 @@ class CryptoContextImpl : public Serializable {
      * @return Encoded plaintext.
      */
     Plaintext make_packed_plaintext(const std::vector<int64_t>& value, size_t noise_scale_deg = 1,
-                                  uint32_t level = 0) const {
+                                    uint32_t level = 0) const {
         if (value.empty())
             CIPHER_THROW("Cannot encode an empty value vector");
 
@@ -1305,8 +1309,8 @@ class CryptoContextImpl : public Serializable {
      * @return Encoded CKKS plaintext.
      */
     Plaintext make_ckks_packed_plaintext(const std::vector<std::complex<double>>& value, size_t noise_scale_deg = 1,
-                                      uint32_t level = 0, const std::shared_ptr<ParmType> params = nullptr,
-                                      uint32_t slots = 0) const {
+                                         uint32_t level = 0, const std::shared_ptr<ParmType> params = nullptr,
+                                         uint32_t slots = 0) const {
         verify_ckks_scheme(__func__);
         if (value.empty())
             CIPHER_THROW("Cannot encode an empty value vector");
@@ -1324,8 +1328,9 @@ class CryptoContextImpl : public Serializable {
      * @param slots           Number of slots to use.
      * @return Encoded CKKS plaintext.
      */
-    Plaintext make_ckks_packed_plaintext(const std::vector<double>& value, size_t noise_scale_deg = 1, uint32_t level = 0,
-                                      const std::shared_ptr<ParmType> params = nullptr, uint32_t slots = 0) const {
+    Plaintext make_ckks_packed_plaintext(const std::vector<double>& value, size_t noise_scale_deg = 1,
+                                         uint32_t level = 0, const std::shared_ptr<ParmType> params = nullptr,
+                                         uint32_t slots = 0) const {
         verify_ckks_scheme(__func__);
         if (value.empty())
             CIPHER_THROW("Cannot encode an empty value vector");
@@ -1347,7 +1352,7 @@ class CryptoContextImpl : public Serializable {
      * @return Plaintext for decryption.
      */
     static Plaintext get_plaintext_for_decrypt(PlaintextEncodings pte, std::shared_ptr<ParmType> evp, EncodingParams ep,
-                                            CkksDataType cdt = REAL);
+                                               CkksDataType cdt = REAL);
 
     //------------------------------------------------------------------------------
     // PKE Wrapper
@@ -1482,7 +1487,7 @@ class CryptoContextImpl : public Serializable {
      * @return New evaluation key for key switching.
      */
     EvalKey<Element> key_switch_gen(const PrivateKey<Element>& old_private_key,
-                                  const PrivateKey<Element>& new_private_key) const {
+                                    const PrivateKey<Element>& new_private_key) const {
         validate_key(old_private_key);
         validate_key(new_private_key);
         return scheme_->key_switch_gen(old_private_key, new_private_key);
@@ -2105,7 +2110,7 @@ class CryptoContextImpl : public Serializable {
      * @return Resulting ciphertext.
      */
     Ciphertext<Element> eval_mult_no_relin(ConstCiphertext<Element>& ciphertext1,
-                                        ConstCiphertext<Element>& ciphertext2) const {
+                                           ConstCiphertext<Element>& ciphertext2) const {
         type_check(ciphertext1, ciphertext2);
         return scheme_->eval_mult(ciphertext1, ciphertext2);
     }
@@ -2120,7 +2125,8 @@ class CryptoContextImpl : public Serializable {
      * @param ctxt2  Multiplicand.
      * @return Resulting ciphertext.
      */
-    Ciphertext<Element> eval_mult_no_relin_no_check(ConstCiphertext<Element>& ctxt1, ConstCiphertext<Element>& ctxt2) const {
+    Ciphertext<Element> eval_mult_no_relin_no_check(ConstCiphertext<Element>& ctxt1,
+                                                    ConstCiphertext<Element>& ctxt2) const {
         auto& cv1 = ctxt1->get_elements();
         auto& cv2 = ctxt2->get_elements();
 
@@ -2203,7 +2209,7 @@ class CryptoContextImpl : public Serializable {
      * @return Resulting ciphertext.
      */
     Ciphertext<Element> eval_mult_and_relinearize(ConstCiphertext<Element>& ciphertext1,
-                                               ConstCiphertext<Element>& ciphertext2) const {
+                                                  ConstCiphertext<Element>& ciphertext2) const {
         if (!ciphertext1 || !ciphertext2)
             CIPHER_THROW("Input ciphertext is nullptr");
 
@@ -2402,8 +2408,8 @@ class CryptoContextImpl : public Serializable {
      * @return Transformed ciphertext.
      */
     Ciphertext<Element> eval_automorphism(ConstCiphertext<Element>& ciphertext, uint32_t i,
-                                         const std::map<uint32_t, EvalKey<Element>>& eval_key_map,
-                                         CALLER_INFO_ARGS_HDR) const {
+                                          const std::map<uint32_t, EvalKey<Element>>& eval_key_map,
+                                          CALLER_INFO_ARGS_HDR) const {
         validate_ciphertext(ciphertext);
 
         if (eval_key_map.empty())
@@ -2515,7 +2521,7 @@ class CryptoContextImpl : public Serializable {
      * @return Rotated ciphertext.
      */
     Ciphertext<Element> eval_fast_rotation(ConstCiphertext<Element>& ciphertext, const uint32_t index, const uint32_t m,
-                                         const std::shared_ptr<std::vector<Element>> digits) const {
+                                           const std::shared_ptr<std::vector<Element>> digits) const {
         return scheme_->eval_fast_rotation(ciphertext, index, m, digits);
     }
 
@@ -2548,7 +2554,7 @@ class CryptoContextImpl : public Serializable {
      * @return Rotated ciphertext.
      */
     Ciphertext<Element> eval_fast_rotation(ConstCiphertext<Element>& ciphertext, const uint32_t index,
-                                         const std::shared_ptr<std::vector<Element>> digits) const {
+                                           const std::shared_ptr<std::vector<Element>> digits) const {
         return eval_fast_rotation(ciphertext, index, get_ring_dimension() * 2, digits);
     }
 
@@ -2562,7 +2568,8 @@ class CryptoContextImpl : public Serializable {
      * @return Rotated ciphertext in extended basis.
      */
     Ciphertext<Element> eval_fast_rotation_ext(ConstCiphertext<Element>& ciphertext, uint32_t index,
-                                            const std::shared_ptr<std::vector<Element>> digits, bool add_first) const {
+                                               const std::shared_ptr<std::vector<Element>> digits,
+                                               bool add_first) const {
         auto eval_key_map = CryptoContextImpl<Element>::get_eval_automorphism_key_map(ciphertext->get_key_tag());
         return scheme_->eval_fast_rotation_ext(ciphertext, index, digits, add_first, eval_key_map);
     }
@@ -2642,7 +2649,7 @@ class CryptoContextImpl : public Serializable {
      * @return Resulting ciphertext.
      */
     Ciphertext<Element> composed_eval_mult(ConstCiphertext<Element>& ciphertext1,
-                                         ConstCiphertext<Element>& ciphertext2) const {
+                                           ConstCiphertext<Element>& ciphertext2) const {
         validate_ciphertext(ciphertext1);
         validate_ciphertext(ciphertext2);
 
@@ -2706,7 +2713,7 @@ class CryptoContextImpl : public Serializable {
      * @note Supported in BGV and CKKS. In CKKS with COMPOSITESCALING*, levels are scaled by the composite degree.
      */
     Ciphertext<Element> level_reduce(ConstCiphertext<Element>& ciphertext, const EvalKey<Element> eval_key,
-                                    size_t levels = 1) const {
+                                     size_t levels = 1) const {
         validate_ciphertext(ciphertext);
         return scheme_->level_reduce(ciphertext, eval_key, levels * get_composite_degree_from_ctxt());
     }
@@ -2720,7 +2727,8 @@ class CryptoContextImpl : public Serializable {
      *
      * @note Supported in BGV and CKKS. In CKKS with COMPOSITESCALING*, levels are scaled by the composite degree.
      */
-    void level_reduce_in_place(Ciphertext<Element>& ciphertext, const EvalKey<Element> eval_key, size_t levels = 1) const {
+    void level_reduce_in_place(Ciphertext<Element>& ciphertext, const EvalKey<Element> eval_key,
+                               size_t levels = 1) const {
         validate_ciphertext(ciphertext);
         if (levels > 0)
             scheme_->level_reduce_in_place(ciphertext, eval_key, levels * get_composite_degree_from_ctxt());
@@ -2791,7 +2799,8 @@ class CryptoContextImpl : public Serializable {
             CIPHER_THROW("Empty input ciphertext vector");
         if (ciphertext_vec.size() == 1)
             return ciphertext_vec[0]->clone();
-        const auto eval_key_vec = CryptoContextImpl<Element>::get_eval_mult_key_vector(ciphertext_vec[0]->get_key_tag());
+        const auto eval_key_vec =
+                CryptoContextImpl<Element>::get_eval_mult_key_vector(ciphertext_vec[0]->get_key_tag());
         if (eval_key_vec.size() < (ciphertext_vec[0]->number_ciphertext_elements() - 2))
             CIPHER_THROW("Insufficient value was used for maxRelinSkDeg to generate keys");
         return scheme_->eval_mult_many(ciphertext_vec, eval_key_vec);
@@ -2810,7 +2819,7 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename VectorDataType = double>
     Ciphertext<Element> eval_linear_w_sum(std::vector<ReadOnlyCiphertext<Element>>& ciphertext_vec,
-                                       const std::vector<VectorDataType>& constant_vec) const {
+                                          const std::vector<VectorDataType>& constant_vec) const {
         return scheme_->eval_linear_w_sum(ciphertext_vec, constant_vec);
     }
 
@@ -2823,7 +2832,7 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename VectorDataType = double>
     Ciphertext<Element> eval_linear_w_sum(const std::vector<VectorDataType>& constants_vec,
-                                       std::vector<ReadOnlyCiphertext<Element>>& ciphertext_vec) const {
+                                          std::vector<ReadOnlyCiphertext<Element>>& ciphertext_vec) const {
         return eval_linear_w_sum(ciphertext_vec, constants_vec);
     }
 
@@ -2836,7 +2845,7 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename VectorDataType = double>
     Ciphertext<Element> eval_linear_w_sum_mutable(std::vector<Ciphertext<Element>>& ciphertext_vec,
-                                              const std::vector<VectorDataType>& constants_vec) const {
+                                                  const std::vector<VectorDataType>& constants_vec) const {
         return scheme_->eval_linear_w_sum_mutable(ciphertext_vec, constants_vec);
     }
 
@@ -2849,7 +2858,7 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename VectorDataType = double>
     Ciphertext<Element> eval_linear_w_sum_mutable(const std::vector<VectorDataType>& constants_vec,
-                                              std::vector<Ciphertext<Element>>& ciphertext_vec) const {
+                                                  std::vector<Ciphertext<Element>>& ciphertext_vec) const {
         return eval_linear_w_sum_mutable(ciphertext_vec, constants_vec);
     }
 
@@ -2868,7 +2877,7 @@ class CryptoContextImpl : public Serializable {
 
     template <typename VectorDataType = double>
     std::shared_ptr<SeriesPowers<Element>> eval_powers(ConstCiphertext<Element>& ciphertext,
-                                                      const std::vector<VectorDataType>& coefficients) const {
+                                                       const std::vector<VectorDataType>& coefficients) const {
         validate_ciphertext(ciphertext);
         return scheme_->eval_powers(ciphertext, coefficients);
     }
@@ -2884,7 +2893,7 @@ class CryptoContextImpl : public Serializable {
 
     template <typename VectorDataType = double>
     Ciphertext<Element> eval_poly(ConstCiphertext<Element>& ciphertext,
-                                 const std::vector<VectorDataType>& coefficients) const {
+                                  const std::vector<VectorDataType>& coefficients) const {
         validate_ciphertext(ciphertext);
         return scheme_->eval_poly(ciphertext, coefficients);
     }
@@ -2901,7 +2910,7 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename VectorDataType = double>
     Ciphertext<Element> eval_poly_with_precomp(std::shared_ptr<SeriesPowers<Element>> powers,
-                                            const std::vector<VectorDataType>& coefficients) const {
+                                               const std::vector<VectorDataType>& coefficients) const {
         validate_series_powers(powers);
         return scheme_->eval_poly_with_precomp(powers, coefficients);
     }
@@ -2916,7 +2925,7 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename VectorDataType = double>
     Ciphertext<Element> eval_poly_linear(ConstCiphertext<Element>& ciphertext,
-                                       const std::vector<VectorDataType>& coefficients) const {
+                                         const std::vector<VectorDataType>& coefficients) const {
         validate_ciphertext(ciphertext);
         return scheme_->eval_poly_linear(ciphertext, coefficients);
     }
@@ -2931,7 +2940,7 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename VectorDataType = double>
     Ciphertext<Element> eval_poly_ps(ConstCiphertext<Element>& ciphertext,
-                                   const std::vector<VectorDataType>& coefficients) const {
+                                     const std::vector<VectorDataType>& coefficients) const {
         validate_ciphertext(ciphertext);
         return scheme_->eval_poly_ps(ciphertext, coefficients);
     }
@@ -2954,8 +2963,8 @@ class CryptoContextImpl : public Serializable {
 
     template <typename VectorDataType = double>
     std::shared_ptr<SeriesPowers<Element>> eval_cheby_polys(ConstCiphertext<Element>& ciphertext,
-                                                          const std::vector<VectorDataType>& coefficients, double a,
-                                                          double b) const {
+                                                            const std::vector<VectorDataType>& coefficients, double a,
+                                                            double b) const {
         validate_ciphertext(ciphertext);
         return scheme_->eval_cheby_polys(ciphertext, coefficients, a, b);
     }
@@ -2974,7 +2983,8 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename VectorDataType = double>
     Ciphertext<Element> eval_chebyshev_series(ConstCiphertext<Element>& ciphertext,
-                                            const std::vector<VectorDataType>& coefficients, double a, double b) const {
+                                              const std::vector<VectorDataType>& coefficients, double a,
+                                              double b) const {
         validate_ciphertext(ciphertext);
         return scheme_->eval_chebyshev_series(ciphertext, coefficients, a, b);
     }
@@ -2990,7 +3000,7 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename VectorDataType = double>
     Ciphertext<Element> eval_chebyshev_series_with_precomp(std::shared_ptr<SeriesPowers<Element>> polys,
-                                                       const std::vector<VectorDataType>& coefficients) const {
+                                                           const std::vector<VectorDataType>& coefficients) const {
         validate_series_powers(polys);
         return scheme_->eval_chebyshev_series_with_precomp(polys, coefficients);
     }
@@ -3007,8 +3017,8 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename VectorDataType = double>
     Ciphertext<Element> eval_chebyshev_series_linear(ConstCiphertext<Element>& ciphertext,
-                                                  const std::vector<VectorDataType>& coefficients, double a,
-                                                  double b) const {
+                                                     const std::vector<VectorDataType>& coefficients, double a,
+                                                     double b) const {
         validate_ciphertext(ciphertext);
         return scheme_->eval_chebyshev_series_linear(ciphertext, coefficients, a, b);
     }
@@ -3025,8 +3035,8 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename VectorDataType = double>
     Ciphertext<Element> eval_chebyshev_series_ps(ConstCiphertext<Element>& ciphertext,
-                                              const std::vector<VectorDataType>& coefficients, double a,
-                                              double b) const {
+                                                 const std::vector<VectorDataType>& coefficients, double a,
+                                                 double b) const {
         validate_ciphertext(ciphertext);
         return scheme_->eval_chebyshev_series_ps(ciphertext, coefficients, a, b);
     }
@@ -3042,8 +3052,9 @@ class CryptoContextImpl : public Serializable {
      * @param degree      Degree of the Chebyshev approximation.
      * @return Ciphertext after function evaluation.
      */
-    Ciphertext<Element> eval_chebyshev_function(std::function<double(double)> func, ConstCiphertext<Element>& ciphertext,
-                                              double a, double b, uint32_t degree) const;
+    Ciphertext<Element> eval_chebyshev_function(std::function<double(double)> func,
+                                                ConstCiphertext<Element>& ciphertext, double a, double b,
+                                                uint32_t degree) const;
 
     /**
      * @brief Evaluates an approximate sine function on a ciphertext using Chebyshev approximation.
@@ -3113,8 +3124,8 @@ class CryptoContextImpl : public Serializable {
      * @return Map of generated evaluation keys.
      */
     std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_sum_rows_key_gen(const PrivateKey<Element> private_key,
-                                                                            uint32_t row_size = 0,
-                                                                            uint32_t subring_dim = 0);
+                                                                                uint32_t row_size = 0,
+                                                                                uint32_t subring_dim = 0);
 
     /**
      * @brief Generates automorphism keys for eval_sum_rows (only for packed encoding). Kept for backwards
@@ -3128,9 +3139,9 @@ class CryptoContextImpl : public Serializable {
      */
     // TODO: this is here for backwards compatibility; should remove in v2.0
     std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_sum_rows_key_gen(const PrivateKey<Element> private_key,
-                                                                            const PublicKey<Element> public_key,
-                                                                            uint32_t row_size = 0,
-                                                                            uint32_t subring_dim = 0);
+                                                                                const PublicKey<Element> public_key,
+                                                                                uint32_t row_size = 0,
+                                                                                uint32_t subring_dim = 0);
 
     /**
      * @brief Generates automorphism keys for eval_sum_cols (only for packed encoding).
@@ -3159,8 +3170,8 @@ class CryptoContextImpl : public Serializable {
      * @return Ciphertext containing row-wise sums.
      */
     Ciphertext<Element> eval_sum_rows(ConstCiphertext<Element>& ciphertext, uint32_t num_rows,
-                                    const std::map<uint32_t, EvalKey<Element>>& eval_sum_key_map,
-                                    uint32_t subring_dim = 0) const;
+                                      const std::map<uint32_t, EvalKey<Element>>& eval_sum_key_map,
+                                      uint32_t subring_dim = 0) const;
 
     /**
      * @brief Sums all elements across each column in a packed-encoded matrix ciphertext.
@@ -3171,7 +3182,7 @@ class CryptoContextImpl : public Serializable {
      * @return Ciphertext containing column-wise sums.
      */
     Ciphertext<Element> eval_sum_cols(ConstCiphertext<Element>& ciphertext, uint32_t num_cols,
-                                    const std::map<uint32_t, EvalKey<Element>>& eval_sum_key_map) const;
+                                      const std::map<uint32_t, EvalKey<Element>>& eval_sum_key_map) const;
 
     //------------------------------------------------------------------------------
     // Advanced SHE EVAL INNER PRODUCT
@@ -3186,7 +3197,7 @@ class CryptoContextImpl : public Serializable {
      * @return Ciphertext containing the inner product.
      */
     Ciphertext<Element> eval_inner_product(ConstCiphertext<Element>& ciphertext1, ConstCiphertext<Element>& ciphertext2,
-                                         uint32_t batch_size) const;
+                                           uint32_t batch_size) const;
 
     /**
      * @brief Computes the inner product of a ciphertext and a plaintext using packed encoding and eval_sum.
@@ -3197,7 +3208,7 @@ class CryptoContextImpl : public Serializable {
      * @return Ciphertext containing the inner product.
      */
     Ciphertext<Element> eval_inner_product(ConstCiphertext<Element>& ciphertext, ConstPlaintext& plaintext,
-                                         uint32_t batch_size) const;
+                                           uint32_t batch_size) const;
 
     /**
      * @brief Merges multiple ciphertexts with values in slot 0 into a single packed ciphertext.
@@ -3220,7 +3231,8 @@ class CryptoContextImpl : public Serializable {
      * @param new_public_key   Public key of the target recipient.
      * @return Re-encryption evaluation key.
      */
-    EvalKey<Element> re_key_gen(const PrivateKey<Element> old_private_key, const PublicKey<Element> new_public_key) const {
+    EvalKey<Element> re_key_gen(const PrivateKey<Element> old_private_key,
+                                const PublicKey<Element> new_public_key) const {
         validate_key(old_private_key);
         validate_key(new_public_key);
         validate_pre_mode();
@@ -3236,7 +3248,7 @@ class CryptoContextImpl : public Serializable {
      * @attention This functionality has been completely removed from Cipher
      */
     EvalKey<Element> re_key_gen(const PrivateKey<Element> original_private_key,
-                              const PrivateKey<Element> new_private_key) const
+                                const PrivateKey<Element> new_private_key) const
             __attribute__((deprecated("functionality removed from Cipher")));
 
     /**
@@ -3248,7 +3260,7 @@ class CryptoContextImpl : public Serializable {
      * @return Re-encrypted ciphertext.
      */
     Ciphertext<Element> re_encrypt(ConstCiphertext<Element>& ciphertext, EvalKey<Element> eval_key,
-                                  const PublicKey<Element> public_key = nullptr) const {
+                                   const PublicKey<Element> public_key = nullptr) const {
         validate_ciphertext(ciphertext);
         validate_key(eval_key);
         validate_pre_mode();
@@ -3281,7 +3293,8 @@ class CryptoContextImpl : public Serializable {
      * @param fresh       Indicates if proxy re-encryption is used in the multi-party protocol or star topology is used.
      * @return Key pair containing this party's private key and the updated joined public key.
      */
-    KeyPair<Element> multiparty_key_gen(const PublicKey<Element> public_key, bool make_sparse_value = false, bool fresh = false) {
+    KeyPair<Element> multiparty_key_gen(const PublicKey<Element> public_key, bool make_sparse_value = false,
+                                        bool fresh = false) {
         if (!public_key)
             CIPHER_THROW("Input public key is empty");
         return scheme_->multiparty_key_gen(get_context_for_pointer(this), public_key, make_sparse_value, fresh);
@@ -3295,7 +3308,7 @@ class CryptoContextImpl : public Serializable {
      * @return Vector of partially decrypted ciphertexts.
      */
     std::vector<Ciphertext<Element>> multiparty_decrypt_lead(const std::vector<Ciphertext<Element>>& ciphertext_vec,
-                                                           const PrivateKey<Element> private_key) const {
+                                                             const PrivateKey<Element> private_key) const {
         validate_key(private_key);
         std::vector<Ciphertext<Element>> new_ciphertext_vec;
         new_ciphertext_vec.reserve(ciphertext_vec.size());
@@ -3314,7 +3327,7 @@ class CryptoContextImpl : public Serializable {
      * @return Vector of partially decrypted ciphertexts.
      */
     std::vector<Ciphertext<Element>> multiparty_decrypt_main(const std::vector<Ciphertext<Element>>& ciphertext_vec,
-                                                           const PrivateKey<Element> private_key) const {
+                                                             const PrivateKey<Element> private_key) const {
         validate_key(private_key);
         std::vector<Ciphertext<Element>> new_ciphertext_vec;
         new_ciphertext_vec.reserve(ciphertext_vec.size());
@@ -3333,7 +3346,7 @@ class CryptoContextImpl : public Serializable {
      * @return Decoding result.
      */
     DecryptResult multiparty_decrypt_fusion(const std::vector<Ciphertext<Element>>& partial_ciphertext_vec,
-                                          Plaintext* plaintext) const {
+                                            Plaintext* plaintext) const {
         std::string datatype = demangle(typeid(Element).name());
         CIPHER_THROW("Not implemented for " + datatype);
     }
@@ -3347,7 +3360,8 @@ class CryptoContextImpl : public Serializable {
      * @return New joined evaluation key.
      */
     EvalKey<Element> multi_key_switch_gen(const PrivateKey<Element> original_private_key,
-                                       const PrivateKey<Element> new_private_key, const EvalKey<Element> eval_key) const {
+                                          const PrivateKey<Element> new_private_key,
+                                          const EvalKey<Element> eval_key) const {
         if (!original_private_key)
             CIPHER_THROW("Input first private key is nullptr");
         if (!new_private_key)
@@ -3428,7 +3442,7 @@ class CryptoContextImpl : public Serializable {
      * @return Joined evaluation key.
      */
     EvalKey<Element> multi_add_eval_keys(EvalKey<Element> eval_key1, EvalKey<Element> eval_key2,
-                                      const std::string& key_tag = "") {
+                                         const std::string& key_tag = "") {
         if (!eval_key1)
             CIPHER_THROW("Input first evaluation key is nullptr");
         if (!eval_key2)
@@ -3445,7 +3459,7 @@ class CryptoContextImpl : public Serializable {
      * @return Joined evaluation key.
      */
     EvalKey<Element> multi_mult_eval_key(PrivateKey<Element> private_key, EvalKey<Element> eval_key,
-                                      const std::string& key_tag = "") {
+                                         const std::string& key_tag = "") {
         if (!private_key)
             CIPHER_THROW("Input private key is nullptr");
         if (!eval_key)
@@ -3463,7 +3477,8 @@ class CryptoContextImpl : public Serializable {
      */
     std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> multi_add_eval_sum_keys(
             const std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_key_map1,
-            const std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_key_map2, const std::string& key_tag = "") {
+            const std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_key_map2,
+            const std::string& key_tag = "") {
         if (!eval_key_map1)
             CIPHER_THROW("Input first evaluation key map is nullptr");
         if (!eval_key_map2)
@@ -3481,7 +3496,8 @@ class CryptoContextImpl : public Serializable {
      */
     std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> multi_add_eval_automorphism_keys(
             const std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_key_map1,
-            const std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_key_map2, const std::string& key_tag = "") {
+            const std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_key_map2,
+            const std::string& key_tag = "") {
         if (!eval_key_map1)
             CIPHER_THROW("Input first evaluation key map is nullptr");
         if (!eval_key_map2)
@@ -3498,7 +3514,7 @@ class CryptoContextImpl : public Serializable {
      * @return Combined public key.
      */
     PublicKey<Element> multi_add_pub_keys(PublicKey<Element> public_key1, PublicKey<Element> public_key2,
-                                       const std::string& key_tag = "") {
+                                          const std::string& key_tag = "") {
         if (!public_key1)
             CIPHER_THROW("Input first public key is nullptr");
         if (!public_key2)
@@ -3515,7 +3531,7 @@ class CryptoContextImpl : public Serializable {
      * @return Combined evaluation key.
      */
     EvalKey<Element> multi_add_eval_mult_keys(EvalKey<Element> eval_key1, EvalKey<Element> eval_key2,
-                                          const std::string& key_tag = "") {
+                                              const std::string& key_tag = "") {
         if (!eval_key1)
             CIPHER_THROW("Input first evaluation key is nullptr");
         if (!eval_key2)
@@ -3535,7 +3551,7 @@ class CryptoContextImpl : public Serializable {
      *       Includes rounding as part of decryption.
      */
     Ciphertext<Element> int_boot_decrypt(const PrivateKey<Element> private_key,
-                                       ConstCiphertext<Element>& ciphertext) const {
+                                         ConstCiphertext<Element>& ciphertext) const {
         validate_ciphertext(ciphertext);
         validate_key(private_key);
         return scheme_->int_boot_decrypt(private_key, ciphertext);
@@ -3549,7 +3565,8 @@ class CryptoContextImpl : public Serializable {
      * @param ciphertext  Input ciphertext.
      * @return Encrypted ciphertext.
      */
-    Ciphertext<Element> int_boot_encrypt(const PublicKey<Element> public_key, ConstCiphertext<Element>& ciphertext) const {
+    Ciphertext<Element> int_boot_encrypt(const PublicKey<Element> public_key,
+                                         ConstCiphertext<Element>& ciphertext) const {
         validate_ciphertext(ciphertext);
         validate_key(public_key);
         return scheme_->int_boot_encrypt(public_key, ciphertext);
@@ -3563,7 +3580,8 @@ class CryptoContextImpl : public Serializable {
      * @param ciphertext2  Unencrypted masked decryption.
      * @return Refreshed ciphertext.
      */
-    Ciphertext<Element> int_boot_add(ConstCiphertext<Element>& ciphertext1, ConstCiphertext<Element>& ciphertext2) const {
+    Ciphertext<Element> int_boot_add(ConstCiphertext<Element>& ciphertext1,
+                                     ConstCiphertext<Element>& ciphertext2) const {
         validate_ciphertext(ciphertext1);
         validate_ciphertext(ciphertext2);
         return scheme_->int_boot_add(ciphertext1, ciphertext2);
@@ -3617,8 +3635,8 @@ class CryptoContextImpl : public Serializable {
      * @return Vector of masked decryption shares.
      */
     std::vector<Ciphertext<Element>> int_mp_boot_decrypt(const PrivateKey<Element> private_key,
-                                                      ConstCiphertext<Element>& ciphertext,
-                                                      ConstCiphertext<Element>& a) const;
+                                                         ConstCiphertext<Element>& ciphertext,
+                                                         ConstCiphertext<Element>& a) const;
 
     /**
      * @brief Aggregates masked decryption and re-encryption shares (Threshold FHE).
@@ -3627,7 +3645,8 @@ class CryptoContextImpl : public Serializable {
      * @param shares_pair_vec  Vector of (h_0i, h_1i) shares from each party.
      * @return Aggregated pair of shares (h_0, h_1).
      */
-    std::vector<Ciphertext<Element>> int_mp_boot_add(std::vector<std::vector<Ciphertext<Element>>>& shares_pair_vec) const;
+    std::vector<Ciphertext<Element>> int_mp_boot_add(
+            std::vector<std::vector<Ciphertext<Element>>>& shares_pair_vec) const;
 
     /**
      * @brief Encrypts the lead party's masked decryption result as the final step of Multi-Party Interactive Bootstrapping (Threshold FHE).
@@ -3641,8 +3660,8 @@ class CryptoContextImpl : public Serializable {
      * @return Encrypted refreshed ciphertext.
      */
     Ciphertext<Element> int_mp_boot_encrypt(const PublicKey<Element> public_key,
-                                         const std::vector<Ciphertext<Element>>& shares_pair,
-                                         ConstCiphertext<Element>& a, ConstCiphertext<Element>& ciphertext) const;
+                                            const std::vector<Ciphertext<Element>>& shares_pair,
+                                            ConstCiphertext<Element>& a, ConstCiphertext<Element>& ciphertext) const;
 
     /**
      * @brief Performs secret sharing of a secret key for Threshold FHE with aborts.
@@ -3655,7 +3674,7 @@ class CryptoContextImpl : public Serializable {
      * @return Map of secret key shares indexed by party ID.
      */
     std::unordered_map<uint32_t, Element> share_keys(const PrivateKey<Element>& sk, uint32_t N, uint32_t threshold,
-                                                    uint32_t index, const std::string& share_type) const {
+                                                     uint32_t index, const std::string& share_type) const {
         std::string datatype = demangle(typeid(Element).name());
         CIPHER_THROW("Not implemented for " + datatype);
     }
@@ -3670,7 +3689,7 @@ class CryptoContextImpl : public Serializable {
      * @param share_type  Type of secret sharing ("additive" or "shamir").
      */
     void recover_shared_key(PrivateKey<Element>& sk, std::unordered_map<uint32_t, Element>& sk_shares, uint32_t N,
-                          uint32_t threshold, const std::string& share_type) const;
+                            uint32_t threshold, const std::string& share_type) const;
 
     //------------------------------------------------------------------------------
     // FHE Bootstrap Methods
@@ -3697,9 +3716,10 @@ class CryptoContextImpl : public Serializable {
      * @param bt_slots_encoding  Whether the approximate modular reduction happens over the message being in slots or coefficients
      */
     void eval_bootstrap_setup(std::vector<uint32_t> level_budget = {5, 4}, std::vector<uint32_t> dim1 = {0, 0},
-                            uint32_t slots = 0, uint32_t correction_factor = 0, bool precompute = true,
-                            bool bt_slots_encoding = false) {
-        scheme_->eval_bootstrap_setup(*this, level_budget, dim1, slots, correction_factor, precompute, bt_slots_encoding);
+                              uint32_t slots = 0, uint32_t correction_factor = 0, bool precompute = true,
+                              bool bt_slots_encoding = false) {
+        scheme_->eval_bootstrap_setup(*this, level_budget, dim1, slots, correction_factor, precompute,
+                                      bt_slots_encoding);
     }
 
     /**
@@ -3732,7 +3752,7 @@ class CryptoContextImpl : public Serializable {
      * @return Refreshed ciphertext.
      */
     Ciphertext<Element> eval_bootstrap(ConstCiphertext<Element>& ciphertext, uint32_t num_iterations = 1,
-                                      uint32_t precision = 0) const {
+                                       uint32_t precision = 0) const {
         return scheme_->eval_bootstrap(ciphertext, num_iterations, precision);
     }
 
@@ -3748,7 +3768,7 @@ class CryptoContextImpl : public Serializable {
      * @return Refreshed ciphertext.
      */
     Ciphertext<Element> eval_bootstrap_st_c_first(ConstCiphertext<Element>& ciphertext, uint32_t num_iterations = 1,
-                                              uint32_t precision = 0) const {
+                                                  uint32_t precision = 0) const {
         return scheme_->eval_bootstrap_st_c_first(ciphertext, num_iterations, precision);
     }
 
@@ -3764,7 +3784,7 @@ class CryptoContextImpl : public Serializable {
      * @param slots        Number of slots to be bootstrapped (0 = full packing).
      */
     void eval_fe_func_bootstrap_setup(const std::vector<uint32_t>& level_budget = {5, 4},
-                                  const std::vector<uint32_t>& dim1 = {0, 0}, uint32_t slots = 0) {
+                                      const std::vector<uint32_t>& dim1 = {0, 0}, uint32_t slots = 0) {
         get_scheme()->eval_fe_func_bootstrap_setup(*this, level_budget, dim1, slots);
     }
 
@@ -3783,7 +3803,7 @@ class CryptoContextImpl : public Serializable {
      * @return Refreshed ciphertext holding the function values.
      */
     Ciphertext<Element> eval_fe_func_bootstrap(ConstCiphertext<Element>& ciphertext,
-                                            const std::vector<std::complex<double>>& coefficients) const {
+                                               const std::vector<std::complex<double>>& coefficients) const {
         validate_ciphertext(ciphertext);
         return get_scheme()->eval_fe_func_bootstrap(ciphertext, coefficients);
     }
@@ -3819,8 +3839,9 @@ class CryptoContextImpl : public Serializable {
      * @param coefficients  Fourier coefficients c_j of this function, c_0 first.
      * @return Refreshed ciphertext holding the function values.
      */
-    Ciphertext<Element> eval_fe_func_bootstrap_with_precomp(const std::shared_ptr<SeriesPowers<Element>>& powers,
-                                                       const std::vector<std::complex<double>>& coefficients) const {
+    Ciphertext<Element> eval_fe_func_bootstrap_with_precomp(
+            const std::shared_ptr<SeriesPowers<Element>>& powers,
+            const std::vector<std::complex<double>>& coefficients) const {
         validate_series_powers(powers);
         return get_scheme()->eval_fe_func_bootstrap_with_precomp(powers, coefficients);
     }
@@ -3848,11 +3869,11 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename VectorDataType>
     void eval_fbt_setup(const std::vector<VectorDataType>& coeffs, uint32_t num_slots, const BigInteger& p_in,
-                      const BigInteger& P_out, const BigInteger& bigq, const PublicKey<RnsPoly>& pub_key,
-                      const std::vector<uint32_t>& dim1, const std::vector<uint32_t>& level_budget,
-                      uint32_t lvls_after_boot = 0, uint32_t depth_leveled_computation = 0, size_t order = 1) {
-        scheme_->eval_fbt_setup(*this, coeffs, num_slots, p_in, P_out, bigq, pub_key, dim1, level_budget, lvls_after_boot,
-                               depth_leveled_computation, order);
+                        const BigInteger& P_out, const BigInteger& bigq, const PublicKey<RnsPoly>& pub_key,
+                        const std::vector<uint32_t>& dim1, const std::vector<uint32_t>& level_budget,
+                        uint32_t lvls_after_boot = 0, uint32_t depth_leveled_computation = 0, size_t order = 1) {
+        scheme_->eval_fbt_setup(*this, coeffs, num_slots, p_in, P_out, bigq, pub_key, dim1, level_budget,
+                                lvls_after_boot, depth_leveled_computation, order);
     }
 
     /**
@@ -3875,9 +3896,10 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename VectorDataType>
     Ciphertext<Element> eval_fbt(ConstCiphertext<Element>& ciphertext, const std::vector<VectorDataType>& coeffs,
-                                uint32_t digit_bit_size, const BigInteger& initial_scaling, uint64_t post_scaling,
-                                uint32_t level_to_reduce = 0, size_t order = 1) {
-        return scheme_->eval_fbt(ciphertext, coeffs, digit_bit_size, initial_scaling, post_scaling, level_to_reduce, order);
+                                 uint32_t digit_bit_size, const BigInteger& initial_scaling, uint64_t post_scaling,
+                                 uint32_t level_to_reduce = 0, size_t order = 1) {
+        return scheme_->eval_fbt(ciphertext, coeffs, digit_bit_size, initial_scaling, post_scaling, level_to_reduce,
+                                 order);
     }
 
     /**
@@ -3894,8 +3916,8 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename VectorDataType>
     Ciphertext<Element> eval_fbt_no_decoding(ConstCiphertext<Element>& ciphertext,
-                                          const std::vector<VectorDataType>& coeffs, uint32_t digit_bit_size,
-                                          const BigInteger& initial_scaling, size_t order = 1) {
+                                             const std::vector<VectorDataType>& coeffs, uint32_t digit_bit_size,
+                                             const BigInteger& initial_scaling, size_t order = 1) {
         return scheme_->eval_fbt_no_decoding(ciphertext, coeffs, digit_bit_size, initial_scaling, order);
     }
 
@@ -3910,7 +3932,7 @@ class CryptoContextImpl : public Serializable {
      * @return Ciphertext holding the outputs in its coefficients, at noise scale degree 1.
      */
     Ciphertext<Element> eval_hom_decoding(ConstCiphertext<Element>& ciphertext, uint64_t post_scaling,
-                                        uint32_t level_to_reduce = 0) {
+                                          uint32_t level_to_reduce = 0) {
         return scheme_->eval_hom_decoding(ciphertext, post_scaling, level_to_reduce);
     }
 
@@ -3929,9 +3951,9 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename VectorDataType>
     std::shared_ptr<SeriesPowers<Element>> eval_mvb_precompute(ConstCiphertext<Element>& ciphertext,
-                                                             const std::vector<VectorDataType>& coeffs,
-                                                             uint32_t digit_bit_size, const BigInteger& initial_scaling,
-                                                             size_t order = 1) {
+                                                               const std::vector<VectorDataType>& coeffs,
+                                                               uint32_t digit_bit_size,
+                                                               const BigInteger& initial_scaling, size_t order = 1) {
         return scheme_->eval_mvb_precompute(ciphertext, coeffs, digit_bit_size, initial_scaling, order);
     }
 
@@ -3951,8 +3973,8 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename VectorDataType>
     Ciphertext<Element> eval_mvb(const std::shared_ptr<SeriesPowers<Element>> ciphertexts,
-                                const std::vector<VectorDataType>& coeffs, uint32_t digit_bit_size,
-                                const uint64_t post_scaling, uint32_t level_to_reduce = 0, size_t order = 1) {
+                                 const std::vector<VectorDataType>& coeffs, uint32_t digit_bit_size,
+                                 const uint64_t post_scaling, uint32_t level_to_reduce = 0, size_t order = 1) {
         return scheme_->eval_mvb(ciphertexts, coeffs, digit_bit_size, post_scaling, level_to_reduce, order);
     }
 
@@ -3970,8 +3992,8 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename VectorDataType>
     Ciphertext<Element> eval_mvb_no_decoding(const std::shared_ptr<SeriesPowers<Element>> ciphertexts,
-                                          const std::vector<VectorDataType>& coeffs, uint32_t digit_bit_size,
-                                          size_t order = 1) {
+                                             const std::vector<VectorDataType>& coeffs, uint32_t digit_bit_size,
+                                             size_t order = 1) {
         return scheme_->eval_mvb_no_decoding(ciphertexts, coeffs, digit_bit_size, order);
     }
 
@@ -3992,9 +4014,9 @@ class CryptoContextImpl : public Serializable {
      */
     template <typename VectorDataType>
     Ciphertext<Element> eval_hermite_trig_series(ConstCiphertext<Element>& ciphertext,
-                                              const std::vector<std::complex<double>>& coefficients_cheb, double a,
-                                              double b, const std::vector<VectorDataType>& coefficients_herm,
-                                              size_t precomp = 0) {
+                                                 const std::vector<std::complex<double>>& coefficients_cheb, double a,
+                                                 double b, const std::vector<VectorDataType>& coefficients_herm,
+                                                 size_t precomp = 0) {
         return scheme_->eval_hermite_trig_series(ciphertext, coefficients_cheb, a, b, coefficients_herm, precomp);
     }
 
@@ -4091,7 +4113,7 @@ class CryptoContextImpl : public Serializable {
      * @return Vector of LWE ciphertexts.
      */
     std::vector<std::shared_ptr<LweCiphertextImpl>> eval_ckks_to_fhew(ConstCiphertext<Element>& ciphertext,
-                                                                   uint32_t num_ctxts = 0) {
+                                                                      uint32_t num_ctxts = 0) {
         verify_ckks_scheme(__func__);
         verify_ckks_real_data_type(__func__);
         if (ciphertext == nullptr)
@@ -4108,7 +4130,7 @@ class CryptoContextImpl : public Serializable {
      * @param log_q          Ciphertext modulus size in FHEW (for high precision).
      */
     void eval_fhew_to_ckks_setup(const std::shared_ptr<BooleanContext>& cc_lwe, uint32_t num_slots_ckks = 0,
-                             uint32_t log_q = 25) {
+                                 uint32_t log_q = 25) {
         verify_ckks_scheme(__func__);
         verify_ckks_real_data_type(__func__);
         scheme_->eval_fhew_to_ckks_setup(*this, cc_lwe, num_slots_ckks, log_q);
@@ -4125,7 +4147,7 @@ class CryptoContextImpl : public Serializable {
      * @param L         Target level for homomorphic decoding matrix.
      */
     void eval_fhew_to_ckks_key_gen(const KeyPair<Element>& key_pair, ConstLwePrivateKey& lwesk, uint32_t num_slots = 0,
-                              uint32_t num_ctxts = 0, uint32_t dim1 = 0, uint32_t L = 0) {
+                                   uint32_t num_ctxts = 0, uint32_t dim1 = 0, uint32_t L = 0) {
         verify_ckks_scheme(__func__);
         verify_ckks_real_data_type(__func__);
         validate_key(key_pair.secret_key);
@@ -4147,8 +4169,8 @@ class CryptoContextImpl : public Serializable {
      * @return CKKS ciphertext encoding the input LWE messages.
      */
     Ciphertext<Element> eval_fhew_to_ckks(std::vector<std::shared_ptr<LweCiphertextImpl>>& lwe_ciphertexts,
-                                       uint32_t num_ctxts = 0, uint32_t num_slots = 0, uint32_t p = 4, double pmin = 0.0,
-                                       double pmax = 2.0, uint32_t dim1 = 0) const {
+                                          uint32_t num_ctxts = 0, uint32_t num_slots = 0, uint32_t p = 4,
+                                          double pmin = 0.0, double pmax = 2.0, uint32_t dim1 = 0) const {
         verify_ckks_scheme(__func__);
         verify_ckks_real_data_type(__func__);
         return scheme_->eval_fhew_to_ckks(lwe_ciphertexts, num_ctxts, num_slots, p, pmin, pmax, dim1);
@@ -4228,15 +4250,15 @@ class CryptoContextImpl : public Serializable {
      * @return CKKS ciphertext encoding sign comparison result.
      */
     Ciphertext<Element> eval_compare_scheme_switching(ConstCiphertext<Element>& ciphertext1,
-                                                   ConstCiphertext<Element>& ciphertext2, uint32_t num_ctxts = 0,
-                                                   uint32_t num_slots = 0, uint32_t p_lwe = 0, double scale_sign = 1.0,
-                                                   bool unit = false) {
+                                                      ConstCiphertext<Element>& ciphertext2, uint32_t num_ctxts = 0,
+                                                      uint32_t num_slots = 0, uint32_t p_lwe = 0,
+                                                      double scale_sign = 1.0, bool unit = false) {
         verify_ckks_scheme(__func__);
         verify_ckks_real_data_type(__func__);
         validate_ciphertext(ciphertext1);
         validate_ciphertext(ciphertext2);
         return scheme_->eval_compare_scheme_switching(ciphertext1, ciphertext2, num_ctxts, num_slots, p_lwe, scale_sign,
-                                                    unit);
+                                                      unit);
     }
 
     /**
@@ -4254,9 +4276,9 @@ class CryptoContextImpl : public Serializable {
      *         and after num_values in the second ciphertext if one_hot=true and after the first slot if one_hot=false.
      */
     std::vector<Ciphertext<Element>> eval_min_scheme_switching(ConstCiphertext<Element>& ciphertext,
-                                                            PublicKey<Element>& public_key, uint32_t num_values = 0,
-                                                            uint32_t num_slots = 0, uint32_t p_lwe = 0,
-                                                            double scale_sign = 1.0) {
+                                                               PublicKey<Element>& public_key, uint32_t num_values = 0,
+                                                               uint32_t num_slots = 0, uint32_t p_lwe = 0,
+                                                               double scale_sign = 1.0) {
         verify_ckks_scheme(__func__);
         verify_ckks_real_data_type(__func__);
         validate_ciphertext(ciphertext);
@@ -4275,9 +4297,9 @@ class CryptoContextImpl : public Serializable {
      * @return A vector with two CKKS ciphertexts: [min, argmin].
      */
     std::vector<Ciphertext<Element>> eval_min_scheme_switching_alt(ConstCiphertext<Element>& ciphertext,
-                                                               PublicKey<Element>& public_key, uint32_t num_values = 0,
-                                                               uint32_t num_slots = 0, uint32_t p_lwe = 0,
-                                                               double scale_sign = 1.0) {
+                                                                   PublicKey<Element>& public_key,
+                                                                   uint32_t num_values = 0, uint32_t num_slots = 0,
+                                                                   uint32_t p_lwe = 0, double scale_sign = 1.0) {
         verify_ckks_scheme(__func__);
         verify_ckks_real_data_type(__func__);
         validate_ciphertext(ciphertext);
@@ -4297,9 +4319,9 @@ class CryptoContextImpl : public Serializable {
      *         and after num_values in the second ciphertext if one_hot=true and after the first slot if one_hot=false.
      */
     std::vector<Ciphertext<Element>> eval_max_scheme_switching(ConstCiphertext<Element>& ciphertext,
-                                                            PublicKey<Element>& public_key, uint32_t num_values = 0,
-                                                            uint32_t num_slots = 0, uint32_t p_lwe = 0,
-                                                            double scale_sign = 1.0) {
+                                                               PublicKey<Element>& public_key, uint32_t num_values = 0,
+                                                               uint32_t num_slots = 0, uint32_t p_lwe = 0,
+                                                               double scale_sign = 1.0) {
         verify_ckks_scheme(__func__);
         verify_ckks_real_data_type(__func__);
         validate_ciphertext(ciphertext);
@@ -4318,9 +4340,9 @@ class CryptoContextImpl : public Serializable {
      * @return A vector of two CKKS ciphertexts: [max, argmax].
      */
     std::vector<Ciphertext<Element>> eval_max_scheme_switching_alt(ConstCiphertext<Element>& ciphertext,
-                                                               PublicKey<Element>& public_key, uint32_t num_values = 0,
-                                                               uint32_t num_slots = 0, uint32_t p_lwe = 0,
-                                                               double scale_sign = 1.0) {
+                                                                   PublicKey<Element>& public_key,
+                                                                   uint32_t num_values = 0, uint32_t num_slots = 0,
+                                                                   uint32_t p_lwe = 0, double scale_sign = 1.0) {
         verify_ckks_scheme(__func__);
         verify_ckks_real_data_type(__func__);
         validate_ciphertext(ciphertext);
@@ -4367,11 +4389,12 @@ class CryptoContextImpl : public Serializable {
      * @return indices that do not have automorphism keys associated with
      */
     static std::set<uint32_t> get_eval_automorphism_no_key_indices(const std::string& key_tag,
-                                                              const std::set<uint32_t>& indices) {
-        std::set<uint32_t> existing_indices{CryptoContextImpl<Element>::get_existing_eval_automorphism_key_indices(key_tag)};
+                                                                   const std::set<uint32_t>& indices) {
+        std::set<uint32_t> existing_indices{
+                CryptoContextImpl<Element>::get_existing_eval_automorphism_key_indices(key_tag)};
         // if no index found for the given key_tag, then the entire set "indices" is returned
         return (existing_indices.empty()) ? indices :
-                                           CryptoContextImpl<Element>::get_unique_values(existing_indices, indices);
+                                            CryptoContextImpl<Element>::get_unique_values(existing_indices, indices);
     }
 
     /**
@@ -4387,7 +4410,8 @@ class CryptoContextImpl : public Serializable {
      * @param new_values   Second set to extract unique values from.
      * @return Set of values present in new_values but not in old_values.
      */
-    static std::set<uint32_t> get_unique_values(const std::set<uint32_t>& old_values, const std::set<uint32_t>& new_values);
+    static std::set<uint32_t> get_unique_values(const std::set<uint32_t>& old_values,
+                                                const std::set<uint32_t>& new_values);
 
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
@@ -4400,7 +4424,7 @@ class CryptoContextImpl : public Serializable {
     void load(Archive& ar, std::uint32_t const version) {
         if (version > CryptoContextImpl<Element>::serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         ar(cereal::make_nvp("cc", params_));
         ar(cereal::make_nvp("kt", scheme_));
@@ -4430,10 +4454,9 @@ template <>
 DecryptResult CryptoContextImpl<RnsPoly>::multiparty_decrypt_fusion(
         const std::vector<Ciphertext<RnsPoly>>& partial_ciphertext_vec, Plaintext* plaintext) const;
 template <>
-std::unordered_map<uint32_t, RnsPoly> CryptoContextImpl<RnsPoly>::share_keys(const PrivateKey<RnsPoly>& sk,
-                                                                              uint32_t N, uint32_t threshold,
-                                                                              uint32_t index,
-                                                                              const std::string& share_type) const;
+std::unordered_map<uint32_t, RnsPoly> CryptoContextImpl<RnsPoly>::share_keys(const PrivateKey<RnsPoly>& sk, uint32_t N,
+                                                                             uint32_t threshold, uint32_t index,
+                                                                             const std::string& share_type) const;
 /// @endcond
 }  // namespace cipher
 

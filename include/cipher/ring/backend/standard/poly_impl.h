@@ -293,7 +293,7 @@ PolyImpl<VecType> PolyImpl<VecType>::minus_impl(const PolyImpl& rhs) const {
 
 template <typename VecType>
 PolyImpl<VecType> PolyImpl<VecType>::multiply_and_round(const typename VecType::Integer& p,
-                                                      const typename VecType::Integer& q) const {
+                                                        const typename VecType::Integer& q) const {
     PolyImpl<VecType> tmp(params_, format_);
     tmp.set_values((*values_).multiply_and_round(p, q), format_);
     return tmp;
@@ -431,8 +431,8 @@ PolyImpl<VecType> PolyImpl<VecType>::mod(const Integer& modulus) const {
 }
 
 template <typename VecType>
-void PolyImpl<VecType>::switch_modulus(const Integer& modulus, const Integer& root_of_unity_value, const Integer& modulus_arb,
-                                      const Integer& root_of_unity_arb) {
+void PolyImpl<VecType>::switch_modulus(const Integer& modulus, const Integer& root_of_unity_value,
+                                       const Integer& modulus_arb, const Integer& root_of_unity_arb) {
     if (values_ != nullptr) {
         values_->switch_modulus(modulus);
         auto c{params_->get_cyclotomic_order()};
@@ -441,8 +441,8 @@ void PolyImpl<VecType>::switch_modulus(const Integer& modulus, const Integer& ro
 }
 
 template <typename VecType>
-void PolyImpl<VecType>::lazy_switch_modulus(const Integer& modulus, const Integer& root_of_unity_value, const Integer& modulus_arb,
-                                          const Integer& root_of_unity_arb) {
+void PolyImpl<VecType>::lazy_switch_modulus(const Integer& modulus, const Integer& root_of_unity_value,
+                                            const Integer& modulus_arb, const Integer& root_of_unity_arb) {
     if (values_ != nullptr) {
         values_->lazy_switch_modulus(modulus);
         auto c{params_->get_cyclotomic_order()};
@@ -589,7 +589,8 @@ std::vector<PolyImpl<VecType>> PolyImpl<VecType>::base_decompose(uint32_t base_b
         // TP: x is same for BACKEND 2 and 6
         for (uint32_t i = 0; i < n_windows; ++i) {
             PolyImpl<VecType> x_digit(params_);
-            x_digit.set_values(x.get_values().get_digit_at_index_for_base(i + 1, uint32_t{1} << base_bits), Format::COEFFICIENT);
+            x_digit.set_values(x.get_values().get_digit_at_index_for_base(i + 1, uint32_t{1} << base_bits),
+                               Format::COEFFICIENT);
 
             // TP: x_digit is all zeros for BACKEND=6, but not for BACKEND-2
             // *********************************************************

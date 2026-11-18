@@ -45,7 +45,8 @@
 
 namespace cipher {
 
-std::vector<double> eval_chebyshev_coefficients(std::function<double(double)> func, double a, double b, uint32_t degree) {
+std::vector<double> eval_chebyshev_coefficients(std::function<double(double)> func, double a, double b,
+                                                uint32_t degree) {
     if (degree == 0)
         CIPHER_THROW("The degree of approximation can not be zero");
     // the number of coefficients to be generated should be degree+1 as zero is also included
@@ -69,7 +70,7 @@ std::vector<double> eval_chebyshev_coefficients(std::function<double(double)> fu
 
 // A cleartext version of CryptoContext<...>::eval_chebyshev_function(...)
 std::vector<double> eval_chebyshev_function_ptxt(std::function<double(double)> func, const std::vector<double>& ptxt,
-                                              double a, double b, size_t degree) {
+                                                 double a, double b, size_t degree) {
     auto coeffs = eval_chebyshev_coefficients(func, a, b, degree);
 
     // The standard practice is to halve the 1st coefficient.

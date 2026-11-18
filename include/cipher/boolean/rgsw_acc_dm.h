@@ -56,7 +56,7 @@ class RingGswAccumulatorDm final : public RingGswAccumulator {
      * @return a shared pointer to the resulting keys
      */
     RingGswAccKey key_gen_acc(const std::shared_ptr<RingGswCryptoParams>& params, const NativePoly& sk_ntt,
-                            ConstLwePrivateKey& LWE_sk) const override;
+                              ConstLwePrivateKey& LWE_sk) const override;
 
 #if CIPHER_NATIVE_INT != 32
     /**
@@ -70,7 +70,7 @@ class RingGswAccumulatorDm final : public RingGswAccumulator {
      * @return a shared pointer to the resulting 32-bit keys, laid out as [n][base_r][digits_r] like the 64-bit key
      */
     RingGswAccKey32 key_gen_acc32(const std::shared_ptr<RingGswCryptoParams>& params, const NativePoly& sk_ntt,
-                                ConstLwePrivateKey& LWE_sk) const override;
+                                  ConstLwePrivateKey& LWE_sk) const override;
 
     /**
      * Main accumulator function used in bootstrapping - AP variant on the 32-bit internal key. The accumulator is
@@ -83,7 +83,7 @@ class RingGswAccumulatorDm final : public RingGswAccumulator {
      * @param a value to update the accumulator with
      */
     void eval_acc32(const std::shared_ptr<RingGswCryptoParams>& params, ConstRingGswAccKey32& ek, RlweCiphertext& acc,
-                   const NativeVector& a) const override;
+                    const NativeVector& a) const override;
 #endif
 
     /**
@@ -95,7 +95,7 @@ class RingGswAccumulatorDm final : public RingGswAccumulator {
      * @param a value to update the accumulator with
      */
     void eval_acc(const std::shared_ptr<RingGswCryptoParams>& params, ConstRingGswAccKey& ek, RlweCiphertext& acc,
-                 const NativeVector& a) const override;
+                  const NativeVector& a) const override;
 
   private:
     /**
@@ -107,8 +107,8 @@ class RingGswAccumulatorDm final : public RingGswAccumulator {
      * @param index LWE secret-key coefficient index
      * @return a shared pointer to the resulting keys
      */
-    RingGswEvalKey key_gen_dm(const std::shared_ptr<RingGswCryptoParams>& params, const NativePoly& sk_ntt, LwePlaintext m,
-                            uint32_t index) const;
+    RingGswEvalKey key_gen_dm(const std::shared_ptr<RingGswCryptoParams>& params, const NativePoly& sk_ntt,
+                              LwePlaintext m, uint32_t index) const;
 
     /**
      * DM Accumulation as described in https://eprint.iacr.org/2020/086
@@ -119,7 +119,7 @@ class RingGswAccumulatorDm final : public RingGswAccumulator {
      * @param index LWE secret-key coefficient index
      */
     void add_to_acc_dm(const std::shared_ptr<RingGswCryptoParams>& params, ConstRingGswEvalKey& ek, RlweCiphertext& acc,
-                    uint32_t index) const;
+                       uint32_t index) const;
 };
 
 }  // namespace cipher

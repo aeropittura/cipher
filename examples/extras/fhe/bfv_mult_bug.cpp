@@ -43,7 +43,7 @@
 using namespace cipher;
 
 void eval_noise_bfv(PrivateKey<RnsPoly> private_key, ConstCiphertext<RnsPoly> ciphertext, Plaintext ptxt, uint32_t ptm,
-                  double& noise, double& log_q);
+                    double& noise, double& log_q);
 
 int main() {
     ContextParams<BfvRnsContext> parameters;
@@ -114,7 +114,7 @@ int main() {
 }
 
 void eval_noise_bfv(PrivateKey<RnsPoly> private_key, ConstCiphertext<RnsPoly> ciphertext, Plaintext ptxt, uint32_t ptm,
-                  double& noise, double& log_q) {
+                    double& noise, double& log_q) {
     const auto crypto_params = std::static_pointer_cast<BfvRnsCryptoParams>(private_key->get_crypto_parameters());
 
     const std::vector<RnsPoly>& cv = ciphertext->get_elements();

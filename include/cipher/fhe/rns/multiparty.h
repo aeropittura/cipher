@@ -88,7 +88,7 @@ class RnsMultiparty : public BaseMultiparty<RnsPoly> {
      * @return the partial decryption.
      */
     Ciphertext<RnsPoly> multiparty_decrypt_main(ConstCiphertext<RnsPoly> ciphertext,
-                                               const PrivateKey<RnsPoly> private_key) const override;
+                                                const PrivateKey<RnsPoly> private_key) const override;
 
     /**
      * Threshold FHE: Method for decryption operation run by the lead decryption client. Returns c_0 + s*c_1
@@ -99,7 +99,7 @@ class RnsMultiparty : public BaseMultiparty<RnsPoly> {
      * @return the partial decryption.
      */
     Ciphertext<RnsPoly> multiparty_decrypt_lead(ConstCiphertext<RnsPoly> ciphertext,
-                                               const PrivateKey<RnsPoly> private_key) const override;
+                                                const PrivateKey<RnsPoly> private_key) const override;
 
     /**
      * Threshold FHE: Generates a partial evaluation key for homomorphic multiplication by multiplying both
@@ -122,7 +122,7 @@ class RnsMultiparty : public BaseMultiparty<RnsPoly> {
      * @return the masked decryption as a single-polynomial ciphertext.
      */
     Ciphertext<RnsPoly> int_boot_decrypt(const PrivateKey<RnsPoly> private_key,
-                                        ConstCiphertext<RnsPoly> ciphertext) const override;
+                                         ConstCiphertext<RnsPoly> ciphertext) const override;
 
     /**
      * Interactive bootstrapping: public-key encryption of the client's masked decryption. The input polynomial
@@ -134,7 +134,7 @@ class RnsMultiparty : public BaseMultiparty<RnsPoly> {
      * @return the resulting encryption.
      */
     Ciphertext<RnsPoly> int_boot_encrypt(const PublicKey<RnsPoly> public_key,
-                                        ConstCiphertext<RnsPoly> ciphertext) const override;
+                                         ConstCiphertext<RnsPoly> ciphertext) const override;
 
     /**
      * Interactive bootstrapping: adds the encrypted masked decryption and the unencrypted masked decryption
@@ -145,7 +145,7 @@ class RnsMultiparty : public BaseMultiparty<RnsPoly> {
      * @return the refreshed ciphertext.
      */
     Ciphertext<RnsPoly> int_boot_add(ConstCiphertext<RnsPoly> ciphertext1,
-                                    ConstCiphertext<RnsPoly> ciphertext2) const override;
+                                     ConstCiphertext<RnsPoly> ciphertext2) const override;
 
     /////////////////////////////////////
     // SERIALIZATION

@@ -125,7 +125,7 @@ struct BaseTestCase {
             param_overrides = std::vector<std::string>(start, start + num_overrides);
         } catch (...) {
             std::string err_msg("Check the number of parameter overrides in the .csv file. It should be [" +
-                               std::to_string(num_overrides) + "]");
+                                std::to_string(num_overrides) + "]");
             CIPHER_THROW(err_msg);
         }
         return num_overrides;

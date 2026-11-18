@@ -50,15 +50,15 @@ BFV implementation. See https://eprint.iacr.org/2021/204 for details.
 namespace cipher {
 
 bool BfvRnsParamGen::params_gen_bfvrns_internal(std::shared_ptr<BaseCryptoParams<RnsPoly>> crypto_params,
-                                                        uint32_t eval_add_count, uint32_t multiplicative_depth,
-                                                        uint32_t key_switch_count, size_t dcrt_bits, uint32_t n_custom,
-                                                        uint32_t num_digits) const {
+                                                uint32_t eval_add_count, uint32_t multiplicative_depth,
+                                                uint32_t key_switch_count, size_t dcrt_bits, uint32_t n_custom,
+                                                uint32_t num_digits) const {
     if (!crypto_params)
         CIPHER_THROW("No crypto parameters are supplied to BFVrns ParamsGen");
 
     if ((dcrt_bits < DCRT_MODULUS::MIN_SIZE) || (dcrt_bits > DCRT_MODULUS::MAX_SIZE)) {
         CIPHER_THROW("Number of bits in CRT moduli should be in the range from " +
-                      std::to_string(DCRT_MODULUS::MIN_SIZE) + " to " + std::to_string(DCRT_MODULUS::MAX_SIZE));
+                     std::to_string(DCRT_MODULUS::MIN_SIZE) + " to " + std::to_string(DCRT_MODULUS::MAX_SIZE));
     }
 
     const auto crypto_params_bfvrns = std::dynamic_pointer_cast<BfvRnsCryptoParams>(crypto_params);
@@ -313,16 +313,16 @@ bool BfvRnsParamGen::params_gen_bfvrns_internal(std::shared_ptr<BaseCryptoParams
 
     if ((n > n_custom) && (n_custom != 0))
         CIPHER_THROW("Ring dimension " + std::to_string(n_custom) +
-                      " specified by the user does not meet the "
-                      "security requirement. Please increase it to " +
-                      std::to_string(n) + ".");
+                     " specified by the user does not meet the "
+                     "security requirement. Please increase it to " +
+                     std::to_string(n) + ".");
 
     const size_t num_initial_moduli = static_cast<size_t>(std::ceil(std::ceil(logq) / dcrt_bits));
     if (num_initial_moduli < 1)
         CIPHER_THROW("numInitialModuli must be greater than 0.");
     const size_t size_q = multiparty_mode == NOISE_FLOODING_MULTIPARTY ?
-                                 num_initial_moduli + NoiseFlooding::NUM_MODULI_MULTIPARTY :
-                                 num_initial_moduli;
+                                  num_initial_moduli + NoiseFlooding::NUM_MODULI_MULTIPARTY :
+                                  num_initial_moduli;
 
     std::vector<NativeInteger> moduli_q(size_q);
     std::vector<NativeInteger> roots_q(size_q);

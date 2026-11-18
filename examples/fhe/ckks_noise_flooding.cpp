@@ -106,7 +106,8 @@ void ckks_noise_flooding_demo() {
     crypto_context_noise_estimation->eval_mult_key_gen(key_pair_noise_estimation.secret_key);
 
     // We run the encrypted computation the first time.
-    auto noise_ciphertext = encrypted_computation(crypto_context_noise_estimation, key_pair_noise_estimation.public_key);
+    auto noise_ciphertext =
+            encrypted_computation(crypto_context_noise_estimation, key_pair_noise_estimation.public_key);
 
     // Decrypt  noise
     Plaintext noise_plaintext;

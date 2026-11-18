@@ -502,7 +502,8 @@ void common_cyclotomic_order(const std::string& msg) {
     auto ilparams0 =
             std::make_shared<ParmType>(m, typename VecType::Integer("1234"), typename VecType::Integer("5678"));
     Element ilv0(ilparams0);
-    EXPECT_EQ(ilparams0->get_cyclotomic_order(), ilv0.get_cyclotomic_order()) << msg << " Failure: GetCyclotomicOrder()";
+    EXPECT_EQ(ilparams0->get_cyclotomic_order(), ilv0.get_cyclotomic_order())
+            << msg << " Failure: GetCyclotomicOrder()";
 }
 
 // Instantiations of cyclotomic_order()

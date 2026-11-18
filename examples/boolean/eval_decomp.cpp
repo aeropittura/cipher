@@ -58,8 +58,8 @@ int main() {
 
     uint32_t Q = 1 << log_q;
 
-    int q = 4096;                                                    // q
-    int factor = 1 << int(log_q - std::log2(q));                      // Q/q
+    int q = 4096;                                                         // q
+    int factor = 1 << int(log_q - std::log2(q));                          // Q/q
     uint64_t P = cc.get_max_plaintext_space().convert_to_int() * factor;  // Obtain the maximum plaintext space
 
     // Sample Program: Step 2: Key Generation

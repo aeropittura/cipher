@@ -102,7 +102,7 @@ class CenteredToInt32ConverterImpl {
                         -static_cast<int64_t>((modulus_ - value).template convert_to_int<uint64_t>()));
         }
         CIPHER_THROW("The centered representative of " + value.to_string() + " mod " + modulus_.to_string() +
-                      " cannot be represented as int32_t");
+                     " cannot be represented as int32_t");
     }
 
   private:

@@ -86,18 +86,18 @@ class CkksRnsCryptoParams : public RnsCryptoParams {
      * interactive bootstrapping (SLACK or COMPACT).
      */
     CkksRnsCryptoParams(std::shared_ptr<ParmType> params, const PlaintextModulus& plaintext_modulus,
-                            float distribution_parameter, float assurance_measure, SecurityLevel security_level,
-                            uint32_t digit_size, SecretKeyDist secret_key_dist, int max_relin_sk_deg = 2,
-                            KeySwitchTechnique ks_tech = BV, ScalingTechnique scal_tech = FIXEDMANUAL,
-                            EncryptionTechnique enc_tech = STANDARD, MultiplicationTechnique mult_tech = HPS,
-                            MultipartyMode multiparty_mode = FIXED_NOISE_MULTIPARTY,
-                            ExecutionMode execution_mode = EXEC_EVALUATION,
-                            DecryptionNoiseMode decryption_noise_mode = FIXED_NOISE_DECRYPT,
-                            CompressionLevel m_p_int_boot_ciphertext_compression_level = CompressionLevel::SLACK)
+                        float distribution_parameter, float assurance_measure, SecurityLevel security_level,
+                        uint32_t digit_size, SecretKeyDist secret_key_dist, int max_relin_sk_deg = 2,
+                        KeySwitchTechnique ks_tech = BV, ScalingTechnique scal_tech = FIXEDMANUAL,
+                        EncryptionTechnique enc_tech = STANDARD, MultiplicationTechnique mult_tech = HPS,
+                        MultipartyMode multiparty_mode = FIXED_NOISE_MULTIPARTY,
+                        ExecutionMode execution_mode = EXEC_EVALUATION,
+                        DecryptionNoiseMode decryption_noise_mode = FIXED_NOISE_DECRYPT,
+                        CompressionLevel m_p_int_boot_ciphertext_compression_level = CompressionLevel::SLACK)
         : RnsCryptoParams(params, plaintext_modulus, distribution_parameter, assurance_measure, security_level,
-                              digit_size, secret_key_dist, max_relin_sk_deg, ks_tech, scal_tech, enc_tech, mult_tech,
-                              multiparty_mode, execution_mode, decryption_noise_mode, m_p_int_boot_ciphertext_compression_level) {
-    }
+                          digit_size, secret_key_dist, max_relin_sk_deg, ks_tech, scal_tech, enc_tech, mult_tech,
+                          multiparty_mode, execution_mode, decryption_noise_mode,
+                          m_p_int_boot_ciphertext_compression_level) {}
 
     /**
      * Constructor that initializes the CKKS parameters from explicit encoding parameters, including the
@@ -130,25 +130,25 @@ class CkksRnsCryptoParams : public RnsCryptoParams {
      * scaling mode.
      * @param ckks_data_type CKKS data type (REAL or COMPLEX).
      */
-    CkksRnsCryptoParams(std::shared_ptr<ParmType> params, EncodingParams encoding_params,
-                            float distribution_parameter, float assurance_measure, SecurityLevel security_level,
-                            uint32_t digit_size, SecretKeyDist secret_key_dist, int max_relin_sk_deg = 2,
-                            KeySwitchTechnique ks_tech = BV, ScalingTechnique scal_tech = FIXEDMANUAL,
-                            EncryptionTechnique enc_tech = STANDARD, MultiplicationTechnique mult_tech = HPS,
-                            ProxyReEncryptionMode pre_mode = NOT_SET,
-                            MultipartyMode multiparty_mode = FIXED_NOISE_MULTIPARTY,
-                            ExecutionMode execution_mode = EXEC_EVALUATION,
-                            DecryptionNoiseMode decryption_noise_mode = FIXED_NOISE_DECRYPT,
-                            PlaintextModulus noise_scale_value = 1, uint32_t statistical_security = 30,
-                            uint32_t num_adversarial_queries = 1, uint32_t threshold_num_of_parties = 1,
-                            CompressionLevel m_p_int_boot_ciphertext_compression_level = CompressionLevel::SLACK,
-                            uint32_t composite_degree = BASE_NUM_LEVELS_TO_DROP, uint32_t register_word_size = CIPHER_NATIVE_INT,
-                            CkksDataType ckks_data_type = REAL)
-        : RnsCryptoParams(params, encoding_params, distribution_parameter, assurance_measure, security_level, digit_size,
-                              secret_key_dist, max_relin_sk_deg, ks_tech, scal_tech, enc_tech, mult_tech, pre_mode,
-                              multiparty_mode, execution_mode, decryption_noise_mode, noise_scale_value, statistical_security,
-                              num_adversarial_queries, threshold_num_of_parties, m_p_int_boot_ciphertext_compression_level,
-                              composite_degree, register_word_size, ckks_data_type) {}
+    CkksRnsCryptoParams(std::shared_ptr<ParmType> params, EncodingParams encoding_params, float distribution_parameter,
+                        float assurance_measure, SecurityLevel security_level, uint32_t digit_size,
+                        SecretKeyDist secret_key_dist, int max_relin_sk_deg = 2, KeySwitchTechnique ks_tech = BV,
+                        ScalingTechnique scal_tech = FIXEDMANUAL, EncryptionTechnique enc_tech = STANDARD,
+                        MultiplicationTechnique mult_tech = HPS, ProxyReEncryptionMode pre_mode = NOT_SET,
+                        MultipartyMode multiparty_mode = FIXED_NOISE_MULTIPARTY,
+                        ExecutionMode execution_mode = EXEC_EVALUATION,
+                        DecryptionNoiseMode decryption_noise_mode = FIXED_NOISE_DECRYPT,
+                        PlaintextModulus noise_scale_value = 1, uint32_t statistical_security = 30,
+                        uint32_t num_adversarial_queries = 1, uint32_t threshold_num_of_parties = 1,
+                        CompressionLevel m_p_int_boot_ciphertext_compression_level = CompressionLevel::SLACK,
+                        uint32_t composite_degree = BASE_NUM_LEVELS_TO_DROP,
+                        uint32_t register_word_size = CIPHER_NATIVE_INT, CkksDataType ckks_data_type = REAL)
+        : RnsCryptoParams(params, encoding_params, distribution_parameter, assurance_measure, security_level,
+                          digit_size, secret_key_dist, max_relin_sk_deg, ks_tech, scal_tech, enc_tech, mult_tech,
+                          pre_mode, multiparty_mode, execution_mode, decryption_noise_mode, noise_scale_value,
+                          statistical_security, num_adversarial_queries, threshold_num_of_parties,
+                          m_p_int_boot_ciphertext_compression_level, composite_degree, register_word_size,
+                          ckks_data_type) {}
 
     virtual ~CkksRnsCryptoParams() = default;
 
@@ -166,8 +166,8 @@ class CkksRnsCryptoParams : public RnsCryptoParams {
      * @param extra_bits size in bits of the extra modulus of FLEXIBLEAUTOEXT
      */
     void precompute_crt_tables(KeySwitchTechnique ks_tech, ScalingTechnique scal_tech, EncryptionTechnique enc_tech,
-                             MultiplicationTechnique mult_tech, uint32_t num_part_q, uint32_t aux_bits,
-                             uint32_t extra_bits) override;
+                               MultiplicationTechnique mult_tech, uint32_t num_part_q, uint32_t aux_bits,
+                               uint32_t extra_bits) override;
 
     /**
      * Gets the step between candidate auxiliary primes of HYBRID key switching: 2n for CKKS, so that the primes
@@ -466,14 +466,14 @@ class CkksRnsCryptoParams : public RnsCryptoParams {
     void load(Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             std::string err_msg("serialized object version " + std::to_string(version) +
-                               " is from a later version of the library");
+                                " is from a later version of the library");
             CIPHER_THROW(err_msg);
         }
         ar(cereal::base_class<RnsCryptoParams>(this));
 
         if (precompute_crt_tables_after_deserializaton()) {
-            precompute_crt_tables(ks_technique_, scal_technique_, enc_technique_, mult_technique_, num_part_q_, aux_bits_,
-                                extra_bits_);
+            precompute_crt_tables(ks_technique_, scal_technique_, enc_technique_, mult_technique_, num_part_q_,
+                                  aux_bits_, extra_bits_);
         }
     }
 

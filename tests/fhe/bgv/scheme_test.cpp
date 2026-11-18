@@ -325,7 +325,8 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             c_result = cc->eval_add(ciphertext1, ciphertext2);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_add->get_length());
-            check_equality(plaintext_add->get_packed_value(), results->get_packed_value(), eps, failmsg + " EvalAdd fails");
+            check_equality(plaintext_add->get_packed_value(), results->get_packed_value(), eps,
+                           failmsg + " EvalAdd fails");
 
             // Testing eval_add_in_place
             Ciphertext<Element> ciphertext1_clone = ciphertext1->clone();
@@ -333,13 +334,14 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             cc->decrypt(kp.secret_key, ciphertext1_clone, &results);
             results->set_length(plaintext_add->get_length());
             check_equality(plaintext_add->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " EvalAddInPlace fails");
+                           failmsg + " EvalAddInPlace fails");
 
             // Testing operator+
             c_result = ciphertext1 + ciphertext2;
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_add->get_length());
-            check_equality(plaintext_add->get_packed_value(), results->get_packed_value(), eps, failmsg + " operator+ fails");
+            check_equality(plaintext_add->get_packed_value(), results->get_packed_value(), eps,
+                           failmsg + " operator+ fails");
 
             // Testing operator+=
             Ciphertext<Element> cadd_inplace(ciphertext1);
@@ -347,19 +349,21 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             cc->decrypt(kp.secret_key, cadd_inplace, &results);
             results->set_length(plaintext_add->get_length());
             check_equality(plaintext_add->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " operator+= fails");
+                           failmsg + " operator+= fails");
 
             // Testing eval_sub
             c_result = cc->eval_sub(ciphertext1, ciphertext2);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_sub->get_length());
-            check_equality(plaintext_sub->get_packed_value(), results->get_packed_value(), eps, failmsg + " EvalSub fails");
+            check_equality(plaintext_sub->get_packed_value(), results->get_packed_value(), eps,
+                           failmsg + " EvalSub fails");
 
             // Testing operator-
             c_result = ciphertext1 - ciphertext2;
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_sub->get_length());
-            check_equality(plaintext_sub->get_packed_value(), results->get_packed_value(), eps, failmsg + " operator- fails");
+            check_equality(plaintext_sub->get_packed_value(), results->get_packed_value(), eps,
+                           failmsg + " operator- fails");
 
             // Testing operator-=
             Ciphertext<Element> csub_inplace(ciphertext1);
@@ -367,27 +371,28 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             cc->decrypt(kp.secret_key, csub_inplace, &results);
             results->set_length(plaintext_sub->get_length());
             check_equality(plaintext_sub->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " operator-= fails");
+                           failmsg + " operator-= fails");
 
             // Testing eval_add ciphertext + plaintext
             c_result = cc->eval_add(ciphertext1, plaintext2);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_add->get_length());
             check_equality(plaintext_add->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " EvalAdd Ct and Pt fails");
+                           failmsg + " EvalAdd Ct and Pt fails");
 
             // Testing eval_sub ciphertext - plaintext
             c_result = cc->eval_sub(ciphertext1, plaintext2);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_sub->get_length());
             check_equality(plaintext_sub->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " EvalSub Ct and Pt fails");
+                           failmsg + " EvalSub Ct and Pt fails");
 
             // Testing eval_negate
             c_result = cc->eval_negate(ciphertext1);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(negatives1->get_length());
-            check_equality(negatives1->get_packed_value(), results->get_packed_value(), eps, failmsg + " EvalNegate fails");
+            check_equality(negatives1->get_packed_value(), results->get_packed_value(), eps,
+                           failmsg + " EvalNegate fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -401,7 +406,7 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
     // squared, which is right only if the level adjustment gives the plaintext the ciphertext's factor. This
     // multiplies ciphertexts at several levels and noise-scale degrees by plaintexts encoded at other levels.
     void unit_test_mult_plaintext_at_level(const TEST_CASE_UTBGVRNS& test_data,
-                                        const std::string& failmsg = std::string()) {
+                                           const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
             KeyPair<Element> kp = cc->key_gen();
@@ -429,7 +434,8 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
                                             " (degree " + std::to_string(cts[c]->get_noise_scale_deg()) +
                                             ") times plaintext at level " + std::to_string(pt_level);
 
-                    cc->decrypt(kp.secret_key, cc->eval_mult(cts[c], cc->make_packed_plaintext(y, 1, pt_level)), &result);
+                    cc->decrypt(kp.secret_key, cc->eval_mult(cts[c], cc->make_packed_plaintext(y, 1, pt_level)),
+                                &result);
                     result->set_length(VECTOR_SIZE);
                     check_equality(xy, result->get_packed_value(), eps, msg + ": EvalMult fails");
 
@@ -483,14 +489,15 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             c_result = cc->eval_mult(ciphertext1, ciphertext2);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_mult->get_length());
-            check_equality(plaintext_mult->get_packed_value(), results->get_packed_value(), eps, failmsg + " EvalMult fails");
+            check_equality(plaintext_mult->get_packed_value(), results->get_packed_value(), eps,
+                           failmsg + " EvalMult fails");
 
             // Testing operator*
             c_result = ciphertext1 * ciphertext2;
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_mult->get_length());
             check_equality(plaintext_mult->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " operator* fails");
+                           failmsg + " operator* fails");
 
             // Testing operator*=
             Ciphertext<Element> cmult_inplace(ciphertext1);
@@ -498,21 +505,21 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             cc->decrypt(kp.secret_key, cmult_inplace, &results);
             results->set_length(plaintext_mult->get_length());
             check_equality(plaintext_mult->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " operator*= fails");
+                           failmsg + " operator*= fails");
 
             // Testing eval_mult ciphertext * plaintext
             c_result = cc->eval_mult(ciphertext1, plaintext2);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_mult->get_length());
             check_equality(plaintext_mult->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " EvalMult Ct and Pt fails");
+                           failmsg + " EvalMult Ct and Pt fails");
 
             // Testing eval_mult_no_relin ciphertext * ciphertext
             c_result = cc->eval_mult_no_relin(ciphertext1, ciphertext2);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_mult->get_length());
             check_equality(plaintext_mult->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " EvalMultNoRelin Ct and Ct fails");
+                           failmsg + " EvalMultNoRelin Ct and Ct fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -570,14 +577,14 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_left2->get_length());
             check_equality(plaintext_left2->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " EvalAtIndex(+2) fails");
+                           failmsg + " EvalAtIndex(+2) fails");
 
             // Testing eval_at_index -2
             c_result = cc->eval_at_index(ciphertext1, -2);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_right2->get_length());
             check_equality(plaintext_right2->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " EvalAtIndex(-2) fails");
+                           failmsg + " EvalAtIndex(-2) fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -643,7 +650,8 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             auto c_result = cc->eval_merge(ciphertexts);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(p_merged->get_length());
-            check_equality(p_merged->get_packed_value(), results->get_packed_value(), eps, failmsg + " EvalMerge fails");
+            check_equality(p_merged->get_packed_value(), results->get_packed_value(), eps,
+                           failmsg + " EvalMerge fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -740,8 +748,8 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
                 p_ct5[i] = p_ct_mult[i] * vector_of_ints1[i];
                 p_ct6[i] = vector_of_ints1[i] + p_ct_mult[i];
                 p_ct7[i] = vector_of_ints1[i] - p_ct_mult[i];
-                auto tmp =
-                        (vector_of_ints1[i] * vector_of_ints1[i] + vector_of_ints1[i] * vector_of_ints1[i]) * vector_of_ints1[i];
+                auto tmp = (vector_of_ints1[i] * vector_of_ints1[i] + vector_of_ints1[i] * vector_of_ints1[i]) *
+                           vector_of_ints1[i];
                 p_ct_5[i] = tmp + vector_of_ints2[i];
                 p_ct_6[i] = tmp - vector_of_ints2[i];
                 p_ct_7[i] = tmp * vector_of_ints2[i];
@@ -789,31 +797,31 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             cc->decrypt(kp.secret_key, ct3, &results);
             results->set_length(plaintext_ct3->get_length());
             check_equality(plaintext_ct3->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " addition with tower diff = 1 fails");
+                           failmsg + " addition with tower diff = 1 fails");
 
             cc->eval_add_in_place(ct_red_clone, ct);  // In-place addition with tower diff = 1
             cc->decrypt(kp.secret_key, ct_red_clone, &results);
             results->set_length(plaintext_ct3->get_length());
             check_equality(plaintext_ct3->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " in-place addition with tower diff = 1 fails");
+                           failmsg + " in-place addition with tower diff = 1 fails");
 
             auto ct4 = cc->eval_sub(ct_red, ct);  // Subtraction with tower diff = 1
             cc->decrypt(kp.secret_key, ct4, &results);
             results->set_length(plaintext_ct4->get_length());
             check_equality(plaintext_ct4->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " subtraction with tower diff = 1 fails");
+                           failmsg + " subtraction with tower diff = 1 fails");
 
             auto ct5 = cc->eval_mult(ct_red, ct);  // Multiplication with tower diff = 1
             cc->decrypt(kp.secret_key, ct5, &results);
             results->set_length(plaintext_ct5->get_length());
             check_equality(plaintext_ct5->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " multiplication with tower diff = 1 fails");
+                           failmsg + " multiplication with tower diff = 1 fails");
 
             auto ct6 = cc->eval_add(ct, ct_red);  // Addition with tower diff = 1 (inputs reversed)
             cc->decrypt(kp.secret_key, ct6, &results);
             results->set_length(plaintext_ct6->get_length());
             check_equality(plaintext_ct6->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " addition (reverse) with tower diff = 1 fails");
+                           failmsg + " addition (reverse) with tower diff = 1 fails");
 
             // In-place addition with tower diff = 1 (inputs reversed)
             auto ct_clone = ct->clone();
@@ -821,19 +829,19 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             cc->decrypt(kp.secret_key, ct_clone, &results);
             results->set_length(plaintext_ct6->get_length());
             check_equality(plaintext_ct6->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " in-place addition (reverse) with tower diff = 1 fails");
+                           failmsg + " in-place addition (reverse) with tower diff = 1 fails");
 
             auto ct7 = cc->eval_sub(ct, ct_red);  // Subtraction with tower diff = 1 (inputs reversed)
             cc->decrypt(kp.secret_key, ct7, &results);
             results->set_length(plaintext_ct7->get_length());
             check_equality(plaintext_ct7->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " subtraction (reverse) with tower diff = 1 fails");
+                           failmsg + " subtraction (reverse) with tower diff = 1 fails");
 
             auto ct8 = cc->eval_mult(ct, ct_red);  // Multiplication with tower diff = 1 (inputs reversed)
             cc->decrypt(kp.secret_key, ct8, &results);
             results->set_length(plaintext_ct8->get_length());
             check_equality(plaintext_ct8->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " multiplication (reverse) with tower diff = 1 fails");
+                           failmsg + " multiplication (reverse) with tower diff = 1 fails");
 
             auto ct_mul2 = cc->eval_mult(ct_red, ct);
             auto ct_red2 = cc->mod_reduce(ct_mul2);
@@ -845,33 +853,33 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             cc->decrypt(kp.secret_key, ct9, &results);
             results->set_length(plaintext_ct9->get_length());
             check_equality(plaintext_ct9->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " addition with tower diff > 1 fails");
+                           failmsg + " addition with tower diff > 1 fails");
 
             // In-place Addition with more than 1 level difference
             cc->eval_add_in_place(ct_red3_clone_value, ct);
             cc->decrypt(kp.secret_key, ct_red3_clone_value, &results);
             results->set_length(plaintext_ct9->get_length());
             check_equality(plaintext_ct9->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " in-place addition with tower diff > 1 fails");
+                           failmsg + " in-place addition with tower diff > 1 fails");
 
             auto ct10 = cc->eval_sub(ct_red3, ct);  // Subtraction with more than 1 level difference
             cc->decrypt(kp.secret_key, ct10, &results);
             results->set_length(plaintext_ct10->get_length());
             check_equality(plaintext_ct10->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " subtraction with tower diff > 1 fails");
+                           failmsg + " subtraction with tower diff > 1 fails");
 
             auto ct11 = cc->eval_mult(ct_red3, ct);  // Multiplication with more than 1 level difference
             cc->decrypt(kp.secret_key, ct11, &results);
             results->set_length(plaintext_ct11->get_length());
             check_equality(plaintext_ct11->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " multiplication with tower diff > 1 fails");
+                           failmsg + " multiplication with tower diff > 1 fails");
 
             // Addition with more than 1 level difference (inputs reversed)
             auto ct12 = cc->eval_add(ct, ct_red3);
             cc->decrypt(kp.secret_key, ct12, &results);
             results->set_length(plaintext_ct12->get_length());
             check_equality(plaintext_ct12->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " addition (reverse) with tower diff > 1 fails");
+                           failmsg + " addition (reverse) with tower diff > 1 fails");
 
             // In-place addition with more than 1 level difference (inputs reversed)
             auto ct_clone_value = ct->clone();
@@ -879,19 +887,20 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             cc->decrypt(kp.secret_key, ct_clone_value, &results);
             results->set_length(plaintext_ct12->get_length());
             check_equality(plaintext_ct12->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " in-place addition (reverse) with tower diff > 1 fails");
+                           failmsg + " in-place addition (reverse) with tower diff > 1 fails");
 
             auto ct13 = cc->eval_sub(ct, ct_red3);  // Subtraction with more than 1 level difference (inputs reversed)
             cc->decrypt(kp.secret_key, ct13, &results);
             results->set_length(plaintext_ct13->get_length());
             check_equality(plaintext_ct13->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " subtraction (reverse) with tower diff > 1 fails");
+                           failmsg + " subtraction (reverse) with tower diff > 1 fails");
 
-            auto ct14 = cc->eval_mult(ct, ct_red3);  // Multiplication with more than 1 level difference (inputs reversed)
+            auto ct14 =
+                    cc->eval_mult(ct, ct_red3);  // Multiplication with more than 1 level difference (inputs reversed)
             cc->decrypt(kp.secret_key, ct14, &results);
             results->set_length(plaintext_ct14->get_length());
             check_equality(plaintext_ct14->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " multiplication (reverse) with tower diff > 1 fails");
+                           failmsg + " multiplication (reverse) with tower diff > 1 fails");
 
             // This scenario tests for operations on
             // ciphertext and plaintext that differ on
@@ -906,17 +915,17 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             cc->decrypt(kp.secret_key, ct_5, &results);
             results->set_length(plaintext_ct_5->get_length());
             check_equality(plaintext_ct_5->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " addition with plaintext and tower diff = 1 fails");
+                           failmsg + " addition with plaintext and tower diff = 1 fails");
 
             cc->decrypt(kp.secret_key, ct_6, &results);
             results->set_length(plaintext_ct_6->get_length());
             check_equality(plaintext_ct_6->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " subtraction with plaintext and tower diff = 1 fails");
+                           failmsg + " subtraction with plaintext and tower diff = 1 fails");
 
             cc->decrypt(kp.secret_key, ct_7, &results);
             results->set_length(plaintext_ct_7->get_length());
             check_equality(plaintext_ct_7->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " multiplication with plaintext and tower diff = 1 fails");
+                           failmsg + " multiplication with plaintext and tower diff = 1 fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -954,7 +963,7 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             cc->decrypt(kp.secret_key, ct, &result);
             cc->decrypt(kp.secret_key, ct_compressed, &result_compressed);
             check_equality(result->get_packed_value(), result_compressed->get_packed_value(), eps,
-                          failmsg + " compress fails");
+                           failmsg + " compress fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1015,14 +1024,14 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_left2->get_length());
             check_equality(plaintext_left2->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " EvalAtIndex(+2) fails");
+                           failmsg + " EvalAtIndex(+2) fails");
 
             // Testing eval_at_index -2
             c_result = cc->eval_fast_rotation(ciphertext1, -2, m, decompose);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_right2->get_length());
             check_equality(plaintext_right2->get_packed_value(), results->get_packed_value(), eps,
-                          failmsg + " EvalAtIndex(-2) fails");
+                           failmsg + " EvalAtIndex(-2) fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1141,7 +1150,7 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
     }
 
     void unit_test_cryptoparams_validation(const TEST_CASE_UTBGVRNS& test_data,
-                                         const std::string& failmsg = std::string()) {
+                                           const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 

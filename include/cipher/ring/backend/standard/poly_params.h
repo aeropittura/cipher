@@ -97,8 +97,8 @@ class PolyParamsImpl final : public ElementParams<IntType> {
      * @param big_modulus the big modulus.
      * @param big_root_of_unity the root of unity for the big modulus.
      */
-    PolyParamsImpl(uint32_t order, const IntType& modulus, const IntType& root_of_unity_value, const IntType& big_modulus,
-                 const IntType& big_root_of_unity)
+    PolyParamsImpl(uint32_t order, const IntType& modulus, const IntType& root_of_unity_value,
+                   const IntType& big_modulus, const IntType& big_root_of_unity)
         : ElementParams<IntType>(order, modulus, root_of_unity_value, big_modulus, big_root_of_unity) {}
 
     /**
@@ -156,7 +156,7 @@ class PolyParamsImpl final : public ElementParams<IntType> {
     void load(Archive& ar, std::uint32_t const version) {
         if (version > serialized_version())
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         ar(::cereal::base_class<ElementParams<IntType>>(this));
     }
 

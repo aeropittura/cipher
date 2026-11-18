@@ -56,26 +56,28 @@
 namespace cipher {
 
 void RingGswAccumulator::signed_digit_decompose(const std::shared_ptr<RingGswCryptoParams>& params,
-                                              const std::vector<NativePoly>& input,
-                                              std::vector<NativePoly>& output) const {
+                                                const std::vector<NativePoly>& input,
+                                                std::vector<NativePoly>& output) const {
     signed_digit_decompose_impl(params, input, output, params->get_default_base_g_params());
 }
 
 void RingGswAccumulator::signed_digit_decompose(const std::shared_ptr<RingGswCryptoParams>& params,
-                                              const std::vector<NativePoly>& input, std::vector<NativePoly>& output,
-                                              uint32_t index) const {
+                                                const std::vector<NativePoly>& input, std::vector<NativePoly>& output,
+                                                uint32_t index) const {
     signed_digit_decompose_impl(params, input, output, params->get_base_g_params(index));
 }
 
 void RingGswAccumulator::signed_digit_decompose_impl(const std::shared_ptr<RingGswCryptoParams>& params,
-                                                  const std::vector<NativePoly>& input, std::vector<NativePoly>& output,
-                                                  const RingGswCryptoParams::BaseGParams& bp) const {
+                                                     const std::vector<NativePoly>& input,
+                                                     std::vector<NativePoly>& output,
+                                                     const RingGswCryptoParams::BaseGParams& bp) const {
     excess_h_digit_decompose(params->get_Q().convert_to_int<BasicInteger>(), bp, input, output);
 }
 
 void RingGswAccumulator::signed_digit_decompose(const std::shared_ptr<RingGswCryptoParams>& params,
-                                              const NativePoly& input, std::vector<NativePoly>& output) const {
-    excess_h_digit_decompose(params->get_Q().convert_to_int<BasicInteger>(), params->get_default_base_g_params(), input, output);
+                                                const NativePoly& input, std::vector<NativePoly>& output) const {
+    excess_h_digit_decompose(params->get_Q().convert_to_int<BasicInteger>(), params->get_default_base_g_params(), input,
+                             output);
 }
 
 };  // namespace cipher

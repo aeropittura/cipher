@@ -438,7 +438,7 @@ std::vector<int> get_cyclotomic_polynomial_recursive(uint32_t m);
  */
 template <typename IntVector>
 typename IntVector::Integer synthetic_remainder(const IntVector& dividend, const typename IntVector::Integer& a,
-                                               const typename IntVector::Integer& modulus);
+                                                const typename IntVector::Integer& modulus);
 
 /**
  * Returns the remainder vector after polynomial division of dividend with
@@ -451,7 +451,7 @@ typename IntVector::Integer synthetic_remainder(const IntVector& dividend, const
  */
 template <typename IntVector>
 IntVector synthetic_poly_remainder(const IntVector& dividend, const IntVector& a_list,
-                                 const typename IntVector::Integer& modulus);
+                                   const typename IntVector::Integer& modulus);
 
 /**
  * Returns the polynomial after raising it by exponent = power.
@@ -474,7 +474,7 @@ IntVector polynomial_power(const IntVector& input, uint32_t power);
  */
 template <typename IntVector>
 IntVector synthetic_polynomial_division(const IntVector& dividend, const typename IntVector::Integer& a,
-                                      const typename IntVector::Integer& modulus);
+                                        const typename IntVector::Integer& modulus);
 
 /**
  * Checks if g is a generator for any cyclic group with modulus q (non-prime

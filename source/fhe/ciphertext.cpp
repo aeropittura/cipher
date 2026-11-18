@@ -50,7 +50,7 @@ void CiphertextImpl<RnsPoly>::set_level(size_t level) {
         if (limb_num < get_noise_scale_deg()) {
             uint32_t mult_depth_value = crypto_params->get_multiplicative_depth();
             CIPHER_THROW("The current multiplicative depth [" + std::to_string(mult_depth_value) +
-                          "] is insufficient; increase it.");
+                         "] is insufficient; increase it.");
         }
     }
 }

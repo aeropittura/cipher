@@ -60,7 +60,7 @@ typename VecType::Integer TernaryUniformGeneratorImpl<VecType>::generate_integer
 
 template <typename VecType>
 VecType TernaryUniformGeneratorImpl<VecType>::generate_vector(uint32_t size, const typename VecType::Integer& modulus,
-                                                             uint32_t h) const {
+                                                              uint32_t h) const {
     if (h == 0) {
         // regular ternary distribution
         VecType v(size, modulus, modulus - typename VecType::Integer(1));

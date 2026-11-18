@@ -176,7 +176,7 @@ class UTCKKSRNS_NOISE_FLOODING : public ::testing::TestWithParam<TEST_CASE_UTCKK
     }
 
     Ciphertext<RnsPoly> encrypted_multiparty_computation(CryptoContext<RnsPoly>& crypto_context,
-                                                        PublicKey<RnsPoly> public_key) {
+                                                         PublicKey<RnsPoly> public_key) {
         // Encoding and encryption of inputs
         // Generate random input
         std::vector<double> vec1 = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8};
@@ -195,10 +195,14 @@ class UTCKKSRNS_NOISE_FLOODING : public ::testing::TestWithParam<TEST_CASE_UTCKK
     void generate_multiparty_keys(CryptoContext<RnsPoly>& crypto_context, KeyPair<RnsPoly> kp1, KeyPair<RnsPoly> kp2) {
         auto eval_mult_key = crypto_context->key_switch_gen(kp1.secret_key, kp1.secret_key);
         auto eval_mult_key2 = crypto_context->multi_key_switch_gen(kp2.secret_key, kp2.secret_key, eval_mult_key);
-        auto eval_mult_ab = crypto_context->multi_add_eval_keys(eval_mult_key, eval_mult_key2, kp2.public_key->get_key_tag());
-        auto eval_mult_bab = crypto_context->multi_mult_eval_key(kp2.secret_key, eval_mult_ab, kp2.public_key->get_key_tag());
-        auto eval_mult_aab = crypto_context->multi_mult_eval_key(kp1.secret_key, eval_mult_ab, kp2.public_key->get_key_tag());
-        auto eval_mult_final = crypto_context->multi_add_eval_mult_keys(eval_mult_aab, eval_mult_bab, eval_mult_ab->get_key_tag());
+        auto eval_mult_ab =
+                crypto_context->multi_add_eval_keys(eval_mult_key, eval_mult_key2, kp2.public_key->get_key_tag());
+        auto eval_mult_bab =
+                crypto_context->multi_mult_eval_key(kp2.secret_key, eval_mult_ab, kp2.public_key->get_key_tag());
+        auto eval_mult_aab =
+                crypto_context->multi_mult_eval_key(kp1.secret_key, eval_mult_ab, kp2.public_key->get_key_tag());
+        auto eval_mult_final =
+                crypto_context->multi_add_eval_mult_keys(eval_mult_aab, eval_mult_bab, eval_mult_ab->get_key_tag());
         crypto_context->insert_eval_mult_key({eval_mult_final});
     }
 
@@ -213,7 +217,7 @@ class UTCKKSRNS_NOISE_FLOODING : public ::testing::TestWithParam<TEST_CASE_UTCKK
     }
 
     void unit_test_noise_estimation(const TEST_CASE_UTCKKSRNS_NOISE_FLOODING& test_data,
-                                  const std::string& failmsg = std::string()) {
+                                    const std::string& failmsg = std::string()) {
         try {
             CryptoContext<RnsPoly> cc(unit_test_generate_context(test_data.params));
             cc->enable(PKE);
@@ -239,7 +243,7 @@ class UTCKKSRNS_NOISE_FLOODING : public ::testing::TestWithParam<TEST_CASE_UTCKK
         }
     }
     void unit_test_full_noise_flooding(const TEST_CASE_UTCKKSRNS_NOISE_FLOODING& test_data,
-                                    const std::string& failmsg = std::string()) {
+                                       const std::string& failmsg = std::string()) {
         CryptoContext<RnsPoly> cc(unit_test_generate_context(test_data.params));
         cc->enable(PKE);
         cc->enable(LEVELEDSHE);
@@ -256,11 +260,12 @@ class UTCKKSRNS_NOISE_FLOODING : public ::testing::TestWithParam<TEST_CASE_UTCKK
 
         std::vector<std::complex<double>> expected_result = {1.01, 1.04, 0, 0, 1.25, 0, 0, 1.64};
 
-        check_equality(result->get_ckks_packed_value(), expected_result, eps, failmsg + " Noise flooding computation fails");
+        check_equality(result->get_ckks_packed_value(), expected_result, eps,
+                       failmsg + " Noise flooding computation fails");
     }
 
     void unit_test_multiparty_noise_flooding(const TEST_CASE_UTCKKSRNS_NOISE_FLOODING& test_data,
-                                          const std::string& failmsg = std::string()) {
+                                             const std::string& failmsg = std::string()) {
         CryptoContext<RnsPoly> cc(unit_test_generate_context(test_data.params));
         cc->enable(PKE);
         cc->enable(LEVELEDSHE);
@@ -269,7 +274,8 @@ class UTCKKSRNS_NOISE_FLOODING : public ::testing::TestWithParam<TEST_CASE_UTCKK
         auto kp1 = cc->key_gen();
         KeyPair<Element> kp2 = cc->multiparty_key_gen(kp1.public_key, false, true);
         generate_multiparty_keys(cc, kp1, kp2);
-        auto pub_key_for_encryption = cc->multi_add_pub_keys(kp1.public_key, kp2.public_key, kp2.public_key->get_key_tag());
+        auto pub_key_for_encryption =
+                cc->multi_add_pub_keys(kp1.public_key, kp2.public_key, kp2.public_key->get_key_tag());
 
         auto ciphertext_result = encrypted_multiparty_computation(cc, pub_key_for_encryption);
 
@@ -283,7 +289,8 @@ class UTCKKSRNS_NOISE_FLOODING : public ::testing::TestWithParam<TEST_CASE_UTCKK
 
         std::vector<std::complex<double>> expected_result = {0.1, 0.2, 0, 0, 0.5, 0, 0, 0.8};
 
-        check_equality(result->get_ckks_packed_value(), expected_result, eps, failmsg + " Noise flooding computation fails");
+        check_equality(result->get_ckks_packed_value(), expected_result, eps,
+                       failmsg + " Noise flooding computation fails");
     }
 };
 

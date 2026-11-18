@@ -70,7 +70,7 @@ inline void widen_poly32_into(const NativePoly32& src, NativePoly& dst) {
 }
 
 inline std::vector<NativePoly32> narrow_acc32(const std::shared_ptr<NativePolyParams32>& params,
-                                             const std::vector<NativePoly>& acc) {
+                                              const std::vector<NativePoly>& acc) {
     std::vector<NativePoly32> out;
     out.reserve(acc.size());
     for (const auto& p : acc)
@@ -202,7 +202,7 @@ class RingGswAccKey32Impl : public Serializable {
     void load(Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         ar(::cereal::make_nvp("N", N_));
         ar(::cereal::make_nvp("p", poly_params_));

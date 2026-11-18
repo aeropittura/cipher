@@ -45,8 +45,10 @@ extern template class cipher::SchemeBase<cipher::RnsPoly>;
 extern template class cipher::BaseFhe<cipher::RnsPoly>;
 
 CEREAL_REGISTER_TYPE_WITH_NAME(cipher::Serializable, "lbcrypto::Serializable");
-CEREAL_REGISTER_TYPE_WITH_NAME(cipher::BaseCryptoParams<cipher::RnsPoly>, "lbcrypto::CryptoParametersBase<lbcrypto::DCRTPoly>");
-CEREAL_REGISTER_TYPE_WITH_NAME(cipher::RlweCryptoParams<cipher::RnsPoly>, "lbcrypto::CryptoParametersRLWE<lbcrypto::DCRTPoly>");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::BaseCryptoParams<cipher::RnsPoly>,
+                               "lbcrypto::CryptoParametersBase<lbcrypto::DCRTPoly>");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::RlweCryptoParams<cipher::RnsPoly>,
+                               "lbcrypto::CryptoParametersRLWE<lbcrypto::DCRTPoly>");
 CEREAL_REGISTER_TYPE_WITH_NAME(cipher::SchemeBase<cipher::RnsPoly>, "lbcrypto::SchemeBase<lbcrypto::DCRTPoly>");
 CEREAL_REGISTER_TYPE_WITH_NAME(cipher::BaseFhe<cipher::RnsPoly>, "lbcrypto::FHEBase<lbcrypto::DCRTPoly>");
 

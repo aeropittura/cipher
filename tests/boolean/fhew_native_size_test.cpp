@@ -283,8 +283,8 @@ TEST(UnitTestFHEWNativeSize, SwitchingKey32FitsCapsModulus) {
 TEST(UnitTestFHEWNativeSize, SwitchingKey32RejectsCiphertextAboveKeySwitchingModulus) {
     const std::string msg("UnitTestFHEWNativeSize.SwitchingKey32RejectsCiphertextAboveKeySwitchingModulus:");
     BooleanContext cc;
-    cc.generate_boolean_context(BooleanContextParams{27, 1024, 64, 512, 16384, 32, 512, 23, 9, UNIFORM_TERNARY, 3.19, {}},
-                             GINX);
+    cc.generate_boolean_context(
+            BooleanContextParams{27, 1024, 64, 512, 16384, 32, 512, 23, 9, UNIFORM_TERNARY, 3.19, {}}, GINX);
     auto&& lwe = cc.get_params()->get_lwe_params();
     auto sk = cc.key_gen();
     auto sk_n = cc.key_gen_n();

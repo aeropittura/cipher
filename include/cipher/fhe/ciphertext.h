@@ -447,7 +447,8 @@ class CiphertextImpl : public CryptoObject<Element> {
      * @return a new ciphertext with the same context, key tag, level/scaling data and metadata but no elements
      */
     virtual Ciphertext<Element> clone_empty() const {
-        auto ct(std::make_shared<CiphertextImpl<Element>>(this->get_crypto_context(), this->get_key_tag(), encoding_type_));
+        auto ct(std::make_shared<CiphertextImpl<Element>>(this->get_crypto_context(), this->get_key_tag(),
+                                                          encoding_type_));
         ct->slots_ = slots_;
         ct->level_ = level_;
         ct->hopslevel_ = hopslevel_;
@@ -562,7 +563,7 @@ class CiphertextImpl : public CryptoObject<Element> {
     void load(Archive& ar, std::uint32_t const version) {
         if (version > serialized_version())
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         ar(cereal::base_class<CryptoObject<Element>>(this));
         ar(cereal::make_nvp("v", elements_));
         ar(cereal::make_nvp("sl", slots_));

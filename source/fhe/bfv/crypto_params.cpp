@@ -44,8 +44,8 @@ namespace cipher {
 
 // Precomputation of CRT tables for encryption, decryption, and homomorphic multiplication
 void BfvRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, ScalingTechnique scal_tech,
-                                                 EncryptionTechnique enc_tech, MultiplicationTechnique mult_tech,
-                                                 uint32_t num_part_q, uint32_t aux_bits, uint32_t extra_bits) {
+                                               EncryptionTechnique enc_tech, MultiplicationTechnique mult_tech,
+                                               uint32_t num_part_q, uint32_t aux_bits, uint32_t extra_bits) {
     RnsCryptoParams::precompute_crt_tables(ks_tech, scal_tech, enc_tech, mult_tech, num_part_q, aux_bits, extra_bits);
 
     NativeInteger t = get_plaintext_modulus();
@@ -66,7 +66,8 @@ void BfvRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, Scali
     const auto barrett_base128_bit(BigInteger(1).l_shift_eq(128));
     for (const auto& p : params_q) {
         t_inv_modq_.emplace_back(t.mod_inverse(p->get_modulus()));
-        modq_barrett_mu_.emplace_back((barrett_base128_bit / BigInteger(p->get_modulus())).convert_to_int<DoubleNativeInt>());
+        modq_barrett_mu_.emplace_back(
+                (barrett_base128_bit / BigInteger(p->get_modulus())).convert_to_int<DoubleNativeInt>());
         moduli_q.emplace_back(p->get_modulus());
         roots_q.emplace_back(p->get_root_of_unity());
     }
@@ -270,12 +271,12 @@ void BfvRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, Scali
         /////////////////////////////////////
 
         const BigInteger modulus_r = mult_tech == HPSPOVERQLEVELED || mult_tech == HPSPOVERQ ?
-                                            params_rl_[size_q - 1]->get_modulus() :
-                                            params_rl_[0]->get_modulus();
+                                             params_rl_[size_q - 1]->get_modulus() :
+                                             params_rl_[0]->get_modulus();
 
         const BigInteger modulus_qr = mult_tech == HPSPOVERQLEVELED || mult_tech == HPSPOVERQ ?
-                                             params_ql_rl_[size_q - 1]->get_modulus() :
-                                             params_ql_rl_[0]->get_modulus();
+                                              params_ql_rl_[size_q - 1]->get_modulus() :
+                                              params_ql_rl_[0]->get_modulus();
 
         const BigInteger modulust(get_plaintext_modulus());
 
@@ -283,8 +284,9 @@ void BfvRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, Scali
         for (uint32_t i = 0; i < size_q; ++i) {
             BigInteger qi(moduli_q[i].convert_to_int());
             t_rs_hat_inv_mods_divs_frac_[i] =
-                    static_cast<double>(
-                            ((modulus_qr.divided_by(qi)).mod_inverse(qi) * modulus_r * modulust).mod(qi).convert_to_int()) /
+                    static_cast<double>(((modulus_qr.divided_by(qi)).mod_inverse(qi) * modulus_r * modulust)
+                                                .mod(qi)
+                                                .convert_to_int()) /
                     static_cast<double>(qi.convert_to_int());
         }
 
@@ -447,7 +449,8 @@ void BfvRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, Scali
                         ((modulus_q.divided_by(qi)).mod_inverse(qi) * BigInteger(get_plaintext_modulus()));
                 BigInteger t_q_hat_inv_modq_divqi = t_q_hat_inv_modqi.divided_by(qi);
                 t_q_hat_inv_modq_divq_modt_[i] = t_q_hat_inv_modq_divqi.mod(get_plaintext_modulus()).convert_to_int();
-                t_q_hat_inv_modq_divq_modt_precon_[i] = t_q_hat_inv_modq_divq_modt_[i].prep_mod_mul_const(get_plaintext_modulus());
+                t_q_hat_inv_modq_divq_modt_precon_[i] =
+                        t_q_hat_inv_modq_divq_modt_[i].prep_mod_mul_const(get_plaintext_modulus());
 
                 int64_t numerator = t_q_hat_inv_modqi.mod(qi).convert_to_int();
                 int64_t denominator = moduli_q[i].convert_to_int();
@@ -464,7 +467,8 @@ void BfvRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, Scali
                         ((modulus_q.divided_by(qi)).mod_inverse(qi) * BigInteger(get_plaintext_modulus()));
                 BigInteger t_q_hat_inv_modq_divqi = t_q_hat_inv_modqi.divided_by(qi);
                 t_q_hat_inv_modq_divq_modt_[i] = t_q_hat_inv_modq_divqi.mod(get_plaintext_modulus()).convert_to_int();
-                t_q_hat_inv_modq_divq_modt_precon_[i] = t_q_hat_inv_modq_divq_modt_[i].prep_mod_mul_const(get_plaintext_modulus());
+                t_q_hat_inv_modq_divq_modt_precon_[i] =
+                        t_q_hat_inv_modq_divq_modt_[i].prep_mod_mul_const(get_plaintext_modulus());
 
                 int64_t numerator = t_q_hat_inv_modqi.mod(qi).convert_to_int();
                 int64_t denominator = moduli_q[i].convert_to_int();
@@ -473,7 +477,8 @@ void BfvRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, Scali
                 t_q_hat_inv_modqi.l_shift_eq(q_msb_hf);
                 t_q_hat_inv_modq_divqi = t_q_hat_inv_modqi.divided_by(qi);
                 t_q_hat_inv_modq_b_divq_modt_[i] = t_q_hat_inv_modq_divqi.mod(get_plaintext_modulus()).convert_to_int();
-                t_q_hat_inv_modq_b_divq_modt_precon_[i] = t_q_hat_inv_modq_b_divq_modt_[i].prep_mod_mul_const(get_plaintext_modulus());
+                t_q_hat_inv_modq_b_divq_modt_precon_[i] =
+                        t_q_hat_inv_modq_b_divq_modt_[i].prep_mod_mul_const(get_plaintext_modulus());
 
                 numerator = t_q_hat_inv_modqi.mod(qi).convert_to_int();
                 t_q_hat_inv_modq_b_divq_frac_[i] = static_cast<double>(numerator) / static_cast<double>(denominator);
@@ -494,9 +499,11 @@ void BfvRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, Scali
                 for (uint32_t i = 0; i < size_q; ++i) {
                     BigInteger q_hati = modulus_q / BigInteger(moduli_q[i]);
                     BigInteger q_hat_inv_modqi = q_hati.mod_inverse(moduli_q[i]);
-                    neg_rl_q_hat_inv_modq_[l - 1][i] = rl_value[l].mod_mul(q_hat_inv_modqi, moduli_q[i]).convert_to_int();
+                    neg_rl_q_hat_inv_modq_[l - 1][i] =
+                            rl_value[l].mod_mul(q_hat_inv_modqi, moduli_q[i]).convert_to_int();
                     neg_rl_q_hat_inv_modq_[l - 1][i] = moduli_q[i].sub(neg_rl_q_hat_inv_modq_[l - 1][i]);
-                    neg_rl_q_hat_inv_modq_precon_[l - 1][i] = neg_rl_q_hat_inv_modq_[l - 1][i].prep_mod_mul_const(moduli_q[i]);
+                    neg_rl_q_hat_inv_modq_precon_[l - 1][i] =
+                            neg_rl_q_hat_inv_modq_[l - 1][i].prep_mod_mul_const(moduli_q[i]);
                 }
             }
 
@@ -510,9 +517,11 @@ void BfvRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, Scali
                 for (uint32_t i = 0; i < l; ++i) {
                     BigInteger ql_hati = modulus_qtmp / BigInteger(moduli_q[i]);
                     BigInteger ql_hat_inv_modqi = ql_hati.mod_inverse(moduli_q[i]);
-                    neg_rl_ql_hat_inv_modq_[l - 1][i] = rl_value[l].mod_mul(ql_hat_inv_modqi, moduli_q[i]).convert_to_int();
+                    neg_rl_ql_hat_inv_modq_[l - 1][i] =
+                            rl_value[l].mod_mul(ql_hat_inv_modqi, moduli_q[i]).convert_to_int();
                     neg_rl_ql_hat_inv_modq_[l - 1][i] = moduli_q[i].sub(neg_rl_ql_hat_inv_modq_[l - 1][i]);
-                    neg_rl_ql_hat_inv_modq_precon_[l - 1][i] = neg_rl_ql_hat_inv_modq_[l - 1][i].prep_mod_mul_const(moduli_q[i]);
+                    neg_rl_ql_hat_inv_modq_precon_[l - 1][i] =
+                            neg_rl_ql_hat_inv_modq_[l - 1][i].prep_mod_mul_const(moduli_q[i]);
                 }
                 modulus_qtmp = modulus_qtmp / BigInteger(moduli_q[l - 1]);
             }
@@ -550,7 +559,8 @@ void BfvRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, Scali
                 BigInteger qi(moduli_q[i].convert_to_int());
                 for (uint32_t j = 0; j < size_r; ++j) {
                     BigInteger rj(moduli_r[j].convert_to_int());
-                    BigInteger t_ql_sl_hat_inv_mods = modulust * modulus_q * ((modulus_qr.divided_by(rj)).mod_inverse(rj));
+                    BigInteger t_ql_sl_hat_inv_mods =
+                            modulust * modulus_q * ((modulus_qr.divided_by(rj)).mod_inverse(rj));
                     BigInteger t_ql_sl_hat_inv_mods_divs = t_ql_sl_hat_inv_mods / rj;
                     t_ql_sl_hat_inv_mods_divs_modq_[0][i][j] = t_ql_sl_hat_inv_mods_divs.mod(qi).convert_to_int();
                 }
@@ -578,12 +588,15 @@ void BfvRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, Scali
                     BigInteger qi(moduli_q[i].convert_to_int());
                     for (uint32_t j = 0; j < l; ++j) {
                         BigInteger rj(moduli_r[j].convert_to_int());
-                        BigInteger t_ql_sl_hat_inv_mods = modulust * ql_value[l] * ((ql_rl[l].divided_by(rj)).mod_inverse(rj));
+                        BigInteger t_ql_sl_hat_inv_mods =
+                                modulust * ql_value[l] * ((ql_rl[l].divided_by(rj)).mod_inverse(rj));
                         BigInteger t_ql_sl_hat_inv_mods_divs = t_ql_sl_hat_inv_mods / rj;
-                        t_ql_sl_hat_inv_mods_divs_modq_[l - 1][i][j] = t_ql_sl_hat_inv_mods_divs.mod(qi).convert_to_int();
+                        t_ql_sl_hat_inv_mods_divs_modq_[l - 1][i][j] =
+                                t_ql_sl_hat_inv_mods_divs.mod(qi).convert_to_int();
                     }
 
-                    BigInteger t_ql_sl_hat_inv_mods = modulust * ql_value[l] * ((ql_rl[l].divided_by(qi)).mod_inverse(qi));
+                    BigInteger t_ql_sl_hat_inv_mods =
+                            modulust * ql_value[l] * ((ql_rl[l].divided_by(qi)).mod_inverse(qi));
                     BigInteger t_ql_sl_hat_inv_mods_divs = t_ql_sl_hat_inv_mods / qi;
                     t_ql_sl_hat_inv_mods_divs_modq_[l - 1][i][l] = t_ql_sl_hat_inv_mods_divs.mod(qi).convert_to_int();
                 }
@@ -601,7 +614,8 @@ void BfvRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, Scali
             for (uint32_t j = 0; j < size_q - l; ++j) {
                 BigInteger qj(moduli_q[j + l].convert_to_int());
                 ql_q_hat_inv_modq_divq_frac_[l - 1][j] =
-                        static_cast<double>(((modulus_q.divided_by(qj)).mod_inverse(qj) * ql_value[l]).mod(qj).convert_to_int()) /
+                        static_cast<double>(
+                                ((modulus_q.divided_by(qj)).mod_inverse(qj) * ql_value[l]).mod(qj).convert_to_int()) /
                         static_cast<double>(qj.convert_to_int());
             }
             ql_q_hat_inv_modq_divq_modq_[l - 1].resize(l);
@@ -707,7 +721,8 @@ void BfvRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, Scali
         // populate Barrett constant for m_BskModuli
         modbsk_barrett_mu_.resize(moduli_bsk_.size());
         for (size_t i = 0; i < modbsk_barrett_mu_.size(); ++i) {
-            modbsk_barrett_mu_[i] = (barrett_base128_bit / BigInteger(moduli_bsk_[i])).convert_to_int<DoubleNativeInt>();
+            modbsk_barrett_mu_[i] =
+                    (barrett_base128_bit / BigInteger(moduli_bsk_[i])).convert_to_int<DoubleNativeInt>();
         }
 
         // Populate [t*(Q/q_i)^-1]_{q_i}

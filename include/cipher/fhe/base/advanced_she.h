@@ -101,7 +101,7 @@ class BaseAdvancedShe {
      * @return the new resulting ciphertext.
      */
     virtual Ciphertext<Element> eval_mult_many(const std::vector<Ciphertext<Element>>& ciphertext_vec,
-                                             const std::vector<EvalKey<Element>>& eval_key_vec) const;
+                                               const std::vector<EvalKey<Element>>& eval_key_vec) const;
 
     //------------------------------------------------------------------------------
     // LINEAR WEIGHTED SUM
@@ -116,7 +116,7 @@ class BaseAdvancedShe {
      * @return A ciphertext containing the linear weighted sum.
      */
     virtual Ciphertext<Element> eval_linear_w_sum(std::vector<ReadOnlyCiphertext<Element>>& ciphertext_vec,
-                                               const std::vector<int64_t>& weights) const {
+                                                  const std::vector<int64_t>& weights) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -128,7 +128,7 @@ class BaseAdvancedShe {
      * @return A ciphertext containing the linear weighted sum.
      */
     virtual Ciphertext<Element> eval_linear_w_sum(std::vector<ReadOnlyCiphertext<Element>>& ciphertext_vec,
-                                               const std::vector<double>& weights) const {
+                                                  const std::vector<double>& weights) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -140,7 +140,7 @@ class BaseAdvancedShe {
      * @return A ciphertext containing the linear weighted sum.
      */
     virtual Ciphertext<Element> eval_linear_w_sum(std::vector<ReadOnlyCiphertext<Element>>& ciphertext_vec,
-                                               const std::vector<std::complex<double>>& weights) const {
+                                                  const std::vector<std::complex<double>>& weights) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
 
@@ -154,7 +154,7 @@ class BaseAdvancedShe {
      * @return A ciphertext containing the linear weighted sum.
      */
     virtual Ciphertext<Element> eval_linear_w_sum_mutable(std::vector<Ciphertext<Element>>& ciphertext_vec,
-                                                      const std::vector<int64_t>& weights) const {
+                                                          const std::vector<int64_t>& weights) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -166,7 +166,7 @@ class BaseAdvancedShe {
      * @return A ciphertext containing the linear weighted sum.
      */
     virtual Ciphertext<Element> eval_linear_w_sum_mutable(std::vector<Ciphertext<Element>>& ciphertext_vec,
-                                                      const std::vector<double>& weights) const {
+                                                          const std::vector<double>& weights) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -178,7 +178,7 @@ class BaseAdvancedShe {
      * @return A ciphertext containing the linear weighted sum.
      */
     virtual Ciphertext<Element> eval_linear_w_sum_mutable(std::vector<Ciphertext<Element>>& ciphertext_vec,
-                                                      const std::vector<std::complex<double>>& weights) const {
+                                                          const std::vector<std::complex<double>>& weights) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
 
@@ -197,7 +197,7 @@ class BaseAdvancedShe {
      * @return the resulting data structure of powers.
      */
     virtual std::shared_ptr<SeriesPowers<Element>> eval_powers(ConstCiphertext<Element>& ciphertext,
-                                                              const std::vector<int64_t>& coefficients) const {
+                                                               const std::vector<int64_t>& coefficients) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -210,7 +210,7 @@ class BaseAdvancedShe {
      * @return the resulting data structure of powers.
      */
     virtual std::shared_ptr<SeriesPowers<Element>> eval_powers(ConstCiphertext<Element>& ciphertext,
-                                                              const std::vector<double>& coefficients) const {
+                                                               const std::vector<double>& coefficients) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -237,7 +237,7 @@ class BaseAdvancedShe {
      * @return the result of polynomial evaluation.
      */
     virtual Ciphertext<Element> eval_poly(ConstCiphertext<Element>& ciphertext,
-                                         const std::vector<int64_t>& coefficients) const {
+                                          const std::vector<int64_t>& coefficients) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -250,7 +250,7 @@ class BaseAdvancedShe {
      * @return the result of polynomial evaluation.
      */
     virtual Ciphertext<Element> eval_poly(ConstCiphertext<Element>& ciphertext,
-                                         const std::vector<double>& coefficients) const {
+                                          const std::vector<double>& coefficients) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -263,7 +263,7 @@ class BaseAdvancedShe {
      * @return the result of polynomial evaluation.
      */
     virtual Ciphertext<Element> eval_poly(ConstCiphertext<Element>& ciphertext,
-                                         const std::vector<std::complex<double>>& coefficients) const {
+                                          const std::vector<std::complex<double>>& coefficients) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
 
@@ -278,7 +278,7 @@ class BaseAdvancedShe {
      * @return the result of polynomial evaluation.
      */
     virtual Ciphertext<Element> eval_poly_with_precomp(std::shared_ptr<SeriesPowers<Element>> powers,
-                                                    const std::vector<int64_t>& coefficients) const {
+                                                       const std::vector<int64_t>& coefficients) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -292,7 +292,7 @@ class BaseAdvancedShe {
      * @return the result of polynomial evaluation.
      */
     virtual Ciphertext<Element> eval_poly_with_precomp(std::shared_ptr<SeriesPowers<Element>> powers,
-                                                    const std::vector<double>& coefficients) const {
+                                                       const std::vector<double>& coefficients) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -306,7 +306,7 @@ class BaseAdvancedShe {
      * @return the result of polynomial evaluation.
      */
     virtual Ciphertext<Element> eval_poly_with_precomp(std::shared_ptr<SeriesPowers<Element>> powers,
-                                                    const std::vector<std::complex<double>>& coefficients) const {
+                                                       const std::vector<std::complex<double>>& coefficients) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
 
@@ -321,7 +321,7 @@ class BaseAdvancedShe {
      * @return the result of polynomial evaluation.
      */
     virtual Ciphertext<Element> eval_poly_linear(ConstCiphertext<Element>& ciphertext,
-                                               const std::vector<int64_t>& coefficients) const {
+                                                 const std::vector<int64_t>& coefficients) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -335,7 +335,7 @@ class BaseAdvancedShe {
      * @return the result of polynomial evaluation.
      */
     virtual Ciphertext<Element> eval_poly_linear(ConstCiphertext<Element>& ciphertext,
-                                               const std::vector<double>& coefficients) const {
+                                                 const std::vector<double>& coefficients) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -349,7 +349,7 @@ class BaseAdvancedShe {
      * @return the result of polynomial evaluation.
      */
     virtual Ciphertext<Element> eval_poly_linear(ConstCiphertext<Element>& ciphertext,
-                                               const std::vector<std::complex<double>>& coefficients) const {
+                                                 const std::vector<std::complex<double>>& coefficients) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
 
@@ -363,7 +363,7 @@ class BaseAdvancedShe {
      * @return the result of polynomial evaluation.
      */
     virtual Ciphertext<Element> eval_poly_ps(ConstCiphertext<Element>& x,
-                                           const std::vector<int64_t>& coefficients) const {
+                                             const std::vector<int64_t>& coefficients) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -375,7 +375,8 @@ class BaseAdvancedShe {
      * size of the vector is the degree of the polynomial + 1
      * @return the result of polynomial evaluation.
      */
-    virtual Ciphertext<Element> eval_poly_ps(ConstCiphertext<Element>& x, const std::vector<double>& coefficients) const {
+    virtual Ciphertext<Element> eval_poly_ps(ConstCiphertext<Element>& x,
+                                             const std::vector<double>& coefficients) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -388,7 +389,7 @@ class BaseAdvancedShe {
      * @return the result of polynomial evaluation.
      */
     virtual Ciphertext<Element> eval_poly_ps(ConstCiphertext<Element>& x,
-                                           const std::vector<std::complex<double>>& coefficients) const {
+                                             const std::vector<std::complex<double>>& coefficients) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
 
@@ -409,8 +410,8 @@ class BaseAdvancedShe {
      * @return the resulting data structure of Chebyshev polynomials.
      */
     virtual std::shared_ptr<SeriesPowers<Element>> eval_cheby_polys(ConstCiphertext<Element>& ciphertext,
-                                                                  const std::vector<int64_t>& coefficients, double a,
-                                                                  double b) const {
+                                                                    const std::vector<int64_t>& coefficients, double a,
+                                                                    double b) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -425,8 +426,8 @@ class BaseAdvancedShe {
      * @return the resulting data structure of Chebyshev polynomials.
      */
     virtual std::shared_ptr<SeriesPowers<Element>> eval_cheby_polys(ConstCiphertext<Element>& ciphertext,
-                                                                  const std::vector<double>& coefficients, double a,
-                                                                  double b) const {
+                                                                    const std::vector<double>& coefficients, double a,
+                                                                    double b) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -440,9 +441,9 @@ class BaseAdvancedShe {
      * @param b - upper bound of argument for which the coefficients were found
      * @return the resulting data structure of Chebyshev polynomials.
      */
-    virtual std::shared_ptr<SeriesPowers<Element>> eval_cheby_polys(ConstCiphertext<Element>& ciphertext,
-                                                                  const std::vector<std::complex<double>>& coefficients,
-                                                                  double a, double b) const {
+    virtual std::shared_ptr<SeriesPowers<Element>> eval_cheby_polys(
+            ConstCiphertext<Element>& ciphertext, const std::vector<std::complex<double>>& coefficients, double a,
+            double b) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
 
@@ -459,8 +460,8 @@ class BaseAdvancedShe {
      * @return the result of polynomial evaluation.
      */
     virtual Ciphertext<Element> eval_chebyshev_series(ConstCiphertext<Element>& ciphertext,
-                                                    const std::vector<int64_t>& coefficients, double a,
-                                                    double b) const {
+                                                      const std::vector<int64_t>& coefficients, double a,
+                                                      double b) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -476,7 +477,8 @@ class BaseAdvancedShe {
      * @return the result of polynomial evaluation.
      */
     virtual Ciphertext<Element> eval_chebyshev_series(ConstCiphertext<Element>& ciphertext,
-                                                    const std::vector<double>& coefficients, double a, double b) const {
+                                                      const std::vector<double>& coefficients, double a,
+                                                      double b) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -492,8 +494,8 @@ class BaseAdvancedShe {
      * @return the result of polynomial evaluation.
      */
     virtual Ciphertext<Element> eval_chebyshev_series(ConstCiphertext<Element>& ciphertext,
-                                                    const std::vector<std::complex<double>>& coefficients, double a,
-                                                    double b) const {
+                                                      const std::vector<std::complex<double>>& coefficients, double a,
+                                                      double b) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
 
@@ -507,7 +509,7 @@ class BaseAdvancedShe {
      * @return the result of polynomial evaluation.
      */
     virtual Ciphertext<Element> eval_chebyshev_series_with_precomp(std::shared_ptr<SeriesPowers<Element>> polys,
-                                                               const std::vector<int64_t>& coefficients) const {
+                                                                   const std::vector<int64_t>& coefficients) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -520,7 +522,7 @@ class BaseAdvancedShe {
      * @return the result of polynomial evaluation.
      */
     virtual Ciphertext<Element> eval_chebyshev_series_with_precomp(std::shared_ptr<SeriesPowers<Element>> polys,
-                                                               const std::vector<double>& coefficients) const {
+                                                                   const std::vector<double>& coefficients) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -548,8 +550,8 @@ class BaseAdvancedShe {
      * @return the result of polynomial evaluation.
      */
     virtual Ciphertext<Element> eval_chebyshev_series_linear(ConstCiphertext<Element>& ciphertext,
-                                                          const std::vector<int64_t>& coefficients, double a,
-                                                          double b) const {
+                                                             const std::vector<int64_t>& coefficients, double a,
+                                                             double b) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -563,8 +565,8 @@ class BaseAdvancedShe {
      * @return the result of polynomial evaluation.
      */
     virtual Ciphertext<Element> eval_chebyshev_series_linear(ConstCiphertext<Element>& ciphertext,
-                                                          const std::vector<double>& coefficients, double a,
-                                                          double b) const {
+                                                             const std::vector<double>& coefficients, double a,
+                                                             double b) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -578,8 +580,8 @@ class BaseAdvancedShe {
      * @return the result of polynomial evaluation.
      */
     virtual Ciphertext<Element> eval_chebyshev_series_linear(ConstCiphertext<Element>& ciphertext,
-                                                          const std::vector<std::complex<double>>& coefficients,
-                                                          double a, double b) const {
+                                                             const std::vector<std::complex<double>>& coefficients,
+                                                             double a, double b) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
 
@@ -594,8 +596,8 @@ class BaseAdvancedShe {
      * @return the result of polynomial evaluation.
      */
     virtual Ciphertext<Element> eval_chebyshev_series_ps(ConstCiphertext<Element>& ciphertext,
-                                                      const std::vector<int64_t>& coefficients, double a,
-                                                      double b) const {
+                                                         const std::vector<int64_t>& coefficients, double a,
+                                                         double b) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -609,8 +611,8 @@ class BaseAdvancedShe {
      * @return the result of polynomial evaluation.
      */
     virtual Ciphertext<Element> eval_chebyshev_series_ps(ConstCiphertext<Element>& ciphertext,
-                                                      const std::vector<double>& coefficients, double a,
-                                                      double b) const {
+                                                         const std::vector<double>& coefficients, double a,
+                                                         double b) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
     /**
@@ -624,8 +626,8 @@ class BaseAdvancedShe {
      * @return the result of polynomial evaluation.
      */
     virtual Ciphertext<Element> eval_chebyshev_series_ps(ConstCiphertext<Element>& ciphertext,
-                                                      const std::vector<std::complex<double>>& coefficients, double a,
-                                                      double b) const {
+                                                         const std::vector<std::complex<double>>& coefficients,
+                                                         double a, double b) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
 
@@ -678,7 +680,7 @@ class BaseAdvancedShe {
      * @return resulting ciphertext
      */
     virtual Ciphertext<Element> eval_sum(ConstCiphertext<Element> ciphertext, uint32_t batch_size,
-                                        const std::map<uint32_t, EvalKey<Element>>& eval_sum_key_map) const;
+                                         const std::map<uint32_t, EvalKey<Element>>& eval_sum_key_map) const;
 
     /**
      * @brief Sums all elements over row-vectors in a matrix - works only with packed encoding.
@@ -689,8 +691,8 @@ class BaseAdvancedShe {
      * @return resulting ciphertext
      */
     virtual Ciphertext<Element> eval_sum_rows(ConstCiphertext<Element> ciphertext, uint32_t num_rows,
-                                            const std::map<uint32_t, EvalKey<Element>>& eval_sum_keys,
-                                            uint32_t subring_dim) const;
+                                              const std::map<uint32_t, EvalKey<Element>>& eval_sum_keys,
+                                              uint32_t subring_dim) const;
 
     /**
      * @brief Sums all elements over column-vectors in a matrix - works only with packed encoding. The code is
@@ -702,8 +704,8 @@ class BaseAdvancedShe {
      * @return resulting ciphertext
      */
     virtual Ciphertext<Element> eval_sum_cols(ConstCiphertext<Element> ciphertext, uint32_t num_cols,
-                                            const std::map<uint32_t, EvalKey<Element>>& eval_sum_keys,
-                                            const std::map<uint32_t, EvalKey<Element>>& right_eval_keys) const;
+                                              const std::map<uint32_t, EvalKey<Element>>& eval_sum_keys,
+                                              const std::map<uint32_t, EvalKey<Element>>& right_eval_keys) const;
 
     //------------------------------------------------------------------------------
     // Advanced SHE EVAL INNER PRODUCT
@@ -719,9 +721,9 @@ class BaseAdvancedShe {
      * @return resulting ciphertext
      */
     virtual Ciphertext<Element> eval_inner_product(ConstCiphertext<Element> ciphertext1,
-                                                 ConstCiphertext<Element> ciphertext2, uint32_t batch_size,
-                                                 const std::map<uint32_t, EvalKey<Element>>& eval_key_map,
-                                                 const EvalKey<Element> eval_mult_key) const;
+                                                   ConstCiphertext<Element> ciphertext2, uint32_t batch_size,
+                                                   const std::map<uint32_t, EvalKey<Element>>& eval_key_map,
+                                                   const EvalKey<Element> eval_mult_key) const;
 
     /**
      * @brief Evaluates inner product in batched encoding
@@ -732,8 +734,8 @@ class BaseAdvancedShe {
      * @return resulting ciphertext
      */
     virtual Ciphertext<Element> eval_inner_product(ConstCiphertext<Element> ciphertext, ConstPlaintext plaintext,
-                                                 uint32_t batch_size,
-                                                 const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const;
+                                                   uint32_t batch_size,
+                                                   const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const;
 
     /**
      * Function to add random noise to all plaintext slots except for the first
@@ -755,7 +757,7 @@ class BaseAdvancedShe {
      * @return resulting ciphertext
      */
     virtual Ciphertext<Element> eval_merge(const std::vector<Ciphertext<Element>>& ciphertext_vector,
-                                          const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const;
+                                           const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const;
 
     //------------------------------------------------------------------------------
     // LINEAR TRANSFORMATION
@@ -832,8 +834,8 @@ class BaseAdvancedShe {
      * @param eval_key_map the map of automorphism keys, containing the indices of generate_eval_sum_indices.
      * @return the ciphertext with the partial sums.
      */
-    Ciphertext<Element> eval_sum_radix_fold(ConstCiphertext<Element>& ciphertext, uint32_t g0, uint32_t size, uint32_t m,
-                                         const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const;
+    Ciphertext<Element> eval_sum_radix_fold(ConstCiphertext<Element>& ciphertext, uint32_t g0, uint32_t size,
+                                            uint32_t m, const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const;
 
     /**
      * Automorphism indices needed by eval_sum for the batch size and cyclotomic order of the crypto
@@ -857,7 +859,7 @@ class BaseAdvancedShe {
      * @return the ciphertext with the sum in every slot.
      */
     Ciphertext<Element> eval_sum_2n(ConstCiphertext<Element> ciphertext, uint32_t batch_size, uint32_t m,
-                                   const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const;
+                                    const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const;
 
     /**
      * Sums batch_size slots of a ciphertext with CKKS packing: the radix fold generated by 5.
@@ -869,7 +871,7 @@ class BaseAdvancedShe {
      * @return the ciphertext with the sum in every slot.
      */
     Ciphertext<Element> eval_sum2n_complex(ConstCiphertext<Element> ciphertext, uint32_t batch_size, uint32_t m,
-                                         const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const;
+                                           const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const;
 
     /**
      * Sums the rows of a matrix with row_size columns packed in CKKS slots: the radix fold generated by
@@ -882,7 +884,7 @@ class BaseAdvancedShe {
      * @return the ciphertext with the row sums.
      */
     Ciphertext<Element> eval_sum2n_complex_rows(ConstCiphertext<Element> ciphertext, uint32_t row_size, uint32_t m,
-                                             const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const;
+                                                const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const;
 
     /**
      * Sums over the columns of a matrix packed in CKKS slots: the radix fold generated by 5^-1 mod m
@@ -895,7 +897,7 @@ class BaseAdvancedShe {
      * @return the ciphertext with the column sums.
      */
     Ciphertext<Element> eval_sum2n_complex_cols(ConstCiphertext<Element> ciphertext, uint32_t batch_size, uint32_t m,
-                                             const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const;
+                                                const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const;
 };
 
 }  // namespace cipher

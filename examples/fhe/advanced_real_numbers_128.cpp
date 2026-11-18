@@ -188,12 +188,12 @@ void automatic_rescale_demo(ScalingTechnique scal_tech) {
      * The result is correct, even though there is no call to
      * the rescale() operation.
      */
-    auto c2 = cc->eval_mult(c, c);                          // x^2
-    auto c4 = cc->eval_mult(c2, c2);                        // x^4
-    auto c8 = cc->eval_mult(c4, c4);                        // x^8
-    auto c16 = cc->eval_mult(c8, c8);                       // x^16
-    auto c9 = cc->eval_mult(c8, c);                         // x^9
-    auto c18 = cc->eval_mult(c16, c2);                      // x^18
+    auto c2 = cc->eval_mult(c, c);                            // x^2
+    auto c4 = cc->eval_mult(c2, c2);                          // x^4
+    auto c8 = cc->eval_mult(c4, c4);                          // x^8
+    auto c16 = cc->eval_mult(c8, c8);                         // x^16
+    auto c9 = cc->eval_mult(c8, c);                           // x^9
+    auto c18 = cc->eval_mult(c16, c2);                        // x^18
     auto c_res1 = cc->eval_add(cc->eval_add(c18, c9), 1.0);   // Final result 1
     auto c_res2 = cc->eval_sub(cc->eval_add(c18, c9), 1.0);   // Final result 2
     auto c_res3 = cc->eval_mult(cc->eval_add(c18, c9), 0.5);  // Final result 3

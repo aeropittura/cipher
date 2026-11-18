@@ -197,7 +197,7 @@ class UTCKKSRNS_SER : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_SER> {
 
     template <typename ST>
     void test_keys_and_ciphertexts(const TEST_CASE_UTCKKSRNS_SER& test_data, const ST& sertype,
-                                const std::string& failmsg = std::string()) {
+                                   const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -267,9 +267,10 @@ class UTCKKSRNS_SER : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_SER> {
             plaintext_short_new->set_length(plaintext_short->get_length());
             plaintext_short_new_l2_d2->set_length(plaintext_short_l2_d2->get_length());
             check_equality(plaintext_short_new->get_ckks_packed_value(), plaintext_short->get_ckks_packed_value(), eps,
-                          failmsg + " Decrypted serialization test fails");
-            check_equality(plaintext_short_new_l2_d2->get_ckks_packed_value(), plaintext_short_l2_d2->get_ckks_packed_value(), eps,
-                          failmsg + " Decrypted serialization test fails (level 2, depth 2)");
+                           failmsg + " Decrypted serialization test fails");
+            check_equality(plaintext_short_new_l2_d2->get_ckks_packed_value(),
+                           plaintext_short_l2_d2->get_ckks_packed_value(), eps,
+                           failmsg + " Decrypted serialization test fails (level 2, depth 2)");
 
             CIPHER_DEBUG("step 6");
             KeyPair<RnsPoly> kp2 = cc->key_gen();
@@ -282,7 +283,8 @@ class UTCKKSRNS_SER : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_SER> {
             CIPHER_DEBUG("step 7");
             // serialize a bunch of mult keys
             std::stringstream ser0;
-            EXPECT_EQ(CryptoContextImpl<RnsPoly>::serialize_eval_mult_key(ser0, sertype, kp.secret_key->get_key_tag()), true)
+            EXPECT_EQ(CryptoContextImpl<RnsPoly>::serialize_eval_mult_key(ser0, sertype, kp.secret_key->get_key_tag()),
+                      true)
                     << "single eval mult key ser fails";
             std::stringstream ser2a;
             EXPECT_EQ(CryptoContextImpl<RnsPoly>::serialize_eval_mult_key(ser2a, sertype, cc), true)
@@ -294,7 +296,8 @@ class UTCKKSRNS_SER : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_SER> {
             CIPHER_DEBUG("step 8");
             // serialize a bunch of sum keys
             std::stringstream aser0;
-            EXPECT_EQ(CryptoContextImpl<RnsPoly>::serialize_eval_sum_key(aser0, sertype, kp.secret_key->get_key_tag()), true)
+            EXPECT_EQ(CryptoContextImpl<RnsPoly>::serialize_eval_sum_key(aser0, sertype, kp.secret_key->get_key_tag()),
+                      true)
                     << "single eval sum key ser fails";
             std::stringstream aser2a;
             EXPECT_EQ(CryptoContextImpl<RnsPoly>::serialize_eval_sum_key(aser2a, sertype, cc), true)
@@ -377,14 +380,14 @@ class UTCKKSRNS_SER : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_SER> {
         }
     }
     void unit_test_keys_and_ciphertexts(const TEST_CASE_UTCKKSRNS_SER& test_data,
-                                    const std::string& failmsg = std::string()) {
+                                        const std::string& failmsg = std::string()) {
         test_keys_and_ciphertexts(test_data, SerType::JSON, "json");
         test_keys_and_ciphertexts(test_data, SerType::BINARY, "binary");
     }
 
     template <typename ST>
     void test_decryption_ser_no_crt_tables(const TEST_CASE_UTCKKSRNS_SER& test_data, const ST& sertype,
-                                      const std::string& failmsg = std::string()) {
+                                           const std::string& failmsg = std::string()) {
         try {
             CryptoContextImpl<RnsPoly>::clear_eval_mult_keys();
             CryptoContextImpl<RnsPoly>::clear_eval_sum_keys();
@@ -435,7 +438,7 @@ class UTCKKSRNS_SER : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_SER> {
             cc->decrypt(kp.secret_key, new_c, &result);
             result->set_length(plaintext_short->get_length());
             check_equality(plaintext_short->get_ckks_packed_value(), result->get_ckks_packed_value(), eps,
-                          failmsg + " Decryption Failed");
+                           failmsg + " Decryption Failed");
 
             enable_precompute_crt_tables_after_deserializaton();
             CryptoContextImpl<RnsPoly>::clear_eval_mult_keys();
@@ -453,7 +456,7 @@ class UTCKKSRNS_SER : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_SER> {
         }
     }
     void unit_test_decryption_ser_no_crt_tables(const TEST_CASE_UTCKKSRNS_SER& test_data,
-                                          const std::string& failmsg = std::string()) {
+                                                const std::string& failmsg = std::string()) {
         test_decryption_ser_no_crt_tables(test_data, SerType::JSON, "json");
         test_decryption_ser_no_crt_tables(test_data, SerType::BINARY, "binary");
     }

@@ -72,7 +72,7 @@ class SchemeletRlweMp {
      * @return the reduced element parameters
      */
     static std::shared_ptr<RnsParams<RnsPoly::Integer>> get_element_params(const PrivateKey<RnsPoly>& private_key,
-                                                                             uint32_t level = 0);
+                                                                           uint32_t level = 0);
 
     /**
      * Encrypts a vector of integers as the coefficients of an RLWE ciphertext under the CKKS secret key.
@@ -93,9 +93,9 @@ class SchemeletRlweMp {
      * @return the RLWE ciphertext as the pair {b, a} of polynomials modulo Q
      */
     static std::vector<Poly> encrypt_coeff(std::vector<int64_t> input, const BigInteger& Q, const BigInteger& p,
-                                          const PrivateKey<RnsPoly>& private_key,
-                                          const std::shared_ptr<RnsParams<RnsPoly::Integer>>& element_params,
-                                          bool bit_reverse = false);
+                                           const PrivateKey<RnsPoly>& private_key,
+                                           const std::shared_ptr<RnsParams<RnsPoly::Integer>>& element_params,
+                                           bool bit_reverse = false);
 
     /**
      * Decrypts an RLWE ciphertext {b, a} modulo Q (as produced by encrypt_coeff() or convert_ckks_to_rlwe()) with the
@@ -116,9 +116,9 @@ class SchemeletRlweMp {
      * @return the decrypted integer values
      */
     static std::vector<int64_t> decrypt_coeff(const std::vector<Poly>& input, const BigInteger& Q, const BigInteger& p,
-                                             const PrivateKey<RnsPoly>& private_key,
-                                             const std::shared_ptr<RnsParams<RnsPoly::Integer>>& element_params,
-                                             uint32_t num_slots, uint32_t length = 0, bool bit_reverse = false);
+                                              const PrivateKey<RnsPoly>& private_key,
+                                              const std::shared_ptr<RnsParams<RnsPoly::Integer>>& element_params,
+                                              uint32_t num_slots, uint32_t length = 0, bool bit_reverse = false);
 
     /**
      * Switches an RLWE ciphertext {b, a} from modulus Q2 to modulus Q1 in place by scaling both polynomials by
@@ -146,8 +146,8 @@ class SchemeletRlweMp {
      * @return a CKKS ciphertext whose elements are the modulus-switched RLWE polynomials
      */
     static Ciphertext<RnsPoly> convert_rlwe_to_ckks(const CryptoContextImpl<RnsPoly>& cc,
-                                                  const std::vector<Poly>& coeffs, const PublicKey<RnsPoly>& pub_key,
-                                                  const BigInteger& bigq, uint32_t slots, uint32_t level = 0);
+                                                    const std::vector<Poly>& coeffs, const PublicKey<RnsPoly>& pub_key,
+                                                    const BigInteger& bigq, uint32_t slots, uint32_t level = 0);
 
     /**
      * Extracts an RLWE ciphertext {b, a} modulo Q from a CKKS ciphertext: both elements are brought to coefficient

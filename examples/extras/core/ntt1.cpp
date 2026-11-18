@@ -66,23 +66,23 @@ int main(int argc, char* argv[]) {
 // res = fn
 // an a loop nloop times, timed with timer t with res compared to testval
 
-#define TESTIT(t, res, fn, testval, nloop)                                                                  \
-    do {                                                                                                    \
-        try {                                                                                               \
-            TIC(t);                                                                                         \
-            for (uint32_t j = 0; j < nloop; j++) {                                                          \
-                res = (fn);                                                                                 \
-            }                                                                                               \
-            time2 = TOC(t);                                                                                 \
+#define TESTIT(t, res, fn, testval, nloop)                                                                 \
+    do {                                                                                                   \
+        try {                                                                                              \
+            TIC(t);                                                                                        \
+            for (uint32_t j = 0; j < nloop; j++) {                                                         \
+                res = (fn);                                                                                \
+            }                                                                                              \
+            time2 = TOC(t);                                                                                \
             CIPHER_DEBUG(#t << ": " << nloop << " loops " << #res << " = " << #fn << " computation time: " \
-                             << "\t" << time2 << " us");                                                    \
-            if (res != testval) {                                                                           \
-                std::cout << "Bad " << #res << " = " << #fn << std::endl;                                   \
-                /*vec_diff(res, testval);*/                                                                 \
-            }                                                                                               \
-        } catch (exception & e) {                                                                           \
-            std::cout << #res << " = " << #fn << " caught exception " << e.what() << std::endl;             \
-        }                                                                                                   \
+                            << "\t" << time2 << " us");                                                    \
+            if (res != testval) {                                                                          \
+                std::cout << "Bad " << #res << " = " << #fn << std::endl;                                  \
+                /*vec_diff(res, testval);*/                                                                \
+            }                                                                                              \
+        } catch (exception & e) {                                                                          \
+            std::cout << #res << " = " << #fn << " caught exception " << e.what() << std::endl;            \
+        }                                                                                                  \
     } while (0);
 
 // helper function that bulds BigVector from a vector of strings

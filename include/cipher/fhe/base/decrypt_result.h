@@ -54,7 +54,7 @@ struct EncryptResult {
      */
     explicit EncryptResult(uint32_t len) : is_valid(true), num_bytes_encrypted(len) {}
 
-    bool is_valid{false};           /**< whether the encryption was successful */
+    bool is_valid{false};            /**< whether the encryption was successful */
     uint32_t num_bytes_encrypted{0}; /**< count of the number of plaintext bytes that were encrypted */
 };
 
@@ -91,8 +91,8 @@ struct DecryptResult {
      */
     DecryptResult(uint32_t len, NativeInteger scf) : is_valid(true), message_length(len), scaling_factor_int(scf) {}
 
-    bool is_valid{false};               /**< whether the decryption was successful */
-    uint32_t message_length{0};         /**< the length of the decrypted plaintext message */
+    bool is_valid{false};                /**< whether the decryption was successful */
+    uint32_t message_length{0};          /**< the length of the decrypted plaintext message */
     NativeInteger scaling_factor_int{1}; /**< Scaling factor for BGV FlexibleAuto mode. */
 };
 

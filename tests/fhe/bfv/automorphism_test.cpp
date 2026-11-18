@@ -111,12 +111,12 @@ std::vector<int64_t> bfv_rns_automorphism_packed_array(uint32_t i, TEST_ESTIMATE
     std::vector<uint32_t> index_list(init_index_list);
 
     auto eval_keys = (INVALID_PRIVATE_KEY == test_result) ?
-                            cc->eval_automorphism_key_gen(PrivateKey<Element>(nullptr), index_list) :
-                            cc->eval_automorphism_key_gen(kp.secret_key, index_list);
+                             cc->eval_automorphism_key_gen(PrivateKey<Element>(nullptr), index_list) :
+                             cc->eval_automorphism_key_gen(kp.secret_key, index_list);
 
     std::map<uint32_t, EvalKey<Element>> empty_eval_keys;
     Ciphertext<Element> p1 = (INVALID_EVAL_KEY == test_result) ? cc->eval_automorphism(ciphertext, i, empty_eval_keys) :
-                                                                cc->eval_automorphism(ciphertext, i, *eval_keys);
+                                                                 cc->eval_automorphism(ciphertext, i, *eval_keys);
 
     Plaintext int_array_new;
     cc->decrypt(kp.secret_key, p1, &int_array_new);

@@ -56,7 +56,7 @@ class RingGswAccumulatorLmkcdey final : public RingGswAccumulator {
      * @return a shared pointer to the resulting keys
      */
     RingGswAccKey key_gen_acc(const std::shared_ptr<RingGswCryptoParams>& params, const NativePoly& sk_ntt,
-                            ConstLwePrivateKey& LWE_sk) const override;
+                              ConstLwePrivateKey& LWE_sk) const override;
 
 #if CIPHER_NATIVE_INT != 32
     /**
@@ -72,7 +72,7 @@ class RingGswAccumulatorLmkcdey final : public RingGswAccumulator {
      *         the encryption of X^{s_i}, [0][1][0] the automorphism key for 2N - 5 and [0][1][k] the one for 5^k
      */
     RingGswAccKey32 key_gen_acc32(const std::shared_ptr<RingGswCryptoParams>& params, const NativePoly& sk_ntt,
-                                ConstLwePrivateKey& LWE_sk) const override;
+                                  ConstLwePrivateKey& LWE_sk) const override;
 
     /**
      * Main accumulator function used in bootstrapping - LMKCDEY variant on the 32-bit internal key. The accumulator is
@@ -85,7 +85,7 @@ class RingGswAccumulatorLmkcdey final : public RingGswAccumulator {
      * @param a value to update the accumulator with
      */
     void eval_acc32(const std::shared_ptr<RingGswCryptoParams>& params, ConstRingGswAccKey32& ek, RlweCiphertext& acc,
-                   const NativeVector& a) const override;
+                    const NativeVector& a) const override;
 #endif
 
     /**
@@ -97,7 +97,7 @@ class RingGswAccumulatorLmkcdey final : public RingGswAccumulator {
      * @param a value to update the accumulator with
      */
     void eval_acc(const std::shared_ptr<RingGswCryptoParams>& params, ConstRingGswAccKey& ek, RlweCiphertext& acc,
-                 const NativeVector& a) const override;
+                  const NativeVector& a) const override;
 
   private:
     /**
@@ -110,7 +110,7 @@ class RingGswAccumulatorLmkcdey final : public RingGswAccumulator {
      * @return a shared pointer to the resulting keys
      */
     RingGswEvalKey key_gen_lmkcdey(const std::shared_ptr<RingGswCryptoParams>& params, const NativePoly& sk_ntt,
-                                 LwePlaintext m, uint32_t index) const;
+                                   LwePlaintext m, uint32_t index) const;
 
     /**
      * Automorphism keys generation for internal Ring GSW as described in https://eprint.iacr.org/2022/198
@@ -121,7 +121,7 @@ class RingGswAccumulatorLmkcdey final : public RingGswAccumulator {
      * @return a shared pointer to the resulting keys
      */
     RingGswEvalKey key_gen_auto(const std::shared_ptr<RingGswCryptoParams>& params, const NativePoly& sk_ntt,
-                              LwePlaintext k) const;
+                                LwePlaintext k) const;
 
     /**
      * LMKCDEY Accumulation as described in https://eprint.iacr.org/2022/198
@@ -132,7 +132,7 @@ class RingGswAccumulatorLmkcdey final : public RingGswAccumulator {
      * @param index LWE secret-key coefficient index
      */
     void add_to_acc_lmkcdey(const std::shared_ptr<RingGswCryptoParams>& params, ConstRingGswEvalKey& ek,
-                         RlweCiphertext& acc, uint32_t index) const;
+                            RlweCiphertext& acc, uint32_t index) const;
 
     /**
      * LMKCDEY Accumulation automorphism evaluation as described in https://eprint.iacr.org/2022/198

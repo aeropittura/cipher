@@ -49,13 +49,13 @@ BGV implementation. See https://eprint.iacr.org/2021/204 for details.
 
 namespace cipher {
 
-uint32_t BgvRnsParamGen::compute_ring_dimension(
-        const std::shared_ptr<BaseCryptoParams<RnsPoly>>& crypto_params, uint32_t q_bound,
-        uint32_t cycl_order) const {
+uint32_t BgvRnsParamGen::compute_ring_dimension(const std::shared_ptr<BaseCryptoParams<RnsPoly>>& crypto_params,
+                                                uint32_t q_bound, uint32_t cycl_order) const {
     const auto crypto_params_bgvrns = std::dynamic_pointer_cast<BgvRnsCryptoParams>(crypto_params);
 
     // GAUSSIAN security constraint
-    DistributionType dist_type = (crypto_params_bgvrns->get_secret_key_dist() == GAUSSIAN) ? HEStd_error : HEStd_ternary;
+    DistributionType dist_type =
+            (crypto_params_bgvrns->get_secret_key_dist() == GAUSSIAN) ? HEStd_error : HEStd_ternary;
 
     // HE Standards compliance logic/check
     SecurityLevel std_level = crypto_params_bgvrns->get_std_level();
@@ -73,7 +73,7 @@ uint32_t BgvRnsParamGen::compute_ring_dimension(
             // Case 3: Both SecurityLevel and ring dimension specified
             // Check whether particular selection is standards-compliant
             CIPHER_THROW("The specified ring dimension (" + std::to_string(ring_dimension_value) +
-                          ") does not comply with HE standards recommendation (" + std::to_string(he_std_n) + ").");
+                         ") does not comply with HE standards recommendation (" + std::to_string(he_std_n) + ").");
         }
     } else if (ring_dimension_value == 0) {
         CIPHER_THROW("Please specify the ring dimension or desired security level.");
@@ -100,7 +100,7 @@ BgvNoiseEstimates BgvRnsParamGen::compute_noise_estimates(
 
     // Bkey set to threshold_parties * 1 for ternary distribution
     double bkey = (crypto_params_bgvrns->get_secret_key_dist() == GAUSSIAN) ? std::sqrt(threshold_parties) * berr :
-                                                                         threshold_parties;
+                                                                              threshold_parties;
     // delta for multiplication of a Gaussian polynomial by a random polynomial
     auto expansion_factor = 2. * std::sqrt(ring_dimension_value);
     // delta for modulus switching
@@ -135,15 +135,16 @@ BgvNoiseEstimates BgvRnsParamGen::compute_noise_estimates(
     if (scal_tech == FLEXIBLEAUTOEXT) {
         noise_per_level = 1. + expansion_factor_ms * bkey;
     } else {
-        noise_per_level = (eval_add_count + 1.) * fresh_encryption_noise + (key_switch_count + 1.) * key_switching_noise;
+        noise_per_level =
+                (eval_add_count + 1.) * fresh_encryption_noise + (key_switch_count + 1.) * key_switching_noise;
     }
 
-    return BgvNoiseEstimates(berr, bkey, expansion_factor, fresh_encryption_noise, key_switching_noise, mod_switching_noise,
-                             noise_per_level);
+    return BgvNoiseEstimates(berr, bkey, expansion_factor, fresh_encryption_noise, key_switching_noise,
+                             mod_switching_noise, noise_per_level);
 }
 
 uint64_t BgvRnsParamGen::get_cyclic_order(const uint32_t ring_dimension_value, const int plain_modulus,
-                                                   const ScalingTechnique scal_tech) const {
+                                          const ScalingTechnique scal_tech) const {
     // Moduli need to be primes that are 1 (mod 2n)
     uint32_t cycl_order = 2 * ring_dimension_value;
     uint64_t lcm_cycl_order_ptm = 0;
@@ -184,8 +185,8 @@ std::pair<std::vector<NativeInteger>, uint32_t> BgvRnsParamGen::compute_moduli(
     uint64_t plain_modulus = crypto_params_bgvrns->get_plaintext_modulus();
     NativeInteger plain_modulus_int = NativeInteger(plain_modulus);
 
-    BgvNoiseEstimates noise_estimates =
-            compute_noise_estimates(crypto_params, ring_dimension_value, eval_add_count, key_switch_count, aux_towers, num_primes_value);
+    BgvNoiseEstimates noise_estimates = compute_noise_estimates(crypto_params, ring_dimension_value, eval_add_count,
+                                                                key_switch_count, aux_towers, num_primes_value);
     uint64_t cycl_order = get_cyclic_order(ring_dimension_value, plain_modulus, scal_tech);
 
     double first_mod_lower_bound = 0;
@@ -196,7 +197,7 @@ std::pair<std::vector<NativeInteger>, uint32_t> BgvRnsParamGen::compute_moduli(
     uint32_t first_mod_size_value = std::ceil(std::log2(first_mod_lower_bound));
     if (first_mod_size_value >= DCRT_MODULUS::MAX_SIZE) {
         CIPHER_THROW(std::string("Reduce the number of additions or key switches per level or the digit size. ") +
-                      "We do not support moduli greater than " + std::to_string(DCRT_MODULUS::MAX_SIZE) + " bits.");
+                     "We do not support moduli greater than " + std::to_string(DCRT_MODULUS::MAX_SIZE) + " bits.");
     }
 
     moduli_q[0] = first_prime<NativeInteger>(first_mod_size_value, cycl_order);
@@ -204,13 +205,14 @@ std::pair<std::vector<NativeInteger>, uint32_t> BgvRnsParamGen::compute_moduli(
     if (scal_tech == FLEXIBLEAUTOEXT) {
         double extra_mod_lower_bound =
                 noise_estimates.fresh_encryption_noise / noise_estimates.noise_per_level * (eval_add_count + 1);
-        extra_mod_lower_bound += key_switch_count * noise_estimates.key_switching_noise / noise_estimates.noise_per_level;
+        extra_mod_lower_bound +=
+                key_switch_count * noise_estimates.key_switching_noise / noise_estimates.noise_per_level;
         extra_mod_lower_bound *= 2;
         uint32_t extra_mod_size = std::ceil(std::log2(extra_mod_lower_bound));
 
         if (extra_mod_size >= DCRT_MODULUS::MAX_SIZE) {
             CIPHER_THROW(std::string("Reduce the number of additions or key switches per level or the digit size. ") +
-                          "We do not support moduli greater than " + std::to_string(DCRT_MODULUS::MAX_SIZE) + " bits.");
+                         "We do not support moduli greater than " + std::to_string(DCRT_MODULUS::MAX_SIZE) + " bits.");
         }
 
         moduli_q[num_primes_value] = first_prime<NativeInteger>(extra_mod_size, cycl_order);
@@ -224,13 +226,15 @@ std::pair<std::vector<NativeInteger>, uint32_t> BgvRnsParamGen::compute_moduli(
         double mod_lower_bound = 0;
         if (scal_tech == FLEXIBLEAUTOEXT) {
             mod_lower_bound = 2 * noise_estimates.noise_per_level + 2 +
-                            std::sqrt(ring_dimension_value) / 2.0 / noise_estimates.noise_per_level;
+                              std::sqrt(ring_dimension_value) / 2.0 / noise_estimates.noise_per_level;
             mod_lower_bound *= noise_estimates.expansion_factor * plain_modulus * (eval_add_count + 1) / 2.0;
-            mod_lower_bound += (key_switch_count + 1) * noise_estimates.key_switching_noise / noise_estimates.noise_per_level;
+            mod_lower_bound +=
+                    (key_switch_count + 1) * noise_estimates.key_switching_noise / noise_estimates.noise_per_level;
             mod_lower_bound *= 2;
         } else {
             double mod_lower_bound_numerator = 2 * noise_estimates.noise_per_level * noise_estimates.noise_per_level +
-                                            2 * noise_estimates.noise_per_level + std::sqrt(ring_dimension_value) / 2.0;
+                                               2 * noise_estimates.noise_per_level +
+                                               std::sqrt(ring_dimension_value) / 2.0;
             mod_lower_bound_numerator *= noise_estimates.expansion_factor * plain_modulus / 2. * (eval_add_count + 1);
             mod_lower_bound_numerator += (key_switch_count + 1) * noise_estimates.key_switching_noise;
             double mod_lower_bound_denom = noise_estimates.noise_per_level - noise_estimates.mod_switching_noise;
@@ -240,19 +244,21 @@ std::pair<std::vector<NativeInteger>, uint32_t> BgvRnsParamGen::compute_moduli(
         uint32_t mod_size = std::ceil(std::log2(mod_lower_bound));
         if (mod_size >= DCRT_MODULUS::MAX_SIZE) {
             CIPHER_THROW(std::string("Reduce the number of additions or key switches per level or the digit size. ") +
-                          "We do not support moduli greater than " + std::to_string(DCRT_MODULUS::MAX_SIZE) + " bits.");
+                         "We do not support moduli greater than " + std::to_string(DCRT_MODULUS::MAX_SIZE) + " bits.");
         }
 
         // Compute moduli.
         moduli_q[1] = first_prime<NativeInteger>(mod_size, cycl_order);
         if (scal_tech == FLEXIBLEAUTOEXT) {
-            while (moduli_q[1] == moduli_q[0] || moduli_q[1] == moduli_q[num_primes_value] || moduli_q[1] == plain_modulus_int) {
+            while (moduli_q[1] == moduli_q[0] || moduli_q[1] == moduli_q[num_primes_value] ||
+                   moduli_q[1] == plain_modulus_int) {
                 moduli_q[1] = next_prime<NativeInteger>(moduli_q[1], cycl_order);
             }
 
             for (size_t i = 2; i < num_primes_value; i++) {
                 moduli_q[i] = next_prime<NativeInteger>(moduli_q[i - 1], cycl_order);
-                while (moduli_q[i] == moduli_q[0] || moduli_q[i] == moduli_q[num_primes_value] || moduli_q[i] == plain_modulus_int) {
+                while (moduli_q[i] == moduli_q[0] || moduli_q[i] == moduli_q[num_primes_value] ||
+                       moduli_q[i] == plain_modulus_int) {
                     moduli_q[i] = next_prime<NativeInteger>(moduli_q[i], cycl_order);
                 }
             }
@@ -277,9 +283,8 @@ std::pair<std::vector<NativeInteger>, uint32_t> BgvRnsParamGen::compute_moduli(
     return std::make_pair(moduli_q, composite.get_msb());
 }
 
-void BgvRnsParamGen::initialize_flooding_dgg(
-        const std::shared_ptr<BaseCryptoParams<RnsPoly>>& crypto_params, uint32_t num_primes_value,
-        uint32_t ring_dimension_value) const {
+void BgvRnsParamGen::initialize_flooding_dgg(const std::shared_ptr<BaseCryptoParams<RnsPoly>>& crypto_params,
+                                             uint32_t num_primes_value, uint32_t ring_dimension_value) const {
     const auto crypto_params_bgvrns = std::dynamic_pointer_cast<BgvRnsCryptoParams>(crypto_params);
 
     KeySwitchTechnique ks_tech = crypto_params_bgvrns->get_key_switch_technique();
@@ -297,8 +302,8 @@ void BgvRnsParamGen::initialize_flooding_dgg(
     // and is 1 * threshold number of parties if the secret is sampled from ternary distribution. The threshold number of
     // parties is 1 by default but can be set to the number of parties in a threshold application.
     // Bkey set to threshold_parties * 1 for ternary distribution
-    double bkey =
-            (crypto_params_bgvrns->get_secret_key_dist() == GAUSSIAN) ? b_e * std::sqrt(threshold_parties) : threshold_parties;
+    double bkey = (crypto_params_bgvrns->get_secret_key_dist() == GAUSSIAN) ? b_e * std::sqrt(threshold_parties) :
+                                                                              threshold_parties;
 
     double stat_sec_half = crypto_params_bgvrns->get_statistical_security() / 2;
     double num_queries = crypto_params_bgvrns->get_num_adversarial_queries();
@@ -351,9 +356,9 @@ void BgvRnsParamGen::initialize_flooding_dgg(
 }
 
 bool BgvRnsParamGen::params_gen_bgvrns_internal(std::shared_ptr<BaseCryptoParams<RnsPoly>> crypto_params,
-                                                        uint32_t eval_add_count, uint32_t key_switch_count,
-                                                        uint32_t cycl_order, uint32_t num_primes_value, uint32_t first_mod_size_value,
-                                                        uint32_t dcrt_bits, uint32_t num_part_q, uint32_t num_hops) const {
+                                                uint32_t eval_add_count, uint32_t key_switch_count, uint32_t cycl_order,
+                                                uint32_t num_primes_value, uint32_t first_mod_size_value,
+                                                uint32_t dcrt_bits, uint32_t num_part_q, uint32_t num_hops) const {
     const auto crypto_params_bgvrns = std::dynamic_pointer_cast<BgvRnsCryptoParams>(crypto_params);
 
     uint32_t ptm = crypto_params_bgvrns->get_plaintext_modulus();
@@ -380,8 +385,8 @@ bool BgvRnsParamGen::params_gen_bgvrns_internal(std::shared_ptr<BaseCryptoParams
         if (pre_mode != NOISE_FLOODING_HRA) {
             // Select the size of moduli according to the plaintext modulus
             if (dcrt_bits == 0) {
-                dcrt_bits =
-                        ((28 + get_msb64(ptm)) > DCRT_MODULUS::MAX_SIZE) ? DCRT_MODULUS::MAX_SIZE : (28 + get_msb64(ptm));
+                dcrt_bits = ((28 + get_msb64(ptm)) > DCRT_MODULUS::MAX_SIZE) ? DCRT_MODULUS::MAX_SIZE :
+                                                                               (28 + get_msb64(ptm));
             }
             // Select first_mod_size_value to be dcrt_bits if not indicated otherwise
             if (first_mod_size_value == 0)
@@ -400,8 +405,9 @@ bool BgvRnsParamGen::params_gen_bgvrns_internal(std::shared_ptr<BaseCryptoParams
             // discrete Gaussian (GAUSSIAN) and ternary uniform distribution (UNIFORM_TERNARY) cases
             uint32_t threshold_parties = crypto_params_bgvrns->get_threshold_num_of_parties();
             // Bkey set to threshold_parties * 1 for ternary distribution
-            double bkey = (crypto_params_bgvrns->get_secret_key_dist() == GAUSSIAN) ? std::sqrt(threshold_parties) * berr :
-                                                                                 threshold_parties;
+            double bkey = (crypto_params_bgvrns->get_secret_key_dist() == GAUSSIAN) ?
+                                  std::sqrt(threshold_parties) * berr :
+                                  threshold_parties;
             // delta
             auto expansion_factor = 2. * std::sqrt(ring_dimension_value);
             // Vnorm
@@ -429,8 +435,8 @@ bool BgvRnsParamGen::params_gen_bgvrns_internal(std::shared_ptr<BaseCryptoParams
             // check that the mod size needed for each hop fits in 60 bits
             if (dcrt_bits > DCRT_MODULUS::MAX_SIZE) {
                 CIPHER_THROW("The modulus size for HRA-secure PRE (" + std::to_string(dcrt_bits) +
-                              " bits) is above the maximum:" + std::to_string(DCRT_MODULUS::MAX_SIZE) +
-                              ". Try reducing reducing the parameters for noise flooding.");
+                             " bits) is above the maximum:" + std::to_string(DCRT_MODULUS::MAX_SIZE) +
+                             ". Try reducing reducing the parameters for noise flooding.");
             }
         }
     }
@@ -461,9 +467,9 @@ bool BgvRnsParamGen::params_gen_bgvrns_internal(std::shared_ptr<BaseCryptoParams
         bool is_noise_flooding_multiparty = (multiparty_mode == NOISE_FLOODING_MULTIPARTY);
         if (is_noise_flooding_multiparty)
             num_primes_est += NoiseFlooding::NUM_MODULI_MULTIPARTY;
-        auto hybrid_ks_info =
-                RnsCryptoParams::estimate_log_p(num_part_q, first_mod_size_value, dcrt_bits, extra_mod_size, num_primes_est, aux_bits,
-                                                  scal_tech, add_one, is_noise_flooding_multiparty);
+        auto hybrid_ks_info = RnsCryptoParams::estimate_log_p(num_part_q, first_mod_size_value, dcrt_bits,
+                                                              extra_mod_size, num_primes_est, aux_bits, scal_tech,
+                                                              add_one, is_noise_flooding_multiparty);
         q_bound += std::get<0>(hybrid_ks_info);
         aux_towers = std::get<1>(hybrid_ks_info);
     }
@@ -477,7 +483,8 @@ bool BgvRnsParamGen::params_gen_bgvrns_internal(std::shared_ptr<BaseCryptoParams
     uint64_t modulus_order = 0;
 
     if ((dcrt_bits == 0) && (scal_tech == FIXEDAUTO || scal_tech == FLEXIBLEAUTO || scal_tech == FLEXIBLEAUTOEXT)) {
-        auto moduli_info = compute_moduli(crypto_params, n, eval_add_count, key_switch_count, aux_towers, num_primes_value);
+        auto moduli_info =
+                compute_moduli(crypto_params, n, eval_add_count, key_switch_count, aux_towers, num_primes_value);
         moduli_q = std::get<0>(moduli_info);
         uint32_t new_q_bound = std::get<1>(moduli_info);
 
@@ -485,7 +492,8 @@ bool BgvRnsParamGen::params_gen_bgvrns_internal(std::shared_ptr<BaseCryptoParams
         do {
             q_bound = new_q_bound;
             n = compute_ring_dimension(crypto_params, new_q_bound, cycl_order);
-            auto moduli_info = compute_moduli(crypto_params, n, eval_add_count, key_switch_count, aux_towers, num_primes_value);
+            auto moduli_info =
+                    compute_moduli(crypto_params, n, eval_add_count, key_switch_count, aux_towers, num_primes_value);
             moduli_q = std::get<0>(moduli_info);
             new_q_bound = std::get<1>(moduli_info);
             if (multiparty_mode == NOISE_FLOODING_MULTIPARTY)
@@ -498,7 +506,8 @@ bool BgvRnsParamGen::params_gen_bgvrns_internal(std::shared_ptr<BaseCryptoParams
                     num_primes_est += NoiseFlooding::NUM_MODULI_MULTIPARTY;
                 auto hybrid_ks_info = RnsCryptoParams::estimate_log_p(
                         num_part_q, std::log2(moduli_q[0].convert_to_double()), dcrt_bits_est,
-                        (scal_tech == FLEXIBLEAUTOEXT) ? std::log2(moduli_q[moduli_q.size() - 1].convert_to_double()) : 0,
+                        (scal_tech == FLEXIBLEAUTOEXT) ? std::log2(moduli_q[moduli_q.size() - 1].convert_to_double()) :
+                                                         0,
                         num_primes_est, aux_bits, scal_tech, false, is_noise_flooding_multiparty);
                 new_q_bound += std::get<0>(hybrid_ks_info);
             }
@@ -532,8 +541,9 @@ bool BgvRnsParamGen::params_gen_bgvrns_internal(std::shared_ptr<BaseCryptoParams
         roots_q[0] = root_of_unity<NativeInteger>(cycl_order, moduli_q[0]);
 
         if (num_primes_value > 1) {
-            NativeInteger q =
-                    (first_mod_size_value != dcrt_bits) ? last_prime<NativeInteger>(dcrt_bits, modulus_order) : moduli_q[0];
+            NativeInteger q = (first_mod_size_value != dcrt_bits) ?
+                                      last_prime<NativeInteger>(dcrt_bits, modulus_order) :
+                                      moduli_q[0];
 
             moduli_q[1] = previous_prime<NativeInteger>(q, modulus_order);
             roots_q[1] = root_of_unity<NativeInteger>(cycl_order, moduli_q[1]);
@@ -561,9 +571,9 @@ bool BgvRnsParamGen::params_gen_bgvrns_internal(std::shared_ptr<BaseCryptoParams
         roots_q.reserve(roots_q.size() + extra_roots.size());
         // We insert the extra_moduli after the first modulus to improve security in multiparty decryption.
         moduli_q.insert(moduli_q.begin() + 1, std::make_move_iterator(extra_moduli.begin()),
-                       std::make_move_iterator(extra_moduli.end()));
+                        std::make_move_iterator(extra_moduli.end()));
         roots_q.insert(roots_q.begin() + 1, std::make_move_iterator(extra_roots.begin()),
-                      std::make_move_iterator(extra_roots.end()));
+                       std::make_move_iterator(extra_roots.end()));
     }
     auto params_dcrt = std::make_shared<RnsParams<BigInteger>>(cycl_order, moduli_q, roots_q);
 
@@ -633,7 +643,8 @@ bool BgvRnsParamGen::params_gen_bgvrns_internal(std::shared_ptr<BaseCryptoParams
             log_actual_q = crypto_params_bgvrns->get_element_params()->get_modulus().get_msb();
         }
 
-        DistributionType dist_type = (crypto_params_bgvrns->get_secret_key_dist() == GAUSSIAN) ? HEStd_error : HEStd_ternary;
+        DistributionType dist_type =
+                (crypto_params_bgvrns->get_secret_key_dist() == GAUSSIAN) ? HEStd_error : HEStd_ternary;
         uint32_t n_actual = StdLatticeParm::find_ring_dim(dist_type, std_level, log_actual_q);
 
         if (n < n_actual) {

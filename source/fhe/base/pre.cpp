@@ -43,14 +43,14 @@ namespace cipher {
 
 template <class Element>
 EvalKey<Element> BasePre<Element>::re_key_gen(const PrivateKey<Element> old_private_key,
-                                            const PublicKey<Element> new_public_key) const {
+                                              const PublicKey<Element> new_public_key) const {
     auto algo = old_private_key->get_crypto_context()->get_scheme();
     return algo->key_switch_gen(old_private_key, new_public_key);
 }
 
 template <class Element>
 Ciphertext<Element> BasePre<Element>::re_encrypt(ConstCiphertext<Element> ciphertext, const EvalKey<Element> eval_key,
-                                                const PublicKey<Element> public_key) const {
+                                                 const PublicKey<Element> public_key) const {
     auto algo = ciphertext->get_crypto_context()->get_scheme();
     const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(ciphertext->get_crypto_parameters());
 

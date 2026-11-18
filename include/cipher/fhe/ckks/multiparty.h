@@ -55,17 +55,17 @@ class CkksRnsMultiparty : public RnsMultiparty {
     virtual ~CkksRnsMultiparty() = default;
 
     DecryptResult multiparty_decrypt_fusion(const std::vector<Ciphertext<RnsPoly>>& ciphertext_vec,
-                                          Poly* plaintext) const override;
+                                            Poly* plaintext) const override;
 
     DecryptResult multiparty_decrypt_fusion(const std::vector<Ciphertext<RnsPoly>>& ciphertext_vec,
-                                          NativePoly* plaintext) const override;
+                                            NativePoly* plaintext) const override;
 
     Ciphertext<RnsPoly> int_boot_adjust_scale(ConstCiphertext<RnsPoly> ciphertext) const override;
 
     Ciphertext<RnsPoly> int_mp_boot_adjust_scale(ConstCiphertext<RnsPoly> ciphertext) const override;
 
     Ciphertext<RnsPoly> int_mp_boot_random_element_gen(std::shared_ptr<CkksRnsCryptoParams> params,
-                                                   const PublicKey<RnsPoly> public_key) const override;
+                                                       const PublicKey<RnsPoly> public_key) const override;
 
     /**
      * Threshold FHE: generates a common random polynomial for multi-party interactive bootstrapping with the element
@@ -76,19 +76,19 @@ class CkksRnsMultiparty : public RnsMultiparty {
      * @return a ciphertext holding the common random polynomial as its single element
      */
     Ciphertext<RnsPoly> int_mp_boot_random_element_gen(std::shared_ptr<CkksRnsCryptoParams> params,
-                                                   ConstCiphertext<RnsPoly>& ciphertext) const override;
+                                                       ConstCiphertext<RnsPoly>& ciphertext) const override;
 
     std::vector<Ciphertext<RnsPoly>> int_mp_boot_decrypt(const PrivateKey<RnsPoly> private_key,
-                                                       ConstCiphertext<RnsPoly> ciphertext,
-                                                       ConstCiphertext<RnsPoly> a) const override;
+                                                         ConstCiphertext<RnsPoly> ciphertext,
+                                                         ConstCiphertext<RnsPoly> a) const override;
 
     std::vector<Ciphertext<RnsPoly>> int_mp_boot_add(
             std::vector<std::vector<Ciphertext<RnsPoly>>>& shares_pair_vec) const override;
 
     Ciphertext<RnsPoly> int_mp_boot_encrypt(const PublicKey<RnsPoly> public_key,
-                                          const std::vector<Ciphertext<RnsPoly>>& shares_pair,
-                                          ConstCiphertext<RnsPoly> a,
-                                          ConstCiphertext<RnsPoly> ciphertext) const override;
+                                            const std::vector<Ciphertext<RnsPoly>>& shares_pair,
+                                            ConstCiphertext<RnsPoly> a,
+                                            ConstCiphertext<RnsPoly> ciphertext) const override;
 
     /////////////////////////////////////
     // SERIALIZATION

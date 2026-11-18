@@ -146,12 +146,13 @@ class RingGswCryptoParams : public Serializable {
      * @brief Gadget parameters for one LWE secret-key index: the base, its digit count, and its gadget powers
      */
     struct BaseGParams {
-        uint32_t base_g{0};                                ///< gadget base, a power of two
-        uint32_t digits_g{0};                              ///< number of base-base_g digits needed to represent Q
-        uint32_t g_bits{0};                                ///< log2(base_g), the width of one digit in bits
-        const std::vector<NativeInteger>* gpow{nullptr};  ///< powers base_g^i mod Q for i < digits_g, owned by the params
-        uint32_t team_width{0};                            ///< thread-team size for the external product: the largest
-                                                          ///< 2(digits_g - 1) over all gadget bases in use
+        uint32_t base_g{0};    ///< gadget base, a power of two
+        uint32_t digits_g{0};  ///< number of base-base_g digits needed to represent Q
+        uint32_t g_bits{0};    ///< log2(base_g), the width of one digit in bits
+        const std::vector<NativeInteger>* gpow{
+                nullptr};        ///< powers base_g^i mod Q for i < digits_g, owned by the params
+        uint32_t team_width{0};  ///< thread-team size for the external product: the largest
+                                 ///< 2(digits_g - 1) over all gadget bases in use
     };
 
     /**
@@ -267,7 +268,8 @@ class RingGswCryptoParams : public Serializable {
     uint32_t get_digit_extent_r(uint32_t pos) const {
         if (pos + 1 < digits_r_.size())
             return base_r_;
-        return static_cast<uint32_t>((q_.convert_to_int<uint64_t>() - 1) / digits_r_.back().convert_to_int<uint64_t>()) +
+        return static_cast<uint32_t>((q_.convert_to_int<uint64_t>() - 1) /
+                                     digits_r_.back().convert_to_int<uint64_t>()) +
                1;
     }
 
@@ -435,7 +437,7 @@ class RingGswCryptoParams : public Serializable {
     void load(Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         ar(::cereal::make_nvp("bN", N_));
         ar(::cereal::make_nvp("bQ", Q_));
@@ -486,7 +488,7 @@ class RingGswCryptoParams : public Serializable {
     static void check_digits_g(uint32_t base_g, uint32_t digits_g) {
         if (digits_g < 2)
             CIPHER_THROW("Gadget base " + std::to_string(base_g) +
-                          " is too large for Q: the approximate gadget decomposition needs at least two digits.");
+                         " is too large for Q: the approximate gadget decomposition needs at least two digits.");
     }
 
     static uint32_t digits_for_base(const NativeInteger& Q, uint32_t base_g) {

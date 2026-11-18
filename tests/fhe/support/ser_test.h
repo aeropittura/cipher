@@ -49,7 +49,7 @@ using namespace cipher;
 
 template <typename Element, typename ST>
 void unit_test_context_with_sertype(CryptoContext<Element> cc, const ST& sertype,
-                                const std::string& failmsg = std::string()) {
+                                    const std::string& failmsg = std::string()) {
     try {
         KeyPair<Element> kp = cc->key_gen();
         cc->eval_mult_key_gen(kp.secret_key);

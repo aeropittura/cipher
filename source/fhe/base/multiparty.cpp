@@ -53,8 +53,8 @@ namespace cipher {
 // make_sparse_value is not used by this scheme
 template <class Element>
 KeyPair<Element> BaseMultiparty<Element>::multiparty_key_gen(CryptoContext<Element> cc,
-                                                           const std::vector<PrivateKey<Element>>& private_key_vec,
-                                                           bool make_sparse_value) {
+                                                             const std::vector<PrivateKey<Element>>& private_key_vec,
+                                                             bool make_sparse_value) {
     const auto crypto_params = std::dynamic_pointer_cast<RlweCryptoParams<Element>>(cc->get_crypto_parameters());
     const auto element_params = crypto_params->get_element_params();
 
@@ -78,7 +78,7 @@ KeyPair<Element> BaseMultiparty<Element>::multiparty_key_gen(CryptoContext<Eleme
     Element b(std::move(e -= a * s));
 
     KeyPair<Element> key_pair(std::make_shared<PublicKeyImpl<Element>>(cc),
-                             std::make_shared<PrivateKeyImpl<Element>>(cc));
+                              std::make_shared<PrivateKeyImpl<Element>>(cc));
     key_pair.secret_key->set_private_element(std::move(s));
     std::vector<Element> pk_elems;
     pk_elems.reserve(2);
@@ -90,8 +90,8 @@ KeyPair<Element> BaseMultiparty<Element>::multiparty_key_gen(CryptoContext<Eleme
 
 template <class Element>
 KeyPair<Element> BaseMultiparty<Element>::multiparty_key_gen(CryptoContext<Element> cc,
-                                                           const PublicKey<Element> public_key, bool make_sparse_value,
-                                                           bool fresh) {
+                                                             const PublicKey<Element> public_key,
+                                                             bool make_sparse_value, bool fresh) {
     const auto crypto_params = std::dynamic_pointer_cast<RlweCryptoParams<Element>>(cc->get_crypto_parameters());
     const auto element_params = crypto_params->get_element_params();
     const auto params_pk = crypto_params->get_params_pk();
@@ -136,7 +136,7 @@ KeyPair<Element> BaseMultiparty<Element>::multiparty_key_gen(CryptoContext<Eleme
         s.drop_last_elements(size_pk - size_q);
 
     KeyPair<Element> key_pair(std::make_shared<PublicKeyImpl<Element>>(cc),
-                             std::make_shared<PrivateKeyImpl<Element>>(cc));
+                              std::make_shared<PrivateKeyImpl<Element>>(cc));
     key_pair.secret_key->set_private_element(std::move(s));
     std::vector<Element> pk_elems;
     pk_elems.reserve(2);
@@ -148,9 +148,10 @@ KeyPair<Element> BaseMultiparty<Element>::multiparty_key_gen(CryptoContext<Eleme
 
 template <class Element>
 EvalKey<Element> BaseMultiparty<Element>::multi_key_switch_gen(const PrivateKey<Element> old_private_key,
-                                                            const PrivateKey<Element> new_private_key,
-                                                            const EvalKey<Element> eval_key) const {
-    return old_private_key->get_crypto_context()->get_scheme()->key_switch_gen(old_private_key, new_private_key, eval_key);
+                                                               const PrivateKey<Element> new_private_key,
+                                                               const EvalKey<Element> eval_key) const {
+    return old_private_key->get_crypto_context()->get_scheme()->key_switch_gen(old_private_key, new_private_key,
+                                                                               eval_key);
 }
 
 template <class Element>
@@ -221,7 +222,7 @@ std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> BaseMultiparty<Element>::m
 
 template <class Element>
 Ciphertext<Element> BaseMultiparty<Element>::multiparty_decrypt_lead(ConstCiphertext<Element> ciphertext,
-                                                                   const PrivateKey<Element> private_key) const {
+                                                                     const PrivateKey<Element> private_key) const {
     const auto crypto_params =
             std::dynamic_pointer_cast<RlweCryptoParams<Element>>(private_key->get_crypto_parameters());
 
@@ -242,7 +243,7 @@ Ciphertext<Element> BaseMultiparty<Element>::multiparty_decrypt_lead(ConstCipher
 
 template <class Element>
 Ciphertext<Element> BaseMultiparty<Element>::multiparty_decrypt_main(ConstCiphertext<Element> ciphertext,
-                                                                   const PrivateKey<Element> private_key) const {
+                                                                     const PrivateKey<Element> private_key) const {
     const auto crypto_params =
             std::dynamic_pointer_cast<RlweCryptoParams<Element>>(private_key->get_crypto_parameters());
 
@@ -263,9 +264,10 @@ Ciphertext<Element> BaseMultiparty<Element>::multiparty_decrypt_main(ConstCipher
 
 template <class Element>
 DecryptResult BaseMultiparty<Element>::multiparty_decrypt_fusion(const std::vector<Ciphertext<Element>>& ciphertext_vec,
-                                                               NativePoly* plaintext) const {
-    Element b = (ciphertext_vec.size() > 1) ? ciphertext_vec[0]->get_elements()[0] + ciphertext_vec[1]->get_elements()[0] :
-                                             ciphertext_vec[0]->get_elements()[0];
+                                                                 NativePoly* plaintext) const {
+    Element b = (ciphertext_vec.size() > 1) ?
+                        ciphertext_vec[0]->get_elements()[0] + ciphertext_vec[1]->get_elements()[0] :
+                        ciphertext_vec[0]->get_elements()[0];
     for (size_t i = 2; i < ciphertext_vec.size(); i++)
         b += ciphertext_vec[i]->get_elements()[0];
     b.set_format(Format::COEFFICIENT);
@@ -277,7 +279,7 @@ DecryptResult BaseMultiparty<Element>::multiparty_decrypt_fusion(const std::vect
 
 template <class Element>
 PublicKey<Element> BaseMultiparty<Element>::multi_add_pub_keys(PublicKey<Element> public_key1,
-                                                            PublicKey<Element> public_key2) const {
+                                                               PublicKey<Element> public_key2) const {
     PublicKey<Element> public_key_sum = std::make_shared<PublicKeyImpl<Element>>(public_key1->get_crypto_context());
 
     const Element& b1 = public_key1->get_public_elements()[0];
@@ -293,7 +295,8 @@ PublicKey<Element> BaseMultiparty<Element>::multi_add_pub_keys(PublicKey<Element
 }
 
 template <class Element>
-EvalKey<Element> BaseMultiparty<Element>::multi_add_eval_keys(EvalKey<Element> eval_key1, EvalKey<Element> eval_key2) const {
+EvalKey<Element> BaseMultiparty<Element>::multi_add_eval_keys(EvalKey<Element> eval_key1,
+                                                              EvalKey<Element> eval_key2) const {
     const auto cc = eval_key1->get_crypto_context();
 
     EvalKey<Element> eval_key_sum = std::make_shared<EvalKeyRelinImpl<Element>>(cc);
@@ -316,7 +319,7 @@ EvalKey<Element> BaseMultiparty<Element>::multi_add_eval_keys(EvalKey<Element> e
 
 template <class Element>
 EvalKey<Element> BaseMultiparty<Element>::multi_add_eval_mult_keys(EvalKey<Element> eval_key1,
-                                                               EvalKey<Element> eval_key2) const {
+                                                                   EvalKey<Element> eval_key2) const {
     const auto cc = eval_key1->get_crypto_context();
 
     EvalKey<Element> eval_key_sum = std::make_shared<EvalKeyRelinImpl<Element>>(cc);
@@ -343,7 +346,7 @@ EvalKey<Element> BaseMultiparty<Element>::multi_add_eval_mult_keys(EvalKey<Eleme
 
 template <class Element>
 EvalKey<Element> BaseMultiparty<Element>::multi_mult_eval_key(PrivateKey<Element> private_key,
-                                                           EvalKey<Element> eval_key) const {
+                                                              EvalKey<Element> eval_key) const {
     const auto cc = eval_key->get_crypto_context();
 
     const auto crypto_params = std::dynamic_pointer_cast<RlweCryptoParams<Element>>(cc->get_crypto_parameters());

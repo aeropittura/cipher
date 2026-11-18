@@ -90,9 +90,7 @@ using BigVector = myVecP<BigInteger>;
  */
 
 template <typename myT>
-class myVecP : public NTL::Vec<myT>,
-               public cipher::BigVectorInterface<myVecP<myT>, myT>,
-               public cipher::Serializable {
+class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<myT>, myT>, public cipher::Serializable {
   public:
     // CONSTRUCTORS
 
@@ -654,7 +652,7 @@ class myVecP : public NTL::Vec<myT>,
             Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         // YSP. This was seg-faulting in MINGW
         // std::string m;
@@ -686,7 +684,7 @@ class myVecP : public NTL::Vec<myT>,
             Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         std::string m;
         ar(::cereal::make_nvp("m", m));

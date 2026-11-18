@@ -45,7 +45,8 @@ namespace {
 // pointing at a destroyed stream.
 class ScopedDiagnosticCapture {
   public:
-    ScopedDiagnosticCapture() : previous_err_(set_cipher_err_stream(err_)), previous_out_(set_cipher_out_stream(out_)) {}
+    ScopedDiagnosticCapture()
+        : previous_err_(set_cipher_err_stream(err_)), previous_out_(set_cipher_out_stream(out_)) {}
 
     ~ScopedDiagnosticCapture() {
         set_cipher_err_stream(previous_err_);

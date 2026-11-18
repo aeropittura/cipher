@@ -113,8 +113,7 @@ class NativeVectorT final : public cipher::BigVectorInterface<NativeVectorT<Inte
      * entries.
      * @param modulus is the modulus of the ring.
      */
-    constexpr NativeVectorT(uint32_t length, const IntegerType& modulus) noexcept
-        : modulus_{modulus}, data_(length) {}
+    constexpr NativeVectorT(uint32_t length, const IntegerType& modulus) noexcept : modulus_{modulus}, data_(length) {}
 
     /**
      * Constructor for specifying the length, the modulus, and one value for every entry.
@@ -149,8 +148,7 @@ class NativeVectorT final : public cipher::BigVectorInterface<NativeVectorT<Inte
      *
      * @param v is the native vector to be moved.
      */
-    constexpr NativeVectorT(NativeVectorT&& v) noexcept
-        : modulus_{std::move(v.modulus_)}, data_{std::move(v.data_)} {}
+    constexpr NativeVectorT(NativeVectorT&& v) noexcept : modulus_{std::move(v.modulus_)}, data_{std::move(v.data_)} {}
 
     /**
      * Basic constructor for specifying the length of the vector
@@ -706,7 +704,7 @@ class NativeVectorT final : public cipher::BigVectorInterface<NativeVectorT<Inte
                                                                                   std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         ::cereal::size_type size;
         ar(size);
@@ -722,7 +720,7 @@ class NativeVectorT final : public cipher::BigVectorInterface<NativeVectorT<Inte
                                                                                  std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         ar(::cereal::make_nvp("v", data_));
         ar(::cereal::make_nvp("m", modulus_));
@@ -763,7 +761,7 @@ class NativeVectorT final : public cipher::BigVectorInterface<NativeVectorT<Inte
      * @param modulus is the modulus to perform operations with.
      */
     static void barrett_mod_mul_loop(IntegerType* dst, const IntegerType* a, const IntegerType* b, size_t size,
-                                  const IntegerType& modulus);
+                                     const IntegerType& modulus);
 
     /**
      * General-shrink loop shared by switch_modulus, mod_eq and the copy-with-switch ctor:
@@ -799,10 +797,10 @@ class NativeVectorT final : public cipher::BigVectorInterface<NativeVectorT<Inte
      * @param modulus is the modulus to perform operations with.
      */
     static void barrett_mult_acc_loop(IntegerType* acc, const IntegerType* a, const IntegerType* b, size_t size,
-                                   const IntegerType& modulus);
+                                      const IntegerType& modulus);
 };
 
-}  // namespace intnat
+}  // namespace native_int
 
 namespace cereal {
 

@@ -45,8 +45,8 @@ namespace cipher {
 // Precomputation of CRT tables encryption, decryption, and  homomorphic
 // multiplication
 void BgvRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, ScalingTechnique scal_tech,
-                                                 EncryptionTechnique enc_tech, MultiplicationTechnique mult_tech,
-                                                 uint32_t num_part_q, uint32_t aux_bits, uint32_t extra_bits) {
+                                               EncryptionTechnique enc_tech, MultiplicationTechnique mult_tech,
+                                               uint32_t num_part_q, uint32_t aux_bits, uint32_t extra_bits) {
     RnsCryptoParams::precompute_crt_tables(ks_tech, scal_tech, enc_tech, mult_tech, num_part_q, aux_bits, extra_bits);
 
     size_t size_q = get_element_params()->get_params().size();

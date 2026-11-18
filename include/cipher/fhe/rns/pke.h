@@ -114,7 +114,7 @@ class RnsPke : public BasePke<RnsPoly> {
      * @return the two ciphertext polynomials.
      */
     std::shared_ptr<std::vector<RnsPoly>> encrypt_zero_core(const PrivateKey<RnsPoly> private_key,
-                                                           const std::shared_ptr<ParmType> params) const override;
+                                                            const std::shared_ptr<ParmType> params) const override;
 
     /**
      * Generates a public-key encryption of zero, i.e., the pair (p0*v + ns*e0, p1*v + ns*e1) for a fresh
@@ -127,7 +127,7 @@ class RnsPke : public BasePke<RnsPoly> {
      * @return the two ciphertext polynomials.
      */
     std::shared_ptr<std::vector<RnsPoly>> encrypt_zero_core(const PublicKey<RnsPoly> public_key,
-                                                           const std::shared_ptr<ParmType> params) const override;
+                                                            const std::shared_ptr<ParmType> params) const override;
 
     /**
      * Computes the decryption polynomial c_0 + c_1*s + c_2*s^2 + ... in EVALUATION format, using only the

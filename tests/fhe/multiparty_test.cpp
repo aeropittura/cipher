@@ -391,7 +391,7 @@ class UTGENERAL_MULTIPARTY : public ::testing::TestWithParam<TEST_CASE_UTGENERAL
     //  - CKKSRNS_TEST false/true
     // runs for two parties only
     void unit_test_multi_party(const TEST_CASE_UTGENERAL_MULTIPARTY& test_data,
-                             const std::string& failmsg = std::string()) {
+                               const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -410,25 +410,28 @@ class UTGENERAL_MULTIPARTY : public ::testing::TestWithParam<TEST_CASE_UTGENERAL
             //====================================================================
 
             KeyPair<Element> kp2 = test_data.star ? cc->multiparty_key_gen(kp1.public_key) :
-                                                   cc->multiparty_key_gen(kp1.public_key, false, true);
+                                                    cc->multiparty_key_gen(kp1.public_key, false, true);
 
             auto eval_mult_key2 = cc->multi_key_switch_gen(kp2.secret_key, kp2.secret_key, eval_mult_key);
             auto eval_mult_ab = cc->multi_add_eval_keys(eval_mult_key, eval_mult_key2, kp2.public_key->get_key_tag());
             auto eval_mult_bab = cc->multi_mult_eval_key(kp2.secret_key, eval_mult_ab, kp2.public_key->get_key_tag());
-            auto eval_sum_keys_b = cc->multi_eval_sum_key_gen(kp2.secret_key, eval_sum_keys, kp2.public_key->get_key_tag());
-            auto eval_sum_keys_join = cc->multi_add_eval_sum_keys(eval_sum_keys, eval_sum_keys_b, kp2.public_key->get_key_tag());
+            auto eval_sum_keys_b =
+                    cc->multi_eval_sum_key_gen(kp2.secret_key, eval_sum_keys, kp2.public_key->get_key_tag());
+            auto eval_sum_keys_join =
+                    cc->multi_add_eval_sum_keys(eval_sum_keys, eval_sum_keys_b, kp2.public_key->get_key_tag());
             cc->insert_eval_sum_key(eval_sum_keys_join);
 
-            auto eval_at_index_keys_b =
-                    cc->multi_eval_at_index_key_gen(kp2.secret_key, eval_at_index_keys, indices, kp2.public_key->get_key_tag());
-            auto eval_at_index_keys_join =
-                    cc->multi_add_eval_automorphism_keys(eval_at_index_keys, eval_at_index_keys_b, kp2.public_key->get_key_tag());
+            auto eval_at_index_keys_b = cc->multi_eval_at_index_key_gen(kp2.secret_key, eval_at_index_keys, indices,
+                                                                        kp2.public_key->get_key_tag());
+            auto eval_at_index_keys_join = cc->multi_add_eval_automorphism_keys(
+                    eval_at_index_keys, eval_at_index_keys_b, kp2.public_key->get_key_tag());
             cc->insert_eval_automorphism_key(eval_at_index_keys_join);
 
             auto eval_mult_aab = cc->multi_mult_eval_key(kp1.secret_key, eval_mult_ab, kp2.public_key->get_key_tag());
-            auto eval_mult_final = cc->multi_add_eval_mult_keys(
-                    eval_mult_aab, eval_mult_bab,
-                    (CKKSRNS_TEST == test_data.test_case_type) ? eval_mult_ab->get_key_tag() : kp2.public_key->get_key_tag());
+            auto eval_mult_final = cc->multi_add_eval_mult_keys(eval_mult_aab, eval_mult_bab,
+                                                                (CKKSRNS_TEST == test_data.test_case_type) ?
+                                                                        eval_mult_ab->get_key_tag() :
+                                                                        kp2.public_key->get_key_tag());
             cc->insert_eval_mult_key({eval_mult_final});
             //====================================================================
             std::vector<PrivateKey<Element>> secret_keys{kp1.secret_key, kp2.secret_key};
@@ -456,8 +459,8 @@ class UTGENERAL_MULTIPARTY : public ::testing::TestWithParam<TEST_CASE_UTGENERAL
             if (CKKSRNS_TEST == test_data.test_case_type) {
                 // For CKKS there is different logic, depending on slots value
                 uint32_t slots = (test_data.slots != 0) ? test_data.slots :
-                                 (BATCH != 0)          ? BATCH :
-                                                         cc->get_ring_dimension() / 2;
+                                 (BATCH != 0)           ? BATCH :
+                                                          cc->get_ring_dimension() / 2;
                 for (uint32_t i = 0; i < encoded_length; ++i) {
                     eval_sum_input[i] = 0;
                     // we add to eval_sum_input[i] value vector_of_ints3[(i + j) % BATCH];
@@ -497,20 +500,20 @@ class UTGENERAL_MULTIPARTY : public ::testing::TestWithParam<TEST_CASE_UTGENERAL
             if (CKKSRNS_TEST == test_data.test_case_type) {
                 // TODO (dsuponit): we have to rename make_ckks_packed_plaintext() to make_packed_plaintext(). All of them have different input params
                 // for CKKS we need to convert vectors of integers to vectors of complex numbers
-                plaintext1 =
-                        cc->make_ckks_packed_plaintext(to_complex_double_vec(vector_of_ints1), 1, 0, nullptr, test_data.slots);
-                plaintext2 =
-                        cc->make_ckks_packed_plaintext(to_complex_double_vec(vector_of_ints2), 1, 0, nullptr, test_data.slots);
-                plaintext3 =
-                        cc->make_ckks_packed_plaintext(to_complex_double_vec(vector_of_ints3), 1, 0, nullptr, test_data.slots);
-                plaintext_sum_input =
-                        cc->make_ckks_packed_plaintext(to_complex_double_vec(sum_input), 1, 0, nullptr, test_data.slots);
-                plaintext_mult_input =
-                        cc->make_ckks_packed_plaintext(to_complex_double_vec(mult_input), 1, 0, nullptr, test_data.slots);
-                plaintext_eval_sum_input =
-                        cc->make_ckks_packed_plaintext(to_complex_double_vec(eval_sum_input), 1, 0, nullptr, test_data.slots);
-                plaintext_rotate_input =
-                        cc->make_ckks_packed_plaintext(to_complex_double_vec(rotate_input), 1, 0, nullptr, test_data.slots);
+                plaintext1 = cc->make_ckks_packed_plaintext(to_complex_double_vec(vector_of_ints1), 1, 0, nullptr,
+                                                            test_data.slots);
+                plaintext2 = cc->make_ckks_packed_plaintext(to_complex_double_vec(vector_of_ints2), 1, 0, nullptr,
+                                                            test_data.slots);
+                plaintext3 = cc->make_ckks_packed_plaintext(to_complex_double_vec(vector_of_ints3), 1, 0, nullptr,
+                                                            test_data.slots);
+                plaintext_sum_input = cc->make_ckks_packed_plaintext(to_complex_double_vec(sum_input), 1, 0, nullptr,
+                                                                     test_data.slots);
+                plaintext_mult_input = cc->make_ckks_packed_plaintext(to_complex_double_vec(mult_input), 1, 0, nullptr,
+                                                                      test_data.slots);
+                plaintext_eval_sum_input = cc->make_ckks_packed_plaintext(to_complex_double_vec(eval_sum_input), 1, 0,
+                                                                          nullptr, test_data.slots);
+                plaintext_rotate_input = cc->make_ckks_packed_plaintext(to_complex_double_vec(rotate_input), 1, 0,
+                                                                        nullptr, test_data.slots);
             } else {
                 plaintext1 = cc->make_packed_plaintext(vector_of_ints1);
                 plaintext2 = cc->make_packed_plaintext(vector_of_ints2);
@@ -523,9 +526,9 @@ class UTGENERAL_MULTIPARTY : public ::testing::TestWithParam<TEST_CASE_UTGENERAL
             ////////////////////////////////////////////////////////////
             // Encryption
             ////////////////////////////////////////////////////////////
-            auto pub_key_for_encryption =
-                    test_data.star ? kp2.public_key :
-                                    cc->multi_add_pub_keys(kp1.public_key, kp2.public_key, kp2.public_key->get_key_tag());
+            auto pub_key_for_encryption = test_data.star ? kp2.public_key :
+                                                           cc->multi_add_pub_keys(kp1.public_key, kp2.public_key,
+                                                                                  kp2.public_key->get_key_tag());
             Ciphertext<Element> ciphertext1 = cc->encrypt(pub_key_for_encryption, plaintext1);
             Ciphertext<Element> ciphertext2 = cc->encrypt(pub_key_for_encryption, plaintext2);
             Ciphertext<Element> ciphertext3 = cc->encrypt(pub_key_for_encryption, plaintext3);
@@ -554,10 +557,11 @@ class UTGENERAL_MULTIPARTY : public ::testing::TestWithParam<TEST_CASE_UTGENERAL
             // TODO (dsuponit): we have to rename get_ckks_packed_value() to get_packed_value(). it should be an override of the virtual function in plaintext.h
             std::string err_msg = failmsg + " accumulation failed";
             if (CKKSRNS_TEST == test_data.test_case_type) {
-                check_equality(plaintext_add_new->get_ckks_packed_value(), plaintext_sum_input->get_ckks_packed_value(), eps,
-                              err_msg);
+                check_equality(plaintext_add_new->get_ckks_packed_value(), plaintext_sum_input->get_ckks_packed_value(),
+                               eps, err_msg);
             } else {
-                check_equality(plaintext_add_new->get_packed_value(), plaintext_sum_input->get_packed_value(), eps, err_msg);
+                check_equality(plaintext_add_new->get_packed_value(), plaintext_sum_input->get_packed_value(), eps,
+                               err_msg);
             }
             //====================================================================
             Plaintext plaintext_mult;
@@ -566,10 +570,11 @@ class UTGENERAL_MULTIPARTY : public ::testing::TestWithParam<TEST_CASE_UTGENERAL
 
             err_msg = failmsg + " multiplication failed";
             if (CKKSRNS_TEST == test_data.test_case_type) {
-                check_equality(plaintext_mult->get_ckks_packed_value(), plaintext_mult_input->get_ckks_packed_value(), eps,
-                              err_msg);
+                check_equality(plaintext_mult->get_ckks_packed_value(), plaintext_mult_input->get_ckks_packed_value(),
+                               eps, err_msg);
             } else {
-                check_equality(plaintext_mult->get_packed_value(), plaintext_mult_input->get_packed_value(), eps, err_msg);
+                check_equality(plaintext_mult->get_packed_value(), plaintext_mult_input->get_packed_value(), eps,
+                               err_msg);
             }
             //====================================================================
             Plaintext plaintext_rotate;
@@ -578,10 +583,11 @@ class UTGENERAL_MULTIPARTY : public ::testing::TestWithParam<TEST_CASE_UTGENERAL
 
             err_msg = failmsg + " rotation failed";
             if (CKKSRNS_TEST == test_data.test_case_type) {
-                check_equality(plaintext_rotate->get_ckks_packed_value(), plaintext_rotate_input->get_ckks_packed_value(), eps,
-                              err_msg);
+                check_equality(plaintext_rotate->get_ckks_packed_value(),
+                               plaintext_rotate_input->get_ckks_packed_value(), eps, err_msg);
             } else {
-                check_equality(plaintext_rotate->get_packed_value(), plaintext_rotate_input->get_packed_value(), eps, err_msg);
+                check_equality(plaintext_rotate->get_packed_value(), plaintext_rotate_input->get_packed_value(), eps,
+                               err_msg);
             }
 
             ////////////////////////////////////////////////////////////
@@ -600,11 +606,11 @@ class UTGENERAL_MULTIPARTY : public ::testing::TestWithParam<TEST_CASE_UTGENERAL
                 buffer << "should be: " << plaintext_multiparty_new->get_ckks_packed_value()
                        << " - we get: " << plaintext_sum_input->get_ckks_packed_value();
 
-                check_equality(plaintext_multiparty_new->get_ckks_packed_value(), plaintext_sum_input->get_ckks_packed_value(),
-                              eps, err_msg + buffer.str());
+                check_equality(plaintext_multiparty_new->get_ckks_packed_value(),
+                               plaintext_sum_input->get_ckks_packed_value(), eps, err_msg + buffer.str());
             } else {
-                check_equality(plaintext_multiparty_new->get_packed_value(), plaintext_sum_input->get_packed_value(), eps,
-                              err_msg);
+                check_equality(plaintext_multiparty_new->get_packed_value(), plaintext_sum_input->get_packed_value(),
+                               eps, err_msg);
             }
             //====================================================================
             if (BGVRNS_TEST == test_data.test_case_type && test_data.star) {  // TODO (dsuponit): is this necessary???
@@ -615,49 +621,52 @@ class UTGENERAL_MULTIPARTY : public ::testing::TestWithParam<TEST_CASE_UTGENERAL
             Plaintext plaintext_multiparty_mult;
             ciphertext_partial1 = cc->multiparty_decrypt_lead({ciphertext_mult}, kp1.secret_key);
             ciphertext_partial2 = cc->multiparty_decrypt_main({ciphertext_mult}, kp2.secret_key);
-            std::vector<Ciphertext<Element>> partial_ciphertext_vec_mult{ciphertext_partial1[0], ciphertext_partial2[0]};
+            std::vector<Ciphertext<Element>> partial_ciphertext_vec_mult{ciphertext_partial1[0],
+                                                                         ciphertext_partial2[0]};
             cc->multiparty_decrypt_fusion(partial_ciphertext_vec_mult, &plaintext_multiparty_mult);
             plaintext_multiparty_mult->set_length(plaintext1->get_length());
 
             err_msg = failmsg + " Multiparty multiplication failed";
             if (CKKSRNS_TEST == test_data.test_case_type) {
-                check_equality(plaintext_multiparty_mult->get_ckks_packed_value(), plaintext_mult_input->get_ckks_packed_value(),
-                              eps, err_msg);
+                check_equality(plaintext_multiparty_mult->get_ckks_packed_value(),
+                               plaintext_mult_input->get_ckks_packed_value(), eps, err_msg);
             } else {
-                check_equality(plaintext_multiparty_mult->get_packed_value(), plaintext_mult_input->get_packed_value(), eps,
-                              err_msg);
+                check_equality(plaintext_multiparty_mult->get_packed_value(), plaintext_mult_input->get_packed_value(),
+                               eps, err_msg);
             }
             //====================================================================
             Plaintext plaintext_multiparty_eval_sum;
             ciphertext_partial1 = cc->multiparty_decrypt_lead({ciphertext_eval_sum}, kp1.secret_key);
             ciphertext_partial2 = cc->multiparty_decrypt_main({ciphertext_eval_sum}, kp2.secret_key);
-            std::vector<Ciphertext<Element>> partial_ciphertext_vec_eval_sum{ciphertext_partial1[0], ciphertext_partial2[0]};
+            std::vector<Ciphertext<Element>> partial_ciphertext_vec_eval_sum{ciphertext_partial1[0],
+                                                                             ciphertext_partial2[0]};
             cc->multiparty_decrypt_fusion(partial_ciphertext_vec_eval_sum, &plaintext_multiparty_eval_sum);
             plaintext_multiparty_eval_sum->set_length(plaintext1->get_length());
 
             err_msg = failmsg + " Multiparty eval sum failed";
             if (CKKSRNS_TEST == test_data.test_case_type) {
                 check_equality(plaintext_multiparty_eval_sum->get_ckks_packed_value(),
-                              plaintext_eval_sum_input->get_ckks_packed_value(), eps, err_msg);
+                               plaintext_eval_sum_input->get_ckks_packed_value(), eps, err_msg);
             } else {
-                check_equality(plaintext_multiparty_eval_sum->get_packed_value(), plaintext_eval_sum_input->get_packed_value(),
-                              eps, err_msg);
+                check_equality(plaintext_multiparty_eval_sum->get_packed_value(),
+                               plaintext_eval_sum_input->get_packed_value(), eps, err_msg);
             }
             //====================================================================
             Plaintext plaintext_multiparty_rotate;
             ciphertext_partial1 = cc->multiparty_decrypt_lead({ciphertext_rotate}, kp1.secret_key);
             ciphertext_partial2 = cc->multiparty_decrypt_main({ciphertext_rotate}, kp2.secret_key);
-            std::vector<Ciphertext<Element>> partial_ciphertext_vec_rotate{ciphertext_partial1[0], ciphertext_partial2[0]};
+            std::vector<Ciphertext<Element>> partial_ciphertext_vec_rotate{ciphertext_partial1[0],
+                                                                           ciphertext_partial2[0]};
             cc->multiparty_decrypt_fusion(partial_ciphertext_vec_rotate, &plaintext_multiparty_rotate);
             plaintext_multiparty_rotate->set_length(plaintext1->get_length());
 
             err_msg = failmsg + " Multiparty rotation failed";
             if (CKKSRNS_TEST == test_data.test_case_type) {
                 check_equality(plaintext_multiparty_rotate->get_ckks_packed_value(),
-                              plaintext_rotate_input->get_ckks_packed_value(), eps, err_msg);
+                               plaintext_rotate_input->get_ckks_packed_value(), eps, err_msg);
             } else {
-                check_equality(plaintext_multiparty_rotate->get_packed_value(), plaintext_rotate_input->get_packed_value(), eps,
-                              err_msg);
+                check_equality(plaintext_multiparty_rotate->get_packed_value(),
+                               plaintext_rotate_input->get_packed_value(), eps, err_msg);
             }
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
@@ -670,7 +679,7 @@ class UTGENERAL_MULTIPARTY : public ::testing::TestWithParam<TEST_CASE_UTGENERAL
 
     // runs for three parties only
     void unit_test_multiparty(const TEST_CASE_UTGENERAL_MULTIPARTY& test_data,
-                            const std::string& failmsg = std::string()) {
+                              const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
             ////////////////////////////////////////////////////////////
@@ -767,7 +776,7 @@ class UTGENERAL_MULTIPARTY : public ::testing::TestWithParam<TEST_CASE_UTGENERAL
             auto ciphertext_partial3 = cc->multiparty_decrypt_main({ciphertext_add_new}, kp3.secret_key);
 
             std::vector<Ciphertext<Element>> partial_ciphertext_vec{ciphertext_partial1[0], ciphertext_partial2[0],
-                                                                  ciphertext_partial3[0]};
+                                                                    ciphertext_partial3[0]};
 
             Plaintext plaintext_multiparty_new;
             cc->multiparty_decrypt_fusion(partial_ciphertext_vec, &plaintext_multiparty_new);
@@ -777,8 +786,8 @@ class UTGENERAL_MULTIPARTY : public ::testing::TestWithParam<TEST_CASE_UTGENERAL
             std::string err_msg = failmsg + " Multiparty: Does not match plaintext addition";
             check_equality(vector_of_ints_sum, plaintext_multiparty_new->get_coef_packed_value(), eps, err_msg);
             err_msg = failmsg + " Multiparty: Does not match the results of direction encryption";
-            check_equality(plaintext_add_new->get_coef_packed_value(), plaintext_multiparty_new->get_coef_packed_value(), eps,
-                          err_msg);
+            check_equality(plaintext_add_new->get_coef_packed_value(),
+                           plaintext_multiparty_new->get_coef_packed_value(), eps, err_msg);
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -790,7 +799,7 @@ class UTGENERAL_MULTIPARTY : public ::testing::TestWithParam<TEST_CASE_UTGENERAL
 
     // runs for three parties only
     void unit_test_multiparty_aborts(const TEST_CASE_UTGENERAL_MULTIPARTY& test_data,
-                                  const std::string& failmsg = std::string()) {
+                                     const std::string& failmsg = std::string()) {
         ////////////////////////////////////////////////////////////
         // Set-up of parameters
         ////////////////////////////////////////////////////////////
@@ -823,7 +832,8 @@ class UTGENERAL_MULTIPARTY : public ::testing::TestWithParam<TEST_CASE_UTGENERAL
         auto eval_mult_key2 = cc->multi_key_switch_gen(kp2.secret_key, kp2.secret_key, eval_mult_key);
         auto eval_mult_ab = cc->multi_add_eval_keys(eval_mult_key, eval_mult_key2, kp2.public_key->get_key_tag());
         auto eval_sum_keys_b = cc->multi_eval_sum_key_gen(kp2.secret_key, eval_sum_keys, kp2.public_key->get_key_tag());
-        auto eval_sum_keys_ab = cc->multi_add_eval_sum_keys(eval_sum_keys, eval_sum_keys_b, kp2.public_key->get_key_tag());
+        auto eval_sum_keys_ab =
+                cc->multi_add_eval_sum_keys(eval_sum_keys, eval_sum_keys_b, kp2.public_key->get_key_tag());
 
         KeyPair<RnsPoly> kp3 = cc->multiparty_key_gen(kp2.public_key);
 
@@ -831,15 +841,19 @@ class UTGENERAL_MULTIPARTY : public ::testing::TestWithParam<TEST_CASE_UTGENERAL
         auto eval_mult_key3 = cc->multi_key_switch_gen(kp3.secret_key, kp3.secret_key, eval_mult_ab);
         auto eval_mult_abc = cc->multi_add_eval_keys(eval_mult_ab, eval_mult_key3, kp3.public_key->get_key_tag());
         auto eval_mult_cabc = cc->multi_mult_eval_key(kp3.secret_key, eval_mult_abc, kp3.public_key->get_key_tag());
-        auto eval_sum_keys_c = cc->multi_eval_sum_key_gen(kp3.secret_key, eval_sum_keys_b, kp3.public_key->get_key_tag());
-        auto eval_sum_keys_join = cc->multi_add_eval_sum_keys(eval_sum_keys_c, eval_sum_keys_ab, kp3.public_key->get_key_tag());
+        auto eval_sum_keys_c =
+                cc->multi_eval_sum_key_gen(kp3.secret_key, eval_sum_keys_b, kp3.public_key->get_key_tag());
+        auto eval_sum_keys_join =
+                cc->multi_add_eval_sum_keys(eval_sum_keys_c, eval_sum_keys_ab, kp3.public_key->get_key_tag());
 
         cc->insert_eval_sum_key(eval_sum_keys_join);
 
         auto eval_mult_babc = cc->multi_mult_eval_key(kp2.secret_key, eval_mult_abc, kp3.public_key->get_key_tag());
-        auto eval_mult_bcabc = cc->multi_add_eval_mult_keys(eval_mult_cabc, eval_mult_babc, eval_mult_cabc->get_key_tag());
+        auto eval_mult_bcabc =
+                cc->multi_add_eval_mult_keys(eval_mult_cabc, eval_mult_babc, eval_mult_cabc->get_key_tag());
         auto eval_mult_aabc = cc->multi_mult_eval_key(kp1.secret_key, eval_mult_abc, kp3.public_key->get_key_tag());
-        auto eval_mult_final = cc->multi_add_eval_mult_keys(eval_mult_aabc, eval_mult_bcabc, eval_mult_aabc->get_key_tag());
+        auto eval_mult_final =
+                cc->multi_add_eval_mult_keys(eval_mult_aabc, eval_mult_bcabc, eval_mult_aabc->get_key_tag());
 
         cc->insert_eval_mult_key({eval_mult_final});
 
@@ -863,7 +877,9 @@ class UTGENERAL_MULTIPARTY : public ::testing::TestWithParam<TEST_CASE_UTGENERAL
 
         if (CKKSRNS_SCHEME == test_data.params.scheme_id_value) {
             // For CKKS there is different logic, depending on slots value
-            uint32_t slots = (test_data.slots != 0) ? test_data.slots : (BATCH != 0) ? BATCH : cc->get_ring_dimension() / 2;
+            uint32_t slots = (test_data.slots != 0) ? test_data.slots :
+                             (BATCH != 0)           ? BATCH :
+                                                      cc->get_ring_dimension() / 2;
             for (size_t i = 0; i < encoded_length; ++i) {
                 eval_sum_input[i] = 0;
                 // we add to eval_sum_input[i] value vector_of_ints3[(i + j) % BATCH];
@@ -890,14 +906,18 @@ class UTGENERAL_MULTIPARTY : public ::testing::TestWithParam<TEST_CASE_UTGENERAL
         Plaintext plaintextevalmult;
         Plaintext plaintextevalsum;
         if (CKKSRNS_SCHEME == test_data.params.scheme_id_value) {
-            plaintext1 = cc->make_ckks_packed_plaintext(to_complex_double_vec(vector_of_ints1), 1, 0, nullptr, test_data.slots);
-            plaintext2 = cc->make_ckks_packed_plaintext(to_complex_double_vec(vector_of_ints2), 1, 0, nullptr, test_data.slots);
-            plaintext3 = cc->make_ckks_packed_plaintext(to_complex_double_vec(vector_of_ints3), 1, 0, nullptr, test_data.slots);
-            plaintextevaladd = cc->make_ckks_packed_plaintext(to_complex_double_vec(sum_input), 1, 0, nullptr, test_data.slots);
+            plaintext1 = cc->make_ckks_packed_plaintext(to_complex_double_vec(vector_of_ints1), 1, 0, nullptr,
+                                                        test_data.slots);
+            plaintext2 = cc->make_ckks_packed_plaintext(to_complex_double_vec(vector_of_ints2), 1, 0, nullptr,
+                                                        test_data.slots);
+            plaintext3 = cc->make_ckks_packed_plaintext(to_complex_double_vec(vector_of_ints3), 1, 0, nullptr,
+                                                        test_data.slots);
+            plaintextevaladd =
+                    cc->make_ckks_packed_plaintext(to_complex_double_vec(sum_input), 1, 0, nullptr, test_data.slots);
             plaintextevalmult =
                     cc->make_ckks_packed_plaintext(to_complex_double_vec(mult_input), 1, 0, nullptr, test_data.slots);
-            plaintextevalsum =
-                    cc->make_ckks_packed_plaintext(to_complex_double_vec(eval_sum_input), 1, 0, nullptr, test_data.slots);
+            plaintextevalsum = cc->make_ckks_packed_plaintext(to_complex_double_vec(eval_sum_input), 1, 0, nullptr,
+                                                              test_data.slots);
         } else {
             plaintext1 = cc->make_packed_plaintext(vector_of_ints1);
             plaintext2 = cc->make_packed_plaintext(vector_of_ints2);
@@ -989,17 +1009,19 @@ class UTGENERAL_MULTIPARTY : public ::testing::TestWithParam<TEST_CASE_UTGENERAL
         std::string err_msg = failmsg + " Multiparty: Does not match plaintext computaion results";
 
         if ((test_data.test_case_type == TEST_ABORTS) && (test_data.params.scheme_id_value == CKKSRNS_SCHEME)) {
-            check_equality(plaintextevaladd->get_ckks_packed_value(), plaintext_multiparty_new->get_ckks_packed_value(), eps,
-                          err_msg);
-            check_equality(plaintextevalmult->get_ckks_packed_value(), plaintext_multiparty_mult->get_ckks_packed_value(), eps,
-                          err_msg);
-            check_equality(plaintextevalsum->get_ckks_packed_value(), plaintext_multiparty_eval_sum->get_ckks_packed_value(), eps,
-                          err_msg);
+            check_equality(plaintextevaladd->get_ckks_packed_value(), plaintext_multiparty_new->get_ckks_packed_value(),
+                           eps, err_msg);
+            check_equality(plaintextevalmult->get_ckks_packed_value(),
+                           plaintext_multiparty_mult->get_ckks_packed_value(), eps, err_msg);
+            check_equality(plaintextevalsum->get_ckks_packed_value(),
+                           plaintext_multiparty_eval_sum->get_ckks_packed_value(), eps, err_msg);
         } else {
-            check_equality(plaintextevaladd->get_packed_value(), plaintext_multiparty_new->get_packed_value(), eps, err_msg);
-            check_equality(plaintextevalmult->get_packed_value(), plaintext_multiparty_mult->get_packed_value(), eps, err_msg);
+            check_equality(plaintextevaladd->get_packed_value(), plaintext_multiparty_new->get_packed_value(), eps,
+                           err_msg);
+            check_equality(plaintextevalmult->get_packed_value(), plaintext_multiparty_mult->get_packed_value(), eps,
+                           err_msg);
             check_equality(plaintextevalsum->get_packed_value(), plaintext_multiparty_eval_sum->get_packed_value(), eps,
-                          err_msg);
+                           err_msg);
         }
     }
 };

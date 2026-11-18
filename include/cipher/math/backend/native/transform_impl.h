@@ -178,7 +178,8 @@ template <typename VecType>
 std::map<typename VecType::Integer, VecType> ChineseRemainderTransformArbNat<VecType>::cyclotomic_poly_ntt_map_;
 
 template <typename VecType>
-std::map<ModulusRoot<typename VecType::Integer>, VecType> BluesteinFftNat<VecType>::root_of_unity_table_by_modulus_root_;
+std::map<ModulusRoot<typename VecType::Integer>, VecType>
+        BluesteinFftNat<VecType>::root_of_unity_table_by_modulus_root_;
 
 template <typename VecType>
 std::map<ModulusRoot<typename VecType::Integer>, VecType>
@@ -231,24 +232,25 @@ std::map<uint32_t, uint32_t> ChineseRemainderTransformArbNat<VecType>::ntt_divis
 
 template <typename VecType>
 void NumberTheoreticTransformNat<VecType>::forward_transform_iterative(const VecType& element,
-                                                                     const VecType& root_of_unity_table, VecType* r) {
+                                                                       const VecType& root_of_unity_table, VecType* r) {
     uint32_t n = element.get_length();
     if (r->get_length() != n)
         CIPHER_THROW("size of input element and size of output element not of same size");
-    forward_transform_iterative(element, root_of_unity_table, prep_shoup_consts(root_of_unity_table, element.get_modulus()), r);
+    forward_transform_iterative(element, root_of_unity_table,
+                                prep_shoup_consts(root_of_unity_table, element.get_modulus()), r);
 }
 
 template <typename VecType>
 void NumberTheoreticTransformNat<VecType>::inverse_transform_iterative(const VecType& element,
-                                                                     const VecType& root_inv_table, VecType* r) {
+                                                                       const VecType& root_inv_table, VecType* r) {
     inverse_transform_iterative(element, root_inv_table, prep_shoup_consts(root_inv_table, element.get_modulus()), r);
 }
 
 template <typename VecType>
 void NumberTheoreticTransformNat<VecType>::forward_transform_iterative(const VecType& element,
-                                                                     const VecType& root_of_unity_table,
-                                                                     const VecType& precon_root_of_unity_table,
-                                                                     VecType* result) {
+                                                                       const VecType& root_of_unity_table,
+                                                                       const VecType& precon_root_of_unity_table,
+                                                                       VecType* result) {
     uint32_t n = element.get_length();
     if (result->get_length() != n)
         CIPHER_THROW("size of input element and size of output element not of same size");
@@ -294,14 +296,13 @@ void NumberTheoreticTransformNat<VecType>::forward_transform_iterative(const Vec
 }
 
 template <typename VecType>
-void NumberTheoreticTransformNat<VecType>::inverse_transform_iterative(const VecType& element,
-                                                                     const VecType& root_of_unity_inverse_table,
-                                                                     const VecType& precon_root_of_unity_inverse_table,
-                                                                     VecType* result) {
+void NumberTheoreticTransformNat<VecType>::inverse_transform_iterative(
+        const VecType& element, const VecType& root_of_unity_inverse_table,
+        const VecType& precon_root_of_unity_inverse_table, VecType* result) {
     uint32_t n = element.get_length();
     const auto modulus = element.get_modulus();
     NumberTheoreticTransformNat<VecType>().forward_transform_iterative(element, root_of_unity_inverse_table,
-                                                                     precon_root_of_unity_inverse_table, result);
+                                                                       precon_root_of_unity_inverse_table, result);
     using NInt = decltype(modulus.value_);
     const NInt mv{modulus.value_};
     IntType cyclo_order_inv(IntType(n).mod_inverse(modulus));
@@ -316,15 +317,16 @@ void NumberTheoreticTransformNat<VecType>::inverse_transform_iterative(const Vec
 
 template <typename VecType>
 void NumberTheoreticTransformNat<VecType>::forward_transform_to_bit_reverse_in_place(const VecType& root_table,
-                                                                               VecType* element) {
+                                                                                     VecType* element) {
     // compute the Shoup constants once and share the vectorized precon kernel
-    forward_transform_to_bit_reverse_in_place(root_table, prep_shoup_consts(root_table, element->get_modulus()), element);
+    forward_transform_to_bit_reverse_in_place(root_table, prep_shoup_consts(root_table, element->get_modulus()),
+                                              element);
 }
 
 template <typename VecType>
 void NumberTheoreticTransformNat<VecType>::forward_transform_to_bit_reverse(const VecType& element,
-                                                                        const VecType& root_of_unity_table,
-                                                                        VecType* result) {
+                                                                            const VecType& root_of_unity_table,
+                                                                            VecType* result) {
     uint32_t n = element.get_length();
     if (result->get_length() != n)
         CIPHER_THROW("size of input element and size of output element not of same size");
@@ -334,9 +336,8 @@ void NumberTheoreticTransformNat<VecType>::forward_transform_to_bit_reverse(cons
 }
 
 template <typename VecType>
-void NumberTheoreticTransformNat<VecType>::forward_transform_to_bit_reverse_in_place(const VecType& root_of_unity_table,
-                                                                               const VecType& precon_root_of_unity_table,
-                                                                               VecType* element) {
+void NumberTheoreticTransformNat<VecType>::forward_transform_to_bit_reverse_in_place(
+        const VecType& root_of_unity_table, const VecType& precon_root_of_unity_table, VecType* element) {
     // NTT based on the Cooley-Tukey (CT) butterfly
     // Inputs: element (vector of size n in standard ordering)
     //         root_of_unity_table (precomputed roots of unity in bit-reversed ordering)
@@ -507,9 +508,9 @@ void NumberTheoreticTransformNat<VecType>::forward_transform_to_bit_reverse_in_p
 
 template <typename VecType>
 void NumberTheoreticTransformNat<VecType>::forward_transform_to_bit_reverse(const VecType& element,
-                                                                        const VecType& root_of_unity_table,
-                                                                        const VecType& precon_root_of_unity_table,
-                                                                        VecType* result) {
+                                                                            const VecType& root_of_unity_table,
+                                                                            const VecType& precon_root_of_unity_table,
+                                                                            VecType* result) {
     if (result->get_length() != element.get_length())
         CIPHER_THROW("size of input element and size of output element not of same size");
     *result = element;
@@ -518,19 +519,19 @@ void NumberTheoreticTransformNat<VecType>::forward_transform_to_bit_reverse(cons
 
 template <typename VecType>
 void NumberTheoreticTransformNat<VecType>::inverse_transform_from_bit_reverse_in_place(const VecType& root_inv_table,
-                                                                                 const IntType& co_inv,
-                                                                                 VecType* element) {
+                                                                                       const IntType& co_inv,
+                                                                                       VecType* element) {
     // compute the Shoup constants once and share the vectorized precon kernel
     const auto modulus = element->get_modulus();
     const auto precon = prep_shoup_consts(root_inv_table, modulus);
-    inverse_transform_from_bit_reverse_in_place(root_inv_table, precon, co_inv, co_inv.prep_mod_mul_const(modulus), element);
+    inverse_transform_from_bit_reverse_in_place(root_inv_table, precon, co_inv, co_inv.prep_mod_mul_const(modulus),
+                                                element);
 }
 
 template <typename VecType>
-void NumberTheoreticTransformNat<VecType>::inverse_transform_from_bit_reverse(const VecType& element,
-                                                                          const VecType& root_of_unity_inverse_table,
-                                                                          const IntType& cyclo_order_inv,
-                                                                          VecType* result) {
+void NumberTheoreticTransformNat<VecType>::inverse_transform_from_bit_reverse(
+        const VecType& element, const VecType& root_of_unity_inverse_table, const IntType& cyclo_order_inv,
+        VecType* result) {
     uint32_t n = element.get_length();
     if (result->get_length() != n)
         CIPHER_THROW("size of input element and size of output element not of same size");
@@ -573,7 +574,8 @@ void NumberTheoreticTransformNat<VecType>::inverse_transform_from_bit_reverse_in
 
     // precomputed omega[bitreversed(1)] * (n inverse). used in final stage of intt.
     // Please see https://github.com/openfheorg/openfhe-development/issues/872 for details.
-    const auto omega1_inv{root_of_unity_inverse_table[1].mod_mul_fast_const(cyclo_order_inv, modulus, precon_cyclo_order_inv)};
+    const auto omega1_inv{
+            root_of_unity_inverse_table[1].mod_mul_fast_const(cyclo_order_inv, modulus, precon_cyclo_order_inv)};
     const NInt o1{omega1_inv.value_};
     const NInt precon_o1{omega1_inv.prep_mod_mul_const(modulus).value_};
 
@@ -638,8 +640,9 @@ void NumberTheoreticTransformNat<VecType>::inverse_transform_from_bit_reverse_in
 
 template <typename VecType>
 void NumberTheoreticTransformNat<VecType>::inverse_transform_from_bit_reverse(
-        const VecType& element, const VecType& root_of_unity_inverse_table, const VecType& precon_root_of_unity_inverse_table,
-        const IntType& cyclo_order_inv, const IntType& precon_cyclo_order_inv, VecType* result) {
+        const VecType& element, const VecType& root_of_unity_inverse_table,
+        const VecType& precon_root_of_unity_inverse_table, const IntType& cyclo_order_inv,
+        const IntType& precon_cyclo_order_inv, VecType* result) {
     uint32_t n = element.get_length();
     if (result->get_length() != n)
         CIPHER_THROW("size of input element and size of output element not of same size");
@@ -649,41 +652,39 @@ void NumberTheoreticTransformNat<VecType>::inverse_transform_from_bit_reverse(
     for (size_t i = 0; i < n; i++) {
         (*result)[i] = element[i];
     }
-    inverse_transform_from_bit_reverse_in_place(root_of_unity_inverse_table, precon_root_of_unity_inverse_table, cyclo_order_inv,
-                                          precon_cyclo_order_inv, result);
+    inverse_transform_from_bit_reverse_in_place(root_of_unity_inverse_table, precon_root_of_unity_inverse_table,
+                                                cyclo_order_inv, precon_cyclo_order_inv, result);
 
     return;
 }
 
 template <typename VecType>
-void ChineseRemainderTransformFttNat<VecType>::forward_transform_to_bit_reverse_in_place(const IntType& root_of_unity_value,
-                                                                                   const uint32_t cyclo_order,
-                                                                                   VecType* element) {
+void ChineseRemainderTransformFttNat<VecType>::forward_transform_to_bit_reverse_in_place(
+        const IntType& root_of_unity_value, const uint32_t cyclo_order, VecType* element) {
     if (root_of_unity_value == IntType(1) || root_of_unity_value == IntType(0))
         return;
     auto tables = get_tables(root_of_unity_value, cyclo_order, element->get_modulus());
-    NumberTheoreticTransformNat<VecType>().forward_transform_to_bit_reverse_in_place(tables->root_reverse,
-                                                                               tables->precon_root_reverse, element);
+    NumberTheoreticTransformNat<VecType>().forward_transform_to_bit_reverse_in_place(
+            tables->root_reverse, tables->precon_root_reverse, element);
 }
 
 template <typename VecType>
 void ChineseRemainderTransformFttNat<VecType>::forward_transform_to_bit_reverse(const VecType& element,
-                                                                            const IntType& root_of_unity_value,
-                                                                            const uint32_t cyclo_order,
-                                                                            VecType* result) {
+                                                                                const IntType& root_of_unity_value,
+                                                                                const uint32_t cyclo_order,
+                                                                                VecType* result) {
     if (root_of_unity_value == IntType(1) || root_of_unity_value == IntType(0)) {
         *result = element;
         return;
     }
     auto tables = get_tables(root_of_unity_value, cyclo_order, element.get_modulus());
     NumberTheoreticTransformNat<VecType>().forward_transform_to_bit_reverse(element, tables->root_reverse,
-                                                                        tables->precon_root_reverse, result);
+                                                                            tables->precon_root_reverse, result);
 }
 
 template <typename VecType>
-void ChineseRemainderTransformFttNat<VecType>::inverse_transform_from_bit_reverse_in_place(const IntType& root_of_unity_value,
-                                                                                     const uint32_t cyclo_order,
-                                                                                     VecType* element) {
+void ChineseRemainderTransformFttNat<VecType>::inverse_transform_from_bit_reverse_in_place(
+        const IntType& root_of_unity_value, const uint32_t cyclo_order, VecType* element) {
     if (root_of_unity_value == IntType(1) || root_of_unity_value == IntType(0))
         return;
     auto tables = get_tables(root_of_unity_value, cyclo_order, element->get_modulus());
@@ -695,9 +696,9 @@ void ChineseRemainderTransformFttNat<VecType>::inverse_transform_from_bit_revers
 
 template <typename VecType>
 void ChineseRemainderTransformFttNat<VecType>::inverse_transform_from_bit_reverse(const VecType& element,
-                                                                              const IntType& root_of_unity_value,
-                                                                              const uint32_t cyclo_order,
-                                                                              VecType* result) {
+                                                                                  const IntType& root_of_unity_value,
+                                                                                  const uint32_t cyclo_order,
+                                                                                  VecType* result) {
     if (root_of_unity_value == IntType(1) || root_of_unity_value == IntType(0)) {
         *result = element;
         return;
@@ -716,7 +717,7 @@ void ChineseRemainderTransformFttNat<VecType>::inverse_transform_from_bit_revers
 template <typename VecType>
 std::shared_ptr<const typename ChineseRemainderTransformFttNat<VecType>::Tables>
 ChineseRemainderTransformFttNat<VecType>::get_tables(const IntType& root_of_unity_value, const uint32_t cyclo_order,
-                                                    const IntType& modulus) {
+                                                     const IntType& modulus) {
     const uint32_t ring_dim = (cyclo_order >> 1);
     {
         std::shared_lock<std::shared_mutex> rlk(tables_mutex());
@@ -770,14 +771,15 @@ ChineseRemainderTransformFttNat<VecType>::get_tables(const IntType& root_of_unit
 }
 
 template <typename VecType>
-void ChineseRemainderTransformFttNat<VecType>::pre_compute(const IntType& root_of_unity_value, const uint32_t cyclo_order,
-                                                          const IntType& modulus) {
+void ChineseRemainderTransformFttNat<VecType>::pre_compute(const IntType& root_of_unity_value,
+                                                           const uint32_t cyclo_order, const IntType& modulus) {
     get_tables(root_of_unity_value, cyclo_order, modulus);
 }
 
 template <typename VecType>
-void ChineseRemainderTransformFttNat<VecType>::pre_compute(std::vector<IntType>& root_of_unity_value, const uint32_t cyclo_order,
-                                                          std::vector<IntType>& modulii_chain) {
+void ChineseRemainderTransformFttNat<VecType>::pre_compute(std::vector<IntType>& root_of_unity_value,
+                                                           const uint32_t cyclo_order,
+                                                           std::vector<IntType>& modulii_chain) {
     uint32_t num_of_root_u = root_of_unity_value.size();
     uint32_t num_modulii = modulii_chain.size();
     if (num_of_root_u != num_modulii)
@@ -806,7 +808,7 @@ void BluesteinFftNat<VecType>::pre_compute_default_ntt_modulus_root(uint32_t cyc
 
 template <typename VecType>
 void BluesteinFftNat<VecType>::pre_compute_root_table_for_ntt(uint32_t cycloto_order,
-                                                         const ModulusRoot<IntType>& ntt_modulus_root) {
+                                                              const ModulusRoot<IntType>& ntt_modulus_root) {
     std::lock_guard<std::recursive_mutex> lk(cache_mutex());
     uint32_t ntt_dim = 1u << get_msb(2 * cycloto_order - 2);
     const auto& ntt_modulus = ntt_modulus_root.first;
@@ -854,7 +856,8 @@ void BluesteinFftNat<VecType>::pre_compute_powers(uint32_t cyclo_order, const Mo
 }
 
 template <typename VecType>
-void BluesteinFftNat<VecType>::pre_compute_rb_table(uint32_t cyclo_order, const ModulusRootPair<IntType>& modulus_root_pair) {
+void BluesteinFftNat<VecType>::pre_compute_rb_table(uint32_t cyclo_order,
+                                                    const ModulusRootPair<IntType>& modulus_root_pair) {
     std::lock_guard<std::recursive_mutex> lk(cache_mutex());
     const auto& modulus_root = modulus_root_pair.first;
     const auto& modulus = modulus_root.first;
@@ -886,7 +889,7 @@ void BluesteinFftNat<VecType>::pre_compute_rb_table(uint32_t cyclo_order, const 
 
 template <typename VecType>
 VecType BluesteinFftNat<VecType>::forward_transform(const VecType& element, const IntType& root,
-                                                   const uint32_t cyclo_order) {
+                                                    const uint32_t cyclo_order) {
     const auto& modulus = element.get_modulus();
     std::unique_lock<std::recursive_mutex> lk(cache_mutex());
     const auto ntt_modulus_root = default_ntt_modulus_root_[modulus];
@@ -896,8 +899,8 @@ VecType BluesteinFftNat<VecType>::forward_transform(const VecType& element, cons
 
 template <typename VecType>
 VecType BluesteinFftNat<VecType>::forward_transform(const VecType& element, const IntType& root,
-                                                   const uint32_t cyclo_order,
-                                                   const ModulusRoot<IntType>& ntt_modulus_root) {
+                                                    const uint32_t cyclo_order,
+                                                    const ModulusRoot<IntType>& ntt_modulus_root) {
     if (element.get_length() != cyclo_order)
         CIPHER_THROW("expected size of element vector should be equal to cyclotomic order");
 
@@ -927,7 +930,8 @@ VecType BluesteinFftNat<VecType>::forward_transform(const VecType& element, cons
 
     auto RC = RA.mod_mul(RB);
     VecType rc(ntt_dim);
-    NumberTheoreticTransformNat<VecType>().inverse_transform_iterative(RC, root_table_inverse, precon_table_inverse, &rc);
+    NumberTheoreticTransformNat<VecType>().inverse_transform_iterative(RC, root_table_inverse, precon_table_inverse,
+                                                                       &rc);
     auto resize_rc = Resize(rc, cyclo_order - 1, 2 * (cyclo_order - 1));
     resize_rc.set_modulus(modulus);
     resize_rc.mod_reduce_eq();
@@ -979,9 +983,10 @@ void ChineseRemainderTransformArbNat<VecType>::pre_compute(const uint32_t cyclot
 }
 
 template <typename VecType>
-void ChineseRemainderTransformArbNat<VecType>::set_pre_computed_ntt_modulus(uint32_t cycloto_order, const IntType& modulus,
-                                                                        const IntType& ntt_modulus,
-                                                                        const IntType& ntt_root) {
+void ChineseRemainderTransformArbNat<VecType>::set_pre_computed_ntt_modulus(uint32_t cycloto_order,
+                                                                            const IntType& modulus,
+                                                                            const IntType& ntt_modulus,
+                                                                            const IntType& ntt_root) {
     const ModulusRoot<IntType> ntt_modulus_root = {ntt_modulus, ntt_root};
     std::lock_guard<std::recursive_mutex> lk(BluesteinFftNat<VecType>::cache_mutex());
     BluesteinFftNat<VecType>().pre_compute_root_table_for_ntt(cycloto_order, ntt_modulus_root);
@@ -989,9 +994,9 @@ void ChineseRemainderTransformArbNat<VecType>::set_pre_computed_ntt_modulus(uint
 
 template <typename VecType>
 void ChineseRemainderTransformArbNat<VecType>::set_pre_computed_ntt_division_modulus(uint32_t cycloto_order,
-                                                                                const IntType& modulus,
-                                                                                const IntType& ntt_mod,
-                                                                                const IntType& ntt_root_big) {
+                                                                                     const IntType& modulus,
+                                                                                     const IntType& ntt_mod,
+                                                                                     const IntType& ntt_root_big) {
     std::lock_guard<std::recursive_mutex> lk(BluesteinFftNat<VecType>::cache_mutex());
     CIPHER_DEBUG_FLAG(false);
 
@@ -1060,14 +1065,14 @@ void ChineseRemainderTransformArbNat<VecType>::set_pre_computed_ntt_division_mod
 
     VecType q_fwd_result(ntt_dim);
     NumberTheoreticTransformNat<VecType>().forward_transform_iterative(q_forward_transform, div_table, div_precon,
-                                                                     &q_fwd_result);
+                                                                       &q_fwd_result);
 
     cyclotomic_poly_ntt_map_[modulus] = std::move(q_fwd_result);
 }
 
 template <typename VecType>
 VecType ChineseRemainderTransformArbNat<VecType>::inverse_poly_mod(const VecType& cyclo_poly, const IntType& modulus,
-                                                                 uint32_t power) {
+                                                                   uint32_t power) {
     VecType result(power, modulus);
     uint32_t r = (power > 1) ? get_msb(power - 1) : 0;
     VecType h(1, modulus);  // h is a unit polynomial
@@ -1104,8 +1109,8 @@ VecType ChineseRemainderTransformArbNat<VecType>::inverse_poly_mod(const VecType
 
 template <typename VecType>
 VecType ChineseRemainderTransformArbNat<VecType>::forward_transform(const VecType& element, const IntType& root,
-                                                                   const IntType& ntt_modulus, const IntType& ntt_root,
-                                                                   const uint32_t cyclo_order) {
+                                                                    const IntType& ntt_modulus, const IntType& ntt_root,
+                                                                    const uint32_t cyclo_order) {
     uint32_t phim = get_totient(cyclo_order);
     if (element.get_length() != phim)
         CIPHER_THROW("element size should be equal to phim");
@@ -1141,8 +1146,8 @@ VecType ChineseRemainderTransformArbNat<VecType>::forward_transform(const VecTyp
 
 template <typename VecType>
 VecType ChineseRemainderTransformArbNat<VecType>::inverse_transform(const VecType& element, const IntType& root,
-                                                                   const IntType& ntt_modulus, const IntType& ntt_root,
-                                                                   const uint32_t cyclo_order) {
+                                                                    const IntType& ntt_modulus, const IntType& ntt_root,
+                                                                    const uint32_t cyclo_order) {
     uint32_t phim = get_totient(cyclo_order);
     if (element.get_length() != phim)
         CIPHER_THROW("element size should be equal to phim");
@@ -1169,8 +1174,8 @@ VecType ChineseRemainderTransformArbNat<VecType>::inverse_transform(const VecTyp
         }
     }
     VecType input_to_bluestein = pad(element, cyclo_order, false);
-    auto output_bluestein =
-            BluesteinFftNat<VecType>().forward_transform(input_to_bluestein, root_inverse, cyclo_order, ntt_modulus_root);
+    auto output_bluestein = BluesteinFftNat<VecType>().forward_transform(input_to_bluestein, root_inverse, cyclo_order,
+                                                                         ntt_modulus_root);
     auto cyclotomic_inverse((IntType(cyclo_order)).mod_inverse(modulus));
     output_bluestein = output_bluestein * cyclotomic_inverse;
     VecType output = drop(output_bluestein, cyclo_order, false, ntt_modulus, ntt_root);
@@ -1178,7 +1183,8 @@ VecType ChineseRemainderTransformArbNat<VecType>::inverse_transform(const VecTyp
 }
 
 template <typename VecType>
-VecType ChineseRemainderTransformArbNat<VecType>::pad(const VecType& element, const uint32_t cyclo_order, bool forward) {
+VecType ChineseRemainderTransformArbNat<VecType>::pad(const VecType& element, const uint32_t cyclo_order,
+                                                      bool forward) {
     uint32_t n = get_totient(cyclo_order);
 
     const auto& modulus = element.get_modulus();
@@ -1270,8 +1276,8 @@ VecType ChineseRemainderTransformArbNat<VecType>::drop(const VecType& element, c
             NumberTheoreticTransformNat<VecType>().forward_transform_iterative(a_padded2, root_table, precon_table, &A);
             auto AB = A * cyclo_reverse_ntt;
             VecType a(ntt_div_dim);
-            NumberTheoreticTransformNat<VecType>().inverse_transform_iterative(AB, root_table_inverse, precon_table_inverse,
-                                                                             &a);
+            NumberTheoreticTransformNat<VecType>().inverse_transform_iterative(AB, root_table_inverse,
+                                                                               precon_table_inverse, &a);
 
             VecType quotient(ntt_div_dim, modulus);
             for (size_t i = 0; i < power; i++) {
@@ -1282,12 +1288,12 @@ VecType ChineseRemainderTransformArbNat<VecType>::drop(const VecType& element, c
 
             VecType new_quotient(ntt_div_dim);
             NumberTheoreticTransformNat<VecType>().forward_transform_iterative(quotient, root_table, precon_table,
-                                                                             &new_quotient);
+                                                                               &new_quotient);
             new_quotient *= cyclo_ntt;
 
             VecType new_quotient2(ntt_div_dim);
             NumberTheoreticTransformNat<VecType>().inverse_transform_iterative(new_quotient, root_table_inverse,
-                                                                             precon_table_inverse, &new_quotient2);
+                                                                               precon_table_inverse, &new_quotient2);
             new_quotient2.set_modulus(modulus);
             new_quotient2.mod_reduce_eq();
 
@@ -1317,6 +1323,6 @@ void ChineseRemainderTransformArbNat<VecType>::reset() {
     BluesteinFftNat<VecType>().reset();
 }
 
-}  // namespace intnat
+}  // namespace native_int
 
 #endif  // CIPHER_MATH_BACKEND_NATIVE_TRANSFORM_IMPL_H_

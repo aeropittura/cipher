@@ -61,7 +61,7 @@ namespace cipher {
 struct RingGswBtKey {
     RingGswAccKey b_skey;    ///< refreshing key (64-bit form)
     LweSwitchingKey ks_key;  ///< switching key (64-bit form)
-    LwePublicKey pkey;      ///< public key
+    LwePublicKey pkey;       ///< public key
 #if CIPHER_NATIVE_INT != 32
     RingGswAccKey32 b_skey32;    ///< refreshing key in the 32-bit internal form, null when b_skey is resident
     LweSwitchingKey32 ks_key32;  ///< switching key in the 32-bit internal form, null when ks_key is resident
@@ -97,7 +97,7 @@ struct RingGswBtKey {
     void load(Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         ar(::cereal::make_nvp("bs", b_skey));
         ar(::cereal::make_nvp("ks", ks_key));
@@ -154,7 +154,7 @@ class BooleanScheme {
      * @return a shared pointer to the refresh key
      */
     RingGswBtKey key_gen(const std::shared_ptr<BooleanCryptoParams>& params, ConstLwePrivateKey& LWE_sk,
-                        KEYGEN_MODE keygen_mode, bool internal32) const;
+                         KEYGEN_MODE keygen_mode, bool internal32) const;
 
     /**
      * Evaluates a binary gate (calls bootstrapping as a subroutine)
@@ -167,8 +167,9 @@ class BooleanScheme {
      * @param extended if true, the result is returned before key switching (modulus Q, dimension N)
      * @return a shared pointer to the resulting ciphertext
      */
-    LweCiphertext eval_bin_gate(const std::shared_ptr<BooleanCryptoParams>& params, BINGATE gate, const RingGswBtKey& EK,
-                              ConstLweCiphertext& ct1, ConstLweCiphertext& ct2, bool extended = false) const;
+    LweCiphertext eval_bin_gate(const std::shared_ptr<BooleanCryptoParams>& params, BINGATE gate,
+                                const RingGswBtKey& EK, ConstLweCiphertext& ct1, ConstLweCiphertext& ct2,
+                                bool extended = false) const;
 
     /**
      * Evaluates a binary gate on a vector of ciphertexts (calls bootstrapping as a subroutine).
@@ -181,8 +182,9 @@ class BooleanScheme {
      * @param extended if true, the result is returned before key switching (modulus Q, dimension N)
      * @return a shared pointer to the resulting ciphertext
      */
-    LweCiphertext eval_bin_gate(const std::shared_ptr<BooleanCryptoParams>& params, BINGATE gate, const RingGswBtKey& EK,
-                              const std::vector<LweCiphertext>& ctvector, bool extended = false) const;
+    LweCiphertext eval_bin_gate(const std::shared_ptr<BooleanCryptoParams>& params, BINGATE gate,
+                                const RingGswBtKey& EK, const std::vector<LweCiphertext>& ctvector,
+                                bool extended = false) const;
 
     /**
      * Evaluates NOT gate
@@ -216,7 +218,7 @@ class BooleanScheme {
      * @return a shared pointer to the resulting ciphertext
      */
     LweCiphertext eval_func(const std::shared_ptr<BooleanCryptoParams>& params, const RingGswBtKey& EK,
-                           ConstLweCiphertext& ct, const std::vector<NativeInteger>& LUT, NativeInteger beta) const;
+                            ConstLweCiphertext& ct, const std::vector<NativeInteger>& LUT, NativeInteger beta) const;
 
     /**
      * Evaluate a round down function
@@ -229,7 +231,7 @@ class BooleanScheme {
      * @return a shared pointer to the resulting ciphertext
      */
     LweCiphertext eval_floor(const std::shared_ptr<BooleanCryptoParams>& params, const RingGswBtKey& EK,
-                            ConstLweCiphertext& ct, NativeInteger beta, uint32_t roundbits = 0) const;
+                             ConstLweCiphertext& ct, NativeInteger beta, uint32_t roundbits = 0) const;
 
     /**
      * Evaluate a sign function over large precision
@@ -242,8 +244,8 @@ class BooleanScheme {
      * @return a shared pointer to the resulting ciphertext
      */
     LweCiphertext eval_sign(const std::shared_ptr<BooleanCryptoParams>& params,
-                           const std::map<uint32_t, RingGswBtKey>& e_ks, ConstLweCiphertext& ct, NativeInteger beta,
-                           bool scheme_switch = false) const;
+                            const std::map<uint32_t, RingGswBtKey>& e_ks, ConstLweCiphertext& ct, NativeInteger beta,
+                            bool scheme_switch = false) const;
 
     /**
      * Evaluate digit decomposition over a large precision LWE ciphertext
@@ -255,8 +257,8 @@ class BooleanScheme {
      * @return a shared pointer to the resulting ciphertext
      */
     std::vector<LweCiphertext> eval_decomp(const std::shared_ptr<BooleanCryptoParams>& params,
-                                          const std::map<uint32_t, RingGswBtKey>& e_ks, ConstLweCiphertext& ct,
-                                          NativeInteger beta) const;
+                                           const std::map<uint32_t, RingGswBtKey>& e_ks, ConstLweCiphertext& ct,
+                                           NativeInteger beta) const;
 
   private:
     /**
@@ -269,7 +271,7 @@ class BooleanScheme {
      * @return the output RingLWE accumulator
      */
     RlweCiphertext bootstrap_gate_core(const std::shared_ptr<BooleanCryptoParams>& params, BINGATE gate,
-                                     const RingGswBtKey& EK, ConstLweCiphertext& ct) const;
+                                       const RingGswBtKey& EK, ConstLweCiphertext& ct) const;
 
     // Arbitrary function evaluation purposes
 
@@ -285,7 +287,7 @@ class BooleanScheme {
      */
     template <typename Func>
     RlweCiphertext bootstrap_func_core(const std::shared_ptr<BooleanCryptoParams>& params, const RingGswBtKey& EK,
-                                     ConstLweCiphertext& ct, const Func f, NativeInteger fmod) const;
+                                       ConstLweCiphertext& ct, const Func f, NativeInteger fmod) const;
 
     /**
      * Bootstraps a ciphertext while evaluating a function on it (functional bootstrapping)
@@ -299,14 +301,14 @@ class BooleanScheme {
      */
     template <typename Func>
     LweCiphertext bootstrap_func(const std::shared_ptr<BooleanCryptoParams>& params, const RingGswBtKey& EK,
-                                ConstLweCiphertext& ct, const Func f, NativeInteger fmod) const;
+                                 ConstLweCiphertext& ct, const Func f, NativeInteger fmod) const;
 
     // dispatch to the key representation EK actually holds
     LweCiphertext switch_c_ttoqn(const std::shared_ptr<LweCryptoParams>& params, const RingGswBtKey& EK,
-                               ConstLweCiphertext& ct) const;
+                                 ConstLweCiphertext& ct) const;
 
     LweCiphertext key_switch(const std::shared_ptr<LweCryptoParams>& params, const RingGswBtKey& EK,
-                            ConstLweCiphertext& ct) const;
+                             ConstLweCiphertext& ct) const;
 
   protected:
     std::shared_ptr<LweEncryptionScheme> lwe_scheme{std::make_shared<LweEncryptionScheme>()};  ///< the LWE scheme

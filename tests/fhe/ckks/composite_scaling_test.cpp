@@ -387,7 +387,7 @@ bool check_min_diff(const std::vector<V>& high, const std::vector<V>& low, const
  */
 template <typename V>
 void check_min_diff(const std::vector<V>& high, const std::vector<V>& low, const uint32_t diff,
-                  const std::string& err_msg) {
+                    const std::string& err_msg) {
     // print vector values to error message
     std::stringstream ss;
     ss << ": HIGHER precision/LOWER error: [";
@@ -434,7 +434,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
     // The higher the precision, the less the error.
     template <typename T>
     double calculate_approximation_error(const std::vector<std::complex<double>>& result,
-                                       const std::vector<std::complex<double>>& expected_result) {
+                                         const std::vector<std::complex<double>>& expected_result) {
         CIPHER_THROW("CalculateApproximationError() is not implemented for this datatype");
     }
 
@@ -450,7 +450,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
 
     template <typename T>
     bool unit_test_add_packed(const TEST_CASE_UTCKKSRNS_CS& test_data, std::vector<T>& approximation_errors,
-                             const std::string& failmsg = std::string()) {
+                              const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -464,8 +464,8 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             Plaintext negatives1 = cc->make_ckks_packed_plaintext(vector_of_ints0_7neg, 1, 0, nullptr, test_data.slots);
             Plaintext plaintext2 = cc->make_ckks_packed_plaintext(vector_of_ints7_0, 1, 0, nullptr, test_data.slots);
 
-            Plaintext plaintext_add = cc->make_ckks_packed_plaintext(std::vector<std::complex<double>>(VECTOR_SIZE, 7), 1,
-                                                                 0, nullptr, test_data.slots);  // vector of 7s
+            Plaintext plaintext_add = cc->make_ckks_packed_plaintext(std::vector<std::complex<double>>(VECTOR_SIZE, 7),
+                                                                     1, 0, nullptr, test_data.slots);  // vector of 7s
             Plaintext plaintext_sub = cc->make_ckks_packed_plaintext(
                     std::vector<std::complex<double>>{-7, -5, -3, -1, 1, 3, 5, 7}, 1, 0, nullptr, test_data.slots);
 
@@ -485,26 +485,26 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_add->get_length());
             check_equality(plaintext_add->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalAdd fails");
-            approximation_errors.emplace_back(
-                    calculate_approximation_error<T>(plaintext_add->get_ckks_packed_value(), results->get_ckks_packed_value()));
+                           failmsg + " EvalAdd fails");
+            approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext_add->get_ckks_packed_value(),
+                                                                               results->get_ckks_packed_value()));
 
             cc->eval_add_in_place(ciphertext1_mutable, ciphertext2);
             cc->decrypt(kp.secret_key, ciphertext1_mutable, &results);
             results->set_length(plaintext_add->get_length());
             check_equality(plaintext_add->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalAddInPlace fails");
-            approximation_errors.emplace_back(
-                    calculate_approximation_error<T>(plaintext_add->get_ckks_packed_value(), results->get_ckks_packed_value()));
+                           failmsg + " EvalAddInPlace fails");
+            approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext_add->get_ckks_packed_value(),
+                                                                               results->get_ckks_packed_value()));
 
             // Testing operator+
             c_result = ciphertext1 + ciphertext2;
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_add->get_length());
             check_equality(plaintext_add->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " operator+ fails");
-            approximation_errors.emplace_back(
-                    calculate_approximation_error<T>(plaintext_add->get_ckks_packed_value(), results->get_ckks_packed_value()));
+                           failmsg + " operator+ fails");
+            approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext_add->get_ckks_packed_value(),
+                                                                               results->get_ckks_packed_value()));
 
             // Testing operator+=
             Ciphertext<Element> cadd_inplace(ciphertext1);
@@ -512,26 +512,26 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, cadd_inplace, &results);
             results->set_length(plaintext_add->get_length());
             check_equality(plaintext_add->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " operator+= fails");
-            approximation_errors.emplace_back(
-                    calculate_approximation_error<T>(plaintext_add->get_ckks_packed_value(), results->get_ckks_packed_value()));
+                           failmsg + " operator+= fails");
+            approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext_add->get_ckks_packed_value(),
+                                                                               results->get_ckks_packed_value()));
 
             c_result = cc->eval_sub(ciphertext1, ciphertext2);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_sub->get_length());
             check_equality(plaintext_sub->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalSub fails");
-            approximation_errors.emplace_back(
-                    calculate_approximation_error<T>(plaintext_sub->get_ckks_packed_value(), results->get_ckks_packed_value()));
+                           failmsg + " EvalSub fails");
+            approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext_sub->get_ckks_packed_value(),
+                                                                               results->get_ckks_packed_value()));
 
             // Testing operator-
             c_result = ciphertext1 - ciphertext2;
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_sub->get_length());
             check_equality(plaintext_sub->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " operator- fails");
-            approximation_errors.emplace_back(
-                    calculate_approximation_error<T>(plaintext_sub->get_ckks_packed_value(), results->get_ckks_packed_value()));
+                           failmsg + " operator- fails");
+            approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext_sub->get_ckks_packed_value(),
+                                                                               results->get_ckks_packed_value()));
 
             // Testing operator-=
             Ciphertext<Element> csub_inplace(ciphertext1);
@@ -539,70 +539,70 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, csub_inplace, &results);
             results->set_length(plaintext_sub->get_length());
             check_equality(plaintext_sub->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " operator-= fails");
-            approximation_errors.emplace_back(
-                    calculate_approximation_error<T>(plaintext_sub->get_ckks_packed_value(), results->get_ckks_packed_value()));
+                           failmsg + " operator-= fails");
+            approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext_sub->get_ckks_packed_value(),
+                                                                               results->get_ckks_packed_value()));
 
             // Testing eval_add ciphertext + plaintext
             c_result = cc->eval_add(ciphertext1, plaintext2);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_add->get_length());
             check_equality(plaintext_add->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalAdd Ct and Pt fails");
-            approximation_errors.emplace_back(
-                    calculate_approximation_error<T>(plaintext_add->get_ckks_packed_value(), results->get_ckks_packed_value()));
+                           failmsg + " EvalAdd Ct and Pt fails");
+            approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext_add->get_ckks_packed_value(),
+                                                                               results->get_ckks_packed_value()));
 
             // Testing eval_sub ciphertext - plaintext
             c_result = cc->eval_sub(ciphertext1, plaintext2);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_sub->get_length());
             check_equality(plaintext_sub->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalSub Ct and Pt fails fails");
-            approximation_errors.emplace_back(
-                    calculate_approximation_error<T>(plaintext_sub->get_ckks_packed_value(), results->get_ckks_packed_value()));
+                           failmsg + " EvalSub Ct and Pt fails fails");
+            approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext_sub->get_ckks_packed_value(),
+                                                                               results->get_ckks_packed_value()));
 
             // Testing eval_add ciphertext + double
             c_result = cc->eval_add(ciphertext1, 0.5);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext1_add_scalar->get_length());
             check_equality(plaintext1_add_scalar->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalAdd Ct and double fails");
-            approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext1_add_scalar->get_ckks_packed_value(),
-                                                                            results->get_ckks_packed_value()));
+                           failmsg + " EvalAdd Ct and double fails");
+            approximation_errors.emplace_back(calculate_approximation_error<T>(
+                    plaintext1_add_scalar->get_ckks_packed_value(), results->get_ckks_packed_value()));
 
             // Testing eval_add ciphertext - double
             c_result = cc->eval_sub(ciphertext1, 0.5);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext1_sub_scalar->get_length());
             check_equality(plaintext1_sub_scalar->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalSub Ct and double fails");
-            approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext1_sub_scalar->get_ckks_packed_value(),
-                                                                            results->get_ckks_packed_value()));
+                           failmsg + " EvalSub Ct and double fails");
+            approximation_errors.emplace_back(calculate_approximation_error<T>(
+                    plaintext1_sub_scalar->get_ckks_packed_value(), results->get_ckks_packed_value()));
 
             // Testing eval_add ciphertext + negative double
             c_result = cc->eval_add(ciphertext1, -0.5);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext1_sub_scalar->get_length());
             check_equality(plaintext1_sub_scalar->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalAdd Ct and negative double fails");
-            approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext1_sub_scalar->get_ckks_packed_value(),
-                                                                            results->get_ckks_packed_value()));
+                           failmsg + " EvalAdd Ct and negative double fails");
+            approximation_errors.emplace_back(calculate_approximation_error<T>(
+                    plaintext1_sub_scalar->get_ckks_packed_value(), results->get_ckks_packed_value()));
 
             // Testing eval_add ciphertext - negative double
             c_result = cc->eval_sub(ciphertext1, -0.5);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext1_add_scalar->get_length());
             check_equality(plaintext1_add_scalar->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalSub Ct and negative double fails");
-            approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext1_add_scalar->get_ckks_packed_value(),
-                                                                            results->get_ckks_packed_value()));
+                           failmsg + " EvalSub Ct and negative double fails");
+            approximation_errors.emplace_back(calculate_approximation_error<T>(
+                    plaintext1_add_scalar->get_ckks_packed_value(), results->get_ckks_packed_value()));
             if (test_data.params.multiplicative_depth > 0) {
                 // Testing eval_add ciphertext + large double
                 c_result = cc->eval_add(ciphertext1, factor);
                 cc->decrypt(kp.secret_key, c_result, &results);
                 results->set_length(plaintext1_add_large_scalar->get_length());
                 check_equality(plaintext1_add_large_scalar->get_ckks_packed_value(), results->get_ckks_packed_value(),
-                              factor * eps, failmsg + " EvalAdd Ct and large double fails");
+                               factor * eps, failmsg + " EvalAdd Ct and large double fails");
             }
 
             // Testing eval_negate
@@ -610,9 +610,9 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(negatives1->get_length());
             check_equality(negatives1->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalNegate fails");
-            approximation_errors.emplace_back(
-                    calculate_approximation_error<T>(negatives1->get_ckks_packed_value(), results->get_ckks_packed_value()));
+                           failmsg + " EvalNegate fails");
+            approximation_errors.emplace_back(calculate_approximation_error<T>(negatives1->get_ckks_packed_value(),
+                                                                               results->get_ckks_packed_value()));
 
             return true;
         } catch (std::exception& e) {
@@ -632,7 +632,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
     }
 
     void unit_test_add_packed_precision(const TEST_CASE_UTCKKSRNS_CS& test_data,
-                                       const std::string& failmsg = std::string()) {
+                                        const std::string& failmsg = std::string()) {
         TEST_CASE_UTCKKSRNS_CS test_data_local(test_data);
 
         std::vector<double> low_precisions;
@@ -648,23 +648,24 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             return;
 
         check_min_diff(high_precisions, low_precisions, MIN_PRECISION_DIFF,
-                     failmsg + " Approximation errors' comparison failed");
+                       failmsg + " Approximation errors' comparison failed");
     }
 
     template <typename T>
     bool unit_test_mult_packed(const TEST_CASE_UTCKKSRNS_CS& test_data, std::vector<T>& approximation_errors,
-                              const std::string& failmsg = std::string()) {
+                               const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
             Plaintext plaintext1 = cc->make_ckks_packed_plaintext(vector_of_ints0_7, 1, 0, nullptr, test_data.slots);
             Plaintext plaintext2 = cc->make_ckks_packed_plaintext(vector_of_ints7_0, 1, 0, nullptr, test_data.slots);
-            Plaintext plaintext_neg = cc->make_ckks_packed_plaintext(vector_of_ints0_7_neg, 1, 0, nullptr, test_data.slots);
+            Plaintext plaintext_neg =
+                    cc->make_ckks_packed_plaintext(vector_of_ints0_7_neg, 1, 0, nullptr, test_data.slots);
             Plaintext plaintext_mult = cc->make_ckks_packed_plaintext(
                     std::vector<std::complex<double>>({0, 6, 10, 12, 12, 10, 6, 0}), 1, 0, nullptr, test_data.slots);
-            Plaintext plaintext_large =
-                    cc->make_ckks_packed_plaintext(std::vector<std::complex<double>>({factor, factor, 0, 0, 0, 0, 0, 0}),
-                                                1, 0, nullptr, test_data.slots);
+            Plaintext plaintext_large = cc->make_ckks_packed_plaintext(
+                    std::vector<std::complex<double>>({factor, factor, 0, 0, 0, 0, 0, 0}), 1, 0, nullptr,
+                    test_data.slots);
             Plaintext plaintext_large_mult = cc->make_ckks_packed_plaintext(
                     std::vector<std::complex<double>>({7 * factor, 6 * factor, 0, 0, 0, 0, 0, 0}), 1, 0, nullptr,
                     test_data.slots);
@@ -692,25 +693,25 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_mult->get_length());
             check_equality(plaintext_mult->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalMult fails");
-            approximation_errors.emplace_back(
-                    calculate_approximation_error<T>(plaintext_mult->get_ckks_packed_value(), results->get_ckks_packed_value()));
+                           failmsg + " EvalMult fails");
+            approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext_mult->get_ckks_packed_value(),
+                                                                               results->get_ckks_packed_value()));
 
             // Testing eval_mult by a large plaintext
             c_result = cc->eval_mult(ciphertext2, plaintext_large);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_large_mult->get_length());
-            check_equality(plaintext_large_mult->get_ckks_packed_value(), results->get_ckks_packed_value(), factor * eps,
-                          failmsg + " EvalMult by a large plaintext fails");
+            check_equality(plaintext_large_mult->get_ckks_packed_value(), results->get_ckks_packed_value(),
+                           factor * eps, failmsg + " EvalMult by a large plaintext fails");
 
             // Testing operator*
             c_result = ciphertext1 * ciphertext2;
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_mult->get_length());
             check_equality(plaintext_mult->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " operator* fails");
-            approximation_errors.emplace_back(
-                    calculate_approximation_error<T>(plaintext_mult->get_ckks_packed_value(), results->get_ckks_packed_value()));
+                           failmsg + " operator* fails");
+            approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext_mult->get_ckks_packed_value(),
+                                                                               results->get_ckks_packed_value()));
 
             // Testing operator*=
             Ciphertext<Element> cmult_inplace(ciphertext1);
@@ -718,23 +719,23 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, cmult_inplace, &results);
             results->set_length(plaintext_mult->get_length());
             check_equality(plaintext_mult->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " operator*= fails");
-            approximation_errors.emplace_back(
-                    calculate_approximation_error<T>(plaintext_mult->get_ckks_packed_value(), results->get_ckks_packed_value()));
+                           failmsg + " operator*= fails");
+            approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext_mult->get_ckks_packed_value(),
+                                                                               results->get_ckks_packed_value()));
 
             // Testing eval_mult ciphertext * plaintext
             c_result = cc->eval_mult(ciphertext1, plaintext2);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_mult->get_length());
             check_equality(plaintext_mult->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalMult Ct and Pt fails");
+                           failmsg + " EvalMult Ct and Pt fails");
 
             // Testing eval_mult ciphertext * positive double
             c_result = cc->eval_mult(ciphertext1, 1.0);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext1->get_length());
             check_equality(plaintext1->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalMult Ct and positive double fails");
+                           failmsg + " EvalMult Ct and positive double fails");
 
             // Testing eval_mult ciphertext * negative double
             c_result = cc->eval_mult(ciphertext1, -1.0);
@@ -744,16 +745,16 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             buffer1 << "should be: " << plaintext_neg->get_ckks_packed_value()
                     << " - we get: " << results->get_ckks_packed_value();
             check_equality(plaintext_neg->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalMult Ct and negative double fails; " + buffer1.str());
+                           failmsg + " EvalMult Ct and negative double fails; " + buffer1.str());
 
             // Testing eval_mult_no_relin ciphertext * ciphertext
             c_result = cc->eval_mult_no_relin(ciphertext1, ciphertext2);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_mult->get_length());
             check_equality(plaintext_mult->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalMultNoRelin Ct fails");
-            approximation_errors.emplace_back(
-                    calculate_approximation_error<T>(plaintext_mult->get_ckks_packed_value(), results->get_ckks_packed_value()));
+                           failmsg + " EvalMultNoRelin Ct fails");
+            approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext_mult->get_ckks_packed_value(),
+                                                                               results->get_ckks_packed_value()));
 
             return true;
         } catch (std::exception& e) {
@@ -773,7 +774,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
     }
 
     void unit_test_mult_packed_precision(const TEST_CASE_UTCKKSRNS_CS& test_data,
-                                        const std::string& failmsg = std::string()) {
+                                         const std::string& failmsg = std::string()) {
         TEST_CASE_UTCKKSRNS_CS test_data_local(test_data);
 
         std::vector<double> low_precisions;
@@ -789,7 +790,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             return;
 
         check_min_diff(high_precisions, low_precisions, MIN_PRECISION_DIFF,
-                     failmsg + " Approximation errors' comparison failed");
+                       failmsg + " Approximation errors' comparison failed");
     }
 
     /**
@@ -801,7 +802,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
      * ciphertext
      */
     void unit_test_scale_factor_adjustments(const TEST_CASE_UTCKKSRNS_CS& test_data,
-                                         const std::string& failmsg = std::string()) {
+                                            const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -832,8 +833,10 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
                 vector_of_ints_add_after_mult[i] = vector_of_ints_mult[i] + std::complex<double>(10, 0);
                 vector_of_ints_sub_after_mult[i] = vector_of_ints_mult[i] - std::complex<double>(10, 0);
                 vector_of_ints_mult2[i] = vector_of_ints_mult[i] * vector_of_ints1[i];
-                vector_of_ints_add_after_mult2[i] = vector_of_ints_mult2[i] + constant_ints[i];  // complex<double>({11,0});
-                vector_of_ints_sub_after_mult2[i] = vector_of_ints_mult2[i] - constant_ints[i];  // complex<double>({11,0});
+                vector_of_ints_add_after_mult2[i] =
+                        vector_of_ints_mult2[i] + constant_ints[i];  // complex<double>({11,0});
+                vector_of_ints_sub_after_mult2[i] =
+                        vector_of_ints_mult2[i] - constant_ints[i];  // complex<double>({11,0});
             }
             // The vector values should be:
             // vector_of_ints_mult = { 0,6,10,12,12,10,6,0 };
@@ -884,42 +887,42 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_add_after_mult, &results);
             results->set_length(plaintex_add_after_mult->get_length());
             check_equality(plaintex_add_after_mult->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " add after 1 multiplication fails");
+                           failmsg + " add after 1 multiplication fails");
 
             cc->decrypt(kp.secret_key, c_sub_after_mult, &results);
             results->set_length(plaintex_sub_after_mult->get_length());
             check_equality(plaintex_sub_after_mult->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " subtract after 1 multiplication fails");
+                           failmsg + " subtract after 1 multiplication fails");
 
             cc->decrypt(kp.secret_key, c_add_after_mult2, &results);
             results->set_length(plaintex_add_after_mult2->get_length());
             check_equality(plaintex_add_after_mult2->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " add after 2 multiplications fails");
+                           failmsg + " add after 2 multiplications fails");
 
             cc->decrypt(kp.secret_key, c_sub_after_mult2, &results);
             results->set_length(plaintex_sub_after_mult2->get_length());
             check_equality(plaintex_sub_after_mult2->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " subtract after 2 multiplications fails");
+                           failmsg + " subtract after 2 multiplications fails");
 
             cc->decrypt(kp.secret_key, c2_add_after_mult2, &results);
             results->set_length(plaintex2_add_after_mult2->get_length());
             check_equality(plaintex2_add_after_mult2->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " add (negative) after 2 multiplications fails");
+                           failmsg + " add (negative) after 2 multiplications fails");
 
             cc->decrypt(kp.secret_key, c2_sub_after_mult2, &results);
             results->set_length(plaintex2_sub_after_mult2->get_length());
             check_equality(plaintex2_sub_after_mult2->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " subtract (negative) after 2 multiplications fails");
+                           failmsg + " subtract (negative) after 2 multiplications fails");
 
             cc->decrypt(kp.secret_key, c_add_pt_after_mult2, &results);
             results->set_length(plaintex_add_after_mult2->get_length());
             check_equality(plaintex_add_after_mult2->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " add plaintext (auto scale factor matching) after 2 multiplications fails");
+                           failmsg + " add plaintext (auto scale factor matching) after 2 multiplications fails");
 
             cc->decrypt(kp.secret_key, c_sub_pt_after_mult2, &results);
             results->set_length(plaintex_sub_after_mult2->get_length());
             check_equality(plaintex_sub_after_mult2->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " subtract plaintext (auto scale factor matching) after 2 multiplications fails");
+                           failmsg + " subtract plaintext (auto scale factor matching) after 2 multiplications fails");
 
             cc->decrypt(kp.secret_key, c_add_pt2_after_mult2, &results);
             results->set_length(plaintex2_add_after_mult2->get_length());
@@ -937,22 +940,22 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_deep_add, &results);
             results->set_length(plaintex_add_after_mult2->get_length());
             check_equality(plaintex_add_after_mult2->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " add with deep plaintext fails");
+                           failmsg + " add with deep plaintext fails");
 
             cc->decrypt(kp.secret_key, c_deep_sub, &results);
             results->set_length(plaintex_sub_after_mult2->get_length());
             check_equality(plaintex_sub_after_mult2->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " subtract with deep plaintext fails");
+                           failmsg + " subtract with deep plaintext fails");
 
             cc->decrypt(kp.secret_key, c2_deep_add, &results);
             results->set_length(plaintex2_add_after_mult2->get_length());
             check_equality(plaintex2_add_after_mult2->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " add with deep negative plaintext fails");
+                           failmsg + " add with deep negative plaintext fails");
 
             cc->decrypt(kp.secret_key, c2_deep_sub, &results);
             results->set_length(plaintex2_sub_after_mult2->get_length());
             check_equality(plaintex2_sub_after_mult2->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " subtract with deep negative plaintext fails");
+                           failmsg + " subtract with deep negative plaintext fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -962,7 +965,8 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
         }
     }
 
-    void unit_test_auto_level_reduce(const TEST_CASE_UTCKKSRNS_CS& test_data, const std::string& failmsg = std::string()) {
+    void unit_test_auto_level_reduce(const TEST_CASE_UTCKKSRNS_CS& test_data,
+                                     const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -997,8 +1001,8 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
                 p_ct5[i] = p_ct_mult[i] * vector_of_ints1[i];
                 p_ct6[i] = vector_of_ints1[i] + p_ct_mult[i];
                 p_ct7[i] = vector_of_ints1[i] - p_ct_mult[i];
-                auto tmp =
-                        (vector_of_ints1[i] * vector_of_ints1[i] + vector_of_ints1[i] * vector_of_ints1[i]) * vector_of_ints1[i];
+                auto tmp = (vector_of_ints1[i] * vector_of_ints1[i] + vector_of_ints1[i] * vector_of_ints1[i]) *
+                           vector_of_ints1[i];
                 p_ct_5[i] = tmp + vector_of_ints2[i];
                 p_ct_6[i] = tmp - vector_of_ints2[i];
                 p_ct_7[i] = tmp * vector_of_ints2[i];
@@ -1045,7 +1049,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, ct3, &results);
             results->set_length(plaintext_ct3->get_length());
             check_equality(plaintext_ct3->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " addition with tower diff = 1 fails");
+                           failmsg + " addition with tower diff = 1 fails");
 
             // in-place addition with tower diff = 1
             auto ct_red_clone = ct_red->clone();
@@ -1053,28 +1057,28 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, ct_red_clone, &results);
             results->set_length(plaintext_ct3->get_length());
             check_equality(plaintext_ct3->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " in-place addition with tower diff = 1 fails");
+                           failmsg + " in-place addition with tower diff = 1 fails");
 
             // Subtraction with tower diff = 1
             auto ct4 = cc->eval_sub(ct_red, ct);
             cc->decrypt(kp.secret_key, ct4, &results);
             results->set_length(plaintext_ct4->get_length());
             check_equality(plaintext_ct4->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " subtraction with tower diff = 1 fails");
+                           failmsg + " subtraction with tower diff = 1 fails");
 
             // Multiplication with tower diff = 1
             auto ct5 = cc->eval_mult(ct_red, ct);
             cc->decrypt(kp.secret_key, ct5, &results);
             results->set_length(plaintext_ct5->get_length());
             check_equality(plaintext_ct5->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " multiplication with tower diff = 1 fails");
+                           failmsg + " multiplication with tower diff = 1 fails");
 
             // Addition with tower diff = 1 (inputs reversed)
             auto ct6 = cc->eval_add(ct, ct_red);
             cc->decrypt(kp.secret_key, ct6, &results);
             results->set_length(plaintext_ct6->get_length());
             check_equality(plaintext_ct6->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " addition (reverse) with tower diff = 1 fails");
+                           failmsg + " addition (reverse) with tower diff = 1 fails");
 
             // in-place addition with tower diff = 1 (inputs reversed)
             Ciphertext<Element> ct_clone_value = ct->clone();
@@ -1082,21 +1086,21 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, ct_clone_value, &results);
             results->set_length(plaintext_ct6->get_length());
             check_equality(plaintext_ct6->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " in-place addition (reverse) with tower diff = 1 fails");
+                           failmsg + " in-place addition (reverse) with tower diff = 1 fails");
 
             // Subtraction with tower diff = 1 (inputs reversed)
             auto ct7 = cc->eval_sub(ct, ct_red);
             cc->decrypt(kp.secret_key, ct7, &results);
             results->set_length(plaintext_ct7->get_length());
             check_equality(plaintext_ct7->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " subtraction (reverse) with tower diff = 1 fails");
+                           failmsg + " subtraction (reverse) with tower diff = 1 fails");
 
             // Multiplication with tower diff = 1 (inputs reversed)
             auto ct8 = cc->eval_mult(ct, ct_red);
             cc->decrypt(kp.secret_key, ct8, &results);
             results->set_length(plaintext_ct8->get_length());
             check_equality(plaintext_ct8->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " multiplication (reverse) with tower diff = 1 fails");
+                           failmsg + " multiplication (reverse) with tower diff = 1 fails");
 
             auto ct_mul2 = cc->eval_mult(ct_red, ct);
             auto ct_red2 = cc->mod_reduce(ct_mul2);
@@ -1108,7 +1112,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, ct9, &results);
             results->set_length(plaintext_ct9->get_length());
             check_equality(plaintext_ct9->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " addition with tower diff > 1 fails");
+                           failmsg + " addition with tower diff > 1 fails");
 
             // In-place addition with more than 1 level difference
             auto ct_red3_clone = ct_red3->clone();
@@ -1116,14 +1120,14 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, ct_red3_clone, &results);
             results->set_length(plaintext_ct9->get_length());
             check_equality(plaintext_ct9->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " in-place addition with tower diff > 1 fails");
+                           failmsg + " in-place addition with tower diff > 1 fails");
 
             // Subtraction with more than 1 level difference
             auto ct10 = cc->eval_sub(ct_red3, ct);
             cc->decrypt(kp.secret_key, ct10, &results);
             results->set_length(plaintext_ct10->get_length());
             check_equality(plaintext_ct10->get_ckks_packed_value(), results->get_ckks_packed_value(), eps_high,
-                          failmsg + " in-place addition with tower diff > 1 fails");
+                           failmsg + " in-place addition with tower diff > 1 fails");
 
             // Multiplication with more than 1 level difference
             auto ct11 = cc->eval_mult(ct_red3, ct);
@@ -1132,14 +1136,14 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             std::stringstream buffer;
             buffer << plaintext_ct11->get_ckks_packed_value() << " - we get: " << results->get_ckks_packed_value();
             check_equality(plaintext_ct11->get_ckks_packed_value(), results->get_ckks_packed_value(), eps_high,
-                          failmsg + " multiplication with tower diff > 1 fails" + buffer.str());
+                           failmsg + " multiplication with tower diff > 1 fails" + buffer.str());
 
             // Addition with more than 1 level difference (inputs reversed)
             auto ct12 = cc->eval_add(ct, ct_red3);
             cc->decrypt(kp.secret_key, ct12, &results);
             results->set_length(plaintext_ct12->get_length());
             check_equality(plaintext_ct12->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " addition (reverse) with tower diff > 1 fails");
+                           failmsg + " addition (reverse) with tower diff > 1 fails");
 
             // In-place addition with more than 1 level difference (inputs reversed)
             ct_clone_value = ct->clone();
@@ -1147,21 +1151,21 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, ct_clone_value, &results);
             results->set_length(plaintext_ct12->get_length());
             check_equality(plaintext_ct12->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " in-place addition (reverse) with tower diff > 1 fails");
+                           failmsg + " in-place addition (reverse) with tower diff > 1 fails");
 
             // Subtraction with more than 1 level difference (inputs reversed)
             auto ct13 = cc->eval_sub(ct, ct_red3);
             cc->decrypt(kp.secret_key, ct13, &results);
             results->set_length(plaintext_ct13->get_length());
             check_equality(plaintext_ct13->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " subtraction (reverse) with tower diff > 1 fails");
+                           failmsg + " subtraction (reverse) with tower diff > 1 fails");
 
             // Multiplication with more than 1 level difference (inputs reversed)
             auto ct14 = cc->eval_mult(ct, ct_red3);
             cc->decrypt(kp.secret_key, ct14, &results);
             results->set_length(plaintext_ct14->get_length());
             check_equality(plaintext_ct14->get_ckks_packed_value(), results->get_ckks_packed_value(), eps_high,
-                          failmsg + " multiplication (reverse) with tower diff > 1 fails");
+                           failmsg + " multiplication (reverse) with tower diff > 1 fails");
 
             // This scenario tests for operations on ciphertext and plaintext that differ on
             // both scaling factor and number of towers.
@@ -1176,21 +1180,21 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, ct_5, &results);
             results->set_length(plaintext_ct_5->get_length());
             check_equality(plaintext_ct_5->get_ckks_packed_value(), results->get_ckks_packed_value(), eps_high,
-                          failmsg + " addition with plaintext and tower diff = 1 fails");
+                           failmsg + " addition with plaintext and tower diff = 1 fails");
 
             // Subtraction with plaintext and tower diff = 1
             auto ct_6 = cc->eval_sub(ct_4, plaintext2);
             cc->decrypt(kp.secret_key, ct_6, &results);
             results->set_length(plaintext_ct_6->get_length());
             check_equality(plaintext_ct_6->get_ckks_packed_value(), results->get_ckks_packed_value(), eps_high,
-                          failmsg + " subtraction with plaintext and tower diff = 1 fails");
+                           failmsg + " subtraction with plaintext and tower diff = 1 fails");
 
             // Multiplication with plaintext and tower diff = 1
             auto ct_7 = cc->eval_mult(ct_4, plaintext2);
             cc->decrypt(kp.secret_key, ct_7, &results);
             results->set_length(plaintext_ct_7->get_length());
             check_equality(plaintext_ct_7->get_ckks_packed_value(), results->get_ckks_packed_value(), eps_high,
-                          failmsg + " multiplication with plaintext and tower diff = 1 fails");
+                           failmsg + " multiplication with plaintext and tower diff = 1 fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1228,7 +1232,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, ct, &result);
             cc->decrypt(kp.secret_key, ct_compressed, &result_compressed);
             check_equality(result->get_ckks_packed_value(), result_compressed->get_ckks_packed_value(), eps,
-                          failmsg + " compress fails - result is incorrect");
+                           failmsg + " compress fails - result is incorrect");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1238,12 +1242,15 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
         }
     }
 
-    void unit_test_eval_fast_rotation(const TEST_CASE_UTCKKSRNS_CS& test_data, const std::string& failmsg = std::string()) {
+    void unit_test_eval_fast_rotation(const TEST_CASE_UTCKKSRNS_CS& test_data,
+                                      const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
             const uint32_t ring_dim = cc->get_ring_dimension();
-            uint32_t slots = (test_data.slots != 0) ? test_data.slots : (BATCH != 0) ? BATCH : cc->get_ring_dimension() / 2;
+            uint32_t slots = (test_data.slots != 0) ? test_data.slots :
+                             (BATCH != 0)           ? BATCH :
+                                                      cc->get_ring_dimension() / 2;
 
             std::vector<std::complex<double>> vector_of_ints1(slots);
             for (uint32_t i = 0; i < slots; i++) {
@@ -1255,14 +1262,16 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             for (uint32_t i = 0; i < slots; i++) {
                 v_ints_right_rotate2[(i + slots + 2) % slots] = vector_of_ints1[i];
             }
-            Plaintext plaintext_right2 = cc->make_ckks_packed_plaintext(v_ints_right_rotate2, 1, 0, nullptr, test_data.slots);
+            Plaintext plaintext_right2 =
+                    cc->make_ckks_packed_plaintext(v_ints_right_rotate2, 1, 0, nullptr, test_data.slots);
 
             std::vector<std::complex<double>> v_ints_left_rotate2(slots);
             for (uint32_t i = 0; i < slots; i++) {
                 // here 2*slots for the case if slots = 1, to avoid negative index
                 v_ints_left_rotate2[(i + 2 * slots - 2) % slots] = vector_of_ints1[i];
             }
-            Plaintext plaintext_left2 = cc->make_ckks_packed_plaintext(v_ints_left_rotate2, 1, 0, nullptr, test_data.slots);
+            Plaintext plaintext_left2 =
+                    cc->make_ckks_packed_plaintext(v_ints_left_rotate2, 1, 0, nullptr, test_data.slots);
 
             // Generate encryption keys
             KeyPair<Element> kp = cc->key_gen();
@@ -1292,7 +1301,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_left2->get_length());
             check_equality(plaintext_left2->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalFastRotation(+2) fails");
+                           failmsg + " EvalFastRotation(+2) fails");
 
             /* Testing EvalFastRotate -2 (right rotate)
              */
@@ -1300,7 +1309,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_right2->get_length());
             check_equality(plaintext_right2->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalFastRotation(-2) fails");
+                           failmsg + " EvalFastRotation(-2) fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1319,7 +1328,9 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             // v_ints_right_shift2 = { 0,0,1,2,3,4,5,6 } if slots > 8;
             // v_ints_right_shift2 = { 7,8,1,2,3,4,5,6 } if slots = 8;
             std::vector<std::complex<double>> v_ints_right_shift2(VECTOR_SIZE);
-            uint32_t slots = (test_data.slots != 0) ? test_data.slots : (BATCH != 0) ? BATCH : cc->get_ring_dimension() / 2;
+            uint32_t slots = (test_data.slots != 0) ? test_data.slots :
+                             (BATCH != 0)           ? BATCH :
+                                                      cc->get_ring_dimension() / 2;
             for (uint32_t i = 0; i < VECTOR_SIZE; i++) {
                 if ((slots + i - 2) % slots < VECTOR_SIZE) {
                     v_ints_right_shift2[i] = vector_of_ints1_8[(slots + i - 2) % slots];
@@ -1327,7 +1338,8 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
                     v_ints_right_shift2[i] = 0;
                 }
             }
-            Plaintext plaintext_right2 = cc->make_ckks_packed_plaintext(v_ints_right_shift2, 1, 0, nullptr, test_data.slots);
+            Plaintext plaintext_right2 =
+                    cc->make_ckks_packed_plaintext(v_ints_right_shift2, 1, 0, nullptr, test_data.slots);
 
             // v_ints_right_shift2 = { 3,4,5,6,7,8,0,0 } if slots > 8;
             // v_ints_right_shift2 = { 3,4,5,6,7,8,1,2 } if slots = 8;
@@ -1339,7 +1351,8 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
                     v_ints_left_shift2[i] = 0;
                 }
             }
-            Plaintext plaintext_left2 = cc->make_ckks_packed_plaintext(v_ints_left_shift2, 1, 0, nullptr, test_data.slots);
+            Plaintext plaintext_left2 =
+                    cc->make_ckks_packed_plaintext(v_ints_left_shift2, 1, 0, nullptr, test_data.slots);
 
             // Generate encryption keys
             KeyPair<Element> kp = cc->key_gen();
@@ -1366,7 +1379,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_left2->get_length());
             check_equality(plaintext_left2->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalAtIndex(+2) fails");
+                           failmsg + " EvalAtIndex(+2) fails");
 
             /* Testing eval_at_index -2
              */
@@ -1374,7 +1387,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_right2->get_length());
             check_equality(plaintext_right2->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalAtIndex(-2) fails");
+                           failmsg + " EvalAtIndex(-2) fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1448,7 +1461,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(p_merged->get_length());
             check_equality(p_merged->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalMerge fails");
+                           failmsg + " EvalMerge fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1458,7 +1471,8 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
         }
     }
 
-    void unit_test_eval_linear_w_sum(const TEST_CASE_UTCKKSRNS_CS& test_data, const std::string& failmsg = std::string()) {
+    void unit_test_eval_linear_w_sum(const TEST_CASE_UTCKKSRNS_CS& test_data,
+                                     const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -1495,13 +1509,13 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(p_out->get_length());
             check_equality(p_out->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalLinearWSum fails");
+                           failmsg + " EvalLinearWSum fails");
 
             auto c_result2 = cc->eval_linear_w_sum_mutable(ciphertexts, weights);
             cc->decrypt(kp.secret_key, c_result2, &results);
             results->set_length(p_out->get_length());
             check_equality(p_out->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalLinearWSumMutable fails");
+                           failmsg + " EvalLinearWSumMutable fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1553,7 +1567,8 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             tmp_b = plaintext_int->get_ckks_packed_value();
             std::stringstream buffer2;
             buffer2 << tmp_b << " - we get: " << tmp_a;
-            check_equality(tmp_a, tmp_b, eps_high, failmsg + " HRA-secure ReEncrypt integer plaintext " + buffer2.str());
+            check_equality(tmp_a, tmp_b, eps_high,
+                           failmsg + " HRA-secure ReEncrypt integer plaintext " + buffer2.str());
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1622,7 +1637,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             buffer1 << "should be: " << plaintext_result1->get_ckks_packed_value()
                     << " - we get: " << results1->get_ckks_packed_value();
             check_equality(plaintext_result1->get_ckks_packed_value(), results1->get_ckks_packed_value(), eps_high,
-                          failmsg + " EvalPoly with positive coefficients failed: " + buffer1.str());
+                           failmsg + " EvalPoly with positive coefficients failed: " + buffer1.str());
 
             Ciphertext<Element> c_result2 = cc->eval_poly_linear(ciphertext1, coefficients2);
             Plaintext results2;
@@ -1632,7 +1647,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             buffer2 << "should be: " << plaintext_result2->get_ckks_packed_value()
                     << " - we get: " << results2->get_ckks_packed_value();
             check_equality(plaintext_result2->get_ckks_packed_value(), results2->get_ckks_packed_value(), eps_high,
-                          failmsg + " EvalPoly with negative coefficients failed: " + buffer2.str());
+                           failmsg + " EvalPoly with negative coefficients failed: " + buffer2.str());
 
             Ciphertext<Element> c_result3 = cc->eval_poly_linear(ciphertext1, coefficients3);
             Plaintext results3;
@@ -1642,7 +1657,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             buffer3 << "should be: " << plaintext_result3->get_ckks_packed_value()
                     << " - we get: " << results3->get_ckks_packed_value();
             check_equality(plaintext_result3->get_ckks_packed_value(), results3->get_ckks_packed_value(), eps_high,
-                          failmsg + " EvalPoly for a power function failed: " + buffer3.str());
+                           failmsg + " EvalPoly for a power function failed: " + buffer3.str());
 
             Ciphertext<Element> c_result4 = cc->eval_poly_linear(ciphertext1, coefficients4);
             Plaintext results4;
@@ -1652,7 +1667,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             buffer4 << "should be: " << plaintext_result4->get_ckks_packed_value()
                     << " - we get: " << results4->get_ckks_packed_value();
             check_equality(plaintext_result4->get_ckks_packed_value(), results4->get_ckks_packed_value(), eps_high,
-                          failmsg + " EvalPoly for negative coefficients with magnitude > 1 failed: " + buffer4.str());
+                           failmsg + " EvalPoly for negative coefficients with magnitude > 1 failed: " + buffer4.str());
 
             Ciphertext<Element> c_result5 = cc->eval_poly_linear(ciphertext1, coefficients5);
             Plaintext results5;
@@ -1662,7 +1677,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             buffer5 << "should be: " << plaintext_result5->get_ckks_packed_value()
                     << " - we get: " << results5->get_ckks_packed_value();
             check_equality(plaintext_result5->get_ckks_packed_value(), results5->get_ckks_packed_value(), eps_high,
-                          failmsg + " EvalPoly for low-degree polynomial failed: " + buffer5.str());
+                           failmsg + " EvalPoly for low-degree polynomial failed: " + buffer5.str());
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1846,15 +1861,15 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, ciphertext_sq, &results);
             results->set_length(int_array_expected_square->get_length());
             check_equality(int_array_expected_square->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                          failmsg + " EvalSquare (CKKSPacked) fails");
+                           failmsg + " EvalSquare (CKKSPacked) fails");
 
             Ciphertext<Element> ciphertext_third = cc->eval_mult(ciphertext_sq, plaintext);
 
             Ciphertext<Element> ciphertext_sixth = cc->eval_square(ciphertext_third);
             cc->decrypt(kp.secret_key, ciphertext_sixth, &results);
             results->set_length(int_array_expected_sixth->get_length());
-            check_equality(int_array_expected_sixth->get_ckks_packed_value(), results->get_ckks_packed_value(), eps_high,
-                          failmsg + " EvalSquare Sixth (CKKSPacked) fails");
+            check_equality(int_array_expected_sixth->get_ckks_packed_value(), results->get_ckks_packed_value(),
+                           eps_high, failmsg + " EvalSquare Sixth (CKKSPacked) fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1865,7 +1880,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
     }
 
     void unit_test_small_scaling_mod_size(const TEST_CASE_UTCKKSRNS_CS& test_data,
-                                       const std::string& failmsg = std::string()) {
+                                          const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
         } catch (std::exception& e) {
@@ -1880,7 +1895,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
 
 template <>
 double UTCKKSRNSCS::calculate_approximation_error<double>(const std::vector<std::complex<double>>& result,
-                                                        const std::vector<std::complex<double>>& expected_result) {
+                                                          const std::vector<std::complex<double>>& expected_result) {
     if (result.size() != expected_result.size())
         CIPHER_THROW("Cannot compare vectors with different numbers of elements");
 

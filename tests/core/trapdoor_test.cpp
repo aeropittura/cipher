@@ -77,7 +77,7 @@ TEST(UTTrapdoor, sizes) {
     float stddev = 4;
 
     double val = modulus.convert_to_double();  // TODO get the next few lines
-                                             // working in a single instance.
+                                               // working in a single instance.
     double log_two = std::log2(val - 1.0) + 1.0;
     uint32_t k = (uint32_t)std::floor(log_two);  // = this->m_cryptoParameters.get_modulus();
 
@@ -102,7 +102,7 @@ TEST(UTTrapdoor, TrapDoorPairTest) {
     float stddev = 4;
 
     double val = modulus.convert_to_double();  // TODO get the next few lines
-                                             // working in a single instance.
+                                               // working in a single instance.
     double log_two = std::log2(val - 1.0) + 1.0;
     uint32_t k = (uint32_t)std::floor(log_two);  // = this->m_cryptoParameters.get_modulus();
 
@@ -140,7 +140,7 @@ TEST(UTTrapdoor, TrapDoorPairTestSquareMat) {
     float stddev = 4;
 
     double val = modulus.convert_to_double();  // TODO get the next few lines
-                                             // working in a single instance.
+                                               // working in a single instance.
     double log_two = std::ceil(std::log2(val));
     uint32_t k = (uint32_t)std::floor(log_two);  // = this->m_cryptoParameters.get_modulus();
 
@@ -176,7 +176,7 @@ TEST(UTTrapdoor, GadgetTest) {
     BigInteger root_of_unity_value("61564");
 
     double val = modulus.convert_to_double();  // TODO get the next few lines
-                                             // working in a single instance.
+                                               // working in a single instance.
     double log_two = std::log2(val - 1.0) + 1.0;
     uint32_t k = (uint32_t)std::floor(log_two);  // = this->m_cryptoParameters.get_modulus();
 
@@ -196,7 +196,7 @@ TEST(UTTrapdoor, TrapDoorMultTest) {
     float stddev = 4;
 
     double val = modulus.convert_to_double();  // TODO get the next few lines
-                                             // working in a single instance.
+                                               // working in a single instance.
     double log_two = std::log2(val - 1.0) + 1.0;
     uint32_t k = (uint32_t)std::floor(log_two);  // = this->m_cryptoParameters.get_modulus();
 
@@ -231,7 +231,7 @@ TEST(UTTrapdoor, TrapDoorMultTestSquareMat) {
     float stddev = 4;
 
     double val = modulus.convert_to_double();  // TODO get the next few lines
-                                             // working in a single instance.
+                                               // working in a single instance.
     double log_two = std::ceil(std::log2(val));
     uint32_t k = (uint32_t)std::floor(log_two);  // = this->m_cryptoParameters.get_modulus();
 
@@ -285,7 +285,7 @@ TEST(UTTrapdoor, TrapDoorGaussGqSampTest) {
     Poly u(dug, params, Format::COEFFICIENT);
     CIPHER_DEBUG("2");
     double val = modulus.convert_to_double();  // TODO get the next few lines
-                                             // working in a single instance.
+                                               // working in a single instance.
     // YSP check log_two computation
     double log_two = std::log2(val - 1.0) + 1.0;
     uint32_t k = (uint32_t)std::floor(log_two);
@@ -325,8 +325,8 @@ TEST(UTTrapdoor, TrapDoorGaussSampTestDCRT) {
     double sigma = SIGMA;
 
     auto params = std::make_shared<RnsParams<BigInteger>>(2 * n, size, k_res);
-    int64_t digit_count =
-            static_cast<int64_t>(std::ceil(std::log2((*params)[0]->get_modulus().convert_to_double()) / std::log2(base)));
+    int64_t digit_count = static_cast<int64_t>(
+            std::ceil(std::log2((*params)[0]->get_modulus().convert_to_double()) / std::log2(base)));
 
     std::pair<Matrix<RnsPoly>, RlweTrapdoorPair<RnsPoly>> trap_pair =
             RlweTrapdoorUtility<RnsPoly>::trapdoor_gen(params, sigma, base);
@@ -347,7 +347,7 @@ TEST(UTTrapdoor, TrapDoorGaussSampTestDCRT) {
     u.switch_format();
 
     Matrix<RnsPoly> z = RlweTrapdoorUtility<RnsPoly>::gauss_samp(n, k, trap_pair.first, trap_pair.second, u, dgg,
-                                                                  dgg_large_sigma, base);
+                                                                 dgg_large_sigma, base);
 
     // Matrix<Poly> u_est = trap_pair.first * z;
 
@@ -456,7 +456,7 @@ TEST(UTTrapdoor, TrapDoorGaussSampTest) {
     double sigma = SIGMA;
 
     double val = modulus.convert_to_double();  // TODO get the next few lines
-                                             // working in a single instance.
+                                               // working in a single instance.
     double log_two = std::log2(val - 1.0) + 1.0;
     uint32_t k = (uint32_t)std::floor(log_two);  // = this->m_cryptoParameters.get_modulus();
 
@@ -525,7 +525,7 @@ TEST(UTTrapdoor, TrapDoorGaussSampTestSquareMatrices) {
     double sigma = SIGMA;
 
     double val = modulus.convert_to_double();  // TODO get the next few lines
-                                             // working in a single instance.
+                                               // working in a single instance.
     double log_two = std::ceil(std::log2(val));
     uint32_t k = (uint32_t)(log_two);
 
@@ -550,8 +550,8 @@ TEST(UTTrapdoor, TrapDoorGaussSampTestSquareMatrices) {
 
         Matrix<Poly> U(zero_alloc, d, d, uniform_alloc);
 
-        Matrix<Poly> z = RlweTrapdoorUtility<Poly>::gauss_samp_square_mat(m / 2, k, trap_pair.first, trap_pair.second, U,
-                                                                       dgg, dgg_large_sigma);
+        Matrix<Poly> z = RlweTrapdoorUtility<Poly>::gauss_samp_square_mat(m / 2, k, trap_pair.first, trap_pair.second,
+                                                                          U, dgg, dgg_large_sigma);
 
         EXPECT_EQ(trap_pair.first.get_cols(), z.get_rows()) << "Failure testing number of rows";
         EXPECT_EQ(m / 2, z(0, 0).get_length()) << "Failure testing ring dimension for the first ring element";
@@ -601,8 +601,8 @@ TEST(UTTrapdoor, TrapDoorGaussSampTestSquareMatricesDCRT) {
 
         Matrix<RnsPoly> U(zero_alloc, d, d, uniform_alloc);
 
-        Matrix<RnsPoly> z = RlweTrapdoorUtility<RnsPoly>::gauss_samp_square_mat(m / 2, k, trap_pair.first,
-                                                                               trap_pair.second, U, dgg, dgg_large_sigma);
+        Matrix<RnsPoly> z = RlweTrapdoorUtility<RnsPoly>::gauss_samp_square_mat(
+                m / 2, k, trap_pair.first, trap_pair.second, U, dgg, dgg_large_sigma);
 
         EXPECT_EQ(trap_pair.first.get_cols(), z.get_rows()) << "Failure testing number of rows";
         EXPECT_EQ(m / 2, z(0, 0).get_length()) << "Failure testing ring dimension for the first ring element";
@@ -643,7 +643,7 @@ TEST(UTTrapdoor, TrapDoorPerturbationSamplingTest) {
     // BigInteger root_of_unity_value("977145384161930579732228319");
 
     double val = modulus.convert_to_double();  // TODO get the next few lines
-                                             // working in a single instance.
+                                               // working in a single instance.
     double log_two = std::log2(val - 1.0) + 1.0;
     uint32_t k = (uint32_t)std::floor(log_two);  // = this->m_cryptoParameters.get_modulus();
 

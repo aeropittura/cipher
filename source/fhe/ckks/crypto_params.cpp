@@ -50,8 +50,8 @@ namespace cipher {
 
 // Precomputation of CRT tables encryption, decryption, and  homomorphic multiplication
 void CkksRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, ScalingTechnique scal_tech,
-                                                  EncryptionTechnique enc_tech, MultiplicationTechnique mult_tech,
-                                                  uint32_t num_part_q, uint32_t aux_bits, uint32_t extra_bits) {
+                                                EncryptionTechnique enc_tech, MultiplicationTechnique mult_tech,
+                                                uint32_t num_part_q, uint32_t aux_bits, uint32_t extra_bits) {
     RnsCryptoParams::precompute_crt_tables(ks_tech, scal_tech, enc_tech, mult_tech, num_part_q, aux_bits, extra_bits);
 
     size_t size_q = get_element_params()->get_params().size();
@@ -108,9 +108,9 @@ void CkksRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, Scal
             const double last_preset_factor = (extra_bits == 0) ? scaling_factors_real_[0] : scaling_factors_real_[1];
             // number of levels with pre-calculated factors
             const size_t num_preset_factors = (extra_bits == 0 || (scal_technique_ == COMPOSITESCALINGAUTO ||
-                                                                scal_technique_ == COMPOSITESCALINGMANUAL)) ?
-                                                    1 :
-                                                    2;
+                                                                   scal_technique_ == COMPOSITESCALINGMANUAL)) ?
+                                                      1 :
+                                                      2;
 
             for (size_t k = num_preset_factors; k < size_q; k++) {
                 if (scal_technique_ == COMPOSITESCALINGAUTO || scal_technique_ == COMPOSITESCALINGMANUAL) {
@@ -131,8 +131,8 @@ void CkksRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, Scal
                         double ratio = scaling_factors_real_[k] / last_preset_factor;
                         if (ratio <= 0.5 || ratio >= 2.0) {
                             CIPHER_THROW("FLEXIBLEAUTO scaling failed at level " + std::to_string(k) +
-                                          " with scaling factor ratio " + std::to_string(ratio) +
-                                          ". Use FIXEDMANUAL or FIXEDAUTO instead.");
+                                         " with scaling factor ratio " + std::to_string(ratio) +
+                                         ". Use FIXEDMANUAL or FIXEDAUTO instead.");
                         }
                     }
                 }
@@ -183,8 +183,8 @@ void CkksRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, Scal
 
         std::vector<NativeInteger> moduli_compl_ql(moduli_q.begin() + size_ql, moduli_q.end());
         std::vector<NativeInteger> roots_compl_ql(roots_q.begin() + size_ql, roots_q.end());
-        params_mod_raise_compl_ql_ = std::make_shared<RnsParams<BigInteger>>(get_element_params()->get_cyclotomic_order(),
-                                                                             moduli_compl_ql, roots_compl_ql);
+        params_mod_raise_compl_ql_ = std::make_shared<RnsParams<BigInteger>>(
+                get_element_params()->get_cyclotomic_order(), moduli_compl_ql, roots_compl_ql);
 
         BigInteger modulus_ql(1);
         for (uint32_t i = 0; i < size_ql; ++i)
@@ -320,12 +320,12 @@ void CkksRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, Scal
             bool found = false;
             do {
                 p_cur = (search_down) ? previous_prime<NativeInteger>(p_cur, prime_step) :
-                                      next_prime<NativeInteger>(p_cur, prime_step);
+                                        next_prime<NativeInteger>(p_cur, prime_step);
                 found = (std::find(moduli_to_avoid.begin(), moduli_to_avoid.end(), p_cur) != moduli_to_avoid.end());
             } while (found);
             if (p_cur.get_msb() > max_prime_bits)
                 CIPHER_THROW("Could not find enough auxiliary primes of at most " + std::to_string(max_prime_bits) +
-                              " bits for SPARSE_ENCAPSULATED at this ring dimension.");
+                             " bits for SPARSE_ENCAPSULATED at this ring dimension.");
             moduli_p_sparse[j] = p_cur;
             roots_p_sparse[j] = root_of_unity<NativeInteger>(2 * n, moduli_p_sparse[j]);
             modulus_p_sparse *= BigInteger(moduli_p_sparse[j]);
@@ -359,14 +359,16 @@ void CkksRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, Scal
             sparse_ksp_modq_[i] = modulus_p_sparse.mod(qi).convert_to_int();
             sparse_ksp_inv_modq_[i] = modulus_p_sparse.mod_inverse(qi).convert_to_int();
             for (uint32_t j = 0; j < size_p_sparse; ++j)
-                sparse_ksp_hat_modq_[i][j] = (modulus_p_sparse / BigInteger(moduli_p_sparse[j])).mod(qi).convert_to_int();
+                sparse_ksp_hat_modq_[i][j] =
+                        (modulus_p_sparse / BigInteger(moduli_p_sparse[j])).mod(qi).convert_to_int();
             // the overflow correction [a*P']_{q_i}, 0 <= a <= k (running sum; the a = 0 row stays zero)
             for (uint32_t a = 1; a <= size_p_sparse; ++a)
-                sparse_ks_alpha_p_modq_[a][i] = sparse_ks_alpha_p_modq_[a - 1][i].mod_add_fast(sparse_ksp_modq_[i], moduli_q[i]);
+                sparse_ks_alpha_p_modq_[a][i] =
+                        sparse_ks_alpha_p_modq_[a - 1][i].mod_add_fast(sparse_ksp_modq_[i], moduli_q[i]);
             // reuse the Barrett constants computed for HYBRID above when available
             sparse_ks_modq_barrett_mu_[i] = (modq_barrett_mu_.size() > i) ?
-                                                 modq_barrett_mu_[i] :
-                                                 (barrett_base128_bit / qi).convert_to_int<DoubleNativeInt>();
+                                                    modq_barrett_mu_[i] :
+                                                    (barrett_base128_bit / qi).convert_to_int<DoubleNativeInt>();
         }
         // [(P'/p'_j)^{-1}]_{p'_j} and 1./p'_j
         sparse_ksp_hat_inv_modp_.resize(size_p_sparse);
@@ -392,7 +394,8 @@ void CkksRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, Scal
                 sparse_ks_ql_hat_modp_[j][i] = (modulus_ql / BigInteger(moduli_q[i])).mod(pj).convert_to_int();
             NativeInteger ql_modpj = modulus_ql.mod(pj).convert_to_int();
             for (uint32_t a = 1; a <= size_ql; ++a)
-                sparse_ks_alpha_ql_modp_[a][j] = sparse_ks_alpha_ql_modp_[a - 1][j].mod_add_fast(ql_modpj, moduli_p_sparse[j]);
+                sparse_ks_alpha_ql_modp_[a][j] =
+                        sparse_ks_alpha_ql_modp_[a - 1][j].mod_add_fast(ql_modpj, moduli_p_sparse[j]);
             sparse_ks_modp_barrett_mu_[j] = (barrett_base128_bit / pj).convert_to_int<DoubleNativeInt>();
         }
     }

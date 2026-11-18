@@ -79,11 +79,11 @@ CryptoContext<RnsPoly> make_context() {
 }
 
 Plaintext encode_constant(const CryptoContext<RnsPoly>& cc, bool auxiliary, std::complex<double> value,
-                         uint32_t depth) {
+                          uint32_t depth) {
     std::vector<std::complex<double>> values(SLOTS, value);
     if (auxiliary)
         return CkksRnsFhe::make_aux_plaintext(*cc, cc->get_crypto_parameters()->get_element_params(), values, depth, 0,
-                                            SLOTS);
+                                              SLOTS);
     return cc->make_ckks_packed_plaintext(values, depth);
 }
 
@@ -108,7 +108,7 @@ NativeInteger expected_units(double magnitude) {
 // `units` is the unsigned expected magnitude; `real_sign` and `imag_sign` are -1, 0 or 1. The sign is
 // applied per tower because the negation depends on that tower's modulus.
 ::testing::AssertionResult coefficients_equal(const Plaintext& plaintext, const NativeInteger& units, int real_sign,
-                                             int imag_sign, uint32_t depth) {
+                                              int imag_sign, uint32_t depth) {
     auto poly = plaintext->get_element<RnsPoly>();
     poly.set_format(Format::COEFFICIENT);
     for (const auto& tower : poly.get_all_elements()) {

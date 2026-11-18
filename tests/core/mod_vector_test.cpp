@@ -96,10 +96,10 @@ TEST(UTmubintvec, ctor_access_eq_neq) {
 
     // new way of setting value of the value at different index locations
     n[0] = "4";
-    n[1] = 9;                        // int (implied)
+    n[1] = 9;                          // int (implied)
     n[2] = dynamic_int::xubint("66");  // bigintdyn::xubint
-    n[3] = 33L;                      // long
-    n[4] = 7UL;                      // unsigned long
+    n[3] = 33L;                        // long
+    n[4] = 7UL;                        // unsigned long
 
     // new way of accessing
     EXPECT_EQ(dynamic_int::xubint(4), n[0]) << "Failure in []";
@@ -228,8 +228,8 @@ TEST(UTmubintvec, constructorTest) {
     CIPHER_DEBUG("m: " << m);
 
     uint64_t expected_result[10] = {48,  53, 7,   178, 190,
-                                   120, 79, 108, 60,  12};  // the expected values are stored as one dimensional
-                                                            // integer array
+                                    120, 79, 108, 60,  12};  // the expected values are stored as one dimensional
+                                                             // integer array
 
     for (uint32_t i = 0; i < 10; i++) {
         CIPHER_DEBUG("val " << i << " is " << m.at(i));
@@ -259,7 +259,7 @@ TEST(UTmubintvec, mod) {
     m.at(9) = "7698798";
 
     dynamic_int::xubint q("233");  // calling costructor of bigintdyn::xubint Class
-                                 // to create object for modulus
+                                   // to create object for modulus
     // set modulus
     m.set_modulus(q);  // should take modulus as well.
 

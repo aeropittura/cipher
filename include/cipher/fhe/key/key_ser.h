@@ -40,9 +40,9 @@
 #include "cipher/util/serial.h"
 
 CEREAL_REGISTER_TYPE_WITH_NAME(cipher::EvalKeyImpl<cipher::RnsPoly>, "lbcrypto::EvalKeyImpl<lbcrypto::DCRTPoly>");
-CEREAL_REGISTER_TYPE_WITH_NAME(cipher::EvalKeyRelinImpl<cipher::RnsPoly>, "lbcrypto::EvalKeyRelinImpl<lbcrypto::DCRTPoly>");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::EvalKeyRelinImpl<cipher::RnsPoly>,
+                               "lbcrypto::EvalKeyRelinImpl<lbcrypto::DCRTPoly>");
 
-CEREAL_REGISTER_POLYMORPHIC_RELATION(cipher::EvalKeyImpl<cipher::RnsPoly>,
-                                     cipher::EvalKeyRelinImpl<cipher::RnsPoly>);
+CEREAL_REGISTER_POLYMORPHIC_RELATION(cipher::EvalKeyImpl<cipher::RnsPoly>, cipher::EvalKeyRelinImpl<cipher::RnsPoly>);
 
 #endif  // CIPHER_FHE_KEY_KEY_SER_H_

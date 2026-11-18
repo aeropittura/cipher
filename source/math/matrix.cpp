@@ -52,10 +52,10 @@ namespace cipher {
 
 #define MODEQ_FOR_TYPE(T)                             \
     template <>                                       \
-    Matrix<T>& Matrix<T>::mod_eq(const T& element) {   \
+    Matrix<T>& Matrix<T>::mod_eq(const T& element) {  \
         for (size_t row = 0; row < rows; ++row) {     \
             for (size_t col = 0; col < cols; ++col) { \
-                data[row][col].mod_eq(element);        \
+                data[row][col].mod_eq(element);       \
             }                                         \
         }                                             \
         return *this;                                 \
@@ -64,15 +64,15 @@ namespace cipher {
 MODEQ_FOR_TYPE(NativeInteger)
 MODEQ_FOR_TYPE(BigInteger)
 
-#define MODSUBEQ_FOR_TYPE(T)                                               \
-    template <>                                                            \
+#define MODSUBEQ_FOR_TYPE(T)                                                 \
+    template <>                                                              \
     Matrix<T>& Matrix<T>::mod_sub_eq(Matrix<T> const& b, const T& element) { \
-        for (size_t row = 0; row < rows; ++row) {                          \
-            for (size_t col = 0; col < cols; ++col) {                      \
+        for (size_t row = 0; row < rows; ++row) {                            \
+            for (size_t col = 0; col < cols; ++col) {                        \
                 data[row][col].mod_sub_eq(b.data[row][col], element);        \
-            }                                                              \
-        }                                                                  \
-        return *this;                                                      \
+            }                                                                \
+        }                                                                    \
+        return *this;                                                        \
     }
 
 MODSUBEQ_FOR_TYPE(NativeInteger)

@@ -102,7 +102,7 @@ class MetadataTest : public Metadata {
         try {
             const MetadataTest& mdata_test = dynamic_cast<const MetadataTest&>(mdata);
             return s_ == mdata_test.get_metadata();  // All Metadata objects without
-                                                    // any members are equal
+                                                     // any members are equal
         } catch (const std::bad_cast& e) {
             CIPHER_THROW("Tried to downcast an object of different class to MetadataTest");
         }
@@ -124,7 +124,7 @@ class MetadataTest : public Metadata {
     void load(Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         ar(cereal::base_class<Metadata>(this));
         ar(cereal::make_nvp("str", s_));
@@ -186,7 +186,7 @@ class MetadataTest : public Metadata {
      */
     template <class Element>
     static void store_metadata(std::shared_ptr<CiphertextImpl<Element>> ciphertext,
-                              std::shared_ptr<MetadataTest> mdata) {
+                               std::shared_ptr<MetadataTest> mdata) {
         ciphertext->set_metadata_by_key("test", mdata);
     }
 

@@ -56,8 +56,8 @@ void BgvRnsLeveledShe::mod_reduce_internal_in_place(Ciphertext<RnsPoly>& ciphert
         for (auto& c : cv) {
             for (size_t i = size_ql - 1; i >= size_ql - levels; --i) {
                 c.mod_reduce(t, crypto_params->get_t_modq_precon(), crypto_params->get_negt_inv_modq(i),
-                            crypto_params->get_negt_inv_modq_precon(i), crypto_params->get_ql_inv_modq(i),
-                            crypto_params->get_ql_inv_modq_precon(i));
+                             crypto_params->get_negt_inv_modq_precon(i), crypto_params->get_ql_inv_modq(i),
+                             crypto_params->get_ql_inv_modq_precon(i));
             }
         }
     } else {
@@ -67,7 +67,8 @@ void BgvRnsLeveledShe::mod_reduce_internal_in_place(Ciphertext<RnsPoly>& ciphert
     ciphertext->set_level(ciphertext->get_level() + levels);
     ciphertext->set_noise_scale_deg(ciphertext->get_noise_scale_deg() - levels);
 
-    if (crypto_params->get_scaling_technique() == FLEXIBLEAUTO || crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT) {
+    if (crypto_params->get_scaling_technique() == FLEXIBLEAUTO ||
+        crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT) {
         for (size_t i = 0; i < levels; ++i) {
             NativeInteger mod_reduce_factor = crypto_params->get_mod_reduce_factor_int(size_ql - 1 - i);
             NativeInteger mod_reduce_factor_inv = mod_reduce_factor.mod_inverse(t);
@@ -83,7 +84,7 @@ void BgvRnsLeveledShe::level_reduce_internal_in_place(Ciphertext<RnsPoly>& ciphe
 }
 
 void BgvRnsLeveledShe::adjust_levels_and_depth_in_place(Ciphertext<RnsPoly>& ciphertext1,
-                                                   Ciphertext<RnsPoly>& ciphertext2) const {
+                                                        Ciphertext<RnsPoly>& ciphertext2) const {
     const auto crypto_params = std::dynamic_pointer_cast<BgvRnsCryptoParams>(ciphertext1->get_crypto_parameters());
 
     const NativeInteger t(crypto_params->get_plaintext_modulus());
@@ -118,7 +119,8 @@ void BgvRnsLeveledShe::adjust_levels_and_depth_in_place(Ciphertext<RnsPoly>& cip
                     NativeInteger ql1_modt = crypto_params->get_mod_reduce_factor_int(size_ql1 - 1);
                     NativeInteger scf1_inv = scf1.mod_inverse(t);
 
-                    eval_mult_core_in_place(ciphertext1, scf2.mod_mul(scf1_inv, t).mod_mul(ql1_modt, t).convert_to_int());
+                    eval_mult_core_in_place(ciphertext1,
+                                            scf2.mod_mul(scf1_inv, t).mod_mul(ql1_modt, t).convert_to_int());
                     mod_reduce_internal_in_place(ciphertext1, BASE_NUM_LEVELS_TO_DROP);
                     if (c1lvl + 2 < c2lvl) {
                         level_reduce_internal_in_place(ciphertext1, c2lvl - c1lvl - 2);
@@ -172,7 +174,8 @@ void BgvRnsLeveledShe::adjust_levels_and_depth_in_place(Ciphertext<RnsPoly>& cip
                     NativeInteger ql2_modt = crypto_params->get_mod_reduce_factor_int(size_ql2 - 1);
                     NativeInteger scf2_inv = scf2.mod_inverse(t);
 
-                    eval_mult_core_in_place(ciphertext2, scf1.mod_mul(scf2_inv, t).mod_mul(ql2_modt, t).convert_to_int());
+                    eval_mult_core_in_place(ciphertext2,
+                                            scf1.mod_mul(scf2_inv, t).mod_mul(ql2_modt, t).convert_to_int());
                     mod_reduce_internal_in_place(ciphertext2, BASE_NUM_LEVELS_TO_DROP);
                     if (c2lvl + 2 < c1lvl) {
                         level_reduce_internal_in_place(ciphertext2, c1lvl - c2lvl - 2);
@@ -215,7 +218,7 @@ void BgvRnsLeveledShe::adjust_levels_and_depth_in_place(Ciphertext<RnsPoly>& cip
 }
 
 void BgvRnsLeveledShe::adjust_levels_and_depth_to_one_in_place(Ciphertext<RnsPoly>& ciphertext1,
-                                                        Ciphertext<RnsPoly>& ciphertext2) const {
+                                                               Ciphertext<RnsPoly>& ciphertext2) const {
     adjust_levels_and_depth_in_place(ciphertext1, ciphertext2);
     if (ciphertext1->get_noise_scale_deg() == 2) {
         mod_reduce_internal_in_place(ciphertext1, BASE_NUM_LEVELS_TO_DROP);
@@ -233,7 +236,8 @@ void BgvRnsLeveledShe::eval_mult_core_in_place(Ciphertext<RnsPoly>& ciphertext, 
 
     const NativeInteger t(crypto_params->get_plaintext_modulus());
     ciphertext->set_noise_scale_deg(ciphertext->get_noise_scale_deg() + 1);
-    if (crypto_params->get_scaling_technique() == FLEXIBLEAUTO || crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT) {
+    if (crypto_params->get_scaling_technique() == FLEXIBLEAUTO ||
+        crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT) {
         ciphertext->set_scaling_factor_int(ciphertext->get_scaling_factor_int().mod_mul(scalar, t));
     }
 }
@@ -241,7 +245,8 @@ void BgvRnsLeveledShe::eval_mult_core_in_place(Ciphertext<RnsPoly>& ciphertext, 
 void BgvRnsLeveledShe::eval_mult_in_place(Ciphertext<RnsPoly>& ciphertext, ConstPlaintext& plaintext) const {
     RnsLeveledShe::eval_mult_in_place(ciphertext, plaintext);
     const auto crypto_params = std::dynamic_pointer_cast<BgvRnsCryptoParams>(ciphertext->get_crypto_parameters());
-    if (crypto_params->get_scaling_technique() == FLEXIBLEAUTO || crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT) {
+    if (crypto_params->get_scaling_technique() == FLEXIBLEAUTO ||
+        crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT) {
         const auto plain_mod = ciphertext->get_crypto_parameters()->get_plaintext_modulus();
         ciphertext->set_scaling_factor_int(
                 ciphertext->get_scaling_factor_int().mod_mul(ciphertext->get_scaling_factor_int(), plain_mod));

@@ -76,7 +76,7 @@ void crt_polynomial_mult(const std::string& msg) {
 
     V inverse_fftab(cyclo_order / 2);
     ChineseRemainderTransformFtt<V>().inverse_transform_from_bit_reverse(AB, primitive_root_of_unity, cyclo_order,
-                                                                     &inverse_fftab);
+                                                                         &inverse_fftab);
 
     V expected_result(n, prime_modulus);
     expected_result.at(0) = typename V::Integer("94");
@@ -244,7 +244,8 @@ void crt_check_small_ring(const std::string& msg) {
 
     V input(n, modulus);
     input = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-    auto INPUT = ChineseRemainderTransformArb<V>().forward_transform(input, square_root_of_root, big_modulus, big_root, m);
+    auto INPUT =
+            ChineseRemainderTransformArb<V>().forward_transform(input, square_root_of_root, big_modulus, big_root, m);
 
     auto input_check =
             ChineseRemainderTransformArb<V>().inverse_transform(INPUT, square_root_of_root, big_modulus, big_root, m);
@@ -282,9 +283,11 @@ void crt_check_big_ring(const std::string& msg) {
         input.at(i) = typename V::Integer(dis(PseudoRandomNumberGenerator::get_prng()));
     }
 
-    auto output = ChineseRemainderTransformArb<V>().forward_transform(input, square_root_of_root, big_modulus, big_root, m);
+    auto output =
+            ChineseRemainderTransformArb<V>().forward_transform(input, square_root_of_root, big_modulus, big_root, m);
 
-    auto rec_out = ChineseRemainderTransformArb<V>().inverse_transform(output, square_root_of_root, big_modulus, big_root, m);
+    auto rec_out =
+            ChineseRemainderTransformArb<V>().inverse_transform(output, square_root_of_root, big_modulus, big_root, m);
 
     for (uint32_t i = 0; i < n; i++) {
         EXPECT_EQ(input.at(i), rec_out.at(i)) << msg;
@@ -314,7 +317,8 @@ void crt_check_small_ring_precomputed(const std::string& msg) {
     V input(n, modulus);
     input = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
-    auto INPUT = ChineseRemainderTransformArb<V>().forward_transform(input, square_root_of_root, nttmodulus, nttroot, m);
+    auto INPUT =
+            ChineseRemainderTransformArb<V>().forward_transform(input, square_root_of_root, nttmodulus, nttroot, m);
 
     auto input_check =
             ChineseRemainderTransformArb<V>().inverse_transform(INPUT, square_root_of_root, nttmodulus, nttroot, m);
@@ -357,7 +361,8 @@ void crt_check_very_big_ring_precomputed(const std::string& msg) {
     V input(n, modulus);
     input = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     CIPHER_DEBUG("4");
-    auto INPUT = ChineseRemainderTransformArb<V>().forward_transform(input, square_root_of_root, nttmodulus, nttroot, m);
+    auto INPUT =
+            ChineseRemainderTransformArb<V>().forward_transform(input, square_root_of_root, nttmodulus, nttroot, m);
     CIPHER_DEBUG("5");
     auto input_check =
             ChineseRemainderTransformArb<V>().inverse_transform(INPUT, square_root_of_root, nttmodulus, nttroot, m);

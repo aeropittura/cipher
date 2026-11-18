@@ -72,8 +72,8 @@ bool PackedEncoding::encode() {
 
         for (size_t i = 0; i < value.size(); i++) {
             if ((PlaintextModulus)llabs(value[i]) >= mod_value) {
-                CIPHER_THROW("Cannot encode integer " + std::to_string(value[i]) + " at position " +
-                              std::to_string(i) + " that is > plaintext modulus " + std::to_string(mod_value));
+                CIPHER_THROW("Cannot encode integer " + std::to_string(value[i]) + " at position " + std::to_string(i) +
+                             " that is > plaintext modulus " + std::to_string(mod_value));
             }
 
             if (value[i] < 0) {
@@ -100,11 +100,12 @@ bool PackedEncoding::encode() {
 
             // Calls the inverse NTT mod plaintext modulus
             this->pack_native_vector(this->encoding_params->get_plaintext_modulus(),
-                                   this->encoded_native_vector.get_cyclotomic_order(), &temp_vector);
+                                     this->encoded_native_vector.get_cyclotomic_order(), &temp_vector);
             temp_vector.set_modulus(q);
             this->encoded_native_vector.set_values(std::move(temp_vector), Format::COEFFICIENT);
         } else {
-            PlaintextModulus q = this->encoded_vector_dcrt.get_params()->get_params()[0]->get_modulus().convert_to_int();
+            PlaintextModulus q =
+                    this->encoded_vector_dcrt.get_params()->get_params()[0]->get_modulus().convert_to_int();
             if (q < mod_value) {
                 CIPHER_THROW(
                         "the plaintext modulus size is larger than the size of "
@@ -114,7 +115,7 @@ bool PackedEncoding::encode() {
 
             // Calls the inverse NTT mod plaintext modulus
             this->pack_native_vector(this->encoding_params->get_plaintext_modulus(),
-                                   this->encoded_vector_dcrt.get_cyclotomic_order(), &temp_vector);
+                                     this->encoded_vector_dcrt.get_cyclotomic_order(), &temp_vector);
             // Switches from plaintext modulus to the modulus of the first RNS limb
             temp_vector.set_modulus(q);
             NativePoly first_element = this->get_element<RnsPoly>().get_element_at_index(0);
@@ -127,7 +128,7 @@ bool PackedEncoding::encode() {
             for (size_t j = 1; j < native_params.size(); j++) {
                 NativePoly temp_poly(native_params[j], Format::COEFFICIENT);
                 temp_poly.set_values(NativeVector(first_element.get_values(), native_params[j]->get_modulus()),
-                                   Format::COEFFICIENT);
+                                     Format::COEFFICIENT);
                 this->encoded_vector_dcrt.set_element_at_index(j, std::move(temp_poly));
             }
             // Setting the first limb at the end make sure first_element is available during the main loop
@@ -143,8 +144,8 @@ bool PackedEncoding::encode() {
             BigInteger entry;
 
             if ((PlaintextModulus)llabs(value[i]) >= mod_value)
-                CIPHER_THROW("Cannot encode integer " + std::to_string(value[i]) + " at position " +
-                              std::to_string(i) + " that is > plaintext modulus " + std::to_string(mod_value));
+                CIPHER_THROW("Cannot encode integer " + std::to_string(value[i]) + " at position " + std::to_string(i) +
+                             " that is > plaintext modulus " + std::to_string(mod_value));
 
             if (value[i] < 0) {
                 // It is more efficient to encode negative numbers using the ciphertext
@@ -321,7 +322,7 @@ void PackedEncoding::pack_into(P* ring, const PlaintextModulus& modulus) const {
     CIPHER_DEBUG_FLAG(false);
 
     uint32_t m = ring->get_cyclotomic_order();  // cyclotomic order
-    NativeInteger modulus_ni(modulus);         // native int modulus
+    NativeInteger modulus_ni(modulus);          // native int modulus
 
     const ModulusM modulus_m = {modulus_ni, m};
 
@@ -430,7 +431,7 @@ void PackedEncoding::unpack(P* ring, const PlaintextModulus& modulus) const {
     CIPHER_DEBUG_FLAG(false);
 
     uint32_t m = ring->get_cyclotomic_order();  // cyclotomic order
-    NativeInteger modulus_ni(modulus);         // native int modulus
+    NativeInteger modulus_ni(modulus);          // native int modulus
 
     const ModulusM modulus_m = {modulus_ni, m};
 
@@ -454,8 +455,8 @@ void PackedEncoding::unpack(P* ring, const PlaintextModulus& modulus) const {
     // Transform Coeff to Eval
     NativeVector permuted_slots(phim, modulus_ni);
     if (is_power_of_two(m)) {
-        ChineseRemainderTransformFtt<NativeVector>().forward_transform_to_bit_reverse(packed_vector, init_root_[modulus_m], m,
-                                                                                  &permuted_slots);
+        ChineseRemainderTransformFtt<NativeVector>().forward_transform_to_bit_reverse(
+                packed_vector, init_root_[modulus_m], m, &permuted_slots);
     } else {  // Arbitrary cyclotomic
         permuted_slots = ChineseRemainderTransformArb<NativeVector>().forward_transform(
                 packed_vector, init_root_[modulus_m], big_modulus_[modulus_m], big_root_[modulus_m], m);

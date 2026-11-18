@@ -77,14 +77,14 @@ class BgvRnsCryptoParams : public RnsCryptoParams {
      * @param multiparty_mode security mode for multiparty (threshold) decryption.
      */
     BgvRnsCryptoParams(std::shared_ptr<ParmType> params, const PlaintextModulus& plaintext_modulus,
-                           float distribution_parameter, float assurance_measure, SecurityLevel security_level,
-                           uint32_t digit_size, SecretKeyDist secret_key_dist, int max_relin_sk_deg = 2,
-                           KeySwitchTechnique ks_tech = BV, ScalingTechnique scal_tech = FIXEDMANUAL,
-                           EncryptionTechnique enc_tech = STANDARD, MultiplicationTechnique mult_tech = HPS,
-                           MultipartyMode multiparty_mode = FIXED_NOISE_MULTIPARTY)
+                       float distribution_parameter, float assurance_measure, SecurityLevel security_level,
+                       uint32_t digit_size, SecretKeyDist secret_key_dist, int max_relin_sk_deg = 2,
+                       KeySwitchTechnique ks_tech = BV, ScalingTechnique scal_tech = FIXEDMANUAL,
+                       EncryptionTechnique enc_tech = STANDARD, MultiplicationTechnique mult_tech = HPS,
+                       MultipartyMode multiparty_mode = FIXED_NOISE_MULTIPARTY)
         : RnsCryptoParams(params, plaintext_modulus, distribution_parameter, assurance_measure, security_level,
-                              digit_size, secret_key_dist, max_relin_sk_deg, ks_tech, scal_tech, enc_tech, mult_tech,
-                              multiparty_mode) {}
+                          digit_size, secret_key_dist, max_relin_sk_deg, ks_tech, scal_tech, enc_tech, mult_tech,
+                          multiparty_mode) {}
 
     /**
      * Constructor that initializes the BGV crypto parameters from explicit encoding parameters.
@@ -111,19 +111,19 @@ class BgvRnsCryptoParams : public RnsCryptoParams {
      * @param threshold_num_of_parties number of parties in a threshold-FHE application (bounds the joint secret key).
      */
     BgvRnsCryptoParams(std::shared_ptr<ParmType> params, EncodingParams encoding_params, float distribution_parameter,
-                           float assurance_measure, SecurityLevel security_level, uint32_t digit_size,
-                           SecretKeyDist secret_key_dist, int max_relin_sk_deg = 2, KeySwitchTechnique ks_tech = BV,
-                           ScalingTechnique scal_tech = FIXEDMANUAL, EncryptionTechnique enc_tech = STANDARD,
-                           MultiplicationTechnique mult_tech = HPS, ProxyReEncryptionMode pre_mode = NOT_SET,
-                           MultipartyMode multiparty_mode = FIXED_NOISE_MULTIPARTY,
-                           ExecutionMode execution_mode = EXEC_EVALUATION,
-                           DecryptionNoiseMode decryption_noise_mode = FIXED_NOISE_DECRYPT,
-                           PlaintextModulus noise_scale_value = 1, uint32_t statistical_security = 30,
-                           uint32_t num_adversarial_queries = 1, uint32_t threshold_num_of_parties = 1)
-        : RnsCryptoParams(params, encoding_params, distribution_parameter, assurance_measure, security_level, digit_size,
-                              secret_key_dist, max_relin_sk_deg, ks_tech, scal_tech, enc_tech, mult_tech, pre_mode,
-                              multiparty_mode, execution_mode, decryption_noise_mode, noise_scale_value, statistical_security,
-                              num_adversarial_queries, threshold_num_of_parties) {}
+                       float assurance_measure, SecurityLevel security_level, uint32_t digit_size,
+                       SecretKeyDist secret_key_dist, int max_relin_sk_deg = 2, KeySwitchTechnique ks_tech = BV,
+                       ScalingTechnique scal_tech = FIXEDMANUAL, EncryptionTechnique enc_tech = STANDARD,
+                       MultiplicationTechnique mult_tech = HPS, ProxyReEncryptionMode pre_mode = NOT_SET,
+                       MultipartyMode multiparty_mode = FIXED_NOISE_MULTIPARTY,
+                       ExecutionMode execution_mode = EXEC_EVALUATION,
+                       DecryptionNoiseMode decryption_noise_mode = FIXED_NOISE_DECRYPT,
+                       PlaintextModulus noise_scale_value = 1, uint32_t statistical_security = 30,
+                       uint32_t num_adversarial_queries = 1, uint32_t threshold_num_of_parties = 1)
+        : RnsCryptoParams(params, encoding_params, distribution_parameter, assurance_measure, security_level,
+                          digit_size, secret_key_dist, max_relin_sk_deg, ks_tech, scal_tech, enc_tech, mult_tech,
+                          pre_mode, multiparty_mode, execution_mode, decryption_noise_mode, noise_scale_value,
+                          statistical_security, num_adversarial_queries, threshold_num_of_parties) {}
 
     virtual ~BgvRnsCryptoParams() {}
 
@@ -142,8 +142,8 @@ class BgvRnsCryptoParams : public RnsCryptoParams {
      * @param extra_bits the number of extra bits reserved for the auxiliary modulus in HYBRID key switching.
      */
     void precompute_crt_tables(KeySwitchTechnique ks_tech, ScalingTechnique scal_tech, EncryptionTechnique enc_tech,
-                             MultiplicationTechnique mult_tech, uint32_t num_part_q, uint32_t aux_bits,
-                             uint32_t extra_bits) override;
+                               MultiplicationTechnique mult_tech, uint32_t num_part_q, uint32_t aux_bits,
+                               uint32_t extra_bits) override;
 
     /**
      * Returns the step for the auxiliary prime search of HYBRID key switching; for BGV the auxiliary primes
@@ -176,14 +176,14 @@ class BgvRnsCryptoParams : public RnsCryptoParams {
     void load(Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             std::string err_msg("serialized object version " + std::to_string(version) +
-                               " is from a later version of the library");
+                                " is from a later version of the library");
             CIPHER_THROW(err_msg);
         }
         ar(cereal::base_class<RnsCryptoParams>(this));
 
         if (precompute_crt_tables_after_deserializaton()) {
-            precompute_crt_tables(ks_technique_, scal_technique_, enc_technique_, mult_technique_, num_part_q_, aux_bits_,
-                                extra_bits_);
+            precompute_crt_tables(ks_technique_, scal_technique_, enc_technique_, mult_technique_, num_part_q_,
+                                  aux_bits_, extra_bits_);
         }
     }
 

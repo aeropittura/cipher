@@ -44,7 +44,8 @@ void validate_parameters_for_cryptocontext(const Params& parameters) {
     SCHEME scheme = parameters.get_scheme();
     if (is_ckks(scheme)) {
 #if CIPHER_NATIVE_INT == 128
-        if (parameters.get_scaling_technique() == FLEXIBLEAUTO || parameters.get_scaling_technique() == FLEXIBLEAUTOEXT ||
+        if (parameters.get_scaling_technique() == FLEXIBLEAUTO ||
+            parameters.get_scaling_technique() == FLEXIBLEAUTOEXT ||
             parameters.get_scaling_technique() == COMPOSITESCALINGAUTO ||
             parameters.get_scaling_technique() == COMPOSITESCALINGMANUAL) {
             CIPHER_THROW(
@@ -74,17 +75,16 @@ void validate_parameters_for_cryptocontext(const Params& parameters) {
             if (COMPOSITESCALING_MAX_MODULUS_SIZE <= parameters.get_scaling_mod_size() ||
                 DCRT_MODULUS::MIN_SIZE > parameters.get_scaling_mod_size()) {
                 CIPHER_THROW("scalingModSize should be at least " + std::to_string(DCRT_MODULUS::MIN_SIZE) +
-                              " and less than " + std::to_string(COMPOSITESCALING_MAX_MODULUS_SIZE));
+                             " and less than " + std::to_string(COMPOSITESCALING_MAX_MODULUS_SIZE));
             }
             if (SPARSE_ENCAPSULATED == parameters.get_secret_key_dist() && parameters.get_first_mod_size() > 121) {
-                CIPHER_THROW(
-                        "SPARSE_ENCAPSULATED with COMPOSITESCALING* supports a first modulus of at most 121 bits");
+                CIPHER_THROW("SPARSE_ENCAPSULATED with COMPOSITESCALING* supports a first modulus of at most 121 bits");
             }
         } else {
             if (MAX_MODULUS_SIZE <= parameters.get_scaling_mod_size() ||
                 DCRT_MODULUS::MIN_SIZE > parameters.get_scaling_mod_size()) {
                 CIPHER_THROW("scalingModSize should be at least " + std::to_string(DCRT_MODULUS::MIN_SIZE) +
-                              " and less than " + std::to_string(MAX_MODULUS_SIZE));
+                             " and less than " + std::to_string(MAX_MODULUS_SIZE));
             }
         }
         if (30 != parameters.get_statistical_security()) {
@@ -184,22 +184,22 @@ void validate_parameters_for_cryptocontext(const Params& parameters) {
     // general validations
     if (parameters.get_ring_dim() && !is_power_of_two(parameters.get_ring_dim())) {
         std::string error_msg(std::string("Invalid ringDim [") + std::to_string(parameters.get_ring_dim()) +
-                             "]. Ring dimension must be a power of 2.");
+                              "]. Ring dimension must be a power of 2.");
         CIPHER_THROW(error_msg);
     }
     if (BV == parameters.get_key_switch_technique()) {
         const uint32_t max_digit_size = static_cast<uint32_t>(std::ceil(MAX_MODULUS_SIZE / 2));
         if (max_digit_size < parameters.get_digit_size()) {
             CIPHER_THROW("digitSize should not be greater than " + std::to_string(max_digit_size) +
-                          " for keySwitchTechnique == BV");
+                         " for keySwitchTechnique == BV");
         }
     }
     //====================================================================================================================
     constexpr uint32_t max_multiplicative_depth_value = 1000;
     if (parameters.get_multiplicative_depth() > max_multiplicative_depth_value) {
         std::string error_msg(std::string("The provided multiplicative depth [") +
-                             std::to_string(parameters.get_multiplicative_depth()) +
-                             "] is not computationally feasible. Use a smaller value.");
+                              std::to_string(parameters.get_multiplicative_depth()) +
+                              "] is not computationally feasible. Use a smaller value.");
         CIPHER_THROW(error_msg);
     }
     //====================================================================================================================

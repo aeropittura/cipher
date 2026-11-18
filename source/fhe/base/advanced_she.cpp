@@ -52,7 +52,8 @@
 namespace cipher {
 
 template <class Element>
-Ciphertext<Element> BaseAdvancedShe<Element>::eval_add_many(const std::vector<Ciphertext<Element>>& ciphertext_vec) const {
+Ciphertext<Element> BaseAdvancedShe<Element>::eval_add_many(
+        const std::vector<Ciphertext<Element>>& ciphertext_vec) const {
     const uint32_t size = ciphertext_vec.size();
     if (size == 0)
         CIPHER_THROW("Input ciphertext vector is empty.");
@@ -100,7 +101,7 @@ Ciphertext<Element> BaseAdvancedShe<Element>::eval_add_many_in_place(
 
 template <class Element>
 Ciphertext<Element> BaseAdvancedShe<Element>::eval_mult_many(const std::vector<Ciphertext<Element>>& ciphertext_vec,
-                                                           const std::vector<EvalKey<Element>>& eval_keys) const {
+                                                             const std::vector<EvalKey<Element>>& eval_keys) const {
     const uint32_t size = ciphertext_vec.size();
     if (size == 0)
         CIPHER_THROW("Input ciphertext vector is empty.");
@@ -133,8 +134,8 @@ Ciphertext<Element> BaseAdvancedShe<Element>::eval_mult_many(const std::vector<C
     }
     // partial x partial
     for (; i < lim; i += 2) {
-        ciphertext_mult_vec[j] =
-                algo->eval_mult_and_relinearize(ciphertext_mult_vec[i - size], ciphertext_mult_vec[i + 1 - size], eval_keys);
+        ciphertext_mult_vec[j] = algo->eval_mult_and_relinearize(ciphertext_mult_vec[i - size],
+                                                                 ciphertext_mult_vec[i + 1 - size], eval_keys);
         algo->mod_reduce_in_place(ciphertext_mult_vec[j++], levels_to_drop);
         ciphertext_mult_vec[i - size].reset();
         ciphertext_mult_vec[i + 1 - size].reset();
@@ -172,7 +173,7 @@ Ciphertext<Element> BaseAdvancedShe<Element>::add_random_noise(ConstCiphertext<E
         }
 
         plaintext = cc->make_ckks_packed_plaintext(random_int_vector, ciphertext->get_noise_scale_deg(), 0, nullptr,
-                                                ciphertext->get_slots());
+                                                   ciphertext->get_slots());
     } else {
         DiscreteUniformGeneratorImpl<typename Element::Vector> dug;
         auto random_vector{dug.generate_vector(n - 1, encoding_params->get_plaintext_modulus())};
@@ -218,8 +219,9 @@ std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> BaseAdvancedShe<Element>::
     if (!is_ckks(cc->get_scheme_id_impl()))
         CIPHER_THROW("Matrix summation of row-vectors is only supported for CKKSPackedEncoding.");
 
-    uint32_t m = (subring_dim == 0) ? private_key->get_crypto_parameters()->get_element_params()->get_cyclotomic_order() :
-                                     subring_dim;
+    uint32_t m = (subring_dim == 0) ?
+                         private_key->get_crypto_parameters()->get_element_params()->get_cyclotomic_order() :
+                         subring_dim;
 
     if (!is_power_of_two(m))
         CIPHER_THROW("Matrix summation of row-vectors is not supported for arbitrary cyclotomics.");
@@ -260,7 +262,7 @@ std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> BaseAdvancedShe<Element>::
 
 template <class Element>
 Ciphertext<Element> BaseAdvancedShe<Element>::eval_sum(ConstCiphertext<Element> ciphertext, uint32_t batch_size,
-                                                      const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const {
+                                                       const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const {
     const auto crypto_params = ciphertext->get_crypto_parameters();
     const auto encoding_params = crypto_params->get_encoding_params();
 
@@ -289,7 +291,8 @@ Ciphertext<Element> BaseAdvancedShe<Element>::eval_sum(ConstCiphertext<Element> 
 
             uint32_t g = encoding_params->get_plaintext_generator();
             for (int i = 0; i < std::floor(std::log2(batch_size)); i++) {
-                new_ciphertext = algo->eval_add(new_ciphertext, algo->eval_automorphism(new_ciphertext, g, eval_key_map));
+                new_ciphertext =
+                        algo->eval_add(new_ciphertext, algo->eval_automorphism(new_ciphertext, g, eval_key_map));
                 g = (g * g) % m;
             }
         }
@@ -300,8 +303,8 @@ Ciphertext<Element> BaseAdvancedShe<Element>::eval_sum(ConstCiphertext<Element> 
 
 template <class Element>
 Ciphertext<Element> BaseAdvancedShe<Element>::eval_sum_rows(ConstCiphertext<Element> ciphertext, uint32_t num_rows,
-                                                          const std::map<uint32_t, EvalKey<Element>>& eval_sum_keys,
-                                                          uint32_t subring_dim) const {
+                                                            const std::map<uint32_t, EvalKey<Element>>& eval_sum_keys,
+                                                            uint32_t subring_dim) const {
     if (ciphertext->get_encoding_type() != CKKS_PACKED_ENCODING)
         CIPHER_THROW("Matrix summation of row-vectors is only supported for CKKS packed encoding.");
 
@@ -397,8 +400,9 @@ Ciphertext<Element> BaseAdvancedShe<Element>::eval_inner_product(
 }
 
 template <class Element>
-Ciphertext<Element> BaseAdvancedShe<Element>::eval_merge(const std::vector<Ciphertext<Element>>& ciphertext_vec,
-                                                        const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const {
+Ciphertext<Element> BaseAdvancedShe<Element>::eval_merge(
+        const std::vector<Ciphertext<Element>>& ciphertext_vec,
+        const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const {
     if (ciphertext_vec.size() == 0)
         CIPHER_THROW("the vector of ciphertexts to be merged cannot be empty");
 
@@ -420,9 +424,9 @@ Ciphertext<Element> BaseAdvancedShe<Element>::eval_merge(const std::vector<Ciphe
     ciphertext_merged = algo->eval_mult(ciphertext_merged, plaintext);
 
     for (size_t i = 1; i < ciphertext_vec.size(); i++) {
-        ciphertext_merged = algo->eval_add(
-                ciphertext_merged,
-                algo->eval_at_index(algo->eval_mult(ciphertext_vec[i], plaintext), -static_cast<int32_t>(i), eval_key_map));
+        ciphertext_merged =
+                algo->eval_add(ciphertext_merged, algo->eval_at_index(algo->eval_mult(ciphertext_vec[i], plaintext),
+                                                                      -static_cast<int32_t>(i), eval_key_map));
     }
 
     return ciphertext_merged;
@@ -496,7 +500,7 @@ std::set<uint32_t> BaseAdvancedShe<Element>::generate_index_list_for_eval_sum(co
         auto cc_inst = private_key->get_crypto_context();
         // CKKS Packing
         indices = is_ckks(cc_inst->get_scheme_id_impl()) ? generate_indices2n_complex(batch_size, m) :
-                                                  generate_indices_2n(batch_size, m);
+                                                           generate_indices_2n(batch_size, m);
     } else {
         // Arbitrary cyclotomics
         auto isize = static_cast<size_t>(std::floor(std::log2(batch_size)));
@@ -533,8 +537,8 @@ Ciphertext<Element> BaseAdvancedShe<Element>::eval_sum_radix_fold(
                 auto eval_key_iterator = eval_key_map.find(auto_index);
                 if (eval_key_iterator == eval_key_map.end())
                     CIPHER_THROW("EvalKey for index [" + std::to_string(auto_index) + "] is not found.");
-                result = algo->eval_add(result,
-                                       algo->eval_automorphism_core(base, auto_index, digits, eval_key_iterator->second));
+                result = algo->eval_add(
+                        result, algo->eval_automorphism_core(base, auto_index, digits, eval_key_iterator->second));
                 gi = gi * g % m;
             }
             for (uint32_t r = radix; r > 1; r >>= 1)
@@ -602,29 +606,29 @@ Ciphertext<Element> BaseAdvancedShe<Element>::eval_sum_radix_fold(
 
         // Element 1 settles once per level from the level's extended sum: the next level's
         // rotations need its digit decomposition.
-        cv[1] += lvl1.approx_mod_down(params_ql, params_p, crypto_params->get_p_inv_modq(), crypto_params->get_p_inv_modq_precon(),
-                                    crypto_params->get_p_hat_inv_modp(), crypto_params->get_p_hat_inv_modp_precon(),
-                                    crypto_params->get_p_hat_modq(), crypto_params->get_modq_barrett_mu(),
-                                    crypto_params->get_t_inv_modp(), crypto_params->get_t_inv_modp_precon(), t,
-                                    crypto_params->get_t_modq_precon());
+        cv[1] += lvl1.approx_mod_down(params_ql, params_p, crypto_params->get_p_inv_modq(),
+                                      crypto_params->get_p_inv_modq_precon(), crypto_params->get_p_hat_inv_modp(),
+                                      crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
+                                      crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
+                                      crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon());
 
         for (uint32_t r = radix; r > 1; r >>= 1)
             g = g * g % m;
     }
 
-    cv[0] = acc.approx_mod_down(params_ql, params_p, crypto_params->get_p_inv_modq(), crypto_params->get_p_inv_modq_precon(),
-                              crypto_params->get_p_hat_inv_modp(), crypto_params->get_p_hat_inv_modp_precon(),
-                              crypto_params->get_p_hat_modq(), crypto_params->get_modq_barrett_mu(),
-                              crypto_params->get_t_inv_modp(), crypto_params->get_t_inv_modp_precon(), t,
-                              crypto_params->get_t_modq_precon());
+    cv[0] = acc.approx_mod_down(params_ql, params_p, crypto_params->get_p_inv_modq(),
+                                crypto_params->get_p_inv_modq_precon(), crypto_params->get_p_hat_inv_modp(),
+                                crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
+                                crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
+                                crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon());
 
     return result;
 }
 
 template <class Element>
 Ciphertext<Element> BaseAdvancedShe<Element>::eval_sum_2n(ConstCiphertext<Element> ciphertext, uint32_t batch_size,
-                                                         uint32_t m,
-                                                         const std::map<uint32_t, EvalKey<Element>>& eval_keys) const {
+                                                          uint32_t m,
+                                                          const std::map<uint32_t, EvalKey<Element>>& eval_keys) const {
     if (batch_size <= 1)
         return ciphertext->clone();
 

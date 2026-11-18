@@ -539,7 +539,8 @@ void simple_bootstrapping_st_c_first_complex() {
     // will be levels_available_after_bootstrap - 1 because an additional level
     // is used for scaling the ciphertext before next bootstrapping (in 64-bit CKKS bootstrapping)
     uint32_t levels_available_after_bootstrap = 10 + level_budget[1];
-    uint32_t depth = levels_available_after_bootstrap + CkksRnsFhe::get_bootstrap_depth({level_budget[0], 0}, secret_key_dist);
+    uint32_t depth =
+            levels_available_after_bootstrap + CkksRnsFhe::get_bootstrap_depth({level_budget[0], 0}, secret_key_dist);
     parameters.set_multiplicative_depth(depth);
 
     CryptoContext<RnsPoly> crypto_context = make_crypto_context(parameters);

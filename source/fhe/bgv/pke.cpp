@@ -59,16 +59,18 @@ DecryptResult BgvRnsPke::decrypt(ConstCiphertext<RnsPoly> ciphertext, const Priv
         if (size_ql > 0) {
             for (size_t i = size_ql - 1; i > 0; --i) {
                 b.mod_reduce(crypto_params->get_plaintext_modulus(), crypto_params->get_t_modq_precon(),
-                            crypto_params->get_negt_inv_modq(i), crypto_params->get_negt_inv_modq_precon(i),
-                            crypto_params->get_ql_inv_modq(i), crypto_params->get_ql_inv_modq_precon(i));
+                             crypto_params->get_negt_inv_modq(i), crypto_params->get_negt_inv_modq_precon(i),
+                             crypto_params->get_ql_inv_modq(i), crypto_params->get_ql_inv_modq_precon(i));
             }
             // TODO: Use pre-computed scaling factor at level L.
             if (crypto_params->get_scaling_technique() == FLEXIBLEAUTO ||
                 crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT) {
                 for (size_t i = 0; i < size_ql - 1; ++i) {
                     NativeInteger mod_reduce_factor = crypto_params->get_mod_reduce_factor_int(size_ql - 1 - i);
-                    NativeInteger mod_reduce_factor_inv = mod_reduce_factor.mod_inverse(crypto_params->get_plaintext_modulus());
-                    scaling_factor_int = scaling_factor_int.mod_mul(mod_reduce_factor_inv, crypto_params->get_plaintext_modulus());
+                    NativeInteger mod_reduce_factor_inv =
+                            mod_reduce_factor.mod_inverse(crypto_params->get_plaintext_modulus());
+                    scaling_factor_int =
+                            scaling_factor_int.mod_mul(mod_reduce_factor_inv, crypto_params->get_plaintext_modulus());
                 }
             }
         }
@@ -78,16 +80,18 @@ DecryptResult BgvRnsPke::decrypt(ConstCiphertext<RnsPoly> ciphertext, const Priv
             for (size_t j = size_ql - 1; j > 0; j--) {
                 for (uint32_t i = 0; i < ct.size(); i++) {
                     ct[i].mod_reduce(crypto_params->get_plaintext_modulus(), crypto_params->get_t_modq_precon(),
-                                    crypto_params->get_negt_inv_modq(j), crypto_params->get_negt_inv_modq_precon(j),
-                                    crypto_params->get_ql_inv_modq(j), crypto_params->get_ql_inv_modq_precon(j));
+                                     crypto_params->get_negt_inv_modq(j), crypto_params->get_negt_inv_modq_precon(j),
+                                     crypto_params->get_ql_inv_modq(j), crypto_params->get_ql_inv_modq_precon(j));
                 }
             }
             if (crypto_params->get_scaling_technique() == FLEXIBLEAUTO ||
                 crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT) {
                 for (size_t i = 0; i < size_ql - 1; i++) {
                     NativeInteger mod_reduce_factor = crypto_params->get_mod_reduce_factor_int(size_ql - 1 - i);
-                    NativeInteger mod_reduce_factor_inv = mod_reduce_factor.mod_inverse(crypto_params->get_plaintext_modulus());
-                    scaling_factor_int = scaling_factor_int.mod_mul(mod_reduce_factor_inv, crypto_params->get_plaintext_modulus());
+                    NativeInteger mod_reduce_factor_inv =
+                            mod_reduce_factor.mod_inverse(crypto_params->get_plaintext_modulus());
+                    scaling_factor_int =
+                            scaling_factor_int.mod_mul(mod_reduce_factor_inv, crypto_params->get_plaintext_modulus());
                 }
             }
         }

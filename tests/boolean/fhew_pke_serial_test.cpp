@@ -39,7 +39,7 @@ using namespace cipher;
 
 template <typename ST>
 void unit_test_fhewpke_serial(const ST& sertype, BINFHE_PARAMSET sec_level, BINFHE_METHOD variant,
-                           const std::string& err_msg) {
+                              const std::string& err_msg) {
     const LwePlaintext val(1);
     auto cc1 = BooleanContext();
     cc1.generate_boolean_context(sec_level, variant);

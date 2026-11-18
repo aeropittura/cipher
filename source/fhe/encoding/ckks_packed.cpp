@@ -104,7 +104,8 @@ double std_dev(const std::vector<std::complex<double>>& vec, const std::vector<s
     };
 
     // use the symmetry condition
-    double variance = 2 * accumulate(complex_values.begin() + 1, complex_values.begin() + slots / 2, 0.0, variance_func);
+    double variance =
+            2 * accumulate(complex_values.begin() + 1, complex_values.begin() + slots / 2, 0.0, variance_func);
     // and then add values at indices 0 and Nh/2
     variance += (complex_values[0].imag() - mean) * (complex_values[0].imag() - mean);
     variance += 2 * (complex_values[slots / 2].real() - mean) * (complex_values[slots / 2].real() - mean);
@@ -123,7 +124,7 @@ bool CKKSPackedEncoding::encode() {
 
     if (slots < value.size()) {
         std::string err_msg = std::string("The number of slots [") + std::to_string(slots) +
-                             "] is less than the size of data [" + std::to_string(value.size()) + "]";
+                              "] is less than the size of data [" + std::to_string(value.size()) + "]";
         CIPHER_THROW(err_msg);
     }
 
@@ -490,7 +491,7 @@ bool CKKSPackedEncoding::decode(size_t noise_scale_deg, double scaling_factor, S
 void CKKSPackedEncoding::destroy() {}
 
 void CKKSPackedEncoding::fit_to_native_vector(const std::vector<int64_t>& vec, int64_t big_bound,
-                                           NativeVector* native_vec) const {
+                                              NativeVector* native_vec) const {
     NativeInteger big_value_hf(big_bound >> 1);
     NativeInteger modulus(native_vec->get_modulus());
     NativeInteger diff = big_bound - modulus;
@@ -534,7 +535,7 @@ void CKKSPackedEncoding::fit_to_native_vector(const std::vector<int64_t>& vec, i
 
 #if CIPHER_NATIVE_INT == 128
 void CKKSPackedEncoding::fit_to_native_vector(const std::vector<int128_t>& vec, int128_t big_bound,
-                                           NativeVector* native_vec) const {
+                                              NativeVector* native_vec) const {
     NativeInteger big_value_hf((uint128_t)big_bound >> 1);
     NativeInteger modulus(native_vec->get_modulus());
     NativeInteger diff = NativeInteger((uint128_t)big_bound) - modulus;

@@ -58,7 +58,8 @@ Field2n::Field2n(const Poly& element) : format(Format::COEFFICIENT) {
     BigInteger negative_threshold(element.get_modulus() / Poly::Integer(2));
     for (size_t i = 0; i < size; ++i) {
         if (element[i] > negative_threshold)
-            this->std::vector<std::complex<double>>::push_back(-(element.get_modulus() - element[i]).convert_to_double());
+            this->std::vector<std::complex<double>>::push_back(
+                    -(element.get_modulus() - element[i]).convert_to_double());
         else
             this->std::vector<std::complex<double>>::push_back(element[i].convert_to_double());
     }
@@ -73,7 +74,8 @@ Field2n::Field2n(const NativePoly& element) : format(Format::COEFFICIENT) {
     NativeInteger negative_threshold(element.get_modulus() / 2);
     for (size_t i = 0; i < size; ++i) {
         if (element[i] > negative_threshold)
-            this->std::vector<std::complex<double>>::push_back(-(element.get_modulus() - element[i]).convert_to_double());
+            this->std::vector<std::complex<double>>::push_back(
+                    -(element.get_modulus() - element[i]).convert_to_double());
         else
             this->std::vector<std::complex<double>>::push_back(element[i].convert_to_double());
     }

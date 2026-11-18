@@ -69,7 +69,7 @@ std::vector<double> measure_st_c_first_bootstrap_double_iter_precision(uint32_t 
 // base 2 logarithm of the average L1 norm between results from standard (cleartext) calculation
 // and those computed homomorphically.
 double calculate_approximation_error(const std::vector<std::complex<double>>& result,
-                                   const std::vector<std::complex<double>>& expected_result) {
+                                     const std::vector<std::complex<double>>& expected_result) {
     if (result.size() != expected_result.size())
         CIPHER_THROW("Cannot compare vectors with different numbers of elements");
 
@@ -208,7 +208,8 @@ double measure_st_c_first_bootstrap_precision(uint32_t num_slots, uint32_t corre
     std::vector<uint32_t> level_budget = {3, 3};
     std::vector<uint32_t> bsgs_dim = {0, 0};
     uint32_t levels_available_after_bootstrap = 10 + level_budget[1];
-    uint32_t depth = levels_available_after_bootstrap + CkksRnsFhe::get_bootstrap_depth({level_budget[0], 0}, secret_key_dist);
+    uint32_t depth =
+            levels_available_after_bootstrap + CkksRnsFhe::get_bootstrap_depth({level_budget[0], 0}, secret_key_dist);
     parameters.set_multiplicative_depth(depth);
 
     CryptoContext<RnsPoly> crypto_context = make_crypto_context(parameters);
@@ -323,8 +324,8 @@ std::vector<double> measure_bootstrap_double_iter_precision(uint32_t num_slots, 
     crypto_context->decrypt(key_pair.secret_key, ciphertext_two_iterations, &result_two_iterations);
     result_two_iterations->set_length(num_slots);
 
-    double precision_multiple_iterations =
-            calculate_approximation_error(result_two_iterations->get_ckks_packed_value(), ptxt->get_ckks_packed_value());
+    double precision_multiple_iterations = calculate_approximation_error(result_two_iterations->get_ckks_packed_value(),
+                                                                         ptxt->get_ckks_packed_value());
 
     crypto_context->clear_static_maps_and_vectors();
 
@@ -402,8 +403,8 @@ std::vector<double> measure_st_c_first_bootstrap_double_iter_precision(uint32_t 
     crypto_context->decrypt(key_pair.secret_key, ciphertext_two_iterations, &result_two_iterations);
     result_two_iterations->set_length(num_slots);
 
-    double precision_multiple_iterations =
-            calculate_approximation_error(result_two_iterations->get_ckks_packed_value(), ptxt->get_ckks_packed_value());
+    double precision_multiple_iterations = calculate_approximation_error(result_two_iterations->get_ckks_packed_value(),
+                                                                         ptxt->get_ckks_packed_value());
 
     crypto_context->clear_static_maps_and_vectors();
 

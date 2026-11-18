@@ -72,8 +72,8 @@ static void Blake2SeedGenerator(Blake2Engine::blake2_seed_array_t& seed) {
 #if defined(FIXED_SEED)
     // Only used for debugging in the single-threaded mode.
     CIPHER_DIAGNOSTIC_ERR << "**FOR DEBUGGING ONLY!!!!  Using fixed initializer for PRNG. "
-                              "Use a single thread only, e.g., OMP_NUM_THREADS=1!"
-                           << std::endl;
+                             "Use a single thread only, e.g., OMP_NUM_THREADS=1!"
+                          << std::endl;
 
     seed[0] = 1;
 #else

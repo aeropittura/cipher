@@ -211,7 +211,7 @@ class EvalKeyRelinImpl : public EvalKeyImpl<Element> {
     void load(Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         ar(::cereal::base_class<EvalKeyImpl<Element>>(this));
         ar(::cereal::make_nvp("ak", a_key_));

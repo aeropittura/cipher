@@ -61,7 +61,7 @@ class RingGswAccumulator {
      * @return a shared pointer to the 32-bit refreshing key, or nullptr when not implemented
      */
     virtual RingGswAccKey32 key_gen_acc32(const std::shared_ptr<RingGswCryptoParams>&, const NativePoly&,
-                                        ConstLwePrivateKey&) const {
+                                          ConstLwePrivateKey&) const {
         return nullptr;
     }
 
@@ -72,7 +72,7 @@ class RingGswAccumulator {
      * key_gen_acc32; the base implementation throws
      */
     virtual void eval_acc32(const std::shared_ptr<RingGswCryptoParams>&, ConstRingGswAccKey32&, RlweCiphertext&,
-                           const NativeVector&) const {
+                            const NativeVector&) const {
         CIPHER_THROW("32-bit internal evaluation is not supported by this accumulator");
     }
 #endif
@@ -86,7 +86,7 @@ class RingGswAccumulator {
      * @return a shared pointer to the resulting keys
      */
     virtual RingGswAccKey key_gen_acc(const std::shared_ptr<RingGswCryptoParams>& params, const NativePoly& sk_ntt,
-                                    ConstLwePrivateKey& LWE_sk) const {
+                                      ConstLwePrivateKey& LWE_sk) const {
         CIPHER_THROW("Operation not supported");
     }
 
@@ -99,7 +99,7 @@ class RingGswAccumulator {
      * @param a value to update the accumulator with
      */
     virtual void eval_acc(const std::shared_ptr<RingGswCryptoParams>& params, ConstRingGswAccKey& ek,
-                         RlweCiphertext& acc, const NativeVector& a) const {
+                          RlweCiphertext& acc, const NativeVector& a) const {
         CIPHER_THROW("Operation not supported");
     }
 
@@ -111,8 +111,8 @@ class RingGswAccumulator {
      * @param input input RLWE ciphertext
      * @param output output RLWE' ciphertext
      */
-    void signed_digit_decompose(const std::shared_ptr<RingGswCryptoParams>& params, const std::vector<NativePoly>& input,
-                              std::vector<NativePoly>& output) const;
+    void signed_digit_decompose(const std::shared_ptr<RingGswCryptoParams>& params,
+                                const std::vector<NativePoly>& input, std::vector<NativePoly>& output) const;
 
     /**
      * The signed digit decomposition which takes an RLWE ciphertext input and outputs a vector of its digits, i.e., an
@@ -123,8 +123,9 @@ class RingGswAccumulator {
      * @param output output RLWE' ciphertext
      * @param index LWE secret-key coefficient index
      */
-    void signed_digit_decompose(const std::shared_ptr<RingGswCryptoParams>& params, const std::vector<NativePoly>& input,
-                              std::vector<NativePoly>& output, uint32_t index) const;
+    void signed_digit_decompose(const std::shared_ptr<RingGswCryptoParams>& params,
+                                const std::vector<NativePoly>& input, std::vector<NativePoly>& output,
+                                uint32_t index) const;
 
     /**
      * The signed digit decomposition of an RLWE ciphertext into an RLWE' ciphertext with explicit gadget parameters.
@@ -137,8 +138,8 @@ class RingGswAccumulator {
      * @param bp the gadget parameters (base, digit count, digit width) to decompose with
      */
     void signed_digit_decompose_impl(const std::shared_ptr<RingGswCryptoParams>& params,
-                                  const std::vector<NativePoly>& input, std::vector<NativePoly>& output,
-                                  const RingGswCryptoParams::BaseGParams& bp) const;
+                                     const std::vector<NativePoly>& input, std::vector<NativePoly>& output,
+                                     const RingGswCryptoParams::BaseGParams& bp) const;
 
     /**
      * The signed digit decomposition which takes a ring element input and outputs a vector of its digits, i.e.,
@@ -150,7 +151,7 @@ class RingGswAccumulator {
      * @param output decomposed value
      */
     void signed_digit_decompose(const std::shared_ptr<RingGswCryptoParams>& params, const NativePoly& input,
-                              std::vector<NativePoly>& output) const;
+                                std::vector<NativePoly>& output) const;
 };
 
 }  // namespace cipher

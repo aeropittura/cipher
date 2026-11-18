@@ -41,7 +41,7 @@ namespace cipher {
 
 // Key generation as described in Section 4 of https://eprint.iacr.org/2014/816
 RingGswAccKey RingGswAccumulatorCggi::key_gen_acc(const std::shared_ptr<RingGswCryptoParams>& params,
-                                                const NativePoly& sk_ntt, ConstLwePrivateKey& LWE_sk) const {
+                                                  const NativePoly& sk_ntt, ConstLwePrivateKey& LWE_sk) const {
     auto sv = LWE_sk->get_element();
     auto neg = sv.get_modulus().convert_to_int() - 1;
     uint32_t n = sv.get_length();
@@ -69,7 +69,7 @@ RingGswAccKey RingGswAccumulatorCggi::key_gen_acc(const std::shared_ptr<RingGswC
 
 #if CIPHER_NATIVE_INT != 32
 RingGswAccKey32 RingGswAccumulatorCggi::key_gen_acc32(const std::shared_ptr<RingGswCryptoParams>& params,
-                                                    const NativePoly& sk_ntt, ConstLwePrivateKey& LWE_sk) const {
+                                                      const NativePoly& sk_ntt, ConstLwePrivateKey& LWE_sk) const {
     auto sv = LWE_sk->get_element();
     auto neg = sv.get_modulus().convert_to_int() - 1;
     uint32_t n = sv.get_length();
@@ -102,10 +102,10 @@ RingGswAccKey32 RingGswAccumulatorCggi::key_gen_acc32(const std::shared_ptr<Ring
 namespace {
 
 void add_to_acc_cggi32(const std::shared_ptr<NativePolyParams32>& poly_params, uint32_t Q, uint64_t mu, uint32_t M,
-                    const RingGswCryptoParams::BaseGParams& bp, const RingGswAccKey32Impl::EvalKey32& ek1,
-                    const RingGswAccKey32Impl::EvalKey32& ek2, const std::vector<NativePoly32>& monomials,
-                    const std::vector<NativeVector32>& monomials_precon, const NativeInteger& a,
-                    std::vector<NativePoly32>& acc) {
+                       const RingGswCryptoParams::BaseGParams& bp, const RingGswAccKey32Impl::EvalKey32& ek1,
+                       const RingGswAccKey32Impl::EvalKey32& ek2, const std::vector<NativePoly32>& monomials,
+                       const std::vector<NativeVector32>& monomials_precon, const NativeInteger& a,
+                       std::vector<NativePoly32>& acc) {
     thread_local std::vector<NativePoly32> ct_scratch, dct_scratch, tmp_scratch;
     auto& ct = ct_scratch;
     auto& dct = dct_scratch;
@@ -183,7 +183,7 @@ void add_to_acc_cggi32(const std::shared_ptr<NativePolyParams32>& poly_params, u
 }  // namespace
 
 void RingGswAccumulatorCggi::eval_acc32(const std::shared_ptr<RingGswCryptoParams>& params, ConstRingGswAccKey32& ek,
-                                       RlweCiphertext& acc, const NativeVector& a) const {
+                                        RlweCiphertext& acc, const NativeVector& a) const {
     const auto& poly_params = params->get_poly_params32();
     const auto& monomials = *params->get_monomials32();
     const auto& monomials_precon = *params->get_monomials_precon32();
@@ -197,8 +197,8 @@ void RingGswAccumulatorCggi::eval_acc32(const std::shared_ptr<RingGswCryptoParam
     auto mod_value{a.get_modulus()};
     auto mby_mod{NativeInteger(M) / mod_value};
     for (uint32_t i = 0; i < n; ++i) {
-        add_to_acc_cggi32(poly_params, Q, mu, M, params->get_base_g_params(i), (*ek)[0][0][i], (*ek)[0][1][i], monomials,
-                       monomials_precon, NativeInteger(0).mod_sub_fast(a[i], mod_value) * mby_mod, acc32);
+        add_to_acc_cggi32(poly_params, Q, mu, M, params->get_base_g_params(i), (*ek)[0][0][i], (*ek)[0][1][i],
+                          monomials, monomials_precon, NativeInteger(0).mod_sub_fast(a[i], mod_value) * mby_mod, acc32);
     }
 
     widen_acc32_into(acc32, acc->get_elements());
@@ -206,7 +206,7 @@ void RingGswAccumulatorCggi::eval_acc32(const std::shared_ptr<RingGswCryptoParam
 #endif  // CIPHER_NATIVE_INT != 32
 
 void RingGswAccumulatorCggi::eval_acc(const std::shared_ptr<RingGswCryptoParams>& params, ConstRingGswAccKey& ek,
-                                     RlweCiphertext& acc, const NativeVector& a) const {
+                                      RlweCiphertext& acc, const NativeVector& a) const {
     if (!params->has_monomials())
         CIPHER_THROW("the 64-bit monomials were released; regenerate keys or reload them through the context");
     uint32_t n(a.get_length());
@@ -214,13 +214,14 @@ void RingGswAccumulatorCggi::eval_acc(const std::shared_ptr<RingGswCryptoParams>
     auto mby_mod{NativeInteger(2 * params->get_N()) / mod_value};
     for (uint32_t i = 0; i < n; ++i) {
         // handles -a*E(1) and handles -a*E(-1) = a*E(1)
-        add_to_acc_cggi(params, (*ek)[0][0][i], (*ek)[0][1][i], NativeInteger(0).mod_sub_fast(a[i], mod_value) * mby_mod, acc, i);
+        add_to_acc_cggi(params, (*ek)[0][0][i], (*ek)[0][1][i],
+                        NativeInteger(0).mod_sub_fast(a[i], mod_value) * mby_mod, acc, i);
     }
 }
 
 // Encryption for the CGGI variant, as described in https://eprint.iacr.org/2020/086
 RingGswEvalKey RingGswAccumulatorCggi::key_gen_cggi(const std::shared_ptr<RingGswCryptoParams>& params,
-                                                  const NativePoly& sk_ntt, LwePlaintext m, uint32_t index) const {
+                                                    const NativePoly& sk_ntt, LwePlaintext m, uint32_t index) const {
     GadgetMonomial mono{0, m ? GadgetTerm::ADD : GadgetTerm::NONE};
     return std::make_shared<RingGswEvalKeyImpl>(
             rgsw_encrypt(params, params->get_poly_params(), sk_ntt, params->get_dgg_impl(), index, mono));
@@ -230,9 +231,9 @@ RingGswEvalKey RingGswAccumulatorCggi::key_gen_cggi(const std::shared_ptr<RingGs
 // Added ternary MUX introduced in paper https://eprint.iacr.org/2022/074.pdf section 5
 // We optimize the algorithm by multiplying the monomial after the external product
 // This reduces the number of polynomial multiplications which further reduces the runtime
-void RingGswAccumulatorCggi::add_to_acc_cggi(const std::shared_ptr<RingGswCryptoParams>& params, ConstRingGswEvalKey& ek1,
-                                          ConstRingGswEvalKey& ek2, NativeInteger a, RlweCiphertext& acc,
-                                          uint32_t index) const {
+void RingGswAccumulatorCggi::add_to_acc_cggi(const std::shared_ptr<RingGswCryptoParams>& params,
+                                             ConstRingGswEvalKey& ek1, ConstRingGswEvalKey& ek2, NativeInteger a,
+                                             RlweCiphertext& acc, uint32_t index) const {
     thread_local std::vector<NativePoly> ct_scratch, dct_scratch, tmp_scratch;
     auto& ct = ct_scratch;
     auto& dct = dct_scratch;

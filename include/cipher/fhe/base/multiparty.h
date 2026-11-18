@@ -104,7 +104,8 @@ class BaseMultiparty {
      * public key
      */
     virtual KeyPair<Element> multiparty_key_gen(CryptoContext<Element> cc,
-                                              const std::vector<PrivateKey<Element>>& private_key_vec, bool make_sparse_value);
+                                                const std::vector<PrivateKey<Element>>& private_key_vec,
+                                                bool make_sparse_value);
 
     /**
      * Threshold FHE: Generation of a public key derived
@@ -121,7 +122,7 @@ class BaseMultiparty {
      * joined public key
      */
     virtual KeyPair<Element> multiparty_key_gen(CryptoContext<Element> cc, const PublicKey<Element> public_key,
-                                              bool make_sparse_value, bool fresh);
+                                                bool make_sparse_value, bool fresh);
 
     /**
      * Threshold FHE: Generates a joined evaluation key
@@ -134,8 +135,8 @@ class BaseMultiparty {
      * @return the new joined evaluation key.
      */
     virtual EvalKey<Element> multi_key_switch_gen(const PrivateKey<Element> old_private_key,
-                                               const PrivateKey<Element> new_private_key,
-                                               const EvalKey<Element> eval_key) const;
+                                                  const PrivateKey<Element> new_private_key,
+                                                  const EvalKey<Element> eval_key) const;
 
     /**
      * Threshold FHE: Generates joined automorphism keys
@@ -191,7 +192,7 @@ class BaseMultiparty {
      * @return the partial decryption.
      */
     virtual Ciphertext<Element> multiparty_decrypt_main(ConstCiphertext<Element> ciphertext,
-                                                      const PrivateKey<Element> private_key) const;
+                                                        const PrivateKey<Element> private_key) const;
 
     /**
      * Threshold FHE: Method for decryption operation run by the lead decryption
@@ -202,7 +203,7 @@ class BaseMultiparty {
      * @return the partial decryption.
      */
     virtual Ciphertext<Element> multiparty_decrypt_lead(ConstCiphertext<Element> ciphertext,
-                                                      const PrivateKey<Element> private_key) const;
+                                                        const PrivateKey<Element> private_key) const;
 
     /**
      * Threshold FHE: Method for combining the partially decrypted ciphertexts
@@ -213,7 +214,7 @@ class BaseMultiparty {
      * @return the decoding result.
      */
     virtual DecryptResult multiparty_decrypt_fusion(const std::vector<Ciphertext<Element>>& ciphertext_vec,
-                                                  NativePoly* plaintext) const;
+                                                    NativePoly* plaintext) const;
 
     /**
      * Threshold FHE: Method for combining the partially decrypted ciphertexts
@@ -224,7 +225,7 @@ class BaseMultiparty {
      * @return the decoding result.
      */
     virtual DecryptResult multiparty_decrypt_fusion(const std::vector<Ciphertext<Element>>& ciphertext_vec,
-                                                  Poly* plaintext) const {
+                                                    Poly* plaintext) const {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
@@ -319,7 +320,7 @@ class BaseMultiparty {
      * @return Resulting masked decryption
      */
     virtual Ciphertext<Element> int_boot_decrypt(const PrivateKey<Element> private_key,
-                                               ConstCiphertext<Element> ciphertext) const {
+                                                 ConstCiphertext<Element> ciphertext) const {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
@@ -334,7 +335,7 @@ class BaseMultiparty {
      * @return Resulting encryption
      */
     virtual Ciphertext<Element> int_boot_encrypt(const PublicKey<Element> public_key,
-                                               ConstCiphertext<Element> ciphertext) const {
+                                                 ConstCiphertext<Element> ciphertext) const {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
@@ -348,7 +349,7 @@ class BaseMultiparty {
      * @return Refreshed ciphertext
      */
     virtual Ciphertext<Element> int_boot_add(ConstCiphertext<Element> ciphertext1,
-                                           ConstCiphertext<Element> ciphertext2) const {
+                                             ConstCiphertext<Element> ciphertext2) const {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
@@ -370,7 +371,7 @@ class BaseMultiparty {
      * @return Resulting ring element
      */
     virtual Ciphertext<Element> int_mp_boot_random_element_gen(std::shared_ptr<CkksRnsCryptoParams> params,
-                                                          const PublicKey<Element> public_key) const {
+                                                               const PublicKey<Element> public_key) const {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
     /**
@@ -383,7 +384,7 @@ class BaseMultiparty {
      * @return Resulting ring element, wrapped in a single-element ciphertext
      */
     virtual Ciphertext<Element> int_mp_boot_random_element_gen(std::shared_ptr<CkksRnsCryptoParams> params,
-                                                          ConstCiphertext<Element>& ciphertext) const {
+                                                               ConstCiphertext<Element>& ciphertext) const {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
@@ -397,8 +398,8 @@ class BaseMultiparty {
      * @return Resulting masked decryption
      */
     virtual std::vector<Ciphertext<Element>> int_mp_boot_decrypt(const PrivateKey<Element> private_key,
-                                                              ConstCiphertext<Element> ciphertext,
-                                                              ConstCiphertext<Element> a) const {
+                                                                 ConstCiphertext<Element> ciphertext,
+                                                                 ConstCiphertext<Element> a) const {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
@@ -429,9 +430,9 @@ class BaseMultiparty {
      * @return Resulting encryption
      */
     virtual Ciphertext<Element> int_mp_boot_encrypt(const PublicKey<Element> public_key,
-                                                 const std::vector<Ciphertext<Element>>& shares_pair,
-                                                 ConstCiphertext<Element> a,
-                                                 ConstCiphertext<Element> ciphertext) const {
+                                                    const std::vector<Ciphertext<Element>>& shares_pair,
+                                                    ConstCiphertext<Element> a,
+                                                    ConstCiphertext<Element> ciphertext) const {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 

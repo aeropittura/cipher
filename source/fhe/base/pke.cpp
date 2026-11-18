@@ -92,7 +92,7 @@ KeyPair<Element> BasePke<Element>::key_gen_internal(CryptoContext<Element> cc, b
         s.drop_last_elements(size_pk - size_q);
 
     KeyPair<Element> key_pair(std::make_shared<PublicKeyImpl<Element>>(cc),
-                             std::make_shared<PrivateKeyImpl<Element>>(cc));
+                              std::make_shared<PrivateKeyImpl<Element>>(cc));
     key_pair.secret_key->set_private_element(std::move(s));
     std::vector<Element> pk_elems;
     pk_elems.reserve(2);
@@ -127,8 +127,8 @@ Ciphertext<Element> BasePke<Element>::encrypt(Element plaintext, const PublicKey
 
 // make_sparse_value is not used by this scheme
 template <class Element>
-std::shared_ptr<std::vector<Element>> BasePke<Element>::encrypt_zero_core(const PrivateKey<Element> private_key,
-                                                                        const std::shared_ptr<ParmType> params) const {
+std::shared_ptr<std::vector<Element>> BasePke<Element>::encrypt_zero_core(
+        const PrivateKey<Element> private_key, const std::shared_ptr<ParmType> params) const {
     const auto crypto_params =
             std::dynamic_pointer_cast<RlweCryptoParams<Element>>(private_key->get_crypto_parameters());
     const auto element_params = (params == nullptr) ? crypto_params->get_element_params() : params;
@@ -151,8 +151,8 @@ std::shared_ptr<std::vector<Element>> BasePke<Element>::encrypt_zero_core(const 
 
 // make_sparse_value is not used by this scheme
 template <class Element>
-std::shared_ptr<std::vector<Element>> BasePke<Element>::encrypt_zero_core(const PublicKey<Element> public_key,
-                                                                        const std::shared_ptr<ParmType> params) const {
+std::shared_ptr<std::vector<Element>> BasePke<Element>::encrypt_zero_core(
+        const PublicKey<Element> public_key, const std::shared_ptr<ParmType> params) const {
     const auto crypto_params =
             std::dynamic_pointer_cast<RlweCryptoParams<Element>>(public_key->get_crypto_parameters());
 
@@ -172,7 +172,7 @@ std::shared_ptr<std::vector<Element>> BasePke<Element>::encrypt_zero_core(const 
     Element p1 = (size_pk > size_q) ? pk[1].clone_towers(0, size_q - 1) : pk[1];
 
     Element v = crypto_params->get_secret_key_dist() == GAUSSIAN ? Element(dgg, element_params, Format::EVALUATION) :
-                                                               Element(tug, element_params, Format::EVALUATION);
+                                                                   Element(tug, element_params, Format::EVALUATION);
 
     // noise generation with the discrete gaussian generator dgg
     Element e0(dgg, element_params, Format::EVALUATION);

@@ -79,7 +79,7 @@ class ChineseRemainderTransformFttInterface {
      * @see NumberTheoreticTransform::forward_transform_to_bit_reverse_in_place()
      */
     virtual void forward_transform_to_bit_reverse(const VecType& element, const IntType& root_of_unity_value,
-                                              const uint32_t cyclo_order_value, VecType* result) = 0;
+                                                  const uint32_t cyclo_order_value, VecType* result) = 0;
 
     /**
      * In-place Forward Transform in the ring Z_q[X]/(X^n+1) with prime q and
@@ -93,8 +93,8 @@ class ChineseRemainderTransformFttInterface {
      * @param[in,out] element is the input to the transform of type VecType and length n.
      * @see NumberTheoreticTransform::forward_transform_to_bit_reverse_in_place()
      */
-    virtual void forward_transform_to_bit_reverse_in_place(const IntType& root_of_unity_value, const uint32_t cyclo_order_value,
-                                                     VecType* element) = 0;
+    virtual void forward_transform_to_bit_reverse_in_place(const IntType& root_of_unity_value,
+                                                           const uint32_t cyclo_order_value, VecType* element) = 0;
 
     /**
      * Copies \p element into \p result and calls NumberTheoreticTransform::inverse_transform_from_bit_reverse_in_place()
@@ -113,7 +113,7 @@ class ChineseRemainderTransformFttInterface {
      * @see NumberTheoreticTransform::inverse_transform_from_bit_reverse_in_place()
      */
     virtual void inverse_transform_from_bit_reverse(const VecType& element, const IntType& root_of_unity_value,
-                                                const uint32_t cyclo_order_value, VecType* result) = 0;
+                                                    const uint32_t cyclo_order_value, VecType* result) = 0;
 
     /**
      * In-place Inverse Transform in the ring Z_q[X]/(X^n+1) with prime q and
@@ -127,8 +127,8 @@ class ChineseRemainderTransformFttInterface {
      * @param[in,out] element is the input/output of the transform of type VecType and length n.
      * @see NumberTheoreticTransform::inverse_transform_from_bit_reverse_in_place()
      */
-    virtual void inverse_transform_from_bit_reverse_in_place(const IntType& root_of_unity_value, const uint32_t cyclo_order_value,
-                                                       VecType* element) = 0;
+    virtual void inverse_transform_from_bit_reverse_in_place(const IntType& root_of_unity_value,
+                                                             const uint32_t cyclo_order_value, VecType* element) = 0;
 
     /**
      * Precomputation of root of unity tables for transforms in the ring
@@ -139,7 +139,8 @@ class ChineseRemainderTransformFttInterface {
      * @param cyclo_order_value is a power-of-two, equal to 2n.
      * @param modulus is q, the prime modulus
      */
-    virtual void pre_compute(const IntType& root_of_unity_value, const uint32_t cyclo_order_value, const IntType& modulus) = 0;
+    virtual void pre_compute(const IntType& root_of_unity_value, const uint32_t cyclo_order_value,
+                             const IntType& modulus) = 0;
 
     /**
      * Precomputation of root of unity tables for transforms in the ring
@@ -151,7 +152,7 @@ class ChineseRemainderTransformFttInterface {
      * @param moduli_chain is the vector of prime moduli qi such that 2n|qi-1
      */
     virtual void pre_compute(std::vector<IntType>& root_of_unity_value, const uint32_t cyclo_order_value,
-                            std::vector<IntType>& moduli_chain) = 0;
+                             std::vector<IntType>& moduli_chain) = 0;
 
     /**
      * Reset cached values for the root of unity tables to empty.
@@ -187,7 +188,7 @@ class ChineseRemainderTransformArbInterface {
      * @return is the output result of the transform.
      */
     virtual VecType forward_transform(const VecType& element, const IntType& root, const IntType& big_mod,
-                                     const IntType& big_root, const uint32_t cyclo_order) = 0;
+                                      const IntType& big_root, const uint32_t cyclo_order) = 0;
 
     /**
      * Inverse transform.
@@ -201,7 +202,7 @@ class ChineseRemainderTransformArbInterface {
      * @return is the output result of the transform.
      */
     virtual VecType inverse_transform(const VecType& element, const IntType& root, const IntType& big_mod,
-                                     const IntType& big_root, const uint32_t cyclo_order) = 0;
+                                      const IntType& big_root, const uint32_t cyclo_order) = 0;
 
     /**
      * Reset cached values for the transform to empty.
@@ -227,7 +228,7 @@ class ChineseRemainderTransformArbInterface {
      * Bluestein transform.
      */
     virtual void set_pre_computed_ntt_modulus(uint32_t cycloto_order, const IntType& modulus, const IntType& ntt_mod,
-                                          const IntType& ntt_root) = 0;
+                                              const IntType& ntt_root) = 0;
 
     /**
      * @brief Sets the precomputed root of unity and modulus needed for NTT
@@ -240,8 +241,8 @@ class ChineseRemainderTransformArbInterface {
      * @param ntt_root is the root of unity needed for the NTT operation in forward
      * Bluestein transform.
      */
-    virtual void set_pre_computed_ntt_division_modulus(uint32_t cycloto_order, const IntType& modulus, const IntType& ntt_mod,
-                                                  const IntType& ntt_root) = 0;
+    virtual void set_pre_computed_ntt_division_modulus(uint32_t cycloto_order, const IntType& modulus,
+                                                       const IntType& ntt_mod, const IntType& ntt_root) = 0;
 
     /**
      * @brief Computes the inverse of the cyclotomic polynomial using

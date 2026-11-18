@@ -284,7 +284,8 @@ class UTGENERAL_FHEW : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_FHEW>
     }
 
     // ---------------  TESTING METHODS OF FANDHEW ---------------
-    void unit_test_fhew_key_switch(const TEST_CASE_UTGENERAL_FHEW& test_data, const std::string& failmsg = std::string()) {
+    void unit_test_fhew_key_switch(const TEST_CASE_UTGENERAL_FHEW& test_data,
+                                   const std::string& failmsg = std::string()) {
         try {
             auto cc = BooleanContext();
             cc.generate_boolean_context(test_data.security_level, test_data.method);
@@ -303,8 +304,10 @@ class UTGENERAL_FHEW : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_FHEW>
 
             auto key_switch_hint = cc.key_switch_gen(sk, sk_n);
 
-            LweCiphertext e_q1 = cc.get_lwe_scheme()->key_switch(cc.get_params()->get_lwe_params(), key_switch_hint, ct_qn1);
-            LweCiphertext e_q0 = cc.get_lwe_scheme()->key_switch(cc.get_params()->get_lwe_params(), key_switch_hint, ct_qn0);
+            LweCiphertext e_q1 =
+                    cc.get_lwe_scheme()->key_switch(cc.get_params()->get_lwe_params(), key_switch_hint, ct_qn1);
+            LweCiphertext e_q0 =
+                    cc.get_lwe_scheme()->key_switch(cc.get_params()->get_lwe_params(), key_switch_hint, ct_qn0);
 
             LwePlaintext result_after_key_switch1;
             cc.decrypt(sk_q, e_q1, &result_after_key_switch1);
@@ -325,7 +328,8 @@ class UTGENERAL_FHEW : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_FHEW>
         }
     }
 
-    void unit_test_fhew_mod_switch(const TEST_CASE_UTGENERAL_FHEW& test_data, const std::string& failmsg = std::string()) {
+    void unit_test_fhew_mod_switch(const TEST_CASE_UTGENERAL_FHEW& test_data,
+                                   const std::string& failmsg = std::string()) {
         try {
             auto cc = BooleanContext();
             cc.generate_boolean_context(test_data.security_level, test_data.method);
@@ -441,7 +445,7 @@ class UTGENERAL_FHEW : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_FHEW>
     }
 
     void unit_test_fhew_multiinput(const TEST_CASE_UTGENERAL_FHEW& test_data,
-                                  const std::string& failmsg = std::string()) {
+                                   const std::string& failmsg = std::string()) {
         try {
             auto cc = BooleanContext();
             cc.generate_boolean_context(test_data.security_level, test_data.method);

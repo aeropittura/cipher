@@ -217,10 +217,10 @@ BigIntegerFixedT<uint_type, BITLENGTH> BigIntegerFixedT<uint_type, BITLENGTH>::a
     }
 
     BigIntegerFixedT result;
-    Duint_type ofl = 0;                            // overflow variable
+    Duint_type ofl = 0;                                 // overflow variable
     uint_type ceil_int_a = ceil_int_by_u_int(A->msb_);  // position from A to start addition
     uint_type ceil_int_b = ceil_int_by_u_int(B->msb_);  // position from B to start addition
-    size_t i;                                      // counter
+    size_t i;                                           // counter
     // DTS: TODO: verify that the sign/unsigned compare is valid here. it seems to
     // have the same form as the bugs fixed above, but i did not observe any
     // crashes in this function (perhaps it was never exercised) a safer
@@ -445,7 +445,7 @@ BigIntegerFixedT<uint_type, BITLENGTH> BigIntegerFixedT<uint_type, BITLENGTH>::m
     }
 
     uint_type ceil_int = ceil_int_by_u_int(b.msb_);  // position of B in the array where the
-                                                 // multiplication should start
+                                                     // multiplication should start
     // Multiplication is done by getting a uint_type from b and multiplying it
     // with *this after multiplication the result is shifted and added to the
     // final answer
@@ -485,11 +485,11 @@ BigIntegerFixedT<uint_type, BITLENGTH> BigIntegerFixedT<uint_type, BITLENGTH>::d
     BigIntegerFixedT ans;
 
     BigIntegerFixedT normalised_dividend(this->sub(this->mod(b)));  // normalised_dividend = result*quotient
-    uint_type nchar_in_divisor = ceil_int_by_u_int(b.msb_);              // Number of array elements in Divisor
+    uint_type nchar_in_divisor = ceil_int_by_u_int(b.msb_);         // Number of array elements in Divisor
     uint_type nchar_in_normalised_dividend =
             ceil_int_by_u_int(normalised_dividend.msb_);  // Number of array elements in Normalised_dividend
-    BigIntegerFixedT running_dividend;                 // variable to store the running dividend
-    BigIntegerFixedT running_remainder;                 // variable to store the running remainder
+    BigIntegerFixedT running_dividend;                    // variable to store the running dividend
+    BigIntegerFixedT running_remainder;                   // variable to store the running remainder
     BigIntegerFixedT expected_prod;
     BigIntegerFixedT estimate_finder;
 
@@ -499,7 +499,7 @@ BigIntegerFixedT<uint_type, BITLENGTH> BigIntegerFixedT<uint_type, BITLENGTH>::d
                 normalised_dividend.value_[n_size_ - nchar_in_normalised_dividend + i];
     }
     running_dividend.msb_ = get_msb_uint_type(running_dividend.value_[n_size_ - nchar_in_divisor]) +
-                             (nchar_in_divisor - 1) * uint_bit_length_;
+                            (nchar_in_divisor - 1) * uint_bit_length_;
 
     uint_type estimate = 0;
     uint_type mask_bit = 0;
@@ -507,9 +507,9 @@ BigIntegerFixedT<uint_type, BITLENGTH> BigIntegerFixedT<uint_type, BITLENGTH>::d
     uint32_t ans_ctr = n_size_ - nchar_in_normalised_dividend + nchar_in_divisor - 1;
     // Long Division Computation to determine quotient
     for (uint32_t i = nchar_in_normalised_dividend - nchar_in_divisor;;) {
-        running_remainder = running_dividend.mod(b);          // Get the remainder from the Modulus operation
+        running_remainder = running_dividend.mod(b);           // Get the remainder from the Modulus operation
         expected_prod = running_dividend - running_remainder;  // Compute the expected product from the
-                                                             // running dividend and remainder
+                                                               // running dividend and remainder
         estimate_finder = expected_prod;
         estimate = 0;
         // compute the quotient
@@ -561,13 +561,14 @@ BigIntegerFixedT<uint_type, BITLENGTH> BigIntegerFixedT<uint_type, BITLENGTH>::d
         ans_ctr++;
     }
     ans.msb_ = get_msb_uint_type(ans.value_[ans_ctr]) +
-                (n_size_ - 1 - ans_ctr) * uint_bit_length_;  // Computation of MSB value
+               (n_size_ - 1 - ans_ctr) * uint_bit_length_;  // Computation of MSB value
     return ans;
 }
 
 // TODO reconsider operation
 template <typename uint_type, uint32_t BITLENGTH>
-BigIntegerFixedT<uint_type, BITLENGTH>& BigIntegerFixedT<uint_type, BITLENGTH>::divided_by_eq(const BigIntegerFixedT& b) {
+BigIntegerFixedT<uint_type, BITLENGTH>& BigIntegerFixedT<uint_type, BITLENGTH>::divided_by_eq(
+        const BigIntegerFixedT& b) {
     return *this = this->divided_by(b);
 }
 
@@ -640,12 +641,12 @@ BigIntegerFixedT<uint_type, BITLENGTH> BigIntegerFixedT<uint_type, BITLENGTH>::d
         }
     }
     BigIntegerFixedT ans;
-    BigIntegerFixedT normalised_dividend(*this);        // normalised_dividend = result*quotient
+    BigIntegerFixedT normalised_dividend(*this);             // normalised_dividend = result*quotient
     uint_type nchar_in_divisor = ceil_int_by_u_int(q.msb_);  // Number of array elements in Divisor
     uint_type nchar_in_normalised_dividend =
             ceil_int_by_u_int(normalised_dividend.msb_);  // Number of array elements in Normalised_dividend
-    BigIntegerFixedT running_dividend;                 // variable to store the running dividend
-    BigIntegerFixedT running_remainder;                 // variable to store the running remainder
+    BigIntegerFixedT running_dividend;                    // variable to store the running dividend
+    BigIntegerFixedT running_remainder;                   // variable to store the running remainder
     BigIntegerFixedT expected_prod;
     BigIntegerFixedT estimate_finder;
 
@@ -655,7 +656,7 @@ BigIntegerFixedT<uint_type, BITLENGTH> BigIntegerFixedT<uint_type, BITLENGTH>::d
                 normalised_dividend.value_[n_size_ - nchar_in_normalised_dividend + i];
     }
     running_dividend.msb_ = get_msb_uint_type(running_dividend.value_[n_size_ - nchar_in_divisor]) +
-                             (nchar_in_divisor - 1) * uint_bit_length_;
+                            (nchar_in_divisor - 1) * uint_bit_length_;
 
     uint_type estimate = 0;
     uint_type mask_bit = 0;
@@ -663,9 +664,9 @@ BigIntegerFixedT<uint_type, BITLENGTH> BigIntegerFixedT<uint_type, BITLENGTH>::d
     uint32_t ans_ctr = n_size_ - nchar_in_normalised_dividend + nchar_in_divisor - 1;
     // Long Division Computation to determine quotient
     for (uint32_t i = nchar_in_normalised_dividend - nchar_in_divisor;;) {
-        running_remainder = running_dividend.mod(q);          // Get the remainder from the Modulus operation
+        running_remainder = running_dividend.mod(q);           // Get the remainder from the Modulus operation
         expected_prod = running_dividend - running_remainder;  // Compute the expected product from the
-                                                             // running dividend and remainder
+                                                               // running dividend and remainder
         estimate_finder = expected_prod;
         estimate = 0;
         // compute the quotient
@@ -718,7 +719,7 @@ BigIntegerFixedT<uint_type, BITLENGTH> BigIntegerFixedT<uint_type, BITLENGTH>::d
         ans_ctr++;
     }
     ans.msb_ = get_msb_uint_type(ans.value_[ans_ctr]) +
-                (n_size_ - 1 - ans_ctr) * uint_bit_length_;  // Computation of MSB value
+               (n_size_ - 1 - ans_ctr) * uint_bit_length_;  // Computation of MSB value
     // Rounding operation from running remainder
     if (!(running_remainder <= half_q)) {
         ans += 1;
@@ -788,7 +789,8 @@ BigIntegerFixedT<uint_type, BITLENGTH> BigIntegerFixedT<uint_type, BITLENGTH>::m
 }
 
 template <typename uint_type, uint32_t BITLENGTH>
-BigIntegerFixedT<uint_type, BITLENGTH>& BigIntegerFixedT<uint_type, BITLENGTH>::mod_eq(const BigIntegerFixedT& modulus) {
+BigIntegerFixedT<uint_type, BITLENGTH>& BigIntegerFixedT<uint_type, BITLENGTH>::mod_eq(
+        const BigIntegerFixedT& modulus) {
     // return the same value if value is less than modulus
     if (*this < modulus) {
         return *this;
@@ -885,7 +887,7 @@ BigIntegerFixedT<uint_type, BITLENGTH> BigIntegerFixedT<uint_type, BITLENGTH>::m
 
 template <typename uint_type, uint32_t BITLENGTH>
 BigIntegerFixedT<uint_type, BITLENGTH>& BigIntegerFixedT<uint_type, BITLENGTH>::mod_eq(const BigIntegerFixedT& modulus,
-                                                                                      const BigIntegerFixedT& mu) {
+                                                                                       const BigIntegerFixedT& mu) {
     if (*this < modulus) {
         return *this;
     }
@@ -1365,7 +1367,7 @@ BigIntegerFixedT<uint_type, BITLENGTH>& BigIntegerFixedT<uint_type, BITLENGTH>::
         CIPHER_THROW("shift overflow");
     }
     uint32_t shift_by_uint = shift >> log_uint_bit_length_;  // calculate the no.of
-                                                         // shifts
+                                                             // shifts
     uint_type rem_shift = (shift & (uint_bit_length_ - 1));
     if (rem_shift != 0) {
         uint_type end_val = n_size_ - ceil_int_by_u_int(this->msb_);
@@ -1411,7 +1413,7 @@ BigIntegerFixedT<uint_type, BITLENGTH> BigIntegerFixedT<uint_type, BITLENGTH>::r
         return BigIntegerFixedT(0);
     }
     BigIntegerFixedT ans(*this);
-    uint32_t shift_by_uint = shift >> log_uint_bit_length_;    // no of array shifts
+    uint32_t shift_by_uint = shift >> log_uint_bit_length_;  // no of array shifts
     uint_type rem_shift = (shift & (uint_bit_length_ - 1));  // no of bit shifts
     if (shift_by_uint != 0) {
         // termination index counter
@@ -1457,7 +1459,7 @@ BigIntegerFixedT<uint_type, BITLENGTH>& BigIntegerFixedT<uint_type, BITLENGTH>::
         *this = 0;
         return *this;
     }
-    int shift_by_uint = shift >> log_uint_bit_length_;       // no of array shifts
+    int shift_by_uint = shift >> log_uint_bit_length_;     // no of array shifts
     uint8_t rem_shift = (shift & (uint_bit_length_ - 1));  // no of bit shifts
     // perform shifting in arrays
     if (shift_by_uint != 0) {
@@ -1661,7 +1663,7 @@ template <typename uint_type, uint32_t BITLENGTH>
 void BigIntegerFixedT<uint_type, BITLENGTH>::assign_val(const std::string& v) {
     int arr_size = v.length();
     uint8_t* dec_value = new uint8_t[arr_size];  // memory allocated for decimal array
-    for (int i = 0; i < arr_size; i++) {        // store the string to decimal array
+    for (int i = 0; i < arr_size; i++) {         // store the string to decimal array
         dec_value[i] = (uint8_t)atoi(v.substr(i, 1).c_str());
     }
     int zptr = 0;
@@ -1695,7 +1697,7 @@ void BigIntegerFixedT<uint_type, BITLENGTH>::assign_val(const std::string& v) {
             cnt = uint_bit_length_ - 1;
             value_[bit_val_ptr--] =
                     uint_in_binary_to_decimal(bit_arr);  // uint_in_binary_to_decimal converts bit_arr to decimal and
-                                                    // resets the content of bit_arr.
+                                                         // resets the content of bit_arr.
         }
 
         if (dec_value[zptr] == 0) {
@@ -1851,6 +1853,6 @@ void BigIntegerFixedT<uint_type, BITLENGTH>::add_bit_val(uint8_t* a, uint8_t b) 
 
 template class BigIntegerFixedT<integral_dtype, BigIntegerBitLength>;
 
-}  // namespace bigintfxd
+}  // namespace fixed_int
 
 #endif

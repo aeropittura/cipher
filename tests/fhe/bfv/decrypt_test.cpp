@@ -64,7 +64,7 @@ class UTBFVRNS_DECRYPT : public ::testing::TestWithParam<std::tuple<uint32_t, ui
  * @param failmsg Debug message to display upon failure.
  */
 static void check_equality(const std::vector<int64_t>& a, const std::vector<int64_t>& b, int vector_size,
-                          const std::string& failmsg) {
+                           const std::string& failmsg) {
     std::vector<uint32_t> all_true(vector_size);
     std::vector<uint32_t> tmp(vector_size);
     for (int i = 0; i < vector_size; i++) {

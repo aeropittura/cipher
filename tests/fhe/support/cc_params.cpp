@@ -37,11 +37,13 @@
 
 std::string TestContextParams::to_string_impl() const {
     std::stringstream ss;
-    ss << "schemeId [" << scheme_id_value << "], " << "ringDimension [" << ring_dimension_value << "], " << "multiplicativeDepth ["
-       << multiplicative_depth << "], " << "scalingModSize [" << scaling_mod_size << "], " << "digitSize [" << digit_size
-       << "], " << "batchSize [" << batch_size << "], " << "secretKeyDist [" << secret_key_dist << "], "
-       << "maxRelinSkDeg [" << max_relin_sk_deg << "], " << "firstModSize [" << first_mod_size_value << "], " << "securityLevel ["
-       << security_level << "], " << "ksTech [" << ks_tech << "], " << "scalTech [" << scal_tech << "], "
+    ss << "schemeId [" << scheme_id_value << "], " << "ringDimension [" << ring_dimension_value << "], "
+       << "multiplicativeDepth [" << multiplicative_depth << "], " << "scalingModSize [" << scaling_mod_size << "], "
+       << "digitSize [" << digit_size << "], " << "batchSize [" << batch_size << "], " << "secretKeyDist ["
+       << secret_key_dist << "], "
+       << "maxRelinSkDeg [" << max_relin_sk_deg << "], " << "firstModSize [" << first_mod_size_value << "], "
+       << "securityLevel [" << security_level << "], " << "ksTech [" << ks_tech << "], " << "scalTech [" << scal_tech
+       << "], "
        << "numLargeDigits [" << num_large_digits << "], " << "plaintextModulus [" << plaintext_modulus << "], "
        << "standardDeviation [" << standard_deviation << "], " << "evalAddCount [" << eval_add_count << "], "
        << "keySwitchCount [" << key_switch_count << "], " << "multiplicationTechnique [" << multiplication_technique

@@ -186,7 +186,7 @@ class BaseCryptoParams : public Serializable {
     void load(Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         ar(::cereal::make_nvp("elp", params_));
         ar(::cereal::make_nvp("enp", encoding_params_));

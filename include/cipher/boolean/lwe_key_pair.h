@@ -68,7 +68,8 @@ class LweKeyPairImpl {
      * @param Av the public key (A, v)
      * @param s the secret key s that (A, v) was generated from
      */
-    LweKeyPairImpl(LwePublicKey&& av_value, LwePrivateKey&& s) noexcept : public_key(std::move(av_value)), secret_key(std::move(s)) {}
+    LweKeyPairImpl(LwePublicKey&& av_value, LwePrivateKey&& s) noexcept
+        : public_key(std::move(av_value)), secret_key(std::move(s)) {}
 
     /**
      * @return true if both the public key and the secret key are set (non-null)

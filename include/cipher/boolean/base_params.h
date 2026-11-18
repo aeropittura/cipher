@@ -67,7 +67,7 @@ class BooleanCryptoParams : public Serializable {
      * @param rgswparams a shared poiter to an instance of RingGswCryptoParams
      */
     BooleanCryptoParams(const std::shared_ptr<LweCryptoParams>& lweparams,
-                       const std::shared_ptr<RingGswCryptoParams>& rgswparams)
+                        const std::shared_ptr<RingGswCryptoParams>& rgswparams)
         : lwe_params_(lweparams), rgsw_params_(rgswparams) {
         auto key_dist = lwe_params_->get_key_dist();
         if (key_dist != rgsw_params_->get_key_dist())
@@ -121,7 +121,7 @@ class BooleanCryptoParams : public Serializable {
     void load(Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         ar(::cereal::make_nvp("lweparams", lwe_params_));
         ar(::cereal::make_nvp("rgswparams", rgsw_params_));

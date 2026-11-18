@@ -94,7 +94,7 @@ class RnsLeveledShe : public BaseLeveledShe<RnsPoly> {
      * @return the new ciphertext.
      */
     Ciphertext<RnsPoly> eval_add_mutable(Ciphertext<RnsPoly>& ciphertext1,
-                                        Ciphertext<RnsPoly>& ciphertext2) const override;
+                                         Ciphertext<RnsPoly>& ciphertext2) const override;
 
     /**
      * In-place homomorphic addition of ciphertexts. This is the mutable version - both input ciphertexts may
@@ -184,7 +184,7 @@ class RnsLeveledShe : public BaseLeveledShe<RnsPoly> {
      * @return the new ciphertext.
      */
     Ciphertext<RnsPoly> eval_sub_mutable(Ciphertext<RnsPoly>& ciphertext1,
-                                        Ciphertext<RnsPoly>& ciphertext2) const override;
+                                         Ciphertext<RnsPoly>& ciphertext2) const override;
 
     /**
      * Virtual function to define the interface for in-place homomorphic subtraction of
@@ -265,7 +265,7 @@ class RnsLeveledShe : public BaseLeveledShe<RnsPoly> {
      * @return the new ciphertext.
      */
     Ciphertext<RnsPoly> eval_mult_mutable(Ciphertext<RnsPoly>& ciphertext1,
-                                         Ciphertext<RnsPoly>& ciphertext2) const override;
+                                          Ciphertext<RnsPoly>& ciphertext2) const override;
 
     /**
      * Homomorphic squaring of a ciphertext without relinearization. For the automatic scaling techniques a
@@ -391,7 +391,7 @@ class RnsLeveledShe : public BaseLeveledShe<RnsPoly> {
      * @param levels the number of towers to drop.
      */
     void level_reduce_in_place(Ciphertext<RnsPoly>& ciphertext, const EvalKey<RnsPoly> eval_key,
-                            size_t levels) const override;
+                               size_t levels) const override;
 
     /////////////////////////////////////////
     // SHE LEVELED Compress
@@ -408,7 +408,7 @@ class RnsLeveledShe : public BaseLeveledShe<RnsPoly> {
      * @return the compressed ciphertext.
      */
     Ciphertext<RnsPoly> compress(ConstCiphertext<RnsPoly>& ciphertext, size_t towers_left,
-                                  size_t noise_scale_deg) const override;
+                                 size_t noise_scale_deg) const override;
 
     ////////////////////////////////////////
     // SHE LEVELED composed_eval_mult
@@ -425,9 +425,8 @@ class RnsLeveledShe : public BaseLeveledShe<RnsPoly> {
      * @param eval_key the relinearization key for the quadratic secret key after multiplication.
      * @return the resulting ciphertext.
      */
-    Ciphertext<RnsPoly> composed_eval_mult(ConstCiphertext<RnsPoly>& ciphertext1,
-                                          ConstCiphertext<RnsPoly>& ciphertext2,
-                                          const EvalKey<RnsPoly> eval_key) const override;
+    Ciphertext<RnsPoly> composed_eval_mult(ConstCiphertext<RnsPoly>& ciphertext1, ConstCiphertext<RnsPoly>& ciphertext2,
+                                           const EvalKey<RnsPoly> eval_key) const override;
 
   protected:
     /////////////////////////////////////
@@ -495,7 +494,8 @@ class RnsLeveledShe : public BaseLeveledShe<RnsPoly> {
      * @param ciphertext1 first input/output ciphertext.
      * @param ciphertext2 second input/output ciphertext.
      */
-    void adjust_for_add_or_sub_in_place(Ciphertext<RnsPoly>& ciphertext1, Ciphertext<RnsPoly>& ciphertext2) const override;
+    void adjust_for_add_or_sub_in_place(Ciphertext<RnsPoly>& ciphertext1,
+                                        Ciphertext<RnsPoly>& ciphertext2) const override;
 
     /**
      * Brings two operands of a multiplication to the same level and to noise scale degree 1. For FIXEDMANUAL

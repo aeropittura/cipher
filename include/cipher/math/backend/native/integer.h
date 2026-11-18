@@ -657,7 +657,8 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
     NativeIntegerT multiply_and_round(const NativeIntegerT& p, const NativeIntegerT& q) const {
         if (q.value_ == 0)
             CIPHER_THROW("NativeIntegerT MultiplyAndRound: Divide by zero");
-        return static_cast<NativeInt>(p.convert_to_double() * (this->convert_to_double() / q.convert_to_double()) + 0.5);
+        return static_cast<NativeInt>(p.convert_to_double() * (this->convert_to_double() / q.convert_to_double()) +
+                                      0.5);
     }
 
     /**
@@ -671,8 +672,8 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
     NativeIntegerT& multiply_and_round_eq(const NativeIntegerT& p, const NativeIntegerT& q) {
         if (q.value_ == 0)
             CIPHER_THROW("NativeIntegerT MultiplyAndRoundEq: Divide by zero");
-        return *this = static_cast<NativeInt>(p.convert_to_double() * (this->convert_to_double() / q.convert_to_double()) +
-                                              0.5);
+        return *this = static_cast<NativeInt>(
+                       p.convert_to_double() * (this->convert_to_double() / q.convert_to_double()) + 0.5);
     }
 
     /**
@@ -1180,7 +1181,8 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
     upper bound of dividend assuming that none of the dividends will be larger
     than 2^(2*n + 3). The value of \mu is computed by NativeVector::compute_mu.
     */
-    NativeIntegerT mod_mul_fast(const NativeIntegerT& b, const NativeIntegerT& modulus, const NativeIntegerT& mu) const {
+    NativeIntegerT mod_mul_fast(const NativeIntegerT& b, const NativeIntegerT& modulus,
+                                const NativeIntegerT& mu) const {
         int64_t n = modulus.get_msb() - 2;
         auto& mv{modulus.value_};
         TypeD prod;
@@ -1246,7 +1248,7 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
      * @return is the result of the modulus multiplication operation.
      */
     NativeIntegerT mod_mul_fast_const(const NativeIntegerT& b, const NativeIntegerT& modulus,
-                                   const NativeIntegerT& b_inv) const {
+                                      const NativeIntegerT& b_inv) const {
         NativeInt q = mult_d_hi(value_, b_inv.value_) + 1;
         auto yprime = static_cast<SignedNativeInt>(value_ * b.value_ - q * modulus.value_);
         return {yprime >= 0 ? yprime : yprime + modulus.value_};
@@ -1262,7 +1264,7 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
      * @return is the result of the modulus multiplication operation.
      */
     NativeIntegerT& mod_mul_fast_const_eq(const NativeIntegerT& b, const NativeIntegerT& modulus,
-                                      const NativeIntegerT& b_inv) {
+                                          const NativeIntegerT& b_inv) {
         NativeInt q = mult_d_hi(value_, b_inv.value_) + 1;
         auto yprime = static_cast<SignedNativeInt>(value_ * b.value_ - q * modulus.value_);
         value_ = static_cast<NativeInt>(yprime >= 0 ? yprime : yprime + modulus.value_);
@@ -1555,7 +1557,7 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
             Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         ar(::cereal::make_nvp("v", value_));
     }
@@ -1566,12 +1568,12 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
                               void> load(Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         // get an array with 2 uint64_t values for value_
         uint64_t vec[2];
         ar(::cereal::binary_data(vec, sizeof(vec)));  // 2*8 - size in bytes
-        value_ = vec[1];                             // most significant word
+        value_ = vec[1];                              // most significant word
         value_ <<= 64;
         value_ += vec[0];  // least significant word
     }
@@ -1582,7 +1584,7 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
     load(Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         // get an array with 2 uint64_t values for value_
         uint64_t vec[2];
@@ -1854,6 +1856,6 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
  */
 template std::ostream& operator<< <uint64_t>(std::ostream& os, const std::vector<uint64_t>& v);
 
-}  // namespace intnat
+}  // namespace native_int
 
 #endif  // CIPHER_MATH_BACKEND_NATIVE_INTEGER_H_

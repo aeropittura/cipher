@@ -50,19 +50,19 @@ namespace cipher {
 // {Q} = {q_1,...,q_l}, original RNS basis
 // {P} = {p_1,...,p_k}, extended RNS basis
 struct RnsExtensionTables {
-    std::shared_ptr<RnsParams<BigInteger>> params_qp;  // the whole RNS basis
-    std::shared_ptr<RnsParams<BigInteger>> params_p;   // only the new RNS basis
-    std::vector<NativeInteger> q_hat_inv_modq;              // done
-    std::vector<NativeInteger> q_hat_inv_modq_precon;        // done
+    std::shared_ptr<RnsParams<BigInteger>> params_qp;      // the whole RNS basis
+    std::shared_ptr<RnsParams<BigInteger>> params_p;       // only the new RNS basis
+    std::vector<NativeInteger> q_hat_inv_modq;             // done
+    std::vector<NativeInteger> q_hat_inv_modq_precon;      // done
     std::vector<std::vector<NativeInteger>> q_hat_modp;    // done
     std::vector<std::vector<NativeInteger>> alpha_q_modp;  // done
     std::vector<DoubleNativeInt> modp_barrett_mu;          // done
-    std::vector<double> q_inv;                            // done
+    std::vector<double> q_inv;                             // done
     Format result_format;
 };
 
 DecryptResult CkksRnsMultiparty::multiparty_decrypt_fusion(const std::vector<Ciphertext<RnsPoly>>& ciphertext_vec,
-                                                         Poly* plaintext) const {
+                                                           Poly* plaintext) const {
     const auto crypto_params =
             std::dynamic_pointer_cast<CkksRnsCryptoParams>(ciphertext_vec[0]->get_crypto_parameters());
     const std::vector<RnsPoly>& cv0 = ciphertext_vec[0]->get_elements();
@@ -90,7 +90,7 @@ DecryptResult CkksRnsMultiparty::multiparty_decrypt_fusion(const std::vector<Cip
 }
 
 DecryptResult CkksRnsMultiparty::multiparty_decrypt_fusion(const std::vector<Ciphertext<RnsPoly>>& ciphertext_vec,
-                                                         NativePoly* plaintext) const {
+                                                           NativePoly* plaintext) const {
     const auto crypto_params =
             std::dynamic_pointer_cast<CkksRnsCryptoParams>(ciphertext_vec[0]->get_crypto_parameters());
 
@@ -131,7 +131,8 @@ Ciphertext<RnsPoly> CkksRnsMultiparty::int_mp_boot_adjust_scale(ConstCiphertext<
     // Compress ctxt and reduce it to numPrimesToKeep towers
     // 1 is for the message itself (assuming 1 tower (60-bit) for msg)
     size_t scaling_factor_bits = cc->get_encoding_params()->get_plaintext_modulus();
-    size_t first_modulus_size = ciphertext->get_elements()[0].get_all_elements()[0].get_params()->get_modulus().get_msb();
+    size_t first_modulus_size =
+            ciphertext->get_elements()[0].get_all_elements()[0].get_params()->get_modulus().get_msb();
     size_t num_towers_to_keep = (scaling_factor_bits / first_modulus_size + 1) + compression_level;
 
     if (ciphertext->get_elements()[0].get_num_of_elements() < num_towers_to_keep)
@@ -144,7 +145,8 @@ Ciphertext<RnsPoly> CkksRnsMultiparty::int_mp_boot_adjust_scale(ConstCiphertext<
         double target_sf = crypto_params->get_scaling_factor_real(lvl);
         double source_sf = ciphertext_adjusted->get_scaling_factor();
         uint32_t num_towers = ciphertext_adjusted->get_elements()[0].get_num_of_elements();
-        double mod_to_drop = crypto_params->get_element_params()->get_params()[num_towers - 1]->get_modulus().convert_to_double();
+        double mod_to_drop =
+                crypto_params->get_element_params()->get_params()[num_towers - 1]->get_modulus().convert_to_double();
         double adjustment_factor = (target_sf / source_sf) * (mod_to_drop / source_sf);
 
         ciphertext_adjusted = cc->eval_mult(ciphertext_adjusted, adjustment_factor);
@@ -157,7 +159,7 @@ Ciphertext<RnsPoly> CkksRnsMultiparty::int_mp_boot_adjust_scale(ConstCiphertext<
 }
 
 Ciphertext<RnsPoly> CkksRnsMultiparty::int_mp_boot_random_element_gen(std::shared_ptr<CkksRnsCryptoParams> params,
-                                                                  const PublicKey<RnsPoly> public_key) const {
+                                                                      const PublicKey<RnsPoly> public_key) const {
     typename RnsPoly::DugType dug;
     RnsPoly crp(dug, params->get_element_params());
     crp.set_format(Format::EVALUATION);
@@ -173,7 +175,7 @@ Ciphertext<RnsPoly> CkksRnsMultiparty::int_mp_boot_random_element_gen(std::share
 }
 
 Ciphertext<RnsPoly> CkksRnsMultiparty::int_mp_boot_random_element_gen(std::shared_ptr<CkksRnsCryptoParams> params,
-                                                                  ConstCiphertext<RnsPoly>& ciphertext) const {
+                                                                      ConstCiphertext<RnsPoly>& ciphertext) const {
     const auto& ctxt_elems = ciphertext->get_elements();
 
     typename RnsPoly::DugType dug;
@@ -191,7 +193,7 @@ Ciphertext<RnsPoly> CkksRnsMultiparty::int_mp_boot_random_element_gen(std::share
 // Subroutines for Interactive Multi-Party Bootstrapping
 // Calculating RNS parameters
 void precompute_rns_extension_tables(CryptoContext<RnsPoly>& cc, uint32_t from, uint32_t to,
-                                  RnsExtensionTables& rns_ext_tables) {
+                                     RnsExtensionTables& rns_ext_tables) {
     std::vector<NativeInteger> moduli_q;
     moduli_q.reserve(from);
     std::vector<NativeInteger> roots_q;
@@ -242,7 +244,8 @@ void precompute_rns_extension_tables(CryptoContext<RnsPoly>& cc, uint32_t from, 
         BigInteger qi(moduli_q[i].convert_to_int());
         BigInteger q_hati = modulus_q / qi;
         rns_ext_tables.q_hat_inv_modq[i] = q_hati.mod_inverse(qi).mod(qi).convert_to_int();
-        rns_ext_tables.q_hat_inv_modq_precon[i] = rns_ext_tables.q_hat_inv_modq[i].prep_mod_mul_const(qi.convert_to_int());
+        rns_ext_tables.q_hat_inv_modq_precon[i] =
+                rns_ext_tables.q_hat_inv_modq[i].prep_mod_mul_const(qi.convert_to_int());
     }
 
     // compute the [Q/q_i]_{p_j}
@@ -271,7 +274,8 @@ void precompute_rns_extension_tables(CryptoContext<RnsPoly>& cc, uint32_t from, 
     const auto barrett_base128_bit(BigInteger(1).l_shift_eq(128));
     rns_ext_tables.modp_barrett_mu.resize(size_p);
     for (uint32_t j = 0; j < moduli_p.size(); j++) {
-        rns_ext_tables.modp_barrett_mu[j] = (barrett_base128_bit / BigInteger(moduli_p[j])).convert_to_int<DoubleNativeInt>();
+        rns_ext_tables.modp_barrett_mu[j] =
+                (barrett_base128_bit / BigInteger(moduli_p[j])).convert_to_int<DoubleNativeInt>();
     }
 
     rns_ext_tables.q_inv.resize(size_q);
@@ -298,7 +302,7 @@ RnsPoly compute_noisy_mult(CryptoContext<RnsPoly>& cc, const RnsPoly& sk, const 
 RnsPoly generate_mi(const RnsPoly& c1, uint32_t mask_bound_num_towers) {
     // only the parameters of the first mask_bound_num_towers towers are needed here, not their contents
     auto params = std::make_shared<RnsPoly::Params>(c1.get_params()->get_cyclotomic_order(),
-                                                     c1.get_params()->get_param_partition(0, mask_bound_num_towers - 1));
+                                                    c1.get_params()->get_param_partition(0, mask_bound_num_towers - 1));
 
     typename RnsPoly::DugType dug;
     return RnsPoly(dug, params, Format::EVALUATION);
@@ -306,7 +310,7 @@ RnsPoly generate_mi(const RnsPoly& c1, uint32_t mask_bound_num_towers) {
 
 // Compute h_{0,i}
 RnsPoly generate_masked_decryption_share(CryptoContext<RnsPoly>& cc, const PrivateKey<RnsPoly> private_key,
-                                       const RnsPoly& c1, RnsPoly& mi, uint32_t compression_level) {
+                                         const RnsPoly& c1, RnsPoly& mi, uint32_t compression_level) {
     // reduce sk's num_towers to c1's num_towers
     RnsPoly sk = private_key->get_private_element().clone_towers(0, c1.get_all_elements().size() - 1);
 
@@ -317,13 +321,16 @@ RnsPoly generate_masked_decryption_share(CryptoContext<RnsPoly>& cc, const Priva
     // Init RNS parameters - we generate these params online as of now - should be cheap
     // Extending Mi parameters:
     RnsExtensionTables mi_for_decryption_share_rns_ext_tables;  // extending Mi from R_t to R_q
-    precompute_rns_extension_tables(cc, compression_level, c1.get_all_elements().size(), mi_for_decryption_share_rns_ext_tables);
+    precompute_rns_extension_tables(cc, compression_level, c1.get_all_elements().size(),
+                                    mi_for_decryption_share_rns_ext_tables);
 
-    mi_copy.expand_crt_basis(mi_for_decryption_share_rns_ext_tables.params_qp, mi_for_decryption_share_rns_ext_tables.params_p,
-                          mi_for_decryption_share_rns_ext_tables.q_hat_inv_modq,
-                          mi_for_decryption_share_rns_ext_tables.q_hat_inv_modq_precon, mi_for_decryption_share_rns_ext_tables.q_hat_modp,
-                          mi_for_decryption_share_rns_ext_tables.alpha_q_modp, mi_for_decryption_share_rns_ext_tables.modp_barrett_mu,
-                          mi_for_decryption_share_rns_ext_tables.q_inv, EVALUATION);
+    mi_copy.expand_crt_basis(
+            mi_for_decryption_share_rns_ext_tables.params_qp, mi_for_decryption_share_rns_ext_tables.params_p,
+            mi_for_decryption_share_rns_ext_tables.q_hat_inv_modq,
+            mi_for_decryption_share_rns_ext_tables.q_hat_inv_modq_precon,
+            mi_for_decryption_share_rns_ext_tables.q_hat_modp, mi_for_decryption_share_rns_ext_tables.alpha_q_modp,
+            mi_for_decryption_share_rns_ext_tables.modp_barrett_mu, mi_for_decryption_share_rns_ext_tables.q_inv,
+            EVALUATION);
 
     masked_decryption_share = masked_decryption_share - mi_copy;
 
@@ -332,7 +339,7 @@ RnsPoly generate_masked_decryption_share(CryptoContext<RnsPoly>& cc, const Priva
 
 // Compute h_{1,i}
 RnsPoly generate_re_encryption_share(CryptoContext<RnsPoly>& cc, const PrivateKey<RnsPoly> private_key,
-                                   ConstCiphertext<RnsPoly> a, RnsPoly& mi, uint32_t compression_level) {
+                                     ConstCiphertext<RnsPoly> a, RnsPoly& mi, uint32_t compression_level) {
     RnsPoly sk = private_key->get_private_element();
     auto negsk = sk.negate();
     RnsPoly re_encryption_share = compute_noisy_mult(cc, negsk, a->get_elements()[0], false);
@@ -342,21 +349,24 @@ RnsPoly generate_re_encryption_share(CryptoContext<RnsPoly>& cc, const PrivateKe
     // Extending Mi parameters:
     RnsExtensionTables mi_for_re_encryption_share_rns_ext_tables;  // extending Mi from R_t to R_Q
     precompute_rns_extension_tables(cc, compression_level, a->get_elements()[0].get_all_elements().size(),
-                                 mi_for_re_encryption_share_rns_ext_tables);
+                                    mi_for_re_encryption_share_rns_ext_tables);
 
-    mi_copy.expand_crt_basis(
-            mi_for_re_encryption_share_rns_ext_tables.params_qp, mi_for_re_encryption_share_rns_ext_tables.params_p,
-            mi_for_re_encryption_share_rns_ext_tables.q_hat_inv_modq, mi_for_re_encryption_share_rns_ext_tables.q_hat_inv_modq_precon,
-            mi_for_re_encryption_share_rns_ext_tables.q_hat_modp, mi_for_re_encryption_share_rns_ext_tables.alpha_q_modp,
-            mi_for_re_encryption_share_rns_ext_tables.modp_barrett_mu, mi_for_re_encryption_share_rns_ext_tables.q_inv, EVALUATION);
+    mi_copy.expand_crt_basis(mi_for_re_encryption_share_rns_ext_tables.params_qp,
+                             mi_for_re_encryption_share_rns_ext_tables.params_p,
+                             mi_for_re_encryption_share_rns_ext_tables.q_hat_inv_modq,
+                             mi_for_re_encryption_share_rns_ext_tables.q_hat_inv_modq_precon,
+                             mi_for_re_encryption_share_rns_ext_tables.q_hat_modp,
+                             mi_for_re_encryption_share_rns_ext_tables.alpha_q_modp,
+                             mi_for_re_encryption_share_rns_ext_tables.modp_barrett_mu,
+                             mi_for_re_encryption_share_rns_ext_tables.q_inv, EVALUATION);
     re_encryption_share = re_encryption_share + mi_copy;
 
     return re_encryption_share;
 }
 
 std::vector<Ciphertext<RnsPoly>> CkksRnsMultiparty::int_mp_boot_decrypt(const PrivateKey<RnsPoly> private_key,
-                                                                      ConstCiphertext<RnsPoly> ciphertext,
-                                                                      ConstCiphertext<RnsPoly> a) const {
+                                                                        ConstCiphertext<RnsPoly> ciphertext,
+                                                                        ConstCiphertext<RnsPoly> a) const {
     // Generate maskedDecryptionShares: secretShare M_i and publicShare: s_i*c_1+e_{0,i} to compute h_{0,i}
     // Generate secretShare M_i \in R_{q*2^{\lambda}} where lambda is the security level
     // Calculate publicShare s_i*c_1 + e_{0,i} in R_{q*2^{\lambda}}
@@ -413,9 +423,9 @@ std::vector<Ciphertext<RnsPoly>> CkksRnsMultiparty::int_mp_boot_add(
 }
 
 Ciphertext<RnsPoly> CkksRnsMultiparty::int_mp_boot_encrypt(const PublicKey<RnsPoly> public_key,
-                                                         const std::vector<Ciphertext<RnsPoly>>& shares_pair,
-                                                         ConstCiphertext<RnsPoly> a,
-                                                         ConstCiphertext<RnsPoly> ciphertext) const {
+                                                           const std::vector<Ciphertext<RnsPoly>>& shares_pair,
+                                                           ConstCiphertext<RnsPoly> a,
+                                                           ConstCiphertext<RnsPoly> ciphertext) const {
     if (ciphertext->number_ciphertext_elements() == 0) {
         CIPHER_THROW("No polynomials in the input ciphertext.");
     }
@@ -426,13 +436,14 @@ Ciphertext<RnsPoly> CkksRnsMultiparty::int_mp_boot_encrypt(const PublicKey<RnsPo
     // Init RNS parameters - we generate these params online as of now - should be cheap
     // Extending Mi parameters:
     RnsExtensionTables c0_for_re_encrypt_rns_ext_tables;  // extending c0 from R_q to R_Q
-    precompute_rns_extension_tables(cc, c0_prime.get_all_elements().size(), a->get_elements()[0].get_all_elements().size(),
-                                 c0_for_re_encrypt_rns_ext_tables);
+    precompute_rns_extension_tables(cc, c0_prime.get_all_elements().size(),
+                                    a->get_elements()[0].get_all_elements().size(), c0_for_re_encrypt_rns_ext_tables);
 
-    c0_prime.expand_crt_basis(c0_for_re_encrypt_rns_ext_tables.params_qp, c0_for_re_encrypt_rns_ext_tables.params_p,
-                           c0_for_re_encrypt_rns_ext_tables.q_hat_inv_modq, c0_for_re_encrypt_rns_ext_tables.q_hat_inv_modq_precon,
-                           c0_for_re_encrypt_rns_ext_tables.q_hat_modp, c0_for_re_encrypt_rns_ext_tables.alpha_q_modp,
-                           c0_for_re_encrypt_rns_ext_tables.modp_barrett_mu, c0_for_re_encrypt_rns_ext_tables.q_inv, EVALUATION);
+    c0_prime.expand_crt_basis(
+            c0_for_re_encrypt_rns_ext_tables.params_qp, c0_for_re_encrypt_rns_ext_tables.params_p,
+            c0_for_re_encrypt_rns_ext_tables.q_hat_inv_modq, c0_for_re_encrypt_rns_ext_tables.q_hat_inv_modq_precon,
+            c0_for_re_encrypt_rns_ext_tables.q_hat_modp, c0_for_re_encrypt_rns_ext_tables.alpha_q_modp,
+            c0_for_re_encrypt_rns_ext_tables.modp_barrett_mu, c0_for_re_encrypt_rns_ext_tables.q_inv, EVALUATION);
 
     c0_prime = c0_prime + shares_pair[1]->get_elements()[0];
 
@@ -483,7 +494,8 @@ Ciphertext<RnsPoly> CkksRnsMultiparty::int_boot_adjust_scale(ConstCiphertext<Rns
         double target_sf = crypto_params->get_scaling_factor_real(lvl);
         double source_sf = ciphertext_adjusted->get_scaling_factor();
         uint32_t num_towers = ciphertext_adjusted->get_elements()[0].get_num_of_elements();
-        double mod_to_drop = crypto_params->get_element_params()->get_params()[num_towers - 1]->get_modulus().convert_to_double();
+        double mod_to_drop =
+                crypto_params->get_element_params()->get_params()[num_towers - 1]->get_modulus().convert_to_double();
         double adjustment_factor = (target_sf / source_sf) * (mod_to_drop / source_sf);
 
         // in the case of FLEXIBLEAUTO, we need to bring the ciphertext to the right scale using a

@@ -112,7 +112,7 @@ class LweEncryptionScheme {
      * @return a shared pointer to the ciphertext
      */
     LweCiphertext encrypt_n(const std::shared_ptr<LweCryptoParams>& params, ConstLwePublicKey& pk, LwePlaintext m,
-                           LwePlaintextModulus p = 4, NativeInteger mod_value = 0) const;
+                            LwePlaintextModulus p = 4, NativeInteger mod_value = 0) const;
 
     /**
      * Converts a ciphertext (public key encryption) with modulus Q and dimension N to ciphertext with q and n
@@ -123,7 +123,7 @@ class LweEncryptionScheme {
      * @return a shared pointer to the ciphertext
      */
     LweCiphertext switch_c_ttoqn(const std::shared_ptr<LweCryptoParams>& params, ConstLweSwitchingKey& ksk,
-                               ConstLweCiphertext& ct) const;
+                                 ConstLweCiphertext& ct) const;
 
     /**
      * Decrypts the ciphertext using secret key sk
@@ -204,7 +204,7 @@ class LweEncryptionScheme {
      * @return a shared pointer to the switching key
      */
     LweSwitchingKey key_switch_gen(const std::shared_ptr<LweCryptoParams>& params, ConstLwePrivateKey& sk,
-                                 ConstLwePrivateKey& sk_n) const;
+                                   ConstLwePrivateKey& sk_n) const;
 
     /**
      * Switches ciphertext from (Q,N) to (Q,n)
@@ -215,7 +215,7 @@ class LweEncryptionScheme {
      * @return a shared pointer to the resulting ciphertext
      */
     LweCiphertext key_switch(const std::shared_ptr<LweCryptoParams>& params, ConstLweSwitchingKey& K,
-                            ConstLweCiphertext& ct_qn) const;
+                             ConstLweCiphertext& ct_qn) const;
 
 #if CIPHER_NATIVE_INT != 32
     /**
@@ -230,7 +230,7 @@ class LweEncryptionScheme {
      * @return a shared pointer to the 32-bit switching key
      */
     LweSwitchingKey32 key_switch_gen32(const std::shared_ptr<LweCryptoParams>& params, ConstLwePrivateKey& sk,
-                                     ConstLwePrivateKey& sk_n) const;
+                                       ConstLwePrivateKey& sk_n) const;
 
     /**
      * Switches ciphertext from (q_ks,N) to (q_ks,n) using the 32-bit internal switching key. Rows are accumulated
@@ -243,7 +243,7 @@ class LweEncryptionScheme {
      * @return a shared pointer to the resulting ciphertext
      */
     LweCiphertext key_switch(const std::shared_ptr<LweCryptoParams>& params, ConstLweSwitchingKey32& K,
-                            ConstLweCiphertext& ct_qn) const;
+                             ConstLweCiphertext& ct_qn) const;
 
     /**
      * Converts a ciphertext with modulus Q and dimension N to a ciphertext with q and n using the 32-bit internal
@@ -255,7 +255,7 @@ class LweEncryptionScheme {
      * @return a shared pointer to the ciphertext
      */
     LweCiphertext switch_c_ttoqn(const std::shared_ptr<LweCryptoParams>& params, ConstLweSwitchingKey32& ksk,
-                               ConstLweCiphertext& ct) const;
+                                 ConstLweCiphertext& ct) const;
 #endif
 
     /**

@@ -101,7 +101,8 @@ void method_miller_rabin_primality(const std::string& msg) {
 
         T is_not_prime("10403");
 
-        EXPECT_FALSE(miller_rabin_primality_test(is_not_prime)) << msg << " Failure is_not_prime_small_composite_number";
+        EXPECT_FALSE(miller_rabin_primality_test(is_not_prime))
+                << msg << " Failure is_not_prime_small_composite_number";
     }
     {
         // TEST CASE FOR MILLER RABIN PRIMALITY TEST FOR BIG COMPOSITE NUMBER
@@ -380,7 +381,7 @@ void test_next_q(const std::string& msg) {
     uint32_t bits = 22;
 
     std::vector<T> moduli_bbv = {T("4208641"), T("4263937"), T("4270081"), T("4274177"), T("4294657"),
-                                T("4300801"), T("4304897"), T("4319233"), T("4323329"), T("4360193")};
+                                 T("4300801"), T("4304897"), T("4319233"), T("4323329"), T("4360193")};
 
     auto q = first_prime<T>(bits, m);
     for (uint32_t i = 0; i < 10; i++) {

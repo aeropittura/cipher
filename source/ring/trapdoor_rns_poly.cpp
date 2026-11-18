@@ -143,8 +143,8 @@ std::pair<Matrix<RnsPoly>, RlweTrapdoorPair<RnsPoly>> RlweTrapdoorUtility<RnsPol
 
 template <>
 Matrix<RnsPoly> RlweTrapdoorUtility<RnsPoly>::gauss_samp(size_t n, size_t k, const Matrix<RnsPoly>& A,
-                                                          const RlweTrapdoorPair<RnsPoly>& T, const RnsPoly& u,
-                                                          DggType& dgg, DggType& dgg_large_sigma, int64_t base) {
+                                                         const RlweTrapdoorPair<RnsPoly>& T, const RnsPoly& u,
+                                                         DggType& dgg, DggType& dgg_large_sigma, int64_t base) {
     CIPHER_DEBUG_FLAG(false);
     TimeVar t1, t1_tot, t2, t2_tot;
     TIC(t1);
@@ -189,8 +189,8 @@ Matrix<RnsPoly> RlweTrapdoorUtility<RnsPoly>::gauss_samp(size_t n, size_t k, con
         NativeInteger qu = params->get_params()[u]->get_modulus();
 
         Matrix<int64_t> digits([]() { return 0; }, k_res, n);
-        LatticeGaussSampUtility<NativePoly>::gauss_samp_gq_arb_base(perturbed_syndrome.get_element_at_index(u), c, k_res, qu,
-                                                                base, dgg, &digits);
+        LatticeGaussSampUtility<NativePoly>::gauss_samp_gq_arb_base(perturbed_syndrome.get_element_at_index(u), c,
+                                                                    k_res, qu, base, dgg, &digits);
         for (size_t p = 0; p < k_res; p++) {
             for (size_t j = 0; j < n; j++) {
                 z_hat_bbi(p + u * k_res, j) = digits(p, j);
@@ -226,9 +226,9 @@ Matrix<RnsPoly> RlweTrapdoorUtility<RnsPoly>::gauss_samp(size_t n, size_t k, con
 
 template <>
 Matrix<RnsPoly> RlweTrapdoorUtility<RnsPoly>::gauss_samp_square_mat(size_t n, size_t k, const Matrix<RnsPoly>& A,
-                                                                   const RlweTrapdoorPair<RnsPoly>& T,
-                                                                   const Matrix<RnsPoly>& U, DggType& dgg,
-                                                                   DggType& dgg_large_sigma, int64_t base) {
+                                                                    const RlweTrapdoorPair<RnsPoly>& T,
+                                                                    const Matrix<RnsPoly>& U, DggType& dgg,
+                                                                    DggType& dgg_large_sigma, int64_t base) {
     const std::shared_ptr<ParmType> params = U(0, 0).get_params();
     auto zero_alloc = RnsPoly::allocator(params, Format::EVALUATION);
 
@@ -265,8 +265,8 @@ Matrix<RnsPoly> RlweTrapdoorUtility<RnsPoly>::gauss_samp_square_mat(size_t n, si
 
                 Matrix<int64_t> digits([]() { return 0; }, k_res, n);
 
-                LatticeGaussSampUtility<NativePoly>::gauss_samp_gq_arb_base(perturbed_syndrome(i, j).get_element_at_index(u), c,
-                                                                        k_res, qu, base, dgg, &digits);
+                LatticeGaussSampUtility<NativePoly>::gauss_samp_gq_arb_base(
+                        perturbed_syndrome(i, j).get_element_at_index(u), c, k_res, qu, base, dgg, &digits);
 
                 for (size_t p = 0; p < k_res; p++) {
                     for (size_t jj = 0; jj < n; jj++) {

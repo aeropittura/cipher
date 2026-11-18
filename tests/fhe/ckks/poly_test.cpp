@@ -297,7 +297,8 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
         cipher_parallel_controls.unit_test_stop();
     }
 
-    void unit_test_eval_poly(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data, const std::string& failmsg = std::string()) {
+    void unit_test_eval_poly(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data,
+                             const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -348,35 +349,35 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
             cc->decrypt(key_pair.secret_key, c_result1, &results1);
             results1->set_length(encoded_length);
             check_equality(plaintext_result1->get_ckks_packed_value(), results1->get_ckks_packed_value(), eps,
-                          failmsg + " EvalPoly with positive coefficients fails");
+                           failmsg + " EvalPoly with positive coefficients fails");
 
             Plaintext results2;
             auto c_result2 = cc->eval_poly(ciphertext1, coefficients2);
             cc->decrypt(key_pair.secret_key, c_result2, &results2);
             results2->set_length(encoded_length);
             check_equality(plaintext_result2->get_ckks_packed_value(), results2->get_ckks_packed_value(), eps,
-                          failmsg + " EvalPoly with negative coefficients fails");
+                           failmsg + " EvalPoly with negative coefficients fails");
 
             Plaintext results3;
             auto c_result3 = cc->eval_poly(ciphertext1, coefficients3);
             cc->decrypt(key_pair.secret_key, c_result3, &results3);
             results3->set_length(encoded_length);
             check_equality(plaintext_result3->get_ckks_packed_value(), results3->get_ckks_packed_value(), eps,
-                          failmsg + " EvalPoly for a power function fails");
+                           failmsg + " EvalPoly for a power function fails");
 
             Plaintext results4;
             auto c_result4 = cc->eval_poly(ciphertext1, coefficients4);
             cc->decrypt(key_pair.secret_key, c_result4, &results4);
             results4->set_length(encoded_length);
             check_equality(plaintext_result4->get_ckks_packed_value(), results4->get_ckks_packed_value(), eps,
-                          failmsg + " EvalPoly for negative coefficients with magnitude > 1 fails");
+                           failmsg + " EvalPoly for negative coefficients with magnitude > 1 fails");
 
             Plaintext results5;
             auto c_result5 = cc->eval_poly(ciphertext1, coefficients5);
             cc->decrypt(key_pair.secret_key, c_result5, &results5);
             results5->set_length(encoded_length);
             check_equality(plaintext_result5->get_ckks_packed_value(), results5->get_ckks_packed_value(), eps,
-                          failmsg + " EvalPoly for low-degree polynomial fails");
+                           failmsg + " EvalPoly for low-degree polynomial fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -387,7 +388,7 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
     }
 
     void unit_test_eval_cheb_division(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data,
-                                   const std::string& failmsg = std::string()) {
+                                      const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -438,7 +439,7 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
             std::vector<std::complex<double>> final_result = plaintext_dec->get_ckks_packed_value();
             final_result.resize(encoded_length);
             check_equality(plaintext_result1->get_ckks_packed_value(), final_result, eps,
-                          failmsg + " EvalChebyshevSeries approximation for division fails");
+                           failmsg + " EvalChebyshevSeries approximation for division fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -449,7 +450,7 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
     }
 
     void unit_test_eval_cheb_logit(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data,
-                                const std::string& failmsg = std::string()) {
+                                   const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -480,7 +481,7 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
             final_result.resize(encoded_length);
 
             check_equality(plaintext_result1->get_ckks_packed_value(), final_result, eps,
-                          failmsg + " EvalChebyshevSeries approximation for logistic function fails");
+                           failmsg + " EvalChebyshevSeries approximation for logistic function fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -491,7 +492,7 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
     }
 
     void unit_test_eval_cheb_logit_no_lin(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data,
-                                     const std::string& failmsg = std::string()) {
+                                          const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -524,7 +525,7 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
             final_result.resize(encoded_length);
 
             check_equality(plaintext_result1->get_ckks_packed_value(), final_result, eps,
-                          failmsg + " EvalChebyshevSeries approximation for logistic function fails");
+                           failmsg + " EvalChebyshevSeries approximation for logistic function fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -535,7 +536,7 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
     }
 
     void unit_test_eval_cheb_sine(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data,
-                               const std::string& failmsg = std::string()) {
+                                  const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -578,7 +579,7 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
             final_result.resize(encoded_length);
 
             check_equality(plaintext_result1->get_ckks_packed_value(), final_result, eps,
-                          failmsg + " EvalChebyshevSeries approximation for sine fails");
+                           failmsg + " EvalChebyshevSeries approximation for sine fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -589,7 +590,7 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
     }
 
     void unit_test_eval_cheb_poly(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data,
-                               const std::string& failmsg = std::string()) {
+                                  const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -618,7 +619,7 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
             final_result.resize(encoded_length);
 
             check_equality(plaintext_result1->get_ckks_packed_value(), final_result, eps,
-                          failmsg + " EvalChebyshevSeries approximation for sine fails");
+                           failmsg + " EvalChebyshevSeries approximation for sine fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -629,7 +630,7 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
     }
 
     void unit_test_eval_divide(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data,
-                             const std::string& failmsg = std::string()) {
+                               const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -664,7 +665,7 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
         }
     }
     void unit_test_eval_logistic(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data,
-                               const std::string& failmsg = std::string()) {
+                                 const std::string& failmsg = std::string()) {
         CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
         std::vector<std::complex<double>> input{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0};
@@ -692,14 +693,15 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
 
         check_equality(expected_output, final_result, eps, failmsg + " EvalLogistic Chebyshev approximation fails");
     }
-    void unit_test_eval_sin(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data, const std::string& failmsg = std::string()) {
+    void unit_test_eval_sin(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data,
+                            const std::string& failmsg = std::string()) {
         CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
         std::vector<std::complex<double>> input{-1., -0.8, -0.6, -0.4, -0.2, 0., 0.2, 0.4, 0.6, 0.8, 1.};
         size_t encoded_length = input.size();
 
         std::vector<std::complex<double>> expected_output{-0.841470, -0.717356, -0.564642, -0.389418, -0.198669, 0,
-                                                         0.198669,  0.389418,  0.564642,  0.717356,  0.841470};
+                                                          0.198669,  0.389418,  0.564642,  0.717356,  0.841470};
 
         Plaintext plaintext = cc->make_ckks_packed_plaintext(input);
 
@@ -720,14 +722,15 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
 
         check_equality(expected_output, final_result, eps, failmsg + " EvalSin Chebyshev approximation fails");
     }
-    void unit_test_eval_cos(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data, const std::string& failmsg = std::string()) {
+    void unit_test_eval_cos(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data,
+                            const std::string& failmsg = std::string()) {
         CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
         std::vector<std::complex<double>> input{-1., -0.8, -0.6, -0.4, -0.2, 0., 0.2, 0.4, 0.6, 0.8, 1.};
         size_t encoded_length = input.size();
 
         std::vector<std::complex<double>> expected_output{0.540302, 0.696706, 0.825335, 0.921060, 0.980066, 1.0,
-                                                         0.980066, 0.921060, 0.825335, 0.696706, 0.540302};
+                                                          0.980066, 0.921060, 0.825335, 0.696706, 0.540302};
 
         Plaintext plaintext = cc->make_ckks_packed_plaintext(input);
 
@@ -754,7 +757,7 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
     // shared basis by the earlier ones. Degree 3 is evaluated term by term straight from the power or
     // Chebyshev basis rather than by Paterson-Stockmeyer, which is the path that touches the basis.
     void unit_test_eval_precomp_reuse(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data,
-                                   const std::string& failmsg = std::string()) {
+                                      const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -791,7 +794,7 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
                 auto check = [&](const std::vector<double>& coefficients, const std::string& label) {
                     auto result = cc->eval_poly_with_precomp(powers, coefficients);
                     check_equality(eval_plain(coefficients), decrypt_fn(result, input.size()), eps,
-                                  failmsg + " EvalPolyWithPrecomp on the reused powers fails for the " + label);
+                                   failmsg + " EvalPolyWithPrecomp on the reused powers fails for the " + label);
                 };
                 check(coefficients_a, "first polynomial");
                 check(coefficients_b, "second polynomial");
@@ -830,8 +833,9 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
                 auto check = [&](const std::vector<double>& coefficients, const std::string& label) {
                     auto result = cc->eval_chebyshev_series_with_precomp(polys, coefficients);
                     check_equality(eval_plain(coefficients), decrypt_fn(result, input.size()), eps,
-                                  failmsg + " EvalChebyshevSeriesWithPrecomp on the reused polynomials fails for the " +
-                                          label);
+                                   failmsg +
+                                           " EvalChebyshevSeriesWithPrecomp on the reused polynomials fails for the " +
+                                           label);
                 };
                 check(coefficients_a, "first series");
                 check(coefficients_b, "second series");

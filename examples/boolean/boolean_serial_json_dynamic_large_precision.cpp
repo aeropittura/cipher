@@ -54,8 +54,8 @@ int main() {
     cc1.generate_boolean_context(TOY, false, log_q, 0, GINX, true);
     uint32_t Q = 1 << log_q;
 
-    int q = 4096;                                                // q
-    int factor = 1 << int(log_q - std::log2(q));                  // Q/q
+    int q = 4096;                                                     // q
+    int factor = 1 << int(log_q - std::log2(q));                      // Q/q
     int p = cc1.get_max_plaintext_space().convert_to_int() * factor;  // Obtain the maximum plaintext space
 
     std::cout << "Generating keys." << std::endl;
@@ -93,7 +93,8 @@ int main() {
     for (auto it = bt_key_map->begin(); it != bt_key_map->end(); it++) {
         auto index = it->first;
         auto thekey = it->second;
-        if (!serialization::serialize_to_file(DATAFOLDER + "/" + std::to_string(index) + "btKey.txt", thekey, SerType::JSON)) {
+        if (!serialization::serialize_to_file(DATAFOLDER + "/" + std::to_string(index) + "btKey.txt", thekey,
+                                              SerType::JSON)) {
             std::cerr << "Error serializing the bootstrapping keys" << std::endl;
             return 1;
         }
@@ -141,8 +142,8 @@ int main() {
 
     for (size_t i = 0; i < 3; i++) {
         RingGswBtKey map_key;
-        if (serialization::deserialize_from_file(DATAFOLDER + "/" + std::to_string(base_glist[i]) + "btKey.txt", map_key,
-                                        SerType::JSON) == false) {
+        if (serialization::deserialize_from_file(DATAFOLDER + "/" + std::to_string(base_glist[i]) + "btKey.txt",
+                                                 map_key, SerType::JSON) == false) {
             std::cerr << "Could not deserialize the bootstrapping keys" << std::endl;
             return 1;
         }

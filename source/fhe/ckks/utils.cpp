@@ -118,7 +118,7 @@ uint32_t get_depth_by_degree(size_t d) {
                                 [](uint32_t v, const std::pair<uint32_t, uint32_t>& r) { return v <= r.first; })
                 ->second;
     CIPHER_THROW("degree " + std::to_string(d) + " not in range [" + std::to_string(LOWER_BOUND_DEGREE) + ", " +
-                  std::to_string(UPPER_BOUND_DEGREE) + "].");
+                 std::to_string(UPPER_BOUND_DEGREE) + "].");
 }
 template struct LongDiv<int64_t>;
 template struct LongDiv<double>;
@@ -130,7 +130,7 @@ quotient and remainder of the division f/g. LongDiv is a struct that contains th
 vectors of coefficients for the quotient and rest. */
 template <typename VectorDataType>
 std::shared_ptr<LongDiv<VectorDataType>> long_division_poly(const std::vector<VectorDataType>& f,
-                                                          const std::vector<VectorDataType>& g) {
+                                                            const std::vector<VectorDataType>& g) {
     auto n = Degree(f);
     if (n != f.size() - 1)
         CIPHER_THROW("The dominant coefficient of the divident is zero");
@@ -174,10 +174,11 @@ std::shared_ptr<LongDiv<VectorDataType>> long_division_poly(const std::vector<Ve
     return res;
 }
 template std::shared_ptr<LongDiv<int64_t>> long_division_poly(const std::vector<int64_t>& f,
-                                                            const std::vector<int64_t>& g);
-template std::shared_ptr<LongDiv<double>> long_division_poly(const std::vector<double>& f, const std::vector<double>& g);
+                                                              const std::vector<int64_t>& g);
+template std::shared_ptr<LongDiv<double>> long_division_poly(const std::vector<double>& f,
+                                                             const std::vector<double>& g);
 template std::shared_ptr<LongDiv<std::complex<double>>> long_division_poly(const std::vector<std::complex<double>>& f,
-                                                                         const std::vector<std::complex<double>>& g);
+                                                                           const std::vector<std::complex<double>>& g);
 
 /* f and g are vectors of Chebyshev interpolation coefficients of the two polynomials.
 We assume their dominant coefficient is not zero. long_division_chebyshev returns the
@@ -187,7 +188,7 @@ quotient and rest. We assume that the zero-th coefficient is c0, not c0/2 and re
 the same format.*/
 template <typename VectorDataType>
 std::shared_ptr<LongDiv<VectorDataType>> long_division_chebyshev(const std::vector<VectorDataType>& f,
-                                                               const std::vector<VectorDataType>& g) {
+                                                                 const std::vector<VectorDataType>& g) {
     auto n = Degree(f);
     if (n != f.size() - 1)
         CIPHER_THROW("The dominant coefficient of the divident is zero");
@@ -285,9 +286,9 @@ std::shared_ptr<LongDiv<VectorDataType>> long_division_chebyshev(const std::vect
     return res;
 }
 template std::shared_ptr<LongDiv<int64_t>> long_division_chebyshev(const std::vector<int64_t>& f,
-                                                                 const std::vector<int64_t>& g);
+                                                                   const std::vector<int64_t>& g);
 template std::shared_ptr<LongDiv<double>> long_division_chebyshev(const std::vector<double>& f,
-                                                                const std::vector<double>& g);
+                                                                  const std::vector<double>& g);
 template std::shared_ptr<LongDiv<std::complex<double>>> long_division_chebyshev(
         const std::vector<std::complex<double>>& f, const std::vector<std::complex<double>>& g);
 
@@ -354,7 +355,7 @@ std::vector<uint32_t> compute_degrees_ps(uint32_t n) {
 }
 
 std::vector<std::complex<double>> extract_shifted_diagonal(const std::vector<std::vector<std::complex<double>>>& A,
-                                                         int index) {
+                                                           int index) {
     uint32_t cols = A[0].size();
     uint32_t rows = A.size();
     std::vector<std::complex<double>> result(cols);
@@ -439,8 +440,8 @@ template std::vector<double> Fill(std::initializer_list<double> a, uint32_t slot
 template std::vector<int64_t> Fill(std::initializer_list<int64_t> a, uint32_t slots);
 
 std::vector<std::vector<std::complex<double>>> coeff_encoding_one_level(const std::vector<std::complex<double>>& pows,
-                                                                     const std::vector<uint32_t>& rot_group,
-                                                                     bool flag_i) {
+                                                                        const std::vector<uint32_t>& rot_group,
+                                                                        bool flag_i) {
     constexpr std::complex<double> I(0.0, 1.0);
     static const std::complex<double> neg_exp_m_pi = std::exp(-M_PI / 2 * I);
 
@@ -481,8 +482,8 @@ std::vector<std::vector<std::complex<double>>> coeff_encoding_one_level(const st
 }
 
 std::vector<std::vector<std::complex<double>>> coeff_decoding_one_level(const std::vector<std::complex<double>>& pows,
-                                                                     const std::vector<uint32_t>& rot_group,
-                                                                     bool flag_i) {
+                                                                        const std::vector<uint32_t>& rot_group,
+                                                                        bool flag_i) {
     constexpr std::complex<double> I(0.0, 1.0);
     static const std::complex<double> pos_exp_m_pi = std::exp(M_PI / 2 * I);
 
@@ -678,7 +679,8 @@ std::vector<std::vector<std::vector<std::complex<double>>>> coeff_decoding_colla
         }
     }
 
-    if (flag_rem && rem_collapse) {  // check if (rem_collapse > 0). it is necessary for the code executed before the loop
+    if (flag_rem &&
+        rem_collapse) {  // check if (rem_collapse > 0). it is necessary for the code executed before the loop
         const uint32_t s = rows_collapse;
 
         coeff[s][0] = coeff1[s * layers_collapse];

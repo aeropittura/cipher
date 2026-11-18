@@ -44,7 +44,7 @@ std::vector<CryptoContext<RnsPoly>> ContextFactory<RnsPoly>::all_contexts = {};
 
 template <typename Element>
 CryptoContext<Element> ContextFactory<Element>::find_context(std::shared_ptr<BaseCryptoParams<Element>> params,
-                                                                  std::shared_ptr<SchemeBase<Element>> scheme) {
+                                                             std::shared_ptr<SchemeBase<Element>> scheme) {
     for (CryptoContext<Element> cc : ContextFactory<Element>::all_contexts) {
         if (*cc->get_scheme().get() == *scheme.get() && *cc->get_crypto_parameters().get() == *params.get()) {
             if (cc->get_encoding_params()->get_plaintext_root_of_unity() != 0) {
@@ -68,8 +68,8 @@ void ContextFactory<Element>::add_context(CryptoContext<Element> cc) {
 
 template <typename Element>
 CryptoContext<Element> ContextFactory<Element>::get_context(std::shared_ptr<BaseCryptoParams<Element>> params,
-                                                                 std::shared_ptr<SchemeBase<Element>> scheme,
-                                                                 SCHEME scheme_id_value) {
+                                                            std::shared_ptr<SchemeBase<Element>> scheme,
+                                                            SCHEME scheme_id_value) {
     CryptoContext<Element> cc = find_context(params, scheme);
     // if the context is not found we should create one
     if (nullptr == cc) {
@@ -84,7 +84,7 @@ template <typename Element>
 CryptoContext<Element> ContextFactory<Element>::get_full_context_by_deserialized_context(
         const CryptoContext<Element> context) {
     return ContextFactory<Element>::get_context(context->get_crypto_parameters(), context->get_scheme(),
-                                                     context->get_scheme_id_impl());
+                                                context->get_scheme_id_impl());
 }
 
 }  // namespace cipher

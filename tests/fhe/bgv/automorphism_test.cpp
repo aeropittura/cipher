@@ -204,7 +204,7 @@ class UTBGVRNS_AUTOMORPHISM : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS
     }
 
     void unit_test_automorphism_packed_array(const TEST_CASE_UTBGVRNS_AUTOMORPHISM& test_data,
-                                          const std::string& failmsg = std::string()) {
+                                             const std::string& failmsg = std::string()) {
         for (auto index : test_data.index_list) {
             try {
                 CryptoContext<Element> cc(unit_test_generate_context(test_data));
@@ -223,10 +223,10 @@ class UTBGVRNS_AUTOMORPHISM : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS
 
                 std::vector<uint32_t> index_list(test_data.index_list);
 
-                auto eval_keys =
-                        (INVALID_PRIVATE_KEY == test_data.error) ?
-                                cc->eval_automorphism_key_gen(static_cast<const PrivateKey<Element>>(nullptr), index_list) :
-                                cc->eval_automorphism_key_gen(kp.secret_key, index_list);
+                auto eval_keys = (INVALID_PRIVATE_KEY == test_data.error) ?
+                                         cc->eval_automorphism_key_gen(static_cast<const PrivateKey<Element>>(nullptr),
+                                                                       index_list) :
+                                         cc->eval_automorphism_key_gen(kp.secret_key, index_list);
 
                 std::map<uint32_t, EvalKey<Element>> empty_eval_keys;
                 Ciphertext<Element> p1 = (INVALID_EVAL_KEY == test_data.error) ?
@@ -271,7 +271,7 @@ class UTBGVRNS_AUTOMORPHISM : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS
     }
 
     void unit_test_eval_at_index_packed_array(const TEST_CASE_UTBGVRNS_AUTOMORPHISM& test_data,
-                                         const std::string& failmsg = std::string()) {
+                                              const std::string& failmsg = std::string()) {
         for (auto index : test_data.index_list) {
             try {
                 CryptoContext<Element> cc(unit_test_generate_context(test_data));
@@ -341,7 +341,7 @@ class UTBGVRNS_AUTOMORPHISM : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS
     }
 
     void unit_test_eval_sum_packed_array(const TEST_CASE_UTBGVRNS_AUTOMORPHISM& test_data,
-                                     const std::string& failmsg = std::string()) {
+                                         const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data));
 

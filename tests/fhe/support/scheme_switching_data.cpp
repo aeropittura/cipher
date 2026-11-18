@@ -93,7 +93,7 @@ std::string DataAndLocation::get_data_dir() {
     std::error_code ec;
     std::filesystem::path abs = std::filesystem::weakly_canonical(data_dir, ec);
     if (ec || abs.empty()) {
-        ec.clear();                                    // don't carry the old error forward
+        ec.clear();                                     // don't carry the old error forward
         abs = std::filesystem::absolute(data_dir, ec);  // fallback
     }
     if (ec || abs.empty()) {

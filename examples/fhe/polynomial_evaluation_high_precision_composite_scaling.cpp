@@ -58,15 +58,15 @@ void print_prime_moduli_chain(const RnsPoly& poly) {
     std::cout << "Total bit length: " << total_bit_len << std::endl;
 }
 
-double get_scale_approx_error(const RnsPoly& poly, uint32_t num_primes_value, uint32_t composite_degree, uint32_t first_mod_size_value,
-                           uint32_t scaling_mod_size) {
+double get_scale_approx_error(const RnsPoly& poly, uint32_t num_primes_value, uint32_t composite_degree,
+                              uint32_t first_mod_size_value, uint32_t scaling_mod_size) {
     double delta0 = std::pow(2.0, static_cast<double>(first_mod_size_value));
     double delta = std::pow(2.0, static_cast<double>(scaling_mod_size));
     // uint32_t num_primes_value = poly.get_num_of_elements();
     auto q = poly.get_params()->get_params();
 
-    std::cout << "numPrimes=" << num_primes_value << " compositeDegree=" << composite_degree << " firstModSize=" << first_mod_size_value
-              << " scalingModSize=" << scaling_mod_size << std::endl;
+    std::cout << "numPrimes=" << num_primes_value << " compositeDegree=" << composite_degree
+              << " firstModSize=" << first_mod_size_value << " scalingModSize=" << scaling_mod_size << std::endl;
 
     double prod = q[0]->get_modulus().convert_to_double();
     std::cout << "q0_0: " << prod;
@@ -83,7 +83,8 @@ double get_scale_approx_error(const RnsPoly& poly, uint32_t num_primes_value, ui
         prod = q[i]->get_modulus().convert_to_double();
         std::cout << "q" << i / composite_degree << "_0: " << prod;
         for (uint32_t d = 1; d < composite_degree; ++d) {
-            std::cout << " q" << i / composite_degree << "_" << d << ": " << q[i + d]->get_modulus().convert_to_double();
+            std::cout << " q" << i / composite_degree << "_" << d << ": "
+                      << q[i + d]->get_modulus().convert_to_double();
             prod *= q[i + d]->get_modulus().convert_to_double();
         }
         std::cout << "\n";
@@ -197,8 +198,8 @@ int main(int argc, char* argv[]) {
     std::cout << "Moduli chain of pk: " << std::endl;
     print_prime_moduli_chain(ckkspk[0]);
 
-    double avg_scale_error = get_scale_approx_error(ckkspk[0], (mult_depth_value + 1) * composite_degree, composite_degree,
-                                               first_mod_size_value, scaling_mod_size);
+    double avg_scale_error = get_scale_approx_error(ckkspk[0], (mult_depth_value + 1) * composite_degree,
+                                                    composite_degree, first_mod_size_value, scaling_mod_size);
     std::cout << "Average Scale Error: " << avg_scale_error << std::endl;
 
     auto ciphertext1 = cc->encrypt(key_pair.public_key, plaintext1);

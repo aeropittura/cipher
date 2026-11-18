@@ -102,7 +102,8 @@ static void set_crypto_context_parameters_from_unit_test_cc_params(const TestCon
     }
     if constexpr (std::is_same_v<U, ContextParams<BfvRnsContext>> == true) {
         if (!is_default_value(params.encryption_technique)) {
-            parameters.set_encryption_technique(static_cast<EncryptionTechnique>(std::round(params.encryption_technique)));
+            parameters.set_encryption_technique(
+                    static_cast<EncryptionTechnique>(std::round(params.encryption_technique)));
         }
     }
     if constexpr (std::is_same_v<U, ContextParams<CkksRnsContext>> == false) {
@@ -125,7 +126,8 @@ static void set_crypto_context_parameters_from_unit_test_cc_params(const TestCon
     }
     if constexpr (std::is_same_v<U, ContextParams<CkksRnsContext>> == true) {
         if (!is_default_value(params.decryption_noise_mode)) {
-            parameters.set_decryption_noise_mode(static_cast<DecryptionNoiseMode>(std::round(params.decryption_noise_mode)));
+            parameters.set_decryption_noise_mode(
+                    static_cast<DecryptionNoiseMode>(std::round(params.decryption_noise_mode)));
         }
     }
     if constexpr (std::is_same_v<U, ContextParams<CkksRnsContext>> == true) {

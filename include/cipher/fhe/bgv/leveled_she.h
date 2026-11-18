@@ -118,7 +118,7 @@ class BgvRnsLeveledShe : public RnsLeveledShe {
      * @param ciphertext2 second input/output ciphertext.
      */
     void adjust_levels_and_depth_in_place(Ciphertext<RnsPoly>& ciphertext1,
-                                     Ciphertext<RnsPoly>& ciphertext2) const override;
+                                          Ciphertext<RnsPoly>& ciphertext2) const override;
 
     /**
      * Brings two ciphertexts to the same level and to noise scale degree 1 for multiplication: calls
@@ -128,7 +128,7 @@ class BgvRnsLeveledShe : public RnsLeveledShe {
      * @param ciphertext2 second input/output ciphertext.
      */
     void adjust_levels_and_depth_to_one_in_place(Ciphertext<RnsPoly>& ciphertext1,
-                                          Ciphertext<RnsPoly>& ciphertext2) const override;
+                                                 Ciphertext<RnsPoly>& ciphertext2) const override;
 
     /////////////////////////////////////
     // SERIALIZATION

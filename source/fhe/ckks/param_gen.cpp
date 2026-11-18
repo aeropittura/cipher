@@ -61,10 +61,10 @@ constexpr size_t AUXMODSIZE = 60;
 #endif
 
 bool CkksRnsParamGen::params_gen_ckksrns_internal(std::shared_ptr<BaseCryptoParams<RnsPoly>> crypto_params,
-                                                          uint32_t cycl_order, uint32_t num_primes_value,
-                                                          uint32_t scaling_mod_size, uint32_t first_mod_size_value,
-                                                          uint32_t num_part_q,
-                                                          CompressionLevel m_p_int_boot_ciphertext_compression_level) const {
+                                                  uint32_t cycl_order, uint32_t num_primes_value,
+                                                  uint32_t scaling_mod_size, uint32_t first_mod_size_value,
+                                                  uint32_t num_part_q,
+                                                  CompressionLevel m_p_int_boot_ciphertext_compression_level) const {
     // the "const" modifier for crypto_params_ckksrns and encoding_params below doesn't mean that the objects those 2 pointers
     // point to are const (not changeable). it means that the pointers themselves are const only.
     const auto crypto_params_ckksrns = std::dynamic_pointer_cast<CkksRnsCryptoParams>(crypto_params);
@@ -119,13 +119,14 @@ bool CkksRnsParamGen::params_gen_ckksrns_internal(std::shared_ptr<BaseCryptoPara
     SecurityLevel std_level = crypto_params_ckksrns->get_std_level();
     // TODO Duhyeong: Let's check if aux_bits = register_word_size makes an error in the P prime generation.
     uint32_t aux_bits = ((scal_tech == COMPOSITESCALINGAUTO || scal_tech == COMPOSITESCALINGMANUAL) &&
-                        register_word_size <= AUXMODSIZE) ?
-                               (register_word_size - 1) :
-                               AUXMODSIZE;
+                         register_word_size <= AUXMODSIZE) ?
+                                (register_word_size - 1) :
+                                AUXMODSIZE;
     uint32_t n = cycl_order / 2;
 
     // GAUSSIAN security constraint
-    DistributionType dist_type = (crypto_params_ckksrns->get_secret_key_dist() == GAUSSIAN) ? HEStd_error : HEStd_ternary;
+    DistributionType dist_type =
+            (crypto_params_ckksrns->get_secret_key_dist() == GAUSSIAN) ? HEStd_error : HEStd_ternary;
     if (std_level != HEStd_NotSet) {
         uint32_t q_bound = first_mod_size_value + (num_primes_value - 1) * scaling_mod_size + extra_mod_size;
 
@@ -137,8 +138,8 @@ bool CkksRnsParamGen::params_gen_ckksrns_internal(std::shared_ptr<BaseCryptoPara
         // Estimate ciphertext modulus Q*P bound (in case of HYBRID P*Q)
         if (ks_tech == HYBRID)
             q_bound += std::get<0>(RnsCryptoParams::estimate_log_p(num_part_q, first_mod_size_value, scaling_mod_size,
-                                                                    extra_mod_size, num_primes_value, aux_bits, scal_tech, true,
-                                                                    false, composite_degree));
+                                                                   extra_mod_size, num_primes_value, aux_bits,
+                                                                   scal_tech, true, false, composite_degree));
 
         uint32_t he_std_n = StdLatticeParm::find_ring_dim(dist_type, std_level, q_bound);
 
@@ -150,7 +151,7 @@ bool CkksRnsParamGen::params_gen_ckksrns_internal(std::shared_ptr<BaseCryptoPara
             // Check whether particular selection is standards-compliant
             if (he_std_n > n) {
                 CIPHER_THROW("The specified ring dimension (" + std::to_string(n) +
-                              ") does not comply with HE standards recommendation (" + std::to_string(he_std_n) + ").");
+                             ") does not comply with HE standards recommendation (" + std::to_string(he_std_n) + ").");
             }
         }
     } else if (n == 0) {
@@ -174,10 +175,11 @@ bool CkksRnsParamGen::params_gen_ckksrns_internal(std::shared_ptr<BaseCryptoPara
     std::vector<NativeInteger> roots_q(vec_size);
 
     if ((scal_tech == COMPOSITESCALINGAUTO || scal_tech == COMPOSITESCALINGMANUAL) && (composite_degree > 1)) {
-        composite_prime_moduli_gen(moduli_q, roots_q, composite_degree, num_primes_value, first_mod_size_value, dcrt_bits, cycl_order,
-                                register_word_size);
+        composite_prime_moduli_gen(moduli_q, roots_q, composite_degree, num_primes_value, first_mod_size_value,
+                                   dcrt_bits, cycl_order, register_word_size);
     } else
-        single_prime_moduli_gen(moduli_q, roots_q, scal_tech, num_primes_value, first_mod_size_value, dcrt_bits, cycl_order, extra_mod_size);
+        single_prime_moduli_gen(moduli_q, roots_q, scal_tech, num_primes_value, first_mod_size_value, dcrt_bits,
+                                cycl_order, extra_mod_size);
 
     auto params_dcrt = std::make_shared<RnsParams<BigInteger>>(cycl_order, moduli_q, roots_q);
 
@@ -191,12 +193,14 @@ bool CkksRnsParamGen::params_gen_ckksrns_internal(std::shared_ptr<BaseCryptoPara
         crypto_params_ckksrns->set_encoding_params(encoding_params_new);
     }
 
-    crypto_params_ckksrns->precompute_crt_tables(ks_tech, scal_tech, enc_tech, mult_tech, num_part_q, aux_bits, extra_mod_size);
+    crypto_params_ckksrns->precompute_crt_tables(ks_tech, scal_tech, enc_tech, mult_tech, num_part_q, aux_bits,
+                                                 extra_mod_size);
 
     // Validate the ring dimension found using estimated log_q(P) against actual log_q(P)
     if (std_level != HEStd_NotSet) {
-        uint32_t log_actual_q = (ks_tech == HYBRID) ? crypto_params_ckksrns->get_params_qp()->get_modulus().get_msb() :
-                                                   crypto_params_ckksrns->get_element_params()->get_modulus().get_msb();
+        uint32_t log_actual_q = (ks_tech == HYBRID) ?
+                                        crypto_params_ckksrns->get_params_qp()->get_modulus().get_msb() :
+                                        crypto_params_ckksrns->get_element_params()->get_modulus().get_msb();
 
         uint32_t n_actual = StdLatticeParm::find_ring_dim(dist_type, std_level, log_actual_q);
         if (n < n_actual) {
@@ -210,9 +214,10 @@ bool CkksRnsParamGen::params_gen_ckksrns_internal(std::shared_ptr<BaseCryptoPara
 }
 
 void CkksRnsParamGen::composite_prime_moduli_gen(std::vector<NativeInteger>& moduli_q,
-                                                         std::vector<NativeInteger>& roots_q, uint32_t composite_degree,
-                                                         uint32_t num_primes_value, uint32_t first_mod_size_value, uint32_t dcrt_bits,
-                                                         uint32_t cycl_order, uint32_t register_word_size) const {
+                                                 std::vector<NativeInteger>& roots_q, uint32_t composite_degree,
+                                                 uint32_t num_primes_value, uint32_t first_mod_size_value,
+                                                 uint32_t dcrt_bits, uint32_t cycl_order,
+                                                 uint32_t register_word_size) const {
     if (first_mod_size_value <= dcrt_bits) {
         CIPHER_THROW("firstModSize must be > scalingModSize.");
     }
@@ -397,7 +402,8 @@ void CkksRnsParamGen::composite_prime_moduli_gen(std::vector<NativeInteger>& mod
         uint32_t q_bit_size = std::ceil(static_cast<double>(rem_bits) / (composite_degree - d + 1));
         try {
             // Find next prime
-            NativeInteger next_integer = first_prime<NativeInteger>(std::min(q_bit_size, register_word_size), cycl_order);
+            NativeInteger next_integer =
+                    first_prime<NativeInteger>(std::min(q_bit_size, register_word_size), cycl_order);
             next_integer = previous_prime<NativeInteger>(next_integer, cycl_order);
 
             while (std::log2(next_integer.convert_to_double()) > q_bit_size ||
@@ -419,10 +425,10 @@ void CkksRnsParamGen::composite_prime_moduli_gen(std::vector<NativeInteger>& mod
     return;
 }
 
-void CkksRnsParamGen::single_prime_moduli_gen(std::vector<NativeInteger>& moduli_q,
-                                                      std::vector<NativeInteger>& roots_q, ScalingTechnique scal_tech,
-                                                      uint32_t num_primes_value, uint32_t first_mod_size_value, uint32_t dcrt_bits,
-                                                      uint32_t cycl_order, uint32_t extra_mod_size) const {
+void CkksRnsParamGen::single_prime_moduli_gen(std::vector<NativeInteger>& moduli_q, std::vector<NativeInteger>& roots_q,
+                                              ScalingTechnique scal_tech, uint32_t num_primes_value,
+                                              uint32_t first_mod_size_value, uint32_t dcrt_bits, uint32_t cycl_order,
+                                              uint32_t extra_mod_size) const {
     NativeInteger q = first_prime<NativeInteger>(dcrt_bits, cycl_order);
     moduli_q[num_primes_value - 1] = q;
     roots_q[num_primes_value - 1] = root_of_unity(cycl_order, moduli_q[num_primes_value - 1]);

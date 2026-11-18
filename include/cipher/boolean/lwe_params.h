@@ -64,8 +64,8 @@ class LweCryptoParams : public Serializable {
      * @param base_ks the base used for key switching
      * @param key_dist the key distribution
      */
-    explicit LweCryptoParams(uint32_t n, uint32_t N, NativeInteger q, NativeInteger Q, NativeInteger q_ks_value, double std,
-                             uint32_t base_ks, SecretKeyDist key_dist = UNIFORM_TERNARY)
+    explicit LweCryptoParams(uint32_t n, uint32_t N, NativeInteger q, NativeInteger Q, NativeInteger q_ks_value,
+                             double std, uint32_t base_ks, SecretKeyDist key_dist = UNIFORM_TERNARY)
         : q_(q), Q_(Q), q_ks_(q_ks_value), n_(n), N_(N), base_ks_(base_ks), key_dist_(key_dist) {
         if (n_ == 0)
             CIPHER_THROW("m_n (lattice parameter) can not be zero");
@@ -199,7 +199,7 @@ class LweCryptoParams : public Serializable {
     void load(Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
 
         ar(::cereal::make_nvp("n", n_));

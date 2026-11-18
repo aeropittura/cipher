@@ -266,7 +266,7 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
     // calculate_approximation_error() calculates the precision number (or approximation error).
     // The higher the precision, the less the error.
     double calculate_approximation_error(const std::vector<std::complex<double>>& result,
-                                       const std::vector<std::complex<double>>& expected_result) {
+                                         const std::vector<std::complex<double>>& expected_result) {
         if (result.size() != expected_result.size())
             CIPHER_THROW("Cannot compare vectors with different numbers of elements");
 
@@ -282,7 +282,7 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
     }
 
     double calculate_approximation_error_int(const std::vector<int32_t>& result,
-                                          const std::vector<int32_t>& expected_result) {
+                                             const std::vector<int32_t>& expected_result) {
         if (result.size() != expected_result.size())
             CIPHER_THROW("Cannot compare vectors with different numbers of elements");
 
@@ -308,7 +308,7 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
     }
 
     void unit_test_scheme_switch_ckks_fhew(const TEST_CASE_UTCKKSRNS_SCHEMESWITCH& test_data,
-                                         const std::string& failmsg = std::string()) {
+                                           const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -331,7 +331,8 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
             double scale = 1.0 / p_lwe;
             cc->eval_ckks_to_fhew_precompute(scale);
 
-            auto input(Fill<double>({0, 1, -2, -3, p_lwe / 8.0, p_lwe / 4.0, p_lwe / 2.0, p_lwe / 1.0}, test_data.slots));
+            auto input(
+                    Fill<double>({0, 1, -2, -3, p_lwe / 8.0, p_lwe / 4.0, p_lwe / 2.0, p_lwe / 1.0}, test_data.slots));
 
             size_t encoded_length = input.size();
             std::vector<int32_t> input_int(encoded_length);
@@ -360,7 +361,7 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
     }
 
     void unit_test_scheme_switch_fhew_ckks(const TEST_CASE_UTCKKSRNS_SCHEMESWITCH& test_data,
-                                         const std::string& failmsg = std::string()) {
+                                           const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -393,7 +394,8 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
             }
 
             cc->eval_fhew_to_ckks_setup(cc_lwe, test_data.slots, test_data.log_q);
-            cc->eval_fhew_to_ckks_key_gen(key_pair, lwesk, test_data.num_values, test_data.num_values, test_data.dim1[1]);
+            cc->eval_fhew_to_ckks_key_gen(key_pair, lwesk, test_data.num_values, test_data.num_values,
+                                          test_data.dim1[1]);
 
             auto c_temp = cc->eval_fhew_to_ckks(ctxts_lwe1, test_data.num_values, test_data.slots);
 
@@ -402,7 +404,7 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
             plaintext_dec->set_length(test_data.num_values);
 
             check_equality(plaintext_dec->get_ckks_packed_value(), to_complex_double_vec(x1_values), eps1,
-                          failmsg + " FHEW to CKKS fails for binary messages.");
+                           failmsg + " FHEW to CKKS fails for binary messages.");
 
             c_temp = cc->eval_fhew_to_ckks(ctxts_lwe2, test_data.num_values, test_data.slots, p_lwe, 0, p_lwe);
 
@@ -410,7 +412,7 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
             plaintext_dec->set_length(test_data.num_values);
 
             check_equality(plaintext_dec->get_ckks_packed_value(), to_complex_double_vec(x2_values), eps2,
-                          failmsg + " FHEW to CKKS fails for larger messages.");
+                           failmsg + " FHEW to CKKS fails for larger messages.");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -421,7 +423,7 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
     }
 
     void unit_test_scheme_switch_comparison(const TEST_CASE_UTCKKSRNS_SCHEMESWITCH& test_data,
-                                          const std::string& failmsg = std::string()) {
+                                            const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -487,7 +489,7 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
     }
 
     void unit_test_scheme_switch_argmin(const TEST_CASE_UTCKKSRNS_SCHEMESWITCH& test_data,
-                                      const std::string& failmsg = std::string()) {
+                                        const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -538,7 +540,7 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
                 std::vector<std::complex<double>> xargmin_oh(test_data.num_values);
                 xargmin_oh[xargmin] = 1;
                 check_equality(ptxt_min->get_ckks_packed_value(), xargmin_oh, eps1,
-                              failmsg + " EvalMinSchemeSwitching fails.");
+                               failmsg + " EvalMinSchemeSwitching fails.");
             } else {
                 ptxt_min->set_length(1);
                 check_equality(ptxt_min->get_real_packed_value()[0], static_cast<double>(xargmin), eps1);
@@ -579,7 +581,7 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
     }
 
     void unit_test_scheme_switch_alt_argmin(const TEST_CASE_UTCKKSRNS_SCHEMESWITCH& test_data,
-                                         const std::string& failmsg = std::string()) {
+                                            const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -616,7 +618,8 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
             Plaintext p1 = cc->make_ckks_packed_plaintext(x1, 1, 0, nullptr, test_data.slots);
             auto c1 = cc->encrypt(key_pair.public_key, p1);
 
-            auto result = cc->eval_min_scheme_switching_alt(c1, key_pair.public_key, test_data.num_values, test_data.slots);
+            auto result =
+                    cc->eval_min_scheme_switching_alt(c1, key_pair.public_key, test_data.num_values, test_data.slots);
 
             Plaintext ptxt_min;
             cc->decrypt(key_pair.secret_key, result[0], &ptxt_min);
@@ -630,7 +633,7 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
                 std::vector<std::complex<double>> xargmin_oh(test_data.num_values);
                 xargmin_oh[xargmin] = 1;
                 check_equality(ptxt_min->get_ckks_packed_value(), xargmin_oh, eps1,
-                              failmsg + " EvalMinSchemeSwitching fails.");
+                               failmsg + " EvalMinSchemeSwitching fails.");
             } else {
                 ptxt_min->set_length(1);
                 check_equality(ptxt_min->get_real_packed_value()[0], static_cast<double>(xargmin), eps1);
@@ -670,7 +673,7 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
     }
 
     void unit_test_scheme_switch_serialize(const TEST_CASE_UTCKKSRNS_SCHEMESWITCH& test_data,
-                                         const std::string& failmsg = std::string()) {
+                                           const std::string& failmsg = std::string()) {
         try {
             CryptoContextImpl<Element>::clear_eval_mult_keys();
             CryptoContextImpl<Element>::clear_eval_sum_keys();
@@ -738,7 +741,8 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
             auto p_lwe = modulus_lwe / (2 * cc_lwe->get_beta().convert_to_int());
             cc->eval_compare_switch_precompute(p_lwe, scale_sign);
 
-            auto result = cc->eval_min_scheme_switching(client_c, client_public_key, test_data.num_values, test_data.slots);
+            auto result =
+                    cc->eval_min_scheme_switching(client_c, client_public_key, test_data.num_values, test_data.slots);
 
             Plaintext ptxt_min;
             cc->decrypt(secret_key_for_verification, result[0], &ptxt_min);
@@ -752,7 +756,7 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
             std::vector<std::complex<double>> xargmin_oh(test_data.num_values);
             xargmin_oh[xargmin] = 1;
             check_equality(ptxt_min->get_ckks_packed_value(), xargmin_oh, eps1,
-                          failmsg + " Serialization for scheme switching fails.");
+                           failmsg + " Serialization for scheme switching fails.");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail

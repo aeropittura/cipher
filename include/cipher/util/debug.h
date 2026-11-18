@@ -60,60 +60,60 @@
 
     // debugging macro prints value of x on cerr
     #define CIPHER_DEBUG(x)                              \
-        do {                                              \
-            if (dbg_flag) {                               \
+        do {                                             \
+            if (dbg_flag) {                              \
                 CIPHER_DIAGNOSTIC_ERR << x << std::endl; \
-            }                                             \
+            }                                            \
         } while (0)
 
     // debugging macro prints typography of x and value of x on cerr
     #define CIPHER_DEBUGEXP(x)                                        \
-        do {                                                           \
-            if (dbg_flag) {                                            \
+        do {                                                          \
+            if (dbg_flag) {                                           \
                 CIPHER_DIAGNOSTIC_ERR << #x << ":" << x << std::endl; \
-            }                                                          \
+            }                                                         \
         } while (0)
 
     // debugging macro prints value of x and location in codex on cerr
     #define CIPHER_DEBUGWHERE(x)                                                                             \
-        do {                                                                                                  \
-            if (dbg_flag) {                                                                                   \
+        do {                                                                                                 \
+            if (dbg_flag) {                                                                                  \
                 CIPHER_DIAGNOSTIC_ERR << __FILE__ << ":" << __LINE__ << ": " << #x << ":" << x << std::endl; \
-            }                                                                                                 \
+            }                                                                                                \
         } while (0)
 
     // debugging macro prints location in codex on cerr
     #define CIPHER_DEBUGHERE()                                                             \
-        do {                                                                                \
-            if (dbg_flag) {                                                                 \
+        do {                                                                               \
+            if (dbg_flag) {                                                                \
                 CIPHER_DIAGNOSTIC_ERR << __FILE__ << ":" << __LINE__ << ": " << std::endl; \
-            }                                                                               \
+            }                                                                              \
         } while (0)
 
     #if defined(PROFILE)  // Profiler works
 
-        #define PROFILELOG(x)                                 \
-            do {                                              \
-                if (true) {                                   \
+        #define PROFILELOG(x)                                \
+            do {                                             \
+                if (true) {                                  \
                     CIPHER_DIAGNOSTIC_OUT << x << std::endl; \
-                }                                             \
+                }                                            \
             } while (0)
 
         // debugging macro prints typography of x and value of x on cerr
-        #define PROFILELOGEXP(x)                                           \
-            do {                                                           \
-                if (true) {                                                \
+        #define PROFILELOGEXP(x)                                          \
+            do {                                                          \
+                if (true) {                                               \
                     CIPHER_DIAGNOSTIC_OUT << #x << ":" << x << std::endl; \
-                }                                                          \
+                }                                                         \
             } while (0)
 
         // debugging macro prints value of x and location in codex on cerr
-        #define PROFILELOGWHERE(x)                                                                         \
-            do {                                                                                           \
-                if (true) {                                                                                \
+        #define PROFILELOGWHERE(x)                                                                        \
+            do {                                                                                          \
+                if (true) {                                                                               \
                     CIPHER_DIAGNOSTIC_OUT << #x << ":" << x << " at " << __FILE__ << " line " << __LINE__ \
-                                           << std::endl;                                                   \
-                }                                                                                          \
+                                          << std::endl;                                                   \
+                }                                                                                         \
             } while (0)
 
     #else  // #if!defined(PROFILE) // profiling a noop
@@ -163,28 +163,28 @@
         #define CIPHER_DEBUGWHERE(x)
         #define CIPHER_DEBUGHERE()
 
-        #define PROFILELOG(x)                                 \
-            do {                                              \
-                if (true) {                                   \
+        #define PROFILELOG(x)                                \
+            do {                                             \
+                if (true) {                                  \
                     CIPHER_DIAGNOSTIC_ERR << x << std::endl; \
-                }                                             \
+                }                                            \
             } while (0)
 
         // debugging macro prints typography of x and value of x on cerr
-        #define PROFILELOGEXP(x)                                           \
-            do {                                                           \
-                if (true) {                                                \
+        #define PROFILELOGEXP(x)                                          \
+            do {                                                          \
+                if (true) {                                               \
                     CIPHER_DIAGNOSTIC_OUT << #x << ":" << x << std::endl; \
-                }                                                          \
+                }                                                         \
             } while (0)
 
         // debugging macro prints value of x and location in codex on cerr
-        #define PROFILELOGWHERE(x)                                                                         \
-            do {                                                                                           \
-                if (true) {                                                                                \
+        #define PROFILELOGWHERE(x)                                                                        \
+            do {                                                                                          \
+                if (true) {                                                                               \
                     CIPHER_DIAGNOSTIC_OUT << #x << ":" << x << " at " << __FILE__ << " line " << __LINE__ \
-                                           << std::endl;                                                   \
-                }                                                                                          \
+                                          << std::endl;                                                   \
+                }                                                                                         \
             } while (0)
 
         #define TIC(t)    t = ::cipher::time_now()

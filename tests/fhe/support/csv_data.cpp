@@ -114,7 +114,7 @@ std::vector<std::vector<std::string>> read_data_file(const std::string& data_fil
         CIPHER_THROW(err_msg);
     } catch (...) {
         std::string err_msg(std::string("Unknown exception for data file ") + data_file_name + ": type " +
-                           UNIT_TEST_EXCEPTION_TYPE_NAME);
+                            UNIT_TEST_EXCEPTION_TYPE_NAME);
         CIPHER_THROW(err_msg);
     }
 }

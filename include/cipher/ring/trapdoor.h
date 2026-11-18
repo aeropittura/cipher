@@ -112,8 +112,8 @@ class RlweTrapdoorUtility {
      * and trapdoor itself
      */
     static std::pair<Matrix<Element>, RlweTrapdoorPair<Element>> trapdoor_gen(std::shared_ptr<ParmType> params,
-                                                                             double stddev, int64_t base = 2,
-                                                                             bool bal = false);
+                                                                              double stddev, int64_t base = 2,
+                                                                              bool bal = false);
 
     /**
      * Generalized trapdoor generation method (described in "Implementing
@@ -129,10 +129,8 @@ class RlweTrapdoorUtility {
      * @return the trapdoor pair including the public key (matrix of rings) and
      * trapdoor itself
      */
-    static std::pair<Matrix<Element>, RlweTrapdoorPair<Element>> trapdoor_gen_square_mat(std::shared_ptr<ParmType> params,
-                                                                                      double stddev, size_t dimension,
-                                                                                      int64_t base = 2,
-                                                                                      bool bal = false);
+    static std::pair<Matrix<Element>, RlweTrapdoorPair<Element>> trapdoor_gen_square_mat(
+            std::shared_ptr<ParmType> params, double stddev, size_t dimension, int64_t base = 2, bool bal = false);
 
     /**
      * Gaussian sampling as described in Alogorithm 2 of
@@ -151,7 +149,7 @@ class RlweTrapdoorUtility {
      * @return the sampled vector (matrix)
      */
     static Matrix<Element> gauss_samp(size_t n, size_t k, const Matrix<Element>& A, const RlweTrapdoorPair<Element>& T,
-                                     const Element& u, DggType& dgg, DggType& dgg_large_sigma, int64_t base = 2);
+                                      const Element& u, DggType& dgg, DggType& dgg_large_sigma, int64_t base = 2);
 
     /**
      * Gaussian sampling (described in "Implementing Token-Based Obfuscation under
@@ -169,8 +167,8 @@ class RlweTrapdoorUtility {
      * @return the sampled vector (matrix)
      */
     static Matrix<Element> gauss_samp_square_mat(size_t n, size_t k, const Matrix<Element>& A,
-                                              const RlweTrapdoorPair<Element>& T, const Matrix<Element>& U,
-                                              DggType& dgg, DggType& dgg_large_sigma, int64_t base = 2);
+                                                 const RlweTrapdoorPair<Element>& T, const Matrix<Element>& U,
+                                                 DggType& dgg, DggType& dgg_large_sigma, int64_t base = 2);
 
     /**
      * On-line stage of pre-image sampling (includes only G-sampling)
@@ -188,8 +186,9 @@ class RlweTrapdoorUtility {
      * @return the sampled vector (matrix)
      */
     static Matrix<Element> gauss_samp_online(size_t n, size_t k, const Matrix<Element>& A,
-                                           const RlweTrapdoorPair<Element>& T, const Element& u, DggType& dgg,
-                                           const std::shared_ptr<Matrix<Element>> perturbation_vector, int64_t base = 2);
+                                             const RlweTrapdoorPair<Element>& T, const Element& u, DggType& dgg,
+                                             const std::shared_ptr<Matrix<Element>> perturbation_vector,
+                                             int64_t base = 2);
 
     /**
      * Offline stage of pre-image sampling (perturbation sampling)
@@ -204,7 +203,8 @@ class RlweTrapdoorUtility {
      * @return the sampled vector (matrix)
      */
     static std::shared_ptr<Matrix<Element>> gauss_samp_offline(size_t n, size_t k, const RlweTrapdoorPair<Element>& T,
-                                                             DggType& dgg, DggType& dgg_large_sigma, int64_t base = 2);
+                                                               DggType& dgg, DggType& dgg_large_sigma,
+                                                               int64_t base = 2);
 
     /**
      * Method for perturbation generation as described in Algorithm 4 of
@@ -220,8 +220,8 @@ class RlweTrapdoorUtility {
      *@param perturbation_vector perturbation vector;output of the function
      */
     static void z_sample_sigma_p(size_t n, double s, double sigma, const RlweTrapdoorPair<Element>& tprime,
-                              const DggType& dgg, const DggType& dgg_large_sigma,
-                              std::shared_ptr<Matrix<Element>> perturbation_vector) {
+                                 const DggType& dgg, const DggType& dgg_large_sigma,
+                                 std::shared_ptr<Matrix<Element>> perturbation_vector) {
         CIPHER_DEBUG_FLAG(false);
         TimeVar t1, t1_tot;
 
@@ -365,8 +365,8 @@ class RlweTrapdoorUtility {
      *@param perturbation_vector perturbation vector;output of the function
      */
     static void sample_pert_square_mat(size_t n, double s, double sigma, const RlweTrapdoorPair<Element>& tprime,
-                                    const DggType& dgg, const DggType& dgg_large_sigma,
-                                    std::shared_ptr<Matrix<Element>> perturbation_vector) {
+                                       const DggType& dgg, const DggType& dgg_large_sigma,
+                                       std::shared_ptr<Matrix<Element>> perturbation_vector) {
         Matrix<Element> R = tprime.r_;
         Matrix<Element> E = tprime.e_;
 

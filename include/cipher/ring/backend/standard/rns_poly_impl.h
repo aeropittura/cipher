@@ -58,8 +58,7 @@
 namespace cipher {
 
 template <typename VecType>
-RnsPolyImpl<VecType>::RnsPolyImpl(const PolyLargeType& rhs,
-                                    const std::shared_ptr<RnsPolyImpl::Params>& params) noexcept
+RnsPolyImpl<VecType>::RnsPolyImpl(const PolyLargeType& rhs, const std::shared_ptr<RnsPolyImpl::Params>& params) noexcept
     : RnsPolyImpl<VecType>::RnsPolyImpl(params, rhs.get_format(), true) {
     const uint32_t rdim = rhs.get_length();
     for (auto& v : vectors_) {
@@ -140,7 +139,7 @@ RnsPolyImpl<VecType>::RnsPolyImpl(const std::vector<RnsPolyImpl::PolyType>& towe
 
 template <typename VecType>
 RnsPolyImpl<VecType>::RnsPolyImpl(const DggType& dgg, const std::shared_ptr<RnsPolyImpl::Params>& dcrt_params,
-                                    Format format)
+                                  Format format)
     : params_{dcrt_params}, format_{format} {
     const uint32_t rdim = params_->get_ring_dimension();
     const auto dgg_values = dgg.generate_int_vector(rdim);
@@ -156,7 +155,7 @@ RnsPolyImpl<VecType>::RnsPolyImpl(const DggType& dgg, const std::shared_ptr<RnsP
         } else {
             for (uint32_t j = 0; j < rdim; ++j)
                 ildv[j] = (dgg_values[j] < 0) ? p->get_modulus() - static_cast<NativeInteger>(-dgg_values[j]) :
-                                               static_cast<NativeInteger>(dgg_values[j]);
+                                                static_cast<NativeInteger>(dgg_values[j]);
         }
         vectors_.emplace_back(p);
         vectors_.back().set_values(std::move(ildv), Format::COEFFICIENT);
@@ -170,7 +169,8 @@ RnsPolyImpl<VecType>::RnsPolyImpl(DugType& dug, const std::shared_ptr<Params>& d
     vectors_.reserve(params_->get_params().size());
     for (auto& p : params_->get_params()) {
         vectors_.emplace_back(p);
-        vectors_.back().set_values(NativeVector(dug.generate_vector(p->get_ring_dimension(), p->get_modulus())), format_);
+        vectors_.back().set_values(NativeVector(dug.generate_vector(p->get_ring_dimension(), p->get_modulus())),
+                                   format_);
     }
 }
 
@@ -191,7 +191,7 @@ RnsPolyImpl<VecType>::RnsPolyImpl(const BugType& bug, const std::shared_ptr<Para
 
 template <typename VecType>
 RnsPolyImpl<VecType>::RnsPolyImpl(const TugType& tug, const std::shared_ptr<Params>& dcrt_params, Format format,
-                                    uint32_t h)
+                                  uint32_t h)
     : params_{dcrt_params}, format_{format} {
     const uint32_t rdim = params_->get_ring_dimension();
     const auto tug_values = tug.generate_int_vector(rdim, h);
@@ -200,7 +200,7 @@ RnsPolyImpl<VecType>::RnsPolyImpl(const TugType& tug, const std::shared_ptr<Para
         NativeVector iltvs(rdim, p->get_modulus());
         for (uint32_t j = 0; j < rdim; ++j)
             iltvs[j] = (tug_values[j] < 0) ? p->get_modulus() - static_cast<NativeInteger>(-tug_values[j]) :
-                                            static_cast<NativeInteger>(tug_values[j]);
+                                             static_cast<NativeInteger>(tug_values[j]);
         vectors_.emplace_back(p);
         vectors_.back().set_values(std::move(iltvs), Format::COEFFICIENT);
         vectors_.back().set_format(format_);
@@ -233,7 +233,8 @@ RnsPolyImpl<VecType> RnsPolyImpl<VecType>::clone_towers(uint32_t start_tower, ui
 }
 
 template <typename VecType>
-std::vector<RnsPolyImpl<VecType>> RnsPolyImpl<VecType>::base_decompose(uint32_t base_bits, bool eval_mode_answer) const {
+std::vector<RnsPolyImpl<VecType>> RnsPolyImpl<VecType>::base_decompose(uint32_t base_bits,
+                                                                       bool eval_mode_answer) const {
     auto bd_v(crt_interpolate().base_decompose(base_bits, false));
     std::vector<RnsPolyImpl<VecType>> result;
     result.reserve(bd_v.size());
@@ -262,7 +263,7 @@ std::vector<RnsPolyImpl<VecType>> RnsPolyImpl<VecType>::crt_decompose(uint32_t b
                 if (i != k) {
                     RnsPolyImpl::PolyType tmp((*coef).vectors_[k].get_params(), Format::COEFFICIENT);
                     tmp.set_values(NativeVector((*coef).vectors_[i].get_values(), (*coef).vectors_[k].get_modulus()),
-                                  Format::COEFFICIENT);
+                                   Format::COEFFICIENT);
                     tmp.set_format(Format::EVALUATION);
                     result[i].vectors_[k] = std::move(tmp);
                 }
@@ -296,7 +297,7 @@ std::vector<RnsPolyImpl<VecType>> RnsPolyImpl<VecType>::crt_decompose(uint32_t b
                 if (i != k) {
                     RnsPolyImpl::PolyType tmp((*coef).vectors_[k].get_params(), Format::COEFFICIENT);
                     tmp.set_values(NativeVector(decomposed[j].get_values(), (*coef).vectors_[k].get_modulus()),
-                                  Format::COEFFICIENT);
+                                   Format::COEFFICIENT);
                     current_rns_poly.vectors_[k] = std::move(tmp);
                 }
             }
@@ -347,7 +348,7 @@ RnsPolyImpl<VecType> RnsPolyImpl<VecType>::automorphism_transform(uint32_t idx) 
 
 template <typename VecType>
 RnsPolyImpl<VecType> RnsPolyImpl<VecType>::automorphism_transform(uint32_t idx,
-                                                                   const std::vector<uint32_t>& vec) const {
+                                                                  const std::vector<uint32_t>& vec) const {
     RnsPolyImpl<VecType> tmp(params_, format_);
     uint32_t size(vectors_.size());
 #pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(size))
@@ -941,22 +942,23 @@ RnsPolyImpl<VecType> RnsPolyImpl<VecType>::approx_switch_crt_basis(
         const std::vector<std::vector<NativeInteger>>& q_hat_modp,
         const std::vector<DoubleNativeInt>& modp_barrett_mu) const {
     RnsPolyImpl<VecType> ans(params_p, format_, true);
-    uint32_t size_q = (vectors_.size() > params_q->get_params().size()) ? params_q->get_params().size() : vectors_.size();
+    uint32_t size_q =
+            (vectors_.size() > params_q->get_params().size()) ? params_q->get_params().size() : vectors_.size();
     uint32_t size_p = ans.vectors_.size();
 #if defined(CIPHER_HAVE_INT128) && (CIPHER_NATIVE_INT == 64) && !defined(CIPHER_WITH_REDUCED_NOISE) && \
         (defined(CIPHER_WITH_OPENMP) || (defined(__clang__) && !defined(CIPHER_WITH_NATIVEOPT)))
     uint32_t ring_dim = params_->get_ring_dimension();
     std::vector<DoubleNativeInt> sum(size_p);
-    #pragma omp parallel for firstprivate(sum) \
-            num_threads(cipher_parallel_controls.get_thread_limit(approx_switch_crt_basis_threads(ring_dim, size_q, size_p)))
+    #pragma omp parallel for firstprivate(sum) num_threads(cipher_parallel_controls.get_thread_limit( \
+                    approx_switch_crt_basis_threads(ring_dim, size_q, size_p)))
     for (uint32_t ri = 0; ri < ring_dim; ++ri) {
         std::fill(sum.begin(), sum.end(), 0);
         for (uint32_t i = 0; i < size_q; ++i) {
             const auto& q_hat_modpi = q_hat_modp[i];
             const auto& qi = vectors_[i].get_modulus();
             const auto x_q_hat_inv_modqi = vectors_[i][ri]
-                                               .mod_mul_fast_const(q_hat_inv_modq[i], qi, q_hat_inv_modq_precon[i])
-                                               .template convert_to_int<uint64_t>();
+                                                   .mod_mul_fast_const(q_hat_inv_modq[i], qi, q_hat_inv_modq_precon[i])
+                                                   .template convert_to_int<uint64_t>();
             for (uint32_t j = 0; j < size_p; ++j)
                 sum[j] += mul128(x_q_hat_inv_modqi, q_hat_modpi[j].convert_to_int<uint64_t>());
         }
@@ -984,22 +986,24 @@ RnsPolyImpl<VecType> RnsPolyImpl<VecType>::approx_switch_crt_basis(
 }
 
 template <typename VecType>
-void RnsPolyImpl<VecType>::approx_mod_up(const std::shared_ptr<Params>& params_q, const std::shared_ptr<Params>& params_p,
-                                        const std::shared_ptr<Params>& params_qp,
-                                        const std::vector<NativeInteger>& q_hat_inv_modq,
-                                        const std::vector<NativeInteger>& q_hat_inv_modq_precon,
-                                        const std::vector<std::vector<NativeInteger>>& q_hat_modp,
-                                        const std::vector<DoubleNativeInt>& modp_barrett_mu) {
+void RnsPolyImpl<VecType>::approx_mod_up(const std::shared_ptr<Params>& params_q,
+                                         const std::shared_ptr<Params>& params_p,
+                                         const std::shared_ptr<Params>& params_qp,
+                                         const std::vector<NativeInteger>& q_hat_inv_modq,
+                                         const std::vector<NativeInteger>& q_hat_inv_modq_precon,
+                                         const std::vector<std::vector<NativeInteger>>& q_hat_modp,
+                                         const std::vector<DoubleNativeInt>& modp_barrett_mu) {
     // if input polynomial in evaluation representation, store for later use to reduce number of NTTs
     std::vector<RnsPolyImpl::PolyType> poly_in_ntt;
     if (format_ == Format::EVALUATION) {
         poly_in_ntt = vectors_;
         const uint32_t size_q = std::min<uint32_t>(vectors_.size(), params_q->get_params().size());
-        this->set_format(Format::COEFFICIENT,
-                        approx_switch_crt_basis_threads(params_->get_ring_dimension(), size_q, params_p->get_params().size()));
+        this->set_format(Format::COEFFICIENT, approx_switch_crt_basis_threads(params_->get_ring_dimension(), size_q,
+                                                                              params_p->get_params().size()));
     }
 
-    auto part_p = this->approx_switch_crt_basis(params_q, params_p, q_hat_inv_modq, q_hat_inv_modq_precon, q_hat_modp, modp_barrett_mu);
+    auto part_p = this->approx_switch_crt_basis(params_q, params_p, q_hat_inv_modq, q_hat_inv_modq_precon, q_hat_modp,
+                                                modp_barrett_mu);
 
     if (poly_in_ntt.size() > 0)
         vectors_ = std::move(poly_in_ntt);
@@ -1007,7 +1011,7 @@ void RnsPolyImpl<VecType>::approx_mod_up(const std::shared_ptr<Params>& params_q
     uint32_t size_qp = params_qp->get_params().size();
     vectors_.reserve(size_qp);
     vectors_.insert(vectors_.end(), std::make_move_iterator(part_p.vectors_.begin()),
-                     std::make_move_iterator(part_p.vectors_.end()));
+                    std::make_move_iterator(part_p.vectors_.end()));
 
 #pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(size_qp))
     for (uint32_t i = 0; i < size_qp; ++i)
@@ -1037,7 +1041,8 @@ RnsPolyImpl<VecType> RnsPolyImpl<VecType>::approx_mod_down(
             part_p.vectors_[j] *= t_inv_modp[j];
     }
     part_p.override_format(Format::COEFFICIENT);
-    part_p = part_p.approx_switch_crt_basis(params_p, params_q, p_hat_inv_modp, p_hat_inv_modp_precon, p_hat_modq, modq_barrett_mu);
+    part_p = part_p.approx_switch_crt_basis(params_p, params_q, p_hat_inv_modp, p_hat_inv_modp_precon, p_hat_modq,
+                                            modq_barrett_mu);
 
     RnsPolyImpl<VecType> ans(params_q, Format::EVALUATION);
     if (uint32_t diff_q = params_q->get_params().size() - size_q; diff_q != 0)
@@ -1100,7 +1105,8 @@ RnsPolyImpl<VecType> RnsPolyImpl<VecType>::switch_crt_basis(const std::shared_pt
             ans.vectors_[j][ri] = cur_native_value.mod_sub_fast(alpha_q_modpri[j], pj);
 #else
             for (uint32_t i = 0; i < size_q; ++i)
-                ans.vectors_[j][ri].mod_add_fast_eq(x_q_hat_inv_modq[i].mod(pj).mod_mul_fast(q_hat_modpj[i], pj, mu[j]), pj);
+                ans.vectors_[j][ri].mod_add_fast_eq(x_q_hat_inv_modq[i].mod(pj).mod_mul_fast(q_hat_modpj[i], pj, mu[j]),
+                                                    pj);
             ans.vectors_[j][ri].mod_sub_fast_eq(alpha_q_modpri[j], pj);
 #endif
         }
@@ -1110,13 +1116,13 @@ RnsPolyImpl<VecType> RnsPolyImpl<VecType>::switch_crt_basis(const std::shared_pt
 
 template <typename VecType>
 void RnsPolyImpl<VecType>::expand_crt_basis(const std::shared_ptr<Params>& params_qp,
-                                           const std::shared_ptr<Params>& params_p,
-                                           const std::vector<NativeInteger>& q_hat_inv_modq,
-                                           const std::vector<NativeInteger>& q_hat_inv_modq_precon,
-                                           const std::vector<std::vector<NativeInteger>>& q_hat_modp,
-                                           const std::vector<std::vector<NativeInteger>>& alpha_q_modp,
-                                           const std::vector<DoubleNativeInt>& modp_barrett_mu,
-                                           const std::vector<double>& q_inv, Format result_format) {
+                                            const std::shared_ptr<Params>& params_p,
+                                            const std::vector<NativeInteger>& q_hat_inv_modq,
+                                            const std::vector<NativeInteger>& q_hat_inv_modq_precon,
+                                            const std::vector<std::vector<NativeInteger>>& q_hat_modp,
+                                            const std::vector<std::vector<NativeInteger>>& alpha_q_modp,
+                                            const std::vector<DoubleNativeInt>& modp_barrett_mu,
+                                            const std::vector<double>& q_inv, Format result_format) {
     // if input polynomial in evaluation representation, store for later use to reduce number of NTTs
     std::vector<RnsPolyImpl::PolyType> poly_in_ntt;
     if (format_ == Format::EVALUATION) {
@@ -1124,8 +1130,8 @@ void RnsPolyImpl<VecType>::expand_crt_basis(const std::shared_ptr<Params>& param
         this->set_format(Format::COEFFICIENT, THREADS_CRT_BASIS_SWITCH);
     }
 
-    auto part_p =
-            this->switch_crt_basis(params_p, q_hat_inv_modq, q_hat_inv_modq_precon, q_hat_modp, alpha_q_modp, modp_barrett_mu, q_inv);
+    auto part_p = this->switch_crt_basis(params_p, q_hat_inv_modq, q_hat_inv_modq_precon, q_hat_modp, alpha_q_modp,
+                                         modp_barrett_mu, q_inv);
 
     if ((result_format == Format::EVALUATION) && (poly_in_ntt.size() > 0))
         vectors_ = std::move(poly_in_ntt);
@@ -1133,7 +1139,7 @@ void RnsPolyImpl<VecType>::expand_crt_basis(const std::shared_ptr<Params>& param
     uint32_t size_qp = params_qp->get_params().size();
     vectors_.reserve(size_qp);
     vectors_.insert(vectors_.end(), std::make_move_iterator(part_p.vectors_.begin()),
-                     std::make_move_iterator(part_p.vectors_.end()));
+                    std::make_move_iterator(part_p.vectors_.end()));
 
 #pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(size_qp))
     for (uint32_t i = 0; i < size_qp; ++i)
@@ -1144,13 +1150,13 @@ void RnsPolyImpl<VecType>::expand_crt_basis(const std::shared_ptr<Params>& param
 
 template <typename VecType>
 void RnsPolyImpl<VecType>::expand_crt_basis_reverse_order(const std::shared_ptr<Params>& params_qp,
-                                                       const std::shared_ptr<Params>& params_p,
-                                                       const std::vector<NativeInteger>& q_hat_inv_modq,
-                                                       const std::vector<NativeInteger>& q_hat_inv_modq_precon,
-                                                       const std::vector<std::vector<NativeInteger>>& q_hat_modp,
-                                                       const std::vector<std::vector<NativeInteger>>& alpha_q_modp,
-                                                       const std::vector<DoubleNativeInt>& modp_barrett_mu,
-                                                       const std::vector<double>& q_inv, Format result_format) {
+                                                          const std::shared_ptr<Params>& params_p,
+                                                          const std::vector<NativeInteger>& q_hat_inv_modq,
+                                                          const std::vector<NativeInteger>& q_hat_inv_modq_precon,
+                                                          const std::vector<std::vector<NativeInteger>>& q_hat_modp,
+                                                          const std::vector<std::vector<NativeInteger>>& alpha_q_modp,
+                                                          const std::vector<DoubleNativeInt>& modp_barrett_mu,
+                                                          const std::vector<double>& q_inv, Format result_format) {
     // if input polynomial in evaluation representation, store for later use to reduce number of NTTs
     std::vector<RnsPolyImpl::PolyType> poly_in_ntt;
     if (format_ == Format::EVALUATION) {
@@ -1158,8 +1164,8 @@ void RnsPolyImpl<VecType>::expand_crt_basis_reverse_order(const std::shared_ptr<
         this->set_format(Format::COEFFICIENT, THREADS_CRT_BASIS_SWITCH);
     }
 
-    auto part_p =
-            this->switch_crt_basis(params_p, q_hat_inv_modq, q_hat_inv_modq_precon, q_hat_modp, alpha_q_modp, modp_barrett_mu, q_inv);
+    auto part_p = this->switch_crt_basis(params_p, q_hat_inv_modq, q_hat_inv_modq_precon, q_hat_modp, alpha_q_modp,
+                                         modp_barrett_mu, q_inv);
 
     if ((result_format == Format::EVALUATION) && (poly_in_ntt.size() > 0))
         vectors_ = std::move(poly_in_ntt);
@@ -1180,24 +1186,24 @@ void RnsPolyImpl<VecType>::expand_crt_basis_reverse_order(const std::shared_ptr<
 template <typename VecType>
 void RnsPolyImpl<VecType>::fast_expand_crt_basis_plover_q(const Precomputations& precomputed) {
     auto part_pl = this->approx_switch_crt_basis(params_, precomputed.params_pl, precomputed.m_pl_q_hat_inv_modq,
-                                             precomputed.m_pl_q_hat_inv_modq_precon, precomputed.q_inv_modp,
-                                             precomputed.modp_barrett_mu);
-    auto part_ql = part_pl.switch_crt_basis(precomputed.params_ql, precomputed.pl_hat_inv_modp, precomputed.pl_hat_inv_modp_precon,
-                                        precomputed.pl_hat_modq, precomputed.alpha_pl_modq, precomputed.modq_barrett_mu,
-                                        precomputed.p_inv);
+                                                 precomputed.m_pl_q_hat_inv_modq_precon, precomputed.q_inv_modp,
+                                                 precomputed.modp_barrett_mu);
+    auto part_ql = part_pl.switch_crt_basis(precomputed.params_ql, precomputed.pl_hat_inv_modp,
+                                            precomputed.pl_hat_inv_modp_precon, precomputed.pl_hat_modq,
+                                            precomputed.alpha_pl_modq, precomputed.modq_barrett_mu, precomputed.p_inv);
 
     vectors_ = std::move(part_ql.vectors_);
     vectors_.reserve(part_ql.vectors_.size() + part_pl.vectors_.size());
     vectors_.insert(vectors_.end(), std::make_move_iterator(part_pl.vectors_.begin()),
-                     std::make_move_iterator(part_pl.vectors_.end()));
+                    std::make_move_iterator(part_pl.vectors_.end()));
     params_ = precomputed.params_ql_pl;
 }
 
 template <typename VecType>
 void RnsPolyImpl<VecType>::expand_crt_basis_ql_hat(const std::shared_ptr<Params>& params_q,
-                                                const std::vector<NativeInteger>& ql_hat_modq,
-                                                const std::vector<NativeInteger>& ql_hat_modq_precon,
-                                                const uint32_t size_q) {
+                                                   const std::vector<NativeInteger>& ql_hat_modq,
+                                                   const std::vector<NativeInteger>& ql_hat_modq_precon,
+                                                   const uint32_t size_q) {
     uint32_t size_ql(vectors_.size());
     uint32_t ring_dim(params_->get_ring_dimension());
 #pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(size_ql))
@@ -1221,7 +1227,8 @@ typename RnsPolyImpl<VecType>::PolyType RnsPolyImpl<VecType>::scale_and_round(
         const NativeInteger& t, const std::vector<NativeInteger>& t_q_hat_inv_modq_divq_modt,
         const std::vector<NativeInteger>& t_q_hat_inv_modq_divq_modt_precon,
         const std::vector<NativeInteger>& t_q_hat_inv_modq_b_divq_modt,
-        const std::vector<NativeInteger>& t_q_hat_inv_modq_b_divq_modt_precon, const std::vector<double>& t_q_hat_inv_modq_divq_frac,
+        const std::vector<NativeInteger>& t_q_hat_inv_modq_b_divq_modt_precon,
+        const std::vector<double>& t_q_hat_inv_modq_divq_frac,
         const std::vector<double>& t_q_hat_inv_modq_divq_b_frac) const {
     uint32_t ring_dim = params_->get_ring_dimension();
     uint32_t size_q = vectors_.size();
@@ -1289,7 +1296,8 @@ typename RnsPolyImpl<VecType>::PolyType RnsPolyImpl<VecType>::scale_and_round(
 
                         float_sum += tmp.convert_to_double() * t_q_hat_inv_modq_divq_frac[i];
 
-                        tmp.mod_mul_fast_const_eq(t_q_hat_inv_modq_divq_modt[i], t, t_q_hat_inv_modq_divq_modt_precon[i]);
+                        tmp.mod_mul_fast_const_eq(t_q_hat_inv_modq_divq_modt[i], t,
+                                                  t_q_hat_inv_modq_divq_modt_precon[i]);
                         int_sum.add_eq_fast(tmp);
                     }
                     int_sum += static_cast<uint64_t>(float_sum);
@@ -1341,8 +1349,10 @@ typename RnsPolyImpl<VecType>::PolyType RnsPolyImpl<VecType>::scale_and_round(
                         float_sum += tmp_lo.convert_to_double() * t_q_hat_inv_modq_divq_frac[i];
                         float_sum += tmp_hi.convert_to_double() * t_q_hat_inv_modq_divq_b_frac[i];
 
-                        tmp_lo.mod_mul_fast_const_eq(t_q_hat_inv_modq_divq_modt[i], t, t_q_hat_inv_modq_divq_modt_precon[i]);
-                        tmp_hi.mod_mul_fast_const_eq(t_q_hat_inv_modq_b_divq_modt[i], t, t_q_hat_inv_modq_b_divq_modt_precon[i]);
+                        tmp_lo.mod_mul_fast_const_eq(t_q_hat_inv_modq_divq_modt[i], t,
+                                                     t_q_hat_inv_modq_divq_modt_precon[i]);
+                        tmp_hi.mod_mul_fast_const_eq(t_q_hat_inv_modq_b_divq_modt[i], t,
+                                                     t_q_hat_inv_modq_b_divq_modt_precon[i]);
                         int_sum.add_eq_fast(tmp_lo);
                         int_sum.add_eq_fast(tmp_hi);
                     }
@@ -1405,8 +1415,8 @@ typename RnsPolyImpl<VecType>::PolyType RnsPolyImpl<VecType>::scale_and_round(
                     for (uint32_t i = 0; i < size_q; ++i) {
                         const auto& tmp = vectors_[i][ri];
                         float_sum += tmp.convert_to_double() * t_q_hat_inv_modq_divq_frac[i];
-                        int_sum.add_eq_fast(
-                                tmp.mod_mul_fast_const(t_q_hat_inv_modq_divq_modt[i], t, t_q_hat_inv_modq_divq_modt_precon[i]));
+                        int_sum.add_eq_fast(tmp.mod_mul_fast_const(t_q_hat_inv_modq_divq_modt[i], t,
+                                                                   t_q_hat_inv_modq_divq_modt_precon[i]));
                     }
                     // compute modulo reduction by finding the quotient using doubles
                     // and then substracting quotient * t
@@ -1463,8 +1473,10 @@ typename RnsPolyImpl<VecType>::PolyType RnsPolyImpl<VecType>::scale_and_round(
                         float_sum += tmp_lo.convert_to_double() * t_q_hat_inv_modq_divq_frac[i];
                         float_sum += tmp_hi.convert_to_double() * t_q_hat_inv_modq_divq_b_frac[i];
 
-                        tmp_lo.mod_mul_fast_const_eq(t_q_hat_inv_modq_divq_modt[i], t, t_q_hat_inv_modq_divq_modt_precon[i]);
-                        tmp_hi.mod_mul_fast_const_eq(t_q_hat_inv_modq_b_divq_modt[i], t, t_q_hat_inv_modq_b_divq_modt_precon[i]);
+                        tmp_lo.mod_mul_fast_const_eq(t_q_hat_inv_modq_divq_modt[i], t,
+                                                     t_q_hat_inv_modq_divq_modt_precon[i]);
+                        tmp_hi.mod_mul_fast_const_eq(t_q_hat_inv_modq_b_divq_modt[i], t,
+                                                     t_q_hat_inv_modq_b_divq_modt_precon[i]);
                         int_sum.add_eq_fast(tmp_lo);
                         int_sum.add_eq_fast(tmp_hi);
                     }
@@ -1491,7 +1503,8 @@ typename RnsPolyImpl<VecType>::PolyType RnsPolyImpl<VecType>::scale_and_round(
 
 template <typename VecType>
 RnsPolyImpl<VecType> RnsPolyImpl<VecType>::approx_scale_and_round(
-        const std::shared_ptr<Params>& params_p, const std::vector<std::vector<NativeInteger>>& t_ps_hat_inv_mods_divs_modp,
+        const std::shared_ptr<Params>& params_p,
+        const std::vector<std::vector<NativeInteger>>& t_ps_hat_inv_mods_divs_modp,
         const std::vector<DoubleNativeInt>& modp_barret_mu) const {
     RnsPolyImpl<VecType> ans(params_p, format_, true);
     uint32_t size_qp = vectors_.size();
@@ -1536,7 +1549,8 @@ template <typename VecType>
 RnsPolyImpl<VecType> RnsPolyImpl<VecType>::scale_and_round(
         const std::shared_ptr<Params>& params_output,
         const std::vector<std::vector<NativeInteger>>& t_os_hat_inv_mods_divs_modo,
-        const std::vector<double>& t_os_hat_inv_mods_divs_frac, const std::vector<DoubleNativeInt>& modo_barret_mu) const {
+        const std::vector<double>& t_os_hat_inv_mods_divs_frac,
+        const std::vector<DoubleNativeInt>& modo_barret_mu) const {
     if constexpr (CIPHER_NATIVE_INT == 32)
         CIPHER_THROW("Use of ScaleAndRound with NATIVEINT == 32 may lead to overflow");
 
@@ -1607,7 +1621,8 @@ RnsPolyImpl<VecType> RnsPolyImpl<VecType>::scale_and_round(
 
                 ans.vectors_[j][ri] =
                         NativeInteger(cur_native_value)
-                                .mod_add_fast(barrett_uint128_mod_uint64(alpha, oj.convert_to_int(), modo_barret_mu[j]), oj);
+                                .mod_add_fast(barrett_uint128_mod_uint64(alpha, oj.convert_to_int(), modo_barret_mu[j]),
+                                              oj);
             }
         }
 #else
@@ -1673,9 +1688,9 @@ typename RnsPolyImpl<VecType>::PolyType RnsPolyImpl<VecType>::scale_and_round(
             // -tmp/qi mod gamma*t < 2^58
             const NativeInteger& qi = moduli_q[i];
             s.mod_add_fast_eq(vectors_[i][k]
-                                   .mod_mul_fast_const(tgamma_q_hat_modq[i], qi, tgamma_q_hat_modq_precon[i])
-                                   .mod_mul_fast_const(neg_invq_modtgamma[i], tgamma, neg_invq_modtgamma_precon[i]),
-                           tgamma);
+                                      .mod_mul_fast_const(tgamma_q_hat_modq[i], qi, tgamma_q_hat_modq_precon[i])
+                                      .mod_mul_fast_const(neg_invq_modtgamma[i], tgamma, neg_invq_modtgamma_precon[i]),
+                              tgamma);
         }
 
         // Compute s + s & (gamma-1)
@@ -1697,7 +1712,7 @@ typename RnsPolyImpl<VecType>::PolyType RnsPolyImpl<VecType>::scale_and_round(
 
 template <typename VecType>
 void RnsPolyImpl<VecType>::scale_and_round_p_over_q(const std::shared_ptr<Params>& params_q,
-                                                const std::vector<NativeInteger>& p_inv_modq) {
+                                                    const std::vector<NativeInteger>& p_inv_modq) {
     params_ = params_q;
 
     const uint32_t size_q = vectors_.size() - 1;
@@ -1719,7 +1734,8 @@ template <typename VecType>
 void RnsPolyImpl<VecType>::fast_base_convq_to_bsk_montgomery(
         const std::shared_ptr<Params>& params_q_bsk, const std::vector<NativeInteger>& moduli_q,
         const std::vector<NativeInteger>& moduli_bsk, const std::vector<DoubleNativeInt>& modbsk_barrett_mu,
-        const std::vector<NativeInteger>& mtilde_q_hat_inv_modq, const std::vector<NativeInteger>& mtilde_q_hat_inv_modq_precon,
+        const std::vector<NativeInteger>& mtilde_q_hat_inv_modq,
+        const std::vector<NativeInteger>& mtilde_q_hat_inv_modq_precon,
         const std::vector<std::vector<NativeInteger>>& q_hat_modbsk, const std::vector<uint64_t>& q_hat_modmtilde,
         const std::vector<NativeInteger>& q_modbsk, const std::vector<NativeInteger>& q_modbsk_precon,
         uint64_t neg_q_inv_modmtilde, const std::vector<NativeInteger>& mtilde_inv_modbsk,
@@ -1758,8 +1774,8 @@ void RnsPolyImpl<VecType>::fast_base_convq_to_bsk_montgomery(
         const auto& mtilde_q_hat_inv_modq_preconi = mtilde_q_hat_inv_modq_precon[i];
         const auto& q_hat_modmtildei = q_hat_modmtilde[i];
         for (uint32_t k = 0; k < n; ++k) {
-            ximtilde_q_hat_modqi[i * n + k] =
-                    vectors_[i][k].mod_mul_fast_const(mtilde_q_hat_inv_modqi, moduli_q[i], mtilde_q_hat_inv_modq_preconi);
+            ximtilde_q_hat_modqi[i * n + k] = vectors_[i][k].mod_mul_fast_const(mtilde_q_hat_inv_modqi, moduli_q[i],
+                                                                                mtilde_q_hat_inv_modq_preconi);
             result_mtilde[k] += ximtilde_q_hat_modqi[i * n + k].convert_to_int<uint64_t>() * q_hat_modmtildei;
         }
     }
@@ -1782,7 +1798,8 @@ void RnsPolyImpl<VecType>::fast_base_convq_to_bsk_montgomery(
             for (uint32_t i = 0; i < num_q; ++i)
                 result += mul128(ximtilde_q_hat_modqi[i * n + k].convert_to_int<uint64_t>(),
                                  q_hat_modbsk[i][j].convert_to_int<uint64_t>());
-            vectors_[num_q + j][k] = barrett_uint128_mod_uint64(result, moduli_bskj.convert_to_int(), modbsk_barrett_mu[j]);
+            vectors_[num_q + j][k] =
+                    barrett_uint128_mod_uint64(result, moduli_bskj.convert_to_int(), modbsk_barrett_mu[j]);
 #else
             for (uint32_t i = 0; i < num_q; ++i)
                 vectors_[num_q + j][k].mod_add_fast_eq(
@@ -1790,10 +1807,11 @@ void RnsPolyImpl<VecType>::fast_base_convq_to_bsk_montgomery(
 #endif
             NativeInteger r_m_tilde(result_mtilde[k]);  // mtilde = 2^16 < all moduli of Bsk
             if (result_mtilde[k] >= mtilde_half)
-                r_m_tilde += moduli_bskj - mtilde;                               // centred remainder
+                r_m_tilde += moduli_bskj - mtilde;                                        // centred remainder
             r_m_tilde.mod_mul_fast_const_eq(q_mod_bskj, moduli_bskj, q_mod_bskj_precon);  // (r_mtilde) * q mod Bski
-            r_m_tilde.mod_add_fast_eq(vectors_[num_q + j][k], moduli_bskj);         // (c``_m + (r_mtilde* q)) mod Bski
-            vectors_[num_q + j][k] = r_m_tilde.mod_mul_fast_const(mtilde_inv_modbskj, moduli_bskj, mtilde_inv_modbsk_preconj);
+            r_m_tilde.mod_add_fast_eq(vectors_[num_q + j][k], moduli_bskj);  // (c``_m + (r_mtilde* q)) mod Bski
+            vectors_[num_q + j][k] =
+                    r_m_tilde.mod_mul_fast_const(mtilde_inv_modbskj, moduli_bskj, mtilde_inv_modbsk_preconj);
         }
         vectors_[num_q + j].set_format(Format::EVALUATION);
     }
@@ -1812,12 +1830,15 @@ void RnsPolyImpl<VecType>::fast_base_convq_to_bsk_montgomery(
 // Input: poly in basis {q U Bsk}
 // Output: approximateFloor(t/q*poly) in basis Bsk
 template <typename VecType>
-void RnsPolyImpl<VecType>::fast_rns_floorq(
-        const NativeInteger& t, const std::vector<NativeInteger>& moduli_q, const std::vector<NativeInteger>& moduli_bsk,
-        const std::vector<DoubleNativeInt>& modbsk_barrett_mu, const std::vector<NativeInteger>& t_q_hat_inv_modq,
-        const std::vector<NativeInteger>& t_q_hat_inv_modq_precon, const std::vector<std::vector<NativeInteger>>& q_hat_modbsk,
-        const std::vector<std::vector<NativeInteger>>& q_inv_modbsk, const std::vector<NativeInteger>& t_q_inv_modbsk,
-        const std::vector<NativeInteger>& t_q_inv_modbsk_precon) {
+void RnsPolyImpl<VecType>::fast_rns_floorq(const NativeInteger& t, const std::vector<NativeInteger>& moduli_q,
+                                           const std::vector<NativeInteger>& moduli_bsk,
+                                           const std::vector<DoubleNativeInt>& modbsk_barrett_mu,
+                                           const std::vector<NativeInteger>& t_q_hat_inv_modq,
+                                           const std::vector<NativeInteger>& t_q_hat_inv_modq_precon,
+                                           const std::vector<std::vector<NativeInteger>>& q_hat_modbsk,
+                                           const std::vector<std::vector<NativeInteger>>& q_inv_modbsk,
+                                           const std::vector<NativeInteger>& t_q_inv_modbsk,
+                                           const std::vector<NativeInteger>& t_q_inv_modbsk_precon) {
     uint32_t num_q(moduli_q.size());
     uint32_t num_bsk(moduli_bsk.size());
     uint32_t n(params_->get_ring_dimension());
@@ -1849,11 +1870,13 @@ void RnsPolyImpl<VecType>::fast_rns_floorq(
                 const auto& xi = vectors_[i][k];
                 aq += mul128(xi.template convert_to_int<uint64_t>(), q_inv_modbsk[i][j].convert_to_int<uint64_t>());
             }
-            txiqi_divq_modqi[j * n + k] = barrett_uint128_mod_uint64(aq, moduli_bskj.convert_to_int(), modbsk_barrett_mu[j]);
+            txiqi_divq_modqi[j * n + k] =
+                    barrett_uint128_mod_uint64(aq, moduli_bskj.convert_to_int(), modbsk_barrett_mu[j]);
 #else
             for (uint32_t i = 0; i < num_q; ++i) {
                 const auto& xi = vectors_[i][k];
-                txiqi_divq_modqi[j * n + k].mod_add_fast_eq(xi.mod_mul(q_inv_modbsk[i][j], moduli_bskj, mu[j]), moduli_bskj);
+                txiqi_divq_modqi[j * n + k].mod_add_fast_eq(xi.mod_mul(q_inv_modbsk[i][j], moduli_bskj, mu[j]),
+                                                            moduli_bskj);
             }
 #endif
             // now we have FastBaseConv( |t*ct|q, q, Bsk ) in txiqi_divq_modqi
@@ -1901,8 +1924,9 @@ void RnsPolyImpl<VecType>::fast_base_conv_sk(
         const auto& b_div_bi_mod_bi_precon = b_hat_inv_modb_precon[i];
         for (uint32_t k = 0; k < n; ++k) {
             vectors_[size_q + i][k].mod_mul_fast_const_eq(b_div_bi_mod_bi, moduli_bski, b_div_bi_mod_bi_precon);
-            alphaskx_vector[k].mod_add_fast_eq(vectors_[size_q + i][k].mod_mul(b_hat_modmski, moduli_bsk[size_bskm1], mu_bsk),
-                                           moduli_bsk[size_bskm1]);
+            alphaskx_vector[k].mod_add_fast_eq(
+                    vectors_[size_q + i][k].mod_mul(b_hat_modmski, moduli_bsk[size_bskm1], mu_bsk),
+                    moduli_bsk[size_bskm1]);
         }
     }
     for (uint32_t k = 0; k < n; ++k) {
@@ -1969,7 +1993,8 @@ void RnsPolyImpl<VecType>::switch_format(uint32_t thread_limit) {
 }
 
 template <typename VecType>
-void RnsPolyImpl<VecType>::switch_modulus_at_index(size_t index, const Integer& modulus, const Integer& root_of_unity_value) {
+void RnsPolyImpl<VecType>::switch_modulus_at_index(size_t index, const Integer& modulus,
+                                                   const Integer& root_of_unity_value) {
     if (index >= vectors_.size())
         CIPHER_THROW("Index out of range");
     vectors_[index].switch_modulus(PolyType::Integer(modulus.convert_to_int()),

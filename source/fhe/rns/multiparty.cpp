@@ -45,7 +45,7 @@
 namespace cipher {
 
 Ciphertext<RnsPoly> RnsMultiparty::multiparty_decrypt_lead(ConstCiphertext<RnsPoly> ciphertext,
-                                                          const PrivateKey<RnsPoly> private_key) const {
+                                                           const PrivateKey<RnsPoly> private_key) const {
     const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(private_key->get_crypto_parameters());
 
     const std::vector<RnsPoly>& cv = ciphertext->get_elements();
@@ -59,7 +59,7 @@ Ciphertext<RnsPoly> RnsMultiparty::multiparty_decrypt_lead(ConstCiphertext<RnsPo
     if (crypto_params->get_multiparty_mode() == NOISE_FLOODING_MULTIPARTY) {
         if (size_ql < 3) {
             CIPHER_THROW("sizeQl " + std::to_string(size_ql) +
-                          " must be at least 3 in NOISE_FLOODING_MULTIPARTY mode.");
+                         " must be at least 3 in NOISE_FLOODING_MULTIPARTY mode.");
         }
         DugType dug;
         auto params = cv[0].get_params();
@@ -77,12 +77,13 @@ Ciphertext<RnsPoly> RnsMultiparty::multiparty_decrypt_lead(ConstCiphertext<RnsPo
                 std::make_shared<RnsParams<BigInteger>>(cycl_order, moduli_all_but_first, roots_all_but_first);
         RnsPoly e(dug, params_all_but_first, Format::EVALUATION);
 
-        e.expand_crt_basis_reverse_order(params, params_first, crypto_params->get_multiparty_q_hat_inv_modq_at_index(size_ql - 2),
-                                     crypto_params->get_multiparty_q_hat_inv_modq_precon_at_index(size_ql - 2),
-                                     crypto_params->get_multiparty_q_hat_modq0_at_index(size_ql - 2),
-                                     crypto_params->get_multiparty_alpha_q_modq0_at_index(size_ql - 2),
-                                     crypto_params->get_multiparty_modq0_barrett_mu(), crypto_params->get_multiparty_q_inv(),
-                                     Format::EVALUATION);
+        e.expand_crt_basis_reverse_order(params, params_first,
+                                         crypto_params->get_multiparty_q_hat_inv_modq_at_index(size_ql - 2),
+                                         crypto_params->get_multiparty_q_hat_inv_modq_precon_at_index(size_ql - 2),
+                                         crypto_params->get_multiparty_q_hat_modq0_at_index(size_ql - 2),
+                                         crypto_params->get_multiparty_alpha_q_modq0_at_index(size_ql - 2),
+                                         crypto_params->get_multiparty_modq0_barrett_mu(),
+                                         crypto_params->get_multiparty_q_inv(), Format::EVALUATION);
 
         noise = std::move(e);
     } else if (crypto_params->get_decryption_noise_mode() == NOISE_FLOODING_DECRYPT &&
@@ -106,7 +107,7 @@ Ciphertext<RnsPoly> RnsMultiparty::multiparty_decrypt_lead(ConstCiphertext<RnsPo
 }
 
 Ciphertext<RnsPoly> RnsMultiparty::multiparty_decrypt_main(ConstCiphertext<RnsPoly> ciphertext,
-                                                          const PrivateKey<RnsPoly> private_key) const {
+                                                           const PrivateKey<RnsPoly> private_key) const {
     const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(private_key->get_crypto_parameters());
     const auto ns = crypto_params->get_noise_scale();
 
@@ -120,7 +121,7 @@ Ciphertext<RnsPoly> RnsMultiparty::multiparty_decrypt_main(ConstCiphertext<RnsPo
     if (crypto_params->get_multiparty_mode() == NOISE_FLOODING_MULTIPARTY) {
         if (size_ql < 3) {
             CIPHER_THROW("sizeQl " + std::to_string(size_ql) +
-                          " must be at least 3 in NOISE_FLOODING_MULTIPARTY mode.");
+                         " must be at least 3 in NOISE_FLOODING_MULTIPARTY mode.");
         }
         DugType dug;
         auto params = cv[0].get_params();
@@ -133,12 +134,13 @@ Ciphertext<RnsPoly> RnsMultiparty::multiparty_decrypt_main(ConstCiphertext<RnsPo
         std::vector<NativeInteger> moduli_first = {params->get_params()[0]->get_modulus()};
         std::vector<NativeInteger> roots_first = {params->get_params()[0]->get_root_of_unity()};
         auto params_first = std::make_shared<RnsParams<BigInteger>>(cycl_order, moduli_first, roots_first);
-        e.expand_crt_basis_reverse_order(params, params_first, crypto_params->get_multiparty_q_hat_inv_modq_at_index(size_ql - 2),
-                                     crypto_params->get_multiparty_q_hat_inv_modq_precon_at_index(size_ql - 2),
-                                     crypto_params->get_multiparty_q_hat_modq0_at_index(size_ql - 2),
-                                     crypto_params->get_multiparty_alpha_q_modq0_at_index(size_ql - 2),
-                                     crypto_params->get_multiparty_modq0_barrett_mu(), crypto_params->get_multiparty_q_inv(),
-                                     Format::EVALUATION);
+        e.expand_crt_basis_reverse_order(params, params_first,
+                                         crypto_params->get_multiparty_q_hat_inv_modq_at_index(size_ql - 2),
+                                         crypto_params->get_multiparty_q_hat_inv_modq_precon_at_index(size_ql - 2),
+                                         crypto_params->get_multiparty_q_hat_modq0_at_index(size_ql - 2),
+                                         crypto_params->get_multiparty_alpha_q_modq0_at_index(size_ql - 2),
+                                         crypto_params->get_multiparty_modq0_barrett_mu(),
+                                         crypto_params->get_multiparty_q_inv(), Format::EVALUATION);
 
         noise = std::move(e);
     } else if (crypto_params->get_decryption_noise_mode() == NOISE_FLOODING_DECRYPT &&
@@ -206,7 +208,8 @@ EvalKey<RnsPoly> RnsMultiparty::multi_mult_eval_key(PrivateKey<RnsPoly> private_
         for (uint32_t j = size_q; j < size_qp; j++) {
             const auto& pj = params_qp->get_params()[j];
             NativePoly s_new0(pj, Format::COEFFICIENT);
-            s_new0.set_values(NativeVector(s.get_element_at_index(0).get_values(), pj->get_modulus()), Format::COEFFICIENT);
+            s_new0.set_values(NativeVector(s.get_element_at_index(0).get_values(), pj->get_modulus()),
+                              Format::COEFFICIENT);
             s_ext.set_element_at_index(j, std::move(s_new0));
         }
         s_ext.set_format(Format::EVALUATION);
@@ -282,7 +285,8 @@ void polynomial_round(RnsPoly& dcrtpoly) {
         const BigInteger q0big{q[0].convert_to_int()};
         const BigInteger q1big{q[1].convert_to_int()};
         for (size_t k = 0; k < dcrtpoly.get_ring_dimension(); k++) {
-            BigInteger x{BigInteger((poly[0][k].mod_mul_fast_const(q_inv[0], q[0], precon[0])).convert_to_int()) * q1big};
+            BigInteger x{BigInteger((poly[0][k].mod_mul_fast_const(q_inv[0], q[0], precon[0])).convert_to_int()) *
+                         q1big};
             x += BigInteger((poly[1][k].mod_mul_fast_const(q_inv[1], q[1], precon[1])).convert_to_int()) * q0big;
             if (x > qbig)
                 x = x.mod(qbig);
@@ -375,12 +379,12 @@ void extend_basis(RnsPoly& dcrtpoly, const std::shared_ptr<RnsPoly::Params> para
     }
 
     // Calls the exact RNS basis extension procedure
-    dcrtpoly.expand_crt_basis(params_qp, params_p, q_hat_inv_modq, q_hat_inv_modq_precon, q_hat_modp, alpha_q_modp, modp_barrett_mu,
-                            q_inv, Format::COEFFICIENT);
+    dcrtpoly.expand_crt_basis(params_qp, params_p, q_hat_inv_modq, q_hat_inv_modq_precon, q_hat_modp, alpha_q_modp,
+                              modp_barrett_mu, q_inv, Format::COEFFICIENT);
 }
 
 Ciphertext<RnsPoly> RnsMultiparty::int_boot_decrypt(const PrivateKey<RnsPoly> private_key,
-                                                   ConstCiphertext<RnsPoly> ciphertext) const {
+                                                    ConstCiphertext<RnsPoly> ciphertext) const {
     const size_t NUM_POLYNOMIALS = ciphertext->number_ciphertext_elements();
     if (NUM_POLYNOMIALS != 1 && NUM_POLYNOMIALS != 2) {
         std::string msg = "Ciphertext should contain either one or two polynomials. The input ciphertext has " +
@@ -407,7 +411,7 @@ Ciphertext<RnsPoly> RnsMultiparty::int_boot_decrypt(const PrivateKey<RnsPoly> pr
 }
 
 Ciphertext<RnsPoly> RnsMultiparty::int_boot_encrypt(const PublicKey<RnsPoly> public_key,
-                                                   ConstCiphertext<RnsPoly> ctxt) const {
+                                                    ConstCiphertext<RnsPoly> ctxt) const {
     if (ctxt->get_elements().empty()) {
         CIPHER_THROW("No polynomials found in the input ciphertext");
     }
@@ -416,8 +420,7 @@ Ciphertext<RnsPoly> RnsMultiparty::int_boot_encrypt(const PublicKey<RnsPoly> pub
     using TugType = typename RnsPoly::TugType;
     using ParmType = typename RnsPoly::Params;
 
-    const auto crypto_params =
-            std::static_pointer_cast<RlweCryptoParams<RnsPoly>>(public_key->get_crypto_parameters());
+    const auto crypto_params = std::static_pointer_cast<RlweCryptoParams<RnsPoly>>(public_key->get_crypto_parameters());
 
     RnsPoly ptxt = ctxt->get_elements()[0];
     ptxt.set_format(Format::COEFFICIENT);
@@ -431,7 +434,7 @@ Ciphertext<RnsPoly> RnsMultiparty::int_boot_encrypt(const PublicKey<RnsPoly> pub
 
     // Supports both discrete Gaussian (GAUSSIAN) and ternary uniform distribution (UNIFORM_TERNARY) cases
     RnsPoly v = (crypto_params->get_secret_key_dist() == GAUSSIAN) ? RnsPoly(dgg, ptxt_params, Format::EVALUATION) :
-                                                                  RnsPoly(tug, ptxt_params, Format::EVALUATION);
+                                                                     RnsPoly(tug, ptxt_params, Format::EVALUATION);
 
     RnsPoly e0(dgg, ptxt_params, Format::COEFFICIENT);
     RnsPoly e1(dgg, ptxt_params, Format::EVALUATION);
@@ -481,7 +484,7 @@ Ciphertext<RnsPoly> RnsMultiparty::int_boot_encrypt(const PublicKey<RnsPoly> pub
 }
 
 Ciphertext<RnsPoly> RnsMultiparty::int_boot_add(ConstCiphertext<RnsPoly> ciphertext1,
-                                               ConstCiphertext<RnsPoly> ciphertext2) const {
+                                                ConstCiphertext<RnsPoly> ciphertext2) const {
     if (ciphertext1->get_elements().empty()) {
         CIPHER_THROW("No polynomials found in the input ciphertext1");
     }

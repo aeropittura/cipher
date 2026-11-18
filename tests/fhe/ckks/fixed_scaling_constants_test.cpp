@@ -126,8 +126,8 @@ TEST(UTCKKSRNS_FIXED_SCALING, DegreeTwoConstantsChebyshev119) {
         const double precision_bits_value = -std::log2(max_error);
 
         // both techniques reach about 28 bits; FIXEDAUTO gave about 24 bits before the constants were fixed
-        EXPECT_GE(precision_bits_value, 26.0) << "degree-" << degree << " Chebyshev series with scaling technique " << scal_tech
-                                       << " lost precision: 2^-" << precision_bits_value;
+        EXPECT_GE(precision_bits_value, 26.0) << "degree-" << degree << " Chebyshev series with scaling technique "
+                                              << scal_tech << " lost precision: 2^-" << precision_bits_value;
     }
 #endif
 }

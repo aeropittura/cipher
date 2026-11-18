@@ -106,8 +106,8 @@ class BaseFhe {
      * being in slots or coefficients.
      */
     virtual void eval_bootstrap_setup(const CryptoContextImpl<Element>& cc, std::vector<uint32_t> level_budget,
-                                    std::vector<uint32_t> dim1, uint32_t slots, uint32_t correction_factor,
-                                    bool precompute, bool bt_slots_encoding) {
+                                      std::vector<uint32_t> dim1, uint32_t slots, uint32_t correction_factor,
+                                      bool precompute, bool bt_slots_encoding) {
         CIPHER_THROW(NOT_SUPPORTED_SIMPLE_ERROR);
     }
 
@@ -163,7 +163,7 @@ class BaseFhe {
      * @return the refreshed ciphertext.
      */
     virtual Ciphertext<Element> eval_bootstrap(ConstCiphertext<Element>& ciphertext, uint32_t num_iterations,
-                                              uint32_t precision) const {
+                                               uint32_t precision) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
 
@@ -180,7 +180,7 @@ class BaseFhe {
      * @return the refreshed ciphertext.
      */
     virtual Ciphertext<Element> eval_bootstrap_st_c_first(ConstCiphertext<Element>& ciphertext, uint32_t num_iterations,
-                                                      uint32_t precision) const {
+                                                          uint32_t precision) const {
         CIPHER_THROW(NOT_SUPPORTED_SIMPLE_ERROR);
     }
 
@@ -195,8 +195,8 @@ class BaseFhe {
      * @param num_slots number of slots to be bootstrapped (0 = full packing).
      */
     virtual void eval_fe_func_bootstrap_setup(const CryptoContextImpl<RnsPoly>& cc,
-                                          const std::vector<uint32_t>& level_budget, const std::vector<uint32_t>& dim1,
-                                          uint32_t num_slots) {
+                                              const std::vector<uint32_t>& level_budget,
+                                              const std::vector<uint32_t>& dim1, uint32_t num_slots) {
         CIPHER_THROW(NOT_SUPPORTED_SIMPLE_ERROR);
     }
 
@@ -210,7 +210,7 @@ class BaseFhe {
      * @return the refreshed ciphertext holding the function values.
      */
     virtual Ciphertext<Element> eval_fe_func_bootstrap(ConstCiphertext<Element>& ciphertext,
-                                                    const std::vector<std::complex<double>>& coefficients) const {
+                                                       const std::vector<std::complex<double>>& coefficients) const {
         CIPHER_THROW(NOT_SUPPORTED_SIMPLE_ERROR);
     }
 
@@ -268,10 +268,11 @@ class BaseFhe {
      * @param order order of the trigonometric Hermite interpolation (1, 2 or 3).
      */
     virtual void eval_fbt_setup(const CryptoContextImpl<Element>& cc, const std::vector<std::complex<double>>& coeffs,
-                              uint32_t num_slots, const BigInteger& p_in, const BigInteger& P_out, const BigInteger& bigq,
-                              const PublicKey<RnsPoly>& pub_key, const std::vector<uint32_t>& dim1,
-                              const std::vector<uint32_t>& level_budget, uint32_t lvls_after_boot = 0,
-                              uint32_t depth_leveled_computation = 0, size_t order = 1) {
+                                uint32_t num_slots, const BigInteger& p_in, const BigInteger& P_out,
+                                const BigInteger& bigq, const PublicKey<RnsPoly>& pub_key,
+                                const std::vector<uint32_t>& dim1, const std::vector<uint32_t>& level_budget,
+                                uint32_t lvls_after_boot = 0, uint32_t depth_leveled_computation = 0,
+                                size_t order = 1) {
         CIPHER_THROW(NOT_SUPPORTED_SIMPLE_ERROR);
     }
     /**
@@ -298,10 +299,11 @@ class BaseFhe {
      * @param order order of the trigonometric Hermite interpolation (1, 2 or 3).
      */
     virtual void eval_fbt_setup(const CryptoContextImpl<Element>& cc, const std::vector<int64_t>& coeffs,
-                              uint32_t num_slots, const BigInteger& p_in, const BigInteger& P_out, const BigInteger& bigq,
-                              const PublicKey<RnsPoly>& pub_key, const std::vector<uint32_t>& dim1,
-                              const std::vector<uint32_t>& level_budget, uint32_t lvls_after_boot = 0,
-                              uint32_t depth_leveled_computation = 0, size_t order = 1) {
+                                uint32_t num_slots, const BigInteger& p_in, const BigInteger& P_out,
+                                const BigInteger& bigq, const PublicKey<RnsPoly>& pub_key,
+                                const std::vector<uint32_t>& dim1, const std::vector<uint32_t>& level_budget,
+                                uint32_t lvls_after_boot = 0, uint32_t depth_leveled_computation = 0,
+                                size_t order = 1) {
         CIPHER_THROW(NOT_SUPPORTED_SIMPLE_ERROR);
     }
 
@@ -324,9 +326,9 @@ class BaseFhe {
      * @return the ciphertext encrypting the function values in its coefficients.
      */
     virtual Ciphertext<Element> eval_fbt(ConstCiphertext<RnsPoly>& ciphertext,
-                                        const std::vector<std::complex<double>>& coeffs, uint32_t digit_bit_size,
-                                        const BigInteger& initial_scaling, uint64_t post_scaling,
-                                        uint32_t level_to_reduce = 0, size_t order = 1) {
+                                         const std::vector<std::complex<double>>& coeffs, uint32_t digit_bit_size,
+                                         const BigInteger& initial_scaling, uint64_t post_scaling,
+                                         uint32_t level_to_reduce = 0, size_t order = 1) {
         CIPHER_THROW(NOT_SUPPORTED_SIMPLE_ERROR);
     }
     /**
@@ -348,8 +350,8 @@ class BaseFhe {
      * @return the ciphertext encrypting the function values in its coefficients.
      */
     virtual Ciphertext<Element> eval_fbt(ConstCiphertext<RnsPoly>& ciphertext, const std::vector<int64_t>& coeffs,
-                                        uint32_t digit_bit_size, const BigInteger& initial_scaling, uint64_t post_scaling,
-                                        uint32_t level_to_reduce = 0, size_t order = 1) {
+                                         uint32_t digit_bit_size, const BigInteger& initial_scaling,
+                                         uint64_t post_scaling, uint32_t level_to_reduce = 0, size_t order = 1) {
         CIPHER_THROW(NOT_SUPPORTED_SIMPLE_ERROR);
     }
 
@@ -368,9 +370,9 @@ class BaseFhe {
      * @return the ciphertext with the function values in its slots.
      */
     virtual Ciphertext<Element> eval_fbt_no_decoding(ConstCiphertext<RnsPoly>& ciphertext,
-                                                  const std::vector<std::complex<double>>& coeffs,
-                                                  uint32_t digit_bit_size, const BigInteger& initial_scaling,
-                                                  size_t order = 1) {
+                                                     const std::vector<std::complex<double>>& coeffs,
+                                                     uint32_t digit_bit_size, const BigInteger& initial_scaling,
+                                                     size_t order = 1) {
         CIPHER_THROW(NOT_SUPPORTED_SIMPLE_ERROR);
     }
     /**
@@ -388,8 +390,8 @@ class BaseFhe {
      * @return the ciphertext with the function values in its slots.
      */
     virtual Ciphertext<Element> eval_fbt_no_decoding(ConstCiphertext<RnsPoly>& ciphertext,
-                                                  const std::vector<int64_t>& coeffs, uint32_t digit_bit_size,
-                                                  const BigInteger& initial_scaling, size_t order = 1) {
+                                                     const std::vector<int64_t>& coeffs, uint32_t digit_bit_size,
+                                                     const BigInteger& initial_scaling, size_t order = 1) {
         CIPHER_THROW(NOT_SUPPORTED_SIMPLE_ERROR);
     }
 
@@ -405,7 +407,7 @@ class BaseFhe {
      * @return the ciphertext encrypting the values in its coefficients.
      */
     virtual Ciphertext<Element> eval_hom_decoding(ConstCiphertext<RnsPoly>& ciphertext, uint64_t post_scaling,
-                                                uint32_t level_to_reduce = 0) {
+                                                  uint32_t level_to_reduce = 0) {
         CIPHER_THROW(NOT_SUPPORTED_SIMPLE_ERROR);
     }
 
@@ -426,10 +428,10 @@ class BaseFhe {
      * @return the powers of the complex exponential.
      */
     virtual std::shared_ptr<SeriesPowers<RnsPoly>> eval_mvb_precompute(ConstCiphertext<RnsPoly>& ciphertext,
-                                                                      const std::vector<std::complex<double>>& coeffs,
-                                                                      uint32_t digit_bit_size,
-                                                                      const BigInteger& initial_scaling,
-                                                                      size_t order = 1) {
+                                                                       const std::vector<std::complex<double>>& coeffs,
+                                                                       uint32_t digit_bit_size,
+                                                                       const BigInteger& initial_scaling,
+                                                                       size_t order = 1) {
         CIPHER_THROW(NOT_SUPPORTED_SIMPLE_ERROR);
     }
 
@@ -450,10 +452,10 @@ class BaseFhe {
      * @return the powers of the complex exponential.
      */
     virtual std::shared_ptr<SeriesPowers<RnsPoly>> eval_mvb_precompute(ConstCiphertext<RnsPoly>& ciphertext,
-                                                                      const std::vector<int64_t>& coeffs,
-                                                                      uint32_t digit_bit_size,
-                                                                      const BigInteger& initial_scaling,
-                                                                      size_t order = 1) {
+                                                                       const std::vector<int64_t>& coeffs,
+                                                                       uint32_t digit_bit_size,
+                                                                       const BigInteger& initial_scaling,
+                                                                       size_t order = 1) {
         CIPHER_THROW(NOT_SUPPORTED_SIMPLE_ERROR);
     }
 
@@ -473,8 +475,8 @@ class BaseFhe {
      * @return the ciphertext encrypting the function values in its coefficients.
      */
     virtual Ciphertext<Element> eval_mvb(const std::shared_ptr<SeriesPowers<RnsPoly>> ciphertexts,
-                                        const std::vector<std::complex<double>>& coeffs, uint32_t digit_bit_size,
-                                        const uint64_t post_scaling, uint32_t level_to_reduce = 0, size_t order = 1) {
+                                         const std::vector<std::complex<double>>& coeffs, uint32_t digit_bit_size,
+                                         const uint64_t post_scaling, uint32_t level_to_reduce = 0, size_t order = 1) {
         CIPHER_THROW(NOT_SUPPORTED_SIMPLE_ERROR);
     }
     /**
@@ -493,8 +495,8 @@ class BaseFhe {
      * @return the ciphertext encrypting the function values in its coefficients.
      */
     virtual Ciphertext<Element> eval_mvb(const std::shared_ptr<SeriesPowers<RnsPoly>> ciphertexts,
-                                        const std::vector<int64_t>& coeffs, uint32_t digit_bit_size,
-                                        const uint64_t post_scaling, uint32_t level_to_reduce = 0, size_t order = 1) {
+                                         const std::vector<int64_t>& coeffs, uint32_t digit_bit_size,
+                                         const uint64_t post_scaling, uint32_t level_to_reduce = 0, size_t order = 1) {
         CIPHER_THROW(NOT_SUPPORTED_SIMPLE_ERROR);
     }
 
@@ -511,8 +513,8 @@ class BaseFhe {
      * @return the ciphertext with the function values in its slots.
      */
     virtual Ciphertext<Element> eval_mvb_no_decoding(const std::shared_ptr<SeriesPowers<RnsPoly>> ciphertexts,
-                                                  const std::vector<std::complex<double>>& coeffs,
-                                                  uint32_t digit_bit_size, size_t order = 1) {
+                                                     const std::vector<std::complex<double>>& coeffs,
+                                                     uint32_t digit_bit_size, size_t order = 1) {
         CIPHER_THROW(NOT_SUPPORTED_SIMPLE_ERROR);
     }
     /**
@@ -528,8 +530,8 @@ class BaseFhe {
      * @return the ciphertext with the function values in its slots.
      */
     virtual Ciphertext<Element> eval_mvb_no_decoding(const std::shared_ptr<SeriesPowers<RnsPoly>> ciphertexts,
-                                                  const std::vector<int64_t>& coeffs, uint32_t digit_bit_size,
-                                                  size_t order = 1) {
+                                                     const std::vector<int64_t>& coeffs, uint32_t digit_bit_size,
+                                                     size_t order = 1) {
         CIPHER_THROW(NOT_SUPPORTED_SIMPLE_ERROR);
     }
 
@@ -550,10 +552,10 @@ class BaseFhe {
      * @return the result of the evaluation.
      */
     virtual Ciphertext<RnsPoly> eval_hermite_trig_series(ConstCiphertext<RnsPoly>& ciphertext,
-                                                       const std::vector<std::complex<double>>& coefficients_cheb,
-                                                       double a, double b,
-                                                       const std::vector<std::complex<double>>& coefficients_herm,
-                                                       size_t precomp = 0) {
+                                                         const std::vector<std::complex<double>>& coefficients_cheb,
+                                                         double a, double b,
+                                                         const std::vector<std::complex<double>>& coefficients_herm,
+                                                         size_t precomp = 0) {
         CIPHER_THROW(NOT_SUPPORTED_SIMPLE_ERROR);
     }
     /**
@@ -573,9 +575,10 @@ class BaseFhe {
      * @return the result of the evaluation.
      */
     virtual Ciphertext<RnsPoly> eval_hermite_trig_series(ConstCiphertext<RnsPoly>& ciphertext,
-                                                       const std::vector<std::complex<double>>& coefficients_cheb,
-                                                       double a, double b, const std::vector<int64_t>& coefficients_herm,
-                                                       size_t precomp = 0) {
+                                                         const std::vector<std::complex<double>>& coefficients_cheb,
+                                                         double a, double b,
+                                                         const std::vector<int64_t>& coefficients_herm,
+                                                         size_t precomp = 0) {
         CIPHER_THROW(NOT_SUPPORTED_SIMPLE_ERROR);
     }
 
@@ -617,8 +620,8 @@ class BaseFhe {
      * @param lwesk FHEW secret key
      * @return the map of generated automorphism keys
      */
-    virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_ckks_to_fhew_key_gen(const KeyPair<Element>& key_pair,
-                                                                                       ConstLwePrivateKey& lwesk) {
+    virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_ckks_to_fhew_key_gen(
+            const KeyPair<Element>& key_pair, ConstLwePrivateKey& lwesk) {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
@@ -641,7 +644,7 @@ class BaseFhe {
      * @return a vector of LWE ciphertexts of length the num_ctxts
      */
     virtual std::vector<std::shared_ptr<LweCiphertextImpl>> eval_ckks_to_fhew(ConstCiphertext<Element> ciphertext,
-                                                                           uint32_t num_ctxts) {
+                                                                              uint32_t num_ctxts) {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
 
@@ -655,8 +658,8 @@ class BaseFhe {
      * @param log_q the logarithm of a ciphertext modulus in FHEW
      */
     virtual void eval_fhew_to_ckks_setup(const CryptoContextImpl<Element>& cc_ckks,
-                                     const std::shared_ptr<BooleanContext>& cc_lwe, uint32_t num_slots_ckks,
-                                     uint32_t log_q) {
+                                         const std::shared_ptr<BooleanContext>& cc_lwe, uint32_t num_slots_ckks,
+                                         uint32_t log_q) {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
@@ -690,8 +693,8 @@ class BaseFhe {
      * the resulting FHEW ciphertexts will encrypt values modulo p_lwe, so scale_sign should account for this
      * @param unit whether the input messages are normalized to the unit circle
      */
-    virtual void eval_compare_switch_precompute(const CryptoContextImpl<Element>& cc_ckks, uint32_t p_lwe, double scale_sign,
-                                             bool unit) {
+    virtual void eval_compare_switch_precompute(const CryptoContextImpl<Element>& cc_ckks, uint32_t p_lwe,
+                                                double scale_sign, bool unit) {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
@@ -709,8 +712,8 @@ class BaseFhe {
      * @return a CKKS ciphertext encrypting in its slots the messages in the LWE ciphertexts
      */
     virtual Ciphertext<Element> eval_fhew_to_ckks(std::vector<std::shared_ptr<LweCiphertextImpl>>& lwe_ciphertexts,
-                                               uint32_t num_ctxts, uint32_t num_slots, uint32_t p, double pmin,
-                                               double pmax, uint32_t dim1) const {
+                                                  uint32_t num_ctxts, uint32_t num_slots, uint32_t p, double pmin,
+                                                  double pmax, uint32_t dim1) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
 
@@ -757,9 +760,9 @@ class BaseFhe {
      * @return a CKKS ciphertext encrypting in its slots the sign of  messages in the LWE ciphertexts
      */
     virtual Ciphertext<Element> eval_compare_scheme_switching(ConstCiphertext<Element> ciphertext1,
-                                                           ConstCiphertext<Element> ciphertext2, uint32_t num_ctxts,
-                                                           uint32_t num_slots, uint32_t p_lwe, double scale_sign,
-                                                           bool unit) {
+                                                              ConstCiphertext<Element> ciphertext2, uint32_t num_ctxts,
+                                                              uint32_t num_slots, uint32_t p_lwe, double scale_sign,
+                                                              bool unit) {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
@@ -782,9 +785,9 @@ class BaseFhe {
      * and after num_values in the second ciphertext if one_hot=true and after the first slot if one_hot=false.
      */
     virtual std::vector<Ciphertext<Element>> eval_min_scheme_switching(ConstCiphertext<Element> ciphertext,
-                                                                    PublicKey<Element> public_key, uint32_t num_values,
-                                                                    uint32_t num_slots, uint32_t p_lwe,
-                                                                    double scale_sign) {
+                                                                       PublicKey<Element> public_key,
+                                                                       uint32_t num_values, uint32_t num_slots,
+                                                                       uint32_t p_lwe, double scale_sign) {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
@@ -801,9 +804,9 @@ class BaseFhe {
      * @return a vector of two CKKS ciphertexts: [min, argmin]
      */
     virtual std::vector<Ciphertext<Element>> eval_min_scheme_switching_alt(ConstCiphertext<Element> ciphertext,
-                                                                       PublicKey<Element> public_key, uint32_t num_values,
-                                                                       uint32_t num_slots, uint32_t p_lwe,
-                                                                       double scale_sign) {
+                                                                           PublicKey<Element> public_key,
+                                                                           uint32_t num_values, uint32_t num_slots,
+                                                                           uint32_t p_lwe, double scale_sign) {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
@@ -826,9 +829,9 @@ class BaseFhe {
      * and after num_values in the second ciphertext if one_hot=true and after the first slot if one_hot=false.
      */
     virtual std::vector<Ciphertext<Element>> eval_max_scheme_switching(ConstCiphertext<Element> ciphertext,
-                                                                    PublicKey<Element> public_key, uint32_t num_values,
-                                                                    uint32_t num_slots, uint32_t p_lwe,
-                                                                    double scale_sign) {
+                                                                       PublicKey<Element> public_key,
+                                                                       uint32_t num_values, uint32_t num_slots,
+                                                                       uint32_t p_lwe, double scale_sign) {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
@@ -845,9 +848,9 @@ class BaseFhe {
      * @return a vector of two CKKS ciphertexts: [max, argmax]
      */
     virtual std::vector<Ciphertext<Element>> eval_max_scheme_switching_alt(ConstCiphertext<Element> ciphertext,
-                                                                       PublicKey<Element> public_key, uint32_t num_values,
-                                                                       uint32_t num_slots, uint32_t p_lwe,
-                                                                       double scale_sign) {
+                                                                           PublicKey<Element> public_key,
+                                                                           uint32_t num_values, uint32_t num_slots,
+                                                                           uint32_t p_lwe, double scale_sign) {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 

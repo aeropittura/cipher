@@ -192,7 +192,7 @@ class UTBFVRNS : public ::testing::TestWithParam<TEST_CASE_UTBFVRNS> {
 
             // EvalFastRotate +2 (left rotation)
             std::vector<int64_t> expected_results3 = {-14912, -16,   15300, -29119, 3875, 16,
-                                                     -2298,  15428, -8061, 5916,   0,    0};
+                                                      -2298,  15428, -8061, 5916,   0,    0};
             Plaintext plaintext_rot3;
             cc->decrypt(key_pair.secret_key, ciphertext_rot3, &plaintext_rot3);
             plaintext_rot3->set_length(vector_of_ints1.size());
@@ -201,7 +201,7 @@ class UTBFVRNS : public ::testing::TestWithParam<TEST_CASE_UTBFVRNS> {
 
             // EvalFastRotate -2 (right rotation)
             std::vector<int64_t> expected_results4 = {0,     0,      81,   4096, -14912, -16,
-                                                     15300, -29119, 3875, 16,   -2298,  15428};
+                                                      15300, -29119, 3875, 16,   -2298,  15428};
             Plaintext plaintext_rot4;
             cc->decrypt(key_pair.secret_key, ciphertext_rot4, &plaintext_rot4);
             plaintext_rot4->set_length(vector_of_ints1.size());

@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
 // base 2 logarithm of the average L1 norm between results from standard (cleartext) calculation
 // and those computed homomorphically.
 double calculate_approximation_error(const std::vector<std::complex<double>>& result,
-                                   const std::vector<std::complex<double>>& expected_result) {
+                                     const std::vector<std::complex<double>>& expected_result) {
     if (result.size() != expected_result.size())
         CIPHER_THROW("Cannot compare vectors with different numbers of elements");
 
@@ -230,7 +230,8 @@ void iterative_bootstrap_stc_example() {
     std::vector<uint32_t> bsgs_dim = {0, 0};
 
     uint32_t levels_available_after_bootstrap = 10 + level_budget[1];
-    uint32_t depth = levels_available_after_bootstrap + CkksRnsFhe::get_bootstrap_depth(9, level_budget, secret_key_dist);
+    uint32_t depth =
+            levels_available_after_bootstrap + CkksRnsFhe::get_bootstrap_depth(9, level_budget, secret_key_dist);
     parameters.set_multiplicative_depth(depth);
 
     // Generate crypto context.
@@ -327,7 +328,8 @@ void iterative_bootstrap_stc_example() {
     ciphertext_after = crypto_context->eval_bootstrap(ciph);
     crypto_context->decrypt(key_pair.secret_key, ciphertext_after, &result);
     result->set_length(num_slots);
-    precision = std::floor(calculate_approximation_error(result->get_ckks_packed_value(), ptxt->get_ckks_packed_value()));
+    precision =
+            std::floor(calculate_approximation_error(result->get_ckks_packed_value(), ptxt->get_ckks_packed_value()));
     std::cout << "Bootstrapping precision after 1 iteration: " << precision << "\n\n";
 
     // Set precision equal to empirically measured value after many test runs. One could add a buffer to reduce this value as below.

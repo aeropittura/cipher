@@ -509,7 +509,7 @@ BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::mult_with_out_mod_eq
 
 template <class IntegerType>
 BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::multiply_and_round(const IntegerType& p,
-                                                                            const IntegerType& q) const {
+                                                                              const IntegerType& q) const {
     BigVectorFixedT ans(*this);
     ans.multiply_and_round_eq(p, q);
     return ans;
@@ -517,7 +517,7 @@ BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::multiply_and_round(co
 
 template <class IntegerType>
 BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::multiply_and_round_eq(const IntegerType& p,
-                                                                               const IntegerType& q) {
+                                                                                  const IntegerType& q) {
     IntegerType half_q(this->modulus_ >> 1);
     IntegerType temp;
     for (uint32_t i = 0; i < this->length_; i++) {
@@ -557,7 +557,8 @@ BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::divide_and_round_eq(
 // OTHER OPERATIONS
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::get_digit_at_index_for_base(uint32_t index, uint32_t base) const {
+BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::get_digit_at_index_for_base(uint32_t index,
+                                                                                       uint32_t base) const {
     BigVectorFixedT ans(*this);
     for (uint32_t i = 0; i < this->length_; i++) {
         ans.data_[i] = IntegerType(ans.data_[i].get_digit_at_index_for_base(index, base));
@@ -567,6 +568,6 @@ BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::get_digit_at_index_fo
 
 template class BigVectorFixedT<BigIntegerFixedT<integral_dtype, BigIntegerBitLength>>;
 
-}  // namespace bigintfxd
+}  // namespace fixed_int
 
 #endif

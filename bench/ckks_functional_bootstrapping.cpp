@@ -176,11 +176,11 @@ struct fbt_config {
 
     while (state.KeepRunning()) {
         if (binary_lut)
-            cc->eval_fbt_setup(coeffint, num_slots_ckks, t.p_input, t.p_output, t.bigq, key_pair.public_key, {0, 0}, t.lvlb, 0,
-                             0, t.order);
+            cc->eval_fbt_setup(coeffint, num_slots_ckks, t.p_input, t.p_output, t.bigq, key_pair.public_key, {0, 0},
+                               t.lvlb, 0, 0, t.order);
         else
-            cc->eval_fbt_setup(coeffcomp, num_slots_ckks, t.p_input, t.p_output, t.bigq, key_pair.public_key, {0, 0}, t.lvlb, 0,
-                             0, t.order);
+            cc->eval_fbt_setup(coeffcomp, num_slots_ckks, t.p_input, t.p_output, t.bigq, key_pair.public_key, {0, 0},
+                               t.lvlb, 0, 0, t.order);
     }
 
     cc->clear_static_maps_and_vectors();
@@ -241,11 +241,11 @@ struct fbt_config {
     auto key_pair = cc->key_gen();
 
     if (binary_lut)
-        cc->eval_fbt_setup(coeffint, num_slots_ckks, t.p_input, t.p_output, t.bigq, key_pair.public_key, {0, 0}, t.lvlb, 0, 0,
-                         t.order);
+        cc->eval_fbt_setup(coeffint, num_slots_ckks, t.p_input, t.p_output, t.bigq, key_pair.public_key, {0, 0}, t.lvlb,
+                           0, 0, t.order);
     else
-        cc->eval_fbt_setup(coeffcomp, num_slots_ckks, t.p_input, t.p_output, t.bigq, key_pair.public_key, {0, 0}, t.lvlb, 0, 0,
-                         t.order);
+        cc->eval_fbt_setup(coeffcomp, num_slots_ckks, t.p_input, t.p_output, t.bigq, key_pair.public_key, {0, 0},
+                           t.lvlb, 0, 0, t.order);
 
     for (auto _ : state) {
         state.PauseTiming();
@@ -314,11 +314,11 @@ struct fbt_config {
     auto key_pair = cc->key_gen();
 
     if (binary_lut)
-        cc->eval_fbt_setup(coeffint, num_slots_ckks, t.p_input, t.p_output, t.bigq, key_pair.public_key, {0, 0}, t.lvlb, 0, 0,
-                         t.order);
+        cc->eval_fbt_setup(coeffint, num_slots_ckks, t.p_input, t.p_output, t.bigq, key_pair.public_key, {0, 0}, t.lvlb,
+                           0, 0, t.order);
     else
-        cc->eval_fbt_setup(coeffcomp, num_slots_ckks, t.p_input, t.p_output, t.bigq, key_pair.public_key, {0, 0}, t.lvlb, 0, 0,
-                         t.order);
+        cc->eval_fbt_setup(coeffcomp, num_slots_ckks, t.p_input, t.p_output, t.bigq, key_pair.public_key, {0, 0},
+                           t.lvlb, 0, 0, t.order);
 
     cc->eval_bootstrap_key_gen(key_pair.secret_key, num_slots_ckks);
     cc->eval_mult_key_gen(key_pair.secret_key);
@@ -329,12 +329,14 @@ struct fbt_config {
 
     SchemeletRlweMp::mod_switch(ctxt_bfv, t.Q, t.qbfv_init);
 
-    auto ctxt = SchemeletRlweMp::convert_rlwe_to_ckks(*cc, ctxt_bfv, key_pair.public_key, t.bigq, num_slots_ckks, depth);
+    auto ctxt =
+            SchemeletRlweMp::convert_rlwe_to_ckks(*cc, ctxt_bfv, key_pair.public_key, t.bigq, num_slots_ckks, depth);
 
     while (state.KeepRunning()) {
         Ciphertext<RnsPoly> ctxt_after_fbt;
         if (binary_lut)
-            ctxt_after_fbt = cc->eval_fbt(ctxt, coeffint, t.p_input.get_msb() - 1, ep->get_modulus(), t.scale_thi, 0, t.order);
+            ctxt_after_fbt =
+                    cc->eval_fbt(ctxt, coeffint, t.p_input.get_msb() - 1, ep->get_modulus(), t.scale_thi, 0, t.order);
         else
             ctxt_after_fbt =
                     cc->eval_fbt(ctxt, coeffcomp, t.p_input.get_msb() - 1, ep->get_modulus(), t.scale_thi, 0, t.order);
@@ -378,10 +380,10 @@ struct fbt_config {
     if (binary_lut) {
         coeffint_mod = {func_mod(1), func_mod(0) - func_mod(1)};  // coeffs for [1, cos^2(pi x)], not [1, cos(2pi x)]
     } else {
-        coeffcomp_mod =
-                get_hermite_trig_coefficients(func_mod, t.p_output.convert_to_int(), t.order, t.scale_thi);  // divided by 2
+        coeffcomp_mod = get_hermite_trig_coefficients(func_mod, t.p_output.convert_to_int(), t.order,
+                                                      t.scale_thi);  // divided by 2
         coeffcomp_step = get_hermite_trig_coefficients(func_step, t.p_output.convert_to_int(), t.order,
-                                                   t.scale_step_thi);  // divided by 2
+                                                       t.scale_step_thi);  // divided by 2
     }
 
     uint32_t dcrt_bits = t.bigq.get_msb() - 1;
@@ -412,11 +414,11 @@ struct fbt_config {
     auto key_pair = cc->key_gen();
 
     if (binary_lut)
-        cc->eval_fbt_setup(coeffint_mod, num_slots_ckks, t.p_output, t.p_input, t.bigq, key_pair.public_key, {0, 0}, t.lvlb, 0,
-                         0, t.order);
+        cc->eval_fbt_setup(coeffint_mod, num_slots_ckks, t.p_output, t.p_input, t.bigq, key_pair.public_key, {0, 0},
+                           t.lvlb, 0, 0, t.order);
     else
-        cc->eval_fbt_setup(coeffcomp_mod, num_slots_ckks, t.p_output, t.p_input, t.bigq, key_pair.public_key, {0, 0}, t.lvlb, 0,
-                         0, t.order);
+        cc->eval_fbt_setup(coeffcomp_mod, num_slots_ckks, t.p_output, t.p_input, t.bigq, key_pair.public_key, {0, 0},
+                           t.lvlb, 0, 0, t.order);
 
     cc->eval_bootstrap_key_gen(key_pair.secret_key, num_slots_ckks);
     cc->eval_mult_key_gen(key_pair.secret_key);
@@ -460,17 +462,17 @@ struct fbt_config {
             encrypted_digit[0].switch_modulus(t.bigq, 1, 0, 0);
             encrypted_digit[1].switch_modulus(t.bigq, 1, 0, 0);
 
-            auto ctxt = SchemeletRlweMp::convert_rlwe_to_ckks(*cc, encrypted_digit, key_pair.public_key, t.bigq, num_slots_ckks,
-                                                           depth);
+            auto ctxt = SchemeletRlweMp::convert_rlwe_to_ckks(*cc, encrypted_digit, key_pair.public_key, t.bigq,
+                                                              num_slots_ckks, depth);
 
             // Bootstrap the digit.
             Ciphertext<RnsPoly> ctxt_after_fbt;
             if (binary_lut)
                 ctxt_after_fbt = cc->eval_fbt(ctxt, coeffint, p_digit_bits, ep->get_modulus(),
-                                           scale_thi * (1 << post_scaling_bits), levels_to_drop, t.order);
+                                              scale_thi * (1 << post_scaling_bits), levels_to_drop, t.order);
             else
                 ctxt_after_fbt = cc->eval_fbt(ctxt, coeffcomp, p_digit_bits, ep->get_modulus(),
-                                           scale_thi * (1 << post_scaling_bits), levels_to_drop, t.order);
+                                              scale_thi * (1 << post_scaling_bits), levels_to_drop, t.order);
 
             auto polys = SchemeletRlweMp::convert_ckks_to_rlwe(ctxt_after_fbt, Q);
 
@@ -500,7 +502,7 @@ struct fbt_config {
                 step = true;
                 go = true;
                 int64_t lvls_to_drop = get_multiplicative_depth_by_coeff_vector(coeffcomp_mod, true) -
-                                     get_multiplicative_depth_by_coeff_vector(coeffcomp_step, true);
+                                       get_multiplicative_depth_by_coeff_vector(coeffcomp_step, true);
                 if (coeffcomp_mod.size() > 4 && lvls_to_drop > 0)
                     levels_to_drop = lvls_to_drop;
             }

@@ -74,7 +74,7 @@ static void dcrt_arguments(benchmark::internal::Benchmark* b) {
 }
 
 static void generate_polys(uint32_t order, uint32_t bits, std::shared_ptr<std::vector<NativePoly>>& poly_array_eval,
-                          std::shared_ptr<std::vector<NativePoly>>& poly_array_coef) {
+                           std::shared_ptr<std::vector<NativePoly>>& poly_array_coef) {
     auto p = std::make_shared<NativePolyParams>(order, bits);
     auto eval = std::make_shared<std::vector<NativePoly>>(POLY_NUM);
     auto coef = std::make_shared<std::vector<NativePoly>>(POLY_NUM);
@@ -91,8 +91,8 @@ static void generate_polys(uint32_t order, uint32_t bits, std::shared_ptr<std::v
 }
 
 static void generate_rns_polys(uint32_t order, uint32_t bits, uint32_t towers,
-                              std::shared_ptr<std::vector<RnsPoly>>& poly_array_eval,
-                              std::shared_ptr<std::vector<RnsPoly>>& poly_array_coef) {
+                               std::shared_ptr<std::vector<RnsPoly>>& poly_array_eval,
+                               std::shared_ptr<std::vector<RnsPoly>>& poly_array_coef) {
     auto p = std::make_shared<RnsParams<BigInteger>>(order, towers, bits);
     auto eval = std::make_shared<std::vector<RnsPoly>>(POLY_NUM);
     auto coef = std::make_shared<std::vector<RnsPoly>>(POLY_NUM);

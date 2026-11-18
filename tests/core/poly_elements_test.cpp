@@ -386,7 +386,8 @@ void poly_other_methods(const std::string& msg) {
         ilv.switch_format();
 
         EXPECT_EQ(prime_modulus, ilv.get_modulus()) << msg << " Failure: SwitchFormat() ilv modulus";
-        EXPECT_EQ(primitive_root_of_unity, ilv.get_root_of_unity()) << msg << " Failure: SwitchFormat() ilv rootOfUnity";
+        EXPECT_EQ(primitive_root_of_unity, ilv.get_root_of_unity())
+                << msg << " Failure: SwitchFormat() ilv rootOfUnity";
         EXPECT_EQ(Format::EVALUATION, ilv.get_format()) << msg << " Failure: SwitchFormat() ilv format";
         Element expected(ilparams);
         expected = {"69", "65", "44", "49"};
@@ -398,7 +399,8 @@ void poly_other_methods(const std::string& msg) {
         ilv1.switch_format();
 
         EXPECT_EQ(prime_modulus, ilv1.get_modulus()) << msg << " Failure: SwitchFormat() ilv1 modulus";
-        EXPECT_EQ(primitive_root_of_unity, ilv1.get_root_of_unity()) << msg << " Failure: SwitchFormat() ilv1 rootOfUnity";
+        EXPECT_EQ(primitive_root_of_unity, ilv1.get_root_of_unity())
+                << msg << " Failure: SwitchFormat() ilv1 rootOfUnity";
         EXPECT_EQ(Format::COEFFICIENT, ilv1.get_format()) << msg << " Failure: SwitchFormat() ilv1 format";
         Element expected2(ilparams, Format::COEFFICIENT);
         expected2 = {"2", "3", "50", "3"};

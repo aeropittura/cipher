@@ -50,8 +50,8 @@ namespace cipher {
 // the main rounding operation used in mod_switch (as described in Section 3 of
 // https://eprint.iacr.org/2014/816) The idea is that Round(x) = 0.5 + Floor(x)
 static inline NativeInteger roundq_q(NativeInteger v, NativeInteger q, NativeInteger Q) {
-    return NativeInteger(static_cast<BasicInteger>(
-                                 std::floor(0.5 + v.convert_to_double() * q.convert_to_double() / Q.convert_to_double())))
+    return NativeInteger(static_cast<BasicInteger>(std::floor(0.5 + v.convert_to_double() * q.convert_to_double() /
+                                                                            Q.convert_to_double())))
             .mod(q);
 }
 
@@ -82,7 +82,7 @@ LweKeyPair LweEncryptionScheme::key_gen_pair(const std::shared_ptr<LweCryptoPara
 
 // size is the ring dimension N, modulus is the large Q used in RGSW encryption of bootstrapping.
 LwePublicKey LweEncryptionScheme::pub_key_gen(const std::shared_ptr<LweCryptoParams>& params,
-                                            ConstLwePrivateKey& sk_n) const {
+                                              ConstLwePrivateKey& sk_n) const {
     const uint32_t dim = params->get_N();
     const auto modulus = params->get_Q();
     const auto mu = modulus.compute_mu();
@@ -131,7 +131,7 @@ LweCiphertext LweEncryptionScheme::encrypt(const std::shared_ptr<LweCryptoParams
 // a = As' + e' of dimension n; with integers mod q
 // b = vs' + e" + m floor(q/4) is an integer mod q
 LweCiphertext LweEncryptionScheme::encrypt_n(const std::shared_ptr<LweCryptoParams>& params, ConstLwePublicKey& pk,
-                                            LwePlaintext m, LwePlaintextModulus p, NativeInteger q) const {
+                                             LwePlaintext m, LwePlaintextModulus p, NativeInteger q) const {
     auto bp = pk->get_v();
     bp.switch_modulus(q);  // todo : this is probably not required
     uint32_t N = bp.get_length();
@@ -162,7 +162,7 @@ LweCiphertext LweEncryptionScheme::encrypt_n(const std::shared_ptr<LweCryptoPara
 
 // convert ciphertext with modulus Q and dimension N to ciphertext with modulus q and dimension n
 LweCiphertext LweEncryptionScheme::switch_c_ttoqn(const std::shared_ptr<LweCryptoParams>& params,
-                                                ConstLweSwitchingKey& ksk, ConstLweCiphertext& ct) const {
+                                                  ConstLweSwitchingKey& ksk, ConstLweCiphertext& ct) const {
     // Modulus switching to a middle step Q'
     auto ct_ms = mod_switch(params->get_q_ks(), ct);
     // Key switching
@@ -209,9 +209,9 @@ void LweEncryptionScheme::decrypt(const std::shared_ptr<LweCryptoParams>& params
     *result = ((NativeInteger(p) * r) / q).convert_to_int();
 
 #if defined(CIPHER_WITH_NOISE_DEBUG)
-    double error =
-            (static_cast<double>(p) * (r.convert_to_double() - q.convert_to_double() / (p * 2))) / q.convert_to_double() -
-            static_cast<double>(*result);
+    double error = (static_cast<double>(p) * (r.convert_to_double() - q.convert_to_double() / (p * 2))) /
+                           q.convert_to_double() -
+                   static_cast<double>(*result);
     CIPHER_DIAGNOSTIC_ERR << error * q.convert_to_double() / static_cast<double>(p) << std::endl;
 #endif
 }
@@ -256,7 +256,7 @@ LweCiphertext LweEncryptionScheme::mod_switch(NativeInteger q, ConstLweCiphertex
 
 // Switching key as described in Section 3 of https://eprint.iacr.org/2014/816
 LweSwitchingKey LweEncryptionScheme::key_switch_gen(const std::shared_ptr<LweCryptoParams>& params,
-                                                  ConstLwePrivateKey& sk, ConstLwePrivateKey& sk_n) const {
+                                                    ConstLwePrivateKey& sk, ConstLwePrivateKey& sk_n) const {
     NativeInteger q_ks(params->get_q_ks());
     NativeInteger base_ks(params->get_base_ks());
     NativeInteger value{1};
@@ -310,8 +310,8 @@ LweSwitchingKey LweEncryptionScheme::key_switch_gen(const std::shared_ptr<LweCry
             for (uint32_t k = 0; k < positions; ++k) {
                 vector2_a.emplace_back(dug.generate_vector(n));
                 NativeVector& a = vector2_a.back();
-                NativeInteger b =
-                        (params->get_dgg_ks().generate_integer(q_ks)).mod_add(sv_n[i].mod_mul(j * digits_ks[k], q_ks), q_ks);
+                NativeInteger b = (params->get_dgg_ks().generate_integer(q_ks))
+                                          .mod_add(sv_n[i].mod_mul(j * digits_ks[k], q_ks), q_ks);
                 if (unreduced_accum_fits) {
                     for (uint32_t idx = 0; idx < n; ++idx)
                         b += a[idx].mod_mul_fast(sv[idx], q_ks, mu);
@@ -334,7 +334,7 @@ LweSwitchingKey LweEncryptionScheme::key_switch_gen(const std::shared_ptr<LweCry
 // the key switching operation as described in Section 3 of
 // https://eprint.iacr.org/2014/816
 LweCiphertext LweEncryptionScheme::key_switch(const std::shared_ptr<LweCryptoParams>& params, ConstLweSwitchingKey& K,
-                                             ConstLweCiphertext& ct_qn) const {
+                                              ConstLweCiphertext& ct_qn) const {
     if (K == nullptr)
         CIPHER_THROW("SwitchingKey is empty");
     if (ct_qn == nullptr)
@@ -455,7 +455,7 @@ LweSwitchingKey LweSwitchingKey32Impl::widen(const LweCryptoParams& params) cons
 // same distributions as key_switch_gen but the sampling sequence differs, so keys are not
 // bit-comparable across widths -- verify by truth tables)
 LweSwitchingKey32 LweEncryptionScheme::key_switch_gen32(const std::shared_ptr<LweCryptoParams>& params,
-                                                      ConstLwePrivateKey& sk, ConstLwePrivateKey& sk_n) const {
+                                                        ConstLwePrivateKey& sk, ConstLwePrivateKey& sk_n) const {
     NativeInteger q_ks(params->get_q_ks());
     const uint64_t q_ks64{q_ks.convert_to_int<uint64_t>()};
     const uint32_t q_ks32{static_cast<uint32_t>(q_ks64)};
@@ -521,7 +521,7 @@ LweSwitchingKey32 LweEncryptionScheme::key_switch_gen32(const std::shared_ptr<Lw
 }
 
 LweCiphertext LweEncryptionScheme::key_switch(const std::shared_ptr<LweCryptoParams>& params, ConstLweSwitchingKey32& K,
-                                             ConstLweCiphertext& ct_qn) const {
+                                              ConstLweCiphertext& ct_qn) const {
     if (K == nullptr)
         CIPHER_THROW("SwitchingKey is empty");
     if (ct_qn == nullptr)
@@ -589,11 +589,12 @@ LweCiphertext LweEncryptionScheme::key_switch(const std::shared_ptr<LweCryptoPar
         uint64_t r{acc[k] % q64};
         a[k] = NativeInteger(r != 0 ? q64 - r : 0);
     }
-    return std::make_shared<LweCiphertextImpl>(std::move(a), ct_qn->get_B().mod_sub_fast(NativeInteger(b_acc % q64), Q));
+    return std::make_shared<LweCiphertextImpl>(std::move(a),
+                                               ct_qn->get_B().mod_sub_fast(NativeInteger(b_acc % q64), Q));
 }
 
 LweCiphertext LweEncryptionScheme::switch_c_ttoqn(const std::shared_ptr<LweCryptoParams>& params,
-                                                ConstLweSwitchingKey32& ksk, ConstLweCiphertext& ct) const {
+                                                  ConstLweSwitchingKey32& ksk, ConstLweCiphertext& ct) const {
     auto ct_ms = mod_switch(params->get_q_ks(), ct);
     auto ct_ks = key_switch(params, ksk, ct_ms);
     return mod_switch(params->get_q(), ct_ks);
@@ -604,7 +605,7 @@ LweCiphertext LweEncryptionScheme::switch_c_ttoqn(const std::shared_ptr<LweCrypt
 // a is a zero vector of dimension n; with integers mod q
 // b = m floor(q/4) is an integer mod q
 LweCiphertext LweEncryptionScheme::noiseless_embedding(const std::shared_ptr<LweCryptoParams>& params,
-                                                      LwePlaintext m) const {
+                                                       LwePlaintext m) const {
     NativeInteger q(params->get_q());
     return std::make_shared<LweCiphertextImpl>(NativeVector(params->get_n(), q), (q >> 2) * m);
 }

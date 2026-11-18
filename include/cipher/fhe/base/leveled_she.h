@@ -107,7 +107,7 @@ class BaseLeveledShe {
      * @return the new ciphertext.
      */
     virtual Ciphertext<Element> eval_add(ConstCiphertext<Element>& ciphertext1,
-                                        ConstCiphertext<Element>& ciphertext2) const;
+                                         ConstCiphertext<Element>& ciphertext2) const;
 
     /**
      * Virtual function to define the interface for in-place homomorphic addition
@@ -128,7 +128,7 @@ class BaseLeveledShe {
      * @return the new ciphertext.
      */
     virtual Ciphertext<Element> eval_add_mutable(Ciphertext<Element>& ciphertext1,
-                                               Ciphertext<Element>& ciphertext2) const {
+                                                 Ciphertext<Element>& ciphertext2) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
 
@@ -271,7 +271,7 @@ class BaseLeveledShe {
      * @return the new ciphertext.
      */
     virtual Ciphertext<Element> eval_sub(ConstCiphertext<Element>& ciphertext1,
-                                        ConstCiphertext<Element>& ciphertext2) const;
+                                         ConstCiphertext<Element>& ciphertext2) const;
 
     /**
      * Virtual function to define the interface for homomorphic subtraction of
@@ -292,7 +292,7 @@ class BaseLeveledShe {
      * @return the new ciphertext.
      */
     virtual Ciphertext<Element> eval_sub_mutable(Ciphertext<Element>& ciphertext1,
-                                               Ciphertext<Element>& ciphertext2) const {
+                                                 Ciphertext<Element>& ciphertext2) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
 
@@ -434,7 +434,7 @@ class BaseLeveledShe {
      * @return the new ciphertext.
      */
     virtual Ciphertext<Element> eval_mult(ConstCiphertext<Element>& ciphertext1,
-                                         ConstCiphertext<Element>& ciphertext2) const {
+                                          ConstCiphertext<Element>& ciphertext2) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
 
@@ -448,7 +448,7 @@ class BaseLeveledShe {
      * @return the new ciphertext.
      */
     virtual Ciphertext<Element> eval_mult_mutable(Ciphertext<Element>& ciphertext1,
-                                                Ciphertext<Element>& ciphertext2) const {
+                                                  Ciphertext<Element>& ciphertext2) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
 
@@ -653,7 +653,7 @@ class BaseLeveledShe {
      * @return the new ciphertext.
      */
     virtual Ciphertext<Element> eval_mult(ConstCiphertext<Element>& ciphertext1, ConstCiphertext<Element>& ciphertext2,
-                                         const EvalKey<Element> eval_key) const;
+                                          const EvalKey<Element> eval_key) const;
 
     /**
      * Virtual function to define the interface for in-place multiplicative homomorphic
@@ -666,7 +666,7 @@ class BaseLeveledShe {
      * the same secret key as that of ciphertext1 and ciphertext2.
      */
     virtual void eval_mult_in_place(Ciphertext<Element>& ciphertext1, ConstCiphertext<Element>& ciphertext2,
-                                 const EvalKey<Element> eval_key) const;
+                                    const EvalKey<Element> eval_key) const;
 
     /**
      * Virtual function to define the interface for multiplicative homomorphic
@@ -681,7 +681,7 @@ class BaseLeveledShe {
      * @return the new ciphertext.
      */
     virtual Ciphertext<Element> eval_mult_mutable(Ciphertext<Element>& ciphertext1, Ciphertext<Element>& ciphertext2,
-                                                const EvalKey<Element> eval_key) const;
+                                                  const EvalKey<Element> eval_key) const;
 
     /**
      * Virtual function to define the interface for multiplicative homomorphic
@@ -695,7 +695,7 @@ class BaseLeveledShe {
      * the same secret key as that of ciphertext1 and ciphertext2.
      */
     virtual void eval_mult_mutable_in_place(Ciphertext<Element>& ciphertext1, Ciphertext<Element>& ciphertext2,
-                                        const EvalKey<Element> eval_key) const;
+                                            const EvalKey<Element> eval_key) const;
 
     /**
      * Homomorphic squaring of a ciphertext followed by relinearization with the evaluation key.
@@ -704,7 +704,8 @@ class BaseLeveledShe {
      * @param eval_key the relinearization key for s^2.
      * @return the new ciphertext with two elements.
      */
-    virtual Ciphertext<Element> eval_square(ConstCiphertext<Element>& ciphertext, const EvalKey<Element> eval_key) const;
+    virtual Ciphertext<Element> eval_square(ConstCiphertext<Element>& ciphertext,
+                                            const EvalKey<Element> eval_key) const;
 
     /**
      * In-place homomorphic squaring of a ciphertext followed by relinearization with the evaluation key.
@@ -724,7 +725,7 @@ class BaseLeveledShe {
      * @return the new ciphertext with two elements.
      */
     virtual Ciphertext<Element> eval_square_mutable(Ciphertext<Element>& ciphertext,
-                                                  const EvalKey<Element> eval_key) const;
+                                                    const EvalKey<Element> eval_key) const;
     /**
      * Virtual function to define the interface for multiplicative homomorphic
      * evaluation of ciphertext followed by relinearization using the evaluation keys.
@@ -737,8 +738,8 @@ class BaseLeveledShe {
      * @return the new resulting ciphertext.
      */
     virtual Ciphertext<Element> eval_mult_and_relinearize(ConstCiphertext<Element>& ciphertext1,
-                                                       ConstCiphertext<Element>& ciphertext2,
-                                                       const std::vector<EvalKey<Element>>& eval_key_vec) const;
+                                                          ConstCiphertext<Element>& ciphertext2,
+                                                          const std::vector<EvalKey<Element>>& eval_key_vec) const;
 
     /**
      * Virtual function to do relinearization
@@ -759,7 +760,7 @@ class BaseLeveledShe {
      *  decryptable by the same secret key as that of the input ciphertext.
      */
     virtual void relinearize_in_place(Ciphertext<Element>& ciphertext,
-                                    const std::vector<EvalKey<Element>>& eval_key_vec) const;
+                                      const std::vector<EvalKey<Element>>& eval_key_vec) const;
 
     //------------------------------------------------------------------------------
     // SHE AUTOMORPHISM
@@ -785,8 +786,8 @@ class BaseLeveledShe {
      * @return resulting ciphertext
      */
     virtual Ciphertext<Element> eval_automorphism(ConstCiphertext<Element>& ciphertext, uint32_t i,
-                                                 const std::map<uint32_t, EvalKey<Element>>& eval_key_map,
-                                                 CALLER_INFO_ARGS_HDR) const;
+                                                  const std::map<uint32_t, EvalKey<Element>>& eval_key_map,
+                                                  CALLER_INFO_ARGS_HDR) const;
 
     /**
      * Shared core for evaluating an automorphism from precomputed key-switch digits.
@@ -802,8 +803,8 @@ class BaseLeveledShe {
      * @return resulting ciphertext
      */
     virtual Ciphertext<Element> eval_automorphism_core(ConstCiphertext<Element>& ciphertext, uint32_t auto_index,
-                                                     const std::shared_ptr<std::vector<Element>>& digits,
-                                                     const EvalKey<Element>& eval_key) const;
+                                                       const std::shared_ptr<std::vector<Element>>& digits,
+                                                       const EvalKey<Element>& eval_key) const;
 
     /**
      * Virtual function for the automorphism and key switching step of
@@ -818,8 +819,8 @@ class BaseLeveledShe {
      * @return the rotated ciphertext
      */
     virtual Ciphertext<Element> eval_fast_rotation(ConstCiphertext<Element>& ciphertext, const uint32_t index,
-                                                 const uint32_t m,
-                                                 const std::shared_ptr<std::vector<Element>> digits) const;
+                                                   const uint32_t m,
+                                                   const std::shared_ptr<std::vector<Element>> digits) const;
 
     /**
      * Virtual function for the precomputation step of hoisted
@@ -848,9 +849,9 @@ class BaseLeveledShe {
      * @return the rotated ciphertext in the extended basis Q*P.
      */
     virtual Ciphertext<Element> eval_fast_rotation_ext(ConstCiphertext<Element>& ciphertext, uint32_t index,
-                                                    const std::shared_ptr<std::vector<Element>> expanded_ciphertext,
-                                                    bool add_first,
-                                                    const std::map<uint32_t, EvalKey<Element>>& eval_keys) const {
+                                                       const std::shared_ptr<std::vector<Element>> expanded_ciphertext,
+                                                       bool add_first,
+                                                       const std::map<uint32_t, EvalKey<Element>>& eval_keys) const {
         CIPHER_THROW(NOT_IMPLEMENTED_ERROR);
     }
 
@@ -875,7 +876,7 @@ class BaseLeveledShe {
      * @return resulting ciphertext
      */
     virtual Ciphertext<Element> eval_at_index(ConstCiphertext<Element>& ciphertext, int32_t index,
-                                            const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const;
+                                              const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const;
 
     /**
      * Maps a rotation index to the automorphism index (Galois element) that realizes it for the
@@ -928,8 +929,8 @@ class BaseLeveledShe {
      * decrypted with the secret key of the particular level.
      */
     virtual Ciphertext<Element> composed_eval_mult(ConstCiphertext<Element>& ciphertext1,
-                                                 ConstCiphertext<Element>& ciphertext2,
-                                                 const EvalKey<Element> eval_key) const;
+                                                   ConstCiphertext<Element>& ciphertext2,
+                                                   const EvalKey<Element> eval_key) const;
 
     /**
      * Method for Level Reduction. Drops the given number of towers of the ciphertext
@@ -941,7 +942,7 @@ class BaseLeveledShe {
      * @return the resulting ciphertext.
      */
     virtual Ciphertext<Element> level_reduce(ConstCiphertext<Element>& ciphertext1, const EvalKey<Element> eval_key,
-                                            size_t levels) const;
+                                             size_t levels) const;
 
     /**
      * Method for in-place Level Reduction. Drops the given number of towers of the
@@ -952,7 +953,7 @@ class BaseLeveledShe {
      * @param levels the number of towers to drop.
      */
     virtual void level_reduce_in_place(Ciphertext<Element>& ciphertext1, const EvalKey<Element> eval_key,
-                                    size_t levels) const {
+                                       size_t levels) const {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
@@ -1037,7 +1038,8 @@ class BaseLeveledShe {
      * @param ciphertext1 first input/output ciphertext.
      * @param ciphertext2 second input/output ciphertext.
      */
-    virtual void adjust_levels_and_depth_in_place(Ciphertext<Element>& ciphertext1, Ciphertext<Element>& ciphertext2) const {
+    virtual void adjust_levels_and_depth_in_place(Ciphertext<Element>& ciphertext1,
+                                                  Ciphertext<Element>& ciphertext2) const {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
@@ -1049,7 +1051,7 @@ class BaseLeveledShe {
      * @param ciphertext2 second input/output ciphertext.
      */
     virtual void adjust_levels_and_depth_to_one_in_place(Ciphertext<Element>& ciphertext1,
-                                                  Ciphertext<Element>& ciphertext2) const {
+                                                         Ciphertext<Element>& ciphertext2) const {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
@@ -1063,7 +1065,8 @@ class BaseLeveledShe {
      * @param ciphertext1 first input/output ciphertext.
      * @param ciphertext2 second input/output ciphertext.
      */
-    virtual void adjust_for_add_or_sub_in_place(Ciphertext<Element>& ciphertext1, Ciphertext<Element>& ciphertext2) const {
+    virtual void adjust_for_add_or_sub_in_place(Ciphertext<Element>& ciphertext1,
+                                                Ciphertext<Element>& ciphertext2) const {
         CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
@@ -1103,7 +1106,7 @@ class BaseLeveledShe {
      * @param ciphertext second ciphertext.
      */
     void verify_num_of_towers(ConstCiphertext<Element>& ciphertext1, ConstCiphertext<Element>& ciphertext,
-                           CALLER_INFO_ARGS_HDR) const;
+                              CALLER_INFO_ARGS_HDR) const;
     /**
      * Throws if the ciphertext and the plaintext polynomial do not have the same number of RNS towers.
      * The trailing CALLER_INFO arguments carry the location of the caller for the error message.
@@ -1111,7 +1114,8 @@ class BaseLeveledShe {
      * @param ciphertext the ciphertext.
      * @param plaintext the plaintext polynomial.
      */
-    void verify_num_of_towers(ConstCiphertext<Element>& ciphertext, const Element& plaintext, CALLER_INFO_ARGS_HDR) const;
+    void verify_num_of_towers(ConstCiphertext<Element>& ciphertext, const Element& plaintext,
+                              CALLER_INFO_ARGS_HDR) const;
 
     /**
      * Internal function for homomorphic addition of ciphertexts.
@@ -1123,7 +1127,7 @@ class BaseLeveledShe {
      * @return result of homomorphic addition of input ciphertexts.
      */
     virtual Ciphertext<Element> eval_add_core(ConstCiphertext<Element>& ciphertext1,
-                                            ConstCiphertext<Element>& ciphertext2) const;
+                                              ConstCiphertext<Element>& ciphertext2) const;
 
     /**
      * Internal function for in-place homomorphic addition of ciphertexts.
@@ -1146,7 +1150,7 @@ class BaseLeveledShe {
      * @return result of homomorphic subtraction of input ciphertexts.
      */
     virtual Ciphertext<Element> eval_sub_core(ConstCiphertext<Element>& ciphertext1,
-                                            ConstCiphertext<Element>& ciphertext2) const;
+                                              ConstCiphertext<Element>& ciphertext2) const;
 
     /**
      * Internal function for in-place homomorphic subtraction of ciphertexts.
@@ -1169,7 +1173,7 @@ class BaseLeveledShe {
      * @return result of homomorphic multiplication of input ciphertexts.
      */
     Ciphertext<Element> eval_mult_core(ConstCiphertext<Element>& ciphertext1,
-                                     ConstCiphertext<Element>& ciphertext2) const;
+                                       ConstCiphertext<Element>& ciphertext2) const;
     /**
      * Internal function for multiplication of a ciphertext by a plaintext polynomial: every ciphertext
      * element is multiplied by the polynomial. Only the number of towers is checked; the metadata

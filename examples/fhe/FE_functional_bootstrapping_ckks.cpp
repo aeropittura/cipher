@@ -280,7 +280,7 @@ int main() {
               << " ms (paid once for all functions below)\n";
 
     auto run_one = [&](const std::string& title, double radius, const std::vector<std::complex<double>>& coeffs,
-                      const auto& target) {
+                       const auto& target) {
         auto expected = normalized_input;
         for (double& value : expected) {
             value = target(2.0 * radius * value);
@@ -309,8 +309,8 @@ int main() {
         std::cout << "------- Functional Bootstrapping Results: -------\n";
         print_values(actual, 10);
         std::cout << "-------------------------------------------------\n";
-        std::cout << "Precision: " << std::fixed << std::setprecision(4) << compute_mean_precision_bits(expected, actual)
-                  << " bits\n";
+        std::cout << "Precision: " << std::fixed << std::setprecision(4)
+                  << compute_mean_precision_bits(expected, actual) << " bits\n";
     };
 
     run_one("exp[-2,2]", 2.0, coeff_exp_2_double_29, [](double x) { return std::exp(x); });

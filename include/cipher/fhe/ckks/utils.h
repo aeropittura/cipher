@@ -182,7 +182,7 @@ std::shared_ptr<LongDiv<VecDType>> long_division_poly(const std::vector<VecDType
  */
 template <typename VecDType>
 std::shared_ptr<LongDiv<VecDType>> long_division_chebyshev(const std::vector<VecDType>& f,
-                                                         const std::vector<VecDType>& g);
+                                                           const std::vector<VecDType>& g);
 
 /**
  * Computes the values of the internal degrees k and m needed in the Paterson-Stockmeyer algorithm
@@ -227,7 +227,7 @@ uint32_t get_multiplicative_depth_by_coeff_vector(const std::vector<VecDType>& v
  * @return the vector corresponding to the shifted diagonal
  */
 std::vector<std::complex<double>> extract_shifted_diagonal(const std::vector<std::vector<std::complex<double>>>& A,
-                                                         int i);
+                                                           int i);
 
 /**
  * Rotates a vector by an index - left rotation
@@ -288,8 +288,8 @@ std::vector<VecDType> Fill(const std::vector<VecDType>& a, uint32_t slots);
  * @return the coefficients of each layer of the iFFT (one vector per layer)
  */
 std::vector<std::vector<std::complex<double>>> coeff_encoding_one_level(const std::vector<std::complex<double>>& pows,
-                                                                     const std::vector<uint32_t>& rot_group,
-                                                                     bool flag_i);
+                                                                        const std::vector<uint32_t>& rot_group,
+                                                                        bool flag_i);
 
 /**
  * Computes the coefficients for the FFT decoding for coeff_decoding_collapse such that every
@@ -301,8 +301,8 @@ std::vector<std::vector<std::complex<double>>> coeff_encoding_one_level(const st
  * @return the coefficients of each layer of the FFT (one vector per layer)
  */
 std::vector<std::vector<std::complex<double>>> coeff_decoding_one_level(const std::vector<std::complex<double>>& pows,
-                                                                     const std::vector<uint32_t>& rot_group,
-                                                                     bool flag_i);
+                                                                        const std::vector<uint32_t>& rot_group,
+                                                                        bool flag_i);
 
 /**
  * Computes the coefficients for the given level budget for the FFT encoding. Needed in
@@ -345,15 +345,15 @@ uint32_t reduce_rotation(int32_t index, uint32_t slots);
  * @brief Parameters of the homomorphic encoding or decoding (FFT-like linear transform) in bootstrapping.
  */
 struct ckks_boot_params {
-    uint32_t lvlb;             ///< level budget
-    uint32_t layers_collapse;   ///< layers to collapse in one level
-    uint32_t rem_collapse;      ///< remaining layers to collapse
-    uint32_t num_rotations;     ///< number of rotations in one level
-    uint32_t b;                ///< baby step in the baby-step giant-step strategy
-    uint32_t g;                ///< giant step in the baby-step giant-step strategy
+    uint32_t lvlb;               ///< level budget
+    uint32_t layers_collapse;    ///< layers to collapse in one level
+    uint32_t rem_collapse;       ///< remaining layers to collapse
+    uint32_t num_rotations;      ///< number of rotations in one level
+    uint32_t b;                  ///< baby step in the baby-step giant-step strategy
+    uint32_t g;                  ///< giant step in the baby-step giant-step strategy
     uint32_t num_rotations_rem;  ///< number of rotations in the remaining level
-    uint32_t b_rem;             ///< baby step in the baby-step giant-step strategy for the remaining level
-    uint32_t g_rem;             ///< giant step in the baby-step giant-step strategy for the remaining level
+    uint32_t b_rem;              ///< baby step in the baby-step giant-step strategy for the remaining level
+    uint32_t g_rem;              ///< giant step in the baby-step giant-step strategy for the remaining level
 };
 
 /**

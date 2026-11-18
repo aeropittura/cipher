@@ -242,8 +242,8 @@ class CkksRnsLeveledShe : public RnsLeveledShe {
      * @return the rotated ciphertext in the extended basis Ql*P
      */
     Ciphertext<RnsPoly> eval_fast_rotation_ext(ConstCiphertext<RnsPoly>& ciphertext, uint32_t index,
-                                             const std::shared_ptr<std::vector<RnsPoly>> digits, bool add_first,
-                                             const std::map<uint32_t, EvalKey<RnsPoly>>& eval_keys) const override;
+                                               const std::shared_ptr<std::vector<RnsPoly>> digits, bool add_first,
+                                               const std::map<uint32_t, EvalKey<RnsPoly>>& eval_keys) const override;
 
     /**
      * Finds the automorphism index of a CKKS slot rotation (5^index mod m, with the sign convention of the complex
@@ -320,7 +320,7 @@ class CkksRnsLeveledShe : public RnsLeveledShe {
      * @param ciphertext2 the second ciphertext (modified in place)
      */
     void adjust_levels_and_depth_in_place(Ciphertext<RnsPoly>& ciphertext1,
-                                     Ciphertext<RnsPoly>& ciphertext2) const override;
+                                          Ciphertext<RnsPoly>& ciphertext2) const override;
 
     /**
      * Same as adjust_levels_and_depth_in_place, followed by a rescaling of both ciphertexts to noise scale degree 1 if
@@ -330,7 +330,7 @@ class CkksRnsLeveledShe : public RnsLeveledShe {
      * @param ciphertext2 the second ciphertext (modified in place)
      */
     void adjust_levels_and_depth_to_one_in_place(Ciphertext<RnsPoly>& ciphertext1,
-                                          Ciphertext<RnsPoly>& ciphertext2) const override;
+                                                 Ciphertext<RnsPoly>& ciphertext2) const override;
 
     /**
      * Encodes a non-negative real constant for addition to or subtraction from a ciphertext: the constant is scaled
@@ -342,7 +342,7 @@ class CkksRnsLeveledShe : public RnsLeveledShe {
      * @return the CRT representation of the scaled constant, one residue per tower
      */
     std::vector<RnsPoly::Integer> get_element_for_eval_add_or_sub(ConstCiphertext<RnsPoly>& ciphertext,
-                                                             double operand) const;
+                                                                  double operand) const;
 
     /**
      * Encodes a real constant for multiplication with a ciphertext: the constant is scaled by the scaling factor of

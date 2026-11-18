@@ -678,9 +678,9 @@ class Matrix : public Serializable {
      *
      */
     void switch_format();
-#define NOT_AN_ELEMENT_MATRIX(T)                   \
-    template <>                                    \
-    void Matrix<T>::switch_format() {               \
+#define NOT_AN_ELEMENT_MATRIX(T)                  \
+    template <>                                   \
+    void Matrix<T>::switch_format() {             \
         CIPHER_THROW("Not a matrix of Elements"); \
     }
 
@@ -714,7 +714,7 @@ class Matrix : public Serializable {
     void load(Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         ar(::cereal::make_nvp("d", data));
         ar(::cereal::make_nvp("r", rows));
@@ -842,22 +842,22 @@ Matrix<int32_t> convert_to_int32(const Matrix<BigVector>& input, const BigIntege
  */
 template <typename Element>
 Matrix<Element> split_int64_into_elements(Matrix<int64_t> const& other, size_t n,
-                                       const std::shared_ptr<typename Element::Params> params);
+                                          const std::shared_ptr<typename Element::Params> params);
 
-#define SPLIT64_FOR_TYPE(T)                                                              \
-    template <>                                                                          \
+#define SPLIT64_FOR_TYPE(T)                                                                 \
+    template <>                                                                             \
     Matrix<T> split_int64_into_elements(Matrix<int64_t> const& other, size_t n,             \
-                                     const std::shared_ptr<typename T::Params> params) { \
-        auto zero_alloc = T::allocator(params, Format::COEFFICIENT);                     \
-        size_t rows = other.get_rows() / n;                                               \
-        Matrix<T> result(zero_alloc, rows, 1);                                           \
-        for (size_t row = 0; row < rows; ++row) {                                        \
-            std::vector<int64_t> values(n);                                              \
-            for (size_t i = 0; i < n; ++i)                                               \
-                values[i] = other(row * n + i, 0);                                       \
-            result(row, 0) = values;                                                     \
-        }                                                                                \
-        return result;                                                                   \
+                                        const std::shared_ptr<typename T::Params> params) { \
+        auto zero_alloc = T::allocator(params, Format::COEFFICIENT);                        \
+        size_t rows = other.get_rows() / n;                                                 \
+        Matrix<T> result(zero_alloc, rows, 1);                                              \
+        for (size_t row = 0; row < rows; ++row) {                                           \
+            std::vector<int64_t> values(n);                                                 \
+            for (size_t i = 0; i < n; ++i)                                                  \
+                values[i] = other(row * n + i, 0);                                          \
+            result(row, 0) = values;                                                        \
+        }                                                                                   \
+        return result;                                                                      \
     }
 
 /**
@@ -871,22 +871,22 @@ Matrix<Element> split_int64_into_elements(Matrix<int64_t> const& other, size_t n
  */
 template <typename Element>
 Matrix<Element> split_int32_alt_into_elements(Matrix<int32_t> const& other, size_t n,
-                                          const std::shared_ptr<typename Element::Params> params);
+                                              const std::shared_ptr<typename Element::Params> params);
 
-#define SPLIT32ALT_FOR_TYPE(T)                                                              \
-    template <>                                                                             \
+#define SPLIT32ALT_FOR_TYPE(T)                                                                  \
+    template <>                                                                                 \
     Matrix<T> split_int32_alt_into_elements(Matrix<int32_t> const& other, size_t n,             \
-                                        const std::shared_ptr<typename T::Params> params) { \
-        auto zero_alloc = T::allocator(params, Format::COEFFICIENT);                        \
-        size_t rows = other.get_rows();                                                      \
-        Matrix<T> result(zero_alloc, rows, 1);                                              \
-        for (size_t row = 0; row < rows; ++row) {                                           \
-            std::vector<int32_t> values(n);                                                 \
-            for (size_t i = 0; i < n; ++i)                                                  \
-                values[i] = other(row, i);                                                  \
-            result(row, 0) = values;                                                        \
-        }                                                                                   \
-        return result;                                                                      \
+                                            const std::shared_ptr<typename T::Params> params) { \
+        auto zero_alloc = T::allocator(params, Format::COEFFICIENT);                            \
+        size_t rows = other.get_rows();                                                         \
+        Matrix<T> result(zero_alloc, rows, 1);                                                  \
+        for (size_t row = 0; row < rows; ++row) {                                               \
+            std::vector<int32_t> values(n);                                                     \
+            for (size_t i = 0; i < n; ++i)                                                      \
+                values[i] = other(row, i);                                                      \
+            result(row, 0) = values;                                                            \
+        }                                                                                       \
+        return result;                                                                          \
     }
 
 /**
@@ -900,22 +900,22 @@ Matrix<Element> split_int32_alt_into_elements(Matrix<int32_t> const& other, size
  */
 template <typename Element>
 Matrix<Element> split_int64_alt_into_elements(Matrix<int64_t> const& other, size_t n,
-                                          const std::shared_ptr<typename Element::Params> params);
+                                              const std::shared_ptr<typename Element::Params> params);
 
-#define SPLIT64ALT_FOR_TYPE(T)                                                              \
-    template <>                                                                             \
+#define SPLIT64ALT_FOR_TYPE(T)                                                                  \
+    template <>                                                                                 \
     Matrix<T> split_int64_alt_into_elements(Matrix<int64_t> const& other, size_t n,             \
-                                        const std::shared_ptr<typename T::Params> params) { \
-        auto zero_alloc = T::allocator(params, Format::COEFFICIENT);                        \
-        size_t rows = other.get_rows();                                                      \
-        Matrix<T> result(zero_alloc, rows, 1);                                              \
-        for (size_t row = 0; row < rows; ++row) {                                           \
-            std::vector<int64_t> values(n);                                                 \
-            for (size_t i = 0; i < n; ++i)                                                  \
-                values[i] = other(row, i);                                                  \
-            result(row, 0) = values;                                                        \
-        }                                                                                   \
-        return result;                                                                      \
+                                            const std::shared_ptr<typename T::Params> params) { \
+        auto zero_alloc = T::allocator(params, Format::COEFFICIENT);                            \
+        size_t rows = other.get_rows();                                                         \
+        Matrix<T> result(zero_alloc, rows, 1);                                                  \
+        for (size_t row = 0; row < rows; ++row) {                                               \
+            std::vector<int64_t> values(n);                                                     \
+            for (size_t i = 0; i < n; ++i)                                                      \
+                values[i] = other(row, i);                                                      \
+            result(row, 0) = values;                                                            \
+        }                                                                                       \
+        return result;                                                                          \
     }
 
 }  // namespace cipher

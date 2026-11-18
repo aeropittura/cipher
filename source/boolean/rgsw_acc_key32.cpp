@@ -76,7 +76,7 @@ RingGswAccKey32Impl::RingGswAccKey32Impl(const std::shared_ptr<RingGswCryptoPara
         CIPHER_THROW("RingGSWACCKey32Impl: empty accumulator key");
     init(params);
     key_.assign(src.size(),
-                 std::vector<std::vector<EvalKey32>>(src[0].size(), std::vector<EvalKey32>(src[0][0].size())));
+                std::vector<std::vector<EvalKey32>>(src[0].size(), std::vector<EvalKey32>(src[0][0].size())));
     for (size_t i = 0; i < src.size(); ++i)
         for (size_t j = 0; j < src[i].size(); ++j)
             for (size_t k = 0; k < src[i][j].size(); ++k)

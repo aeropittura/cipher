@@ -541,7 +541,8 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
             c_result = cc->eval_add(ciphertext1, ciphertext2);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_add->get_length());
-            EXPECT_EQ(plaintext_add->get_coef_packed_value(), results->get_coef_packed_value()) << failmsg << " EvalAdd fails";
+            EXPECT_EQ(plaintext_add->get_coef_packed_value(), results->get_coef_packed_value())
+                    << failmsg << " EvalAdd fails";
 
             auto ct1_clone = ciphertext1->clone();
             cc->eval_add_in_place(ct1_clone, ciphertext2);
@@ -566,7 +567,8 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
             c_result = cc->eval_sub(ciphertext1, ciphertext2);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_sub->get_length());
-            EXPECT_EQ(plaintext_sub->get_coef_packed_value(), results->get_coef_packed_value()) << failmsg << " EvalSub fails";
+            EXPECT_EQ(plaintext_sub->get_coef_packed_value(), results->get_coef_packed_value())
+                    << failmsg << " EvalSub fails";
 
             c_result = ciphertext1 - ciphertext2;
             cc->decrypt(kp.secret_key, c_result, &results);
@@ -601,7 +603,8 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
         }
     }
 
-    void unit_test_mult_coef_packed(const TEST_CASE_UTGENERAL_SHE& test_data, const std::string& failmsg = std::string()) {
+    void unit_test_mult_coef_packed(const TEST_CASE_UTGENERAL_SHE& test_data,
+                                    const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -704,7 +707,8 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
 
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(int_array_expected->get_length());
-            EXPECT_EQ(int_array_expected->get_packed_value(), results->get_packed_value()) << failmsg << " EvalMult fails";
+            EXPECT_EQ(int_array_expected->get_packed_value(), results->get_packed_value())
+                    << failmsg << " EvalMult fails";
 
             if (!((cc->get_scheme_id_impl() == SCHEME::BFVRNS_SCHEME) &&
                   ((std::dynamic_pointer_cast<BfvRnsCryptoParams>(cc->get_crypto_parameters())
@@ -724,7 +728,8 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
 
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(int_array_expected->get_length());
-            EXPECT_EQ(int_array_expected->get_packed_value(), results->get_packed_value()) << failmsg << " operator* fails";
+            EXPECT_EQ(int_array_expected->get_packed_value(), results->get_packed_value())
+                    << failmsg << " operator* fails";
 
             if (!((cc->get_scheme_id_impl() == SCHEME::BFVRNS_SCHEME) &&
                   ((std::dynamic_pointer_cast<BfvRnsCryptoParams>(cc->get_crypto_parameters())
@@ -744,7 +749,8 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
             cmul_inplace *= ciphertext2;
             cc->decrypt(kp.secret_key, cmul_inplace, &results);
             results->set_length(int_array_expected->get_length());
-            EXPECT_EQ(int_array_expected->get_packed_value(), results->get_packed_value()) << failmsg << " operator*= fails";
+            EXPECT_EQ(int_array_expected->get_packed_value(), results->get_packed_value())
+                    << failmsg << " operator*= fails";
 
             c_result = cc->eval_mult(ciphertext1, plaintext2);
             cc->decrypt(kp.secret_key, c_result, &results);
@@ -855,7 +861,8 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
             cc->decrypt(kp.secret_key, merged_ciphertext, &results1);
 
             results1->set_length(int_array_merged->get_length());
-            EXPECT_EQ(int_array_merged->get_packed_value(), results1->get_packed_value()) << failmsg << " EvalMerge fails";
+            EXPECT_EQ(int_array_merged->get_packed_value(), results1->get_packed_value())
+                    << failmsg << " EvalMerge fails";
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1034,7 +1041,7 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
     }
 
     void unit_test_eval_sum_bfv_rns_all(const TEST_CASE_UTGENERAL_SHE& test_data,
-                                     const std::string& failmsg = std::string()) {
+                                        const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -1080,7 +1087,7 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
     }
 
     void unit_test_keyswitch_single_crt(const TEST_CASE_UTGENERAL_SHE& test_data,
-                                      const std::string& failmsg = std::string()) {
+                                        const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -1109,7 +1116,7 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
     }
 
     void unit_test_keyswitch_mod_reduce_dcrt(const TEST_CASE_UTGENERAL_SHE& test_data,
-                                           const std::string& failmsg = std::string()) {
+                                             const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -1212,7 +1219,7 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
     }
 
     void unit_test_bfv_ringdimension_security_check(const TEST_CASE_UTGENERAL_SHE& test_data,
-                                                   const std::string& failmsg = std::string()) {
+                                                    const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 

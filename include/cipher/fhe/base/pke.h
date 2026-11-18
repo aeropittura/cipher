@@ -138,7 +138,7 @@ class BasePke {
      * @return the two elements {b, a} of the encryption of zero in EVALUATION format.
      */
     virtual std::shared_ptr<std::vector<Element>> encrypt_zero_core(const PrivateKey<Element> private_key,
-                                                                  const std::shared_ptr<ParmType> params) const;
+                                                                    const std::shared_ptr<ParmType> params) const;
 
     /**
      * Generates a fresh encryption of zero under the public key {p0, p1}: {p0*v + ns*e0, p1*v + ns*e1},
@@ -151,7 +151,7 @@ class BasePke {
      * @return the two elements of the encryption of zero in EVALUATION format.
      */
     virtual std::shared_ptr<std::vector<Element>> encrypt_zero_core(const PublicKey<Element> public_key,
-                                                                  const std::shared_ptr<ParmType> params) const;
+                                                                    const std::shared_ptr<ParmType> params) const;
 
     /**
      * Computes the raw decryption polynomial c0 + c1*s + c2*s^2 + ... of a ciphertext with any number of

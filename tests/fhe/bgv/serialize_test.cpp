@@ -179,7 +179,7 @@ class UTBGVRNS_SER : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS_SER> {
 
     template <typename ST>
     void test_keys_and_ciphertexts(const TEST_CASE_UTBGVRNS_SER& test_data, const ST& sertype,
-                                const std::string& failmsg = std::string()) {
+                                   const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -252,9 +252,9 @@ class UTBGVRNS_SER : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS_SER> {
 
             std::stringstream buffer_short;
             buffer_short << "should be: " << plaintext_short_new->get_packed_value()
-                        << " - we get: " << plaintext_short->get_packed_value();
+                         << " - we get: " << plaintext_short->get_packed_value();
             check_equality(plaintext_short_new->get_packed_value(), plaintext_short->get_packed_value(), eps,
-                          failmsg + " Decrypted serialization test fails" + buffer_short.str());
+                           failmsg + " Decrypted serialization test fails" + buffer_short.str());
 
             CIPHER_DEBUG("step 6");
             KeyPair<RnsPoly> kp2 = cc->key_gen();
@@ -267,7 +267,8 @@ class UTBGVRNS_SER : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS_SER> {
             CIPHER_DEBUG("step 7");
             // serialize a bunch of mult keys
             std::stringstream ser0;
-            EXPECT_EQ(CryptoContextImpl<RnsPoly>::serialize_eval_mult_key(ser0, sertype, kp.secret_key->get_key_tag()), true)
+            EXPECT_EQ(CryptoContextImpl<RnsPoly>::serialize_eval_mult_key(ser0, sertype, kp.secret_key->get_key_tag()),
+                      true)
                     << "single eval mult key ser fails";
             std::stringstream ser2a;
             EXPECT_EQ(CryptoContextImpl<RnsPoly>::serialize_eval_mult_key(ser2a, sertype, cc), true)
@@ -279,7 +280,8 @@ class UTBGVRNS_SER : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS_SER> {
             CIPHER_DEBUG("step 8");
             // serialize a bunch of sum keys
             std::stringstream aser0;
-            EXPECT_EQ(CryptoContextImpl<RnsPoly>::serialize_eval_sum_key(aser0, sertype, kp.secret_key->get_key_tag()), true)
+            EXPECT_EQ(CryptoContextImpl<RnsPoly>::serialize_eval_sum_key(aser0, sertype, kp.secret_key->get_key_tag()),
+                      true)
                     << "single eval sum key ser fails";
             std::stringstream aser2a;
             EXPECT_EQ(CryptoContextImpl<RnsPoly>::serialize_eval_sum_key(aser2a, sertype, cc), true)
@@ -363,7 +365,7 @@ class UTBGVRNS_SER : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS_SER> {
     }
 
     void unit_test_keys_and_ciphertexts(const TEST_CASE_UTBGVRNS_SER& test_data,
-                                    const std::string& failmsg = std::string()) {
+                                        const std::string& failmsg = std::string()) {
         test_keys_and_ciphertexts(test_data, SerType::JSON, "json");
         test_keys_and_ciphertexts(test_data, SerType::BINARY, "binary");
     }

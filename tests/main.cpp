@@ -181,13 +181,14 @@ bool test_b6 = false;
 bool test_native = true;
 
 inline const std::string& get_math_backend_parameters() {
-    static std::string id = std::to_string(CIPHER_MATH_BACKEND) +
+    static std::string id =
+            std::to_string(CIPHER_MATH_BACKEND) +
 #ifdef CIPHER_WITH_BE2
-                            (CIPHER_MATH_BACKEND == 2 ? " (Internal Int Size " + std::to_string(sizeof(integral_dtype) * 8) +
-                                                        ", Bit Length " + std::to_string(BigIntegerBitLength) + ")" :
-                                                "") +
+            (CIPHER_MATH_BACKEND == 2 ? " (Internal Int Size " + std::to_string(sizeof(integral_dtype) * 8) +
+                                                ", Bit Length " + std::to_string(BigIntegerBitLength) + ")" :
+                                        "") +
 #endif
-                            "";
+            "";
     return id;
 }
 

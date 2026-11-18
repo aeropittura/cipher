@@ -45,7 +45,7 @@
 using namespace cipher;
 
 using CT = Ciphertext<RnsPoly>;  // ciphertext
-using PT = Plaintext;             // plaintext
+using PT = Plaintext;            // plaintext
 
 using VecInt = std::vector<int64_t>;  // vector of ints
 using VecChar = std::vector<char>;    // vector of characters
@@ -89,7 +89,8 @@ bool run_demo_pre(void) {
 
     std::cout << "p = " << cc->get_crypto_parameters()->get_plaintext_modulus() << std::endl;
     std::cout << "n = " << cc->get_crypto_parameters()->get_element_params()->get_cyclotomic_order() / 2 << std::endl;
-    std::cout << "log2 q = " << std::log2(cc->get_crypto_parameters()->get_element_params()->get_modulus().convert_to_double())
+    std::cout << "log2 q = "
+              << std::log2(cc->get_crypto_parameters()->get_element_params()->get_modulus().convert_to_double())
               << std::endl;
     std::cout << "r = " << cc->get_crypto_parameters()->get_digit_size() << std::endl;
 

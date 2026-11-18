@@ -82,12 +82,12 @@ template NativeVector poly_mod(const NativeVector& dividend, const NativeVector&
 template NativeVector polynomial_multiplication(const NativeVector& a, const NativeVector& b);
 template NativeVector get_cyclotomic_polynomial(uint32_t m, const NativeInteger& modulus);
 template NativeInteger synthetic_remainder(const NativeVector& dividend, const NativeInteger& a,
-                                          const NativeInteger& modulus);
+                                           const NativeInteger& modulus);
 template NativeVector synthetic_poly_remainder(const NativeVector& dividend, const NativeVector& a_list,
-                                             const NativeInteger& modulus);
+                                               const NativeInteger& modulus);
 template NativeVector polynomial_power<NativeVector>(const NativeVector& input, uint32_t power);
 template NativeVector synthetic_polynomial_division(const NativeVector& dividend, const NativeInteger& a,
-                                                  const NativeInteger& modulus);
+                                                    const NativeInteger& modulus);
 template NativeInteger find_generator_cyclic(const NativeInteger& modulo);
 template bool is_generator(const NativeInteger& g, const NativeInteger& modulo);
 template std::shared_ptr<std::vector<int64_t>> get_digits(const NativeInteger& u, uint64_t base, uint32_t k);

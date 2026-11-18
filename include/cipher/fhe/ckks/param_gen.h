@@ -68,8 +68,8 @@ class CkksRnsParamGen : public RnsParamGen {
      * @param register_word_size maximum size in bits of each prime
      */
     void composite_prime_moduli_gen(std::vector<NativeInteger>& moduli_q, std::vector<NativeInteger>& roots_q,
-                                 uint32_t composite_degree, uint32_t num_primes_value, uint32_t first_mod_size_value, uint32_t dcrt_bits,
-                                 uint32_t cycl_order, uint32_t register_word_size) const;
+                                    uint32_t composite_degree, uint32_t num_primes_value, uint32_t first_mod_size_value,
+                                    uint32_t dcrt_bits, uint32_t cycl_order, uint32_t register_word_size) const;
 
     /**
      * Generates the modulus chain with one prime per level: primes of dcrt_bits bits alternating around 2^dcrt_bits
@@ -87,8 +87,8 @@ class CkksRnsParamGen : public RnsParamGen {
      * @param extra_modsize size in bits of the extra modulus of FLEXIBLEAUTOEXT
      */
     void single_prime_moduli_gen(std::vector<NativeInteger>& moduli_q, std::vector<NativeInteger>& roots_q,
-                              ScalingTechnique scal_tech, uint32_t num_primes_value, uint32_t first_mod_size_value, uint32_t dcrt_bits,
-                              uint32_t cycl_order, uint32_t extra_modsize) const;
+                                 ScalingTechnique scal_tech, uint32_t num_primes_value, uint32_t first_mod_size_value,
+                                 uint32_t dcrt_bits, uint32_t cycl_order, uint32_t extra_modsize) const;
 
   public:
     virtual ~CkksRnsParamGen() = default;
@@ -108,8 +108,9 @@ class CkksRnsParamGen : public RnsParamGen {
      * @return true on success
      */
     bool params_gen_ckksrns_internal(std::shared_ptr<BaseCryptoParams<RnsPoly>> crypto_params, uint32_t cycl_order,
-                                  uint32_t num_primes_value, uint32_t scaling_mod_size, uint32_t first_mod_size_value, uint32_t mul_part_q,
-                                  CompressionLevel m_p_int_boot_ciphertext_compression_level) const override;
+                                     uint32_t num_primes_value, uint32_t scaling_mod_size,
+                                     uint32_t first_mod_size_value, uint32_t mul_part_q,
+                                     CompressionLevel m_p_int_boot_ciphertext_compression_level) const override;
 
     /////////////////////////////////////
     // SERIALIZATION

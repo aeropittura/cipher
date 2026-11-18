@@ -279,7 +279,8 @@ TEST(UNITTestFHEWExtended, ManualContextPropagatesSecretKeyDist) {
     EXPECT_EQ(GAUSSIAN, cc.get_params()->get_ring_gsw_params()->get_key_dist());
 
     auto cc_ginx = BooleanContext();
-    EXPECT_THROW(cc_ginx.generate_boolean_context(64, 512, 512, Q, 3.19, 25, 512, 23, GAUSSIAN, GINX, 9), CipherException);
+    EXPECT_THROW(cc_ginx.generate_boolean_context(64, 512, 512, Q, 3.19, 25, 512, 23, GAUSSIAN, GINX, 9),
+                 CipherException);
 }
 
 // Excluded at NATIVE_SIZE=32 for the reason given above: the large-precision constructor
@@ -432,7 +433,8 @@ TEST(UNITTestFHEWExtended, KeySwitchRejectsCiphertextAboveKeySwitchingModulus) {
     auto cc = BooleanContext();
     cc.generate_boolean_context(params, GINX);
     auto&& lwe = cc.get_params()->get_lwe_params();
-    ASSERT_LT(lwe->get_digit_extent_ks(lwe->get_digit_count_ks() - 1), lwe->get_base_ks()) << "top position must be truncated";
+    ASSERT_LT(lwe->get_digit_extent_ks(lwe->get_digit_count_ks() - 1), lwe->get_base_ks())
+            << "top position must be truncated";
 
     auto sk = cc.key_gen();
     auto sk_n = cc.key_gen_n();
@@ -465,17 +467,19 @@ TEST(UNITTestFHEWExtended, RingGSWParamsEqualityCoversSemanticFields) {
     const NativeInteger Q = last_prime<NativeInteger>(27, 2 * N);
     const NativeInteger q = 128;
 
-    const RingGswCryptoParams reference(N, Q, q, base_g, base_r, AP, std_dev_value, UNIFORM_TERNARY, false, num_auto_keys);
+    const RingGswCryptoParams reference(N, Q, q, base_g, base_r, AP, std_dev_value, UNIFORM_TERNARY, false,
+                                        num_auto_keys);
     const RingGswCryptoParams same(N, Q, q, base_g, base_r, AP, std_dev_value, UNIFORM_TERNARY, false, num_auto_keys);
     EXPECT_EQ(reference, same);
 
+    EXPECT_NE(reference, RingGswCryptoParams(N, Q, q / 2, base_g, base_r, AP, std_dev_value, UNIFORM_TERNARY, false,
+                                             num_auto_keys));
+    EXPECT_NE(reference, RingGswCryptoParams(N, Q, q, base_g, base_r, LMKCDEY, std_dev_value, UNIFORM_TERNARY, false,
+                                             num_auto_keys));
     EXPECT_NE(reference,
-              RingGswCryptoParams(N, Q, q / 2, base_g, base_r, AP, std_dev_value, UNIFORM_TERNARY, false, num_auto_keys));
-    EXPECT_NE(reference,
-              RingGswCryptoParams(N, Q, q, base_g, base_r, LMKCDEY, std_dev_value, UNIFORM_TERNARY, false, num_auto_keys));
-    EXPECT_NE(reference, RingGswCryptoParams(N, Q, q, base_g, base_r, AP, std_dev_value, GAUSSIAN, false, num_auto_keys));
-    EXPECT_NE(reference,
-              RingGswCryptoParams(N, Q, q, base_g, base_r, AP, std_dev_value + 0.01, UNIFORM_TERNARY, false, num_auto_keys));
-    EXPECT_NE(reference,
-              RingGswCryptoParams(N, Q, q, base_g, base_r, AP, std_dev_value, UNIFORM_TERNARY, false, num_auto_keys - 1));
+              RingGswCryptoParams(N, Q, q, base_g, base_r, AP, std_dev_value, GAUSSIAN, false, num_auto_keys));
+    EXPECT_NE(reference, RingGswCryptoParams(N, Q, q, base_g, base_r, AP, std_dev_value + 0.01, UNIFORM_TERNARY, false,
+                                             num_auto_keys));
+    EXPECT_NE(reference, RingGswCryptoParams(N, Q, q, base_g, base_r, AP, std_dev_value, UNIFORM_TERNARY, false,
+                                             num_auto_keys - 1));
 }

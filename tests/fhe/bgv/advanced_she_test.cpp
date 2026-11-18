@@ -133,7 +133,7 @@ class UTBGVRNS_SHEADVANCED : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS_
     }
 
     void unit_test_eval_mult_single(const TEST_CASE_UTBGVRNS_SHEADVANCED& test_data,
-                                 const std::string& failmsg = std::string()) {
+                                    const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -171,7 +171,7 @@ class UTBGVRNS_SHEADVANCED : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS_
     }
 
     void unit_test_eval_add_single(const TEST_CASE_UTBGVRNS_SHEADVANCED& test_data,
-                                const std::string& failmsg = std::string()) {
+                                   const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -220,6 +220,7 @@ TEST_P(UTBGVRNS_SHEADVANCED, SHEADVANCED) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTBGVRNS_SHEADVANCED, ::testing::ValuesIn(test_cases_utbgvrns_sheadvanced), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTBGVRNS_SHEADVANCED, ::testing::ValuesIn(test_cases_utbgvrns_sheadvanced),
+                         testName);
 
 #endif

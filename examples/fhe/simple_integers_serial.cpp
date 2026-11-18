@@ -258,11 +258,11 @@ int main() {
     std::cout << "The third ciphertext has been deserialized." << std::endl;
 
     // Homomorphic additions
-    auto ciphertext_add12 = cc->eval_add(ct1, ct2);                  // iphertext2);
+    auto ciphertext_add12 = cc->eval_add(ct1, ct2);                    // iphertext2);
     auto ciphertext_add_result = cc->eval_add(ciphertext_add12, ct3);  // iphertext3);
 
     // Homomorphic multiplications
-    auto ciphertext_mul12 = cc->eval_mult(ct1, ct2);                   // iphertext2);
+    auto ciphertext_mul12 = cc->eval_mult(ct1, ct2);                     // iphertext2);
     auto ciphertext_mult_result = cc->eval_mult(ciphertext_mul12, ct3);  // iphertext3);
 
     // Homomorphic rotations

@@ -154,7 +154,7 @@ class RnsPolyImpl final : public RnsPolyInterface<RnsPolyImpl<VecType>, VecType,
      * left unallocated.
      */
     RnsPolyImpl(const std::shared_ptr<Params>& params, Format format = Format::EVALUATION,
-                 bool initialize_element_to_zero = false) noexcept
+                bool initialize_element_to_zero = false) noexcept
         : params_{params}, format_{format} {
         vectors_.reserve(params_->get_params().size());
         for (const auto& p : params_->get_params())
@@ -529,9 +529,9 @@ class RnsPolyImpl final : public RnsPolyInterface<RnsPolyImpl<VecType>, VecType,
     void drop_last_element_and_scale(const std::vector<NativeInteger>& ql_inv_modq) override;
 
     void mod_reduce(const NativeInteger& t, const std::vector<NativeInteger>& t_modq_precon,
-                   const NativeInteger& negt_inv_modq, const NativeInteger& negt_inv_modq_precon,
-                   const std::vector<NativeInteger>& ql_inv_modq,
-                   const std::vector<NativeInteger>& ql_inv_modq_precon) override;
+                    const NativeInteger& negt_inv_modq, const NativeInteger& negt_inv_modq_precon,
+                    const std::vector<NativeInteger>& ql_inv_modq,
+                    const std::vector<NativeInteger>& ql_inv_modq_precon) override;
 
     PolyLargeType crt_interpolate() const override;
     PolyType decryption_crt_interpolate(PlaintextModulus ptm) const override;
@@ -561,8 +561,8 @@ class RnsPolyImpl final : public RnsPolyInterface<RnsPolyImpl<VecType>, VecType,
      * @param neg_q_modt_precon NTL-specific precomputation for neg_q_modt.
      */
     void times_qovert(const std::shared_ptr<Params>& params_q, const std::vector<NativeInteger>& t_inv_modq,
-                     const NativeInteger& t, const NativeInteger& neg_q_modt,
-                     const NativeInteger& neg_q_modt_precon) override;
+                      const NativeInteger& t, const NativeInteger& neg_q_modt,
+                      const NativeInteger& neg_q_modt_precon) override;
 
     /**
      * @brief Approximate CRT basis switching {X}_Q -> {X + alpha*Q}_P for a small alpha; see
@@ -576,11 +576,12 @@ class RnsPolyImpl final : public RnsPolyInterface<RnsPolyImpl<VecType>, VecType,
      * @param modp_barrett_mu 128-bit Barrett reduction precomputed values for p_j.
      * @return the representation of X + alpha*Q in the basis P.
      */
-    RnsPolyType approx_switch_crt_basis(const std::shared_ptr<Params>& params_q, const std::shared_ptr<Params>& params_p,
-                                      const std::vector<NativeInteger>& q_hat_inv_modq,
-                                      const std::vector<NativeInteger>& q_hat_inv_modq_precon,
-                                      const std::vector<std::vector<NativeInteger>>& q_hat_modp,
-                                      const std::vector<DoubleNativeInt>& modp_barrett_mu) const override;
+    RnsPolyType approx_switch_crt_basis(const std::shared_ptr<Params>& params_q,
+                                        const std::shared_ptr<Params>& params_p,
+                                        const std::vector<NativeInteger>& q_hat_inv_modq,
+                                        const std::vector<NativeInteger>& q_hat_inv_modq_precon,
+                                        const std::vector<std::vector<NativeInteger>>& q_hat_modp,
+                                        const std::vector<DoubleNativeInt>& modp_barrett_mu) const override;
 
     /**
      * @brief Approximate modulus raising in place, {X}_Q -> {X + alpha*Q}_{Q,P}: the P towers are computed with
@@ -595,10 +596,10 @@ class RnsPolyImpl final : public RnsPolyInterface<RnsPolyImpl<VecType>, VecType,
      * @param modp_barrett_mu 128-bit Barrett reduction precomputed values for p_j.
      */
     void approx_mod_up(const std::shared_ptr<Params>& params_q, const std::shared_ptr<Params>& params_p,
-                     const std::shared_ptr<Params>& params_qp, const std::vector<NativeInteger>& q_hat_inv_modq,
-                     const std::vector<NativeInteger>& q_hat_inv_modq_precon,
-                     const std::vector<std::vector<NativeInteger>>& q_hat_modp,
-                     const std::vector<DoubleNativeInt>& modp_barrett_mu) override;
+                       const std::shared_ptr<Params>& params_qp, const std::vector<NativeInteger>& q_hat_inv_modq,
+                       const std::vector<NativeInteger>& q_hat_inv_modq_precon,
+                       const std::vector<std::vector<NativeInteger>>& q_hat_modp,
+                       const std::vector<DoubleNativeInt>& modp_barrett_mu) override;
 
     /**
      * @brief Approximate modulus reduction {X}_{Q,P} -> {approximately X/P}_Q (with the multiplication by t used by
@@ -618,13 +619,16 @@ class RnsPolyImpl final : public RnsPolyInterface<RnsPolyImpl<VecType>, VecType,
      * @param t_modq_precon NTL-specific precomputations for t modulo q_i.
      * @return the representation of approximately X/P in the basis Q.
      */
-    RnsPolyType approx_mod_down(
-            const std::shared_ptr<Params>& params_q, const std::shared_ptr<Params>& params_p,
-            const std::vector<NativeInteger>& P_inv_modq, const std::vector<NativeInteger>& p_inv_modq_precon,
-            const std::vector<NativeInteger>& p_hat_inv_modp, const std::vector<NativeInteger>& p_hat_inv_modp_precon,
-            const std::vector<std::vector<NativeInteger>>& p_hat_modq, const std::vector<DoubleNativeInt>& modq_barrett_mu,
-            const std::vector<NativeInteger>& t_inv_modp, const std::vector<NativeInteger>& t_inv_modp_precon,
-            const NativeInteger& t, const std::vector<NativeInteger>& t_modq_precon) const override;
+    RnsPolyType approx_mod_down(const std::shared_ptr<Params>& params_q, const std::shared_ptr<Params>& params_p,
+                                const std::vector<NativeInteger>& P_inv_modq,
+                                const std::vector<NativeInteger>& p_inv_modq_precon,
+                                const std::vector<NativeInteger>& p_hat_inv_modp,
+                                const std::vector<NativeInteger>& p_hat_inv_modp_precon,
+                                const std::vector<std::vector<NativeInteger>>& p_hat_modq,
+                                const std::vector<DoubleNativeInt>& modq_barrett_mu,
+                                const std::vector<NativeInteger>& t_inv_modp,
+                                const std::vector<NativeInteger>& t_inv_modp_precon, const NativeInteger& t,
+                                const std::vector<NativeInteger>& t_modq_precon) const override;
 
     /**
      * @brief Exact CRT basis switching {X}_Q -> {X}_P; see RnsPolyInterface::switch_crt_basis for the algorithm.
@@ -638,12 +642,13 @@ class RnsPolyImpl final : public RnsPolyInterface<RnsPolyImpl<VecType>, VecType,
      * @param q_inv precomputed values for 1/q_i.
      * @return the representation of X in the basis P.
      */
-    RnsPolyType switch_crt_basis(const std::shared_ptr<Params>& params_p, const std::vector<NativeInteger>& q_hat_inv_modq,
-                                const std::vector<NativeInteger>& q_hat_inv_modq_precon,
-                                const std::vector<std::vector<NativeInteger>>& q_hat_modp,
-                                const std::vector<std::vector<NativeInteger>>& alpha_q_modp,
-                                const std::vector<DoubleNativeInt>& modp_barrett_mu,
-                                const std::vector<double>& q_inv) const override;
+    RnsPolyType switch_crt_basis(const std::shared_ptr<Params>& params_p,
+                                 const std::vector<NativeInteger>& q_hat_inv_modq,
+                                 const std::vector<NativeInteger>& q_hat_inv_modq_precon,
+                                 const std::vector<std::vector<NativeInteger>>& q_hat_modp,
+                                 const std::vector<std::vector<NativeInteger>>& alpha_q_modp,
+                                 const std::vector<DoubleNativeInt>& modp_barrett_mu,
+                                 const std::vector<double>& q_inv) const override;
 
     /**
      * @brief Exact modulus raising in place, {X}_Q -> {X}_{Q,P}: the P towers are computed with switch_crt_basis and
@@ -660,12 +665,12 @@ class RnsPolyImpl final : public RnsPolyInterface<RnsPolyImpl<VecType>, VecType,
      * @param result_format the format of the resulting element.
      */
     void expand_crt_basis(const std::shared_ptr<Params>& params_qp, const std::shared_ptr<Params>& params_p,
-                        const std::vector<NativeInteger>& q_hat_inv_modq,
-                        const std::vector<NativeInteger>& q_hat_inv_modq_precon,
-                        const std::vector<std::vector<NativeInteger>>& q_hat_modp,
-                        const std::vector<std::vector<NativeInteger>>& alpha_q_modp,
-                        const std::vector<DoubleNativeInt>& modp_barrett_mu, const std::vector<double>& q_inv,
-                        Format result_format) override;
+                          const std::vector<NativeInteger>& q_hat_inv_modq,
+                          const std::vector<NativeInteger>& q_hat_inv_modq_precon,
+                          const std::vector<std::vector<NativeInteger>>& q_hat_modp,
+                          const std::vector<std::vector<NativeInteger>>& alpha_q_modp,
+                          const std::vector<DoubleNativeInt>& modp_barrett_mu, const std::vector<double>& q_inv,
+                          Format result_format) override;
 
     /**
      * @brief Exact modulus raising in place with the new towers first, {X}_Q -> {X}_{P,Q}; see
@@ -681,13 +686,14 @@ class RnsPolyImpl final : public RnsPolyInterface<RnsPolyImpl<VecType>, VecType,
      * @param q_inv precomputed values for 1/q_i.
      * @param result_format the format of the resulting element.
      */
-    void expand_crt_basis_reverse_order(const std::shared_ptr<Params>& params_qp, const std::shared_ptr<Params>& params_p,
-                                    const std::vector<NativeInteger>& q_hat_inv_modq,
-                                    const std::vector<NativeInteger>& q_hat_inv_modq_precon,
-                                    const std::vector<std::vector<NativeInteger>>& q_hat_modp,
-                                    const std::vector<std::vector<NativeInteger>>& alpha_q_modp,
-                                    const std::vector<DoubleNativeInt>& modp_barrett_mu, const std::vector<double>& q_inv,
-                                    Format result_format) override;
+    void expand_crt_basis_reverse_order(const std::shared_ptr<Params>& params_qp,
+                                        const std::shared_ptr<Params>& params_p,
+                                        const std::vector<NativeInteger>& q_hat_inv_modq,
+                                        const std::vector<NativeInteger>& q_hat_inv_modq_precon,
+                                        const std::vector<std::vector<NativeInteger>>& q_hat_modp,
+                                        const std::vector<std::vector<NativeInteger>>& alpha_q_modp,
+                                        const std::vector<DoubleNativeInt>& modp_barrett_mu,
+                                        const std::vector<double>& q_inv, Format result_format) override;
 
     /**
      * @brief Scales the element by P_l/Q and expands it to the basis {Q_l, P_l} in place: approx_switch_crt_basis to
@@ -707,14 +713,14 @@ class RnsPolyImpl final : public RnsPolyInterface<RnsPolyImpl<VecType>, VecType,
      * @param size_q the number of towers in the full basis Q.
      */
     void expand_crt_basis_ql_hat(const std::shared_ptr<Params>& params_q, const std::vector<NativeInteger>& ql_hat_modq,
-                             const std::vector<NativeInteger>& ql_hat_modq_precon, const uint32_t size_q) override;
+                                 const std::vector<NativeInteger>& ql_hat_modq_precon, const uint32_t size_q) override;
 
     PolyType scale_and_round(const NativeInteger& t, const std::vector<NativeInteger>& t_q_hat_inv_modq_divq_modt,
-                           const std::vector<NativeInteger>& t_q_hat_inv_modq_divq_modt_precon,
-                           const std::vector<NativeInteger>& t_q_hat_inv_modq_b_divq_modt,
-                           const std::vector<NativeInteger>& t_q_hat_inv_modq_b_divq_modt_precon,
-                           const std::vector<double>& t_q_hat_inv_modq_divq_frac,
-                           const std::vector<double>& t_q_hat_inv_modq_b_divq_frac) const override;
+                             const std::vector<NativeInteger>& t_q_hat_inv_modq_divq_modt_precon,
+                             const std::vector<NativeInteger>& t_q_hat_inv_modq_b_divq_modt,
+                             const std::vector<NativeInteger>& t_q_hat_inv_modq_b_divq_modt_precon,
+                             const std::vector<double>& t_q_hat_inv_modq_divq_frac,
+                             const std::vector<double>& t_q_hat_inv_modq_b_divq_frac) const override;
 
     /**
      * @brief Approximate scale and round {X}_{Q,P} -> {approximately t/Q * X}_P; see
@@ -726,8 +732,8 @@ class RnsPolyImpl final : public RnsPolyInterface<RnsPolyImpl<VecType>, VecType,
      * @return the representation of approximately t/Q * X in the basis P.
      */
     RnsPolyType approx_scale_and_round(const std::shared_ptr<Params>& params_p,
-                                     const std::vector<std::vector<NativeInteger>>& t_ps_hat_inv_mods_divs_modp,
-                                     const std::vector<DoubleNativeInt>& modp_barret_mu) const override;
+                                       const std::vector<std::vector<NativeInteger>>& t_ps_hat_inv_mods_divs_modp,
+                                       const std::vector<DoubleNativeInt>& modp_barret_mu) const override;
 
     /**
      * @brief Exact scale and round {X}_{I,O} -> {round(t/I * X)}_O, where O is the output basis (P or Q) and I is
@@ -740,15 +746,15 @@ class RnsPolyImpl final : public RnsPolyInterface<RnsPolyImpl<VecType>, VecType,
      * @return the representation of round(t/I * X) in the basis O.
      */
     RnsPolyType scale_and_round(const std::shared_ptr<Params>& params_output,
-                               const std::vector<std::vector<NativeInteger>>& t_os_hat_inv_mods_divs_modo,
-                               const std::vector<double>& t_os_hat_inv_mods_divs_frac,
-                               const std::vector<DoubleNativeInt>& modo_barret_mu) const override;
+                                const std::vector<std::vector<NativeInteger>>& t_os_hat_inv_mods_divs_modo,
+                                const std::vector<double>& t_os_hat_inv_mods_divs_frac,
+                                const std::vector<DoubleNativeInt>& modo_barret_mu) const override;
 
     PolyType scale_and_round(const std::vector<NativeInteger>& moduli_q, const NativeInteger& t,
-                           const NativeInteger& tgamma, const std::vector<NativeInteger>& tgamma_q_hat_modq,
-                           const std::vector<NativeInteger>& tgamma_q_hat_modq_precon,
-                           const std::vector<NativeInteger>& neg_invq_modtgamma,
-                           const std::vector<NativeInteger>& neg_invq_modtgamma_precon) const override;
+                             const NativeInteger& tgamma, const std::vector<NativeInteger>& tgamma_q_hat_modq,
+                             const std::vector<NativeInteger>& tgamma_q_hat_modq_precon,
+                             const std::vector<NativeInteger>& neg_invq_modtgamma,
+                             const std::vector<NativeInteger>& neg_invq_modtgamma_precon) const override;
 
     /**
      * @brief Computes round(X/p) in place for an element in the basis {Q, p} (BFV EXTENDED encryption): the last
@@ -759,7 +765,7 @@ class RnsPolyImpl final : public RnsPolyInterface<RnsPolyImpl<VecType>, VecType,
      * @param p_inv_modq precomputed values for [p^{-1}]_{q_i}.
      */
     void scale_and_round_p_over_q(const std::shared_ptr<Params>& params_q,
-                             const std::vector<NativeInteger>& p_inv_modq) override;
+                                  const std::vector<NativeInteger>& p_inv_modq) override;
 
     /**
      * @brief Expands the element from the basis Q to {Q, Bsk, mtilde} in place using the Montgomery-style fast base
@@ -790,13 +796,14 @@ class RnsPolyImpl final : public RnsPolyInterface<RnsPolyImpl<VecType>, VecType,
             const std::vector<NativeInteger>& mtilde_inv_modbsk_precon) override;
 
     void fast_rns_floorq(const NativeInteger& t, const std::vector<NativeInteger>& moduli_q,
-                       const std::vector<NativeInteger>& moduli_bsk, const std::vector<DoubleNativeInt>& modbsk_barrett_mu,
-                       const std::vector<NativeInteger>& t_q_hat_inv_modq,
-                       const std::vector<NativeInteger>& t_q_hat_inv_modq_precon,
-                       const std::vector<std::vector<NativeInteger>>& q_hat_modbsk,
-                       const std::vector<std::vector<NativeInteger>>& q_inv_modbsk,
-                       const std::vector<NativeInteger>& t_q_inv_modbsk,
-                       const std::vector<NativeInteger>& t_q_inv_modbsk_precon) override;
+                         const std::vector<NativeInteger>& moduli_bsk,
+                         const std::vector<DoubleNativeInt>& modbsk_barrett_mu,
+                         const std::vector<NativeInteger>& t_q_hat_inv_modq,
+                         const std::vector<NativeInteger>& t_q_hat_inv_modq_precon,
+                         const std::vector<std::vector<NativeInteger>>& q_hat_modbsk,
+                         const std::vector<std::vector<NativeInteger>>& q_inv_modbsk,
+                         const std::vector<NativeInteger>& t_q_inv_modbsk,
+                         const std::vector<NativeInteger>& t_q_inv_modbsk_precon) override;
 
     /**
      * @brief Converts the element from the basis {Q, Bsk} back to Q in place with the Shenoy-Kumaresan method: the Q
@@ -815,15 +822,13 @@ class RnsPolyImpl final : public RnsPolyInterface<RnsPolyImpl<VecType>, VecType,
      * @param b_modq precomputed values for [B]_{q_i}.
      * @param b_modq_precon NTL-specific precomputations for b_modq.
      */
-    void fast_base_conv_sk(const std::shared_ptr<Params>& params_q, const std::vector<DoubleNativeInt>& modq_barrett_mu,
-                        const std::vector<NativeInteger>& moduli_bsk,
-                        const std::vector<DoubleNativeInt>& modbsk_barrett_mu,
-                        const std::vector<NativeInteger>& b_hat_inv_modb,
-                        const std::vector<NativeInteger>& b_hat_inv_modb_precon,
-                        const std::vector<NativeInteger>& b_hat_modmsk, const NativeInteger& b_inv_modmsk,
-                        const NativeInteger& b_inv_modmsk_precon, const std::vector<std::vector<NativeInteger>>& b_hat_modq,
-                        const std::vector<NativeInteger>& b_modq,
-                        const std::vector<NativeInteger>& b_modq_precon) override;
+    void fast_base_conv_sk(
+            const std::shared_ptr<Params>& params_q, const std::vector<DoubleNativeInt>& modq_barrett_mu,
+            const std::vector<NativeInteger>& moduli_bsk, const std::vector<DoubleNativeInt>& modbsk_barrett_mu,
+            const std::vector<NativeInteger>& b_hat_inv_modb, const std::vector<NativeInteger>& b_hat_inv_modb_precon,
+            const std::vector<NativeInteger>& b_hat_modmsk, const NativeInteger& b_inv_modmsk,
+            const NativeInteger& b_inv_modmsk_precon, const std::vector<std::vector<NativeInteger>>& b_hat_modq,
+            const std::vector<NativeInteger>& b_modq, const std::vector<NativeInteger>& b_modq_precon) override;
 
     void switch_format(uint32_t thread_limit = 0) override;
 
@@ -849,7 +854,7 @@ class RnsPolyImpl final : public RnsPolyInterface<RnsPolyImpl<VecType>, VecType,
     void load(Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         ar(::cereal::make_nvp("v", vectors_));
         ar(::cereal::make_nvp("f", format_));

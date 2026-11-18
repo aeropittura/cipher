@@ -92,7 +92,8 @@ void run_bgv_rns_additive() {
     // Print out the parameters
     std::cout << "p = " << cc->get_crypto_parameters()->get_plaintext_modulus() << std::endl;
     std::cout << "n = " << cc->get_crypto_parameters()->get_element_params()->get_cyclotomic_order() / 2 << std::endl;
-    std::cout << "log2 q = " << std::log2(cc->get_crypto_parameters()->get_element_params()->get_modulus().convert_to_double())
+    std::cout << "log2 q = "
+              << std::log2(cc->get_crypto_parameters()->get_element_params()->get_modulus().convert_to_double())
               << std::endl;
 
     // Initialize Public Key Containers for 3 parties
@@ -233,7 +234,8 @@ void run_bfv_rns() {
     // Output the generated parameters
     std::cout << "p = " << cc->get_crypto_parameters()->get_plaintext_modulus() << std::endl;
     std::cout << "n = " << cc->get_crypto_parameters()->get_element_params()->get_cyclotomic_order() / 2 << std::endl;
-    std::cout << "log2 q = " << std::log2(cc->get_crypto_parameters()->get_element_params()->get_modulus().convert_to_double())
+    std::cout << "log2 q = "
+              << std::log2(cc->get_crypto_parameters()->get_element_params()->get_modulus().convert_to_double())
               << std::endl;
 
     // Initialize Public Key Containers for two parties A and B
@@ -259,8 +261,8 @@ void run_bfv_rns() {
 
     // Generate evalsum key part for A
     cc->eval_sum_key_gen(kp1.secret_key);
-    auto eval_sum_keys =
-            std::make_shared<std::map<uint32_t, EvalKey<RnsPoly>>>(cc->get_eval_sum_key_map(kp1.secret_key->get_key_tag()));
+    auto eval_sum_keys = std::make_shared<std::map<uint32_t, EvalKey<RnsPoly>>>(
+            cc->get_eval_sum_key_map(kp1.secret_key->get_key_tag()));
 
     std::cout << "Round 1 of key generation completed." << std::endl;
 
@@ -284,7 +286,8 @@ void run_bfv_rns() {
     auto eval_sum_keys_b = cc->multi_eval_sum_key_gen(kp2.secret_key, eval_sum_keys, kp2.public_key->get_key_tag());
 
     std::cout << "Joint evaluation summation key for (s_a + s_b) is generated..." << std::endl;
-    auto eval_sum_keys_join = cc->multi_add_eval_sum_keys(eval_sum_keys, eval_sum_keys_b, kp2.public_key->get_key_tag());
+    auto eval_sum_keys_join =
+            cc->multi_add_eval_sum_keys(eval_sum_keys, eval_sum_keys_b, kp2.public_key->get_key_tag());
 
     cc->insert_eval_sum_key(eval_sum_keys_join);
 
@@ -446,7 +449,8 @@ void run_ckks() {
     // Output the generated parameters
     std::cout << "p = " << cc->get_crypto_parameters()->get_plaintext_modulus() << std::endl;
     std::cout << "n = " << cc->get_crypto_parameters()->get_element_params()->get_cyclotomic_order() / 2 << std::endl;
-    std::cout << "log2 q = " << std::log2(cc->get_crypto_parameters()->get_element_params()->get_modulus().convert_to_double())
+    std::cout << "log2 q = "
+              << std::log2(cc->get_crypto_parameters()->get_element_params()->get_modulus().convert_to_double())
               << std::endl;
 
     // Initialize Public Key Containers
@@ -472,8 +476,8 @@ void run_ckks() {
 
     // Generate evalsum key part for A
     cc->eval_sum_key_gen(kp1.secret_key);
-    auto eval_sum_keys =
-            std::make_shared<std::map<uint32_t, EvalKey<RnsPoly>>>(cc->get_eval_sum_key_map(kp1.secret_key->get_key_tag()));
+    auto eval_sum_keys = std::make_shared<std::map<uint32_t, EvalKey<RnsPoly>>>(
+            cc->get_eval_sum_key_map(kp1.secret_key->get_key_tag()));
 
     std::cout << "Round 1 of key generation completed." << std::endl;
 
@@ -497,7 +501,8 @@ void run_ckks() {
     auto eval_sum_keys_b = cc->multi_eval_sum_key_gen(kp2.secret_key, eval_sum_keys, kp2.public_key->get_key_tag());
 
     std::cout << "Joint evaluation summation key for (s_a + s_b) is generated..." << std::endl;
-    auto eval_sum_keys_join = cc->multi_add_eval_sum_keys(eval_sum_keys, eval_sum_keys_b, kp2.public_key->get_key_tag());
+    auto eval_sum_keys_join =
+            cc->multi_add_eval_sum_keys(eval_sum_keys, eval_sum_keys_b, kp2.public_key->get_key_tag());
 
     cc->insert_eval_sum_key(eval_sum_keys_join);
 

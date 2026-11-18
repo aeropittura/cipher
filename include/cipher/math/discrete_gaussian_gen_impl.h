@@ -131,7 +131,7 @@ typename VecType::Integer DiscreteGaussianGeneratorImpl<VecType>::generate_integ
 
 template <typename VecType>
 VecType DiscreteGaussianGeneratorImpl<VecType>::generate_vector(uint32_t size,
-                                                               const typename VecType::Integer& modulus) const {
+                                                                const typename VecType::Integer& modulus) const {
     VecType ans(size, modulus);
     auto& g = PseudoRandomNumberGenerator::get_prng();
     for (uint32_t i = 0; i < size; ++i) {

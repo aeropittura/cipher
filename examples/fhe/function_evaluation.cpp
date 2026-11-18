@@ -166,7 +166,7 @@ void eval_function_example() {
 
     // We can input any lambda function, which inputs a double and returns a double.
     auto result = cc->eval_chebyshev_function([](double x) -> double { return std::sqrt(x); }, ciphertext, lower_bound,
-                                            upper_bound, poly_degree);
+                                              upper_bound, poly_degree);
 
     Plaintext plaintext_dec;
     cc->decrypt(key_pair.secret_key, result, &plaintext_dec);
@@ -179,7 +179,7 @@ void eval_function_example() {
     // Compute the same approximation on cleartext data
     std::vector<double> input_double{1, 2, 3, 4, 5, 6, 7, 8, 9};
     auto ptxt_approx = eval_chebyshev_function_ptxt([](double x) -> double { return std::sqrt(x); }, input_double,
-                                                lower_bound, upper_bound, poly_degree);
+                                                    lower_bound, upper_bound, poly_degree);
     std::cout << "Cleartext output\n\t" << ptxt_approx << std::endl;
 
     std::vector<std::complex<double>> final_result = plaintext_dec->get_ckks_packed_value();

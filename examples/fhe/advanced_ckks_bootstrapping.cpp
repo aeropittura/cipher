@@ -189,7 +189,8 @@ void bootstrap_example(uint32_t num_slots) {
     // for HE computation.
     auto ciphertext_after = crypto_context->eval_bootstrap(ciph);
 
-    std::cout << "Number of levels remaining after bootstrapping: " << depth - ciphertext_after->get_level() << std::endl
+    std::cout << "Number of levels remaining after bootstrapping: " << depth - ciphertext_after->get_level()
+              << std::endl
               << std::endl;
 
     // Step 7: Decryption and output

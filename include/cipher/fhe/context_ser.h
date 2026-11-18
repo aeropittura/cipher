@@ -88,7 +88,8 @@ void from_stream(CryptoContext<T>& obj, std::istream& stream, const SerType::SER
     cereal::JSONInputArchive archive(stream);
     archive(newob);
 
-    obj = ContextFactory<T>::get_context(newob->get_crypto_parameters(), newob->get_scheme(), newob->get_scheme_id_impl());
+    obj = ContextFactory<T>::get_context(newob->get_crypto_parameters(), newob->get_scheme(),
+                                         newob->get_scheme_id_impl());
 }
 
 /**
@@ -109,33 +110,33 @@ bool deserialize_from_file(const std::string& filename, CryptoContext<T>& obj, c
     }
     return false;
 }
-}  // namespace Serial
+}  // namespace serialization
 /// @cond INTERNAL
 template void serialization::from_stream(std::shared_ptr<CryptoContextImpl<RnsPoly>>& obj, std::istream& stream,
-                                  const SerType::SERJSON&);
+                                         const SerType::SERJSON&);
 template bool CryptoContextImpl<RnsPoly>::serialize_eval_mult_key<SerType::SERJSON>(std::ostream& ser,
-                                                                                  const SerType::SERJSON&,
-                                                                                  const std::string& key_tag);
+                                                                                    const SerType::SERJSON&,
+                                                                                    const std::string& key_tag);
 template bool CryptoContextImpl<RnsPoly>::serialize_eval_mult_key<SerType::SERJSON>(std::ostream& ser,
-                                                                                  const SerType::SERJSON&,
-                                                                                  const CryptoContext<RnsPoly> cc);
+                                                                                    const SerType::SERJSON&,
+                                                                                    const CryptoContext<RnsPoly> cc);
 template bool CryptoContextImpl<RnsPoly>::deserialize_eval_mult_key<SerType::SERJSON>(std::istream& ser,
-                                                                                    const SerType::SERJSON&);
+                                                                                      const SerType::SERJSON&);
 template bool CryptoContextImpl<RnsPoly>::serialize_eval_sum_key<SerType::SERJSON>(std::ostream& ser,
-                                                                                 const SerType::SERJSON&,
-                                                                                 const std::string& key_tag);
+                                                                                   const SerType::SERJSON&,
+                                                                                   const std::string& key_tag);
 template bool CryptoContextImpl<RnsPoly>::serialize_eval_sum_key<SerType::SERJSON>(std::ostream& ser,
-                                                                                 const SerType::SERJSON&,
-                                                                                 const CryptoContext<RnsPoly> cc);
+                                                                                   const SerType::SERJSON&,
+                                                                                   const CryptoContext<RnsPoly> cc);
 template bool CryptoContextImpl<RnsPoly>::deserialize_eval_sum_key<SerType::SERJSON>(std::istream& ser,
-                                                                                   const SerType::SERJSON&);
+                                                                                     const SerType::SERJSON&);
 template bool CryptoContextImpl<RnsPoly>::serialize_eval_automorphism_key<SerType::SERJSON>(std::ostream& ser,
-                                                                                          const SerType::SERJSON&,
-                                                                                          const std::string& key_tag);
+                                                                                            const SerType::SERJSON&,
+                                                                                            const std::string& key_tag);
 template bool CryptoContextImpl<RnsPoly>::serialize_eval_automorphism_key<SerType::SERJSON>(
         std::ostream& ser, const SerType::SERJSON&, const CryptoContext<RnsPoly> cc);
 template bool CryptoContextImpl<RnsPoly>::deserialize_eval_automorphism_key<SerType::SERJSON>(std::istream& ser,
-                                                                                            const SerType::SERJSON&);
+                                                                                              const SerType::SERJSON&);
 /// @endcond
 
 // ================================= BINARY serialization/deserialization
@@ -157,7 +158,8 @@ void from_stream(CryptoContext<T>& obj, std::istream& stream, const SerType::SER
     cereal::PortableBinaryInputArchive archive(stream);
     archive(newob);
 
-    obj = ContextFactory<T>::get_context(newob->get_crypto_parameters(), newob->get_scheme(), newob->get_scheme_id_impl());
+    obj = ContextFactory<T>::get_context(newob->get_crypto_parameters(), newob->get_scheme(),
+                                         newob->get_scheme_id_impl());
 }
 
 /**
@@ -191,30 +193,29 @@ void deserialize_from_string(CryptoContext<T>& obj, const std::string& json) {
     s << json;
     serialization::from_stream(obj, s, SerType::JSON);
 }
-}  // namespace Serial
+}  // namespace serialization
 
 /// @cond INTERNAL
 template void serialization::from_stream(std::shared_ptr<CryptoContextImpl<RnsPoly>>& obj, std::istream& stream,
-                                  const SerType::SERBINARY&);
+                                         const SerType::SERBINARY&);
 template bool CryptoContextImpl<RnsPoly>::serialize_eval_mult_key<SerType::SERBINARY>(std::ostream& ser,
-                                                                                    const SerType::SERBINARY&,
-                                                                                    const std::string& key_tag);
+                                                                                      const SerType::SERBINARY&,
+                                                                                      const std::string& key_tag);
 template bool CryptoContextImpl<RnsPoly>::serialize_eval_mult_key<SerType::SERBINARY>(std::ostream& ser,
-                                                                                    const SerType::SERBINARY&,
-                                                                                    const CryptoContext<RnsPoly> cc);
+                                                                                      const SerType::SERBINARY&,
+                                                                                      const CryptoContext<RnsPoly> cc);
 template bool CryptoContextImpl<RnsPoly>::deserialize_eval_mult_key<SerType::SERBINARY>(std::istream& ser,
-                                                                                      const SerType::SERBINARY&);
+                                                                                        const SerType::SERBINARY&);
 template bool CryptoContextImpl<RnsPoly>::serialize_eval_sum_key<SerType::SERBINARY>(std::ostream& ser,
-                                                                                   const SerType::SERBINARY&,
-                                                                                   const std::string& key_tag);
+                                                                                     const SerType::SERBINARY&,
+                                                                                     const std::string& key_tag);
 template bool CryptoContextImpl<RnsPoly>::serialize_eval_sum_key<SerType::SERBINARY>(std::ostream& ser,
-                                                                                   const SerType::SERBINARY&,
-                                                                                   const CryptoContext<RnsPoly> cc);
+                                                                                     const SerType::SERBINARY&,
+                                                                                     const CryptoContext<RnsPoly> cc);
 template bool CryptoContextImpl<RnsPoly>::deserialize_eval_sum_key<SerType::SERBINARY>(std::istream& ser,
-                                                                                     const SerType::SERBINARY&);
-template bool CryptoContextImpl<RnsPoly>::serialize_eval_automorphism_key<SerType::SERBINARY>(std::ostream& ser,
-                                                                                            const SerType::SERBINARY&,
-                                                                                            const std::string& key_tag);
+                                                                                       const SerType::SERBINARY&);
+template bool CryptoContextImpl<RnsPoly>::serialize_eval_automorphism_key<SerType::SERBINARY>(
+        std::ostream& ser, const SerType::SERBINARY&, const std::string& key_tag);
 template bool CryptoContextImpl<RnsPoly>::serialize_eval_automorphism_key<SerType::SERBINARY>(
         std::ostream& ser, const SerType::SERBINARY&, const CryptoContext<RnsPoly> cc);
 template bool CryptoContextImpl<RnsPoly>::deserialize_eval_automorphism_key<SerType::SERBINARY>(

@@ -93,7 +93,7 @@ class KeySwitchBv : public RnsKeySwitch {
      * @return the key switching key
      */
     EvalKey<RnsPoly> key_switch_gen_internal(const PrivateKey<RnsPoly> old_private_key,
-                                           const PrivateKey<RnsPoly> new_private_key) const override;
+                                             const PrivateKey<RnsPoly> new_private_key) const override;
 
     /**
      * Generates a BV key switching key from old_private_key to new_private_key reusing the "a" components of eval_key
@@ -105,8 +105,8 @@ class KeySwitchBv : public RnsKeySwitch {
      * @return the key switching key
      */
     EvalKey<RnsPoly> key_switch_gen_internal(const PrivateKey<RnsPoly> old_private_key,
-                                           const PrivateKey<RnsPoly> new_private_key,
-                                           const EvalKey<RnsPoly> eval_key) const override;
+                                             const PrivateKey<RnsPoly> new_private_key,
+                                             const EvalKey<RnsPoly> eval_key) const override;
 
     /**
      * Generates a BV key switching key from old_private_key to the secret key of new_public_key by encrypting every CRT
@@ -117,7 +117,7 @@ class KeySwitchBv : public RnsKeySwitch {
      * @return the key switching key
      */
     EvalKey<RnsPoly> key_switch_gen_internal(const PrivateKey<RnsPoly> old_private_key,
-                                           const PublicKey<RnsPoly> new_public_key) const override;
+                                             const PublicKey<RnsPoly> new_public_key) const override;
 
     /**
      * Key switches a ciphertext in place; see KeySwitchBase::key_switch_in_place.
@@ -161,8 +161,8 @@ class KeySwitchBv : public RnsKeySwitch {
      * @return the pair (b', a') in basis Ql such that b' + a' * sB = a * sA + noise
      */
     std::vector<RnsPoly> eval_fast_key_switch_core(const std::shared_ptr<std::vector<RnsPoly>> digits,
-                                                const EvalKey<RnsPoly> eval_key,
-                                                const std::shared_ptr<ParmType> params_ql) const override;
+                                                   const EvalKey<RnsPoly> eval_key,
+                                                   const std::shared_ptr<ParmType> params_ql) const override;
 
     /////////////////////////////////////////
     // SERIALIZATION

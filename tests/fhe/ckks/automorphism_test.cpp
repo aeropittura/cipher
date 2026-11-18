@@ -211,7 +211,7 @@ class UTCKKSRNS_AUTOMORPHISM : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
     const std::vector<std::complex<double>> vector8_complex{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0};
     const std::complex<double> vector8_complex_sum =
             std::accumulate(vector8_complex.begin(), vector8_complex.end(), std::complex<double>(0));  // 36.0;
-    const int64_t vector8_sum = std::accumulate(vector8.begin(), vector8.end(), int64_t(0));          // 36
+    const int64_t vector8_sum = std::accumulate(vector8.begin(), vector8.end(), int64_t(0));           // 36
 
   protected:
     void SetUp() {
@@ -224,7 +224,7 @@ class UTCKKSRNS_AUTOMORPHISM : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
     }
 
     void unit_test_eval_at_index_packed_array(const TEST_CASE_UTCKKSRNS_AUTOMORPHISM& test_data,
-                                         const std::string& failmsg = std::string()) {
+                                              const std::string& failmsg = std::string()) {
         for (auto index : test_data.index_list) {
             try {
                 CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
@@ -268,7 +268,8 @@ class UTCKKSRNS_AUTOMORPHISM : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
                         break;
                     case INVALID_INPUT_DATA:
                         // should fail
-                        EXPECT_FALSE(check_equality(int_array_new->get_ckks_packed_value(), vector8_complex)) << err_msg;
+                        EXPECT_FALSE(check_equality(int_array_new->get_ckks_packed_value(), vector8_complex))
+                                << err_msg;
                         break;
                     default:
                         // make it fail
@@ -296,7 +297,7 @@ class UTCKKSRNS_AUTOMORPHISM : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
     }
 
     void unit_test_eval_sum_packed_array(const TEST_CASE_UTCKKSRNS_AUTOMORPHISM& test_data,
-                                     const std::string& failmsg = std::string()) {
+                                         const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -357,7 +358,7 @@ class UTCKKSRNS_AUTOMORPHISM : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
     }
 
     void unit_test_eval_sum_rows(const TEST_CASE_UTCKKSRNS_AUTOMORPHISM& test_data,
-                              const std::string& failmsg = std::string()) {
+                                 const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -386,7 +387,7 @@ class UTCKKSRNS_AUTOMORPHISM : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
             result->set_length(batch_size);
             // std::cout << "sum Rows: " << result;
             check_equality(result->get_ckks_packed_value(), output_sum_rows, eps,
-                          failmsg + " EvalSumRowsKeyGen()/EvalSumRows fails - result is incorrect");
+                           failmsg + " EvalSumRowsKeyGen()/EvalSumRows fails - result is incorrect");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -397,7 +398,7 @@ class UTCKKSRNS_AUTOMORPHISM : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
     }
 
     void unit_test_eval_sum_cols(const TEST_CASE_UTCKKSRNS_AUTOMORPHISM& test_data,
-                              const std::string& failmsg = std::string()) {
+                                 const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -426,7 +427,7 @@ class UTCKKSRNS_AUTOMORPHISM : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
             result->set_length(batch_size);
             // std::cout << "sum Cols: " << result;
             check_equality(result->get_ckks_packed_value(), output_sum_cols, eps,
-                          failmsg + " EvalSumColsKeyGen()/EvalSumCols fails - result is incorrect");
+                           failmsg + " EvalSumColsKeyGen()/EvalSumCols fails - result is incorrect");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail

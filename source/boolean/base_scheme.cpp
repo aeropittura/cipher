@@ -42,7 +42,7 @@ namespace cipher {
 
 // wrapper for key_gen methods
 RingGswBtKey BooleanScheme::key_gen(const std::shared_ptr<BooleanCryptoParams>& params, ConstLwePrivateKey& LWE_sk,
-                                  KEYGEN_MODE keygen_mode, bool internal32) const {
+                                    KEYGEN_MODE keygen_mode, bool internal32) const {
     if (params == nullptr)
         CIPHER_THROW("BinFHECryptoParams is empty");
     if (LWE_sk == nullptr)
@@ -94,7 +94,7 @@ RingGswBtKey BooleanScheme::key_gen(const std::shared_ptr<BooleanCryptoParams>& 
 }
 
 LweCiphertext BooleanScheme::switch_c_ttoqn(const std::shared_ptr<LweCryptoParams>& params, const RingGswBtKey& EK,
-                                         ConstLweCiphertext& ct) const {
+                                            ConstLweCiphertext& ct) const {
 #if CIPHER_NATIVE_INT != 32
     if (EK.ks_key32 != nullptr)
         return lwe_scheme->switch_c_ttoqn(params, EK.ks_key32, ct);
@@ -103,7 +103,7 @@ LweCiphertext BooleanScheme::switch_c_ttoqn(const std::shared_ptr<LweCryptoParam
 }
 
 LweCiphertext BooleanScheme::key_switch(const std::shared_ptr<LweCryptoParams>& params, const RingGswBtKey& EK,
-                                      ConstLweCiphertext& ct) const {
+                                        ConstLweCiphertext& ct) const {
 #if CIPHER_NATIVE_INT != 32
     if (EK.ks_key32 != nullptr)
         return lwe_scheme->key_switch(params, EK.ks_key32, ct);
@@ -113,8 +113,8 @@ LweCiphertext BooleanScheme::key_switch(const std::shared_ptr<LweCryptoParams>& 
 
 // Full evaluation as described in https://eprint.iacr.org/2020/086
 LweCiphertext BooleanScheme::eval_bin_gate(const std::shared_ptr<BooleanCryptoParams>& params, BINGATE gate,
-                                        const RingGswBtKey& EK, ConstLweCiphertext& ct1, ConstLweCiphertext& ct2,
-                                        bool extended) const {
+                                           const RingGswBtKey& EK, ConstLweCiphertext& ct1, ConstLweCiphertext& ct2,
+                                           bool extended) const {
     if (params == nullptr)
         CIPHER_THROW("BinFHECryptoParams is empty");
     if (ct1 == nullptr)
@@ -128,7 +128,8 @@ LweCiphertext BooleanScheme::eval_bin_gate(const std::shared_ptr<BooleanCryptoPa
     NativeInteger Q{LWE_params->get_Q()};
 
     // input cts expected with SMALL_DIM
-    auto cct1 = (Q == ct1->get_modulus()) ? switch_c_ttoqn(LWE_params, EK, ct1) : std::make_shared<LweCiphertextImpl>(*ct1);
+    auto cct1 =
+            (Q == ct1->get_modulus()) ? switch_c_ttoqn(LWE_params, EK, ct1) : std::make_shared<LweCiphertextImpl>(*ct1);
     const auto cct2 = (Q == ct2->get_modulus()) ? switch_c_ttoqn(LWE_params, EK, ct2) : ct2;
 
     // the additive homomorphic operation for XOR/NXOR is different from the other gates we compute
@@ -166,8 +167,8 @@ LweCiphertext BooleanScheme::eval_bin_gate(const std::shared_ptr<BooleanCryptoPa
 
 // Full evaluation as described in https://eprint.iacr.org/2020/086
 LweCiphertext BooleanScheme::eval_bin_gate(const std::shared_ptr<BooleanCryptoParams>& params, BINGATE gate,
-                                        const RingGswBtKey& EK, const std::vector<LweCiphertext>& ctvector,
-                                        bool extended) const {
+                                           const RingGswBtKey& EK, const std::vector<LweCiphertext>& ctvector,
+                                           bool extended) const {
     if (params == nullptr)
         CIPHER_THROW("BinFHECryptoParams is empty");
 
@@ -209,7 +210,7 @@ LweCiphertext BooleanScheme::eval_bin_gate(const std::shared_ptr<BooleanCryptoPa
 
         // input cts expected with SMALL_DIM
         auto ct = (Q == ctvector[0]->get_modulus()) ? switch_c_ttoqn(LWE_params, EK, ctvector[0]) :
-                                                     std::make_shared<LweCiphertextImpl>(*ctvector[0]);
+                                                      std::make_shared<LweCiphertextImpl>(*ctvector[0]);
         for (uint32_t i = 1; i < expected_size; ++i) {
             lwe_scheme->eval_add_eq(
                     ct, (Q == ctvector[i]->get_modulus()) ? switch_c_ttoqn(LWE_params, EK, ctvector[i]) : ctvector[i]);
@@ -245,7 +246,7 @@ LweCiphertext BooleanScheme::eval_bin_gate(const std::shared_ptr<BooleanCryptoPa
 
 // Full evaluation as described in https://eprint.iacr.org/2020/086
 LweCiphertext BooleanScheme::bootstrap(const std::shared_ptr<BooleanCryptoParams>& params, const RingGswBtKey& EK,
-                                      ConstLweCiphertext& ct, bool extended) const {
+                                       ConstLweCiphertext& ct, bool extended) const {
     if (params == nullptr)
         CIPHER_THROW("BinFHECryptoParams is empty");
     if (ct == nullptr)
@@ -278,7 +279,8 @@ LweCiphertext BooleanScheme::bootstrap(const std::shared_ptr<BooleanCryptoParams
 }
 
 // Evaluation of the NOT operation; no key material is needed
-LweCiphertext BooleanScheme::eval_not(const std::shared_ptr<BooleanCryptoParams>& params, ConstLweCiphertext& ct) const {
+LweCiphertext BooleanScheme::eval_not(const std::shared_ptr<BooleanCryptoParams>& params,
+                                      ConstLweCiphertext& ct) const {
     if (params == nullptr)
         CIPHER_THROW("BinFHECryptoParams is empty");
     if (ct == nullptr)
@@ -297,8 +299,8 @@ LweCiphertext BooleanScheme::eval_not(const std::shared_ptr<BooleanCryptoParams>
 // Evaluate Arbitrary Function homomorphically
 // Modulus of ct is q | 2N
 LweCiphertext BooleanScheme::eval_func(const std::shared_ptr<BooleanCryptoParams>& params, const RingGswBtKey& EK,
-                                     ConstLweCiphertext& ct, const std::vector<NativeInteger>& LUT,
-                                     NativeInteger beta) const {
+                                       ConstLweCiphertext& ct, const std::vector<NativeInteger>& LUT,
+                                       NativeInteger beta) const {
     if (params == nullptr)
         CIPHER_THROW("BinFHECryptoParams is empty");
     if (ct == nullptr)
@@ -388,7 +390,7 @@ LweCiphertext BooleanScheme::eval_func(const std::shared_ptr<BooleanCryptoParams
 
 // Evaluate Homomorphic Flooring
 LweCiphertext BooleanScheme::eval_floor(const std::shared_ptr<BooleanCryptoParams>& params, const RingGswBtKey& EK,
-                                      ConstLweCiphertext& ct, NativeInteger beta, uint32_t roundbits) const {
+                                        ConstLweCiphertext& ct, NativeInteger beta, uint32_t roundbits) const {
     if (params == nullptr)
         CIPHER_THROW("BinFHECryptoParams is empty");
     if (ct == nullptr)
@@ -433,8 +435,8 @@ LweCiphertext BooleanScheme::eval_floor(const std::shared_ptr<BooleanCryptoParam
 
 // Evaluate large-precision sign
 LweCiphertext BooleanScheme::eval_sign(const std::shared_ptr<BooleanCryptoParams>& params,
-                                     const std::map<uint32_t, RingGswBtKey>& e_ks, ConstLweCiphertext& ct,
-                                     NativeInteger beta, bool scheme_switch) const {
+                                       const std::map<uint32_t, RingGswBtKey>& e_ks, ConstLweCiphertext& ct,
+                                       NativeInteger beta, bool scheme_switch) const {
     if (params == nullptr)
         CIPHER_THROW("BinFHECryptoParams is empty");
     if (ct == nullptr)
@@ -501,8 +503,8 @@ LweCiphertext BooleanScheme::eval_sign(const std::shared_ptr<BooleanCryptoParams
 
 // Evaluate Ciphertext Decomposition
 std::vector<LweCiphertext> BooleanScheme::eval_decomp(const std::shared_ptr<BooleanCryptoParams>& params,
-                                                    const std::map<uint32_t, RingGswBtKey>& e_ks, ConstLweCiphertext& ct,
-                                                    NativeInteger beta) const {
+                                                      const std::map<uint32_t, RingGswBtKey>& e_ks,
+                                                      ConstLweCiphertext& ct, NativeInteger beta) const {
     if (params == nullptr)
         CIPHER_THROW("BinFHECryptoParams is empty");
     if (ct == nullptr)
@@ -561,7 +563,7 @@ std::vector<LweCiphertext> BooleanScheme::eval_decomp(const std::shared_ptr<Bool
 // private:
 
 RlweCiphertext BooleanScheme::bootstrap_gate_core(const std::shared_ptr<BooleanCryptoParams>& params, BINGATE gate,
-                                               const RingGswBtKey& EK, ConstLweCiphertext& ct) const {
+                                                  const RingGswBtKey& EK, ConstLweCiphertext& ct) const {
     if (params == nullptr)
         CIPHER_THROW("BinFHECryptoParams is empty");
     if (ct == nullptr)
@@ -638,8 +640,8 @@ RlweCiphertext BooleanScheme::bootstrap_gate_core(const std::shared_ptr<BooleanC
 // funciton evaluation, from https://eprint.iacr.org/2021/1337
 template <typename Func>
 RlweCiphertext BooleanScheme::bootstrap_func_core(const std::shared_ptr<BooleanCryptoParams>& params,
-                                               const RingGswBtKey& EK, ConstLweCiphertext& ct, const Func f,
-                                               NativeInteger fmod) const {
+                                                  const RingGswBtKey& EK, ConstLweCiphertext& ct, const Func f,
+                                                  NativeInteger fmod) const {
     if (!EK.has_refresh_key())
         CIPHER_THROW("Bootstrapping keys not generated. Please call BTKeyGen before bootstrapping.");
 
@@ -681,7 +683,7 @@ RlweCiphertext BooleanScheme::bootstrap_func_core(const std::shared_ptr<BooleanC
 // Full evaluation as described in https://eprint.iacr.org/2020/086
 template <typename Func>
 LweCiphertext BooleanScheme::bootstrap_func(const std::shared_ptr<BooleanCryptoParams>& params, const RingGswBtKey& EK,
-                                          ConstLweCiphertext& ct, const Func f, NativeInteger fmod) const {
+                                            ConstLweCiphertext& ct, const Func f, NativeInteger fmod) const {
     // the accumulator result is encrypted w.r.t. the transposed secret key
     // we can transpose "a" to get an encryption under the original secret key
     auto acc{bootstrap_func_core(params, EK, ct, f, fmod)};

@@ -113,7 +113,7 @@ DecryptResult RnsPke::decrypt(ConstCiphertext<RnsPoly> ciphertext, const Private
 }
 
 std::shared_ptr<std::vector<RnsPoly>> RnsPke::encrypt_zero_core(const PrivateKey<RnsPoly> private_key,
-                                                               const std::shared_ptr<ParmType> params) const {
+                                                                const std::shared_ptr<ParmType> params) const {
     const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(private_key->get_crypto_parameters());
 
     const RnsPoly& s = private_key->get_private_element();
@@ -150,7 +150,7 @@ std::shared_ptr<std::vector<RnsPoly>> RnsPke::encrypt_zero_core(const PrivateKey
 }
 
 std::shared_ptr<std::vector<RnsPoly>> RnsPke::encrypt_zero_core(const PublicKey<RnsPoly> public_key,
-                                                               const std::shared_ptr<ParmType> params) const {
+                                                                const std::shared_ptr<ParmType> params) const {
     const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(public_key->get_crypto_parameters());
 
     const std::vector<RnsPoly>& pk = public_key->get_public_elements();
@@ -166,7 +166,7 @@ std::shared_ptr<std::vector<RnsPoly>> RnsPke::encrypt_zero_core(const PublicKey<
     //    CIPHER_THROW("TugType tug must be assigned");
     //}
     RnsPoly v = crypto_params->get_secret_key_dist() == GAUSSIAN ? RnsPoly(dgg, element_params, Format::EVALUATION) :
-                                                                RnsPoly(tug, element_params, Format::EVALUATION);
+                                                                   RnsPoly(tug, element_params, Format::EVALUATION);
 
     // noise generation with the discrete gaussian generator dgg
     RnsPoly e0(dgg, element_params, Format::EVALUATION);

@@ -72,7 +72,7 @@ class ContextFactory {
      * @return the matching registered context, or nullptr if there is none
      */
     static CryptoContext<Element> find_context(std::shared_ptr<BaseCryptoParams<Element>> params,
-                                              std::shared_ptr<SchemeBase<Element>> scheme);
+                                               std::shared_ptr<SchemeBase<Element>> scheme);
 
     /**
      * Registers the given context and, if it uses packed encoding, initializes the PackedEncoding parameters
@@ -115,8 +115,8 @@ class ContextFactory {
      * @return the shared context
      */
     static CryptoContext<Element> get_context(std::shared_ptr<BaseCryptoParams<Element>> params,
-                                             std::shared_ptr<SchemeBase<Element>> scheme,
-                                             SCHEME scheme_id_value = SCHEME::INVALID_SCHEME);
+                                              std::shared_ptr<SchemeBase<Element>> scheme,
+                                              SCHEME scheme_id_value = SCHEME::INVALID_SCHEME);
 
     /**
      * Returns the full registered context matching a (partial) context obtained by deserialization, registering

@@ -43,7 +43,7 @@ namespace cipher {
 
 template <typename Element>
 Ciphertext<Element> KeySwitchBase<Element>::key_switch(ConstCiphertext<Element> ciphertext,
-                                                      const EvalKey<Element> eval_key) const {
+                                                       const EvalKey<Element> eval_key) const {
     Ciphertext<Element> result = ciphertext->clone();
     key_switch_in_place(result, eval_key);
     return result;

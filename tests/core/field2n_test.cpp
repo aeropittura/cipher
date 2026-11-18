@@ -499,8 +499,8 @@ TEST(UTField2n, native_and_dcrt_centered_coefficients) {
     EXPECT_DOUBLE_EQ(native_field[2].real(), 0.0);
     EXPECT_DOUBLE_EQ(native_field[3].real(), -1.0);
 
-    auto crt_params = std::make_shared<RnsParams<BigInteger>>(8, std::vector<NativeInteger>{q},
-                                                                std::vector<NativeInteger>{root});
+    auto crt_params =
+            std::make_shared<RnsParams<BigInteger>>(8, std::vector<NativeInteger>{q}, std::vector<NativeInteger>{root});
     RnsPoly crt(crt_params, Format::COEFFICIENT, true);
     crt.set_element_at_index(0, poly);
     Field2n crt_field(crt);

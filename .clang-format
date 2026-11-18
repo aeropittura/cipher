@@ -35,6 +35,6 @@ IndentPPDirectives: BeforeHash
 IndentWidth: 4
 PointerAlignment: Left
 ReflowComments: IndentOnly
-SortIncludes: CaseSensitive
-IncludeBlocks: Regroup
+SortIncludes: Never
+IncludeBlocks: Preserve
 UseTab: Never

@@ -408,13 +408,13 @@ class ubint final : public cipher::BigIntegerInterface<ubint<limb_t>> {
 
     template <typename T = limb_t>
     ubint& mod_eq(const ubint& modulus, const ubint& mu,
-                 typename std::enable_if_t<!std::is_same_v<T, Dlimb_t>, bool> = true) {
+                  typename std::enable_if_t<!std::is_same_v<T, Dlimb_t>, bool> = true) {
         return this->ubint::mod_eq(modulus);
     }
 
     template <typename T = limb_t>
     ubint& mod_eq(const ubint& modulus, const ubint& mu,
-                 typename std::enable_if_t<std::is_same_v<T, Dlimb_t>, bool> = true) {
+                  typename std::enable_if_t<std::is_same_v<T, Dlimb_t>, bool> = true) {
         if (*this < modulus)
             return *this;
         int n(modulus.msb_);
@@ -458,25 +458,25 @@ class ubint final : public cipher::BigIntegerInterface<ubint<limb_t>> {
      */
     template <typename T = limb_t>
     ubint mod_add(const ubint& b, const ubint& modulus, const ubint& mu,
-                 typename std::enable_if_t<!std::is_same_v<T, Dlimb_t>, bool> = true) const {
+                  typename std::enable_if_t<!std::is_same_v<T, Dlimb_t>, bool> = true) const {
         return b.mod_add(*this, modulus);
     }
 
     template <typename T = limb_t>
     ubint mod_add(const ubint& b, const ubint& modulus, const ubint& mu,
-                 typename std::enable_if_t<std::is_same_v<T, Dlimb_t>, bool> = true) const {
+                  typename std::enable_if_t<std::is_same_v<T, Dlimb_t>, bool> = true) const {
         return b.add(*this).mod(modulus, mu);
     }
 
     template <typename T = limb_t>
     ubint& mod_add_eq(const ubint& b, const ubint& modulus, const ubint& mu,
-                    typename std::enable_if_t<!std::is_same_v<T, Dlimb_t>, bool> = true) {
+                      typename std::enable_if_t<!std::is_same_v<T, Dlimb_t>, bool> = true) {
         return this->ubint::mod_add_eq(b, modulus);
     }
 
     template <typename T = limb_t>
     ubint& mod_add_eq(const ubint& b, const ubint& modulus, const ubint& mu,
-                    typename std::enable_if_t<std::is_same_v<T, Dlimb_t>, bool> = true) {
+                      typename std::enable_if_t<std::is_same_v<T, Dlimb_t>, bool> = true) {
         return *this = b.add(*this).mod(modulus, mu);
     }
 
@@ -510,13 +510,13 @@ class ubint final : public cipher::BigIntegerInterface<ubint<limb_t>> {
      */
     template <typename T = limb_t>
     ubint mod_sub(const ubint& b, const ubint& modulus, const ubint& mu,
-                 typename std::enable_if_t<!std::is_same_v<T, Dlimb_t>, bool> = true) const {
+                  typename std::enable_if_t<!std::is_same_v<T, Dlimb_t>, bool> = true) const {
         return this->ubint::mod_sub(b, modulus);
     }
 
     template <typename T = limb_t>
     ubint mod_sub(const ubint& b, const ubint& modulus, const ubint& mu,
-                 typename std::enable_if_t<std::is_same_v<T, Dlimb_t>, bool> = true) const {
+                  typename std::enable_if_t<std::is_same_v<T, Dlimb_t>, bool> = true) const {
         auto bv(b);
         auto av(*this);
         if (bv >= modulus)
@@ -530,13 +530,13 @@ class ubint final : public cipher::BigIntegerInterface<ubint<limb_t>> {
 
     template <typename T = limb_t>
     ubint& mod_sub_eq(const ubint& b, const ubint& modulus, const ubint& mu,
-                    typename std::enable_if_t<!std::is_same_v<T, Dlimb_t>, bool> = true) {
+                      typename std::enable_if_t<!std::is_same_v<T, Dlimb_t>, bool> = true) {
         return this->ubint::mod_sub_eq(b, modulus);
     }
 
     template <typename T = limb_t>
     ubint& mod_sub_eq(const ubint& b, const ubint& modulus, const ubint& mu,
-                    typename std::enable_if_t<std::is_same_v<T, Dlimb_t>, bool> = true) {
+                      typename std::enable_if_t<std::is_same_v<T, Dlimb_t>, bool> = true) {
         auto bv(b);
         if (bv >= modulus)
             bv.mod_eq(modulus, mu);
@@ -556,7 +556,7 @@ class ubint final : public cipher::BigIntegerInterface<ubint<limb_t>> {
      */
     template <typename T = limb_t>
     ubint mod_mul(const ubint& b, const ubint& modulus,
-                 typename std::enable_if_t<!std::is_same_v<T, Dlimb_t>, bool> = true) const {
+                  typename std::enable_if_t<!std::is_same_v<T, Dlimb_t>, bool> = true) const {
         auto bv(b);
         auto av(*this);
         if (bv >= modulus)
@@ -568,13 +568,13 @@ class ubint final : public cipher::BigIntegerInterface<ubint<limb_t>> {
 
     template <typename T = limb_t>
     ubint mod_mul(const ubint& b, const ubint& modulus,
-                 typename std::enable_if_t<std::is_same_v<T, Dlimb_t>, bool> = true) const {
+                  typename std::enable_if_t<std::is_same_v<T, Dlimb_t>, bool> = true) const {
         return b.mod_mul(*this, modulus, modulus.compute_mu());
     }
 
     template <typename T = limb_t>
     ubint& mod_mul_eq(const ubint& b, const ubint& modulus,
-                    typename std::enable_if_t<!std::is_same_v<T, Dlimb_t>, bool> = true) {
+                      typename std::enable_if_t<!std::is_same_v<T, Dlimb_t>, bool> = true) {
         auto bv(b);
         if (bv >= modulus)
             bv.mod_eq(modulus);
@@ -585,7 +585,7 @@ class ubint final : public cipher::BigIntegerInterface<ubint<limb_t>> {
 
     template <typename T = limb_t>
     ubint& mod_mul_eq(const ubint& b, const ubint& modulus,
-                    typename std::enable_if_t<std::is_same_v<T, Dlimb_t>, bool> = true) {
+                      typename std::enable_if_t<std::is_same_v<T, Dlimb_t>, bool> = true) {
         return *this = b.mod_mul(*this, modulus, modulus.compute_mu());
     }
 
@@ -885,7 +885,7 @@ class ubint final : public cipher::BigIntegerInterface<ubint<limb_t>> {
     void load(Archive& ar, std::uint32_t const version) {
         if (version > serialized_version()) {
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         }
         ar(::cereal::make_nvp("v", value_));
         ar(::cereal::make_nvp("m", msb_));
@@ -959,7 +959,7 @@ std::ostream &operator<<(std::ostream& os, const std::vector<limb_t>& v) {
 }
     #endif
 
-}  // namespace bigintdyn
+}  // namespace dynamic_int
 #endif
 
 #endif  // CIPHER_MATH_BACKEND_DYNAMIC_INTEGER_H_

@@ -115,7 +115,7 @@ ubint<limb_t> ubint<limb_t>::sub(const ubint& b) const {
     ubint result(*this);
     for (size_t i = 0; i < b.value_.size(); ++i) {
         if (result.value_[i] < b.value_[i]) {  // carryover condition need to
-                                                 // borrow from higher limbs.
+                                               // borrow from higher limbs.
             size_t cntr{i};
             result.value_[cntr] += (max_limb_ - b.value_[cntr]) + 1;
             // set all the zero limbs to all FFs (propagate the 1)
@@ -998,5 +998,5 @@ template class dynamic_int::ubint<expdtype>;
 template std::ostream& operator<<<expdtype>(std::ostream& os, const std::vector<expdtype>& v);
     #endif
 
-}  // namespace bigintdyn
+}  // namespace dynamic_int
 #endif

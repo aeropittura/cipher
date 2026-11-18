@@ -225,9 +225,9 @@ std::pair<Matrix<NativePoly>, RlweTrapdoorPair<NativePoly>> RlweTrapdoorUtility<
 
 template <>
 Matrix<Poly> RlweTrapdoorUtility<Poly>::gauss_samp(size_t n, size_t k, const Matrix<Poly>& A,
-                                                  const RlweTrapdoorPair<Poly>& T, const Poly& u,
-                                                  typename Poly::DggType& dgg, typename Poly::DggType& dgg_large_sigma,
-                                                  int64_t base) {
+                                                   const RlweTrapdoorPair<Poly>& T, const Poly& u,
+                                                   typename Poly::DggType& dgg, typename Poly::DggType& dgg_large_sigma,
+                                                   int64_t base) {
     CIPHER_DEBUG_FLAG(false);
     TimeVar t1, t1_tot, t2, t2_tot;
     TIC(t1);
@@ -294,10 +294,10 @@ Matrix<Poly> RlweTrapdoorUtility<Poly>::gauss_samp(size_t n, size_t k, const Mat
 
 template <>
 Matrix<NativePoly> RlweTrapdoorUtility<NativePoly>::gauss_samp(size_t n, size_t k, const Matrix<NativePoly>& A,
-                                                              const RlweTrapdoorPair<NativePoly>& T,
-                                                              const NativePoly& u, typename NativePoly::DggType& dgg,
-                                                              typename NativePoly::DggType& dgg_large_sigma,
-                                                              int64_t base) {
+                                                               const RlweTrapdoorPair<NativePoly>& T,
+                                                               const NativePoly& u, typename NativePoly::DggType& dgg,
+                                                               typename NativePoly::DggType& dgg_large_sigma,
+                                                               int64_t base) {
     CIPHER_DEBUG_FLAG(false);
     TimeVar t1, t1_tot, t2, t2_tot;
     TIC(t1);
@@ -335,7 +335,8 @@ Matrix<NativePoly> RlweTrapdoorUtility<NativePoly>::gauss_samp(size_t n, size_t 
     perturbed_syndrome.set_format(Format::COEFFICIENT);
     CIPHER_DEBUG("t2a: " << TOC(t2));  // takes 1
     TIC(t2);
-    LatticeGaussSampUtility<NativePoly>::gauss_samp_gq_arb_base(perturbed_syndrome, c, k, modulus, base, dgg, &z_hat_bbi);
+    LatticeGaussSampUtility<NativePoly>::gauss_samp_gq_arb_base(perturbed_syndrome, c, k, modulus, base, dgg,
+                                                                &z_hat_bbi);
     CIPHER_DEBUG("t2b: " << TOC(t2));  // takes 36
     TIC(t2);
     // Convert z_hat from a matrix of BBI to a vector of Element ring elements
@@ -364,9 +365,9 @@ Matrix<NativePoly> RlweTrapdoorUtility<NativePoly>::gauss_samp(size_t n, size_t 
 
 template <>
 Matrix<Poly> RlweTrapdoorUtility<Poly>::gauss_samp_square_mat(size_t n, size_t k, const Matrix<Poly>& A,
-                                                           const RlweTrapdoorPair<Poly>& T, const Matrix<Poly>& U,
-                                                           typename Poly::DggType& dgg,
-                                                           typename Poly::DggType& dgg_large_sigma, int64_t base) {
+                                                              const RlweTrapdoorPair<Poly>& T, const Matrix<Poly>& U,
+                                                              typename Poly::DggType& dgg,
+                                                              typename Poly::DggType& dgg_large_sigma, int64_t base) {
     const std::shared_ptr<typename Poly::Params> params = U(0, 0).get_params();
     auto zero_alloc = Poly::allocator(params, EVALUATION);
 
@@ -397,7 +398,7 @@ Matrix<Poly> RlweTrapdoorUtility<Poly>::gauss_samp_square_mat(size_t n, size_t k
             Matrix<int64_t> z_hat_bbi([]() { return 0; }, k, n);
 
             LatticeGaussSampUtility<Poly>::gauss_samp_gq_arb_base(perturbed_syndrome(i, j), c, k, modulus, base, dgg,
-                                                              &z_hat_bbi);
+                                                                  &z_hat_bbi);
 
             // Convert z_hat from a matrix of BBI to a vector of Poly ring elements
             // z_hat is in the coefficient representation
@@ -432,12 +433,10 @@ Matrix<Poly> RlweTrapdoorUtility<Poly>::gauss_samp_square_mat(size_t n, size_t k
 }
 
 template <>
-Matrix<NativePoly> RlweTrapdoorUtility<NativePoly>::gauss_samp_square_mat(size_t n, size_t k, const Matrix<NativePoly>& A,
-                                                                       const RlweTrapdoorPair<NativePoly>& T,
-                                                                       const Matrix<NativePoly>& U,
-                                                                       typename NativePoly::DggType& dgg,
-                                                                       typename NativePoly::DggType& dgg_large_sigma,
-                                                                       int64_t base) {
+Matrix<NativePoly> RlweTrapdoorUtility<NativePoly>::gauss_samp_square_mat(
+        size_t n, size_t k, const Matrix<NativePoly>& A, const RlweTrapdoorPair<NativePoly>& T,
+        const Matrix<NativePoly>& U, typename NativePoly::DggType& dgg, typename NativePoly::DggType& dgg_large_sigma,
+        int64_t base) {
     const std::shared_ptr<typename NativePoly::Params> params = U(0, 0).get_params();
     auto zero_alloc = NativePoly::allocator(params, EVALUATION);
 
@@ -467,8 +466,8 @@ Matrix<NativePoly> RlweTrapdoorUtility<NativePoly>::gauss_samp_square_mat(size_t
         for (size_t j = 0; j < d; j++) {
             Matrix<int64_t> z_hat_bbi([]() { return 0; }, k, n);
 
-            LatticeGaussSampUtility<NativePoly>::gauss_samp_gq_arb_base(perturbed_syndrome(i, j), c, k, modulus, base, dgg,
-                                                                    &z_hat_bbi);
+            LatticeGaussSampUtility<NativePoly>::gauss_samp_gq_arb_base(perturbed_syndrome(i, j), c, k, modulus, base,
+                                                                        dgg, &z_hat_bbi);
 
             // Convert z_hat from a matrix of BBI to a vector of NativePoly ring
             // elements z_hat is in the coefficient representation

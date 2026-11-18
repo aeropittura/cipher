@@ -53,13 +53,14 @@ inline bool adjust_for_add_or_sub_is_no_op(const CiphertextImpl<RnsPoly>& a, con
 inline bool adjust_for_add_or_sub_is_no_op(const CiphertextImpl<RnsPoly>& ct, const PlaintextImpl& pt) {
     const auto& pe = pt.get_element<RnsPoly>();
     return pt.get_level() == ct.get_level() && pt.get_noise_scale_deg() == ct.get_noise_scale_deg() &&
-           pe.get_format() == Format::EVALUATION && pe.get_num_of_elements() == ct.get_elements()[0].get_num_of_elements();
+           pe.get_format() == Format::EVALUATION &&
+           pe.get_num_of_elements() == ct.get_elements()[0].get_num_of_elements();
 }
 
 // adjust_for_mult_in_place() is a no-op when the operands share level and tower count and either the
 // scaling technique is FIXEDMANUAL (no rescale on mult) or both operands are already at depth 1.
 inline bool adjust_for_mult_is_no_op(const CiphertextImpl<RnsPoly>& a, const CiphertextImpl<RnsPoly>& b,
-                                ScalingTechnique st) {
+                                     ScalingTechnique st) {
     return a.get_level() == b.get_level() &&
            a.get_elements()[0].get_num_of_elements() == b.get_elements()[0].get_num_of_elements() &&
            (st == FIXEDMANUAL || (a.get_noise_scale_deg() == 1 && b.get_noise_scale_deg() == 1));
@@ -95,12 +96,13 @@ void RnsLeveledShe::eval_add_in_place(Ciphertext<RnsPoly>& ciphertext1, ConstCip
 }
 
 Ciphertext<RnsPoly> RnsLeveledShe::eval_add_mutable(Ciphertext<RnsPoly>& ciphertext1,
-                                                   Ciphertext<RnsPoly>& ciphertext2) const {
+                                                    Ciphertext<RnsPoly>& ciphertext2) const {
     adjust_for_add_or_sub_in_place(ciphertext1, ciphertext2);
     return eval_add_core(ciphertext1, ciphertext2);
 }
 
-void RnsLeveledShe::eval_add_mutable_in_place(Ciphertext<RnsPoly>& ciphertext1, Ciphertext<RnsPoly>& ciphertext2) const {
+void RnsLeveledShe::eval_add_mutable_in_place(Ciphertext<RnsPoly>& ciphertext1,
+                                              Ciphertext<RnsPoly>& ciphertext2) const {
     adjust_for_add_or_sub_in_place(ciphertext1, ciphertext2);
     eval_add_core_in_place(ciphertext1, ciphertext2);
 }
@@ -161,12 +163,13 @@ void RnsLeveledShe::eval_sub_in_place(Ciphertext<RnsPoly>& ciphertext1, ConstCip
 }
 
 Ciphertext<RnsPoly> RnsLeveledShe::eval_sub_mutable(Ciphertext<RnsPoly>& ciphertext1,
-                                                   Ciphertext<RnsPoly>& ciphertext2) const {
+                                                    Ciphertext<RnsPoly>& ciphertext2) const {
     adjust_for_add_or_sub_in_place(ciphertext1, ciphertext2);
     return eval_sub_core(ciphertext1, ciphertext2);
 }
 
-void RnsLeveledShe::eval_sub_mutable_in_place(Ciphertext<RnsPoly>& ciphertext1, Ciphertext<RnsPoly>& ciphertext2) const {
+void RnsLeveledShe::eval_sub_mutable_in_place(Ciphertext<RnsPoly>& ciphertext1,
+                                              Ciphertext<RnsPoly>& ciphertext2) const {
     adjust_for_add_or_sub_in_place(ciphertext1, ciphertext2);
     eval_sub_core_in_place(ciphertext1, ciphertext2);
 }
@@ -221,7 +224,7 @@ Ciphertext<RnsPoly> RnsLeveledShe::eval_mult(ConstCiphertext<RnsPoly>& ciphertex
 }
 
 Ciphertext<RnsPoly> RnsLeveledShe::eval_mult_mutable(Ciphertext<RnsPoly>& ciphertext1,
-                                                    Ciphertext<RnsPoly>& ciphertext2) const {
+                                                     Ciphertext<RnsPoly>& ciphertext2) const {
     if (ciphertext1 == ciphertext2)
         return eval_square_mutable(ciphertext1);
     adjust_for_mult_in_place(ciphertext1, ciphertext2);
@@ -369,7 +372,7 @@ Ciphertext<RnsPoly> RnsLeveledShe::level_reduce(ConstCiphertext<RnsPoly>& cipher
 
 // TODO (Andrey) : remove eval_key as unused
 void RnsLeveledShe::level_reduce_in_place(Ciphertext<RnsPoly>& ciphertext, const EvalKey<RnsPoly> eval_key,
-                                       size_t levels) const {
+                                          size_t levels) const {
     auto st = get_scaling_technique(*ciphertext);
     if (st == NORESCALE)
         CIPHER_THROW("Not implemented for NORESCALE rescaling technique");
@@ -386,7 +389,7 @@ void RnsLeveledShe::level_reduce_in_place(Ciphertext<RnsPoly>& ciphertext, const
  * must be a multiple of composite degree.
  */
 Ciphertext<RnsPoly> RnsLeveledShe::compress(ConstCiphertext<RnsPoly>& ciphertext, size_t towers_left,
-                                             size_t noise_scale_deg) const {
+                                            size_t noise_scale_deg) const {
     const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(ciphertext->get_crypto_parameters());
 
     uint32_t levels_to_drop = BASE_NUM_LEVELS_TO_DROP;
@@ -435,7 +438,7 @@ void RnsLeveledShe::adjust_levels_in_place(Ciphertext<RnsPoly>& ciphertext1, Cip
 }
 
 void RnsLeveledShe::adjust_for_add_or_sub_in_place(Ciphertext<RnsPoly>& ciphertext1,
-                                             Ciphertext<RnsPoly>& ciphertext2) const {
+                                                   Ciphertext<RnsPoly>& ciphertext2) const {
     const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(ciphertext1->get_crypto_parameters());
 
     if (crypto_params->get_scaling_technique() == FIXEDMANUAL) {
@@ -522,8 +525,8 @@ void RnsLeveledShe::adjust_for_mult_in_place(Ciphertext<RnsPoly>& ciphertext1, C
 }
 
 Ciphertext<RnsPoly> RnsLeveledShe::composed_eval_mult(ConstCiphertext<RnsPoly>& ciphertext1,
-                                                     ConstCiphertext<RnsPoly>& ciphertext2,
-                                                     const EvalKey<RnsPoly> eval_key) const {
+                                                      ConstCiphertext<RnsPoly>& ciphertext2,
+                                                      const EvalKey<RnsPoly> eval_key) const {
     const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(ciphertext1->get_crypto_parameters());
 
     auto st = crypto_params->get_scaling_technique();

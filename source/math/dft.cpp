@@ -127,7 +127,8 @@ void DiscreteFourierTransform::pre_compute_table(uint32_t s) {
     }
 }
 
-std::vector<std::complex<double>> DiscreteFourierTransform::fft_forward_transform(std::vector<std::complex<double>>& A) {
+std::vector<std::complex<double>> DiscreteFourierTransform::fft_forward_transform(
+        std::vector<std::complex<double>>& A) {
     uint32_t m = A.size();
     std::vector<std::complex<double>> B(A);
     uint32_t l = std::floor(std::log2(m));
@@ -185,7 +186,8 @@ std::vector<std::complex<double>> DiscreteFourierTransform::fft_forward_transfor
     return B;
 }
 
-std::vector<std::complex<double>> DiscreteFourierTransform::fft_inverse_transform(std::vector<std::complex<double>>& A) {
+std::vector<std::complex<double>> DiscreteFourierTransform::fft_inverse_transform(
+        std::vector<std::complex<double>>& A) {
     std::vector<std::complex<double>> result = DiscreteFourierTransform::fft_forward_transform(A);
     double n = result.size() / 2;
     for (int i = 0; i < n; i++) {

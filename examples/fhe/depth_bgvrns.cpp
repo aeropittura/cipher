@@ -86,9 +86,11 @@ int main(int argc, char* argv[]) {
     std::cout << "\np = " << crypto_context->get_crypto_parameters()->get_plaintext_modulus() << std::endl;
     std::cout << "n = " << crypto_context->get_crypto_parameters()->get_element_params()->get_cyclotomic_order() / 2
               << std::endl;
-    std::cout << "log2 q = "
-              << std::log2(crypto_context->get_crypto_parameters()->get_element_params()->get_modulus().convert_to_double())
-              << std::endl;
+    std::cout
+            << "log2 q = "
+            << std::log2(
+                       crypto_context->get_crypto_parameters()->get_element_params()->get_modulus().convert_to_double())
+            << std::endl;
 
     // Initialize Public Key Containers
     KeyPair<RnsPoly> key_pair;

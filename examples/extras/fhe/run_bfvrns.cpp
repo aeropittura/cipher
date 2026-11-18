@@ -158,5 +158,6 @@ void she_run() {
     std::cout << "Average decryption time:\t" << time_decrypt / (1000 * count) << " ms" << std::endl;
     std::cout << "Average multiplication time:\t" << time_mult / (1000 * count) << " ms" << std::endl;
     std::cout << "Average relinearization time:\t" << (time_relin - time_mult) / (1000 * count) << " ms" << std::endl;
-    std::cout << "Average multiplication + relinearization time:\t" << time_relin / (1000 * count) << " ms" << std::endl;
+    std::cout << "Average multiplication + relinearization time:\t" << time_relin / (1000 * count) << " ms"
+              << std::endl;
 }

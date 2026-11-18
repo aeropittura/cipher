@@ -93,9 +93,9 @@ void discrete_uniform_generator_long(const std::string& msg) {
         // test content
         for (size_t i = 0; i < size; i++) {
             EXPECT_LT(uni_rand_vector.at(i), modulus) << msg
-                                                    << " Failure testing vector_uniform_vector_small_modulus value "
-                                                       "greater than modulus at index "
-                                                    << i;
+                                                      << " Failure testing vector_uniform_vector_small_modulus value "
+                                                         "greater than modulus at index "
+                                                      << i;
         }
     }
 
@@ -112,9 +112,9 @@ void discrete_uniform_generator_long(const std::string& msg) {
         // test content
         for (size_t i = 0; i < size; i++) {
             EXPECT_LT(uni_rand_vector.at(i), modulus) << msg
-                                                    << " Failure testing vector_uniform_vector_large_modulus value "
-                                                       "greater than modulus at index "
-                                                    << i;
+                                                      << " Failure testing vector_uniform_vector_large_modulus value "
+                                                         "greater than modulus at index "
+                                                      << i;
         }
     }
 
@@ -192,7 +192,8 @@ void test_discrete_uniform_generator(typename V::Integer& modulus, std::string t
     double diff_in_means = std::abs(computed_mean_in_double - expected_mean_in_double);
 
     // within 1% of expected mean
-    EXPECT_LT(diff_in_means, 0.01 * modulus_in_double) << "Failure testing first_moment_test_convertToDouble " << test_name;
+    EXPECT_LT(diff_in_means, 0.01 * modulus_in_double)
+            << "Failure testing first_moment_test_convertToDouble " << test_name;
 
     // TEST CASE ON SECOND CENTRAL MOMENT
     double expected_variance_in_double = ((modulus_in_double - 1.0) * (modulus_in_double - 1.0)) / 12.0;
@@ -267,7 +268,7 @@ void test_parallel_discrete_uniform_generator(typename V::Integer& modulus, std:
     #pragma omp ordered
             {
                 CIPHER_DEBUG("thread #" << omp_get_thread_num() << " moving " << (int)randBigVectorPvt.size()
-                                         << " to starting point " << (int)rand_big_vector.size());
+                                        << " to starting point " << (int)rand_big_vector.size());
                 rand_big_vector.insert(rand_big_vector.end(), randBigVectorPvt.begin(), randBigVectorPvt.end());
                 CIPHER_DEBUG("thread #" << omp_get_thread_num() << " moved");
             }
@@ -309,7 +310,8 @@ void test_parallel_discrete_uniform_generator(typename V::Integer& modulus, std:
     double diff_in_std_dev = std::abs(computed_std_dev - expected_std_dev_in_double);
 
     // within 1% of expected std dev
-    EXPECT_LT(diff_in_std_dev, 0.1 * expected_std_dev_in_double) << "Failure testing second_central_moment_test " << test_name;
+    EXPECT_LT(diff_in_std_dev, 0.1 * expected_std_dev_in_double)
+            << "Failure testing second_central_moment_test " << test_name;
 }
 #endif
 
@@ -567,7 +569,7 @@ void ParallelDiscreteGaussianGenerator_VERY_LONG(const std::string& msg) {
     #pragma omp ordered
                 {
                     CIPHER_DEBUG("thread #" << omp_get_thread_num() << " " << "moving " << (int)dggCharVectorPvt.size()
-                                             << " to starting point" << (int)dgg_char_vector.size());
+                                            << " to starting point" << (int)dgg_char_vector.size());
                     dgg_char_vector.insert(dgg_char_vector.end(), dggCharVectorPvt.begin(), dggCharVectorPvt.end());
                 }
             }
@@ -610,7 +612,7 @@ void ParallelDiscreteGaussianGenerator_VERY_LONG(const std::string& msg) {
     #pragma omp ordered
                 {
                     CIPHER_DEBUG("thread #" << omp_get_thread_num() << " " << "moving " << (int)dggBigVectorPvt.size()
-                                             << " to starting point" << (int)dgg_big_vector.size());
+                                            << " to starting point" << (int)dgg_big_vector.size());
                     dgg_big_vector.insert(dgg_big_vector.end(), dggBigVectorPvt.begin(), dggBigVectorPvt.end());
                 }
             }

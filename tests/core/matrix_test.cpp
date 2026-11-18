@@ -63,7 +63,8 @@ static std::function<Element()> fast_il2n_alloc() {
     uint32_t m = 16;
     typename Element::Integer modulus("67108913");
     typename Element::Integer root_of_unity_value("61564");
-    return Element::allocator(std::make_shared<typename Element::Params>(m, modulus, root_of_unity_value), Format::EVALUATION);
+    return Element::allocator(std::make_shared<typename Element::Params>(m, modulus, root_of_unity_value),
+                              Format::EVALUATION);
 }
 
 template <typename Element>
@@ -71,8 +72,8 @@ static std::function<Element()> fast_uniform_il2n_alloc() {
     uint32_t m = 16;
     typename Element::Integer modulus("67108913");
     typename Element::Integer root_of_unity_value("61564");
-    return Element::make_discrete_uniform_allocator(std::make_shared<typename Element::Params>(m, modulus, root_of_unity_value),
-                                                 Format::EVALUATION);
+    return Element::make_discrete_uniform_allocator(
+            std::make_shared<typename Element::Params>(m, modulus, root_of_unity_value), Format::EVALUATION);
 }
 
 TEST(UTMatrix, serializer) {
@@ -378,12 +379,12 @@ template <typename Element>
 void poly_mult_square_matrix_caps(const std::string& msg) {
     int32_t dimension = 16;
 
-    MatrixStrassen<Element> A =
-            MatrixStrassen<Element>(fast_il2n_alloc<Element>(), dimension, dimension, fast_uniform_il2n_alloc<Element>());
-    MatrixStrassen<Element> B =
-            MatrixStrassen<Element>(fast_il2n_alloc<Element>(), dimension, dimension, fast_uniform_il2n_alloc<Element>());
-    MatrixStrassen<Element> C =
-            MatrixStrassen<Element>(fast_il2n_alloc<Element>(), dimension, dimension, fast_uniform_il2n_alloc<Element>());
+    MatrixStrassen<Element> A = MatrixStrassen<Element>(fast_il2n_alloc<Element>(), dimension, dimension,
+                                                        fast_uniform_il2n_alloc<Element>());
+    MatrixStrassen<Element> B = MatrixStrassen<Element>(fast_il2n_alloc<Element>(), dimension, dimension,
+                                                        fast_uniform_il2n_alloc<Element>());
+    MatrixStrassen<Element> C = MatrixStrassen<Element>(fast_il2n_alloc<Element>(), dimension, dimension,
+                                                        fast_uniform_il2n_alloc<Element>());
     MatrixStrassen<Element> I = MatrixStrassen<Element>(fast_il2n_alloc<Element>(), dimension, dimension).identity();
 
     // EXPECT_EQ((A.mult(B))(0, 0), (A.MultiplyCAPS(B, 2))(0, 0)) << "CAPS matrix

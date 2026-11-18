@@ -42,8 +42,8 @@
 #ifdef CIPHER_WITH_BE4
 
     #include "cipher/math/backend/dynamic/mod_vector.h"  // rings of ubints
-    #include "cipher/math/backend/dynamic/transform.h"  // transforms for dynamic
-    #include "cipher/math/backend/dynamic/integer.h"      // dynamically sized unsigned big integers or ubints
+    #include "cipher/math/backend/dynamic/transform.h"   // transforms for dynamic
+    #include "cipher/math/backend/dynamic/integer.h"     // dynamically sized unsigned big integers or ubints
 
 // Global alias for CIPHER_MATH_BACKEND 4 Integer
 using M4Integer = dynamic_int::BigInteger;

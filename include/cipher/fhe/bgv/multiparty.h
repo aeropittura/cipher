@@ -60,7 +60,7 @@ class BgvRnsMultiparty : public RnsMultiparty {
      * @return the decoding result (including the scaling factor modulo t).
      */
     DecryptResult multiparty_decrypt_fusion(const std::vector<Ciphertext<RnsPoly>>& ciphertext_vec,
-                                          NativePoly* plaintext) const override;
+                                            NativePoly* plaintext) const override;
 
     /**
      * Threshold FHE: Combines the partial decryptions, CRT-interpolates the sum to a large-integer polynomial
@@ -71,7 +71,7 @@ class BgvRnsMultiparty : public RnsMultiparty {
      * @return the decoding result.
      */
     DecryptResult multiparty_decrypt_fusion(const std::vector<Ciphertext<RnsPoly>>& ciphertext_vec,
-                                          Poly* plaintext) const override;
+                                            Poly* plaintext) const override;
 
     /////////////////////////////////////
     // SERIALIZATION

@@ -133,8 +133,8 @@ void switch_ckks_to_fhew(uint32_t depth, uint32_t slots, uint32_t num_values) {
     // Generate bootstrapping key for timing
     cc_lwe->bt_key_gen(private_key_fhew);
     time_key_gen = TOC(t);
-    std::cout << "Time to compute the CKKS to FHEW switching key generation (+BTKey): " << time_key_gen / 60000 << " min"
-              << std::endl;
+    std::cout << "Time to compute the CKKS to FHEW switching key generation (+BTKey): " << time_key_gen / 60000
+              << " min" << std::endl;
 
     std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
     std::cout << ", logQ " << log_q_cc_lwe;
@@ -307,7 +307,8 @@ void switch_fhew_to_ckks(uint32_t depth, uint32_t slots, uint32_t num_values) {
     TIC(t);
     auto c_temp = cc->eval_fhew_to_ckks(ctxts_lwe, num_values, slots, p_lwe, 0, p_lwe);
     time_eval = TOC(t);
-    std::cout << "Time to evaluate the scheme switching from FHEW to CKKS: " << time_eval / 60000 << " min" << std::endl;
+    std::cout << "Time to evaluate the scheme switching from FHEW to CKKS: " << time_eval / 60000 << " min"
+              << std::endl;
 
     // Step 6. Decrypt
     Plaintext plaintext_dec;
@@ -589,7 +590,8 @@ void argmin_via_scheme_switching(uint32_t depth, uint32_t slots, uint32_t num_va
             std::cout << "Argmin: " << ptxt_min << std::endl;
         }
     }
-    std::cout << "Time to compute min and argmin via scheme switching: " << time_eval_min / 60000 << " min" << std::endl;
+    std::cout << "Time to compute min and argmin via scheme switching: " << time_eval_min / 60000 << " min"
+              << std::endl;
 
     // TIC(t);
     // result      = cc->eval_max_scheme_switching(c1, keys.public_key, num_values, slots);
@@ -740,7 +742,8 @@ void argmin_via_scheme_switching_alt(uint32_t depth, uint32_t slots, uint32_t nu
             std::cout << "Argmin: " << ptxt_min << std::endl;
         }
     }
-    std::cout << "Time to compute min and argmin via scheme switching: " << time_eval_min / 60000 << " min" << std::endl;
+    std::cout << "Time to compute min and argmin via scheme switching: " << time_eval_min / 60000 << " min"
+              << std::endl;
 
     // TIC(t);
     // result      = cc->eval_max_scheme_switching_alt(c1, keys.public_key, num_values, slots);
@@ -891,7 +894,8 @@ void argmin(uint32_t depth, uint32_t slots, uint32_t num_values, uint32_t ring_d
             std::cout << "Argmin: " << ptxt_min << std::endl;
         }
     }
-    std::cout << "Time to compute min and argmin via scheme switching: " << time_eval_min / 60000 << " min" << std::endl;
+    std::cout << "Time to compute min and argmin via scheme switching: " << time_eval_min / 60000 << " min"
+              << std::endl;
 
     // TIC(t);
     // result      = cc->eval_max_scheme_switching(c1, keys.public_key, num_values, slots);
@@ -1048,7 +1052,8 @@ void argmin_alt(uint32_t depth, uint32_t slots, uint32_t num_values, uint32_t ri
             std::cout << "Argmin: " << ptxt_min << std::endl;
         }
     }
-    std::cout << "Time to compute min and argmin via scheme switching: " << time_eval_min / 60000 << " min" << std::endl;
+    std::cout << "Time to compute min and argmin via scheme switching: " << time_eval_min / 60000 << " min"
+              << std::endl;
 
     // TIC(t);
     // result      = cc->eval_max_scheme_switching_alt(c1, keys.public_key, num_values, slots);

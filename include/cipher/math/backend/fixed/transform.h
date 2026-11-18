@@ -87,7 +87,8 @@ class NumberTheoreticTransformFxd {
      * @param[out] result is the result of the transform, a VecType that should be of the same
      * size as input or a throw if an error occurs.
      */
-    void inverse_transform_iterative(const VecType& element, const VecType& root_of_unity_inverse_table, VecType* result);
+    void inverse_transform_iterative(const VecType& element, const VecType& root_of_unity_inverse_table,
+                                     VecType* result);
 
     /**
      * Copies \p element into \p result and calls forward_transform_to_bit_reverse_in_place()
@@ -133,7 +134,7 @@ class NumberTheoreticTransformFxd {
      * @see forward_transform_to_bit_reverse_in_place()
      */
     void forward_transform_to_bit_reverse(const VecType& element, const VecType& root_of_unity_table,
-                                      const VecType& precon_root_of_unity_table, VecType* result);
+                                          const VecType& precon_root_of_unity_table, VecType* result);
 
     /**
      * In-place forward transform in the ring Z_q[X]/(X^n+1) with prime q and
@@ -147,8 +148,8 @@ class NumberTheoreticTransformFxd {
      * optimized NativeInteger modulo multiplications.
      * @param[in,out] element is the input/output of the transform of type VecType and length n.
      */
-    void forward_transform_to_bit_reverse_in_place(const VecType& root_of_unity_table, const VecType& precon_root_of_unity_table,
-                                             VecType* element);
+    void forward_transform_to_bit_reverse_in_place(const VecType& root_of_unity_table,
+                                                   const VecType& precon_root_of_unity_table, VecType* element);
 
     /**
      * Copies \p element into \p result and calls inverse_transform_from_bit_reverse_in_place()
@@ -166,7 +167,7 @@ class NumberTheoreticTransformFxd {
      * @see inverse_transform_from_bit_reverse_in_place()
      */
     void inverse_transform_from_bit_reverse(const VecType& element, const VecType& root_of_unity_inverse_table,
-                                        const IntType& cyclo_order_inv, VecType* result);
+                                            const IntType& cyclo_order_inv, VecType* result);
 
     /**
      * In-place inverse transform in the ring Z_q[X]/(X^n+1) with prime q and
@@ -178,8 +179,8 @@ class NumberTheoreticTransformFxd {
      * @param cyclo_order_inv is inverse of n modulo q
      * @param[in,out] element is the input/output of the transform of type VecType and length n.
      */
-    void inverse_transform_from_bit_reverse_in_place(const VecType& root_of_unity_inverse_table, const IntType& cyclo_order_inv,
-                                               VecType* element);
+    void inverse_transform_from_bit_reverse_in_place(const VecType& root_of_unity_inverse_table,
+                                                     const IntType& cyclo_order_inv, VecType* element);
 
     /**
      * Copies \p element into \p result and calls inverse_transform_from_bit_reverse_in_place()
@@ -202,8 +203,9 @@ class NumberTheoreticTransformFxd {
      * @see inverse_transform_from_bit_reverse_in_place()
      */
     void inverse_transform_from_bit_reverse(const VecType& element, const VecType& root_of_unity_inverse_table,
-                                        const VecType& precon_root_of_unity_inverse_table, const IntType& cyclo_order_inv,
-                                        const IntType& precon_cyclo_order_inv, VecType* result);
+                                            const VecType& precon_root_of_unity_inverse_table,
+                                            const IntType& cyclo_order_inv, const IntType& precon_cyclo_order_inv,
+                                            VecType* result);
 
     /**
      * In-place Inverse transform in the ring Z_q[X]/(X^n+1) with prime q and
@@ -221,9 +223,9 @@ class NumberTheoreticTransformFxd {
      * @param[in,out] element is the input/output of the transform of type VecType and length n.
      */
     void inverse_transform_from_bit_reverse_in_place(const VecType& root_of_unity_inverse_table,
-                                               const VecType& precon_root_of_unity_inverse_table,
-                                               const IntType& cyclo_order_inv, const IntType& precon_cyclo_order_inv,
-                                               VecType* element);
+                                                     const VecType& precon_root_of_unity_inverse_table,
+                                                     const IntType& cyclo_order_inv,
+                                                     const IntType& precon_cyclo_order_inv, VecType* element);
 };
 
 /**
@@ -250,8 +252,8 @@ class ChineseRemainderTransformFttFxd : public cipher::ChineseRemainderTransform
      * size as input or a throw of error occurs.
      * @see NumberTheoreticTransform::forward_transform_to_bit_reverse_in_place()
      */
-    void forward_transform_to_bit_reverse(const VecType& element, const IntType& root_of_unity_value, const uint32_t cyclo_order_value,
-                                      VecType* result);
+    void forward_transform_to_bit_reverse(const VecType& element, const IntType& root_of_unity_value,
+                                          const uint32_t cyclo_order_value, VecType* result);
 
     /**
      * In-place Forward Transform in the ring Z_q[X]/(X^n+1) with prime q and
@@ -265,7 +267,8 @@ class ChineseRemainderTransformFttFxd : public cipher::ChineseRemainderTransform
      * @param[in,out] element is the input/output of the transform of type VecType and length n.
      * @see NumberTheoreticTransform::forward_transform_to_bit_reverse_in_place()
      */
-    void forward_transform_to_bit_reverse_in_place(const IntType& root_of_unity_value, const uint32_t cyclo_order_value, VecType* element);
+    void forward_transform_to_bit_reverse_in_place(const IntType& root_of_unity_value, const uint32_t cyclo_order_value,
+                                                   VecType* element);
 
     /**
      * Copies \p element into \p result and calls NumberTheoreticTransform::inverse_transform_from_bit_reverse_in_place()
@@ -283,8 +286,8 @@ class ChineseRemainderTransformFttFxd : public cipher::ChineseRemainderTransform
      * size as input or a throw if an error occurs.
      * @see NumberTheoreticTransform::inverse_transform_from_bit_reverse_in_place()
      */
-    void inverse_transform_from_bit_reverse(const VecType& element, const IntType& root_of_unity_value, const uint32_t cyclo_order_value,
-                                        VecType* result);
+    void inverse_transform_from_bit_reverse(const VecType& element, const IntType& root_of_unity_value,
+                                            const uint32_t cyclo_order_value, VecType* result);
 
     /**
      * In-place Inverse Transform in the ring Z_q[X]/(X^n+1) with prime q and
@@ -298,7 +301,8 @@ class ChineseRemainderTransformFttFxd : public cipher::ChineseRemainderTransform
      * @param[in,out] element is the input/output of the transform of type VecType and length n.
      * @see NumberTheoreticTransform::inverse_transform_from_bit_reverse_in_place()
      */
-    void inverse_transform_from_bit_reverse_in_place(const IntType& root_of_unity_value, const uint32_t cyclo_order_value, VecType* element);
+    void inverse_transform_from_bit_reverse_in_place(const IntType& root_of_unity_value,
+                                                     const uint32_t cyclo_order_value, VecType* element);
 
     /**
      * Precomputation of root of unity tables for transforms in the ring
@@ -320,7 +324,8 @@ class ChineseRemainderTransformFttFxd : public cipher::ChineseRemainderTransform
      * @param cyclo_order_value is a power-of-two, equal to 2n.
      * @param moduli_chain is the vector of prime moduli qi such that 2n|qi-1
      */
-    void pre_compute(std::vector<IntType>& root_of_unity_value, const uint32_t cyclo_order_value, std::vector<IntType>& moduli_chain);
+    void pre_compute(std::vector<IntType>& root_of_unity_value, const uint32_t cyclo_order_value,
+                     std::vector<IntType>& moduli_chain);
 
     /**
      * Reset cached values for the root of unity tables to empty.
@@ -373,7 +378,7 @@ class BluesteinFftFxd {
      */
     VecType forward_transform(const VecType& element, const IntType& root, const uint32_t cyclo_order);
     VecType forward_transform(const VecType& element, const IntType& root, const uint32_t cyclo_order,
-                             const ModulusRoot<IntType>& ntt_modulus_root);
+                              const ModulusRoot<IntType>& ntt_modulus_root);
 
     /**
      *
@@ -481,8 +486,8 @@ class ChineseRemainderTransformArbFxd : public cipher::ChineseRemainderTransform
      * @param cyclo_order is the cyclotomic order of the ring element.
      * @return is the output result of the transform.
      */
-    VecType forward_transform(const VecType& element, const IntType& root, const IntType& big_mod, const IntType& big_root,
-                             const uint32_t cyclo_order);
+    VecType forward_transform(const VecType& element, const IntType& root, const IntType& big_mod,
+                              const IntType& big_root, const uint32_t cyclo_order);
 
     /**
      * Inverse transform.
@@ -495,8 +500,8 @@ class ChineseRemainderTransformArbFxd : public cipher::ChineseRemainderTransform
      * @param cyclo_order is the cyclotomic order of the ring element.
      * @return is the output result of the transform.
      */
-    VecType inverse_transform(const VecType& element, const IntType& root, const IntType& big_mod, const IntType& big_root,
-                             const uint32_t cyclo_order);
+    VecType inverse_transform(const VecType& element, const IntType& root, const IntType& big_mod,
+                              const IntType& big_root, const uint32_t cyclo_order);
 
     /**
      * Reset cached values for the transform to empty.
@@ -522,7 +527,7 @@ class ChineseRemainderTransformArbFxd : public cipher::ChineseRemainderTransform
      * Bluestein transform.
      */
     void set_pre_computed_ntt_modulus(uint32_t cycloto_order, const IntType& modulus, const IntType& ntt_mod,
-                                  const IntType& ntt_root);
+                                      const IntType& ntt_root);
 
     /**
      * @brief Sets the precomputed root of unity and modulus needed for NTT
@@ -536,7 +541,7 @@ class ChineseRemainderTransformArbFxd : public cipher::ChineseRemainderTransform
      * Bluestein transform.
      */
     void set_pre_computed_ntt_division_modulus(uint32_t cycloto_order, const IntType& modulus, const IntType& ntt_mod,
-                                          const IntType& ntt_root);
+                                               const IntType& ntt_root);
 
     /**
      * @brief Computes the inverse of the cyclotomic polynomial using
@@ -601,7 +606,7 @@ class ChineseRemainderTransformArbFxd : public cipher::ChineseRemainderTransform
     static std::map<uint32_t, uint32_t> ntt_division_dim_;
 };
 
-}  // namespace bigintfxd
+}  // namespace fixed_int
 
 // Compiled once in be2-math-impl.cpp; these declarations suppress implicit instantiation in every
 // other TU so all users link the library's copy (same pattern as transformnat.h).

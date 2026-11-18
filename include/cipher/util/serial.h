@@ -119,9 +119,9 @@ struct is_crypto_context_impl : is_crypto_context_like<std::decay_t<T>> {};
 // when cryptocontext-ser.h has been included and the type has been enabled.
 #define CHECK_CC_SERIALIZATION_ENABLED(T)                                                             \
     do {                                                                                              \
-        if constexpr (::cipher::internal_cc_traits::is_crypto_context_impl<T>::value) {             \
+        if constexpr (::cipher::internal_cc_traits::is_crypto_context_impl<T>::value) {               \
             using DecayedT = std::decay_t<T>;                                                         \
-            static_assert(::cipher::internal_cc_traits::cc_ser_enabled<DecayedT>::value,            \
+            static_assert(::cipher::internal_cc_traits::cc_ser_enabled<DecayedT>::value,              \
                           "CryptoContext serialization is disabled. Include <cryptocontext-ser.h>."); \
         }                                                                                             \
     } while (0)
@@ -262,7 +262,7 @@ void deserialize_from_string(T& obj, const std::string& json) {
     serialization::from_stream(obj, s, SerType::JSON);
 }
 
-}  // namespace Serial
+}  // namespace serialization
 
 }  // namespace cipher
 

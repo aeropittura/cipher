@@ -49,27 +49,27 @@ extern bool test_native;
 // macros for unit testing
 
 #define RUN_NATIVE_BACKENDS_INT(FUNCTION, MESSAGE) \
-    if (test_native)                                \
+    if (test_native)                               \
         FUNCTION<NativeInteger>("NativeInteger " MESSAGE);
 #define RUN_NATIVE_BACKENDS(FUNCTION, MESSAGE) \
-    if (test_native)                            \
+    if (test_native)                           \
         FUNCTION<NativeVector>("NativeVector " MESSAGE);
 #define RUN_NATIVE_POLYS(FUNCTION, MESSAGE) \
-    if (test_native)                         \
+    if (test_native)                        \
         FUNCTION<NativePoly>("NativePoly " MESSAGE);
 
 #ifdef CIPHER_WITH_BE2
     #define RUN_BIG_BACKENDS_INT2(FUNCTION, MESSAGE) \
-        if (test_b2)                                  \
+        if (test_b2)                                 \
             FUNCTION<M2Integer>("BE2Integer " MESSAGE);
     #define RUN_BIG_BACKENDS2(FUNCTION, MESSAGE) \
-        if (test_b2)                              \
+        if (test_b2)                             \
             FUNCTION<M2Vector>("BE2Vector " MESSAGE);
     #define RUN_BIG_POLYS2(FUNCTION, MESSAGE) \
-        if (test_b2)                           \
+        if (test_b2)                          \
             FUNCTION<M2Poly>("BE2Poly " MESSAGE);
     #define RUN_BIG_DCRTPOLYS2(FUNCTION, MESSAGE) \
-        if (test_b2)                               \
+        if (test_b2)                              \
             FUNCTION<M2RnsPoly>("BE2DCRTPoly " MESSAGE);
 #else
     #define RUN_BIG_BACKENDS_INT2(FUNCTION, MESSAGE)
@@ -80,16 +80,16 @@ extern bool test_native;
 
 #ifdef CIPHER_WITH_BE4
     #define RUN_BIG_BACKENDS_INT4(FUNCTION, MESSAGE) \
-        if (test_b4)                                  \
+        if (test_b4)                                 \
             FUNCTION<M4Integer>("BE4Integer " MESSAGE);
     #define RUN_BIG_BACKENDS4(FUNCTION, MESSAGE) \
-        if (test_b4)                              \
+        if (test_b4)                             \
             FUNCTION<M4Vector>("BE4Vector " MESSAGE);
     #define RUN_BIG_POLYS4(FUNCTION, MESSAGE) \
-        if (test_b4)                           \
+        if (test_b4)                          \
             FUNCTION<M4Poly>("BE4Poly " MESSAGE);
     #define RUN_BIG_DCRTPOLYS4(FUNCTION, MESSAGE) \
-        if (test_b4)                               \
+        if (test_b4)                              \
             FUNCTION<M4RnsPoly>("BE4DCRTPoly " MESSAGE);
 #else
     #define RUN_BIG_BACKENDS_INT4(FUNCTION, MESSAGE)
@@ -100,16 +100,16 @@ extern bool test_native;
 
 #ifdef CIPHER_WITH_NTL
     #define RUN_BIG_BACKENDS_INT6(FUNCTION, MESSAGE) \
-        if (test_b6)                                  \
+        if (test_b6)                                 \
             FUNCTION<M6Integer>("BE6Integer " MESSAGE);
     #define RUN_BIG_BACKENDS6(FUNCTION, MESSAGE) \
-        if (test_b6)                              \
+        if (test_b6)                             \
             FUNCTION<M6Vector>("BE6Vector " MESSAGE);
     #define RUN_BIG_POLYS6(FUNCTION, MESSAGE) \
-        if (test_b6)                           \
+        if (test_b6)                          \
             FUNCTION<M6Poly>("BE6Poly " MESSAGE);
     #define RUN_BIG_DCRTPOLYS6(FUNCTION, MESSAGE) \
-        if (test_b6)                               \
+        if (test_b6)                              \
             FUNCTION<M6RnsPoly>("BE6DCRTPoly " MESSAGE);
 #else
     #define RUN_BIG_BACKENDS_INT6(FUNCTION, MESSAGE)

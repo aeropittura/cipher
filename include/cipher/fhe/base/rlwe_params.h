@@ -115,13 +115,13 @@ class RlweCryptoParams : public BaseCryptoParams<Element> {
      * @param threshold_num_of_parties number of parties in threshold FHE
      */
     RlweCryptoParams(std::shared_ptr<typename Element::Params> params, EncodingParams encoding_params,
-                         float distribution_parameter, float assurance_measure, SecurityLevel std_level,
-                         uint32_t digit_size, int max_relin_sk_deg = 2, SecretKeyDist secret_key_dist = GAUSSIAN,
-                         ProxyReEncryptionMode pre_mode = INDCPA, MultipartyMode multiparty_mode = FIXED_NOISE_MULTIPARTY,
-                         ExecutionMode execution_mode = EXEC_EVALUATION,
-                         DecryptionNoiseMode decryption_noise_mode = FIXED_NOISE_DECRYPT, PlaintextModulus noise_scale_value = 1,
-                         uint32_t statistical_security = 30, uint32_t num_adversarial_queries = 1,
-                         uint32_t threshold_num_of_parties = 1)
+                     float distribution_parameter, float assurance_measure, SecurityLevel std_level,
+                     uint32_t digit_size, int max_relin_sk_deg = 2, SecretKeyDist secret_key_dist = GAUSSIAN,
+                     ProxyReEncryptionMode pre_mode = INDCPA, MultipartyMode multiparty_mode = FIXED_NOISE_MULTIPARTY,
+                     ExecutionMode execution_mode = EXEC_EVALUATION,
+                     DecryptionNoiseMode decryption_noise_mode = FIXED_NOISE_DECRYPT,
+                     PlaintextModulus noise_scale_value = 1, uint32_t statistical_security = 30,
+                     uint32_t num_adversarial_queries = 1, uint32_t threshold_num_of_parties = 1)
         : BaseCryptoParams<Element>(params, encoding_params) {
         distribution_parameter_ = distribution_parameter;
         assurance_measure_ = assurance_measure;
@@ -587,13 +587,13 @@ class RlweCryptoParams : public BaseCryptoParams<Element> {
         if (!el)
             return false;
 
-        return BaseCryptoParams<Element>::compare_to(rhs) &&
-               distribution_parameter_ == el->distribution_parameter_ && assurance_measure_ == el->assurance_measure_ &&
-               noise_scale_ == el->noise_scale_ && digit_size_ == el->digit_size_ &&
-               noise_estimate_ == el->noise_estimate_ && multiplicative_depth_ == el->multiplicative_depth_ &&
-               eval_add_count_ == el->eval_add_count_ && key_switch_count_ == el->key_switch_count_ &&
-               pre_num_hops_ == el->pre_num_hops_ && secret_key_dist_ == el->secret_key_dist_ &&
-               std_level_ == el->std_level_ && max_relin_sk_deg_ == el->max_relin_sk_deg_ && pre_mode_ == el->pre_mode_ &&
+        return BaseCryptoParams<Element>::compare_to(rhs) && distribution_parameter_ == el->distribution_parameter_ &&
+               assurance_measure_ == el->assurance_measure_ && noise_scale_ == el->noise_scale_ &&
+               digit_size_ == el->digit_size_ && noise_estimate_ == el->noise_estimate_ &&
+               multiplicative_depth_ == el->multiplicative_depth_ && eval_add_count_ == el->eval_add_count_ &&
+               key_switch_count_ == el->key_switch_count_ && pre_num_hops_ == el->pre_num_hops_ &&
+               secret_key_dist_ == el->secret_key_dist_ && std_level_ == el->std_level_ &&
+               max_relin_sk_deg_ == el->max_relin_sk_deg_ && pre_mode_ == el->pre_mode_ &&
                multiparty_mode_ == el->multiparty_mode_ && execution_mode_ == el->execution_mode_ &&
                flooding_distribution_parameter_ == el->flooding_distribution_parameter_ &&
                statistical_security_ == el->statistical_security_ &&

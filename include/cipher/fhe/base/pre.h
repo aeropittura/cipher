@@ -72,7 +72,7 @@ class BasePre {
      * @return the re-encryption key.
      */
     virtual EvalKey<Element> re_key_gen(const PrivateKey<Element> old_private_key,
-                                      const PublicKey<Element> new_public_key) const;
+                                        const PublicKey<Element> new_public_key) const;
 
     /**
      * Virtual function to define the interface for re-encrypting ciphertext
@@ -85,7 +85,7 @@ class BasePre {
      * @return the ciphertext
      */
     virtual Ciphertext<Element> re_encrypt(ConstCiphertext<Element> ciphertext, const EvalKey<Element> eval_key,
-                                          const PublicKey<Element> public_key) const;
+                                           const PublicKey<Element> public_key) const;
 };
 
 }  // namespace cipher

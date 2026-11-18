@@ -255,7 +255,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
     // calculate_approximation_error() calculates the precision number (or approximation error).
     // The higher the precision, the less the error.
     double calculate_approximation_error(const std::vector<std::complex<double>>& result,
-                                       const std::vector<std::complex<double>>& expected_result) {
+                                         const std::vector<std::complex<double>>& expected_result) {
         if (result.size() != expected_result.size())
             CIPHER_THROW("Cannot compare vectors with different numbers of elements");
 
@@ -281,7 +281,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
     }
 
     void unit_test_bootstrap(const TEST_CASE_UTCKKSRNSCS_BOOT& test_data, const bool st_c_flag,
-                            const std::string& failmsg = std::string()) {
+                             const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -306,7 +306,8 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             auto crypto_params = std::dynamic_pointer_cast<CkksRnsCryptoParams>(cc->get_crypto_parameters());
 
             Plaintext plaintext1 = cc->make_ckks_packed_plaintext(
-                    input, 1, crypto_params->get_composite_degree() * (MULT_DEPTH - 1 - test_data.level_budget[1] * st_c_flag),
+                    input, 1,
+                    crypto_params->get_composite_degree() * (MULT_DEPTH - 1 - test_data.level_budget[1] * st_c_flag),
                     nullptr, test_data.slots);
             auto ciphertext1 = cc->encrypt(key_pair.public_key, plaintext1);
             auto ciphertext_after = cc->eval_bootstrap(ciphertext1);
@@ -316,8 +317,8 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             result->set_length(encoded_length);
             plaintext1->set_length(encoded_length);
             check_equality(result->get_ckks_packed_value(), plaintext1->get_ckks_packed_value(), eps,
-                          failmsg + " Bootstrapping for fully packed ciphertexts fails for " +
-                                  ((st_c_flag) ? "StC-first" : "ModRaise-first") + " version.");
+                           failmsg + " Bootstrapping for fully packed ciphertexts fails for " +
+                                   ((st_c_flag) ? "StC-first" : "ModRaise-first") + " version.");
 
             int32_t rot_index = (test_data.slots < 8) ? 0 : 6;
             auto temp6 = input;
@@ -328,8 +329,8 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             cc->decrypt(key_pair.secret_key, ciphertext6, &result6);
             result6->set_length(encoded_length);
             check_equality(result6->get_ckks_packed_value(), temp6, eps,
-                          failmsg + " EvalAtIndex after Bootstrapping for fully packed ciphertexts fails for " +
-                                  ((st_c_flag) ? "StC-first" : "ModRaise-first") + " version.");
+                           failmsg + " EvalAtIndex after Bootstrapping for fully packed ciphertexts fails for " +
+                                   ((st_c_flag) ? "StC-first" : "ModRaise-first") + " version.");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -340,7 +341,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
     }
 
     void unit_test_bootstrap_key_switching(const TEST_CASE_UTCKKSRNSCS_BOOT& test_data,
-                                         const std::string& failmsg = std::string()) {
+                                           const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -368,7 +369,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             cc->decrypt(key_pair.secret_key, ciphertext, &result);
             result->set_length(a.size());
             check_equality(result->get_ckks_packed_value(), comp_a, eps,
-                          failmsg + " Bootstrapping for KeySwitchExt + KeySwitchDown failed");
+                           failmsg + " Bootstrapping for KeySwitchExt + KeySwitchDown failed");
 
             // Test for eval_fast_rotation_ext
             ciphertext = cc->encrypt(key_pair.public_key, plaintext_a);
@@ -379,7 +380,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             cc->decrypt(key_pair.secret_key, ciphertext, &result);
             result->set_length(b.size());
             check_equality(result->get_ckks_packed_value(), comp_b, eps,
-                          failmsg + " Bootstrapping for EvalFastRotationExt failed");
+                           failmsg + " Bootstrapping for EvalFastRotationExt failed");
 
             // Test for key_switch_ext + key_switch_down w/o first element
             ciphertext = cc->encrypt(key_pair.public_key, plaintext_a);
@@ -393,7 +394,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             cc->decrypt(key_pair.secret_key, ciphertext, &result);
             result->set_length(a.size());
             check_equality(result->get_ckks_packed_value(), comp_a, eps,
-                          failmsg + " Bootstrapping for KeySwitchExt + KeySwitchDown w/o first element failed");
+                           failmsg + " Bootstrapping for KeySwitchExt + KeySwitchDown w/o first element failed");
 
             // Test for eval_fast_rotation_ext w/o first element
             ciphertext = cc->encrypt(key_pair.public_key, plaintext_a);
@@ -413,7 +414,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             cc->decrypt(key_pair.secret_key, ciphertext, &result);
             result->set_length(b.size());
             check_equality(result->get_ckks_packed_value(), comp_b, eps,
-                          failmsg + " Bootstrapping for EvalFastRotationExt w/o first element failed");
+                           failmsg + " Bootstrapping for EvalFastRotationExt w/o first element failed");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -424,13 +425,13 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
     }
 
     void unit_test_bootstrap_iterative(const TEST_CASE_UTCKKSRNSCS_BOOT& test_data, const bool st_c_flag,
-                                      const std::string& failmsg = std::string()) {
+                                       const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
             // For small ring dimensions like the ones tested, the correction factor for StC-first should be small, e.g., 10.
-            cc->eval_bootstrap_setup(test_data.level_budget, test_data.dim1, test_data.slots, (st_c_flag) ? 10 : 0, true,
-                                   st_c_flag);
+            cc->eval_bootstrap_setup(test_data.level_budget, test_data.dim1, test_data.slots, (st_c_flag) ? 10 : 0,
+                                     true, st_c_flag);
 
             auto key_pair = cc->key_gen();
             cc->eval_bootstrap_key_gen(key_pair.secret_key, test_data.slots);
@@ -444,7 +445,8 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             size_t encoded_length = input.size();
 
             Plaintext plaintext = cc->make_ckks_packed_plaintext(
-                    input, 1, crypto_params->get_composite_degree() * (MULT_DEPTH - 1 - test_data.level_budget[1] * st_c_flag),
+                    input, 1,
+                    crypto_params->get_composite_degree() * (MULT_DEPTH - 1 - test_data.level_budget[1] * st_c_flag),
                     nullptr, test_data.slots);
             auto ciphertext = cc->encrypt(key_pair.public_key, plaintext);
             auto ciphertext_after = cc->eval_bootstrap(ciphertext);
@@ -468,8 +470,9 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             result->set_length(encoded_length);
             auto actual_result = result_two_iterations->get_ckks_packed_value();
             check_equality(actual_result, plaintext->get_ckks_packed_value(), eps,
-                          failmsg + " Bootstrapping with " + std::to_string(num_iterations) + " iterations failed for " +
-                                  ((st_c_flag) ? "StC-first" : "ModRaise-first") + " version.");
+                           failmsg + " Bootstrapping with " + std::to_string(num_iterations) +
+                                   " iterations failed for " + ((st_c_flag) ? "StC-first" : "ModRaise-first") +
+                                   " version.");
             double precision_multiple_iterations =
                     calculate_approximation_error(actual_result, plaintext->get_ckks_packed_value());
 
@@ -483,7 +486,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             cc->decrypt(key_pair.secret_key, ciphertext6, &result6);
             result6->set_length(encoded_length);
             check_equality(result6->get_ckks_packed_value(), temp6, eps,
-                          failmsg + " EvalAtIndex after Bootstrapping for ciphertexts fails");
+                           failmsg + " EvalAtIndex after Bootstrapping for ciphertexts fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -494,7 +497,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
     }
 
     void unit_test_bootstrap_num_towers(const TEST_CASE_UTCKKSRNSCS_BOOT& test_data, const bool st_c_flag,
-                                      const std::string& failmsg = std::string()) {
+                                        const std::string& failmsg = std::string()) {
         // This test checks to make sure that we return the original ciphertext if we
         // start with more towers than the number of towers we would end up with by
         // bootstrapping.
@@ -527,11 +530,12 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             result->set_length(encoded_length);
             auto actual_result = result->get_ckks_packed_value();
             check_equality(actual_result, plaintext->get_ckks_packed_value(), eps,
-                          failmsg + " Bootstrapping failed for " + ((st_c_flag) ? "StC-first" : "ModRaise-first") +
-                                  " version.");
+                           failmsg + " Bootstrapping failed for " + ((st_c_flag) ? "StC-first" : "ModRaise-first") +
+                                   " version.");
 
             auto ciphertext_two_iterations = cc->eval_bootstrap(ciphertext);
-            auto bootstrapping_num_towers_two_iterations = ciphertext_two_iterations->get_elements()[0].get_num_of_elements();
+            auto bootstrapping_num_towers_two_iterations =
+                    ciphertext_two_iterations->get_elements()[0].get_num_of_elements();
             // Check to make sure we don't lose any towers with double-iteration bootstrapping.
             EXPECT_EQ(init_num_towers, bootstrapping_num_towers_two_iterations);
 
@@ -540,8 +544,8 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             result->set_length(encoded_length);
             auto actual_result2 = result2->get_ckks_packed_value();
             check_equality(actual_result2, plaintext->get_ckks_packed_value(), eps,
-                          failmsg + " Bootstrapping with two iterations failed for " +
-                                  ((st_c_flag) ? "StC-first" : "ModRaise-first") + " version.");
+                           failmsg + " Bootstrapping with two iterations failed for " +
+                                   ((st_c_flag) ? "StC-first" : "ModRaise-first") + " version.");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -552,7 +556,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
     }
 
     void unit_test_bootstrap_serialize(const TEST_CASE_UTCKKSRNSCS_BOOT& test_data, const bool st_c_flag,
-                                      const std::string& failmsg = std::string()) {
+                                       const std::string& failmsg = std::string()) {
         try {
             CryptoContextImpl<RnsPoly>::clear_eval_mult_keys();
             CryptoContextImpl<RnsPoly>::clear_eval_sum_keys();
@@ -561,7 +565,8 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
 
             CryptoContext<Element> cc_init(unit_test_generate_context(test_data.params));
             cc_init->eval_bootstrap_setup(test_data.level_budget, test_data.dim1, test_data.slots, 0, false, st_c_flag);
-            cc_init->eval_bootstrap_setup(test_data.level_budget, test_data.dim1, test_data.slots / 2, 0, false, st_c_flag);
+            cc_init->eval_bootstrap_setup(test_data.level_budget, test_data.dim1, test_data.slots / 2, 0, false,
+                                          st_c_flag);
 
             auto key_pair_init = cc_init->key_gen();
             cc_init->eval_mult_key_gen(key_pair_init.secret_key);
@@ -610,7 +615,8 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             auto crypto_params = std::dynamic_pointer_cast<CkksRnsCryptoParams>(cc->get_crypto_parameters());
 
             Plaintext plaintext1 = cc->make_ckks_packed_plaintext(
-                    input, 1, crypto_params->get_composite_degree() * (MULT_DEPTH - 1 - test_data.level_budget[1] * st_c_flag),
+                    input, 1,
+                    crypto_params->get_composite_degree() * (MULT_DEPTH - 1 - test_data.level_budget[1] * st_c_flag),
                     nullptr, test_data.slots);
             auto ciphertext1 = cc->encrypt(key_pair.public_key, plaintext1);
             auto ciphertext1_after = cc->eval_bootstrap(ciphertext1);
@@ -620,8 +626,8 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             result->set_length(encoded_length);
             plaintext1->set_length(encoded_length);
             check_equality(result->get_ckks_packed_value(), plaintext1->get_ckks_packed_value(), eps,
-                          failmsg + " Bootstrapping for fully packed ciphertexts fails for " +
-                                  ((st_c_flag) ? "StC-first" : "ModRaise-first") + " version.");
+                           failmsg + " Bootstrapping for fully packed ciphertexts fails for " +
+                                   ((st_c_flag) ? "StC-first" : "ModRaise-first") + " version.");
 
             //====================================================================================================
             auto input2(Fill<std::complex<double>>({0.111111, 0.222222, 0.333333, 0.444444}, test_data.slots / 2));
@@ -629,8 +635,8 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
 
             Plaintext plaintext2 = cc->make_ckks_packed_plaintext(
                     input2, 1,
-                    crypto_params->get_composite_degree() * (MULT_DEPTH - 1 - test_data.level_budget[1] * st_c_flag), nullptr,
-                    test_data.slots / 2);
+                    crypto_params->get_composite_degree() * (MULT_DEPTH - 1 - test_data.level_budget[1] * st_c_flag),
+                    nullptr, test_data.slots / 2);
             auto ciphertext2 = cc->encrypt(key_pair.public_key, plaintext2);
             auto ciphertext2_after = cc->eval_bootstrap(ciphertext2);
 
@@ -638,8 +644,8 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             result->set_length(encoded_length2);
             plaintext2->set_length(encoded_length2);
             check_equality(result->get_ckks_packed_value(), plaintext2->get_ckks_packed_value(), eps,
-                          failmsg + " Bootstrapping for sparsely packed ciphertexts fails for " +
-                                  ((st_c_flag) ? "StC-first" : "ModRaise-first") + " version.");
+                           failmsg + " Bootstrapping for sparsely packed ciphertexts fails for " +
+                                   ((st_c_flag) ? "StC-first" : "ModRaise-first") + " version.");
             //====================================================================================================
             EXPECT_TRUE(1 == 1) << failmsg;
         } catch (std::exception& e) {
@@ -655,7 +661,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
     // For test_data.slots: uses the (key_tag, index_list) overload of deserialize_eval_bootstrap_key.
     // For test_data.slots/2: uses the (cc, key_tag, slots) overload of deserialize_eval_bootstrap_key.
     void unit_test_bootstrap_serialize_bootstrap_key(const TEST_CASE_UTCKKSRNSCS_BOOT& test_data,
-                                                  const std::string& failmsg = std::string()) {
+                                                     const std::string& failmsg = std::string()) {
         try {
             CryptoContextImpl<RnsPoly>::clear_eval_mult_keys();
             CryptoContextImpl<RnsPoly>::clear_eval_sum_keys();
@@ -686,12 +692,13 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
 
             std::stringstream bootstrap_key_stream1;
             CryptoContextImpl<RnsPoly>::serialize_eval_bootstrap_key(bootstrap_key_stream1, SerType::BINARY, cc_init,
-                                                                   key_pair_init.secret_key->get_key_tag(), test_data.slots);
+                                                                     key_pair_init.secret_key->get_key_tag(),
+                                                                     test_data.slots);
 
             std::stringstream bootstrap_key_stream2;
             CryptoContextImpl<RnsPoly>::serialize_eval_bootstrap_key(bootstrap_key_stream2, SerType::BINARY, cc_init,
-                                                                   key_pair_init.secret_key->get_key_tag(),
-                                                                   test_data.slots / 2);
+                                                                     key_pair_init.secret_key->get_key_tag(),
+                                                                     test_data.slots / 2);
             //==============================================================
             CryptoContextImpl<RnsPoly>::clear_eval_mult_keys();
             CryptoContextImpl<RnsPoly>::clear_eval_sum_keys();
@@ -710,13 +717,13 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             // (key_tag, index_list) overload for test_data.slots
             const auto& key_tag = key_pair.secret_key->get_key_tag();
             const auto index_list = cc->get_scheme()->eval_bootstrap_key_map_indices(cc, test_data.slots);
-            EXPECT_TRUE(CryptoContextImpl<RnsPoly>::deserialize_eval_bootstrap_key(bootstrap_key_stream1, SerType::BINARY,
-                                                                                 key_tag, index_list))
+            EXPECT_TRUE(CryptoContextImpl<RnsPoly>::deserialize_eval_bootstrap_key(
+                    bootstrap_key_stream1, SerType::BINARY, key_tag, index_list))
                     << failmsg + " DeserializeEvalBootstrapKey(keyTag, indexList) failed";
 
             // (cc, key_tag, slots) overload for test_data.slots / 2
-            EXPECT_TRUE(CryptoContextImpl<RnsPoly>::deserialize_eval_bootstrap_key(bootstrap_key_stream2, SerType::BINARY,
-                                                                                 cc, key_tag, test_data.slots / 2))
+            EXPECT_TRUE(CryptoContextImpl<RnsPoly>::deserialize_eval_bootstrap_key(
+                    bootstrap_key_stream2, SerType::BINARY, cc, key_tag, test_data.slots / 2))
                     << failmsg + " DeserializeEvalBootstrapKey(cc, keyTag, slots) failed";
 
             cc->eval_bootstrap_precompute(test_data.slots);
@@ -738,7 +745,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             result->set_length(encoded_length);
             plaintext1->set_length(encoded_length);
             check_equality(result->get_ckks_packed_value(), plaintext1->get_ckks_packed_value(), eps,
-                          failmsg + " Bootstrapping for fully packed ciphertexts fails");
+                           failmsg + " Bootstrapping for fully packed ciphertexts fails");
 
             //==============================================================
             auto input2(Fill<std::complex<double>>({0.111111, 0.222222, 0.333333, 0.444444}, test_data.slots / 2));
@@ -753,7 +760,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             result->set_length(encoded_length2);
             plaintext2->set_length(encoded_length2);
             check_equality(result->get_ckks_packed_value(), plaintext2->get_ckks_packed_value(), eps,
-                          failmsg + " Bootstrapping for sparsely packed ciphertexts fails");
+                           failmsg + " Bootstrapping for sparsely packed ciphertexts fails");
 
             EXPECT_TRUE(1 == 1) << failmsg;
         } catch (std::exception& e) {
@@ -767,7 +774,8 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
     // Checks the key switching to a sparse secret over the composite bottom basis (key_switch_gen_sparse /
     // key_switch_sparse), i.e., the exact CRT basis switches between the composite_degree bottom primes and the
     // auxiliary modulus of sparse encapsulation.
-    void unit_test_bootstrap_se(const TEST_CASE_UTCKKSRNSCS_BOOT& test_data, const std::string& failmsg = std::string()) {
+    void unit_test_bootstrap_se(const TEST_CASE_UTCKKSRNSCS_BOOT& test_data,
+                                const std::string& failmsg = std::string()) {
         try {
             CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
@@ -800,7 +808,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             result->set_length(encoded_length);
 
             check_equality(ptxt->get_ckks_packed_value(), result->get_ckks_packed_value(), eps,
-                          failmsg + " input/output mismatch");
+                           failmsg + " input/output mismatch");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             EXPECT_TRUE(0 == 1) << failmsg;

@@ -110,8 +110,9 @@ class BgvRnsParamGen : public RnsParamGen {
      * @return true on success (an exception is thrown otherwise).
      */
     bool params_gen_bgvrns_internal(std::shared_ptr<BaseCryptoParams<RnsPoly>> crypto_params, uint32_t eval_add_count,
-                                 uint32_t key_switch_count, uint32_t cycl_order, uint32_t num_primes_value, uint32_t first_mod_size_value,
-                                 uint32_t dcrt_bits, uint32_t num_part_q, uint32_t num_hops) const override;
+                                    uint32_t key_switch_count, uint32_t cycl_order, uint32_t num_primes_value,
+                                    uint32_t first_mod_size_value, uint32_t dcrt_bits, uint32_t num_part_q,
+                                    uint32_t num_hops) const override;
 
     /////////////////////////////////////
     // SERIALIZATION
@@ -137,7 +138,7 @@ class BgvRnsParamGen : public RnsParamGen {
      * @return The ring dimension.
      */
     uint32_t compute_ring_dimension(const std::shared_ptr<BaseCryptoParams<RnsPoly>>& crypto_params, uint32_t q_bound,
-                                  uint32_t cycl_order) const;
+                                    uint32_t cycl_order) const;
 
     /**
      * Computes the BGV noise bounds (fresh encryption, key switching, modulus switching and the noise to be
@@ -152,8 +153,9 @@ class BgvRnsParamGen : public RnsParamGen {
      * @return the noise estimates.
      */
     BgvNoiseEstimates compute_noise_estimates(const std::shared_ptr<BaseCryptoParams<RnsPoly>>& crypto_params,
-                                            uint32_t ring_dimension_value, uint32_t eval_add_count, uint32_t key_switch_count,
-                                            uint32_t aux_towers, uint32_t num_primes_value) const;
+                                              uint32_t ring_dimension_value, uint32_t eval_add_count,
+                                              uint32_t key_switch_count, uint32_t aux_towers,
+                                              uint32_t num_primes_value) const;
 
     /**
      * Computes the modulus the CRT primes must be congruent to 1 with: the cyclotomic order 2n, or lcm(2n, t)
@@ -165,7 +167,7 @@ class BgvRnsParamGen : public RnsParamGen {
      * @return the modulus for the prime search.
      */
     uint64_t get_cyclic_order(const uint32_t ring_dimension_value, const int plain_modulus,
-                            const ScalingTechnique scal_tech) const;
+                              const ScalingTechnique scal_tech) const;
 
     /**
      * Method that generates moduli for FLEXIBLEAUTOEXT mode for the BGV RNS scheme.
@@ -190,8 +192,8 @@ class BgvRnsParamGen : public RnsParamGen {
      * @param num_primes_value Number of CRT moduli.
      * @param ring_dimension_value ring dimension.
      */
-    void initialize_flooding_dgg(const std::shared_ptr<BaseCryptoParams<RnsPoly>>& crypto_params, uint32_t num_primes_value,
-                               uint32_t ring_dimension_value) const;
+    void initialize_flooding_dgg(const std::shared_ptr<BaseCryptoParams<RnsPoly>>& crypto_params,
+                                 uint32_t num_primes_value, uint32_t ring_dimension_value) const;
 };
 
 }  // namespace cipher

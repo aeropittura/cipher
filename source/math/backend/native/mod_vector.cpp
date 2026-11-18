@@ -89,7 +89,7 @@ static inline T centered_correction_lane(T v, T half_q, T diff) {
 
 template <class IntegerType>
 void NativeVectorT<IntegerType>::general_shrink_loop(IntegerType* dst, const IntegerType* src, size_t size, BasicInt ov,
-                                                   BasicInt nv) {
+                                                     BasicInt nv) {
     using DInt = typename IntegerType::DNativeInt;
     const BasicInt half_q{ov >> 1};
     const BasicInt diff_r{static_cast<BasicInt>((ov - nv) % nv)};
@@ -244,7 +244,8 @@ void NativeVectorT<IntegerType>::lazy_switch_modulus(const IntegerType& modulus)
 }
 
 template <class IntegerType>
-NativeVectorT<IntegerType>& NativeVectorT<IntegerType>::mult_acc_eq_no_check(const NativeVectorT& V, const IntegerType& I) {
+NativeVectorT<IntegerType>& NativeVectorT<IntegerType>::mult_acc_eq_no_check(const NativeVectorT& V,
+                                                                             const IntegerType& I) {
     auto iv{I};
     auto mv{modulus_};
     if (iv.value_ >= mv.value_)
@@ -537,7 +538,7 @@ NativeVectorT<IntegerType> NativeVectorT<IntegerType>::mult_with_out_mod(const N
 
 template <class IntegerType>
 NativeVectorT<IntegerType> NativeVectorT<IntegerType>::multiply_and_round(const IntegerType& p,
-                                                                        const IntegerType& q) const {
+                                                                          const IntegerType& q) const {
     auto half_q{modulus_.value_ >> 1};
     auto mv{modulus_};
     auto ans(*this);
@@ -553,7 +554,8 @@ NativeVectorT<IntegerType> NativeVectorT<IntegerType>::multiply_and_round(const 
 }
 
 template <class IntegerType>
-NativeVectorT<IntegerType>& NativeVectorT<IntegerType>::multiply_and_round_eq(const IntegerType& p, const IntegerType& q) {
+NativeVectorT<IntegerType>& NativeVectorT<IntegerType>::multiply_and_round_eq(const IntegerType& p,
+                                                                              const IntegerType& q) {
     auto half_q{modulus_.value_ >> 1};
     auto mv{modulus_};
     for (size_t i = 0; i < data_.size(); ++i) {
@@ -657,7 +659,8 @@ std::vector<NativeVectorT<IntegerType>> NativeVectorT<IntegerType>::base_decompo
 }
 
 template <class IntegerType>
-NativeVectorT<IntegerType> NativeVectorT<IntegerType>::get_digit_at_index_for_base(uint32_t index, uint32_t base) const {
+NativeVectorT<IntegerType> NativeVectorT<IntegerType>::get_digit_at_index_for_base(uint32_t index,
+                                                                                   uint32_t base) const {
     auto digit_len = cipher::get_msb(base - 1);  // == ceil(log2(base))
     uint32_t shift{(index - 1) * digit_len};
     if (shift >= IntegerType::max_bits())
@@ -672,7 +675,7 @@ NativeVectorT<IntegerType> NativeVectorT<IntegerType>::get_digit_at_index_for_ba
 
 template <class IntegerType>
 void NativeVectorT<IntegerType>::barrett_mod_mul_loop(IntegerType* a, const IntegerType* b, size_t size,
-                                                   const IntegerType& modulus) {
+                                                      const IntegerType& modulus) {
     using NInt = decltype(modulus.value_);
     using DInt = typename IntegerType::DNativeInt;
     if constexpr (sizeof(DInt) > sizeof(NInt)) {
@@ -704,7 +707,7 @@ void NativeVectorT<IntegerType>::barrett_mod_mul_loop(IntegerType* a, const Inte
 
 template <class IntegerType>
 void NativeVectorT<IntegerType>::barrett_mod_mul_loop(IntegerType* dst, const IntegerType* a, const IntegerType* b,
-                                                   size_t size, const IntegerType& modulus) {
+                                                      size_t size, const IntegerType& modulus) {
     using NInt = decltype(modulus.value_);
     using DInt = typename IntegerType::DNativeInt;
     if constexpr (sizeof(DInt) > sizeof(NInt)) {
@@ -736,7 +739,7 @@ void NativeVectorT<IntegerType>::barrett_mod_mul_loop(IntegerType* dst, const In
 
 template <class IntegerType>
 void NativeVectorT<IntegerType>::barrett_mult_acc_loop(IntegerType* acc, const IntegerType* a, const IntegerType* b,
-                                                    size_t size, const IntegerType& modulus) {
+                                                       size_t size, const IntegerType& modulus) {
     using NInt = decltype(modulus.value_);
     using DInt = typename IntegerType::DNativeInt;
     if constexpr (sizeof(DInt) > sizeof(NInt)) {
@@ -777,7 +780,7 @@ NativeVectorT<IntegerType>& NativeVectorT<IntegerType>::mod_mul_no_check_eq(cons
 
 template <class IntegerType>
 NativeVectorT<IntegerType>& NativeVectorT<IntegerType>::mult_acc_eq_no_check(const NativeVectorT& a,
-                                                                         const NativeVectorT& b) {
+                                                                             const NativeVectorT& b) {
     barrett_mult_acc_loop(data_.data(), a.data_.data(), b.data_.data(), data_.size(), modulus_);
     return *this;
 }
@@ -787,4 +790,4 @@ template class NativeVectorT<NativeInteger>;
 template class NativeVectorT<NativeInteger32>;
 #endif
 
-}  // namespace intnat
+}  // namespace native_int

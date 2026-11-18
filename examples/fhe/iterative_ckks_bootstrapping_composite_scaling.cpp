@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
 // base 2 logarithm of the average L1 norm between results from standard (cleartext) calculation
 // and those computed homomorphically.
 double calculate_approximation_error(const std::vector<std::complex<double>>& result,
-                                   const std::vector<std::complex<double>>& expected_result) {
+                                     const std::vector<std::complex<double>>& expected_result) {
     if (result.size() != expected_result.size())
         CIPHER_THROW("Cannot compare vectors with different numbers of elements");
 
@@ -164,7 +164,8 @@ void iterative_bootstrap_example() {
     // parameters.set_batch_size(num_slots);
     // Here, we assume all ciphertexts in the crypto_context will have num_slots slots.
     // We start with a depleted ciphertext that has used up all of its levels.
-    Plaintext ptxt = crypto_context->make_ckks_packed_plaintext(x, 1, composite_degree * (depth - 1), nullptr, num_slots);
+    Plaintext ptxt =
+            crypto_context->make_ckks_packed_plaintext(x, 1, composite_degree * (depth - 1), nullptr, num_slots);
     ptxt->set_length(num_slots);
     std::cout << "Input: " << ptxt << std::endl;
 

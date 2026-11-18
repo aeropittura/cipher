@@ -98,7 +98,8 @@ void dcrt_constructors(const std::string& msg) {
         EXPECT_EQ(Format::EVALUATION, ilva.get_format()) << msg << " Failure: ildcrtparams ctor ilva.GetFormat()";
         EXPECT_EQ(modulus, ilva.get_modulus()) << msg << " Failure: ildcrtparams ctor ilva.GetModulus()";
         EXPECT_EQ(m, ilva.get_cyclotomic_order()) << msg << " Failure: ildcrtparams ctor ilva.GetModulus()";
-        EXPECT_EQ(towersize, ilva.get_num_of_elements()) << msg << " Failure: ildcrtparams ctor ilva.GetNumOfElements()";
+        EXPECT_EQ(towersize, ilva.get_num_of_elements())
+                << msg << " Failure: ildcrtparams ctor ilva.GetNumOfElements()";
     }
 
     CIPHER_DEBUG("2");
@@ -170,7 +171,8 @@ void dcrt_constructors(const std::string& msg) {
 
         EXPECT_EQ(Format::EVALUATION, ilva.get_format()) << msg << " Failure: ctor(dgg, ldcrtparams) ilva.GetFormat()";
         EXPECT_EQ(modulus, ilva.get_modulus()) << msg << " Failure: ctor(dgg, ildcrtparams) ilva.GetModulus()";
-        EXPECT_EQ(m, ilva.get_cyclotomic_order()) << msg << " Failure: ctor(dgg, ildcrtparams) ilva.GetCyclotomicOrder()";
+        EXPECT_EQ(m, ilva.get_cyclotomic_order())
+                << msg << " Failure: ctor(dgg, ildcrtparams) ilva.GetCyclotomicOrder()";
         EXPECT_EQ(towersize, ilva.get_num_of_elements())
                 << msg << " Failure: ctor(dgg, ildcrtparams) ilva.GetNumOfElements()";
     }
@@ -264,7 +266,8 @@ void dcrt_getters_and_ops(const std::string& msg) {
 
     {
         Element ilva_coeff(ildcrtparams, Format::COEFFICIENT, true);
-        EXPECT_THROW(ilva_coeff.add_il_element_one(), CipherException) << msg << " Failure: AddILElementOne format check";
+        EXPECT_THROW(ilva_coeff.add_il_element_one(), CipherException)
+                << msg << " Failure: AddILElementOne format check";
     }
 
     {
@@ -277,7 +280,8 @@ void dcrt_getters_and_ops(const std::string& msg) {
         for (uint32_t i = 0; i < ilva_native.get_num_of_elements(); ++i) {
             EXPECT_EQ(Format::COEFFICIENT, ilva_native.get_element_at_index(i).get_format())
                     << msg << " Failure: operator=(PolyType) tower format";
-            EXPECT_EQ(NativeInteger(3), ilva_native.get_element_at_index(i)[1]) << msg << " Failure: operator=(PolyType)";
+            EXPECT_EQ(NativeInteger(3), ilva_native.get_element_at_index(i)[1])
+                    << msg << " Failure: operator=(PolyType)";
         }
     }
 
@@ -293,7 +297,8 @@ void dcrt_getters_and_ops(const std::string& msg) {
                 for (uint32_t j = 0; j < noise.get_ring_dimension(); ++j) {
                     int64_t first = 0;
                     for (uint32_t i = 0; i < noise.get_num_of_elements(); ++i) {
-                        const auto q = static_cast<int64_t>(noise.get_element_at_index(i).get_modulus().convert_to_int());
+                        const auto q =
+                                static_cast<int64_t>(noise.get_element_at_index(i).get_modulus().convert_to_int());
                         auto v = static_cast<int64_t>(noise.get_element_at_index(i)[j].convert_to_int());
                         if (v > q / 2)
                             v -= q;
@@ -637,7 +642,7 @@ void dcrt_mod_ops_on_two_elements(const std::string& msg) {
             for (uint32_t j = 0; j < ildcrtparams->get_ring_dimension(); j++) {
                 NativeInteger actual_result(sum.get_element_at_index(i).at(j));
                 NativeInteger expected_result((op1.get_element_at_index(i).at(j) + op2.get_element_at_index(i).at(j))
-                                                     .mod(ildcrtparams->get_params()[i]->get_modulus()));
+                                                      .mod(ildcrtparams->get_params()[i]->get_modulus()));
                 EXPECT_EQ(actual_result, expected_result)
                         << msg << " Failure: DCRTPoly + operation tower " << i << " index " << j;
             }
@@ -651,7 +656,7 @@ void dcrt_mod_ops_on_two_elements(const std::string& msg) {
             for (uint32_t j = 0; j < ildcrtparams->get_ring_dimension(); j++) {
                 NativeInteger actual_result(prod.get_element_at_index(i).at(j));
                 NativeInteger expected_result((op1.get_element_at_index(i).at(j) * op2.get_element_at_index(i).at(j))
-                                                     .mod(ildcrtparams->get_params()[i]->get_modulus()));
+                                                      .mod(ildcrtparams->get_params()[i]->get_modulus()));
                 EXPECT_EQ(actual_result, expected_result)
                         << msg << " Failure: DCRTPoly * operation tower " << i << " index " << j;
             }

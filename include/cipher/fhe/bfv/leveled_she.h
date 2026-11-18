@@ -122,7 +122,7 @@ class BfvRnsLeveledShe : public RnsLeveledShe {
      * @param eval_key the relinearization key.
      */
     void eval_mult_in_place(Ciphertext<RnsPoly>& ciphertext1, ConstCiphertext<RnsPoly>& ciphertext2,
-                         const EvalKey<RnsPoly> eval_key) const override;
+                            const EvalKey<RnsPoly> eval_key) const override;
 
     /**
      * Homomorphic squaring of a ciphertext followed by relinearization with the given key.
@@ -161,7 +161,7 @@ class BfvRnsLeveledShe : public RnsLeveledShe {
      * @return never returns.
      */
     Ciphertext<RnsPoly> eval_mult_mutable(Ciphertext<RnsPoly>& ciphertext1,
-                                         Ciphertext<RnsPoly>& ciphertext2) const override;
+                                          Ciphertext<RnsPoly>& ciphertext2) const override;
     /**
      * Not supported in BFV (throws).
      *
@@ -171,7 +171,7 @@ class BfvRnsLeveledShe : public RnsLeveledShe {
      * @return never returns.
      */
     Ciphertext<RnsPoly> eval_mult_mutable(Ciphertext<RnsPoly>& ciphertext1, Ciphertext<RnsPoly>& ciphertext2,
-                                         const EvalKey<RnsPoly> eval_key) const override;
+                                          const EvalKey<RnsPoly> eval_key) const override;
     /**
      * Not supported in BFV (throws).
      *
@@ -188,7 +188,7 @@ class BfvRnsLeveledShe : public RnsLeveledShe {
      * @param eval_key the relinearization key.
      */
     void eval_mult_mutable_in_place(Ciphertext<RnsPoly>& ciphertext1, Ciphertext<RnsPoly>& ciphertext2,
-                                const EvalKey<RnsPoly> eval_key) const override;
+                                    const EvalKey<RnsPoly> eval_key) const override;
     /**
      * Not supported in BFV (throws).
      *
@@ -205,7 +205,7 @@ class BfvRnsLeveledShe : public RnsLeveledShe {
      * @return never returns.
      */
     Ciphertext<RnsPoly> eval_add_mutable(Ciphertext<RnsPoly>& ciphertext1,
-                                        Ciphertext<RnsPoly>& ciphertext2) const override;
+                                         Ciphertext<RnsPoly>& ciphertext2) const override;
     /**
      * Not supported in BFV (throws).
      *
@@ -237,7 +237,7 @@ class BfvRnsLeveledShe : public RnsLeveledShe {
      * @return never returns.
      */
     Ciphertext<RnsPoly> eval_sub_mutable(Ciphertext<RnsPoly>& ciphertext1,
-                                        Ciphertext<RnsPoly>& ciphertext2) const override;
+                                         Ciphertext<RnsPoly>& ciphertext2) const override;
     /**
      * Not supported in BFV (throws).
      *
@@ -292,7 +292,7 @@ class BfvRnsLeveledShe : public RnsLeveledShe {
      * @return the rotated ciphertext.
      */
     Ciphertext<RnsPoly> eval_fast_rotation(ConstCiphertext<RnsPoly>& ciphertext, const uint32_t index, const uint32_t m,
-                                          const std::shared_ptr<std::vector<RnsPoly>> digits) const override;
+                                           const std::shared_ptr<std::vector<RnsPoly>> digits) const override;
 
     /**
      * Precomputation step of hoisted rotations: the digit decomposition of the second ciphertext polynomial.
@@ -324,7 +324,7 @@ class BfvRnsLeveledShe : public RnsLeveledShe {
      * @return the compressed ciphertext.
      */
     Ciphertext<RnsPoly> compress(ConstCiphertext<RnsPoly>& ciphertext, size_t towers_left,
-                                  size_t noise_scale_deg) const override;
+                                 size_t noise_scale_deg) const override;
 
     /////////////////////////////////////
     // SERIALIZATION

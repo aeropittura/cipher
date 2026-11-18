@@ -62,7 +62,7 @@ Archive, Report 2020/1118, 2020. https://eprint.iacr.org/2020/
 namespace cipher {
 
 DecryptResult BgvRnsMultiparty::multiparty_decrypt_fusion(const std::vector<Ciphertext<RnsPoly>>& ciphertext_vec,
-                                                        NativePoly* plaintext) const {
+                                                          NativePoly* plaintext) const {
     const auto crypto_params =
             std::dynamic_pointer_cast<BgvRnsCryptoParams>(ciphertext_vec[0]->get_crypto_parameters());
 
@@ -80,15 +80,17 @@ DecryptResult BgvRnsMultiparty::multiparty_decrypt_fusion(const std::vector<Ciph
     if (size_ql > 0) {
         for (size_t i = size_ql - 1; i > 0; --i) {
             b.mod_reduce(crypto_params->get_plaintext_modulus(), crypto_params->get_t_modq_precon(),
-                        crypto_params->get_negt_inv_modq(i), crypto_params->get_negt_inv_modq_precon(i),
-                        crypto_params->get_ql_inv_modq(i), crypto_params->get_ql_inv_modq_precon(i));
+                         crypto_params->get_negt_inv_modq(i), crypto_params->get_negt_inv_modq_precon(i),
+                         crypto_params->get_ql_inv_modq(i), crypto_params->get_ql_inv_modq_precon(i));
         }
         if (crypto_params->get_scaling_technique() == FLEXIBLEAUTO ||
             crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT) {
             for (size_t i = 0; i < size_ql - 1; ++i) {
                 NativeInteger mod_reduce_factor = crypto_params->get_mod_reduce_factor_int(size_ql - 1 - i);
-                NativeInteger mod_reduce_factor_inv = mod_reduce_factor.mod_inverse(crypto_params->get_plaintext_modulus());
-                scaling_factor_int = scaling_factor_int.mod_mul(mod_reduce_factor_inv, crypto_params->get_plaintext_modulus());
+                NativeInteger mod_reduce_factor_inv =
+                        mod_reduce_factor.mod_inverse(crypto_params->get_plaintext_modulus());
+                scaling_factor_int =
+                        scaling_factor_int.mod_mul(mod_reduce_factor_inv, crypto_params->get_plaintext_modulus());
             }
         }
     }
@@ -99,7 +101,7 @@ DecryptResult BgvRnsMultiparty::multiparty_decrypt_fusion(const std::vector<Ciph
 }
 
 DecryptResult BgvRnsMultiparty::multiparty_decrypt_fusion(const std::vector<Ciphertext<RnsPoly>>& ciphertext_vec,
-                                                        Poly* plaintext) const {
+                                                          Poly* plaintext) const {
     const auto crypto_params =
             std::dynamic_pointer_cast<BgvRnsCryptoParams>(ciphertext_vec[0]->get_crypto_parameters());
 

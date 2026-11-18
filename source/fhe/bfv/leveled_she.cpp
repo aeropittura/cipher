@@ -96,7 +96,7 @@ void BfvRnsLeveledShe::eval_sub_in_place(Ciphertext<RnsPoly>& ciphertext, ConstP
 }
 
 uint32_t find_levels_to_drop(uint32_t multiplicative_depth, std::shared_ptr<BaseCryptoParams<RnsPoly>> crypto_params,
-                          uint32_t dcrt_bits, bool key_switch_value = false) {
+                             uint32_t dcrt_bits, bool key_switch_value = false) {
     const auto crypto_params_bfv_rns = std::dynamic_pointer_cast<BfvRnsCryptoParams>(crypto_params);
     double sigma = crypto_params_bfv_rns->get_distribution_parameter();
     double alpha = crypto_params_bfv_rns->get_assurance_measure();
@@ -114,8 +114,9 @@ uint32_t find_levels_to_drop(uint32_t multiplicative_depth, std::shared_ptr<Base
     double berr = sigma * std::sqrt(alpha);
 
     // Bkey set to threshold_parties * 1 for ternary distribution
-    const double bkey = (crypto_params_bfv_rns->get_secret_key_dist() == GAUSSIAN) ? std::sqrt(threshold_parties) * berr :
-                                                                               threshold_parties;
+    const double bkey = (crypto_params_bfv_rns->get_secret_key_dist() == GAUSSIAN) ?
+                                std::sqrt(threshold_parties) * berr :
+                                threshold_parties;
 
     double w = std::pow(2, relin_window == 0 ? dcrt_bits : relin_window);
 
@@ -224,26 +225,29 @@ Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_mult(ConstCiphertext<RnsPoly>& cipher
     if (crypto_params->get_multiplication_technique() == HPS) {
         for (uint32_t i = 0; i < cv1_size; ++i) {
             cv1[i].expand_crt_basis(crypto_params->get_params_ql_rl(), crypto_params->get_params_rl(),
-                                  crypto_params->get_ql_hat_inv_modq(), crypto_params->get_ql_hat_inv_modq_precon(),
-                                  crypto_params->get_ql_hat_modr(), crypto_params->get_alpha_ql_modr(),
-                                  crypto_params->get_modr_barrett_mu(), crypto_params->get_q_inv(), Format::EVALUATION);
+                                    crypto_params->get_ql_hat_inv_modq(), crypto_params->get_ql_hat_inv_modq_precon(),
+                                    crypto_params->get_ql_hat_modr(), crypto_params->get_alpha_ql_modr(),
+                                    crypto_params->get_modr_barrett_mu(), crypto_params->get_q_inv(),
+                                    Format::EVALUATION);
         }
 
         for (uint32_t i = 0; i < cv2_size; ++i) {
             cv2[i].expand_crt_basis(crypto_params->get_params_ql_rl(), crypto_params->get_params_rl(),
-                                  crypto_params->get_ql_hat_inv_modq(), crypto_params->get_ql_hat_inv_modq_precon(),
-                                  crypto_params->get_ql_hat_modr(), crypto_params->get_alpha_ql_modr(),
-                                  crypto_params->get_modr_barrett_mu(), crypto_params->get_q_inv(), Format::EVALUATION);
+                                    crypto_params->get_ql_hat_inv_modq(), crypto_params->get_ql_hat_inv_modq_precon(),
+                                    crypto_params->get_ql_hat_modr(), crypto_params->get_alpha_ql_modr(),
+                                    crypto_params->get_modr_barrett_mu(), crypto_params->get_q_inv(),
+                                    Format::EVALUATION);
         }
     } else if ((crypto_params->get_multiplication_technique() == HPSPOVERQ) ||
                ((crypto_params->get_multiplication_technique() == HPSPOVERQLEVELED) && (size_q < size_qm))) {
         for (uint32_t i = 0; i < cv1_size; ++i) {
             // Expand ciphertext1 from basis Q to PQ (from Q_l to P_l*Q_l if manual compress/lower-level-encode was called)
-            cv1[i].expand_crt_basis(crypto_params->get_params_ql_rl(size_q - 1), crypto_params->get_params_rl(size_q - 1),
-                                  crypto_params->get_ql_hat_inv_modq(size_q - 1),
-                                  crypto_params->get_ql_hat_inv_modq_precon(size_q - 1), crypto_params->get_ql_hat_modr(size_q - 1),
-                                  crypto_params->get_alpha_ql_modr(size_q - 1), crypto_params->get_modr_barrett_mu(),
-                                  crypto_params->get_q_inv(), Format::EVALUATION);
+            cv1[i].expand_crt_basis(
+                    crypto_params->get_params_ql_rl(size_q - 1), crypto_params->get_params_rl(size_q - 1),
+                    crypto_params->get_ql_hat_inv_modq(size_q - 1),
+                    crypto_params->get_ql_hat_inv_modq_precon(size_q - 1), crypto_params->get_ql_hat_modr(size_q - 1),
+                    crypto_params->get_alpha_ql_modr(size_q - 1), crypto_params->get_modr_barrett_mu(),
+                    crypto_params->get_q_inv(), Format::EVALUATION);
         }
 
         RnsPoly::CrtBasisExtensionPrecomputations basis_pq(
@@ -252,7 +256,8 @@ Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_mult(ConstCiphertext<RnsPoly>& cipher
                 crypto_params->get_m_neg_rl_ql_hat_inv_modq_precon(size_q - 1), crypto_params->get_q_inv_modr(),
                 crypto_params->get_modr_barrett_mu(), crypto_params->get_rl_hat_inv_modr(size_q - 1),
                 crypto_params->get_rl_hat_inv_modr_precon(size_q - 1), crypto_params->get_rl_hat_modq(size_q - 1),
-                crypto_params->get_alpha_rl_modq(size_q - 1), crypto_params->get_modq_barrett_mu(), crypto_params->get_r_inv());
+                crypto_params->get_alpha_rl_modq(size_q - 1), crypto_params->get_modq_barrett_mu(),
+                crypto_params->get_r_inv());
 
         for (uint32_t i = 0; i < cv2_size; ++i) {
             cv2[i].set_format(Format::COEFFICIENT, RnsPoly::THREADS_CRT_BASIS_SWITCH);
@@ -275,22 +280,24 @@ Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_mult(ConstCiphertext<RnsPoly>& cipher
             cv1[i].set_format(Format::COEFFICIENT, RnsPoly::THREADS_CRT_BASIS_SWITCH);
             if (l < size_q - 1) {
                 // Drop from basis Q to Q_l.
-                cv1[i] = cv1[i].scale_and_round(crypto_params->get_params_ql(l), crypto_params->get_ql_q_hat_inv_modq_divq_modq(l),
-                                              crypto_params->get_ql_q_hat_inv_modq_divq_frac(l),
-                                              crypto_params->get_modq_barrett_mu());
+                cv1[i] = cv1[i].scale_and_round(
+                        crypto_params->get_params_ql(l), crypto_params->get_ql_q_hat_inv_modq_divq_modq(l),
+                        crypto_params->get_ql_q_hat_inv_modq_divq_frac(l), crypto_params->get_modq_barrett_mu());
             }
             // Expand ciphertext1 from basis Q_l to P_l*Q_l.
             cv1[i].expand_crt_basis(crypto_params->get_params_ql_rl(l), crypto_params->get_params_rl(l),
-                                  crypto_params->get_ql_hat_inv_modq(l), crypto_params->get_ql_hat_inv_modq_precon(l),
-                                  crypto_params->get_ql_hat_modr(l), crypto_params->get_alpha_ql_modr(l),
-                                  crypto_params->get_modr_barrett_mu(), crypto_params->get_q_inv(), Format::EVALUATION);
+                                    crypto_params->get_ql_hat_inv_modq(l), crypto_params->get_ql_hat_inv_modq_precon(l),
+                                    crypto_params->get_ql_hat_modr(l), crypto_params->get_alpha_ql_modr(l),
+                                    crypto_params->get_modr_barrett_mu(), crypto_params->get_q_inv(),
+                                    Format::EVALUATION);
         }
 
         RnsPoly::CrtBasisExtensionPrecomputations basis_pq(
                 crypto_params->get_params_ql_rl(l), crypto_params->get_params_rl(l), crypto_params->get_params_ql(l),
                 crypto_params->get_m_neg_rl_q_hat_inv_modq(l), crypto_params->get_m_neg_rl_q_hat_inv_modq_precon(l),
-                crypto_params->get_q_inv_modr(), crypto_params->get_modr_barrett_mu(), crypto_params->get_rl_hat_inv_modr(l),
-                crypto_params->get_rl_hat_inv_modr_precon(l), crypto_params->get_rl_hat_modq(l), crypto_params->get_alpha_rl_modq(l),
+                crypto_params->get_q_inv_modr(), crypto_params->get_modr_barrett_mu(),
+                crypto_params->get_rl_hat_inv_modr(l), crypto_params->get_rl_hat_inv_modr_precon(l),
+                crypto_params->get_rl_hat_modq(l), crypto_params->get_alpha_rl_modq(l),
                 crypto_params->get_modq_barrett_mu(), crypto_params->get_r_inv());
 
         for (uint32_t i = 0; i < cv2_size; ++i) {
@@ -305,9 +312,9 @@ Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_mult(ConstCiphertext<RnsPoly>& cipher
                     crypto_params->get_params_q_bsk(), crypto_params->get_moduli_q(), crypto_params->get_moduli_bsk(),
                     crypto_params->get_modbsk_barrett_mu(), crypto_params->get_mtilde_q_hat_inv_modq(),
                     crypto_params->get_mtilde_q_hat_inv_modq_precon(), crypto_params->get_q_hat_modbsk(),
-                    crypto_params->get_q_hat_modmtilde(), crypto_params->get_q_modbsk(), crypto_params->get_q_modbsk_precon(),
-                    crypto_params->get_neg_q_inv_modmtilde(), crypto_params->get_mtilde_inv_modbsk(),
-                    crypto_params->get_mtilde_inv_modbsk_precon());
+                    crypto_params->get_q_hat_modmtilde(), crypto_params->get_q_modbsk(),
+                    crypto_params->get_q_modbsk_precon(), crypto_params->get_neg_q_inv_modmtilde(),
+                    crypto_params->get_mtilde_inv_modbsk(), crypto_params->get_mtilde_inv_modbsk_precon());
             cv1[i].set_format(Format::EVALUATION);
         }
 
@@ -316,9 +323,9 @@ Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_mult(ConstCiphertext<RnsPoly>& cipher
                     crypto_params->get_params_q_bsk(), crypto_params->get_moduli_q(), crypto_params->get_moduli_bsk(),
                     crypto_params->get_modbsk_barrett_mu(), crypto_params->get_mtilde_q_hat_inv_modq(),
                     crypto_params->get_mtilde_q_hat_inv_modq_precon(), crypto_params->get_q_hat_modbsk(),
-                    crypto_params->get_q_hat_modmtilde(), crypto_params->get_q_modbsk(), crypto_params->get_q_modbsk_precon(),
-                    crypto_params->get_neg_q_inv_modmtilde(), crypto_params->get_mtilde_inv_modbsk(),
-                    crypto_params->get_mtilde_inv_modbsk_precon());
+                    crypto_params->get_q_hat_modmtilde(), crypto_params->get_q_modbsk(),
+                    crypto_params->get_q_modbsk_precon(), crypto_params->get_neg_q_inv_modmtilde(),
+                    crypto_params->get_mtilde_inv_modbsk(), crypto_params->get_mtilde_inv_modbsk_precon());
             cv2[i].set_format(Format::EVALUATION);
         }
     }
@@ -367,15 +374,16 @@ Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_mult(ConstCiphertext<RnsPoly>& cipher
             cv_mult[i].set_format(Format::COEFFICIENT, RnsPoly::THREADS_CRT_BASIS_SWITCH);
             // Performs the scaling by t/Q followed by rounding; the result is in the
             // CRT basis P
-            cv_mult[i] =
-                    cv_mult[i].scale_and_round(crypto_params->get_params_rl(), crypto_params->get_t_rs_hat_inv_mods_divs_modr(),
-                                            crypto_params->get_t_rs_hat_inv_mods_divs_frac(), crypto_params->get_modr_barrett_mu());
+            cv_mult[i] = cv_mult[i].scale_and_round(
+                    crypto_params->get_params_rl(), crypto_params->get_t_rs_hat_inv_mods_divs_modr(),
+                    crypto_params->get_t_rs_hat_inv_mods_divs_frac(), crypto_params->get_modr_barrett_mu());
 
             // Converts from the CRT basis P to Q
-            cv_mult[i] = cv_mult[i].switch_crt_basis(crypto_params->get_element_params(), crypto_params->get_rl_hat_inv_modr(),
-                                                 crypto_params->get_rl_hat_inv_modr_precon(), crypto_params->get_rl_hat_modq(),
-                                                 crypto_params->get_alpha_rl_modq(), crypto_params->get_modq_barrett_mu(),
-                                                 crypto_params->get_r_inv());
+            cv_mult[i] = cv_mult[i].switch_crt_basis(
+                    crypto_params->get_element_params(), crypto_params->get_rl_hat_inv_modr(),
+                    crypto_params->get_rl_hat_inv_modr_precon(), crypto_params->get_rl_hat_modq(),
+                    crypto_params->get_alpha_rl_modq(), crypto_params->get_modq_barrett_mu(),
+                    crypto_params->get_r_inv());
         }
     } else if ((crypto_params->get_multiplication_technique() == HPSPOVERQ) ||
                ((crypto_params->get_multiplication_technique() == HPSPOVERQLEVELED) && (size_q < size_qm))) {
@@ -399,8 +407,9 @@ Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_mult(ConstCiphertext<RnsPoly>& cipher
 
             if (l < size_q - 1) {
                 // Expand back to basis Q.
-                cv_mult[i].expand_crt_basis_ql_hat(crypto_params->get_element_params(), crypto_params->get_ql_hat_modq(l),
-                                              crypto_params->get_ql_hat_modq_precon(l), size_q);
+                cv_mult[i].expand_crt_basis_ql_hat(crypto_params->get_element_params(),
+                                                   crypto_params->get_ql_hat_modq(l),
+                                                   crypto_params->get_ql_hat_modq_precon(l), size_q);
             }
         }
     } else {
@@ -411,24 +420,26 @@ Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_mult(ConstCiphertext<RnsPoly>& cipher
             // Performs the scaling by t/Q followed by rounding; the result is in the
             // CRT basis {Bsk}
             cv_mult[i].fast_rns_floorq(t, crypto_params->get_moduli_q(), crypto_params->get_moduli_bsk(),
-                                    crypto_params->get_modbsk_barrett_mu(), crypto_params->get_t_q_hat_inv_modq(),
-                                    crypto_params->get_t_q_hat_inv_modq_precon(), crypto_params->get_q_hat_modbsk(),
-                                    crypto_params->get_q_inv_modbsk(), crypto_params->get_t_q_inv_modbsk(),
-                                    crypto_params->get_t_q_inv_modbsk_precon());
+                                       crypto_params->get_modbsk_barrett_mu(), crypto_params->get_t_q_hat_inv_modq(),
+                                       crypto_params->get_t_q_hat_inv_modq_precon(), crypto_params->get_q_hat_modbsk(),
+                                       crypto_params->get_q_inv_modbsk(), crypto_params->get_t_q_inv_modbsk(),
+                                       crypto_params->get_t_q_inv_modbsk_precon());
 
             // Converts from the CRT basis {Bsk} to {Q}
             cv_mult[i].fast_base_conv_sk(crypto_params->get_element_params(), crypto_params->get_modq_barrett_mu(),
-                                     crypto_params->get_moduli_bsk(), crypto_params->get_modbsk_barrett_mu(),
-                                     crypto_params->get_b_hat_inv_modb(), crypto_params->get_b_hat_inv_modb_precon(),
-                                     crypto_params->get_b_hat_modmsk(), crypto_params->get_b_inv_modmsk(),
-                                     crypto_params->get_b_inv_modmsk_precon(), crypto_params->get_b_hat_modq(),
-                                     crypto_params->get_b_modq(), crypto_params->get_b_modq_precon());
+                                         crypto_params->get_moduli_bsk(), crypto_params->get_modbsk_barrett_mu(),
+                                         crypto_params->get_b_hat_inv_modb(),
+                                         crypto_params->get_b_hat_inv_modb_precon(), crypto_params->get_b_hat_modmsk(),
+                                         crypto_params->get_b_inv_modmsk(), crypto_params->get_b_inv_modmsk_precon(),
+                                         crypto_params->get_b_hat_modq(), crypto_params->get_b_modq(),
+                                         crypto_params->get_b_modq_precon());
         }
     }
 
     auto ciphertext_mult = ciphertext1->clone_empty();
     ciphertext_mult->set_elements(std::move(cv_mult));
-    ciphertext_mult->set_noise_scale_deg(std::max(ciphertext1->get_noise_scale_deg(), ciphertext2->get_noise_scale_deg()) + 1);
+    ciphertext_mult->set_noise_scale_deg(
+            std::max(ciphertext1->get_noise_scale_deg(), ciphertext2->get_noise_scale_deg()) + 1);
     return ciphertext_mult;
 }
 
@@ -452,20 +463,22 @@ Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_square(ConstCiphertext<RnsPoly>& ciph
     if (crypto_params->get_multiplication_technique() == HPS) {
         for (size_t i = 0; i < cv_size; i++) {
             cv[i].expand_crt_basis(crypto_params->get_params_ql_rl(), crypto_params->get_params_rl(),
-                                 crypto_params->get_ql_hat_inv_modq(), crypto_params->get_ql_hat_inv_modq_precon(),
-                                 crypto_params->get_ql_hat_modr(), crypto_params->get_alpha_ql_modr(),
-                                 crypto_params->get_modr_barrett_mu(), crypto_params->get_q_inv(), Format::EVALUATION);
+                                   crypto_params->get_ql_hat_inv_modq(), crypto_params->get_ql_hat_inv_modq_precon(),
+                                   crypto_params->get_ql_hat_modr(), crypto_params->get_alpha_ql_modr(),
+                                   crypto_params->get_modr_barrett_mu(), crypto_params->get_q_inv(),
+                                   Format::EVALUATION);
         }
     } else if ((crypto_params->get_multiplication_technique() == HPSPOVERQ) ||
                ((crypto_params->get_multiplication_technique() == HPSPOVERQLEVELED) && (size_q < size_qm))) {
         cv_pover_q = cv;
         for (size_t i = 0; i < cv_size; i++) {
             // Expand ciphertext1 from basis Q to PQ.
-            cv[i].expand_crt_basis(crypto_params->get_params_ql_rl(size_q - 1), crypto_params->get_params_rl(size_q - 1),
-                                 crypto_params->get_ql_hat_inv_modq(size_q - 1),
-                                 crypto_params->get_ql_hat_inv_modq_precon(size_q - 1), crypto_params->get_ql_hat_modr(size_q - 1),
-                                 crypto_params->get_alpha_ql_modr(size_q - 1), crypto_params->get_modr_barrett_mu(),
-                                 crypto_params->get_q_inv(), Format::EVALUATION);
+            cv[i].expand_crt_basis(
+                    crypto_params->get_params_ql_rl(size_q - 1), crypto_params->get_params_rl(size_q - 1),
+                    crypto_params->get_ql_hat_inv_modq(size_q - 1),
+                    crypto_params->get_ql_hat_inv_modq_precon(size_q - 1), crypto_params->get_ql_hat_modr(size_q - 1),
+                    crypto_params->get_alpha_ql_modr(size_q - 1), crypto_params->get_modr_barrett_mu(),
+                    crypto_params->get_q_inv(), Format::EVALUATION);
         }
 
         RnsPoly::CrtBasisExtensionPrecomputations basis_pq(
@@ -474,7 +487,8 @@ Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_square(ConstCiphertext<RnsPoly>& ciph
                 crypto_params->get_m_neg_rl_ql_hat_inv_modq_precon(size_q - 1), crypto_params->get_q_inv_modr(),
                 crypto_params->get_modr_barrett_mu(), crypto_params->get_rl_hat_inv_modr(size_q - 1),
                 crypto_params->get_rl_hat_inv_modr_precon(size_q - 1), crypto_params->get_rl_hat_modq(size_q - 1),
-                crypto_params->get_alpha_rl_modq(size_q - 1), crypto_params->get_modq_barrett_mu(), crypto_params->get_r_inv());
+                crypto_params->get_alpha_rl_modq(size_q - 1), crypto_params->get_modq_barrett_mu(),
+                crypto_params->get_r_inv());
 
         for (size_t i = 0; i < cv_size; i++) {
             cv_pover_q[i].set_format(Format::COEFFICIENT, RnsPoly::THREADS_CRT_BASIS_SWITCH);
@@ -500,22 +514,24 @@ Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_square(ConstCiphertext<RnsPoly>& ciph
         for (size_t i = 0; i < cv_size; i++) {
             if (l < size_q - 1) {
                 // Drop from basis Q to Q_l.
-                cv[i] = cv[i].scale_and_round(crypto_params->get_params_ql(l), crypto_params->get_ql_q_hat_inv_modq_divq_modq(l),
-                                            crypto_params->get_ql_q_hat_inv_modq_divq_frac(l),
-                                            crypto_params->get_modq_barrett_mu());
+                cv[i] = cv[i].scale_and_round(
+                        crypto_params->get_params_ql(l), crypto_params->get_ql_q_hat_inv_modq_divq_modq(l),
+                        crypto_params->get_ql_q_hat_inv_modq_divq_frac(l), crypto_params->get_modq_barrett_mu());
             }
             // Expand ciphertext1 from basis Q_l to PQ_l.
             cv[i].expand_crt_basis(crypto_params->get_params_ql_rl(l), crypto_params->get_params_rl(l),
-                                 crypto_params->get_ql_hat_inv_modq(l), crypto_params->get_ql_hat_inv_modq_precon(l),
-                                 crypto_params->get_ql_hat_modr(l), crypto_params->get_alpha_ql_modr(l),
-                                 crypto_params->get_modr_barrett_mu(), crypto_params->get_q_inv(), Format::EVALUATION);
+                                   crypto_params->get_ql_hat_inv_modq(l), crypto_params->get_ql_hat_inv_modq_precon(l),
+                                   crypto_params->get_ql_hat_modr(l), crypto_params->get_alpha_ql_modr(l),
+                                   crypto_params->get_modr_barrett_mu(), crypto_params->get_q_inv(),
+                                   Format::EVALUATION);
         }
 
         RnsPoly::CrtBasisExtensionPrecomputations basis_pq(
                 crypto_params->get_params_ql_rl(l), crypto_params->get_params_rl(l), crypto_params->get_params_ql(l),
                 crypto_params->get_m_neg_rl_q_hat_inv_modq(l), crypto_params->get_m_neg_rl_q_hat_inv_modq_precon(l),
-                crypto_params->get_q_inv_modr(), crypto_params->get_modr_barrett_mu(), crypto_params->get_rl_hat_inv_modr(l),
-                crypto_params->get_rl_hat_inv_modr_precon(l), crypto_params->get_rl_hat_modq(l), crypto_params->get_alpha_rl_modq(l),
+                crypto_params->get_q_inv_modr(), crypto_params->get_modr_barrett_mu(),
+                crypto_params->get_rl_hat_inv_modr(l), crypto_params->get_rl_hat_inv_modr_precon(l),
+                crypto_params->get_rl_hat_modq(l), crypto_params->get_alpha_rl_modq(l),
                 crypto_params->get_modq_barrett_mu(), crypto_params->get_r_inv());
 
         for (size_t i = 0; i < cv_size; i++) {
@@ -528,9 +544,9 @@ Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_square(ConstCiphertext<RnsPoly>& ciph
                     crypto_params->get_params_q_bsk(), crypto_params->get_moduli_q(), crypto_params->get_moduli_bsk(),
                     crypto_params->get_modbsk_barrett_mu(), crypto_params->get_mtilde_q_hat_inv_modq(),
                     crypto_params->get_mtilde_q_hat_inv_modq_precon(), crypto_params->get_q_hat_modbsk(),
-                    crypto_params->get_q_hat_modmtilde(), crypto_params->get_q_modbsk(), crypto_params->get_q_modbsk_precon(),
-                    crypto_params->get_neg_q_inv_modmtilde(), crypto_params->get_mtilde_inv_modbsk(),
-                    crypto_params->get_mtilde_inv_modbsk_precon());
+                    crypto_params->get_q_hat_modmtilde(), crypto_params->get_q_modbsk(),
+                    crypto_params->get_q_modbsk_precon(), crypto_params->get_neg_q_inv_modmtilde(),
+                    crypto_params->get_mtilde_inv_modbsk(), crypto_params->get_mtilde_inv_modbsk_precon());
 
             cv[i].set_format(Format::EVALUATION);
         }
@@ -539,7 +555,8 @@ Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_square(ConstCiphertext<RnsPoly>& ciph
     std::vector<RnsPoly> cv_square(cv_sq_size);
 #ifdef USE_KARATSUBA
     if (cv_size == 2) {
-        if (crypto_params->get_multiplication_technique() == HPS || crypto_params->get_multiplication_technique() == BEHZ) {
+        if (crypto_params->get_multiplication_technique() == HPS ||
+            crypto_params->get_multiplication_technique() == BEHZ) {
             // size of each ciphertxt = 2, use Karatsuba
             cv_square[0] = cv[0] * cv[0];  // a
             cv_square[2] = cv[1] * cv[1];  // b
@@ -560,7 +577,8 @@ Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_square(ConstCiphertext<RnsPoly>& ciph
         std::vector<bool> is_first_add(cv_sq_size, true);
         RnsPoly cvtemp;
 
-        if (crypto_params->get_multiplication_technique() == HPS || crypto_params->get_multiplication_technique() == BEHZ) {
+        if (crypto_params->get_multiplication_technique() == HPS ||
+            crypto_params->get_multiplication_technique() == BEHZ) {
             for (size_t i = 0; i < cv_size; i++) {
                 for (size_t j = i; j < cv_size; j++) {
                     if (is_first_add[i + j] == true) {
@@ -648,10 +666,11 @@ Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_square(ConstCiphertext<RnsPoly>& ciph
                     crypto_params->get_t_rs_hat_inv_mods_divs_frac(), crypto_params->get_modr_barrett_mu());
 
             // Converts from the CRT basis P to Q
-            cv_square[i] = cv_square[i].switch_crt_basis(crypto_params->get_element_params(), crypto_params->get_rl_hat_inv_modr(),
-                                                     crypto_params->get_rl_hat_inv_modr_precon(),
-                                                     crypto_params->get_rl_hat_modq(), crypto_params->get_alpha_rl_modq(),
-                                                     crypto_params->get_modq_barrett_mu(), crypto_params->get_r_inv());
+            cv_square[i] = cv_square[i].switch_crt_basis(
+                    crypto_params->get_element_params(), crypto_params->get_rl_hat_inv_modr(),
+                    crypto_params->get_rl_hat_inv_modr_precon(), crypto_params->get_rl_hat_modq(),
+                    crypto_params->get_alpha_rl_modq(), crypto_params->get_modq_barrett_mu(),
+                    crypto_params->get_r_inv());
         }
     } else if ((crypto_params->get_multiplication_technique() == HPSPOVERQ) ||
                ((crypto_params->get_multiplication_technique() == HPSPOVERQLEVELED) && (size_q < size_qm))) {
@@ -675,8 +694,9 @@ Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_square(ConstCiphertext<RnsPoly>& ciph
 
             if (l < size_q - 1) {
                 // Expand back to basis Q.
-                cv_square[i].expand_crt_basis_ql_hat(crypto_params->get_element_params(), crypto_params->get_ql_hat_modq(l),
-                                                crypto_params->get_ql_hat_modq_precon(l), size_q);
+                cv_square[i].expand_crt_basis_ql_hat(crypto_params->get_element_params(),
+                                                     crypto_params->get_ql_hat_modq(l),
+                                                     crypto_params->get_ql_hat_modq_precon(l), size_q);
             }
         }
     } else {
@@ -687,18 +707,20 @@ Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_square(ConstCiphertext<RnsPoly>& ciph
             // Performs the scaling by t/Q followed by rounding; the result is in the
             // CRT basis {Bsk}
             cv_square[i].fast_rns_floorq(t, crypto_params->get_moduli_q(), crypto_params->get_moduli_bsk(),
-                                      crypto_params->get_modbsk_barrett_mu(), crypto_params->get_t_q_hat_inv_modq(),
-                                      crypto_params->get_t_q_hat_inv_modq_precon(), crypto_params->get_q_hat_modbsk(),
-                                      crypto_params->get_q_inv_modbsk(), crypto_params->get_t_q_inv_modbsk(),
-                                      crypto_params->get_t_q_inv_modbsk_precon());
+                                         crypto_params->get_modbsk_barrett_mu(), crypto_params->get_t_q_hat_inv_modq(),
+                                         crypto_params->get_t_q_hat_inv_modq_precon(),
+                                         crypto_params->get_q_hat_modbsk(), crypto_params->get_q_inv_modbsk(),
+                                         crypto_params->get_t_q_inv_modbsk(),
+                                         crypto_params->get_t_q_inv_modbsk_precon());
 
             // Converts from the CRT basis {Bsk} to {Q}
             cv_square[i].fast_base_conv_sk(crypto_params->get_element_params(), crypto_params->get_modq_barrett_mu(),
-                                       crypto_params->get_moduli_bsk(), crypto_params->get_modbsk_barrett_mu(),
-                                       crypto_params->get_b_hat_inv_modb(), crypto_params->get_b_hat_inv_modb_precon(),
-                                       crypto_params->get_b_hat_modmsk(), crypto_params->get_b_inv_modmsk(),
-                                       crypto_params->get_b_inv_modmsk_precon(), crypto_params->get_b_hat_modq(),
-                                       crypto_params->get_b_modq(), crypto_params->get_b_modq_precon());
+                                           crypto_params->get_moduli_bsk(), crypto_params->get_modbsk_barrett_mu(),
+                                           crypto_params->get_b_hat_inv_modb(),
+                                           crypto_params->get_b_hat_inv_modb_precon(),
+                                           crypto_params->get_b_hat_modmsk(), crypto_params->get_b_inv_modmsk(),
+                                           crypto_params->get_b_inv_modmsk_precon(), crypto_params->get_b_hat_modq(),
+                                           crypto_params->get_b_modq(), crypto_params->get_b_modq_precon());
         }
     }
 
@@ -718,7 +740,7 @@ Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_mult(ConstCiphertext<RnsPoly>& cipher
 }
 
 void BfvRnsLeveledShe::eval_mult_in_place(Ciphertext<RnsPoly>& ciphertext1, ConstCiphertext<RnsPoly>& ciphertext2,
-                                       const EvalKey<RnsPoly> eval_key) const {
+                                          const EvalKey<RnsPoly> eval_key) const {
     ciphertext1 = eval_mult(ciphertext1, ciphertext2);
     relinearize_core(ciphertext1, eval_key);
 }
@@ -770,7 +792,8 @@ std::shared_ptr<std::vector<RnsPoly>> BfvRnsLeveledShe::eval_fast_rotation_preco
     // an extra step of modulus reduction is needed
     // otherwise, run the shared implemented of eval_key_switch_precompute_core for all RNS schemes
     if (!((crypto_params->get_multiplication_technique() == HPSPOVERQLEVELED) && (size_q == size_qm))) {
-        return algo->eval_key_switch_precompute_core(ciphertext->get_elements()[1], ciphertext->get_crypto_parameters());
+        return algo->eval_key_switch_precompute_core(ciphertext->get_elements()[1],
+                                                     ciphertext->get_crypto_parameters());
     } else {
         RnsPoly c1 = ciphertext->get_elements()[1];
         uint32_t levels = ciphertext->get_noise_scale_deg() - 1;
@@ -781,7 +804,8 @@ std::shared_ptr<std::vector<RnsPoly>> BfvRnsLeveledShe::eval_fast_rotation_preco
         uint32_t l = levels_dropped > 0 ? size_q - 1 - levels_dropped : size_q - 1;
         c1.set_format(COEFFICIENT, RnsPoly::THREADS_CRT_BASIS_SWITCH);
         c1 = c1.scale_and_round(crypto_params->get_params_ql(l), crypto_params->get_ql_q_hat_inv_modq_divq_modq(l),
-                              crypto_params->get_ql_q_hat_inv_modq_divq_frac(l), crypto_params->get_modq_barrett_mu());
+                                crypto_params->get_ql_q_hat_inv_modq_divq_frac(l),
+                                crypto_params->get_modq_barrett_mu());
         c1.set_format(EVALUATION, RnsPoly::THREADS_CRT_BASIS_SWITCH);
 
         return algo->eval_key_switch_precompute_core(c1, ciphertext->get_crypto_parameters());
@@ -789,8 +813,8 @@ std::shared_ptr<std::vector<RnsPoly>> BfvRnsLeveledShe::eval_fast_rotation_preco
 }
 
 Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_fast_rotation(ConstCiphertext<RnsPoly>& ciphertext, const uint32_t index,
-                                                        const uint32_t m,
-                                                        const std::shared_ptr<std::vector<RnsPoly>> digits) const {
+                                                         const uint32_t m,
+                                                         const std::shared_ptr<std::vector<RnsPoly>> digits) const {
     if (index == 0)
         return ciphertext->clone();
 
@@ -819,7 +843,8 @@ Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_fast_rotation(ConstCiphertext<RnsPoly
         }
     }
 
-    auto ba = cc->get_scheme()->eval_fast_key_switch_core(digits, eval_key, std::make_shared<RnsPoly::Params>(elem_params));
+    auto ba = cc->get_scheme()->eval_fast_key_switch_core(digits, eval_key,
+                                                          std::make_shared<RnsPoly::Params>(elem_params));
 
     const auto element_params = crypto_params->get_element_params();
 
@@ -831,9 +856,9 @@ Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_fast_rotation(ConstCiphertext<RnsPoly
         // l is index corresponding to leveled parameters in crypto_parameters precomputations in HPSPOVERQLEVELED, after the level dropping
         uint32_t l = elem_params.get_params().size() - 1;
         ba[0].expand_crt_basis_ql_hat(crypto_params->get_element_params(), crypto_params->get_ql_hat_modq(l),
-                                  crypto_params->get_ql_hat_modq_precon(l), size_q);
+                                      crypto_params->get_ql_hat_modq_precon(l), size_q);
         ba[1].expand_crt_basis_ql_hat(crypto_params->get_element_params(), crypto_params->get_ql_hat_modq(l),
-                                  crypto_params->get_ql_hat_modq_precon(l), size_q);
+                                      crypto_params->get_ql_hat_modq_precon(l), size_q);
     }
 
     uint32_t N = cc->get_ring_dimension();
@@ -874,8 +899,9 @@ void BfvRnsLeveledShe::relinearize_core(Ciphertext<RnsPoly>& ciphertext, const E
         l = size_q - 1 - find_levels_to_drop(levels, crypto_params, dcrt_bits, is_key_switch);
 
         cv[sel].set_format(COEFFICIENT, RnsPoly::THREADS_CRT_BASIS_SWITCH);
-        cv[sel] = cv[sel].scale_and_round(crypto_params->get_params_ql(l), crypto_params->get_ql_q_hat_inv_modq_divq_modq(l),
-                                        crypto_params->get_ql_q_hat_inv_modq_divq_frac(l), crypto_params->get_modq_barrett_mu());
+        cv[sel] = cv[sel].scale_and_round(
+                crypto_params->get_params_ql(l), crypto_params->get_ql_q_hat_inv_modq_divq_modq(l),
+                crypto_params->get_ql_q_hat_inv_modq_divq_frac(l), crypto_params->get_modq_barrett_mu());
     }
 
     cv[sel].set_format(Format::EVALUATION, RnsPoly::THREADS_CRT_BASIS_SWITCH);
@@ -883,9 +909,9 @@ void BfvRnsLeveledShe::relinearize_core(Ciphertext<RnsPoly>& ciphertext, const E
 
     if ((crypto_params->get_multiplication_technique() == HPSPOVERQLEVELED) && (size_qm == size_q)) {
         ab[0].expand_crt_basis_ql_hat(crypto_params->get_element_params(), crypto_params->get_ql_hat_modq(l),
-                                  crypto_params->get_ql_hat_modq_precon(l), size_q);
+                                      crypto_params->get_ql_hat_modq_precon(l), size_q);
         ab[1].expand_crt_basis_ql_hat(crypto_params->get_element_params(), crypto_params->get_ql_hat_modq(l),
-                                  crypto_params->get_ql_hat_modq_precon(l), size_q);
+                                      crypto_params->get_ql_hat_modq_precon(l), size_q);
     }
 
     cv[0].set_format(Format::EVALUATION);
@@ -900,10 +926,11 @@ void BfvRnsLeveledShe::relinearize_core(Ciphertext<RnsPoly>& ciphertext, const E
 }
 
 Ciphertext<RnsPoly> BfvRnsLeveledShe::compress(ConstCiphertext<RnsPoly>& ciphertext, size_t towers_left,
-                                                size_t noise_scale_deg) const {
+                                               size_t noise_scale_deg) const {
     const auto crypto_params = std::dynamic_pointer_cast<BfvRnsCryptoParams>(ciphertext->get_crypto_parameters());
 
-    if ((crypto_params->get_multiplication_technique() == BEHZ) || (crypto_params->get_multiplication_technique() == HPS)) {
+    if ((crypto_params->get_multiplication_technique() == BEHZ) ||
+        (crypto_params->get_multiplication_technique() == HPS)) {
         CIPHER_THROW(
                 "BFV Compress is not currently supported for BEHZ or HPS. Use one of the HPSPOVERQ* methods instead.");
     }
@@ -936,47 +963,47 @@ Ciphertext<RnsPoly> BfvRnsLeveledShe::compress(ConstCiphertext<RnsPoly>& ciphert
 static const std::string EVAL_MUTABLE_ERROR{
         "The mutable features are not supported in the BFV scheme. Please use a non-mutable version of this function"};
 Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_mult_mutable(Ciphertext<RnsPoly>& ciphertext1,
-                                                       Ciphertext<RnsPoly>& ciphertext2) const {
+                                                        Ciphertext<RnsPoly>& ciphertext2) const {
     CIPHER_THROW(EVAL_MUTABLE_ERROR);
 }
 Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_mult_mutable(Ciphertext<RnsPoly>& ciphertext1,
-                                                       Ciphertext<RnsPoly>& ciphertext2,
-                                                       const EvalKey<RnsPoly> eval_key) const {
+                                                        Ciphertext<RnsPoly>& ciphertext2,
+                                                        const EvalKey<RnsPoly> eval_key) const {
     CIPHER_THROW(EVAL_MUTABLE_ERROR);
 }
 Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_mult_mutable(Ciphertext<RnsPoly>& ciphertext, Plaintext& plaintext) const {
     CIPHER_THROW(EVAL_MUTABLE_ERROR);
 }
 void BfvRnsLeveledShe::eval_mult_mutable_in_place(Ciphertext<RnsPoly>& ciphertext1, Ciphertext<RnsPoly>& ciphertext2,
-                                              const EvalKey<RnsPoly> eval_key) const {
+                                                  const EvalKey<RnsPoly> eval_key) const {
     CIPHER_THROW(EVAL_MUTABLE_ERROR);
 }
 void BfvRnsLeveledShe::eval_mult_mutable_in_place(Ciphertext<RnsPoly>& ciphertext, Plaintext& plaintext) const {
     CIPHER_THROW(EVAL_MUTABLE_ERROR);
 }
 Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_add_mutable(Ciphertext<RnsPoly>& ciphertext1,
-                                                      Ciphertext<RnsPoly>& ciphertext2) const {
+                                                       Ciphertext<RnsPoly>& ciphertext2) const {
     CIPHER_THROW(EVAL_MUTABLE_ERROR);
 }
 Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_add_mutable(Ciphertext<RnsPoly>& ciphertext, Plaintext& plaintext) const {
     CIPHER_THROW(EVAL_MUTABLE_ERROR);
 }
 void BfvRnsLeveledShe::eval_add_mutable_in_place(Ciphertext<RnsPoly>& ciphertext1,
-                                             Ciphertext<RnsPoly>& ciphertext2) const {
+                                                 Ciphertext<RnsPoly>& ciphertext2) const {
     CIPHER_THROW(EVAL_MUTABLE_ERROR);
 }
 void BfvRnsLeveledShe::eval_add_mutable_in_place(Ciphertext<RnsPoly>& ciphertext, Plaintext& plaintext) const {
     CIPHER_THROW(EVAL_MUTABLE_ERROR);
 }
 Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_sub_mutable(Ciphertext<RnsPoly>& ciphertext1,
-                                                      Ciphertext<RnsPoly>& ciphertext2) const {
+                                                       Ciphertext<RnsPoly>& ciphertext2) const {
     CIPHER_THROW(EVAL_MUTABLE_ERROR);
 }
 Ciphertext<RnsPoly> BfvRnsLeveledShe::eval_sub_mutable(Ciphertext<RnsPoly>& ciphertext, Plaintext& plaintext) const {
     CIPHER_THROW(EVAL_MUTABLE_ERROR);
 }
 void BfvRnsLeveledShe::eval_sub_mutable_in_place(Ciphertext<RnsPoly>& ciphertext1,
-                                             Ciphertext<RnsPoly>& ciphertext2) const {
+                                                 Ciphertext<RnsPoly>& ciphertext2) const {
     CIPHER_THROW(EVAL_MUTABLE_ERROR);
 }
 void BfvRnsLeveledShe::eval_sub_mutable_in_place(Ciphertext<RnsPoly>& ciphertext, Plaintext& plaintext) const {

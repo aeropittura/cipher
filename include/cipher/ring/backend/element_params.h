@@ -95,8 +95,8 @@ class ElementParams : public Serializable {
      * operations.
      * @param big_r_unity the big root of unity used for bit packing operations.
      */
-    ElementParams(uint32_t order, const IntegerType& ct_modulus, const IntegerType& r_unity, const IntegerType& big_ct_modulus,
-               const IntegerType& big_r_unity)
+    ElementParams(uint32_t order, const IntegerType& ct_modulus, const IntegerType& r_unity,
+                  const IntegerType& big_ct_modulus, const IntegerType& big_r_unity)
         : ring_dimension_(static_cast<uint32_t>(get_totient(order))),
           cyclotomic_order_(order),
           ciphertext_modulus_(ct_modulus),
@@ -179,7 +179,8 @@ class ElementParams : public Serializable {
     virtual bool operator==(const ElementParams<IntegerType>& other) const {
         return ring_dimension_ == other.ring_dimension_ && cyclotomic_order_ == other.cyclotomic_order_ &&
                ciphertext_modulus_ == other.ciphertext_modulus_ && root_of_unity_ == other.root_of_unity_ &&
-               big_ciphertext_modulus_ == other.big_ciphertext_modulus_ && big_root_of_unity_ == other.big_root_of_unity_;
+               big_ciphertext_modulus_ == other.big_ciphertext_modulus_ &&
+               big_root_of_unity_ == other.big_root_of_unity_;
     }
 
     /**
@@ -205,7 +206,7 @@ class ElementParams : public Serializable {
     void load(Archive& ar, std::uint32_t const version) {
         if (version > serialized_version())
             CIPHER_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
+                         " is from a later version of the library");
         ar(::cereal::make_nvp("co", cyclotomic_order_));
         ar(::cereal::make_nvp("rd", ring_dimension_));
         ar(::cereal::make_nvp("cm", ciphertext_modulus_));
@@ -227,7 +228,7 @@ class ElementParams : public Serializable {
     IntegerType ciphertext_modulus_{0};
     IntegerType root_of_unity_{0};
     IntegerType big_ciphertext_modulus_{0};  // Used for only some applications.
-    IntegerType big_root_of_unity_{0};        // Used for only some applications.
+    IntegerType big_root_of_unity_{0};       // Used for only some applications.
 
     /**
      * @brief Pretty print operator for the ElementParams type.
@@ -236,7 +237,8 @@ class ElementParams : public Serializable {
      */
     virtual std::ostream& doprint(std::ostream& out) const {
         out << "[m=" << cyclotomic_order_ << " n=" << ring_dimension_ << " q=" << ciphertext_modulus_
-            << " ru=" << root_of_unity_ << " bigq=" << big_ciphertext_modulus_ << " bigru=" << big_root_of_unity_ << "]";
+            << " ru=" << root_of_unity_ << " bigq=" << big_ciphertext_modulus_ << " bigru=" << big_root_of_unity_
+            << "]";
         return out;
     }
 };
