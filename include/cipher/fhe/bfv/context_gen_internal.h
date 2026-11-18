@@ -1,0 +1,121 @@
+//==================================================================================
+// BSD 2-Clause License
+//
+// Copyright (c) 2014-2022, NJIT, Duality Technologies Inc. and other contributors
+//
+// All rights reserved.
+//
+// Author TPOC: contact@openfhe.org
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice, this
+//    list of conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
+//    and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//==================================================================================
+
+/*
+  API to generate BFVRNS crypto context. MUST NOT (!) be used without a wrapper function
+ */
+
+#ifndef CIPHER_FHE_BFV_CONTEXT_GEN_INTERNAL_H_
+#define CIPHER_FHE_BFV_CONTEXT_GEN_INTERNAL_H_
+
+#include <memory>
+
+#include "cipher/fhe/constants.h"
+#include "cipher/fhe/encoding/encoding_params.h"
+#include "cipher/fhe/config/scheme_id.h"
+#include "cipher/fhe/config/scheme_utils.h"
+
+namespace lbcrypto {
+
+// forward declarations (don't include headers as compilation fails when you do)
+template <typename T>
+class CCParams;
+
+template <typename ContextGeneratorType, typename Element>
+/**
+ * Builds a BFV crypto context from the parameters: creates the crypto parameters object (with the noise
+ * scale fixed to 1), the scheme object with the requested key switching technique, runs the BFV parameter
+ * generation and registers the context with the factory. MUST NOT be used without the wrapper
+ * CryptoContextBFVRNS::genCryptoContext(), which validates the parameters first.
+ *
+ * @tparam ContextGeneratorType the context generator class (CryptoContextBFVRNS).
+ * @tparam Element the ring element type (DCRTPoly).
+ * @param parameters the BFV parameters.
+ * @return the generated crypto context.
+ */
+typename ContextGeneratorType::ContextType genCryptoContextBFVRNSInternal(
+        const CCParams<ContextGeneratorType>& parameters) {
+    using ParmType = typename Element::Params;
+    constexpr float assuranceMeasure = 36.0f;
+
+    auto ep = std::make_shared<ParmType>();
+    EncodingParams encodingParams(
+            std::make_shared<EncodingParamsImpl>(parameters.GetPlaintextModulus(), parameters.GetBatchSize()));
+
+    // clang-format off
+    auto params = std::make_shared<typename ContextGeneratorType::CryptoParams>(
+        ep,
+        encodingParams,
+        parameters.GetStandardDeviation(),
+        assuranceMeasure,
+        parameters.GetSecurityLevel(),
+        parameters.GetDigitSize(),
+        parameters.GetSecretKeyDist(),
+        parameters.GetMaxRelinSkDeg(),
+        parameters.GetKeySwitchTechnique(),
+        parameters.GetScalingTechnique(),
+        parameters.GetEncryptionTechnique(),
+        parameters.GetMultiplicationTechnique(),
+        parameters.GetPREMode(),
+        parameters.GetMultipartyMode(),
+        parameters.GetExecutionMode(),
+        parameters.GetDecryptionNoiseMode(),
+        parameters.GetPlaintextModulus(),
+        parameters.GetStatisticalSecurity(),
+        parameters.GetNumAdversarialQueries(),
+        parameters.GetThresholdNumOfParties());
+
+    // for BFV scheme noise scale is always set to 1
+    params->SetNoiseScale(1);
+    params->SetMultiplicativeDepth(parameters.GetMultiplicativeDepth());
+    params->SetEvalAddCount(parameters.GetEvalAddCount());
+    params->SetKeySwitchCount(parameters.GetKeySwitchCount());
+
+    auto scheme = std::make_shared<typename ContextGeneratorType::PublicKeyEncryptionScheme>();
+    scheme->SetKeySwitchingTechnique(parameters.GetKeySwitchTechnique());
+    scheme->ParamsGenBFVRNS(
+        params,
+        parameters.GetEvalAddCount(),
+        parameters.GetMultiplicativeDepth(),
+        parameters.GetKeySwitchCount(),
+        parameters.GetScalingModSize(),
+        parameters.GetRingDim(),
+        parameters.GetNumLargeDigits());
+    // clang-format on
+
+    auto cc = ContextGeneratorType::Factory::GetContext(params, scheme);
+    cc->setSchemeId(SCHEME::BFVRNS_SCHEME);
+    return cc;
+};
+
+}  // namespace lbcrypto
+
+#endif  // CIPHER_FHE_BFV_CONTEXT_GEN_INTERNAL_H_

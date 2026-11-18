@@ -1,0 +1,169 @@
+//==================================================================================
+// BSD 2-Clause License
+//
+// Copyright (c) 2014-2022, NJIT, Duality Technologies Inc. and other contributors
+//
+// All rights reserved.
+//
+// Author TPOC: contact@openfhe.org
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice, this
+//    list of conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
+//    and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//==================================================================================
+
+#ifndef CIPHER_FHE_BASE_PKE_H_
+#define CIPHER_FHE_BASE_PKE_H_
+
+#include <memory>
+#include <vector>
+
+#include "cipher/fhe/ciphertext_fwd.h"
+#include "cipher/fhe/context_fwd.h"
+#include "cipher/fhe/base/decrypt_result.h"
+#include "cipher/fhe/key/private_key_fwd.h"
+#include "cipher/fhe/key/public_key_fwd.h"
+
+/**
+ * @namespace lbcrypto
+ * The namespace of lbcrypto
+ */
+namespace lbcrypto {
+template <class Element>
+class KeyPair;
+
+/**
+ * @brief Abstract interface for encryption algorithm
+ * @tparam Element a ring element.
+ */
+template <class Element>
+class PKEBase {
+    using ParmType = typename Element::Params;
+    using IntType = typename Element::Integer;
+    using DugType = typename Element::DugType;
+    using DggType = typename Element::DggType;
+    using TugType = typename Element::TugType;
+
+  public:
+    virtual ~PKEBase() = default;
+
+    /**
+     * Function to generate public and private keys
+     *
+     * @param cc the crypto context the keys are generated for.
+     * @param makeSparse set to true to generate a sparse (ring-reduction) key; no longer supported.
+     * @return the generated key pair.
+     */
+    virtual KeyPair<Element> KeyGenInternal(CryptoContext<Element> cc, bool makeSparse) const;
+
+    //  virtual KeyPair<Element> KeyGen(CryptoContext<Element> cc,
+    //                                    bool makeSparse,
+    //                                    PublicKey<Element>
+    // publicKey);
+
+    /**
+     * Method for encrypting plaintext using LBC
+     *
+     * @param plaintext copy of the plaintext input. NOTE a copy is passed! That
+     * is NOT an error!
+     * @param privateKey private key used for encryption.
+     * @return ciphertext which results from encryption.
+     */
+    virtual Ciphertext<Element> Encrypt(Element plaintext, const PrivateKey<Element> privateKey) const;
+
+    /**
+     * Method for encrypting plaintext using LBC
+     *
+     * @param plaintext copy of the plaintext element. NOTE a copy is passed!
+     * That is NOT an error!
+     * @param publicKey public key used for encryption.
+     * @return ciphertext which results from encryption.
+     */
+    virtual Ciphertext<Element> Encrypt(Element plaintext, const PublicKey<Element> publicKey) const;
+
+    /**
+     * Method for decrypting plaintext using LBC
+     *
+     * @param ciphertext ciphertext to be decrypted.
+     * @param privateKey private key used for decryption.
+     * @param plaintext the plaintext output.
+     * @return the decoding result.
+     */
+    virtual DecryptResult Decrypt(ConstCiphertext<Element> ciphertext, const PrivateKey<Element> privateKey,
+                                  NativePoly* plaintext) const {
+        OPENFHE_THROW("Not supported for NativePoly");
+    }
+
+    /**
+     * Method for decrypting plaintext using LBC
+     *
+     * @param ciphertext ciphertext to be decrypted.
+     * @param privateKey private key used for decryption.
+     * @param plaintext the plaintext output.
+     * @return the decoding result.
+     */
+    virtual DecryptResult Decrypt(ConstCiphertext<Element> ciphertext, const PrivateKey<Element> privateKey,
+                                  Poly* plaintext) const {
+        OPENFHE_THROW("Not supported for Poly");
+    }
+
+    /////////////////////////////////////////
+    // CORE OPERATIONS
+    /////////////////////////////////////////
+
+    /**
+     * Generates a fresh encryption of zero under the secret key: {b = ns*e - a*s, a}, where a is uniform,
+     * e is sampled from the discrete Gaussian generator and ns is the noise scale of the crypto parameters.
+     *
+     * @param privateKey the private key s.
+     * @param params the element parameters of the encryption (nullptr = the element parameters of the
+     * crypto parameters).
+     * @return the two elements {b, a} of the encryption of zero in EVALUATION format.
+     */
+    virtual std::shared_ptr<std::vector<Element>> EncryptZeroCore(const PrivateKey<Element> privateKey,
+                                                                  const std::shared_ptr<ParmType> params) const;
+
+    /**
+     * Generates a fresh encryption of zero under the public key {p0, p1}: {p0*v + ns*e0, p1*v + ns*e1},
+     * where v is sampled from the secret key distribution, e0 and e1 from the discrete Gaussian generator
+     * and ns is the noise scale. Towers of the public key beyond those in \p params are dropped.
+     *
+     * @param publicKey the public key.
+     * @param params the element parameters of the encryption (nullptr = the element parameters of the
+     * crypto parameters).
+     * @return the two elements of the encryption of zero in EVALUATION format.
+     */
+    virtual std::shared_ptr<std::vector<Element>> EncryptZeroCore(const PublicKey<Element> publicKey,
+                                                                  const std::shared_ptr<ParmType> params) const;
+
+    /**
+     * Computes the raw decryption polynomial c0 + c1*s + c2*s^2 + ... of a ciphertext with any number of
+     * elements, in EVALUATION format; the scheme-specific Decrypt then scales and rounds it.
+     *
+     * @param cv the elements of the ciphertext.
+     * @param privateKey the private key s.
+     * @return the decryption polynomial (message plus noise, still scaled).
+     */
+    virtual Element DecryptCore(const std::vector<Element>& cv, const PrivateKey<Element> privateKey) const;
+};
+
+}  // namespace lbcrypto
+
+#endif  // CIPHER_FHE_BASE_PKE_H_

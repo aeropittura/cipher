@@ -1,0 +1,60 @@
+# Package configuration for Cipher.
+#
+# Preferred use:
+#     find_package(Cipher CONFIG REQUIRED)
+#     target_link_libraries(my_app PRIVATE Cipher::fhe)       # or Cipher::boolean, Cipher::core
+#                                                              # (append _static for static builds)
+#
+# The imported targets carry include directories and the math-backend definition. For projects
+# that configure compilers by hand, the following variables are provided as well:
+#  Cipher_INCLUDE            - directory holding the installed "cipher/" header tree
+#  Cipher_INCLUDE_DIRS       - all include directories needed by consumers
+#  Cipher_LIBDIR             - directory holding the installed libraries (import libraries on Windows)
+#  Cipher_BINDIR             - directory holding the installed runtime libraries (DLLs on Windows)
+#  Cipher_LIBRARIES, Cipher_SHARED_LIBRARIES, Cipher_STATIC_LIBRARIES
+#  Cipher_CXX_FLAGS, Cipher_C_FLAGS, Cipher_EXE_LINKER_FLAGS
+@PACKAGE_INIT@
+
+get_filename_component(Cipher_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+if(NOT TARGET Cipher::core AND NOT TARGET Cipher::core_static)
+    include("${Cipher_CMAKE_DIR}/CipherTargets.cmake")
+endif()
+
+set(Cipher_INCLUDE "@PACKAGE_Cipher_INSTALL_INCLUDEDIR@")
+set(Cipher_INCLUDE_DIRS "${Cipher_INCLUDE}" "${Cipher_INCLUDE}/cipher/extern")
+set(Cipher_LIBDIR "@PACKAGE_Cipher_INSTALL_LIBDIR@")
+set(Cipher_BINDIR "@PACKAGE_Cipher_INSTALL_BINDIR@")
+set(Cipher_LIBRARIES @Cipher_PACKAGE_LIBS@ @CIPHER_THIRDPARTY_LIBS@ @OpenMP_CXX_FLAGS@)
+set(Cipher_STATIC_LIBRARIES @Cipher_STATIC_LIBS@ @CIPHER_THIRDPARTY_LIBS@ @OpenMP_CXX_FLAGS@)
+set(Cipher_SHARED_LIBRARIES @Cipher_SHARED_LIBS@ @CIPHER_THIRDPARTY_LIBS@ @OpenMP_CXX_FLAGS@)
+set(Cipher_VERSION_STRING "@PROJECT_VERSION@")
+
+set(Cipher_OPENMP_INCLUDES "@CIPHER_OPENMP_INCLUDES@")
+set(Cipher_OPENMP_LIBRARIES "@CIPHER_OPENMP_LIBRARIES@")
+
+set(Cipher_CXX_FLAGS "@CMAKE_CXX_FLAGS@")
+set(Cipher_C_FLAGS "@CMAKE_C_FLAGS@")
+set(Cipher_EXE_LINKER_FLAGS "@CMAKE_EXE_LINKER_FLAGS@")
+
+# Compiler used for the build
+set(Cipher_CXX_STANDARD "@CMAKE_CXX_STANDARD@")
+set(Cipher_CXX_COMPILER_ID "@CMAKE_CXX_COMPILER_ID@")
+set(Cipher_CXX_COMPILER_VERSION "@CMAKE_CXX_COMPILER_VERSION@")
+
+# Build options
+set(Cipher_STATIC "@CIPHER_BUILD_STATIC@")
+set(Cipher_SHARED "@CIPHER_BUILD_SHARED@")
+set(Cipher_TCM "@CIPHER_WITH_TCM@")
+set(Cipher_NTL "@CIPHER_WITH_NTL@")
+set(Cipher_OPENMP "@CIPHER_WITH_OPENMP@")
+set(Cipher_NATIVE_SIZE "@CIPHER_NATIVE_SIZE@")
+set(Cipher_CKKS_M_FACTOR "@CIPHER_CKKS_M_FACTOR@")
+set(Cipher_NATIVEOPT "@CIPHER_WITH_NATIVEOPT@")
+set(Cipher_NOISE_DEBUG "@CIPHER_WITH_NOISE_DEBUG@")
+set(Cipher_REDUCED_NOISE "@CIPHER_WITH_REDUCED_NOISE@")
+set(Cipher_MATH_BACKEND "@CIPHER_MATH_BACKEND@")
+set(Cipher_BACKEND_FLAGS "@CIPHER_BACKEND_FLAGS@")
+
+# Build details
+set(Cipher_EMSCRIPTEN "@EMSCRIPTEN@")
+set(Cipher_ARCHITECTURE "@CIPHER_ARCHITECTURE@")

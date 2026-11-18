@@ -56,19 +56,11 @@ breathe_default_project = "OpenFHE"
 # Setup the `exhale` extension
 import textwrap
 
-__exhale_base = "../src"
+__exhale_base = ".."
 __exhale_inputs = [
-    # Binfhe
-    f"{__exhale_base}/binfhe/include",
-    f"{__exhale_base}/binfhe/lib",
-    # Core
-    f"{__exhale_base}/core/extras",
-    f"{__exhale_base}/core/include",
-    f"{__exhale_base}/core/lib",
-    # PKE
-    f"{__exhale_base}/pke/extras",
-    f"{__exhale_base}/pke/include",
-    f"{__exhale_base}/pke/lib",
+    f"{__exhale_base}/include/cipher",
+    f"{__exhale_base}/source",
+    f"{__exhale_base}/examples/extras",
 ]
 
 container = "INPUT = "

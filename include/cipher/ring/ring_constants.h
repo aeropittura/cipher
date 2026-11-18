@@ -1,0 +1,76 @@
+//==================================================================================
+// BSD 2-Clause License
+//
+// Copyright (c) 2014-2023, NJIT, Duality Technologies Inc. and other contributors
+//
+// All rights reserved.
+//
+// Author TPOC: contact@openfhe.org
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice, this
+//    list of conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
+//    and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//==================================================================================
+
+#ifndef CIPHER_RING_RING_CONSTANTS_H_
+#define CIPHER_RING_RING_CONSTANTS_H_
+
+#include <cstdint>
+#include <iosfwd>
+#include <string>
+
+namespace lbcrypto {
+
+/**
+ * @brief Lists all modes for RLWE schemes, such as BGV and BFV, and for LWE schemes, such as DM and TFHE
+ */
+enum SecretKeyDist {
+    GAUSSIAN = 0,
+    UNIFORM_TERNARY = 1,  // Default value, all schemes support this key distribution
+    SPARSE_TERNARY = 2,
+    SPARSE_ENCAPSULATED = 3,  // For more effient bootstrapping in SIMD schemes
+                              // (has been used for CKKS and BFV bootstrapping in literature)
+    // BINARY = X, // Future implementation
+};
+
+/**
+ * @brief Converts the name of a secret key distribution (e.g. "UNIFORM_TERNARY") to the enum value.
+ * @param str the name of the distribution, spelled as the enumerator.
+ * @return the corresponding SecretKeyDist; throws if the name is unknown.
+ */
+SecretKeyDist convertToSecretKeyDist(const std::string& str);
+/**
+ * @brief Converts the numeric value of a secret key distribution to the enum value.
+ * @param num the numeric value of the distribution.
+ * @return the corresponding SecretKeyDist; throws if the value is not a valid enumerator.
+ */
+SecretKeyDist convertToSecretKeyDist(uint32_t num);
+
+/**
+ * @brief Writes the name of a secret key distribution to an output stream.
+ * @param s the output stream.
+ * @param m the distribution to print.
+ * @return the output stream.
+ */
+std::ostream& operator<<(std::ostream& s, SecretKeyDist m);
+
+}  // namespace lbcrypto
+
+#endif  // CIPHER_RING_RING_CONSTANTS_H_

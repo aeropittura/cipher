@@ -26,9 +26,9 @@ repos:
         - id: check-diagnostic-output
           name: no direct stdout/stderr in library code
           description: >
-            Library diagnostics must go through utils/diagnostic_output.h, so an
-            embedder can redirect them and -DWITH_DEFAULT_DIAGNOSTIC_SINK=OFF
+            Library diagnostics must go through cipher/util/diagnostic_output.h, so an
+            embedder can redirect them and -DCIPHER_WITH_DEFAULT_DIAGNOSTIC_SINK=OFF
             leaves the library free of std::cerr/std::cout.
-          entry: scripts/maint/check-diagnostic-output.py
+          entry: tools/check_diagnostic_output.py
           language: script
-          files: ^src/[^/]+/(lib|include)/.*\.(c|cpp|h|hpp)$
+          files: ^(source|include)/.*\.(c|cpp|h|hpp)$

@@ -16,19 +16,17 @@ doxyoutput/
 
 .ipynb_checkpoints
 
-test/build
-test/bin
 output.txt
 Doxyfile
 apidoc_warning_logfile.txt
-third-party/distros/gmp-6.1.1
-third-party/distros/gmp-6.1.2
-third-party/distros/ntl-10.3.0
-third-party/distros/ntl-10.5.0
-third-party/include/NTL
-third-party/include/gmp.h
-third-party/lib
-third-party/share
+extern/distros/gmp-6.1.1
+extern/distros/gmp-6.1.2
+extern/distros/ntl-10.3.0
+extern/distros/ntl-10.5.0
+extern/include/NTL
+extern/include/gmp.h
+extern/lib
+extern/share
 **/gmp-*
 **/ntl-*
 timing/

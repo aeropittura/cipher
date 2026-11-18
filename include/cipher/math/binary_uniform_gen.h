@@ -1,0 +1,82 @@
+//==================================================================================
+// BSD 2-Clause License
+//
+// Copyright (c) 2014-2023, NJIT, Duality Technologies Inc. and other contributors
+//
+// All rights reserved.
+//
+// Author TPOC: contact@openfhe.org
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice, this
+//    list of conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
+//    and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//==================================================================================
+
+/*
+  This code provides generation of a uniform distribution of binary values (modulus 2). Discrete uniform generator
+  relies on the built-in C++ generator for 32-bit unsigned integers defined in <random>
+ */
+
+#ifndef CIPHER_MATH_BINARY_UNIFORM_GEN_H_
+#define CIPHER_MATH_BINARY_UNIFORM_GEN_H_
+
+#include <cstdint>
+#include <random>
+
+#include "cipher/math/distribution_gen.h"
+#include "cipher/math/backend.h"
+#include "cipher/util/inttypes.h"
+
+namespace lbcrypto {
+
+/**
+ * @brief A generator of the Binary Uniform Distribution.
+ */
+template <typename VecType>
+class BinaryUniformGeneratorImpl {
+  public:
+    /**
+     * @brief Basic constructor for Binary Uniform Generator.
+     */
+    BinaryUniformGeneratorImpl() = default;
+    ~BinaryUniformGeneratorImpl() = default;
+
+    /**
+     * @brief  Generates a random value within the Binary Uniform Distribution.
+     * @return A random value within this Binary Uniform Distribution.
+     */
+    typename VecType::Integer GenerateInteger() const;
+
+    /**
+     * @brief  Generates a vector of random values within the Binary Uniform
+     * Distribution.
+     * @param size The number of values to generate.
+     * @param modulus The modulus of the resulting vector.
+     * @return A vector of random values within this Binary Uniform Distribution.
+     */
+    VecType GenerateVector(const uint32_t size, const typename VecType::Integer& modulus) const;
+
+  private:
+    static std::bernoulli_distribution m_distribution;
+};
+
+}  // namespace lbcrypto
+
+#endif  // CIPHER_MATH_BINARY_UNIFORM_GEN_H_

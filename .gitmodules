@@ -1,12 +1,12 @@
 [submodule "third-party/google-benchmark"]
-	path = third-party/google-benchmark
+	path = extern/google-benchmark
 	url = https://github.com/google/benchmark.git
 [submodule "third-party/google-test"]
-	path = third-party/google-test
+	path = extern/google-test
 	url = https://github.com/google/googletest.git
 [submodule "third-party/gperftools"]
-	path = third-party/gperftools
+	path = extern/gperftools
 	url = https://github.com/gperftools/gperftools.git
 [submodule "third-party/cereal"]
-	path = third-party/cereal
+	path = extern/cereal
 	url = https://github.com/openfheorg/cereal.git

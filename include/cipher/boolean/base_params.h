@@ -1,0 +1,148 @@
+//==================================================================================
+// BSD 2-Clause License
+//
+// Copyright (c) 2014-2022, NJIT, Duality Technologies Inc. and other contributors
+//
+// All rights reserved.
+//
+// Author TPOC: contact@openfhe.org
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice, this
+//    list of conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
+//    and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//==================================================================================
+
+#ifndef CIPHER_BOOLEAN_BASE_PARAMS_H_
+#define CIPHER_BOOLEAN_BASE_PARAMS_H_
+
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "cipher/boolean/constants.h"
+#include "cipher/ring/backend.h"
+#include "cipher/boolean/lwe_ciphertext.h"
+#include "cipher/boolean/lwe_params.h"
+#include "cipher/boolean/lwe_switch_key.h"
+#include "cipher/math/discrete_gaussian_gen.h"
+#include "cipher/math/number_theory.h"
+#include "cipher/boolean/rgsw_params.h"
+#include "cipher/util/serializable.h"
+#include "cipher/util/utilities.h"
+
+namespace lbcrypto {
+
+/**
+ * @brief Class that stores all parameters for the RingGSW scheme used in
+ * bootstrapping
+ */
+class BinFHECryptoParams : public Serializable {
+  public:
+    BinFHECryptoParams() = default;
+
+    /**
+     * Main constructor for BinFHECryptoParams
+     *
+     * @param lweparams a shared poiter to an instance of LWECryptoParams
+     * @param rgswparams a shared poiter to an instance of RingGSWCryptoParams
+     */
+    BinFHECryptoParams(const std::shared_ptr<LWECryptoParams>& lweparams,
+                       const std::shared_ptr<RingGSWCryptoParams>& rgswparams)
+        : m_LWEParams(lweparams), m_RGSWParams(rgswparams) {
+        auto keyDist = m_LWEParams->GetKeyDist();
+        if (keyDist != m_RGSWParams->GetKeyDist())
+            OPENFHE_THROW("LWE and RingGSW parameters disagree on the secret key distribution");
+        if (keyDist != UNIFORM_TERNARY && keyDist != GAUSSIAN)
+            OPENFHE_THROW("BinFHE implements UNIFORM_TERNARY and GAUSSIAN secret key distributions only");
+        if (m_RGSWParams->GetMethod() == GINX && keyDist == GAUSSIAN)
+            OPENFHE_THROW("GINX/CGGI requires a ternary LWE secret key; use AP or LMKCDEY for GAUSSIAN");
+        if (m_RGSWParams->GetMethod() == LMKCDEY && m_RGSWParams->GetNumAutoKeys() >= m_LWEParams->Getn())
+            OPENFHE_THROW("numAutoKeys must be less than the LWE dimension n");
+        if ((2 * static_cast<uint64_t>(m_LWEParams->GetN())) % m_LWEParams->Getq().ConvertToInt<uint64_t>() != 0)
+            OPENFHE_THROW("the LWE modulus q must divide 2N");
+    }
+
+    /**
+     * Getter for LWE params
+     * @return a shared pointer to the LWE crypto parameters
+     */
+    const std::shared_ptr<LWECryptoParams>& GetLWEParams() const {
+        return m_LWEParams;
+    }
+
+    /**
+     * Getter for RingGSW params
+     * @return a shared pointer to the RingGSW crypto parameters
+     */
+    const std::shared_ptr<RingGSWCryptoParams>& GetRingGSWParams() const {
+        return m_RGSWParams;
+    }
+
+    /**
+     * Compare two BinFHE sets of parameters
+     * @param other the parameters to compare with
+     * @return true if the LWE and RingGSW parameters are both equal
+     */
+    bool operator==(const BinFHECryptoParams& other) const {
+        return *m_LWEParams == *other.m_LWEParams && *m_RGSWParams == *other.m_RGSWParams;
+    }
+
+    bool operator!=(const BinFHECryptoParams& other) const {
+        return !(*this == other);
+    }
+
+    template <class Archive>
+    void save(Archive& ar, std::uint32_t const version) const {
+        ar(::cereal::make_nvp("lweparams", m_LWEParams));
+        ar(::cereal::make_nvp("rgswparams", m_RGSWParams));
+    }
+
+    template <class Archive>
+    void load(Archive& ar, std::uint32_t const version) {
+        if (version > SerializedVersion()) {
+            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+                          " is from a later version of the library");
+        }
+        ar(::cereal::make_nvp("lweparams", m_LWEParams));
+        ar(::cereal::make_nvp("rgswparams", m_RGSWParams));
+    }
+
+    std::string SerializedObjectName() const override {
+        return "BinFHECryptoParams";
+    }
+
+    static uint32_t SerializedVersion() {
+        return 1;
+    }
+
+  private:
+    // shared pointer to an instance of LWECryptoParams
+    std::shared_ptr<LWECryptoParams> m_LWEParams{nullptr};
+
+    // shared pointer to an instance of RGSWCryptoParams
+    std::shared_ptr<RingGSWCryptoParams> m_RGSWParams{nullptr};
+};
+
+}  // namespace lbcrypto
+
+#endif  // CIPHER_BOOLEAN_BASE_PARAMS_H_
