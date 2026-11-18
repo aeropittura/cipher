@@ -36,65 +36,65 @@
 #include "benchmark/benchmark.h"
 #include "cipher/boolean/context.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 [[maybe_unused]] static void FHEW_BTKEYGEN(benchmark::State& state, BINFHE_PARAMSET s, BINFHE_METHOD m) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(s, m);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(s, m);
     for (auto _ : state)
-        cc.BTKeyGen(cc.KeyGen());
+        cc.bt_key_gen(cc.key_gen());
 }
 
 [[maybe_unused]] static void FHEW_ENCRYPT(benchmark::State& state, BINFHE_PARAMSET s, BINFHE_METHOD m) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(s, m);
-    auto sk = cc.KeyGen();
-    auto x = std::bind(std::uniform_int_distribution<LWEPlaintext>(0, 1), std::default_random_engine());
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(s, m);
+    auto sk = cc.key_gen();
+    auto x = std::bind(std::uniform_int_distribution<LwePlaintext>(0, 1), std::default_random_engine());
     for (auto _ : state)
-        auto ct = cc.Encrypt(sk, x());
+        auto ct = cc.encrypt(sk, x());
 }
 
 [[maybe_unused]] static void FHEW_NOT(benchmark::State& state, BINFHE_PARAMSET s, BINFHE_METHOD m) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(s, m);
-    auto sk = cc.KeyGen();
-    auto x = std::bind(std::uniform_int_distribution<LWEPlaintext>(0, 1), std::default_random_engine());
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(s, m);
+    auto sk = cc.key_gen();
+    auto x = std::bind(std::uniform_int_distribution<LwePlaintext>(0, 1), std::default_random_engine());
     for (auto _ : state)
-        auto ct = cc.EvalNOT(cc.Encrypt(sk, x()));
+        auto ct = cc.eval_not(cc.encrypt(sk, x()));
 }
 
 [[maybe_unused]] static void FHEW_BINGATE2(benchmark::State& state, BINFHE_PARAMSET s, BINFHE_METHOD m, BINGATE g) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(s, m);
-    auto sk = cc.KeyGen();
-    cc.BTKeyGen(sk);
-    auto x = std::bind(std::uniform_int_distribution<LWEPlaintext>(0, 1), std::default_random_engine());
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(s, m);
+    auto sk = cc.key_gen();
+    cc.bt_key_gen(sk);
+    auto x = std::bind(std::uniform_int_distribution<LwePlaintext>(0, 1), std::default_random_engine());
     for (auto _ : state)
-        auto ct = cc.EvalBinGate(g, cc.Encrypt(sk, x(), SMALL_DIM, 4), cc.Encrypt(sk, x(), SMALL_DIM, 4));
+        auto ct = cc.eval_bin_gate(g, cc.encrypt(sk, x(), SMALL_DIM, 4), cc.encrypt(sk, x(), SMALL_DIM, 4));
 }
 
 [[maybe_unused]] static void FHEW_BINGATE3(benchmark::State& state, BINFHE_PARAMSET s, BINFHE_METHOD m, BINGATE g) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(s, m);
-    auto sk = cc.KeyGen();
-    cc.BTKeyGen(sk);
-    auto x = std::bind(std::uniform_int_distribution<LWEPlaintext>(0, 1), std::default_random_engine());
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(s, m);
+    auto sk = cc.key_gen();
+    cc.bt_key_gen(sk);
+    auto x = std::bind(std::uniform_int_distribution<LwePlaintext>(0, 1), std::default_random_engine());
     for (auto _ : state)
-        auto ct = cc.EvalBinGate(
-                g, std::vector<LWECiphertext>{cc.Encrypt(sk, x(), SMALL_DIM, 6), cc.Encrypt(sk, x(), SMALL_DIM, 6),
-                                              cc.Encrypt(sk, x(), SMALL_DIM, 6)});
+        auto ct = cc.eval_bin_gate(
+                g, std::vector<LweCiphertext>{cc.encrypt(sk, x(), SMALL_DIM, 6), cc.encrypt(sk, x(), SMALL_DIM, 6),
+                                              cc.encrypt(sk, x(), SMALL_DIM, 6)});
 }
 
 [[maybe_unused]] static void FHEW_BINGATE4(benchmark::State& state, BINFHE_PARAMSET s, BINFHE_METHOD m, BINGATE g) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(s, m);
-    auto sk = cc.KeyGen();
-    cc.BTKeyGen(sk);
-    auto x = std::bind(std::uniform_int_distribution<LWEPlaintext>(0, 1), std::default_random_engine());
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(s, m);
+    auto sk = cc.key_gen();
+    cc.bt_key_gen(sk);
+    auto x = std::bind(std::uniform_int_distribution<LwePlaintext>(0, 1), std::default_random_engine());
     for (auto _ : state)
-        auto ct = cc.EvalBinGate(
-                g, std::vector<LWECiphertext>{cc.Encrypt(sk, x(), SMALL_DIM, 8), cc.Encrypt(sk, x(), SMALL_DIM, 8),
-                                              cc.Encrypt(sk, x(), SMALL_DIM, 8), cc.Encrypt(sk, x(), SMALL_DIM, 8)});
+        auto ct = cc.eval_bin_gate(
+                g, std::vector<LweCiphertext>{cc.encrypt(sk, x(), SMALL_DIM, 8), cc.encrypt(sk, x(), SMALL_DIM, 8),
+                                              cc.encrypt(sk, x(), SMALL_DIM, 8), cc.encrypt(sk, x(), SMALL_DIM, 8)});
 }
 
 // clang-format off
@@ -207,7 +207,7 @@ BENCHMARK_CAPTURE(FHEW_BINGATE3, LPF_STD256_3_AP_OR, LPF_STD256_3_AP, AP, OR3)->
 BENCHMARK_CAPTURE(FHEW_BINGATE4, LPF_STD256_4_AP_OR, LPF_STD256_4_AP, AP, OR4)->Unit(benchmark::kMillisecond)->MinTime(5.0);
 BENCHMARK_CAPTURE(FHEW_BINGATE2, LPF_STD256Q_2_AP_OR, LPF_STD256Q_AP, AP, OR)->Unit(benchmark::kMillisecond)->MinTime(5.0);
 BENCHMARK_CAPTURE(FHEW_BINGATE3, LPF_STD256Q_3_AP_OR, LPF_STD256Q_3_AP, AP, OR3)->Unit(benchmark::kMillisecond)->MinTime(5.0);
-#if NATIVEINT >= 64  // LPF_STD256Q_4_AP has a 51-bit modulus, past the 28-bit cap of 32-bit builds
+#if CIPHER_NATIVE_INT >= 64  // LPF_STD256Q_4_AP has a 51-bit modulus, past the 28-bit cap of 32-bit builds
 BENCHMARK_CAPTURE(FHEW_BINGATE4, LPF_STD256Q_4_AP_OR, LPF_STD256Q_4_AP, AP, OR4)->Unit(benchmark::kMillisecond)->MinTime(5.0);
 #endif
 // clang-format on

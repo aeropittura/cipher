@@ -36,142 +36,142 @@
 
 #include "cipher/boolean/rgsw_acc_common.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 // Key generation as described in https://eprint.iacr.org/2022/198
-RingGSWACCKey RingGSWAccumulatorLMKCDEY::KeyGenAcc(const std::shared_ptr<RingGSWCryptoParams>& params,
-                                                   const NativePoly& skNTT, ConstLWEPrivateKey& LWEsk) const {
-    auto sv{LWEsk->GetElement()};
-    auto mod{sv.GetModulus().ConvertToInt<int32_t>()};
-    auto modHalf{mod >> 1};
-    uint32_t N{params->GetN()};
-    size_t n{sv.GetLength()};
-    params->VerifyBaseGCoverage(static_cast<uint32_t>(n));
-    uint32_t numAutoKeys{params->GetNumAutoKeys()};
+RingGswAccKey RingGswAccumulatorLmkcdey::key_gen_acc(const std::shared_ptr<RingGswCryptoParams>& params,
+                                                   const NativePoly& sk_ntt, ConstLwePrivateKey& LWE_sk) const {
+    auto sv{LWE_sk->get_element()};
+    auto mod_value{sv.get_modulus().convert_to_int<int32_t>()};
+    auto mod_half{mod_value >> 1};
+    uint32_t N{params->get_N()};
+    size_t n{sv.get_length()};
+    params->verify_base_g_coverage(static_cast<uint32_t>(n));
+    uint32_t num_auto_keys{params->get_num_auto_keys()};
 
     // dim2, 0: for RGSW(X^si), 1: for automorphism keys
     // only w automorphism keys required
     // allocates (n - w) more memory for pointer (not critical for performance)
-    RingGSWACCKey ek = std::make_shared<RingGSWACCKeyImpl>(1, 2, n);
+    RingGswAccKey ek = std::make_shared<RingGswAccKeyImpl>(1, 2, n);
 
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(n))
+#pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(n))
     for (size_t i = 0; i < n; ++i) {
-        auto s{sv[i].ConvertToInt<int32_t>()};
-        (*ek)[0][0][i] = KeyGenLMKCDEY(params, skNTT, s > modHalf ? s - mod : s, i);
+        auto s{sv[i].convert_to_int<int32_t>()};
+        (*ek)[0][0][i] = key_gen_lmkcdey(params, sk_ntt, s > mod_half ? s - mod_value : s, i);
     }
 
     NativeInteger gen = NativeInteger(5);
 
-    (*ek)[0][1][0] = KeyGenAuto(params, skNTT, 2 * N - gen.ConvertToInt());
+    (*ek)[0][1][0] = key_gen_auto(params, sk_ntt, 2 * N - gen.convert_to_int());
 
     // m_window: window size, consider parameterization in the future
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(numAutoKeys))
-    for (uint32_t i = 1; i <= numAutoKeys; ++i)
-        (*ek)[0][1][i] = KeyGenAuto(params, skNTT, gen.ModExp(i, 2 * N).ConvertToInt<LWEPlaintext>());
+#pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(num_auto_keys))
+    for (uint32_t i = 1; i <= num_auto_keys; ++i)
+        (*ek)[0][1][i] = key_gen_auto(params, sk_ntt, gen.mod_exp(i, 2 * N).convert_to_int<LwePlaintext>());
     return ek;
 }
 
-#if NATIVEINT != 32
-RingGSWACCKey32 RingGSWAccumulatorLMKCDEY::KeyGenAcc32(const std::shared_ptr<RingGSWCryptoParams>& params,
-                                                       const NativePoly& skNTT, ConstLWEPrivateKey& LWEsk) const {
-    auto sv{LWEsk->GetElement()};
-    auto mod{sv.GetModulus().ConvertToInt<int32_t>()};
-    auto modHalf{mod >> 1};
-    uint32_t N{params->GetN()};
-    size_t n{sv.GetLength()};
-    params->VerifyBaseGCoverage(static_cast<uint32_t>(n));
-    uint32_t numAutoKeys{params->GetNumAutoKeys()};
+#if CIPHER_NATIVE_INT != 32
+RingGswAccKey32 RingGswAccumulatorLmkcdey::key_gen_acc32(const std::shared_ptr<RingGswCryptoParams>& params,
+                                                       const NativePoly& sk_ntt, ConstLwePrivateKey& LWE_sk) const {
+    auto sv{LWE_sk->get_element()};
+    auto mod_value{sv.get_modulus().convert_to_int<int32_t>()};
+    auto mod_half{mod_value >> 1};
+    uint32_t N{params->get_N()};
+    size_t n{sv.get_length()};
+    params->verify_base_g_coverage(static_cast<uint32_t>(n));
+    uint32_t num_auto_keys{params->get_num_auto_keys()};
 
-    auto acc = std::make_shared<RingGSWACCKey32Impl>(params, 1, 2, static_cast<uint32_t>(n));
+    auto acc = std::make_shared<RingGswAccKey32Impl>(params, 1, 2, static_cast<uint32_t>(n));
 
-    const auto& polyParams32 = params->GetPolyParams32();
-    const auto skNTT32 = NarrowPoly32(skNTT, polyParams32);
-    DiscreteGaussianGeneratorImpl<NativeVector32> dgg32(params->GetDgg().GetStd());
+    const auto& poly_params32 = params->get_poly_params32();
+    const auto sk_ntt32 = narrow_poly32(sk_ntt, poly_params32);
+    DiscreteGaussianGeneratorImpl<NativeVector32> dgg32(params->get_dgg_impl().get_std());
 
-    #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(n))
+    #pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(n))
     for (size_t i = 0; i < n; ++i) {
-        auto s{sv[i].ConvertToInt<int32_t>()};
-        const auto mono = MonomialOf(params, s > modHalf ? s - mod : s);
-        acc->SetEvalKey(0, 0, i, RGSWEncrypt(params, polyParams32, skNTT32, dgg32, i, mono));
+        auto s{sv[i].convert_to_int<int32_t>()};
+        const auto mono = monomial_of(params, s > mod_half ? s - mod_value : s);
+        acc->set_eval_key(0, 0, i, rgsw_encrypt(params, poly_params32, sk_ntt32, dgg32, i, mono));
     }
 
     NativeInteger gen = NativeInteger(5);
 
-    acc->SetEvalKey(0, 1, 0, RGSWEncryptAutomorphism(params, polyParams32, skNTT32, dgg32, 2 * N - gen.ConvertToInt()));
+    acc->set_eval_key(0, 1, 0, rgsw_encrypt_automorphism(params, poly_params32, sk_ntt32, dgg32, 2 * N - gen.convert_to_int()));
 
-    #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(numAutoKeys))
-    for (uint32_t i = 1; i <= numAutoKeys; ++i)
-        acc->SetEvalKey(0, 1, i,
-                        RGSWEncryptAutomorphism(params, polyParams32, skNTT32, dgg32,
-                                                gen.ModExp(i, 2 * N).ConvertToInt<LWEPlaintext>()));
+    #pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(num_auto_keys))
+    for (uint32_t i = 1; i <= num_auto_keys; ++i)
+        acc->set_eval_key(0, 1, i,
+                        rgsw_encrypt_automorphism(params, poly_params32, sk_ntt32, dgg32,
+                                                gen.mod_exp(i, 2 * N).convert_to_int<LwePlaintext>()));
     return acc;
 }
 
-void RingGSWAccumulatorLMKCDEY::EvalAcc32(const std::shared_ptr<RingGSWCryptoParams>& params, ConstRingGSWACCKey32& ek,
-                                          RLWECiphertext& acc, const NativeVector& a) const {
-    const auto& polyParams = params->GetPolyParams32();
-    uint32_t Q{static_cast<uint32_t>(params->GetQ().ConvertToInt())};
-    uint32_t M{2 * params->GetN()};
+void RingGswAccumulatorLmkcdey::eval_acc32(const std::shared_ptr<RingGswCryptoParams>& params, ConstRingGswAccKey32& ek,
+                                          RlweCiphertext& acc, const NativeVector& a) const {
+    const auto& poly_params = params->get_poly_params32();
+    uint32_t Q{static_cast<uint32_t>(params->get_Q().convert_to_int())};
+    uint32_t M{2 * params->get_N()};
 
-    auto acc32 = NarrowAcc32(polyParams, acc->GetElements());
-    acc32[1] = acc32[1].AutomorphismTransform(M - 5);
+    auto acc32 = narrow_acc32(poly_params, acc->get_elements());
+    acc32[1] = acc32[1].automorphism_transform(M - 5);
 
-    LMKCDEYAccSchedule(
-            params->Getq(), params->GetN(), params->GetNumAutoKeys(), params->GetLogGen(), a,
+    lmkcdey_acc_schedule(
+            params->get_q(), params->get_N(), params->get_num_auto_keys(), params->get_log_gen(), a,
             [&](int32_t idx) {
-                AddToAccNoMonomial(polyParams, Q, params->GetBaseGParams(idx), (*ek)[0][0][idx], acc32);
+                add_to_acc_no_monomial(poly_params, Q, params->get_base_g_params(idx), (*ek)[0][0][idx], acc32);
             },
             [&](NativeInteger power, uint32_t k) {
-                uint32_t p{power.ConvertToInt<uint32_t>()};
-                AutomorphismKeySwitch(p, params->GetAutoMap(p), polyParams, Q, params->GetDefaultBaseGParams(),
+                uint32_t p{power.convert_to_int<uint32_t>()};
+                automorphism_key_switch(p, params->get_auto_map(p), poly_params, Q, params->get_default_base_g_params(),
                                       (*ek)[0][1][k], acc32);
             });
 
-    WidenAcc32Into(acc32, acc->GetElements());
+    widen_acc32_into(acc32, acc->get_elements());
 }
 #endif
 
-void RingGSWAccumulatorLMKCDEY::EvalAcc(const std::shared_ptr<RingGSWCryptoParams>& params, ConstRingGSWACCKey& ek,
-                                        RLWECiphertext& acc, const NativeVector& a) const {
-    uint32_t M = 2 * params->GetN();
-    acc->GetElements()[1] = (acc->GetElements()[1]).AutomorphismTransform(M - 5);
+void RingGswAccumulatorLmkcdey::eval_acc(const std::shared_ptr<RingGswCryptoParams>& params, ConstRingGswAccKey& ek,
+                                        RlweCiphertext& acc, const NativeVector& a) const {
+    uint32_t M = 2 * params->get_N();
+    acc->get_elements()[1] = (acc->get_elements()[1]).automorphism_transform(M - 5);
 
-    LMKCDEYAccSchedule(
-            params->Getq(), params->GetN(), params->GetNumAutoKeys(), params->GetLogGen(), a,
-            [&](int32_t idx) { AddToAccLMKCDEY(params, (*ek)[0][0][idx], acc, idx); },
-            [&](NativeInteger power, uint32_t k) { Automorphism(params, power, (*ek)[0][1][k], acc); });
+    lmkcdey_acc_schedule(
+            params->get_q(), params->get_N(), params->get_num_auto_keys(), params->get_log_gen(), a,
+            [&](int32_t idx) { add_to_acc_lmkcdey(params, (*ek)[0][0][idx], acc, idx); },
+            [&](NativeInteger power, uint32_t k) { automorphism(params, power, (*ek)[0][1][k], acc); });
 }
 
 // Encryption as described in Section 5 of https://eprint.iacr.org/2022/198
 // Same as KeyGenAP, but only for X^{s_i}
-// skNTT corresponds to the secret key z
-RingGSWEvalKey RingGSWAccumulatorLMKCDEY::KeyGenLMKCDEY(const std::shared_ptr<RingGSWCryptoParams>& params,
-                                                        const NativePoly& skNTT, LWEPlaintext m, uint32_t index) const {
-    return std::make_shared<RingGSWEvalKeyImpl>(
-            RGSWEncrypt(params, params->GetPolyParams(), skNTT, params->GetDgg(), index, MonomialOf(params, m)));
+// sk_ntt corresponds to the secret key z
+RingGswEvalKey RingGswAccumulatorLmkcdey::key_gen_lmkcdey(const std::shared_ptr<RingGswCryptoParams>& params,
+                                                        const NativePoly& sk_ntt, LwePlaintext m, uint32_t index) const {
+    return std::make_shared<RingGswEvalKeyImpl>(
+            rgsw_encrypt(params, params->get_poly_params(), sk_ntt, params->get_dgg_impl(), index, monomial_of(params, m)));
 }
 
 // Generation of an autormorphism key
-RingGSWEvalKey RingGSWAccumulatorLMKCDEY::KeyGenAuto(const std::shared_ptr<RingGSWCryptoParams>& params,
-                                                     const NativePoly& skNTT, LWEPlaintext k) const {
-    return std::make_shared<RingGSWEvalKeyImpl>(
-            RGSWEncryptAutomorphism(params, params->GetPolyParams(), skNTT, params->GetDgg(), k));
+RingGswEvalKey RingGswAccumulatorLmkcdey::key_gen_auto(const std::shared_ptr<RingGswCryptoParams>& params,
+                                                     const NativePoly& sk_ntt, LwePlaintext k) const {
+    return std::make_shared<RingGswEvalKeyImpl>(
+            rgsw_encrypt_automorphism(params, params->get_poly_params(), sk_ntt, params->get_dgg_impl(), k));
 }
 
 // LMKCDEY Accumulation as described in https://eprint.iacr.org/2022/198
 // Same as AP, but multiplied once
-void RingGSWAccumulatorLMKCDEY::AddToAccLMKCDEY(const std::shared_ptr<RingGSWCryptoParams>& params,
-                                                ConstRingGSWEvalKey& ek, RLWECiphertext& acc, uint32_t index) const {
-    AddToAccNoMonomial(params->GetPolyParams(), params->GetQ().ConvertToInt<BasicInteger>(),
-                       params->GetBaseGParams(index), ek->GetElements(), acc->GetElements());
+void RingGswAccumulatorLmkcdey::add_to_acc_lmkcdey(const std::shared_ptr<RingGswCryptoParams>& params,
+                                                ConstRingGswEvalKey& ek, RlweCiphertext& acc, uint32_t index) const {
+    add_to_acc_no_monomial(params->get_poly_params(), params->get_Q().convert_to_int<BasicInteger>(),
+                       params->get_base_g_params(index), ek->get_elements(), acc->get_elements());
 }
 
-void RingGSWAccumulatorLMKCDEY::Automorphism(const std::shared_ptr<RingGSWCryptoParams>& params, NativeInteger a,
-                                             ConstRingGSWEvalKey& ak, RLWECiphertext& acc) const {
-    uint32_t aInt{a.ConvertToInt<uint32_t>()};
-    AutomorphismKeySwitch(aInt, params->GetAutoMap(aInt), params->GetPolyParams(),
-                          params->GetQ().ConvertToInt<BasicInteger>(), params->GetDefaultBaseGParams(),
-                          ak->GetElements(), acc->GetElements());
+void RingGswAccumulatorLmkcdey::automorphism(const std::shared_ptr<RingGswCryptoParams>& params, NativeInteger a,
+                                             ConstRingGswEvalKey& ak, RlweCiphertext& acc) const {
+    uint32_t a_int{a.convert_to_int<uint32_t>()};
+    automorphism_key_switch(a_int, params->get_auto_map(a_int), params->get_poly_params(),
+                          params->get_Q().convert_to_int<BasicInteger>(), params->get_default_base_g_params(),
+                          ak->get_elements(), acc->get_elements());
 }
 
-};  // namespace lbcrypto
+};  // namespace cipher

@@ -38,17 +38,17 @@
 #include "cipher/fhe/base/advanced_she.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Abstract base class for derived HE algorithms
  */
-class AdvancedSHERNS : public AdvancedSHEBase<DCRTPoly> {
+class RnsAdvancedShe : public BaseAdvancedShe<RnsPoly> {
   public:
-    virtual ~AdvancedSHERNS() = default;
+    virtual ~RnsAdvancedShe() = default;
 
     /////////////////////////////////////
     // SERIALIZATION
@@ -56,19 +56,19 @@ class AdvancedSHERNS : public AdvancedSHEBase<DCRTPoly> {
 
     template <class Archive>
     void save(Archive& ar) const {
-        ar(cereal::base_class<AdvancedSHEBase<DCRTPoly>>(this));
+        ar(cereal::base_class<BaseAdvancedShe<RnsPoly>>(this));
     }
 
     template <class Archive>
     void load(Archive& ar) {
-        ar(cereal::base_class<AdvancedSHEBase<DCRTPoly>>(this));
+        ar(cereal::base_class<BaseAdvancedShe<RnsPoly>>(this));
     }
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "AdvancedSHERNS";
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_RNS_ADVANCED_SHE_H_

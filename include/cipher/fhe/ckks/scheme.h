@@ -48,36 +48,36 @@
 #include "cipher/fhe/rns/scheme.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief The CKKS scheme in RNS form: assembles the CKKS parameter generation, PKE, key switching, PRE,
  * leveled SHE, advanced SHE, multiparty, FHE (bootstrapping) and scheme switching capabilities. Capabilities
  * other than parameter generation are instantiated on demand by Enable.
  */
-class SchemeCKKSRNS : public SchemeRNS {
+class CkksRnsScheme : public RnsScheme {
   public:
     /**
      * Constructs the scheme with its parameter generation capability; the other capabilities are created by
      * Enable.
      */
-    SchemeCKKSRNS() {
-        this->m_ParamsGen = std::make_shared<ParameterGenerationCKKSRNS>();
+    CkksRnsScheme() {
+        this->params_gen_ = std::make_shared<CkksRnsParamGen>();
     }
 
-    virtual ~SchemeCKKSRNS() = default;
+    virtual ~CkksRnsScheme() = default;
 
     /**
-     * Compares two schemes by type: any two SchemeCKKSRNS objects are equal.
+     * Compares two schemes by type: any two CkksRnsScheme objects are equal.
      *
      * @param sch the scheme to compare to
-     * @return true if sch is a SchemeCKKSRNS
+     * @return true if sch is a CkksRnsScheme
      */
-    bool operator==(const SchemeBase<DCRTPoly>& sch) const override {
-        return (typeid(sch) == typeid(SchemeCKKSRNS));
+    bool operator==(const SchemeBase<RnsPoly>& sch) const override {
+        return (typeid(sch) == typeid(CkksRnsScheme));
     }
 
     /**
@@ -86,7 +86,7 @@ class SchemeCKKSRNS : public SchemeRNS {
      *
      * @param feature the feature to enable
      */
-    void Enable(PKESchemeFeature feature) override;
+    void enable(PkeSchemeFeature feature) override;
 
     /////////////////////////////////////
     // SERIALIZATION
@@ -94,19 +94,19 @@ class SchemeCKKSRNS : public SchemeRNS {
 
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
-        ar(cereal::base_class<SchemeRNS>(this));
+        ar(cereal::base_class<RnsScheme>(this));
     }
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        ar(cereal::base_class<SchemeRNS>(this));
+        ar(cereal::base_class<RnsScheme>(this));
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "SchemeCKKSRNS";
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_CKKS_SCHEME_H_

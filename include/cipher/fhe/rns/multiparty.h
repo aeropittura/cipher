@@ -39,10 +39,10 @@
 #include "cipher/fhe/base/multiparty.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Abstract interface class for LBC Multiparty algorithms based on
@@ -68,15 +68,15 @@ namespace lbcrypto {
  * secret key. The resulting partially decrypted ciphertext are then fully
  * decrypted with the decryption fusion algorithms.
  */
-class MultipartyRNS : public MultipartyBase<DCRTPoly> {
-    using ParmType = typename DCRTPoly::Params;
-    using IntType = typename DCRTPoly::Integer;
-    using DugType = typename DCRTPoly::DugType;
-    using DggType = typename DCRTPoly::DggType;
-    using TugType = typename DCRTPoly::TugType;
+class RnsMultiparty : public BaseMultiparty<RnsPoly> {
+    using ParmType = typename RnsPoly::Params;
+    using IntType = typename RnsPoly::Integer;
+    using DugType = typename RnsPoly::DugType;
+    using DggType = typename RnsPoly::DggType;
+    using TugType = typename RnsPoly::TugType;
 
   public:
-    virtual ~MultipartyRNS() = default;
+    virtual ~RnsMultiparty() = default;
 
     /**
      * Threshold FHE: "Partial" decryption computed by all parties except for the lead one. Returns s*c_1 plus
@@ -84,57 +84,57 @@ class MultipartyRNS : public MultipartyBase<DCRTPoly> {
      * noise from the flooding generator in NOISE_FLOODING_DECRYPT mode, or fixed Gaussian noise otherwise.
      *
      * @param ciphertext ciphertext that is being decrypted.
-     * @param privateKey secret key share used for decryption.
+     * @param private_key secret key share used for decryption.
      * @return the partial decryption.
      */
-    Ciphertext<DCRTPoly> MultipartyDecryptMain(ConstCiphertext<DCRTPoly> ciphertext,
-                                               const PrivateKey<DCRTPoly> privateKey) const override;
+    Ciphertext<RnsPoly> multiparty_decrypt_main(ConstCiphertext<RnsPoly> ciphertext,
+                                               const PrivateKey<RnsPoly> private_key) const override;
 
     /**
      * Threshold FHE: Method for decryption operation run by the lead decryption client. Returns c_0 + s*c_1
-     * plus flooding noise chosen as in MultipartyDecryptMain().
+     * plus flooding noise chosen as in multiparty_decrypt_main().
      *
      * @param ciphertext ciphertext that is being decrypted.
-     * @param privateKey secret key share used for decryption.
+     * @param private_key secret key share used for decryption.
      * @return the partial decryption.
      */
-    Ciphertext<DCRTPoly> MultipartyDecryptLead(ConstCiphertext<DCRTPoly> ciphertext,
-                                               const PrivateKey<DCRTPoly> privateKey) const override;
+    Ciphertext<RnsPoly> multiparty_decrypt_lead(ConstCiphertext<RnsPoly> ciphertext,
+                                               const PrivateKey<RnsPoly> private_key) const override;
 
     /**
      * Threshold FHE: Generates a partial evaluation key for homomorphic multiplication by multiplying both
      * vectors of an existing partial evaluation key by the current secret share and adding fresh noise. For
      * HYBRID key switching the secret share is first extended to the basis QP.
      *
-     * @param privateKey current secret share.
-     * @param evalKey prior evaluation key.
+     * @param private_key current secret share.
+     * @param eval_key prior evaluation key.
      * @return the new joined key.
      */
-    EvalKey<DCRTPoly> MultiMultEvalKey(PrivateKey<DCRTPoly> privateKey, EvalKey<DCRTPoly> evalKey) const override;
+    EvalKey<RnsPoly> multi_mult_eval_key(PrivateKey<RnsPoly> private_key, EvalKey<RnsPoly> eval_key) const override;
 
     /**
      * Interactive bootstrapping: masked decryption with rounding. For a two-polynomial ciphertext (server) it
      * computes c_0 + c_1*s; for a one-polynomial ciphertext (client) it computes c_0*s. The result is rounded
      * to prevent an overflow when the two masked decryptions are later added.
      *
-     * @param privateKey secret key share.
+     * @param private_key secret key share.
      * @param ciphertext input ciphertext with one or two polynomials.
      * @return the masked decryption as a single-polynomial ciphertext.
      */
-    Ciphertext<DCRTPoly> IntBootDecrypt(const PrivateKey<DCRTPoly> privateKey,
-                                        ConstCiphertext<DCRTPoly> ciphertext) const override;
+    Ciphertext<RnsPoly> int_boot_decrypt(const PrivateKey<RnsPoly> private_key,
+                                        ConstCiphertext<RnsPoly> ciphertext) const override;
 
     /**
      * Interactive bootstrapping: public-key encryption of the client's masked decryption. The input polynomial
      * (2 RNS limbs) is first extended to the full modulus chain Q, and the encoding metadata of the input
      * ciphertext is copied to the result, with the level reset to 0.
      *
-     * @param publicKey joint public key based on Threshold FHE.
+     * @param public_key joint public key based on Threshold FHE.
      * @param ciphertext input ciphertext holding the masked decryption.
      * @return the resulting encryption.
      */
-    Ciphertext<DCRTPoly> IntBootEncrypt(const PublicKey<DCRTPoly> publicKey,
-                                        ConstCiphertext<DCRTPoly> ciphertext) const override;
+    Ciphertext<RnsPoly> int_boot_encrypt(const PublicKey<RnsPoly> public_key,
+                                        ConstCiphertext<RnsPoly> ciphertext) const override;
 
     /**
      * Interactive bootstrapping: adds the encrypted masked decryption and the unencrypted masked decryption
@@ -144,8 +144,8 @@ class MultipartyRNS : public MultipartyBase<DCRTPoly> {
      * @param ciphertext2 unencrypted masked decryption (a single polynomial with 2 RNS limbs).
      * @return the refreshed ciphertext.
      */
-    Ciphertext<DCRTPoly> IntBootAdd(ConstCiphertext<DCRTPoly> ciphertext1,
-                                    ConstCiphertext<DCRTPoly> ciphertext2) const override;
+    Ciphertext<RnsPoly> int_boot_add(ConstCiphertext<RnsPoly> ciphertext1,
+                                    ConstCiphertext<RnsPoly> ciphertext2) const override;
 
     /////////////////////////////////////
     // SERIALIZATION
@@ -157,11 +157,11 @@ class MultipartyRNS : public MultipartyBase<DCRTPoly> {
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {}
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "MultipartyRNS";
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_RNS_MULTIPARTY_H_

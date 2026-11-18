@@ -44,7 +44,7 @@
 #include "cipher/math/backend.h"
 #include "cipher/util/inttypes.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief A generator of the Binary Uniform Distribution.
@@ -62,7 +62,7 @@ class BinaryUniformGeneratorImpl {
      * @brief  Generates a random value within the Binary Uniform Distribution.
      * @return A random value within this Binary Uniform Distribution.
      */
-    typename VecType::Integer GenerateInteger() const;
+    typename VecType::Integer generate_integer() const;
 
     /**
      * @brief  Generates a vector of random values within the Binary Uniform
@@ -71,12 +71,12 @@ class BinaryUniformGeneratorImpl {
      * @param modulus The modulus of the resulting vector.
      * @return A vector of random values within this Binary Uniform Distribution.
      */
-    VecType GenerateVector(const uint32_t size, const typename VecType::Integer& modulus) const;
+    VecType generate_vector(const uint32_t size, const typename VecType::Integer& modulus) const;
 
   private:
-    static std::bernoulli_distribution m_distribution;
+    static std::bernoulli_distribution distribution_;
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_MATH_BINARY_UNIFORM_GEN_H_

@@ -44,9 +44,9 @@
 #include "cipher/util/exception.h"
 #include "cipher/util/inttypes.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-SecurityLevel convertToSecurityLevel(const std::string& str) {
+SecurityLevel convert_to_security_level(const std::string& str) {
     if (str == "HEStd_128_classic")
         return HEStd_128_classic;
     else if (str == "HEStd_192_classic")
@@ -62,11 +62,11 @@ SecurityLevel convertToSecurityLevel(const std::string& str) {
     else if (str == "HEStd_NotSet")
         return HEStd_NotSet;
 
-    OPENFHE_THROW(std::string("Unknown SecurityLevel ") + str);
+    CIPHER_THROW(std::string("Unknown SecurityLevel ") + str);
 }
-SecurityLevel convertToSecurityLevel(uint32_t num) {
-    auto secLevel = static_cast<SecurityLevel>(num);
-    switch (secLevel) {
+SecurityLevel convert_to_security_level(uint32_t num) {
+    auto sec_level = static_cast<SecurityLevel>(num);
+    switch (sec_level) {
         // case HEStd_NotSet:
         case HEStd_128_classic:
         case HEStd_192_classic:
@@ -74,12 +74,12 @@ SecurityLevel convertToSecurityLevel(uint32_t num) {
         case HEStd_128_quantum:
         case HEStd_192_quantum:
         case HEStd_256_quantum:
-            return secLevel;
+            return sec_level;
         default:
             break;
     }
 
-    OPENFHE_THROW(std::string("Unknown value for SecurityLevel ") + std::to_string(num));
+    CIPHER_THROW(std::string("Unknown value for SecurityLevel ") + std::to_string(num));
 }
 
 std::ostream& operator<<(std::ostream& s, SecurityLevel sl) {
@@ -112,15 +112,15 @@ std::ostream& operator<<(std::ostream& s, SecurityLevel sl) {
     return s;
 }
 
-std::map<uint32_t, StdLatticeParm*> StdLatticeParm::byRing[3][6];
-std::map<uint32_t, StdLatticeParm*> StdLatticeParm::byLogQ[3][6];
+std::map<uint32_t, StdLatticeParm*> StdLatticeParm::by_ring[3][6];
+std::map<uint32_t, StdLatticeParm*> StdLatticeParm::by_log_q[3][6];
 
 bool StdLatticeParm::initialized = false;
 
 // this is a collection of all of the parameter sets
 // the constructor for each one saves and indexes it so that you can search for
 // it with static methods in the StdLatticeParm class
-std::vector<StdLatticeParm> StdLatticeParm::StandardLatticeParmSets({
+std::vector<StdLatticeParm> StdLatticeParm::standard_lattice_parm_sets({
         StdLatticeParm(HEStd_uniform, 1024, HEStd_128_classic, 29),
         StdLatticeParm(HEStd_uniform, 1024, HEStd_192_classic, 21),
         StdLatticeParm(HEStd_uniform, 1024, HEStd_256_classic, 16),
@@ -260,4 +260,4 @@ std::vector<StdLatticeParm> StdLatticeParm::StandardLatticeParmSets({
         StdLatticeParm(HEStd_ternary, 131072, HEStd_256_quantum, 1784),
 });
 
-} /* namespace lbcrypto */
+} /* namespace cipher */

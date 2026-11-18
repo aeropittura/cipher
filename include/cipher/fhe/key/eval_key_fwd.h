@@ -37,7 +37,7 @@
 
 #include <memory>
 
-namespace lbcrypto {
+namespace cipher {
 
 template <typename Element>
 class EvalKeyImpl;
@@ -49,6 +49,6 @@ class EvalKeyImpl;
 template <typename Element>
 using EvalKey = std::shared_ptr<EvalKeyImpl<Element>>;
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_KEY_EVAL_KEY_FWD_H_

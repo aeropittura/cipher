@@ -56,7 +56,7 @@
 #include "cipher/util/serializable.h"
 #include "cipher/util/utilities.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 // Forward declaration
 class Field2n;
@@ -82,16 +82,16 @@ class Matrix : public Serializable {
     /**
      * Constructor that initializes matrix values using a zero allocator
      *
-     * @param allocZero lambda function for zero initialization.
+     * @param alloc_zero lambda function for zero initialization.
      * @param rows number of rows.
      * @param cols number of columns.
      */
-    Matrix(alloc_func allocZero, size_t rows, size_t cols) : data(), rows(rows), cols(cols), allocZero(allocZero) {
+    Matrix(alloc_func alloc_zero, size_t rows, size_t cols) : data(), rows(rows), cols(cols), alloc_zero(alloc_zero) {
         data.resize(rows);
         for (auto row = data.begin(); row != data.end(); ++row) {
             row->reserve(cols);
             for (size_t col = 0; col < cols; ++col) {
-                row->push_back(allocZero());
+                row->push_back(alloc_zero());
             }
         }
     }
@@ -102,24 +102,24 @@ class Matrix : public Serializable {
      * Constructor that initializes matrix values using a distribution generation
      * allocator
      *
-     * @param allocZero lambda function for zero initialization (used for
+     * @param alloc_zero lambda function for zero initialization (used for
      * initializing derived matrix objects)
      * @param rows number of rows.
      * @param cols number of columns.
-     * @param allocGen lambda function for initialization using a distribution
+     * @param alloc_gen lambda function for initialization using a distribution
      * generator.
      */
-    Matrix(alloc_func allocZero, size_t rows, size_t cols, alloc_func allocGen);
+    Matrix(alloc_func alloc_zero, size_t rows, size_t cols, alloc_func alloc_gen);
 
     /**
      * Constructor of an empty matrix.
-     * SetSize must be called on this matrix to use it
+     * set_size must be called on this matrix to use it
      * SetAlloc needs to be called if 0 passed to constructor
      * This mostly exists to support deserializing
      *
-     * @param allocZero lambda function for zero initialization.
+     * @param alloc_zero lambda function for zero initialization.
      */
-    explicit Matrix(alloc_func allocZero = 0) : data(), rows(0), cols(0), allocZero(allocZero) {}
+    explicit Matrix(alloc_func alloc_zero = 0) : data(), rows(0), cols(0), alloc_zero(alloc_zero) {}
 
     /**
      * Set the size of a matrix, elements are zeroed out
@@ -128,9 +128,9 @@ class Matrix : public Serializable {
      * @param cols number of columns
      */
 
-    void SetSize(size_t rows, size_t cols) {
+    void set_size(size_t rows, size_t cols) {
         if (this->rows != 0 || this->cols != 0) {
-            OPENFHE_THROW("You cannot SetSize on a non-empty matrix");
+            CIPHER_THROW("You cannot SetSize on a non-empty matrix");
         }
 
         this->rows = rows;
@@ -140,19 +140,19 @@ class Matrix : public Serializable {
         for (auto row = data.begin(); row != data.end(); ++row) {
             row->reserve(cols);
             for (size_t col = 0; col < cols; ++col) {
-                row->push_back(allocZero());
+                row->push_back(alloc_zero());
             }
         }
     }
 
     /**
-     * SetAllocator - set the function to allocate a zero;
+     * set_allocator - set the function to allocate a zero;
      * basically only required for deserializer
      *
-     * @param allocZero lambda function for zero initialization
+     * @param alloc_zero lambda function for zero initialization
      */
-    void SetAllocator(alloc_func allocZero) {
-        this->allocZero = allocZero;
+    void set_allocator(alloc_func alloc_zero) {
+        this->alloc_zero = alloc_zero;
     }
 
     /**
@@ -160,8 +160,8 @@ class Matrix : public Serializable {
      *
      * @param other the matrix object to be copied
      */
-    Matrix(const Matrix<Element>& other) : data(), rows(other.rows), cols(other.cols), allocZero(other.allocZero) {
-        deepCopyData(other.data);
+    Matrix(const Matrix<Element>& other) : data(), rows(other.rows), cols(other.cols), alloc_zero(other.alloc_zero) {
+        deep_copy_data(other.data);
     }
 
     /**
@@ -177,7 +177,7 @@ class Matrix : public Serializable {
      *
      * @return the resulting matrix
      */
-    Matrix<Element>& Ones() {
+    Matrix<Element>& ones() {
         for (size_t row = 0; row < rows; ++row) {
             for (size_t col = 0; col < cols; ++col) {
                 data[row][col] = 1;
@@ -192,7 +192,7 @@ class Matrix : public Serializable {
      * @param modulus the modulus to reduce by
      * @return the resulting matrix (same object)
      */
-    Matrix<Element>& ModEq(const Element& modulus);
+    Matrix<Element>& mod_eq(const Element& modulus);
 
     /**
      * In-place modular subtraction
@@ -201,7 +201,7 @@ class Matrix : public Serializable {
      * @param modulus the modulus to reduce by
      * @return the resulting matrix (same object)
      */
-    Matrix<Element>& ModSubEq(Matrix<Element> const& b, const Element& modulus);
+    Matrix<Element>& mod_sub_eq(Matrix<Element> const& b, const Element& modulus);
 
     /**
      * Fill matrix using the same element
@@ -217,7 +217,7 @@ class Matrix : public Serializable {
      *
      * @return the resulting matrix
      */
-    Matrix<Element>& Identity() {
+    Matrix<Element>& identity() {
         for (size_t row = 0; row < rows; ++row) {
             for (size_t col = 0; col < cols; ++col) {
                 if (row == col) {
@@ -237,12 +237,12 @@ class Matrix : public Serializable {
      * @return the resulting matrix
      */
     template <typename T = Element,
-              typename std::enable_if<!std::is_same<T, M2DCRTPoly>::value && !std::is_same<T, M4DCRTPoly>::value &&
-                                              !std::is_same<T, M6DCRTPoly>::value,
+              typename std::enable_if<!std::is_same<T, M2RnsPoly>::value && !std::is_same<T, M4RnsPoly>::value &&
+                                              !std::is_same<T, M6RnsPoly>::value,
                                       bool>::type = true>
-    Matrix<T> GadgetVector(int64_t base = 2) const {
-        Matrix<T> g(allocZero, rows, cols);
-        auto base_matrix = allocZero();
+    Matrix<T> gadget_vector(int64_t base = 2) const {
+        Matrix<T> g(alloc_zero, rows, cols);
+        auto base_matrix = alloc_zero();
         size_t k = cols / rows;
         base_matrix = base;
         g(0, 0) = 1;
@@ -258,7 +258,7 @@ class Matrix : public Serializable {
     }
 
     /**
-     * Gadget matrix for DCRTPoly elements: the digits of every CRT modulus are handled
+     * Gadget matrix for RnsPoly elements: the digits of every CRT modulus are handled
      * separately, so the first row holds, for each tower i, the powers of the base embedded
      * in tower i only; the other rows are shifted copies of the first row.
      *
@@ -266,32 +266,32 @@ class Matrix : public Serializable {
      * @return the resulting matrix
      */
     template <typename T = Element,
-              typename std::enable_if<std::is_same<T, M2DCRTPoly>::value || std::is_same<T, M4DCRTPoly>::value ||
-                                              std::is_same<T, M6DCRTPoly>::value,
+              typename std::enable_if<std::is_same<T, M2RnsPoly>::value || std::is_same<T, M4RnsPoly>::value ||
+                                              std::is_same<T, M6RnsPoly>::value,
                                       bool>::type = true>
-    Matrix<T> GadgetVector(int64_t base = 2) const {
-        Matrix<T> g(allocZero, rows, cols);
-        auto base_matrix = allocZero();
+    Matrix<T> gadget_vector(int64_t base = 2) const {
+        Matrix<T> g(alloc_zero, rows, cols);
+        auto base_matrix = alloc_zero();
         base_matrix = base;
         size_t bk = 1;
 
-        auto params = g(0, 0).GetParams()->GetParams();
+        auto params = g(0, 0).get_params()->get_params();
 
-        uint64_t digitCount = GetDigitCount(params[0]->GetModulus().ConvertToInt(), static_cast<uint64_t>(base));
+        uint64_t digit_count = get_digit_count(params[0]->get_modulus().convert_to_int(), static_cast<uint64_t>(base));
 
-        for (size_t k = 0; k < digitCount; k++) {
+        for (size_t k = 0; k < digit_count; k++) {
             for (size_t i = 0; i < params.size(); i++) {
                 NativePoly temp(params[i]);
                 temp = bk;
-                g(0, k + i * digitCount).SetElementAtIndex(i, std::move(temp));
+                g(0, k + i * digit_count).set_element_at_index(i, std::move(temp));
             }
             bk *= base;
         }
 
-        size_t kCols = cols / rows;
+        size_t k_cols = cols / rows;
         for (size_t row = 1; row < rows; row++) {
-            for (size_t i = 0; i < kCols; i++) {
-                g(row, i + row * kCols) = g(0, i);
+            for (size_t i = 0; i < k_cols; i++) {
+                g(row, i + row * k_cols) = g(0, i);
             }
         }
         return g;
@@ -307,12 +307,12 @@ class Matrix : public Serializable {
               typename std::enable_if<std::is_same<T, double>::value || std::is_same<T, int>::value ||
                                               std::is_same<T, int64_t>::value || std::is_same<T, Field2n>::value,
                                       bool>::type = true>
-    double Norm() const {
-        OPENFHE_THROW("Norm not defined for this type");
+    double norm() const {
+        CIPHER_THROW("Norm not defined for this type");
     }
 
     /**
-     * Computes the infinity norm: the largest Norm() over all elements
+     * Computes the infinity norm: the largest norm() over all elements
      *
      * @return the norm in double format
      */
@@ -320,18 +320,18 @@ class Matrix : public Serializable {
               typename std::enable_if<!std::is_same<T, double>::value && !std::is_same<T, int>::value &&
                                               !std::is_same<T, int64_t>::value && !std::is_same<T, Field2n>::value,
                                       bool>::type = true>
-    double Norm() const {
-        double retVal = 0.0;
-        double locVal = 0.0;
+    double norm() const {
+        double ret_val = 0.0;
+        double loc_val = 0.0;
         for (size_t row = 0; row < rows; ++row) {
             for (size_t col = 0; col < cols; ++col) {
-                locVal = data[row][col].Norm();
-                if (locVal > retVal) {
-                    retVal = locVal;
+                loc_val = data[row][col].norm();
+                if (loc_val > ret_val) {
+                    ret_val = loc_val;
                 }
             }
         }
-        return retVal;
+        return ret_val;
     }
 
     /**
@@ -340,7 +340,7 @@ class Matrix : public Serializable {
      * @param other the multiplier matrix
      * @return the result of multiplication
      */
-    Matrix<Element> Mult(Matrix<Element> const& other) const;
+    Matrix<Element> mult(Matrix<Element> const& other) const;
 
     /**
      * Operator for matrix multiplication
@@ -349,7 +349,7 @@ class Matrix : public Serializable {
      * @return the result of multiplication
      */
     Matrix<Element> operator*(Matrix<Element> const& other) const {
-        return Mult(other);
+        return mult(other);
     }
 
     /**
@@ -358,9 +358,9 @@ class Matrix : public Serializable {
      * @param other the multiplier element
      * @return the result of multiplication
      */
-    Matrix<Element> ScalarMult(Element const& other) const {
+    Matrix<Element> scalar_mult(Element const& other) const {
         Matrix<Element> result(*this);
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(result.cols))
+#pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(result.cols))
         for (size_t col = 0; col < result.cols; ++col) {
             for (size_t row = 0; row < result.rows; ++row) {
                 result.data[row][col] = result.data[row][col] * other;
@@ -377,7 +377,7 @@ class Matrix : public Serializable {
      * @return the result of multiplication
      */
     Matrix<Element> operator*(Element const& other) const {
-        return ScalarMult(other);
+        return scalar_mult(other);
     }
 
     /**
@@ -386,7 +386,7 @@ class Matrix : public Serializable {
      * @param other the matrix object to compare to
      * @return the boolean result
      */
-    bool Equal(Matrix<Element> const& other) const {
+    bool equal_impl(Matrix<Element> const& other) const {
         if (rows != other.rows || cols != other.cols) {
             return false;
         }
@@ -408,7 +408,7 @@ class Matrix : public Serializable {
      * @return the boolean result
      */
     bool operator==(Matrix<Element> const& other) const {
-        return Equal(other);
+        return equal_impl(other);
     }
 
     /**
@@ -418,7 +418,7 @@ class Matrix : public Serializable {
      * @return the boolean result
      */
     bool operator!=(Matrix<Element> const& other) const {
-        return !Equal(other);
+        return !equal_impl(other);
     }
 
     /**
@@ -426,7 +426,7 @@ class Matrix : public Serializable {
      *
      * @return the data as vector of vectors
      */
-    const data_t& GetData() const {
+    const data_t& get_data() const {
         return data;
     }
 
@@ -435,7 +435,7 @@ class Matrix : public Serializable {
      *
      * @return the number of rows
      */
-    size_t GetRows() const {
+    size_t get_rows() const {
         return rows;
     }
 
@@ -444,7 +444,7 @@ class Matrix : public Serializable {
      *
      * @return the number of columns
      */
-    size_t GetCols() const {
+    size_t get_cols() const {
         return cols;
     }
 
@@ -453,18 +453,18 @@ class Matrix : public Serializable {
      *
      * @return the lambda function corresponding to the element zero allocator
      */
-    alloc_func GetAllocator() const {
-        return allocZero;
+    alloc_func get_allocator() const {
+        return alloc_zero;
     }
 
     /**
      * Sets the evaluation or coefficient representation for all ring elements
-     * that support the SetFormat method
+     * that support the set_format method
      *
      * @param format the enum value corresponding to coefficient or evaluation
      * representation
      */
-    void SetFormat(Format format);
+    void set_format(Format format);
 
     /**
      * Matrix addition
@@ -472,12 +472,12 @@ class Matrix : public Serializable {
      * @param other the matrix to be added
      * @return the resulting matrix
      */
-    Matrix<Element> Add(Matrix<Element> const& other) const {
+    Matrix<Element> add(Matrix<Element> const& other) const {
         if (rows != other.rows || cols != other.cols) {
-            OPENFHE_THROW("Addition operands have incompatible dimensions");
+            CIPHER_THROW("Addition operands have incompatible dimensions");
         }
         Matrix<Element> result(*this);
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(cols))
+#pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(cols))
         for (size_t j = 0; j < cols; ++j) {
             for (size_t i = 0; i < rows; ++i) {
                 result.data[i][j] += other.data[i][j];
@@ -493,7 +493,7 @@ class Matrix : public Serializable {
      * @return the resulting matrix
      */
     Matrix<Element> operator+(Matrix<Element> const& other) const {
-        return this->Add(other);
+        return this->add(other);
     }
 
     /**
@@ -510,12 +510,12 @@ class Matrix : public Serializable {
      * @param other the matrix to be subtracted
      * @return the resulting matrix
      */
-    Matrix<Element> Sub(Matrix<Element> const& other) const {
+    Matrix<Element> sub(Matrix<Element> const& other) const {
         if (rows != other.rows || cols != other.cols) {
-            OPENFHE_THROW("Subtraction operands have incompatible dimensions");
+            CIPHER_THROW("Subtraction operands have incompatible dimensions");
         }
-        Matrix<Element> result(allocZero, rows, other.cols);
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(cols))
+        Matrix<Element> result(alloc_zero, rows, other.cols);
+#pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(cols))
         for (size_t j = 0; j < cols; ++j) {
             for (size_t i = 0; i < rows; ++i) {
                 result.data[i][j] = data[i][j] - other.data[i][j];
@@ -532,7 +532,7 @@ class Matrix : public Serializable {
      * @return the resulting matrix
      */
     Matrix<Element> operator-(Matrix<Element> const& other) const {
-        return this->Sub(other);
+        return this->sub(other);
     }
 
     /**
@@ -548,7 +548,7 @@ class Matrix : public Serializable {
      *
      * @return the resulting matrix
      */
-    Matrix<Element> Transpose() const;
+    Matrix<Element> transposed() const;
 
     // YSP The signature of this method needs to be changed in the future
     /**
@@ -557,8 +557,8 @@ class Matrix : public Serializable {
      *
      * @param result where the result is stored
      */
-    void Determinant(Element* result) const;
-    // Element Determinant() const;
+    void determinant(Element* result) const;
+    // Element determinant() const;
 
     /**
      * Cofactor matrix - the matrix of determinants of the minors A_{ij}
@@ -566,7 +566,7 @@ class Matrix : public Serializable {
      *
      * @return the cofactor matrix for the given matrix
      */
-    Matrix<Element> CofactorMatrix() const;
+    Matrix<Element> cofactor_matrix() const;
 
     /**
      * Add rows to bottom of the matrix
@@ -574,7 +574,7 @@ class Matrix : public Serializable {
      * @param other the matrix to be added to the bottom of current matrix
      * @return the resulting matrix
      */
-    Matrix<Element>& VStack(Matrix<Element> const& other);
+    Matrix<Element>& v_stack(Matrix<Element> const& other);
 
     /**
      * Add columns the right of the matrix
@@ -582,7 +582,7 @@ class Matrix : public Serializable {
      * @param other the matrix to be added to the right of current matrix
      * @return the resulting matrix
      */
-    Matrix<Element>& HStack(Matrix<Element> const& other);
+    Matrix<Element>& h_stack(Matrix<Element> const& other);
 
     /**
      * Matrix indexing operator - writeable instance of the element
@@ -612,10 +612,10 @@ class Matrix : public Serializable {
      * @param row row index
      * @return the row at the index
      */
-    Matrix<Element> ExtractRow(size_t row) const {
-        Matrix<Element> result(this->allocZero, 1, this->cols);
+    Matrix<Element> extract_row(size_t row) const {
+        Matrix<Element> result(this->alloc_zero, 1, this->cols);
         int i = 0;
-        for (auto& elem : this->GetData()[row]) {
+        for (auto& elem : this->get_data()[row]) {
             result(0, i) = elem;
             i++;
         }
@@ -629,8 +629,8 @@ class Matrix : public Serializable {
      * @param col col index
      * @return the col at the index
      */
-    Matrix<Element> ExtractCol(size_t col) const {
-        Matrix<Element> result(this->allocZero, this->rows, 1);
+    Matrix<Element> extract_col(size_t col) const {
+        Matrix<Element> result(this->alloc_zero, this->rows, 1);
         for (size_t i = 0; i < this->rows; i++) {
             result(i, 0) = data[i][col];
         }
@@ -645,13 +645,13 @@ class Matrix : public Serializable {
      * @param row_end index of the last row to extract
      * @return the rows in the range delimited by indices inclusive
      */
-    inline Matrix<Element> ExtractRows(size_t row_start, size_t row_end) const {
-        Matrix<Element> result(this->allocZero, row_end - row_start + 1, this->cols);
+    inline Matrix<Element> extract_rows(size_t row_start, size_t row_end) const {
+        Matrix<Element> result(this->alloc_zero, row_end - row_start + 1, this->cols);
 
         for (uint32_t row = row_start; row < row_end + 1; row++) {
             int i = 0;
 
-            for (auto elem = this->GetData()[row].begin(); elem != this->GetData()[row].end(); ++elem) {
+            for (auto elem = this->get_data()[row].begin(); elem != this->get_data()[row].end(); ++elem) {
                 result(row - row_start, i) = *elem;
                 i++;
             }
@@ -662,9 +662,9 @@ class Matrix : public Serializable {
 
     friend std::ostream& operator<<(std::ostream& os, const Matrix<Element>& m) {
         os << "[ ";
-        for (size_t row = 0; row < m.GetRows(); ++row) {
+        for (size_t row = 0; row < m.get_rows(); ++row) {
             os << "[ ";
-            for (size_t col = 0; col < m.GetCols(); ++col) {
+            for (size_t col = 0; col < m.get_cols(); ++col) {
                 os << m(row, col) << " ";
             }
             os << "]\n";
@@ -677,11 +677,11 @@ class Matrix : public Serializable {
      * Call switch format for each (ring) element
      *
      */
-    void SwitchFormat();
+    void switch_format();
 #define NOT_AN_ELEMENT_MATRIX(T)                   \
     template <>                                    \
-    void Matrix<T>::SwitchFormat() {               \
-        OPENFHE_THROW("Not a matrix of Elements"); \
+    void Matrix<T>::switch_format() {               \
+        CIPHER_THROW("Not a matrix of Elements"); \
     }
 
     /**
@@ -691,7 +691,7 @@ class Matrix : public Serializable {
      *
      * @return the rows x 1 matrix of row sums
      */
-    Matrix<Element> MultByUnityVector() const;
+    Matrix<Element> mult_by_unity_vector() const;
 
     /**
      * Multiply the matrix by a vector of random 1's and 0's, which is the same as
@@ -701,7 +701,7 @@ class Matrix : public Serializable {
      * @param ranvec the 0/1 vector of length cols selecting the columns to add
      * @return the rows x 1 matrix of selected row sums
      */
-    Matrix<Element> MultByRandomVector(std::vector<int> ranvec) const;
+    Matrix<Element> mult_by_random_vector(std::vector<int> ranvec) const;
 
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
@@ -712,21 +712,21 @@ class Matrix : public Serializable {
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
         ar(::cereal::make_nvp("d", data));
         ar(::cereal::make_nvp("r", rows));
         ar(::cereal::make_nvp("c", cols));
 
-        // users will need to SetAllocator for any newly deserialized matrix
+        // users will need to set_allocator for any newly deserialized matrix
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "Matrix";
     }
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 
@@ -734,11 +734,11 @@ class Matrix : public Serializable {
     data_t data;
     uint32_t rows;
     uint32_t cols;
-    alloc_func allocZero;
+    alloc_func alloc_zero;
     // mutable int NUM_THREADS = 1;
 
     // deep copy of data - used for copy constructor
-    void deepCopyData(data_t const& src) {
+    void deep_copy_data(data_t const& src) {
         data = src;
     }
 };
@@ -752,29 +752,29 @@ class Matrix : public Serializable {
  */
 template <class Element>
 Matrix<Element> operator*(Element const& e, Matrix<Element> const& M) {
-    return M.ScalarMult(e);
+    return M.scalar_mult(e);
 }
 
 /**
  * Generates a matrix of rotations. See pages 7-8 of
  * https://eprint.iacr.org/2013/297
  *
- * @param inMat the matrix of power-of-2 cyclotomic ring elements to be rotated
+ * @param in_mat the matrix of power-of-2 cyclotomic ring elements to be rotated
  * @return the resulting matrix of big binary integers
  */
 template <typename Element>
-Matrix<typename Element::Integer> Rotate(Matrix<Element> const& inMat);
+Matrix<typename Element::Integer> Rotate(Matrix<Element> const& in_mat);
 
 /**
  *  Each element becomes a square matrix with columns of that element's
  *  rotations in coefficient form. See pages 7-8 of
  * https://eprint.iacr.org/2013/297
  *
- * @param inMat the matrix of power-of-2 cyclotomic ring elements to be rotated
+ * @param in_mat the matrix of power-of-2 cyclotomic ring elements to be rotated
  * @return the resulting matrix of big binary vectors
  */
 template <typename Element>
-Matrix<typename Element::Vector> RotateVecResult(Matrix<Element> const& inMat);
+Matrix<typename Element::Vector> rotate_vec_result(Matrix<Element> const& in_mat);
 
 /**
  *  Stream output operator
@@ -797,7 +797,7 @@ std::ostream& operator<<(std::ostream& os, const Matrix<Element>& m);
  * computed
  * @return the resulting matrix of floating-point numbers
  */
-Matrix<double> Cholesky(const Matrix<int32_t>& input);
+Matrix<double> cholesky(const Matrix<int32_t>& input);
 
 /**
  * Gives the Cholesky decomposition of the input matrix, writing the lower-triangular factor
@@ -807,7 +807,7 @@ Matrix<double> Cholesky(const Matrix<int32_t>& input);
  * @param input the square matrix for which the Cholesky decomposition is to be computed
  * @param result the preallocated rows x rows matrix receiving the factor
  */
-void Cholesky(const Matrix<int32_t>& input, Matrix<double>& result);
+void cholesky(const Matrix<int32_t>& input, Matrix<double>& result);
 
 /**
  * Convert a matrix of integers from BigInteger to int32_t
@@ -816,9 +816,9 @@ void Cholesky(const Matrix<int32_t>& input, Matrix<double>& result);
  * @param input the input matrix
  * @param modulus the ring modulus
  * @return the resulting matrix of int32_t
- * @throws OpenFHEException if a centered value cannot be represented as int32_t
+ * @throws CipherException if a centered value cannot be represented as int32_t
  */
-Matrix<int32_t> ConvertToInt32(const Matrix<BigInteger>& input, const BigInteger& modulus);
+Matrix<int32_t> convert_to_int32(const Matrix<BigInteger>& input, const BigInteger& modulus);
 
 /**
  * Convert a matrix of BigVector to int32_t
@@ -827,9 +827,9 @@ Matrix<int32_t> ConvertToInt32(const Matrix<BigInteger>& input, const BigInteger
  * @param input the input matrix
  * @param modulus the ring modulus
  * @return the resulting matrix of int32_t
- * @throws OpenFHEException if a centered value cannot be represented as int32_t
+ * @throws CipherException if a centered value cannot be represented as int32_t
  */
-Matrix<int32_t> ConvertToInt32(const Matrix<BigVector>& input, const BigInteger& modulus);
+Matrix<int32_t> convert_to_int32(const Matrix<BigVector>& input, const BigInteger& modulus);
 
 /**
  * Split a vector of int64_t into a vector of ring elements with ring dimension
@@ -841,15 +841,15 @@ Matrix<int32_t> ConvertToInt32(const Matrix<BigVector>& input, const BigInteger&
  * @return the resulting matrix of Poly
  */
 template <typename Element>
-Matrix<Element> SplitInt64IntoElements(Matrix<int64_t> const& other, size_t n,
+Matrix<Element> split_int64_into_elements(Matrix<int64_t> const& other, size_t n,
                                        const std::shared_ptr<typename Element::Params> params);
 
 #define SPLIT64_FOR_TYPE(T)                                                              \
     template <>                                                                          \
-    Matrix<T> SplitInt64IntoElements(Matrix<int64_t> const& other, size_t n,             \
+    Matrix<T> split_int64_into_elements(Matrix<int64_t> const& other, size_t n,             \
                                      const std::shared_ptr<typename T::Params> params) { \
-        auto zero_alloc = T::Allocator(params, Format::COEFFICIENT);                     \
-        size_t rows = other.GetRows() / n;                                               \
+        auto zero_alloc = T::allocator(params, Format::COEFFICIENT);                     \
+        size_t rows = other.get_rows() / n;                                               \
         Matrix<T> result(zero_alloc, rows, 1);                                           \
         for (size_t row = 0; row < rows; ++row) {                                        \
             std::vector<int64_t> values(n);                                              \
@@ -870,15 +870,15 @@ Matrix<Element> SplitInt64IntoElements(Matrix<int64_t> const& other, size_t n,
  * @return the resulting matrix of Poly
  */
 template <typename Element>
-Matrix<Element> SplitInt32AltIntoElements(Matrix<int32_t> const& other, size_t n,
+Matrix<Element> split_int32_alt_into_elements(Matrix<int32_t> const& other, size_t n,
                                           const std::shared_ptr<typename Element::Params> params);
 
 #define SPLIT32ALT_FOR_TYPE(T)                                                              \
     template <>                                                                             \
-    Matrix<T> SplitInt32AltIntoElements(Matrix<int32_t> const& other, size_t n,             \
+    Matrix<T> split_int32_alt_into_elements(Matrix<int32_t> const& other, size_t n,             \
                                         const std::shared_ptr<typename T::Params> params) { \
-        auto zero_alloc = T::Allocator(params, Format::COEFFICIENT);                        \
-        size_t rows = other.GetRows();                                                      \
+        auto zero_alloc = T::allocator(params, Format::COEFFICIENT);                        \
+        size_t rows = other.get_rows();                                                      \
         Matrix<T> result(zero_alloc, rows, 1);                                              \
         for (size_t row = 0; row < rows; ++row) {                                           \
             std::vector<int32_t> values(n);                                                 \
@@ -899,15 +899,15 @@ Matrix<Element> SplitInt32AltIntoElements(Matrix<int32_t> const& other, size_t n
  * @return the resulting matrix of Poly
  */
 template <typename Element>
-Matrix<Element> SplitInt64AltIntoElements(Matrix<int64_t> const& other, size_t n,
+Matrix<Element> split_int64_alt_into_elements(Matrix<int64_t> const& other, size_t n,
                                           const std::shared_ptr<typename Element::Params> params);
 
 #define SPLIT64ALT_FOR_TYPE(T)                                                              \
     template <>                                                                             \
-    Matrix<T> SplitInt64AltIntoElements(Matrix<int64_t> const& other, size_t n,             \
+    Matrix<T> split_int64_alt_into_elements(Matrix<int64_t> const& other, size_t n,             \
                                         const std::shared_ptr<typename T::Params> params) { \
-        auto zero_alloc = T::Allocator(params, Format::COEFFICIENT);                        \
-        size_t rows = other.GetRows();                                                      \
+        auto zero_alloc = T::allocator(params, Format::COEFFICIENT);                        \
+        size_t rows = other.get_rows();                                                      \
         Matrix<T> result(zero_alloc, rows, 1);                                              \
         for (size_t row = 0; row < rows; ++row) {                                           \
             std::vector<int64_t> values(n);                                                 \
@@ -918,5 +918,5 @@ Matrix<Element> SplitInt64AltIntoElements(Matrix<int64_t> const& other, size_t n
         return result;                                                                      \
     }
 
-}  // namespace lbcrypto
+}  // namespace cipher
 #endif  // CIPHER_MATH_MATRIX_H_

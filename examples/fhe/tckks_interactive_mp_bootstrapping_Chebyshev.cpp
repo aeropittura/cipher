@@ -51,17 +51,17 @@ the number of participating parties.
 #include "cipher/cipher.h"
 
 using namespace std;
-using namespace lbcrypto;
+using namespace cipher;
 
-static void checkApproximateEquality(const std::vector<std::complex<double>>& a,
-                                     const std::vector<std::complex<double>>& b, int vectorSize, double epsilon) {
-    std::vector<std::complex<double>> allTrue(vectorSize);
-    std::vector<std::complex<double>> tmp(vectorSize);
-    for (int i = 0; i < vectorSize; i++) {
-        allTrue[i] = 1;
+static void check_approximate_equality(const std::vector<std::complex<double>>& a,
+                                     const std::vector<std::complex<double>>& b, int vector_size, double epsilon) {
+    std::vector<std::complex<double>> all_true(vector_size);
+    std::vector<std::complex<double>> tmp(vector_size);
+    for (int i = 0; i < vector_size; i++) {
+        all_true[i] = 1;
         tmp[i] = std::abs(a[i] - b[i]) <= epsilon;
     }
-    if (tmp != allTrue) {
+    if (tmp != all_true) {
         cerr << __func__ << " - " << __FILE__ << ":" << __LINE__ << " IntMPBoot - Ctxt Chebyshev Failed: " << endl;
         cerr << __func__ << " - " << __FILE__ << ":" << __LINE__ << " - is diff <= eps?: " << tmp << endl;
     } else {
@@ -69,16 +69,16 @@ static void checkApproximateEquality(const std::vector<std::complex<double>>& a,
     }
 }
 
-void TCKKSCollectiveBoot(enum ScalingTechnique scaleTech);
+void tckks_collective_boot(enum ScalingTechnique scale_tech);
 
 int main(int argc, char* argv[]) {
     std::cout << "Interactive (3P) Bootstrapping Ciphertext [Chebyshev] (TCKKS) started ...\n";
 
     // Same test with different rescaling techniques in CKKS
-    TCKKSCollectiveBoot(ScalingTechnique::FIXEDMANUAL);
-    TCKKSCollectiveBoot(ScalingTechnique::FIXEDAUTO);
-    TCKKSCollectiveBoot(ScalingTechnique::FLEXIBLEAUTO);
-    TCKKSCollectiveBoot(ScalingTechnique::FLEXIBLEAUTOEXT);
+    tckks_collective_boot(ScalingTechnique::FIXEDMANUAL);
+    tckks_collective_boot(ScalingTechnique::FIXEDAUTO);
+    tckks_collective_boot(ScalingTechnique::FLEXIBLEAUTO);
+    tckks_collective_boot(ScalingTechnique::FLEXIBLEAUTOEXT);
 
     std::cout << "Interactive (3P) Bootstrapping Ciphertext [Chebyshev] (TCKKS) terminated gracefully!\n";
 
@@ -89,14 +89,14 @@ int main(int argc, char* argv[]) {
 // We follow Protocol 5 in https://eprint.iacr.org/2020/304, "Multiparty
 // Homomorphic Encryption from Ring-Learning-With-Errors"
 
-void TCKKSCollectiveBoot(enum ScalingTechnique scaleTech) {
-    if (scaleTech != ScalingTechnique::FIXEDMANUAL && scaleTech != ScalingTechnique::FIXEDAUTO &&
-        scaleTech != ScalingTechnique::FLEXIBLEAUTO && scaleTech != ScalingTechnique::FLEXIBLEAUTOEXT) {
-        std::string errMsg = "ERROR: Scaling technique is not supported!";
-        OPENFHE_THROW(errMsg);
+void tckks_collective_boot(enum ScalingTechnique scale_tech) {
+    if (scale_tech != ScalingTechnique::FIXEDMANUAL && scale_tech != ScalingTechnique::FIXEDAUTO &&
+        scale_tech != ScalingTechnique::FLEXIBLEAUTO && scale_tech != ScalingTechnique::FLEXIBLEAUTOEXT) {
+        std::string err_msg = "ERROR: Scaling technique is not supported!";
+        CIPHER_THROW(err_msg);
     }
 
-    CCParams<CryptoContextCKKSRNS> parameters;
+    ContextParams<CkksRnsContext> parameters;
     // A. Specify main parameters
     /*  A1) Secret key distribution
      * The secret key distribution for CKKS should either be SPARSE_TERNARY or UNIFORM_TERNARY.
@@ -104,8 +104,8 @@ void TCKKSCollectiveBoot(enum ScalingTechnique scaleTech) {
      * but in this example, we use UNIFORM_TERNARY because this is included in the homomorphic
      * encryption standard.
      */
-    SecretKeyDist secretKeyDist = UNIFORM_TERNARY;
-    parameters.SetSecretKeyDist(secretKeyDist);
+    SecretKeyDist secret_key_dist = UNIFORM_TERNARY;
+    parameters.set_secret_key_dist(secret_key_dist);
 
     /*  A2) Desired security level based on FHE standards.
      * In this example, we use the "NotSet" option, so the example can run more quickly with
@@ -116,35 +116,35 @@ void TCKKSCollectiveBoot(enum ScalingTechnique scaleTech) {
      * or 256-bit security, respectively. If you choose one of these as your security level,
      * you do not need to set the ring dimension.
      */
-    parameters.SetSecurityLevel(HEStd_128_classic);
+    parameters.set_security_level(HEStd_128_classic);
 
     /*  A3) Scaling parameters.
      * By default, we set the modulus sizes and rescaling technique to the following values
      * to obtain a good precision and performance tradeoff. We recommend keeping the parameters
      * below unless you are an FHE expert.
      */
-    uint32_t dcrtBits = 50;
-    uint32_t firstMod = 60;
+    uint32_t dcrt_bits = 50;
+    uint32_t first_mod = 60;
 
-    parameters.SetScalingModSize(dcrtBits);
-    parameters.SetScalingTechnique(scaleTech);
-    parameters.SetFirstModSize(firstMod);
+    parameters.set_scaling_mod_size(dcrt_bits);
+    parameters.set_scaling_technique(scale_tech);
+    parameters.set_first_mod_size(first_mod);
 
     /*  A4) Multiplicative depth.
      * The multiplicative depth detemins the computational capability of the instantiated scheme. It should be set
      * according the following formula:
-     * multDepth >= desired_depth + interactive_bootstrapping_depth
+     * mult_depth_value >= desired_depth + interactive_bootstrapping_depth
      * where,
      *   The desired_depth is the depth of the computation, as chosen by the user.
      *   The interactive_bootstrapping_depth is either 3 or 4, depending on the ciphertext compression mode: COMPACT vs SLACK (see below)
-     * Example 1, if you want to perform a computation of depth 24, you can set multDepth to 10, use 6 levels
+     * Example 1, if you want to perform a computation of depth 24, you can set mult_depth_value to 10, use 6 levels
      * for computation and 4 for interactive bootstrapping. You will need to bootstrap 3 times.
      */
-    parameters.SetMultiplicativeDepth(10);
-    parameters.SetKeySwitchTechnique(KeySwitchTechnique::HYBRID);
+    parameters.set_multiplicative_depth(10);
+    parameters.set_key_switch_technique(KeySwitchTechnique::HYBRID);
 
-    uint32_t batchSize = 16;
-    parameters.SetBatchSize(batchSize);
+    uint32_t batch_size = 16;
+    parameters.set_batch_size(batch_size);
 
     /*  Protocol-specific parameters (SLACK or COMPACT)
      * SLACK (default) uses larger masks, which makes it more secure theoretically. However, it is also slightly less efficient.
@@ -157,83 +157,83 @@ void TCKKSCollectiveBoot(enum ScalingTechnique scaleTech) {
      * Efficiency	    Less efficient	                                More efficient
      * Recommended use	For applications where security is paramount	For applications where efficiency is paramount
      */
-    auto compressionLevel = CompressionLevel::COMPACT;
-    parameters.SetInteractiveBootCompressionLevel(compressionLevel);
+    auto compression_level = CompressionLevel::COMPACT;
+    parameters.set_interactive_boot_compression_level(compression_level);
 
-    CryptoContext<DCRTPoly> cryptoContext = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> crypto_context = make_crypto_context(parameters);
 
-    cryptoContext->Enable(PKE);
-    cryptoContext->Enable(KEYSWITCH);
-    cryptoContext->Enable(LEVELEDSHE);
-    cryptoContext->Enable(ADVANCEDSHE);
-    cryptoContext->Enable(MULTIPARTY);
+    crypto_context->enable(PKE);
+    crypto_context->enable(KEYSWITCH);
+    crypto_context->enable(LEVELEDSHE);
+    crypto_context->enable(ADVANCEDSHE);
+    crypto_context->enable(MULTIPARTY);
 
-    uint32_t ringDim = cryptoContext->GetRingDimension();
+    uint32_t ring_dim = crypto_context->get_ring_dimension();
     // This is the maximum number of slots that can be used for full packing.
-    uint32_t maxNumSlots = ringDim / 2;
-    std::cout << "TCKKS scheme is using ring dimension " << ringDim << std::endl;
-    std::cout << "TCKKS scheme number of slots         " << batchSize << std::endl;
-    std::cout << "TCKKS scheme max number of slots     " << maxNumSlots << std::endl;
-    std::cout << "TCKKS example with Scaling Technique " << scaleTech << std::endl;
+    uint32_t max_num_slots = ring_dim / 2;
+    std::cout << "TCKKS scheme is using ring dimension " << ring_dim << std::endl;
+    std::cout << "TCKKS scheme number of slots         " << batch_size << std::endl;
+    std::cout << "TCKKS scheme max number of slots     " << max_num_slots << std::endl;
+    std::cout << "TCKKS example with Scaling Technique " << scale_tech << std::endl;
 
-    const uint32_t numParties = 3;
+    const uint32_t num_parties = 3;
 
     std::cout << "\n===========================IntMPBoot protocol parameters===========================\n";
-    std::cout << "num of parties: " << numParties << "\n";
+    std::cout << "num of parties: " << num_parties << "\n";
     std::cout << "===============================================================\n";
 
     double eps = 0.0001;
 
     // Initialize Public Key Containers
-    KeyPair<DCRTPoly> kp1;  // Party 1
-    KeyPair<DCRTPoly> kp2;  // Party 2
-    KeyPair<DCRTPoly> kp3;  // Lead party - who finalizes interactive bootstrapping
+    KeyPair<RnsPoly> kp1;  // Party 1
+    KeyPair<RnsPoly> kp2;  // Party 2
+    KeyPair<RnsPoly> kp3;  // Lead party - who finalizes interactive bootstrapping
 
-    KeyPair<DCRTPoly> kpMultiparty;
+    KeyPair<RnsPoly> kp_multiparty;
 
     ////////////////////////////////////////////////////////////
     // Perform Key Generation Operation
     ////////////////////////////////////////////////////////////
 
     // Round 1 (party A)
-    kp1 = cryptoContext->KeyGen();
+    kp1 = crypto_context->key_gen();
 
     // Generate evalmult key part for A
-    auto evalMultKey = cryptoContext->KeySwitchGen(kp1.secretKey, kp1.secretKey);
+    auto eval_mult_key = crypto_context->key_switch_gen(kp1.secret_key, kp1.secret_key);
 
     // Generate evalsum key part for A
-    cryptoContext->EvalSumKeyGen(kp1.secretKey);
-    auto evalSumKeys = std::make_shared<std::map<uint32_t, EvalKey<DCRTPoly>>>(
-            cryptoContext->GetEvalSumKeyMap(kp1.secretKey->GetKeyTag()));
+    crypto_context->eval_sum_key_gen(kp1.secret_key);
+    auto eval_sum_keys = std::make_shared<std::map<uint32_t, EvalKey<RnsPoly>>>(
+            crypto_context->get_eval_sum_key_map(kp1.secret_key->get_key_tag()));
 
     // Round 2 (party B)
-    kp2 = cryptoContext->MultipartyKeyGen(kp1.publicKey);
-    auto evalMultKey2 = cryptoContext->MultiKeySwitchGen(kp2.secretKey, kp2.secretKey, evalMultKey);
-    auto evalMultAB = cryptoContext->MultiAddEvalKeys(evalMultKey, evalMultKey2, kp2.publicKey->GetKeyTag());
-    auto evalMultBAB = cryptoContext->MultiMultEvalKey(kp2.secretKey, evalMultAB, kp2.publicKey->GetKeyTag());
-    auto evalSumKeysB = cryptoContext->MultiEvalSumKeyGen(kp2.secretKey, evalSumKeys, kp2.publicKey->GetKeyTag());
-    auto evalSumKeysJoin = cryptoContext->MultiAddEvalSumKeys(evalSumKeys, evalSumKeysB, kp2.publicKey->GetKeyTag());
-    cryptoContext->InsertEvalSumKey(evalSumKeysJoin);
-    auto evalMultAAB = cryptoContext->MultiMultEvalKey(kp1.secretKey, evalMultAB, kp2.publicKey->GetKeyTag());
-    auto evalMultFinal = cryptoContext->MultiAddEvalMultKeys(evalMultAAB, evalMultBAB, evalMultAB->GetKeyTag());
-    cryptoContext->InsertEvalMultKey({evalMultFinal});
+    kp2 = crypto_context->multiparty_key_gen(kp1.public_key);
+    auto eval_mult_key2 = crypto_context->multi_key_switch_gen(kp2.secret_key, kp2.secret_key, eval_mult_key);
+    auto eval_mult_ab = crypto_context->multi_add_eval_keys(eval_mult_key, eval_mult_key2, kp2.public_key->get_key_tag());
+    auto eval_mult_bab = crypto_context->multi_mult_eval_key(kp2.secret_key, eval_mult_ab, kp2.public_key->get_key_tag());
+    auto eval_sum_keys_b = crypto_context->multi_eval_sum_key_gen(kp2.secret_key, eval_sum_keys, kp2.public_key->get_key_tag());
+    auto eval_sum_keys_join = crypto_context->multi_add_eval_sum_keys(eval_sum_keys, eval_sum_keys_b, kp2.public_key->get_key_tag());
+    crypto_context->insert_eval_sum_key(eval_sum_keys_join);
+    auto eval_mult_aab = crypto_context->multi_mult_eval_key(kp1.secret_key, eval_mult_ab, kp2.public_key->get_key_tag());
+    auto eval_mult_final = crypto_context->multi_add_eval_mult_keys(eval_mult_aab, eval_mult_bab, eval_mult_ab->get_key_tag());
+    crypto_context->insert_eval_mult_key({eval_mult_final});
 
     /////////////////////
     // Round 3 (party C) - Lead Party (who encrypts and finalizes the bootstrapping protocol)
-    kp3 = cryptoContext->MultipartyKeyGen(kp2.publicKey);
-    auto evalMultKey3 = cryptoContext->MultiKeySwitchGen(kp3.secretKey, kp3.secretKey, evalMultKey);
-    auto evalMultABC = cryptoContext->MultiAddEvalKeys(evalMultAB, evalMultKey3, kp3.publicKey->GetKeyTag());
-    auto evalMultBABC = cryptoContext->MultiMultEvalKey(kp2.secretKey, evalMultABC, kp3.publicKey->GetKeyTag());
-    auto evalMultAABC = cryptoContext->MultiMultEvalKey(kp1.secretKey, evalMultABC, kp3.publicKey->GetKeyTag());
-    auto evalMultCABC = cryptoContext->MultiMultEvalKey(kp3.secretKey, evalMultABC, kp3.publicKey->GetKeyTag());
-    auto evalMultABABC = cryptoContext->MultiAddEvalMultKeys(evalMultBABC, evalMultAABC, evalMultBABC->GetKeyTag());
-    auto evalMultFinal2 = cryptoContext->MultiAddEvalMultKeys(evalMultABABC, evalMultCABC, evalMultCABC->GetKeyTag());
-    cryptoContext->InsertEvalMultKey({evalMultFinal2});
+    kp3 = crypto_context->multiparty_key_gen(kp2.public_key);
+    auto eval_mult_key3 = crypto_context->multi_key_switch_gen(kp3.secret_key, kp3.secret_key, eval_mult_key);
+    auto eval_mult_abc = crypto_context->multi_add_eval_keys(eval_mult_ab, eval_mult_key3, kp3.public_key->get_key_tag());
+    auto eval_mult_babc = crypto_context->multi_mult_eval_key(kp2.secret_key, eval_mult_abc, kp3.public_key->get_key_tag());
+    auto eval_mult_aabc = crypto_context->multi_mult_eval_key(kp1.secret_key, eval_mult_abc, kp3.public_key->get_key_tag());
+    auto eval_mult_cabc = crypto_context->multi_mult_eval_key(kp3.secret_key, eval_mult_abc, kp3.public_key->get_key_tag());
+    auto eval_mult_ababc = crypto_context->multi_add_eval_mult_keys(eval_mult_babc, eval_mult_aabc, eval_mult_babc->get_key_tag());
+    auto eval_mult_final2 = crypto_context->multi_add_eval_mult_keys(eval_mult_ababc, eval_mult_cabc, eval_mult_cabc->get_key_tag());
+    crypto_context->insert_eval_mult_key({eval_mult_final2});
 
-    auto evalSumKeysC = cryptoContext->MultiEvalSumKeyGen(kp3.secretKey, evalSumKeys, kp3.publicKey->GetKeyTag());
-    auto evalSumKeysJoin2 =
-            cryptoContext->MultiAddEvalSumKeys(evalSumKeysJoin, evalSumKeysC, kp3.publicKey->GetKeyTag());
-    cryptoContext->InsertEvalSumKey(evalSumKeysJoin2);
+    auto eval_sum_keys_c = crypto_context->multi_eval_sum_key_gen(kp3.secret_key, eval_sum_keys, kp3.public_key->get_key_tag());
+    auto eval_sum_keys_join2 =
+            crypto_context->multi_add_eval_sum_keys(eval_sum_keys_join, eval_sum_keys_c, kp3.public_key->get_key_tag());
+    crypto_context->insert_eval_sum_key(eval_sum_keys_join2);
 
     if (!kp1.good()) {
         std::cout << "Key generation failed!" << std::endl;
@@ -259,73 +259,73 @@ void TCKKSCollectiveBoot(enum ScalingTechnique scaleTech) {
     double a = -4;
     double b = 4;
 
-    Plaintext pt1 = cryptoContext->MakeCKKSPackedPlaintext(input);
-    uint32_t encodedLength = input.size();
+    Plaintext pt1 = crypto_context->make_ckks_packed_plaintext(input);
+    uint32_t encoded_length = input.size();
 
-    auto ct1 = cryptoContext->Encrypt(kp3.publicKey, pt1);
+    auto ct1 = crypto_context->encrypt(kp3.public_key, pt1);
 
-    ct1 = cryptoContext->EvalChebyshevSeries(ct1, coefficients, a, b);
+    ct1 = crypto_context->eval_chebyshev_series(ct1, coefficients, a, b);
 
     // INTERACTIVE BOOTSTRAPPING STARTS
 
-    ct1 = cryptoContext->IntMPBootAdjustScale(ct1);
+    ct1 = crypto_context->int_mp_boot_adjust_scale(ct1);
 
     // Leading party (party B) generates a Common Random Poly (crp) at max coefficient modulus (QNumPrime).
     // a is sampled at random uniformly from R_{Q}
-    auto crp = cryptoContext->IntMPBootRandomElementGen(kp3.publicKey);
-    // Each party generates its own shares: maskedDecryptionShare and reEncryptionShare
+    auto crp = crypto_context->int_mp_boot_random_element_gen(kp3.public_key);
+    // Each party generates its own shares: masked_decryption_share and re_encryption_share
     // (h_{0,i}, h_{1,i}) = (masked decryption share, re-encryption share)
     // we use a vector inseat of std::pair for Python API compatibility
-    vector<Ciphertext<DCRTPoly>> sharesPair0;  // for Party A
-    vector<Ciphertext<DCRTPoly>> sharesPair1;  // for Party B
-    vector<Ciphertext<DCRTPoly>> sharesPair2;  // for Party C
+    vector<Ciphertext<RnsPoly>> shares_pair0;  // for Party A
+    vector<Ciphertext<RnsPoly>> shares_pair1;  // for Party B
+    vector<Ciphertext<RnsPoly>> shares_pair2;  // for Party C
 
     // extract c1 - element-wise
-    auto c1 = ct1->Clone();
-    c1->GetElements().erase(c1->GetElements().begin());
+    auto c1 = ct1->clone();
+    c1->get_elements().erase(c1->get_elements().begin());
     // masked decryption on the client: c1 = a*s1
-    sharesPair0 = cryptoContext->IntMPBootDecrypt(kp1.secretKey, c1, crp);
-    sharesPair1 = cryptoContext->IntMPBootDecrypt(kp2.secretKey, c1, crp);
-    sharesPair2 = cryptoContext->IntMPBootDecrypt(kp3.secretKey, c1, crp);
+    shares_pair0 = crypto_context->int_mp_boot_decrypt(kp1.secret_key, c1, crp);
+    shares_pair1 = crypto_context->int_mp_boot_decrypt(kp2.secret_key, c1, crp);
+    shares_pair2 = crypto_context->int_mp_boot_decrypt(kp3.secret_key, c1, crp);
 
-    vector<vector<Ciphertext<DCRTPoly>>> sharesPairVec;
-    sharesPairVec.push_back(sharesPair0);
-    sharesPairVec.push_back(sharesPair1);
-    sharesPairVec.push_back(sharesPair2);
+    vector<vector<Ciphertext<RnsPoly>>> shares_pair_vec;
+    shares_pair_vec.push_back(shares_pair0);
+    shares_pair_vec.push_back(shares_pair1);
+    shares_pair_vec.push_back(shares_pair2);
 
     // Party B finalizes the protocol by aggregating the shares and reEncrypting the results
-    auto aggregatedSharesPair = cryptoContext->IntMPBootAdd(sharesPairVec);
-    auto ciphertextOutput = cryptoContext->IntMPBootEncrypt(kp3.publicKey, aggregatedSharesPair, crp, ct1);
+    auto aggregated_shares_pair = crypto_context->int_mp_boot_add(shares_pair_vec);
+    auto ciphertext_output = crypto_context->int_mp_boot_encrypt(kp3.public_key, aggregated_shares_pair, crp, ct1);
 
     // INTERACTIVE BOOTSTRAPPING ENDS
 
     // distributed decryption
 
-    auto ciphertextPartial1 = cryptoContext->MultipartyDecryptMain({ciphertextOutput}, kp1.secretKey);
-    auto ciphertextPartial2 = cryptoContext->MultipartyDecryptMain({ciphertextOutput}, kp2.secretKey);
-    auto ciphertextPartial3 = cryptoContext->MultipartyDecryptLead({ciphertextOutput}, kp3.secretKey);
-    vector<Ciphertext<DCRTPoly>> partialCiphertextVec;
-    partialCiphertextVec.push_back(ciphertextPartial1[0]);
-    partialCiphertextVec.push_back(ciphertextPartial2[0]);
-    partialCiphertextVec.push_back(ciphertextPartial3[0]);
+    auto ciphertext_partial1 = crypto_context->multiparty_decrypt_main({ciphertext_output}, kp1.secret_key);
+    auto ciphertext_partial2 = crypto_context->multiparty_decrypt_main({ciphertext_output}, kp2.secret_key);
+    auto ciphertext_partial3 = crypto_context->multiparty_decrypt_lead({ciphertext_output}, kp3.secret_key);
+    vector<Ciphertext<RnsPoly>> partial_ciphertext_vec;
+    partial_ciphertext_vec.push_back(ciphertext_partial1[0]);
+    partial_ciphertext_vec.push_back(ciphertext_partial2[0]);
+    partial_ciphertext_vec.push_back(ciphertext_partial3[0]);
 
-    Plaintext plaintextMultiparty;
-    cryptoContext->MultipartyDecryptFusion(partialCiphertextVec, &plaintextMultiparty);
-    plaintextMultiparty->SetLength(encodedLength);
+    Plaintext plaintext_multiparty;
+    crypto_context->multiparty_decrypt_fusion(partial_ciphertext_vec, &plaintext_multiparty);
+    plaintext_multiparty->set_length(encoded_length);
 
     // Ground truth result
     std::vector<std::complex<double>> result(
             {0.0179885, 0.0474289, 0.119205, 0.268936, 0.5, 0.731064, 0.880795, 0.952571, 0.982011});
-    Plaintext plaintextResult = cryptoContext->MakeCKKSPackedPlaintext(result);
+    Plaintext plaintext_result = crypto_context->make_ckks_packed_plaintext(result);
 
-    std::cout << "Ground Truth: \n\t" << plaintextResult->GetCKKSPackedValue() << std::endl;
-    std::cout << "Computed Res: \n\t" << plaintextMultiparty->GetCKKSPackedValue() << std::endl;
+    std::cout << "Ground Truth: \n\t" << plaintext_result->get_ckks_packed_value() << std::endl;
+    std::cout << "Computed Res: \n\t" << plaintext_multiparty->get_ckks_packed_value() << std::endl;
 
-    checkApproximateEquality(plaintextResult->GetCKKSPackedValue(), plaintextMultiparty->GetCKKSPackedValue(),
-                             encodedLength, eps);
+    check_approximate_equality(plaintext_result->get_ckks_packed_value(), plaintext_multiparty->get_ckks_packed_value(),
+                             encoded_length, eps);
 
     std::cout << "\n============================ INTERACTIVE DECRYPTION ENDED ============================\n";
 
-    std::cout << "\nTCKKSCollectiveBoot FHE example with rescaling technique: " << scaleTech << " Completed!"
+    std::cout << "\nTCKKSCollectiveBoot FHE example with rescaling technique: " << scale_tech << " Completed!"
               << std::endl;
 }

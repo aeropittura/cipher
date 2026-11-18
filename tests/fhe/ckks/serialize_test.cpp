@@ -46,7 +46,7 @@
 #include "gtest/gtest.h"
 #include "cipher/fhe/ckks/ser.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 //===========================================================================================================
 enum TEST_CASE_TYPE : int {
@@ -75,23 +75,23 @@ static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
 }
 //===========================================================================================================
 struct TEST_CASE_UTCKKSRNS_SER {
-    TEST_CASE_TYPE testCaseType;
+    TEST_CASE_TYPE test_case_type;
     // test case description - MUST BE UNIQUE
     std::string description;
 
-    UnitTestCCParams params;
+    TestContextParams params;
 
     // additional test case data
     // ........
 
-    std::string buildTestName() const {
+    std::string build_test_name() const {
         std::stringstream ss;
-        ss << testCaseType << "_" << description;
+        ss << test_case_type << "_" << description;
         return ss.str();
     }
-    std::string toString() const {
+    std::string to_string_impl() const {
         std::stringstream ss;
-        ss << "testCaseType [" << testCaseType << "], " << params.toString();
+        ss << "testCaseType [" << test_case_type << "], " << params.to_string_impl();
         return ss.str();
     }
 };
@@ -99,11 +99,11 @@ struct TEST_CASE_UTCKKSRNS_SER {
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
 static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNS_SER>& test) {
-    return test.param.buildTestName();
+    return test.param.build_test_name();
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_UTCKKSRNS_SER& test) {
-    return os << test.toString();
+    return os << test.to_string_impl();
 }
 //===========================================================================================================
 /* *
@@ -120,49 +120,49 @@ constexpr uint32_t MULT_DEPTH = 3;
 constexpr uint32_t DSIZE = 20;
 constexpr uint32_t BATCH = 16;
 // clang-format off
-static std::vector<TEST_CASE_UTCKKSRNS_SER> testCases = {
-    // TestType,            Descr, Scheme,         RDim,     MultDepth,  SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, StdDev, EvalAddCt, KSCt, MultTech,  EncTech, PREMode
+static std::vector<TEST_CASE_UTCKKSRNS_SER> test_cases = {
+    // TestType,            Descr, Scheme,         RDim,     MultDepth,  SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech,  EncTech, pre_mode
     { CONTEXT_WITH_SERTYPE, "01", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DSIZE, BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { CONTEXT_WITH_SERTYPE, "02", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DSIZE, BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { CONTEXT_WITH_SERTYPE, "03", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DSIZE, BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { CONTEXT_WITH_SERTYPE, "04", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DSIZE, BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
     { CONTEXT_WITH_SERTYPE, "05", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DSIZE, BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { CONTEXT_WITH_SERTYPE, "06", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DSIZE, BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { CONTEXT_WITH_SERTYPE, "07", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DSIZE, BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { CONTEXT_WITH_SERTYPE, "08", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DSIZE, BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
 #endif
     // ==========================================
-    // TestType,            Descr, Scheme,         RDim,     MultDepth,  SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, StdDev, EvalAddCt, KSCt, MultTech,  EncTech, PREMode
+    // TestType,            Descr, Scheme,         RDim,     MultDepth,  SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech,  EncTech, pre_mode
     { KEYS_AND_CIPHERTEXTS, "01", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DSIZE, BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { KEYS_AND_CIPHERTEXTS, "02", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DSIZE, BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { KEYS_AND_CIPHERTEXTS, "03", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DSIZE, BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { KEYS_AND_CIPHERTEXTS, "04", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DSIZE, BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
     { KEYS_AND_CIPHERTEXTS, "05", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DSIZE, BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { KEYS_AND_CIPHERTEXTS, "06", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DSIZE, BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { KEYS_AND_CIPHERTEXTS, "07", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DSIZE, BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { KEYS_AND_CIPHERTEXTS, "08", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DSIZE, BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
 #endif
     // ==========================================
-    // TestType,            Descr, Scheme,         RDim,     MultDepth,  SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, StdDev, EvalAddCt, KSCt, MultTech,  EncTech, PREMode
+    // TestType,            Descr, Scheme,         RDim,     MultDepth,  SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech,  EncTech, pre_mode
     { KEYS_AND_CIPHERTEXTS, "11", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, 0,     BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { KEYS_AND_CIPHERTEXTS, "12", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, 0,     BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { KEYS_AND_CIPHERTEXTS, "13", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, 0,     BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { KEYS_AND_CIPHERTEXTS, "14", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, 0,     BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
     { KEYS_AND_CIPHERTEXTS, "15", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, 0,     BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { KEYS_AND_CIPHERTEXTS, "16", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, 0,     BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { KEYS_AND_CIPHERTEXTS, "17", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, 0,     BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { KEYS_AND_CIPHERTEXTS, "18", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, 0,     BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
 #endif
     // ==========================================
-    // TestType,    Descr,  Scheme,         RDim,     MultDepth,  SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, StdDev, EvalAddCt, KSCt, MultTech,  EncTech, PREMode
+    // TestType,    Descr,  Scheme,         RDim,     MultDepth,  SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech,  EncTech, pre_mode
     { NO_CRT_TABLES, "01", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, 0,     BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { NO_CRT_TABLES, "02", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, 0,     BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { NO_CRT_TABLES, "03", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, 0,     BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { NO_CRT_TABLES, "04", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, 0,     BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
     { NO_CRT_TABLES, "05", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, 0,     BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { NO_CRT_TABLES, "06", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, 0,     BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
     { NO_CRT_TABLES, "07", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, 0,     BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,      DFLT,    DFLT}, },
@@ -173,302 +173,302 @@ static std::vector<TEST_CASE_UTCKKSRNS_SER> testCases = {
 // clang-format on
 //===========================================================================================================
 class UTCKKSRNS_SER : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_SER> {
-    using Element = DCRTPoly;
+    using Element = RnsPoly;
     const double eps = EPSILON;
 
   protected:
     void SetUp() {
-        OpenFHEParallelControls.UnitTestStart();
+        cipher_parallel_controls.unit_test_start();
     }
 
     void TearDown() {
-        CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
-        OpenFHEParallelControls.UnitTestStop();
+        ContextFactory<RnsPoly>::release_all_contexts();
+        cipher_parallel_controls.unit_test_stop();
     }
 
-    void UnitTestContext(const TEST_CASE_UTCKKSRNS_SER& testData, const std::string& failmsg = std::string()) {
-        CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+    void unit_test_context(const TEST_CASE_UTCKKSRNS_SER& test_data, const std::string& failmsg = std::string()) {
+        CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
-        UnitTestContextWithSertype(cc, SerType::JSON, "json");
-        CryptoContextImpl<Element>::ClearEvalMultKeys(cc);
-        CryptoContextImpl<Element>::ClearEvalAutomorphismKeys(cc);
-        UnitTestContextWithSertype(cc, SerType::BINARY, "binary");
+        unit_test_context_with_sertype(cc, SerType::JSON, "json");
+        CryptoContextImpl<Element>::clear_eval_mult_keys(cc);
+        CryptoContextImpl<Element>::clear_eval_automorphism_keys(cc);
+        unit_test_context_with_sertype(cc, SerType::BINARY, "binary");
     }
 
     template <typename ST>
-    void TestKeysAndCiphertexts(const TEST_CASE_UTCKKSRNS_SER& testData, const ST& sertype,
+    void test_keys_and_ciphertexts(const TEST_CASE_UTCKKSRNS_SER& test_data, const ST& sertype,
                                 const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
-            OPENFHE_DEBUG_FLAG(false);
+            CIPHER_DEBUG_FLAG(false);
 
-            CryptoContextImpl<DCRTPoly>::ClearEvalMultKeys();
-            CryptoContextImpl<DCRTPoly>::ClearEvalSumKeys();
-            CryptoContextImpl<DCRTPoly>::ClearEvalAutomorphismKeys();
+            CryptoContextImpl<RnsPoly>::clear_eval_mult_keys();
+            CryptoContextImpl<RnsPoly>::clear_eval_sum_keys();
+            CryptoContextImpl<RnsPoly>::clear_eval_automorphism_keys();
 
-            OPENFHE_DEBUG("step 0");
+            CIPHER_DEBUG("step 0");
             {
                 std::stringstream s;
-                Serial::Serialize(cc, s, sertype);
-                ASSERT_TRUE(CryptoContextFactory<DCRTPoly>::GetContextCount() == 1);
-                CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
-                ASSERT_TRUE(CryptoContextFactory<DCRTPoly>::GetContextCount() == 0);
-                Serial::Deserialize(cc, s, sertype);
+                serialization::to_stream(cc, s, sertype);
+                ASSERT_TRUE(ContextFactory<RnsPoly>::get_context_count() == 1);
+                ContextFactory<RnsPoly>::release_all_contexts();
+                ASSERT_TRUE(ContextFactory<RnsPoly>::get_context_count() == 0);
+                serialization::from_stream(cc, s, sertype);
 
                 ASSERT_TRUE(cc) << "Deser failed";
-                ASSERT_TRUE(CryptoContextFactory<DCRTPoly>::GetContextCount() == 1);
+                ASSERT_TRUE(ContextFactory<RnsPoly>::get_context_count() == 1);
             }
 
-            DisablePrecomputeCRTTablesAfterDeserializaton();
-            KeyPair<DCRTPoly> kp = cc->KeyGen();
-            KeyPair<DCRTPoly> kpnew;
+            disable_precompute_crt_tables_after_deserializaton();
+            KeyPair<RnsPoly> kp = cc->key_gen();
+            KeyPair<RnsPoly> kpnew;
 
-            OPENFHE_DEBUG("step 1");
+            CIPHER_DEBUG("step 1");
             {
                 std::stringstream s;
-                Serial::Serialize(kp.publicKey, s, sertype);
-                Serial::Deserialize(kpnew.publicKey, s, sertype);
-                EXPECT_EQ(*kp.publicKey, *kpnew.publicKey) << "Public key mismatch after ser/deser";
+                serialization::to_stream(kp.public_key, s, sertype);
+                serialization::from_stream(kpnew.public_key, s, sertype);
+                EXPECT_EQ(*kp.public_key, *kpnew.public_key) << "Public key mismatch after ser/deser";
             }
-            OPENFHE_DEBUG("step 2");
+            CIPHER_DEBUG("step 2");
             {
                 std::stringstream s;
-                Serial::Serialize(kp.secretKey, s, sertype);
-                Serial::Deserialize(kpnew.secretKey, s, sertype);
-                EXPECT_EQ(*kp.secretKey, *kpnew.secretKey) << "Secret key mismatch after ser/deser";
+                serialization::to_stream(kp.secret_key, s, sertype);
+                serialization::from_stream(kpnew.secret_key, s, sertype);
+                EXPECT_EQ(*kp.secret_key, *kpnew.secret_key) << "Secret key mismatch after ser/deser";
             }
-            OPENFHE_DEBUG("step 3");
+            CIPHER_DEBUG("step 3");
             std::vector<std::complex<double>> vals = {1.0, 3.0, 5.0, 7.0, 9.0, 2.0, 4.0, 6.0, 8.0, 11.0};
-            Plaintext plaintextShort = cc->MakeCKKSPackedPlaintext(vals);
-            Plaintext plaintextShortL2D2 = cc->MakeCKKSPackedPlaintext(vals, 2, 2);
-            Ciphertext<DCRTPoly> ciphertext = cc->Encrypt(kp.publicKey, plaintextShort);
-            Ciphertext<DCRTPoly> ciphertextL2D2 = cc->Encrypt(kp.publicKey, plaintextShortL2D2);
+            Plaintext plaintext_short = cc->make_ckks_packed_plaintext(vals);
+            Plaintext plaintext_short_l2_d2 = cc->make_ckks_packed_plaintext(vals, 2, 2);
+            Ciphertext<RnsPoly> ciphertext = cc->encrypt(kp.public_key, plaintext_short);
+            Ciphertext<RnsPoly> ciphertext_l2_d2 = cc->encrypt(kp.public_key, plaintext_short_l2_d2);
 
-            OPENFHE_DEBUG("step 4");
-            Ciphertext<DCRTPoly> newC;
-            Ciphertext<DCRTPoly> newCL2D2;
+            CIPHER_DEBUG("step 4");
+            Ciphertext<RnsPoly> new_c;
+            Ciphertext<RnsPoly> new_cl2_d2;
             {
                 std::stringstream s;
-                Serial::Serialize(ciphertext, s, sertype);
-                Serial::Deserialize(newC, s, sertype);
+                serialization::to_stream(ciphertext, s, sertype);
+                serialization::from_stream(new_c, s, sertype);
                 std::stringstream s2;
-                Serial::Serialize(ciphertextL2D2, s2, sertype);
-                Serial::Deserialize(newCL2D2, s2, sertype);
-                EXPECT_EQ(*ciphertext, *newC) << "Ciphertext mismatch";
-                EXPECT_EQ(*ciphertextL2D2, *newCL2D2) << "Ciphertext mismatch";
+                serialization::to_stream(ciphertext_l2_d2, s2, sertype);
+                serialization::from_stream(new_cl2_d2, s2, sertype);
+                EXPECT_EQ(*ciphertext, *new_c) << "Ciphertext mismatch";
+                EXPECT_EQ(*ciphertext_l2_d2, *new_cl2_d2) << "Ciphertext mismatch";
             }
 
-            OPENFHE_DEBUG("step 5");
-            Plaintext plaintextShortNew;
-            Plaintext plaintextShortNewL2D2;
-            cc->Decrypt(kp.secretKey, newC, &plaintextShortNew);
-            cc->Decrypt(kp.secretKey, newCL2D2, &plaintextShortNewL2D2);
-            plaintextShortNew->SetLength(plaintextShort->GetLength());
-            plaintextShortNewL2D2->SetLength(plaintextShortL2D2->GetLength());
-            checkEquality(plaintextShortNew->GetCKKSPackedValue(), plaintextShort->GetCKKSPackedValue(), eps,
+            CIPHER_DEBUG("step 5");
+            Plaintext plaintext_short_new;
+            Plaintext plaintext_short_new_l2_d2;
+            cc->decrypt(kp.secret_key, new_c, &plaintext_short_new);
+            cc->decrypt(kp.secret_key, new_cl2_d2, &plaintext_short_new_l2_d2);
+            plaintext_short_new->set_length(plaintext_short->get_length());
+            plaintext_short_new_l2_d2->set_length(plaintext_short_l2_d2->get_length());
+            check_equality(plaintext_short_new->get_ckks_packed_value(), plaintext_short->get_ckks_packed_value(), eps,
                           failmsg + " Decrypted serialization test fails");
-            checkEquality(plaintextShortNewL2D2->GetCKKSPackedValue(), plaintextShortL2D2->GetCKKSPackedValue(), eps,
+            check_equality(plaintext_short_new_l2_d2->get_ckks_packed_value(), plaintext_short_l2_d2->get_ckks_packed_value(), eps,
                           failmsg + " Decrypted serialization test fails (level 2, depth 2)");
 
-            OPENFHE_DEBUG("step 6");
-            KeyPair<DCRTPoly> kp2 = cc->KeyGen();
+            CIPHER_DEBUG("step 6");
+            KeyPair<RnsPoly> kp2 = cc->key_gen();
 
-            cc->EvalMultKeyGen(kp.secretKey);
-            cc->EvalMultKeyGen(kp2.secretKey);
-            cc->EvalSumKeyGen(kp.secretKey);
-            cc->EvalSumKeyGen(kp2.secretKey);
+            cc->eval_mult_key_gen(kp.secret_key);
+            cc->eval_mult_key_gen(kp2.secret_key);
+            cc->eval_sum_key_gen(kp.secret_key);
+            cc->eval_sum_key_gen(kp2.secret_key);
 
-            OPENFHE_DEBUG("step 7");
+            CIPHER_DEBUG("step 7");
             // serialize a bunch of mult keys
             std::stringstream ser0;
-            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::SerializeEvalMultKey(ser0, sertype, kp.secretKey->GetKeyTag()), true)
+            EXPECT_EQ(CryptoContextImpl<RnsPoly>::serialize_eval_mult_key(ser0, sertype, kp.secret_key->get_key_tag()), true)
                     << "single eval mult key ser fails";
             std::stringstream ser2a;
-            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::SerializeEvalMultKey(ser2a, sertype, cc), true)
+            EXPECT_EQ(CryptoContextImpl<RnsPoly>::serialize_eval_mult_key(ser2a, sertype, cc), true)
                     << "context 1 eval mult key ser fails";
             std::stringstream ser3;
-            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::SerializeEvalMultKey(ser3, sertype), true)
+            EXPECT_EQ(CryptoContextImpl<RnsPoly>::serialize_eval_mult_key(ser3, sertype), true)
                     << "all context eval mult key ser fails";
 
-            OPENFHE_DEBUG("step 8");
+            CIPHER_DEBUG("step 8");
             // serialize a bunch of sum keys
             std::stringstream aser0;
-            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::SerializeEvalSumKey(aser0, sertype, kp.secretKey->GetKeyTag()), true)
+            EXPECT_EQ(CryptoContextImpl<RnsPoly>::serialize_eval_sum_key(aser0, sertype, kp.secret_key->get_key_tag()), true)
                     << "single eval sum key ser fails";
             std::stringstream aser2a;
-            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::SerializeEvalSumKey(aser2a, sertype, cc), true)
+            EXPECT_EQ(CryptoContextImpl<RnsPoly>::serialize_eval_sum_key(aser2a, sertype, cc), true)
                     << "single ctx eval sum key ser fails";
             std::stringstream aser3;
-            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::SerializeEvalSumKey(aser3, sertype), true)
+            EXPECT_EQ(CryptoContextImpl<RnsPoly>::serialize_eval_sum_key(aser3, sertype), true)
                     << "all eval sum key ser fails";
 
-            OPENFHE_DEBUG("step 9");
+            CIPHER_DEBUG("step 9");
             cc.reset();
 
             // test mult deserialize
-            CryptoContextImpl<DCRTPoly>::ClearEvalMultKeys();
-            CryptoContextImpl<DCRTPoly>::ClearEvalSumKeys();
-            CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
-            EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 0) << "after release";
+            CryptoContextImpl<RnsPoly>::clear_eval_mult_keys();
+            CryptoContextImpl<RnsPoly>::clear_eval_sum_keys();
+            ContextFactory<RnsPoly>::release_all_contexts();
+            EXPECT_EQ(ContextFactory<RnsPoly>::get_context_count(), 0) << "after release";
 
-            std::vector<EvalKey<DCRTPoly>> evalMultKeys;
-            CryptoContextImpl<DCRTPoly>::DeserializeEvalMultKey(ser0, sertype);
-            EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 1) << "one-key deser, context";
-            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::GetAllEvalMultKeys().size(), 1U) << "one-key deser, keys";
+            std::vector<EvalKey<RnsPoly>> eval_mult_keys;
+            CryptoContextImpl<RnsPoly>::deserialize_eval_mult_key(ser0, sertype);
+            EXPECT_EQ(ContextFactory<RnsPoly>::get_context_count(), 1) << "one-key deser, context";
+            EXPECT_EQ(CryptoContextImpl<RnsPoly>::get_all_eval_mult_keys().size(), 1U) << "one-key deser, keys";
 
-            CryptoContextImpl<DCRTPoly>::ClearEvalMultKeys();
-            CryptoContextImpl<DCRTPoly>::ClearEvalSumKeys();
-            CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+            CryptoContextImpl<RnsPoly>::clear_eval_mult_keys();
+            CryptoContextImpl<RnsPoly>::clear_eval_sum_keys();
+            ContextFactory<RnsPoly>::release_all_contexts();
 
-            CryptoContextImpl<DCRTPoly>::DeserializeEvalMultKey(ser2a, sertype);
-            EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 1) << "one-ctx deser, context";
-            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::GetAllEvalMultKeys().size(), 2U) << "one-ctx deser, keys";
+            CryptoContextImpl<RnsPoly>::deserialize_eval_mult_key(ser2a, sertype);
+            EXPECT_EQ(ContextFactory<RnsPoly>::get_context_count(), 1) << "one-ctx deser, context";
+            EXPECT_EQ(CryptoContextImpl<RnsPoly>::get_all_eval_mult_keys().size(), 2U) << "one-ctx deser, keys";
 
-            CryptoContextImpl<DCRTPoly>::ClearEvalMultKeys();
-            CryptoContextImpl<DCRTPoly>::ClearEvalSumKeys();
-            CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+            CryptoContextImpl<RnsPoly>::clear_eval_mult_keys();
+            CryptoContextImpl<RnsPoly>::clear_eval_sum_keys();
+            ContextFactory<RnsPoly>::release_all_contexts();
 
-            CryptoContextImpl<DCRTPoly>::DeserializeEvalMultKey(ser3, sertype);
-            EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 1) << "all-key deser, context";
-            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::GetAllEvalMultKeys().size(), 2U) << "all-key deser, keys";
+            CryptoContextImpl<RnsPoly>::deserialize_eval_mult_key(ser3, sertype);
+            EXPECT_EQ(ContextFactory<RnsPoly>::get_context_count(), 1) << "all-key deser, context";
+            EXPECT_EQ(CryptoContextImpl<RnsPoly>::get_all_eval_mult_keys().size(), 2U) << "all-key deser, keys";
 
-            OPENFHE_DEBUG("step 10");
+            CIPHER_DEBUG("step 10");
             // test sum deserialize
 
-            CryptoContextImpl<DCRTPoly>::ClearEvalMultKeys();
-            CryptoContextImpl<DCRTPoly>::ClearEvalSumKeys();
-            CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+            CryptoContextImpl<RnsPoly>::clear_eval_mult_keys();
+            CryptoContextImpl<RnsPoly>::clear_eval_sum_keys();
+            ContextFactory<RnsPoly>::release_all_contexts();
 
-            CryptoContextImpl<DCRTPoly>::DeserializeEvalSumKey(aser0, sertype);
-            EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 1) << "one-key deser, context";
-            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::GetAllEvalSumKeys().size(), 1U) << "one-key deser, keys";
+            CryptoContextImpl<RnsPoly>::deserialize_eval_sum_key(aser0, sertype);
+            EXPECT_EQ(ContextFactory<RnsPoly>::get_context_count(), 1) << "one-key deser, context";
+            EXPECT_EQ(CryptoContextImpl<RnsPoly>::get_all_eval_sum_keys().size(), 1U) << "one-key deser, keys";
 
-            CryptoContextImpl<DCRTPoly>::ClearEvalMultKeys();
-            CryptoContextImpl<DCRTPoly>::ClearEvalSumKeys();
-            CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+            CryptoContextImpl<RnsPoly>::clear_eval_mult_keys();
+            CryptoContextImpl<RnsPoly>::clear_eval_sum_keys();
+            ContextFactory<RnsPoly>::release_all_contexts();
 
-            CryptoContextImpl<DCRTPoly>::DeserializeEvalSumKey(aser2a, sertype);
-            EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 1) << "one-ctx deser, context";
-            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::GetAllEvalSumKeys().size(), 2U) << "one-ctx deser, keys";
+            CryptoContextImpl<RnsPoly>::deserialize_eval_sum_key(aser2a, sertype);
+            EXPECT_EQ(ContextFactory<RnsPoly>::get_context_count(), 1) << "one-ctx deser, context";
+            EXPECT_EQ(CryptoContextImpl<RnsPoly>::get_all_eval_sum_keys().size(), 2U) << "one-ctx deser, keys";
 
-            CryptoContextImpl<DCRTPoly>::ClearEvalMultKeys();
-            CryptoContextImpl<DCRTPoly>::ClearEvalSumKeys();
-            CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+            CryptoContextImpl<RnsPoly>::clear_eval_mult_keys();
+            CryptoContextImpl<RnsPoly>::clear_eval_sum_keys();
+            ContextFactory<RnsPoly>::release_all_contexts();
 
-            CryptoContextImpl<DCRTPoly>::DeserializeEvalSumKey(aser3, sertype);
-            EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 1) << "all-key deser, context";
-            EXPECT_EQ(CryptoContextImpl<DCRTPoly>::GetAllEvalSumKeys().size(), 2U) << "all-key deser, keys";
+            CryptoContextImpl<RnsPoly>::deserialize_eval_sum_key(aser3, sertype);
+            EXPECT_EQ(ContextFactory<RnsPoly>::get_context_count(), 1) << "all-key deser, context";
+            EXPECT_EQ(CryptoContextImpl<RnsPoly>::get_all_eval_sum_keys().size(), 2U) << "all-key deser, keys";
 
             // ending cleanup
-            EnablePrecomputeCRTTablesAfterDeserializaton();
-            CryptoContextImpl<DCRTPoly>::ClearEvalMultKeys();
-            CryptoContextImpl<DCRTPoly>::ClearEvalSumKeys();
-            CryptoContextImpl<DCRTPoly>::ClearEvalAutomorphismKeys();
-            CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+            enable_precompute_crt_tables_after_deserializaton();
+            CryptoContextImpl<RnsPoly>::clear_eval_mult_keys();
+            CryptoContextImpl<RnsPoly>::clear_eval_sum_keys();
+            CryptoContextImpl<RnsPoly>::clear_eval_automorphism_keys();
+            ContextFactory<RnsPoly>::release_all_contexts();
         } catch (std::exception& e) {
-            EnablePrecomputeCRTTablesAfterDeserializaton();
+            enable_precompute_crt_tables_after_deserializaton();
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
             EXPECT_TRUE(0 == 1) << failmsg;
         } catch (...) {
-            EnablePrecomputeCRTTablesAfterDeserializaton();
+            enable_precompute_crt_tables_after_deserializaton();
             UNIT_TEST_HANDLE_ALL_EXCEPTIONS;
         }
     }
-    void UnitTestKeysAndCiphertexts(const TEST_CASE_UTCKKSRNS_SER& testData,
+    void unit_test_keys_and_ciphertexts(const TEST_CASE_UTCKKSRNS_SER& test_data,
                                     const std::string& failmsg = std::string()) {
-        TestKeysAndCiphertexts(testData, SerType::JSON, "json");
-        TestKeysAndCiphertexts(testData, SerType::BINARY, "binary");
+        test_keys_and_ciphertexts(test_data, SerType::JSON, "json");
+        test_keys_and_ciphertexts(test_data, SerType::BINARY, "binary");
     }
 
     template <typename ST>
-    void TestDecryptionSerNoCRTTables(const TEST_CASE_UTCKKSRNS_SER& testData, const ST& sertype,
+    void test_decryption_ser_no_crt_tables(const TEST_CASE_UTCKKSRNS_SER& test_data, const ST& sertype,
                                       const std::string& failmsg = std::string()) {
         try {
-            CryptoContextImpl<DCRTPoly>::ClearEvalMultKeys();
-            CryptoContextImpl<DCRTPoly>::ClearEvalSumKeys();
-            CryptoContextImpl<DCRTPoly>::ClearEvalAutomorphismKeys();
-            CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+            CryptoContextImpl<RnsPoly>::clear_eval_mult_keys();
+            CryptoContextImpl<RnsPoly>::clear_eval_sum_keys();
+            CryptoContextImpl<RnsPoly>::clear_eval_automorphism_keys();
+            ContextFactory<RnsPoly>::release_all_contexts();
 
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
-            KeyPair<Element> kp = cc->KeyGen();
+            KeyPair<Element> kp = cc->key_gen();
 
             std::vector<std::complex<double>> vals = {1.0, 3.0, 5.0, 7.0, 9.0, 2.0, 4.0, 6.0, 8.0, 11.0};
-            Plaintext plaintextShort = cc->MakeCKKSPackedPlaintext(vals);
-            Ciphertext<DCRTPoly> ciphertext = cc->Encrypt(kp.publicKey, plaintextShort);
+            Plaintext plaintext_short = cc->make_ckks_packed_plaintext(vals);
+            Ciphertext<RnsPoly> ciphertext = cc->encrypt(kp.public_key, plaintext_short);
 
             std::stringstream s;
-            Serial::Serialize(cc, s, sertype);
+            serialization::to_stream(cc, s, sertype);
 
-            CryptoContextImpl<DCRTPoly>::ClearEvalMultKeys();
-            CryptoContextImpl<DCRTPoly>::ClearEvalSumKeys();
-            CryptoContextImpl<DCRTPoly>::ClearEvalAutomorphismKeys();
-            CryptoContextFactory<Element>::ReleaseAllContexts();
+            CryptoContextImpl<RnsPoly>::clear_eval_mult_keys();
+            CryptoContextImpl<RnsPoly>::clear_eval_sum_keys();
+            CryptoContextImpl<RnsPoly>::clear_eval_automorphism_keys();
+            ContextFactory<Element>::release_all_contexts();
 
-            DisablePrecomputeCRTTablesAfterDeserializaton();
+            disable_precompute_crt_tables_after_deserializaton();
 
             CryptoContext<Element> newcc;
 
-            Serial::Deserialize(newcc, s, sertype);
+            serialization::from_stream(newcc, s, sertype);
 
             ASSERT_TRUE(newcc) << failmsg << " Deserialize failed";
 
             s.str("");
             s.clear();
-            Serial::Serialize(kp.publicKey, s, sertype);
+            serialization::to_stream(kp.public_key, s, sertype);
 
-            PublicKey<Element> newPub;
-            Serial::Deserialize(newPub, s, sertype);
-            ASSERT_TRUE(newPub) << failmsg << " Key deserialize failed";
+            PublicKey<Element> new_pub;
+            serialization::from_stream(new_pub, s, sertype);
+            ASSERT_TRUE(new_pub) << failmsg << " Key deserialize failed";
 
             s.str("");
             s.clear();
-            Serial::Serialize(ciphertext, s, sertype);
+            serialization::to_stream(ciphertext, s, sertype);
 
-            Ciphertext<DCRTPoly> newC;
-            Serial::Deserialize(newC, s, sertype);
-            ASSERT_TRUE(newC) << failmsg << " ciphertext deserialize failed";
+            Ciphertext<RnsPoly> new_c;
+            serialization::from_stream(new_c, s, sertype);
+            ASSERT_TRUE(new_c) << failmsg << " ciphertext deserialize failed";
 
             Plaintext result;
-            cc->Decrypt(kp.secretKey, newC, &result);
-            result->SetLength(plaintextShort->GetLength());
-            checkEquality(plaintextShort->GetCKKSPackedValue(), result->GetCKKSPackedValue(), eps,
+            cc->decrypt(kp.secret_key, new_c, &result);
+            result->set_length(plaintext_short->get_length());
+            check_equality(plaintext_short->get_ckks_packed_value(), result->get_ckks_packed_value(), eps,
                           failmsg + " Decryption Failed");
 
-            EnablePrecomputeCRTTablesAfterDeserializaton();
-            CryptoContextImpl<DCRTPoly>::ClearEvalMultKeys();
-            CryptoContextImpl<DCRTPoly>::ClearEvalSumKeys();
-            CryptoContextImpl<DCRTPoly>::ClearEvalAutomorphismKeys();
-            CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+            enable_precompute_crt_tables_after_deserializaton();
+            CryptoContextImpl<RnsPoly>::clear_eval_mult_keys();
+            CryptoContextImpl<RnsPoly>::clear_eval_sum_keys();
+            CryptoContextImpl<RnsPoly>::clear_eval_automorphism_keys();
+            ContextFactory<RnsPoly>::release_all_contexts();
         } catch (std::exception& e) {
-            EnablePrecomputeCRTTablesAfterDeserializaton();
+            enable_precompute_crt_tables_after_deserializaton();
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
             EXPECT_TRUE(0 == 1) << failmsg;
         } catch (...) {
-            EnablePrecomputeCRTTablesAfterDeserializaton();
+            enable_precompute_crt_tables_after_deserializaton();
             UNIT_TEST_HANDLE_ALL_EXCEPTIONS;
         }
     }
-    void UnitTestDecryptionSerNoCRTTables(const TEST_CASE_UTCKKSRNS_SER& testData,
+    void unit_test_decryption_ser_no_crt_tables(const TEST_CASE_UTCKKSRNS_SER& test_data,
                                           const std::string& failmsg = std::string()) {
-        TestDecryptionSerNoCRTTables(testData, SerType::JSON, "json");
-        TestDecryptionSerNoCRTTables(testData, SerType::BINARY, "binary");
+        test_decryption_ser_no_crt_tables(test_data, SerType::JSON, "json");
+        test_decryption_ser_no_crt_tables(test_data, SerType::BINARY, "binary");
     }
 };
 //===========================================================================================================
 TEST_P(UTCKKSRNS_SER, CKKSSer) {
-    setupSignals();
+    setup_signals();
     auto test = GetParam();
 
-    if (test.testCaseType == CONTEXT_WITH_SERTYPE)
-        UnitTestContext(test, test.buildTestName());
-    else if (test.testCaseType == KEYS_AND_CIPHERTEXTS)
-        UnitTestKeysAndCiphertexts(test, test.buildTestName());
-    else if (test.testCaseType == NO_CRT_TABLES)
-        UnitTestDecryptionSerNoCRTTables(test, test.buildTestName());
+    if (test.test_case_type == CONTEXT_WITH_SERTYPE)
+        unit_test_context(test, test.build_test_name());
+    else if (test.test_case_type == KEYS_AND_CIPHERTEXTS)
+        unit_test_keys_and_ciphertexts(test, test.build_test_name());
+    else if (test.test_case_type == NO_CRT_TABLES)
+        unit_test_decryption_ser_no_crt_tables(test, test.build_test_name());
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_SER, ::testing::ValuesIn(testCases), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_SER, ::testing::ValuesIn(test_cases), testName);

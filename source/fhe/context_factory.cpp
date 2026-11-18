@@ -37,18 +37,18 @@
 #include "cipher/fhe/config/scheme_id.h"
 #include "cipher/fhe/base/scheme.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 template <>
-std::vector<CryptoContext<DCRTPoly>> CryptoContextFactory<DCRTPoly>::AllContexts = {};
+std::vector<CryptoContext<RnsPoly>> ContextFactory<RnsPoly>::all_contexts = {};
 
 template <typename Element>
-CryptoContext<Element> CryptoContextFactory<Element>::FindContext(std::shared_ptr<CryptoParametersBase<Element>> params,
+CryptoContext<Element> ContextFactory<Element>::find_context(std::shared_ptr<BaseCryptoParams<Element>> params,
                                                                   std::shared_ptr<SchemeBase<Element>> scheme) {
-    for (CryptoContext<Element> cc : CryptoContextFactory<Element>::AllContexts) {
-        if (*cc->GetScheme().get() == *scheme.get() && *cc->GetCryptoParameters().get() == *params.get()) {
-            if (cc->GetEncodingParams()->GetPlaintextRootOfUnity() != 0) {
-                PackedEncoding::SetParams(cc->GetCyclotomicOrder(), cc->GetEncodingParams());
+    for (CryptoContext<Element> cc : ContextFactory<Element>::all_contexts) {
+        if (*cc->get_scheme().get() == *scheme.get() && *cc->get_crypto_parameters().get() == *params.get()) {
+            if (cc->get_encoding_params()->get_plaintext_root_of_unity() != 0) {
+                PackedEncoding::set_params(cc->get_cyclotomic_order(), cc->get_encoding_params());
             }
             return cc;
         }
@@ -58,40 +58,40 @@ CryptoContext<Element> CryptoContextFactory<Element>::FindContext(std::shared_pt
 }
 
 template <typename Element>
-void CryptoContextFactory<Element>::AddContext(CryptoContext<Element> cc) {
-    CryptoContextFactory<Element>::AllContexts.push_back(cc);
+void ContextFactory<Element>::add_context(CryptoContext<Element> cc) {
+    ContextFactory<Element>::all_contexts.push_back(cc);
 
-    if (cc->GetEncodingParams()->GetPlaintextRootOfUnity() != 0) {
-        PackedEncoding::SetParams(cc->GetCyclotomicOrder(), cc->GetEncodingParams());
+    if (cc->get_encoding_params()->get_plaintext_root_of_unity() != 0) {
+        PackedEncoding::set_params(cc->get_cyclotomic_order(), cc->get_encoding_params());
     }
 }
 
 template <typename Element>
-CryptoContext<Element> CryptoContextFactory<Element>::GetContext(std::shared_ptr<CryptoParametersBase<Element>> params,
+CryptoContext<Element> ContextFactory<Element>::get_context(std::shared_ptr<BaseCryptoParams<Element>> params,
                                                                  std::shared_ptr<SchemeBase<Element>> scheme,
-                                                                 SCHEME schemeId) {
-    CryptoContext<Element> cc = FindContext(params, scheme);
+                                                                 SCHEME scheme_id_value) {
+    CryptoContext<Element> cc = find_context(params, scheme);
     // if the context is not found we should create one
     if (nullptr == cc) {
-        cc = std::make_shared<CryptoContextImpl<Element>>(params, scheme, schemeId);
-        AddContext(cc);
+        cc = std::make_shared<CryptoContextImpl<Element>>(params, scheme, scheme_id_value);
+        add_context(cc);
     }
 
     return cc;
 }
 
 template <typename Element>
-CryptoContext<Element> CryptoContextFactory<Element>::GetFullContextByDeserializedContext(
+CryptoContext<Element> ContextFactory<Element>::get_full_context_by_deserialized_context(
         const CryptoContext<Element> context) {
-    return CryptoContextFactory<Element>::GetContext(context->GetCryptoParameters(), context->GetScheme(),
-                                                     context->getSchemeId());
+    return ContextFactory<Element>::get_context(context->get_crypto_parameters(), context->get_scheme(),
+                                                     context->get_scheme_id_impl());
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 // the code below is from pke/lib/cryptocontextfactory-impl.cpp
-namespace lbcrypto {
+namespace cipher {
 
-template class CryptoContextFactory<DCRTPoly>;
+template class ContextFactory<RnsPoly>;
 
 }

@@ -36,7 +36,7 @@
 #include "cipher/ring/backend.h"
 #include "cipher/util/inttypes.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Encryption result. This represents whether the encryption of a plaintext was performed
@@ -52,10 +52,10 @@ struct EncryptResult {
      * Constructor for a successful encryption.
      * @param len the number of plaintext bytes that were encrypted.
      */
-    explicit EncryptResult(uint32_t len) : isValid(true), numBytesEncrypted(len) {}
+    explicit EncryptResult(uint32_t len) : is_valid(true), num_bytes_encrypted(len) {}
 
-    bool isValid{false};           /**< whether the encryption was successful */
-    uint32_t numBytesEncrypted{0}; /**< count of the number of plaintext bytes that were encrypted */
+    bool is_valid{false};           /**< whether the encryption was successful */
+    uint32_t num_bytes_encrypted{0}; /**< count of the number of plaintext bytes that were encrypted */
 };
 
 /**
@@ -82,20 +82,20 @@ struct DecryptResult {
      * Constructor that initializes all message lengths.
      * @param len the new length.
      */
-    explicit DecryptResult(uint32_t len) : isValid(true), messageLength(len) {}
+    explicit DecryptResult(uint32_t len) : is_valid(true), message_length(len) {}
 
     /**
      * Constructor that initializes all message lengths.
      * @param len the new length.
      * @param scf the new scaling factor.
      */
-    DecryptResult(uint32_t len, NativeInteger scf) : isValid(true), messageLength(len), scalingFactorInt(scf) {}
+    DecryptResult(uint32_t len, NativeInteger scf) : is_valid(true), message_length(len), scaling_factor_int(scf) {}
 
-    bool isValid{false};               /**< whether the decryption was successful */
-    uint32_t messageLength{0};         /**< the length of the decrypted plaintext message */
-    NativeInteger scalingFactorInt{1}; /**< Scaling factor for BGV FlexibleAuto mode. */
+    bool is_valid{false};               /**< whether the decryption was successful */
+    uint32_t message_length{0};         /**< the length of the decrypted plaintext message */
+    NativeInteger scaling_factor_int{1}; /**< Scaling factor for BGV FlexibleAuto mode. */
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_BASE_DECRYPT_RESULT_H_

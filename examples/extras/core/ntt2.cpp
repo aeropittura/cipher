@@ -49,10 +49,10 @@
 #include "cipher/core.h"
 #include "time.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 // define the main sections of the test
-void test_NTT(const uint32_t level, const uint32_t nloop);  // test code
+void test_ntt(const uint32_t level, const uint32_t nloop);  // test code
 
 // main()   need this for Kurts' makefile to ignore this.
 int main(int argc, char* argv[]) {
@@ -75,13 +75,13 @@ int main(int argc, char* argv[]) {
         nloop = 1;
     std::cout << "running " << argv[0] << " level = " << level << " nloop = " << nloop << std::endl;
 
-    test_NTT(level, nloop);
+    test_ntt(level, nloop);
     return 0;
 }
 
 // function to compare two BigVectors and print differing indicies
 void vec_diff(BigVector& a, BigVector& b) {
-    for (uint32_t i = 0; i < a.GetLength(); ++i) {
+    for (uint32_t i = 0; i < a.get_length(); ++i) {
         if (a.at(i) != b.at(i)) {
             std::cout << "i: " << i << std::endl;
             std::cout << "first vector " << std::endl;
@@ -105,7 +105,7 @@ bool clonetest(Poly& a, Poly& b, std::string name) {
 }
 
 // main NTT test suite.
-void test_NTT(const uint32_t level, const uint32_t nloop) {
+void test_ntt(const uint32_t level, const uint32_t nloop) {
     // Code to test NTT at three different numbers of limbs.
 
     TimeVar t1, t_setup, t_total;  // timers for TIC() TOC()
@@ -119,7 +119,7 @@ void test_NTT(const uint32_t level, const uint32_t nloop) {
     double time2br, time2bf;
     double time3br, time3bf;
 
-    std::cout << "testing NTT backend " << MATHBACKEND << std::endl;
+    std::cout << "testing NTT backend " << CIPHER_MATH_BACKEND << std::endl;
 
     TIC(t_total);
     TIC(t_setup);
@@ -129,13 +129,13 @@ void test_NTT(const uint32_t level, const uint32_t nloop) {
     uint32_t m = 2048;
     std::cout << "m=" << m << std::endl;
 
-    BigInteger rootOfUnity1(RootOfUnity<BigInteger>(m, q1));
+    BigInteger root_of_unity1(root_of_unity<BigInteger>(m, q1));
     std::cout << "q1 = " << q1 << std::endl;
-    std::cout << "rootOfUnity1 = " << rootOfUnity1 << std::endl;
+    std::cout << "rootOfUnity1 = " << root_of_unity1 << std::endl;
 
     // build parameters for two vectors.
-    ILParams params1(m, q1, rootOfUnity1);
-    auto x1p = std::make_shared<ILParams>(params1);
+    PolyParams params1(m, q1, root_of_unity1);
+    auto x1p = std::make_shared<PolyParams>(params1);
 
     // two vectors
     Poly::DugType dug1;
@@ -143,35 +143,35 @@ void test_NTT(const uint32_t level, const uint32_t nloop) {
     Poly x1b(dug1, x1p, Format::COEFFICIENT);
 
     for (size_t ix = 0; ix < m / 2; ix++) {
-        if (x1a.GetValues().at(ix) >= q1) {
+        if (x1a.get_values().at(ix) >= q1) {
             std::cout << "bad value x1a " << std::endl;
         }
-        if (x1b.GetValues().at(ix) >= q1) {
+        if (x1b.get_values().at(ix) >= q1) {
             std::cout << "bad value x1a " << std::endl;
         }
     }
 
     // make copies to compare against
-    Poly x1aClone(x1a);
-    Poly x1bClone(x1b);
+    Poly x1a_clone(x1a);
+    Poly x1b_clone(x1b);
     std::cout << "setup 1 time " << TOC_US(t_setup) << " usec" << std::endl;
     TIC(t_setup);
     // repeat for q2;
     BigInteger q2("4503599627446273");  // test case 2 32 > x> 64 bits
 
-    BigInteger rootOfUnity2(RootOfUnity<BigInteger>(m, q2));
+    BigInteger root_of_unity2(root_of_unity<BigInteger>(m, q2));
     std::cout << "q2 = " << q2 << std::endl;
-    std::cout << "rootOfUnity2 = " << rootOfUnity2 << std::endl;
+    std::cout << "rootOfUnity2 = " << root_of_unity2 << std::endl;
 
-    ILParams params2(m, q2, rootOfUnity2);
-    auto x2p = std::make_shared<ILParams>(params2);
+    PolyParams params2(m, q2, root_of_unity2);
+    auto x2p = std::make_shared<PolyParams>(params2);
 
     Poly::DugType dug2;
     Poly x2a(dug2, x2p, Format::COEFFICIENT);
     Poly x2b(dug2, x2p, Format::COEFFICIENT);
 
-    Poly x2aClone(x2a);
-    Poly x2bClone(x2b);
+    Poly x2a_clone(x2a);
+    Poly x2b_clone(x2b);
 
     std::cout << "setup 2 time " << TOC_US(t_setup) << " usec" << std::endl;
     TIC(t_setup);
@@ -184,16 +184,16 @@ void test_NTT(const uint32_t level, const uint32_t nloop) {
             "856186982195330803693036166286035467365102402840368690261835415722133141"
             "10873601");
 
-    BigInteger rootOfUnity3(
+    BigInteger root_of_unity3(
             "120238484638556494666603774400695561444642670309493651659937259422204414"
             "126327993119899739382548230714053366233156689615011395926730002978876828"
             "95033094");
 
-    std::cout << "q3 : " << q3.ToString() << std::endl;
-    std::cout << "rootOfUnity3 : " << rootOfUnity3.ToString() << std::endl;
+    std::cout << "q3 : " << q3.to_string() << std::endl;
+    std::cout << "rootOfUnity3 : " << root_of_unity3.to_string() << std::endl;
 
-    ILParams params3(m, q3, rootOfUnity3);
-    auto x3p = std::make_shared<ILParams>(params3);
+    PolyParams params3(m, q3, root_of_unity3);
+    auto x3p = std::make_shared<PolyParams>(params3);
 
     // two vectors
     Poly::DugType dug3;
@@ -201,17 +201,17 @@ void test_NTT(const uint32_t level, const uint32_t nloop) {
     Poly x3b(dug3, x3p, Format::COEFFICIENT);
 
     // make copies to compare against
-    Poly x3aClone(x3a);
-    Poly x3bClone(x3b);
+    Poly x3a_clone(x3a);
+    Poly x3b_clone(x3b);
     std::cout << "setup 3 time " << TOC_US(t_setup) << " usec" << std::endl;
 
     // Precomputations for FTT
     TIC(t_setup);
-    ChineseRemainderTransformFTT<BigVector>().PreCompute(rootOfUnity1, m, q1);
-    ChineseRemainderTransformFTT<BigVector>().PreCompute(rootOfUnity2, m, q2);
+    ChineseRemainderTransformFtt<BigVector>().pre_compute(root_of_unity1, m, q1);
+    ChineseRemainderTransformFtt<BigVector>().pre_compute(root_of_unity2, m, q2);
     std::cout << "CRT 2 setup time " << TOC_US(t_setup) << " usec" << std::endl;
     TIC(t_setup);
-    ChineseRemainderTransformFTT<BigVector>().PreCompute(rootOfUnity3, m, q3);
+    ChineseRemainderTransformFtt<BigVector>().pre_compute(root_of_unity3, m, q3);
     std::cout << "CRT 3 setup time " << TOC_US(t_setup) << " usec" << std::endl;
 
     time1af = 0.0;
@@ -243,70 +243,70 @@ void test_NTT(const uint32_t level, const uint32_t nloop) {
         // forward transforms
         if (level > 0) {
             TIC(t1);
-            x1a.SwitchFormat();
+            x1a.switch_format();
             time1af += TOC_US(t1);
 
             TIC(t1);
-            x1b.SwitchFormat();
+            x1b.switch_format();
             time1bf += TOC_US(t1);
         }
         if (level > 1) {
             TIC(t1);
-            x2a.SwitchFormat();
+            x2a.switch_format();
             time2af += TOC_US(t1);
 
             TIC(t1);
-            x2b.SwitchFormat();
+            x2b.switch_format();
             time2bf += TOC_US(t1);
         }
         if (level > 2) {
             TIC(t1);
-            x3a.SwitchFormat();
+            x3a.switch_format();
             time3af += TOC_US(t1);
 
             TIC(t1);
-            x3b.SwitchFormat();
+            x3b.switch_format();
             time3bf += TOC_US(t1);
         }
         // reverse transforms
         if (level > 0) {
             TIC(t1);
-            x1a.SwitchFormat();
+            x1a.switch_format();
             time1ar += TOC_US(t1);
 
             TIC(t1);
-            x1b.SwitchFormat();
+            x1b.switch_format();
             time1br += TOC_US(t1);
         }
         if (level > 1) {
             TIC(t1);
-            x2a.SwitchFormat();
+            x2a.switch_format();
             time2ar += TOC_US(t1);
 
             TIC(t1);
-            x2b.SwitchFormat();
+            x2b.switch_format();
             time2br += TOC_US(t1);
         }
         if (level > 2) {
             TIC(t1);
-            x3a.SwitchFormat();
+            x3a.switch_format();
             time3ar += TOC_US(t1);
 
             TIC(t1);
-            x3b.SwitchFormat();
+            x3b.switch_format();
             time3br += TOC_US(t1);
         }
         if (level > 0) {
-            failed |= clonetest(x1a, x1aClone, "x1a");
-            failed |= clonetest(x1b, x1bClone, "x1b");
+            failed |= clonetest(x1a, x1a_clone, "x1a");
+            failed |= clonetest(x1b, x1b_clone, "x1b");
         }
         if (level > 1) {
-            failed |= clonetest(x2a, x2aClone, "x2a");
-            failed |= clonetest(x2b, x2bClone, "x2b");
+            failed |= clonetest(x2a, x2a_clone, "x2a");
+            failed |= clonetest(x2b, x2b_clone, "x2b");
         }
         if (level > 2) {
-            failed |= clonetest(x3a, x3aClone, "x3a");
-            failed |= clonetest(x3b, x3bClone, "x3b");
+            failed |= clonetest(x3a, x3a_clone, "x3a");
+            failed |= clonetest(x3b, x3b_clone, "x3b");
         }
     }
 

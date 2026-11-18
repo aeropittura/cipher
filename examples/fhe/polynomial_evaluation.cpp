@@ -42,66 +42,66 @@
 
 #include "cipher/cipher.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 int main(int argc, char* argv[]) {
     TimeVar t;
 
-    double timeEvalPoly1(0.0), timeEvalPoly2(0.0);
+    double time_eval_poly1(0.0), time_eval_poly2(0.0);
 
     std::cout << "\n======EXAMPLE FOR EVALPOLY========\n" << std::endl;
 
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(6);
-    parameters.SetScalingModSize(50);
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_multiplicative_depth(6);
+    parameters.set_scaling_mod_size(50);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
 
     std::vector<std::complex<double>> input({0.5, 0.7, 0.9, 0.95, 0.93});
 
-    size_t encodedLength = input.size();
+    size_t encoded_length = input.size();
 
     std::vector<double> coefficients1({0.15, 0.75, 0, 1.25, 0, 0, 1, 0, 1, 2, 0, 1, 0, 0, 0, 0, 1});
     std::vector<double> coefficients2({1,   2,   3,   4,   5,   -1,   -2,   -3,   -4,   -5,
                                        0.1, 0.2, 0.3, 0.4, 0.5, -0.1, -0.2, -0.3, -0.4, -0.5,
                                        0.1, 0.2, 0.3, 0.4, 0.5, -0.1, -0.2, -0.3, -0.4, -0.5});
-    Plaintext plaintext1 = cc->MakeCKKSPackedPlaintext(input);
+    Plaintext plaintext1 = cc->make_ckks_packed_plaintext(input);
 
-    auto keyPair = cc->KeyGen();
+    auto key_pair = cc->key_gen();
 
     std::cout << "Generating evaluation key for homomorphic multiplication...";
-    cc->EvalMultKeyGen(keyPair.secretKey);
+    cc->eval_mult_key_gen(key_pair.secret_key);
     std::cout << "Completed." << std::endl;
 
-    auto ciphertext1 = cc->Encrypt(keyPair.publicKey, plaintext1);
+    auto ciphertext1 = cc->encrypt(key_pair.public_key, plaintext1);
 
     TIC(t);
 
-    auto result = cc->EvalPoly(ciphertext1, coefficients1);
+    auto result = cc->eval_poly(ciphertext1, coefficients1);
 
-    timeEvalPoly1 = TOC(t);
+    time_eval_poly1 = TOC(t);
 
     TIC(t);
 
-    auto result2 = cc->EvalPoly(ciphertext1, coefficients2);
+    auto result2 = cc->eval_poly(ciphertext1, coefficients2);
 
-    timeEvalPoly2 = TOC(t);
+    time_eval_poly2 = TOC(t);
 
-    Plaintext plaintextDec;
+    Plaintext plaintext_dec;
 
-    cc->Decrypt(keyPair.secretKey, result, &plaintextDec);
+    cc->decrypt(key_pair.secret_key, result, &plaintext_dec);
 
-    plaintextDec->SetLength(encodedLength);
+    plaintext_dec->set_length(encoded_length);
 
-    Plaintext plaintextDec2;
+    Plaintext plaintext_dec2;
 
-    cc->Decrypt(keyPair.secretKey, result2, &plaintextDec2);
+    cc->decrypt(key_pair.secret_key, result2, &plaintext_dec2);
 
-    plaintextDec2->SetLength(encodedLength);
+    plaintext_dec2->set_length(encoded_length);
 
     std::cout << std::setprecision(15) << std::endl;
 
@@ -109,22 +109,22 @@ int main(int argc, char* argv[]) {
     std::cout << plaintext1 << std::endl;
 
     std::cout << "\n Result of evaluating a polynomial with coefficients " << coefficients1 << " \n";
-    std::cout << plaintextDec << std::endl;
+    std::cout << plaintext_dec << std::endl;
 
     std::cout << "\n Expected result: (0.70519107, 1.38285078, 3.97211180, "
                  "5.60215665, 4.86357575) "
               << std::endl;
 
-    std::cout << "\n Evaluation time: " << timeEvalPoly1 << " ms" << std::endl;
+    std::cout << "\n Evaluation time: " << time_eval_poly1 << " ms" << std::endl;
 
     std::cout << "\n Result of evaluating a polynomial with coefficients " << coefficients2 << " \n";
-    std::cout << plaintextDec2 << std::endl;
+    std::cout << plaintext_dec2 << std::endl;
 
     std::cout << "\n Expected result: (3.4515092326, 5.3752765397, 4.8993108833, "
                  "3.2495023573, 4.0485229982) "
               << std::endl;
 
-    std::cout << "\n Evaluation time: " << timeEvalPoly2 << " ms" << std::endl;
+    std::cout << "\n Evaluation time: " << time_eval_poly2 << " ms" << std::endl;
 
     return 0;
 }

@@ -38,24 +38,24 @@
 #include "cipher/math/backend/native/integer.h"
 
 template <typename VecType>
-using NatChineseRemainderTransformFTT = intnat::ChineseRemainderTransformFTTNat<VecType>;
+using NatChineseRemainderTransformFtt = native_int::ChineseRemainderTransformFttNat<VecType>;
 template <typename VecType>
-using NatChineseRemainderTransformArb = intnat::ChineseRemainderTransformArbNat<VecType>;
+using NatChineseRemainderTransformArb = native_int::ChineseRemainderTransformArbNat<VecType>;
 
-namespace lbcrypto {
+namespace cipher {
 
-using NativeInteger = intnat::NativeInteger;
-using NativeVector = intnat::NativeVector;
+using NativeInteger = native_int::NativeInteger;
+using NativeVector = native_int::NativeVector;
 
-using NativeInteger32 = intnat::NativeInteger32;
-using NativeVector32 = intnat::NativeVector32;
+using NativeInteger32 = native_int::NativeInteger32;
+using NativeVector32 = native_int::NativeVector32;
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
-using NativeInteger = lbcrypto::NativeInteger;
-using NativeVector = lbcrypto::NativeVector;
+using NativeInteger = cipher::NativeInteger;
+using NativeVector = cipher::NativeVector;
 
-using NativeInteger32 = lbcrypto::NativeInteger32;
-using NativeVector32 = lbcrypto::NativeVector32;
+using NativeInteger32 = cipher::NativeInteger32;
+using NativeVector32 = cipher::NativeVector32;
 
 #endif  // CIPHER_MATH_BACKEND_NATIVE_INT_BACKEND_H_

@@ -43,7 +43,7 @@
 #include "cipher/fhe/encoding/encoding_params.h"
 #include "cipher/fhe/base/crypto_params.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief CryptoObject
@@ -62,7 +62,7 @@ class CryptoObject {
     CryptoContext<Element> context;  // crypto context belongs to the tag used to find the evaluation key needed
                                      // for SHE/FHE operations
     /** identifier of the secret key the object is associated with; selects the evaluation keys used on it */
-    std::string keyTag;
+    std::string key_tag;
 
   public:
     CryptoObject() = default;
@@ -73,7 +73,7 @@ class CryptoObject {
      * @param cc the crypto context the object belongs to
      * @param tag the key tag identifying the associated secret key (empty by default)
      */
-    explicit CryptoObject(const CryptoContext<Element>& cc, const std::string& tag = "") : context(cc), keyTag(tag) {}
+    explicit CryptoObject(const CryptoContext<Element>& cc, const std::string& tag = "") : context(cc), key_tag(tag) {}
 
     CryptoObject(const CryptoObject& rhs) = default;
 
@@ -83,13 +83,13 @@ class CryptoObject {
 
     CryptoObject& operator=(const CryptoObject& rhs) {
         context = rhs.context;
-        keyTag = rhs.keyTag;
+        key_tag = rhs.key_tag;
         return *this;
     }
 
     CryptoObject& operator=(CryptoObject&& rhs) noexcept {
         context = std::move(rhs.context);
-        keyTag = std::move(rhs.keyTag);
+        key_tag = std::move(rhs.key_tag);
         return *this;
     }
 
@@ -101,7 +101,7 @@ class CryptoObject {
      * @return true if both the context pointer and the key tag match
      */
     bool operator==(const CryptoObject& rhs) const {
-        return context.get() == rhs.context.get() && keyTag == rhs.keyTag;
+        return context.get() == rhs.context.get() && key_tag == rhs.key_tag;
     }
 
     /**
@@ -109,7 +109,7 @@ class CryptoObject {
      *
      * @return the crypto context (may be null for a default-constructed object)
      */
-    CryptoContext<Element> GetCryptoContext() const {
+    CryptoContext<Element> get_crypto_context() const {
         return context;
     }
 
@@ -118,54 +118,54 @@ class CryptoObject {
      *
      * @return the crypto parameters of the object's context
      */
-    const std::shared_ptr<CryptoParametersBase<Element>> GetCryptoParameters() const;
+    const std::shared_ptr<BaseCryptoParams<Element>> get_crypto_parameters() const;
 
     /**
      * Returns the encoding parameters of the crypto context the object belongs to.
      *
      * @return the encoding parameters of the object's context
      */
-    const EncodingParams GetEncodingParameters() const;
+    const EncodingParams get_encoding_parameters() const;
 
-    const std::string& GetKeyTag() const {
-        return keyTag;
+    const std::string& get_key_tag() const {
+        return key_tag;
     }
 
-    void SetKeyTag(const std::string& tag) {
-        keyTag = tag;
+    void set_key_tag(const std::string& tag) {
+        key_tag = tag;
     }
 
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
         ar(::cereal::make_nvp("cc", context));
-        ar(::cereal::make_nvp("kt", keyTag));
+        ar(::cereal::make_nvp("kt", key_tag));
     }
 
     /**
      * Deserializes the object. The deserialized crypto context is replaced by the matching context registered in
-     * CryptoContextFactory (or registered there if it is new), so that all deserialized objects share one context.
+     * ContextFactory (or registered there if it is new), so that all deserialized objects share one context.
      *
      * @param ar the archive to read from
-     * @param version serialized version of the object; must not exceed SerializedVersion()
+     * @param version serialized version of the object; must not exceed serialized_version()
      */
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion())
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version())
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         ar(::cereal::make_nvp("cc", context));
-        ar(::cereal::make_nvp("kt", keyTag));
-        context = CryptoContextFactory<Element>::GetFullContextByDeserializedContext(context);
+        ar(::cereal::make_nvp("kt", key_tag));
+        context = ContextFactory<Element>::get_full_context_by_deserialized_context(context);
     }
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "CryptoObject";
     }
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_CRYPTO_OBJECT_H_

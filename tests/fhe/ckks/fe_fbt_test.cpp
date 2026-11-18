@@ -53,7 +53,7 @@
 #include "cipher/fhe/ckks/crypto_params.h"
 #include "cipher/fhe/ckks/fhe.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 namespace {
 
@@ -120,43 +120,43 @@ static std::ostream& operator<<(std::ostream& os, const FEFBT_FUNCTION& type) {
 }
 
 struct TEST_CASE_UTCKKSRNS_FEFBT {
-    TEST_CASE_TYPE testCaseType;
+    TEST_CASE_TYPE test_case_type;
     std::string description;
-    UnitTestCCParams params;
-    std::vector<uint32_t> levelBudget;
+    TestContextParams params;
+    std::vector<uint32_t> level_budget;
     std::vector<uint32_t> dim1;
     uint32_t slots;
-    FEFBT_FUNCTION functionType;
+    FEFBT_FUNCTION function_type;
     // FEFBT_CS_VS_FA only: COMPOSITESCALINGAUTO may lag FLEXIBLEAUTO by at most this many precision bits
-    double gapTolBits = 0.0;
+    double gap_tol_bits = 0.0;
 
-    std::string buildTestName() const {
+    std::string build_test_name() const {
         std::stringstream ss;
-        ss << testCaseType << "_" << description;
+        ss << test_case_type << "_" << description;
         return ss.str();
     }
 
-    std::string toString() const {
+    std::string to_string_impl() const {
         std::stringstream ss;
-        ss << "testCaseType [" << testCaseType << "], functionType [" << functionType << "], " << params.toString()
+        ss << "testCaseType [" << test_case_type << "], functionType [" << function_type << "], " << params.to_string_impl()
            << ", slots [" << slots << "]";
         return ss.str();
     }
 };
 
 static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNS_FEFBT>& test) {
-    return test.param.buildTestName();
+    return test.param.build_test_name();
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_UTCKKSRNS_FEFBT& test) {
-    return os << test.toString();
+    return os << test.to_string_impl();
 }
 
 constexpr uint32_t MULT_DEPTH = 26;
 // register word size for the COMPOSITESCALING* techniques: composite degree 2 for the 59-bit scaling factor
 constexpr uint32_t REG_WORD_SIZE = 32;
 
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
 constexpr uint32_t RDIM = 1 << 12;
 constexpr uint32_t NUM_LRG_DIGS = 3;
 constexpr uint32_t SPARSE_SLOTS = 8;
@@ -167,103 +167,103 @@ constexpr uint32_t FMODSIZE = 60;
 constexpr uint32_t SMODSIZED3 = 78;
 constexpr uint32_t FMODSIZED3 = 79;
 
-UnitTestCCParams MakeFEFBTParams(uint32_t batchSize, SecretKeyDist skd, ScalingTechnique scalingTechnique = FIXEDMANUAL,
-                                 uint32_t scalingModSize = SMODSIZE, uint32_t firstModSize = FMODSIZE) {
-    UnitTestCCParams params;
-    params.schemeId = CKKSRNS_SCHEME;
-    params.ringDimension = RDIM;
-    params.multiplicativeDepth = MULT_DEPTH;
-    params.scalingModSize = scalingModSize;
-    params.batchSize = batchSize;
-    params.secretKeyDist = skd;
-    params.firstModSize = firstModSize;
-    params.securityLevel = HEStd_NotSet;
-    params.ksTech = HYBRID;
-    params.scalTech = scalingTechnique;
-    params.numLargeDigits = NUM_LRG_DIGS;
-    params.ckksDataType = REAL;
-    if (scalingTechnique == COMPOSITESCALINGAUTO || scalingTechnique == COMPOSITESCALINGMANUAL) {
-        params.registerWordSize = REG_WORD_SIZE;
-        if (scalingTechnique == COMPOSITESCALINGMANUAL)
-            params.compositeDegree = (scalingModSize + REG_WORD_SIZE - 1) / REG_WORD_SIZE;
+TestContextParams make_fefbt_params(uint32_t batch_size, SecretKeyDist skd, ScalingTechnique scaling_technique = FIXEDMANUAL,
+                                 uint32_t scaling_mod_size = SMODSIZE, uint32_t first_mod_size_value = FMODSIZE) {
+    TestContextParams params;
+    params.scheme_id_value = CKKSRNS_SCHEME;
+    params.ring_dimension_value = RDIM;
+    params.multiplicative_depth = MULT_DEPTH;
+    params.scaling_mod_size = scaling_mod_size;
+    params.batch_size = batch_size;
+    params.secret_key_dist = skd;
+    params.first_mod_size_value = first_mod_size_value;
+    params.security_level = HEStd_NotSet;
+    params.ks_tech = HYBRID;
+    params.scal_tech = scaling_technique;
+    params.num_large_digits = NUM_LRG_DIGS;
+    params.ckks_data_type = REAL;
+    if (scaling_technique == COMPOSITESCALINGAUTO || scaling_technique == COMPOSITESCALINGMANUAL) {
+        params.register_word_size = REG_WORD_SIZE;
+        if (scaling_technique == COMPOSITESCALINGMANUAL)
+            params.composite_degree = (scaling_mod_size + REG_WORD_SIZE - 1) / REG_WORD_SIZE;
     }
 
     return params;
 }
 
-TEST_CASE_UTCKKSRNS_FEFBT MakeFEFBTCase(TEST_CASE_TYPE testCaseType, const std::string& description, uint32_t batchSize,
-                                        SecretKeyDist skd, uint32_t slots, FEFBT_FUNCTION functionType,
-                                        std::vector<uint32_t> levelBudget = {3, 2},
-                                        ScalingTechnique scalingTechnique = FIXEDMANUAL,
-                                        uint32_t scalingModSize = SMODSIZE, uint32_t firstModSize = FMODSIZE) {
-    TEST_CASE_UTCKKSRNS_FEFBT testCase;
-    testCase.testCaseType = testCaseType;
-    testCase.description = description;
-    testCase.params = MakeFEFBTParams(batchSize, skd, scalingTechnique, scalingModSize, firstModSize);
-    testCase.levelBudget = std::move(levelBudget);
-    testCase.dim1 = {0, 0};
-    testCase.slots = slots;
-    testCase.functionType = functionType;
+TEST_CASE_UTCKKSRNS_FEFBT make_fefbt_case(TEST_CASE_TYPE test_case_type, const std::string& description, uint32_t batch_size,
+                                        SecretKeyDist skd, uint32_t slots, FEFBT_FUNCTION function_type,
+                                        std::vector<uint32_t> level_budget = {3, 2},
+                                        ScalingTechnique scaling_technique = FIXEDMANUAL,
+                                        uint32_t scaling_mod_size = SMODSIZE, uint32_t first_mod_size_value = FMODSIZE) {
+    TEST_CASE_UTCKKSRNS_FEFBT test_case_value;
+    test_case_value.test_case_type = test_case_type;
+    test_case_value.description = description;
+    test_case_value.params = make_fefbt_params(batch_size, skd, scaling_technique, scaling_mod_size, first_mod_size_value);
+    test_case_value.level_budget = std::move(level_budget);
+    test_case_value.dim1 = {0, 0};
+    test_case_value.slots = slots;
+    test_case_value.function_type = function_type;
 
-    return testCase;
+    return test_case_value;
 }
 
 // A CS-vs-FA precision-gap case: the same FE functional bootstrapping is run under FLEXIBLEAUTO and under
-// COMPOSITESCALINGAUTO, and the CS precision must come within gapTolBits of the FA precision (the analog of
+// COMPOSITESCALINGAUTO, and the CS precision must come within gap_tol_bits of the FA precision (the analog of
 // the FBT_NOISE_VS_FLEXIBLE rows of UnitTestFBT and of UnitTestCKKSrnsCompositeScalingVsFlexible).
-TEST_CASE_UTCKKSRNS_FEFBT MakeFEFBTCSvsFACase(const std::string& description, uint32_t slots, SecretKeyDist skd,
-                                              FEFBT_FUNCTION functionType, std::vector<uint32_t> levelBudget,
-                                              double gapTolBits) {
-    TEST_CASE_UTCKKSRNS_FEFBT testCase =
-            MakeFEFBTCase(FEFBT_CS_VS_FA, description, slots, skd, slots, functionType, std::move(levelBudget));
-    testCase.gapTolBits = gapTolBits;
-    return testCase;
+TEST_CASE_UTCKKSRNS_FEFBT make_fefbtc_svs_fa_case(const std::string& description, uint32_t slots, SecretKeyDist skd,
+                                              FEFBT_FUNCTION function_type, std::vector<uint32_t> level_budget,
+                                              double gap_tol_bits) {
+    TEST_CASE_UTCKKSRNS_FEFBT test_case_value =
+            make_fefbt_case(FEFBT_CS_VS_FA, description, slots, skd, slots, function_type, std::move(level_budget));
+    test_case_value.gap_tol_bits = gap_tol_bits;
+    return test_case_value;
 }
 
-// A CKKSDataType COMPLEX case: the input carries nonzero imaginary parts, which FE functional
+// A CkksDataType COMPLEX case: the input carries nonzero imaginary parts, which FE functional
 // bootstrapping discards (its output is twice the real part of a Fourier series, hence always real).
-TEST_CASE_UTCKKSRNS_FEFBT MakeFEFBTComplexInputCase(const std::string& description, uint32_t slots,
-                                                    FEFBT_FUNCTION functionType, std::vector<uint32_t> levelBudget) {
-    TEST_CASE_UTCKKSRNS_FEFBT testCase = MakeFEFBTCase(FEFBT_COMPLEX_INPUT, description, slots, SPARSE_TERNARY, slots,
-                                                       functionType, std::move(levelBudget));
-    testCase.params.ckksDataType = COMPLEX;
-    return testCase;
+TEST_CASE_UTCKKSRNS_FEFBT make_fefbt_complex_input_case(const std::string& description, uint32_t slots,
+                                                    FEFBT_FUNCTION function_type, std::vector<uint32_t> level_budget) {
+    TEST_CASE_UTCKKSRNS_FEFBT test_case_value = make_fefbt_case(FEFBT_COMPLEX_INPUT, description, slots, SPARSE_TERNARY, slots,
+                                                       function_type, std::move(level_budget));
+    test_case_value.params.ckks_data_type = COMPLEX;
+    return test_case_value;
 }
 
 // clang-format off
-static std::vector<TEST_CASE_UTCKKSRNS_FEFBT> testCases = {
-    MakeFEFBTCase(FEFBT_ACCURACY,      "01", RDIM / 2,    SPARSE_TERNARY,      RDIM / 2,   FEFBT_SIGMOID),
-    MakeFEFBTCase(FEFBT_ACCURACY,      "02", RDIM / 2,    SPARSE_ENCAPSULATED, RDIM / 2,   FEFBT_SIGMOID),
-    MakeFEFBTCase(FEFBT_ACCURACY,      "03", RDIM / 2,    UNIFORM_TERNARY,     RDIM / 2,   FEFBT_SIGMOID),
-    MakeFEFBTCase(FEFBT_ACCURACY,      "04", SPARSE_SLOTS, SPARSE_TERNARY,     SPARSE_SLOTS, FEFBT_SIGMOID),
-    MakeFEFBTCase(FEFBT_POST_ROTATION, "05", RDIM / 2,    SPARSE_TERNARY,      RDIM / 2,   FEFBT_SIGMOID),
-    MakeFEFBTCase(FEFBT_ACCURACY,      "06", RDIM / 2,    SPARSE_TERNARY,      RDIM / 2,   FEFBT_EXP),
-    MakeFEFBTCase(FEFBT_ACCURACY,      "07", RDIM / 2,    SPARSE_TERNARY,      RDIM / 2,   FEFBT_GELU_TANH),
-    MakeFEFBTCase(FEFBT_ACCURACY,      "08", SPARSE_SLOTS, SPARSE_TERNARY,     SPARSE_SLOTS, FEFBT_SIGMOID,
+static std::vector<TEST_CASE_UTCKKSRNS_FEFBT> test_cases = {
+    make_fefbt_case(FEFBT_ACCURACY,      "01", RDIM / 2,    SPARSE_TERNARY,      RDIM / 2,   FEFBT_SIGMOID),
+    make_fefbt_case(FEFBT_ACCURACY,      "02", RDIM / 2,    SPARSE_ENCAPSULATED, RDIM / 2,   FEFBT_SIGMOID),
+    make_fefbt_case(FEFBT_ACCURACY,      "03", RDIM / 2,    UNIFORM_TERNARY,     RDIM / 2,   FEFBT_SIGMOID),
+    make_fefbt_case(FEFBT_ACCURACY,      "04", SPARSE_SLOTS, SPARSE_TERNARY,     SPARSE_SLOTS, FEFBT_SIGMOID),
+    make_fefbt_case(FEFBT_POST_ROTATION, "05", RDIM / 2,    SPARSE_TERNARY,      RDIM / 2,   FEFBT_SIGMOID),
+    make_fefbt_case(FEFBT_ACCURACY,      "06", RDIM / 2,    SPARSE_TERNARY,      RDIM / 2,   FEFBT_EXP),
+    make_fefbt_case(FEFBT_ACCURACY,      "07", RDIM / 2,    SPARSE_TERNARY,      RDIM / 2,   FEFBT_GELU_TANH),
+    make_fefbt_case(FEFBT_ACCURACY,      "08", SPARSE_SLOTS, SPARSE_TERNARY,     SPARSE_SLOTS, FEFBT_SIGMOID,
                   {1, 1}, FIXEDMANUAL),
-    MakeFEFBTCase(FEFBT_ACCURACY,      "09", SPARSE_SLOTS, SPARSE_TERNARY,     SPARSE_SLOTS, FEFBT_SIGMOID,
+    make_fefbt_case(FEFBT_ACCURACY,      "09", SPARSE_SLOTS, SPARSE_TERNARY,     SPARSE_SLOTS, FEFBT_SIGMOID,
                   {1, 1}, FLEXIBLEAUTO),
-    MakeFEFBTCase(FEFBT_ACCURACY,      "10", RDIM / 2,    SPARSE_TERNARY,      RDIM / 2,   FEFBT_SIGMOID,
+    make_fefbt_case(FEFBT_ACCURACY,      "10", RDIM / 2,    SPARSE_TERNARY,      RDIM / 2,   FEFBT_SIGMOID,
                   {3, 2}, FLEXIBLEAUTO),
-    MakeFEFBTCase(FEFBT_ACCURACY,      "11", RDIM / 2,    SPARSE_TERNARY,      RDIM / 2,   FEFBT_SIGMOID,
+    make_fefbt_case(FEFBT_ACCURACY,      "11", RDIM / 2,    SPARSE_TERNARY,      RDIM / 2,   FEFBT_SIGMOID,
                   {3, 2}, FIXEDAUTO),
-    MakeFEFBTCase(FEFBT_ACCURACY,      "12", SPARSE_SLOTS, SPARSE_TERNARY,     SPARSE_SLOTS, FEFBT_SIGMOID,
+    make_fefbt_case(FEFBT_ACCURACY,      "12", SPARSE_SLOTS, SPARSE_TERNARY,     SPARSE_SLOTS, FEFBT_SIGMOID,
                   {1, 1}, FIXEDAUTO),
-    MakeFEFBTCase(FEFBT_ACCURACY,      "13", RDIM / 2,    SPARSE_TERNARY,      RDIM / 2,   FEFBT_SIGMOID,
+    make_fefbt_case(FEFBT_ACCURACY,      "13", RDIM / 2,    SPARSE_TERNARY,      RDIM / 2,   FEFBT_SIGMOID,
                   {3, 2}, FLEXIBLEAUTOEXT),
-    MakeFEFBTCase(FEFBT_ACCURACY,      "14", SPARSE_SLOTS, SPARSE_TERNARY,     SPARSE_SLOTS, FEFBT_SIGMOID,
+    make_fefbt_case(FEFBT_ACCURACY,      "14", SPARSE_SLOTS, SPARSE_TERNARY,     SPARSE_SLOTS, FEFBT_SIGMOID,
                   {1, 1}, FLEXIBLEAUTOEXT),
-    MakeFEFBTCase(FEFBT_ACCURACY,      "15", RDIM / 2,    SPARSE_TERNARY,      RDIM / 2,   FEFBT_SIGMOID,
+    make_fefbt_case(FEFBT_ACCURACY,      "15", RDIM / 2,    SPARSE_TERNARY,      RDIM / 2,   FEFBT_SIGMOID,
                   {3, 2}, COMPOSITESCALINGAUTO),
-    MakeFEFBTCase(FEFBT_ACCURACY,      "16", SPARSE_SLOTS, SPARSE_TERNARY,     SPARSE_SLOTS, FEFBT_SIGMOID,
+    make_fefbt_case(FEFBT_ACCURACY,      "16", SPARSE_SLOTS, SPARSE_TERNARY,     SPARSE_SLOTS, FEFBT_SIGMOID,
                   {1, 1}, COMPOSITESCALINGAUTO),
-    MakeFEFBTCase(FEFBT_ACCURACY,      "17", RDIM / 2,    SPARSE_TERNARY,      RDIM / 2,   FEFBT_EXP,
+    make_fefbt_case(FEFBT_ACCURACY,      "17", RDIM / 2,    SPARSE_TERNARY,      RDIM / 2,   FEFBT_EXP,
                   {3, 2}, COMPOSITESCALINGMANUAL),
-    MakeFEFBTCase(FEFBT_ACCURACY,      "18", RDIM / 2,    UNIFORM_TERNARY,     RDIM / 2,   FEFBT_SIGMOID,
+    make_fefbt_case(FEFBT_ACCURACY,      "18", RDIM / 2,    UNIFORM_TERNARY,     RDIM / 2,   FEFBT_SIGMOID,
                   {3, 2}, COMPOSITESCALINGAUTO),
-    MakeFEFBTCase(FEFBT_ACCURACY,      "19", RDIM / 2,    SPARSE_ENCAPSULATED, RDIM / 2,   FEFBT_SIGMOID,
+    make_fefbt_case(FEFBT_ACCURACY,      "19", RDIM / 2,    SPARSE_ENCAPSULATED, RDIM / 2,   FEFBT_SIGMOID,
                   {3, 2}, COMPOSITESCALINGAUTO),
-    // CS-vs-FA precision-gap cases. Each gap (faBits - csBits) is a random variable; measured over 10 runs
+    // CS-vs-FA precision-gap cases. Each gap (fa_bits - cs_bits) is a random variable; measured over 10 runs
     // per case on x86_64 / GCC, NATIVE_SIZE = 64:
     //   20 full packing, SPARSE_TERNARY, {3,2}       gap  0.010 +/- 0.008  (FA 31.6, CS 31.6)
     //   21 8 slots (LT), SPARSE_TERNARY, {1,1}       gap  0.001 +/- 0.007  (FA 31.9, CS 31.9)
@@ -273,35 +273,35 @@ static std::vector<TEST_CASE_UTCKKSRNS_FEFBT> testCases = {
     // false failure is negligible while a real regression of even one bit is caught. The SPARSE_ENCAPSULATED case
     // keeps the K = 16 exponential table under CS (its 60-bit first modulus keeps the Hamming weight of the sparse
     // secret at 32); the K = 28 table of the denser sparse secret is covered by case 30.
-    MakeFEFBTCSvsFACase("20", RDIM / 2,     SPARSE_TERNARY,      FEFBT_SIGMOID, {3, 2}, 1.0),
-    MakeFEFBTCSvsFACase("21", SPARSE_SLOTS, SPARSE_TERNARY,      FEFBT_SIGMOID, {1, 1}, 1.0),
-    MakeFEFBTCSvsFACase("22", RDIM / 2,     UNIFORM_TERNARY,     FEFBT_SIGMOID, {3, 2}, 1.0),
-    MakeFEFBTCSvsFACase("23", RDIM / 2,     SPARSE_ENCAPSULATED, FEFBT_SIGMOID, {3, 2}, 1.0),
-    MakeFEFBTComplexInputCase("24", RDIM / 2,     FEFBT_SIGMOID, {3, 2}),
-    MakeFEFBTComplexInputCase("25", SPARSE_SLOTS, FEFBT_SIGMOID, {1, 1}),
-    // functionType names the series the powers are precomputed for; every function is then evaluated
+    make_fefbtc_svs_fa_case("20", RDIM / 2,     SPARSE_TERNARY,      FEFBT_SIGMOID, {3, 2}, 1.0),
+    make_fefbtc_svs_fa_case("21", SPARSE_SLOTS, SPARSE_TERNARY,      FEFBT_SIGMOID, {1, 1}, 1.0),
+    make_fefbtc_svs_fa_case("22", RDIM / 2,     UNIFORM_TERNARY,     FEFBT_SIGMOID, {3, 2}, 1.0),
+    make_fefbtc_svs_fa_case("23", RDIM / 2,     SPARSE_ENCAPSULATED, FEFBT_SIGMOID, {3, 2}, 1.0),
+    make_fefbt_complex_input_case("24", RDIM / 2,     FEFBT_SIGMOID, {3, 2}),
+    make_fefbt_complex_input_case("25", SPARSE_SLOTS, FEFBT_SIGMOID, {1, 1}),
+    // function_type names the series the powers are precomputed for; every function is then evaluated
     // against those powers
-    MakeFEFBTCase(FEFBT_MULTI_VALUE, "26", RDIM / 2,     SPARSE_TERNARY, RDIM / 2,     FEFBT_GELU_TANH),
-    MakeFEFBTCase(FEFBT_MULTI_VALUE, "27", SPARSE_SLOTS, SPARSE_TERNARY, SPARSE_SLOTS, FEFBT_GELU_TANH,
+    make_fefbt_case(FEFBT_MULTI_VALUE, "26", RDIM / 2,     SPARSE_TERNARY, RDIM / 2,     FEFBT_GELU_TANH),
+    make_fefbt_case(FEFBT_MULTI_VALUE, "27", SPARSE_SLOTS, SPARSE_TERNARY, SPARSE_SLOTS, FEFBT_GELU_TANH,
                   {1, 1}, FLEXIBLEAUTO),
     // composite degree 3 with UNIFORM_TERNARY: the K = 696 overflow bound of the lower composite degrees is
     // used for every composite degree
-    MakeFEFBTCase(FEFBT_ACCURACY,      "28", RDIM / 2,    UNIFORM_TERNARY,     RDIM / 2,   FEFBT_SIGMOID,
+    make_fefbt_case(FEFBT_ACCURACY,      "28", RDIM / 2,    UNIFORM_TERNARY,     RDIM / 2,   FEFBT_SIGMOID,
                   {3, 2}, COMPOSITESCALINGAUTO, SMODSIZED3, FMODSIZED3),
-    MakeFEFBTCase(FEFBT_ACCURACY,      "29", SPARSE_SLOTS, UNIFORM_TERNARY,    SPARSE_SLOTS, FEFBT_SIGMOID,
+    make_fefbt_case(FEFBT_ACCURACY,      "29", SPARSE_SLOTS, UNIFORM_TERNARY,    SPARSE_SLOTS, FEFBT_SIGMOID,
                   {1, 1}, COMPOSITESCALINGMANUAL, SMODSIZED3, FMODSIZED3),
     // SPARSE_ENCAPSULATED with a first modulus above 60 bits: the sparse secret has Hamming weight 64 and the K = 28
     // exponential table of SPARSE_TERNARY is used
-    MakeFEFBTCase(FEFBT_ACCURACY,      "30", RDIM / 2,    SPARSE_ENCAPSULATED, RDIM / 2,   FEFBT_SIGMOID,
+    make_fefbt_case(FEFBT_ACCURACY,      "30", RDIM / 2,    SPARSE_ENCAPSULATED, RDIM / 2,   FEFBT_SIGMOID,
                   {3, 2}, COMPOSITESCALINGAUTO, SMODSIZED3, FMODSIZED3),
-    // EvalBootstrap on a precomputation generated by EvalFEFuncBootstrapSetup must throw: the two variants
+    // eval_bootstrap on a precomputation generated by eval_fe_func_bootstrap_setup must throw: the two variants
     // fold different uniform-secret overflow bounds K into the CoeffsToSlots matrix (K_UNIFORM vs
     // K_UNIFORM_FEFBT), so sharing it would silently lose precision
-    MakeFEFBTCase(FEFBT_VARIANT_MIX,   "31", SPARSE_SLOTS, UNIFORM_TERNARY,    SPARSE_SLOTS, FEFBT_SIGMOID, {1, 1}),
+    make_fefbt_case(FEFBT_VARIANT_MIX,   "31", SPARSE_SLOTS, UNIFORM_TERNARY,    SPARSE_SLOTS, FEFBT_SIGMOID, {1, 1}),
 };
 // clang-format on
 #else
-static std::vector<TEST_CASE_UTCKKSRNS_FEFBT> testCases = {};
+static std::vector<TEST_CASE_UTCKKSRNS_FEFBT> test_cases = {};
 #endif
 
 static const std::vector<std::complex<double>> coeff_exp_2_double_29{
@@ -420,30 +420,30 @@ static const std::vector<std::complex<double>> coeff_gelu_8_double_44{
         std::complex<double>(1.478126284614e-10, -1.420742295235e-12),
         std::complex<double>(1.014093012815e-10, 4.286355138519e-13)};
 
-// each level consists of compositeDegree towers, so the encoding level scales accordingly
-static uint32_t FEFBTEncodeLevel(const CryptoContext<DCRTPoly>& cc, const TEST_CASE_UTCKKSRNS_FEFBT& testData) {
-    uint32_t compositeDegree =
-            std::dynamic_pointer_cast<CryptoParametersCKKSRNS>(cc->GetCryptoParameters())->GetCompositeDegree();
-    return compositeDegree * (MULT_DEPTH - (testData.levelBudget[1] + 1));
+// each level consists of composite_degree towers, so the encoding level scales accordingly
+static uint32_t fefbt_encode_level(const CryptoContext<RnsPoly>& cc, const TEST_CASE_UTCKKSRNS_FEFBT& test_data) {
+    uint32_t composite_degree =
+            std::dynamic_pointer_cast<CkksRnsCryptoParams>(cc->get_crypto_parameters())->get_composite_degree();
+    return composite_degree * (MULT_DEPTH - (test_data.level_budget[1] + 1));
 }
 
 class UTCKKSRNS_FEFBT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_FEFBT> {
-    using Element = DCRTPoly;
+    using Element = RnsPoly;
 
     static constexpr double eps = 0.0001;
 
   protected:
     void SetUp() {
-        OpenFHEParallelControls.UnitTestStart();
+        cipher_parallel_controls.unit_test_start();
     }
 
     void TearDown() {
-        CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
-        OpenFHEParallelControls.UnitTestStop();
+        ContextFactory<RnsPoly>::release_all_contexts();
+        cipher_parallel_controls.unit_test_stop();
     }
 
-    const std::vector<std::complex<double>>& GetCoefficients(FEFBT_FUNCTION functionType) const {
-        switch (functionType) {
+    const std::vector<std::complex<double>>& get_coefficients(FEFBT_FUNCTION function_type) const {
+        switch (function_type) {
             case FEFBT_EXP:
                 return coeff_exp_2_double_29;
             case FEFBT_SIGMOID:
@@ -451,24 +451,24 @@ class UTCKKSRNS_FEFBT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_FEFB
             case FEFBT_GELU_TANH:
                 return coeff_gelu_8_double_44;
             default:
-                OPENFHE_THROW("Unsupported FEFBT function type");
+                CIPHER_THROW("Unsupported FEFBT function type");
         }
     }
 
-    double GetRadius(FEFBT_FUNCTION functionType) const {
-        switch (functionType) {
+    double get_radius(FEFBT_FUNCTION function_type) const {
+        switch (function_type) {
             case FEFBT_EXP:
                 return 2.0;
             case FEFBT_SIGMOID:
             case FEFBT_GELU_TANH:
                 return 8.0;
             default:
-                OPENFHE_THROW("Unsupported FEFBT function type");
+                CIPHER_THROW("Unsupported FEFBT function type");
         }
     }
 
-    std::string GetFunctionName(FEFBT_FUNCTION functionType) const {
-        switch (functionType) {
+    std::string get_function_name(FEFBT_FUNCTION function_type) const {
+        switch (function_type) {
             case FEFBT_EXP:
                 return "exp[-2,2]";
             case FEFBT_SIGMOID:
@@ -480,10 +480,10 @@ class UTCKKSRNS_FEFBT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_FEFB
         }
     }
 
-    double EvaluateTarget(FEFBT_FUNCTION functionType, double x) const {
+    double evaluate_target(FEFBT_FUNCTION function_type, double x) const {
         constexpr double PI = 3.14159265358979323846;
 
-        switch (functionType) {
+        switch (function_type) {
             case FEFBT_EXP:
                 return std::exp(x);
             case FEFBT_SIGMOID:
@@ -491,11 +491,11 @@ class UTCKKSRNS_FEFBT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_FEFB
             case FEFBT_GELU_TANH:
                 return 0.5 * x * (1.0 + std::tanh(std::sqrt(2.0 / PI) * (x + 0.044715 * std::pow(x, 3))));
             default:
-                OPENFHE_THROW("Unsupported FEFBT function type");
+                CIPHER_THROW("Unsupported FEFBT function type");
         }
     }
 
-    std::vector<double> BuildNormalizedInput(uint32_t slots) const {
+    std::vector<double> build_normalized_input(uint32_t slots) const {
         std::vector<double> input(slots);
         constexpr double left = -0.5;
         constexpr double right = 0.5;
@@ -507,42 +507,42 @@ class UTCKKSRNS_FEFBT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_FEFB
         return input;
     }
 
-    std::vector<double> BuildExpectedOutput(FEFBT_FUNCTION functionType,
-                                            const std::vector<double>& normalizedInput) const {
-        std::vector<double> expected(normalizedInput.size());
-        const double radius = GetRadius(functionType);
+    std::vector<double> build_expected_output(FEFBT_FUNCTION function_type,
+                                            const std::vector<double>& normalized_input) const {
+        std::vector<double> expected(normalized_input.size());
+        const double radius = get_radius(function_type);
 
-        for (size_t i = 0; i < normalizedInput.size(); ++i) {
-            expected[i] = EvaluateTarget(functionType, 2.0 * radius * normalizedInput[i]);
+        for (size_t i = 0; i < normalized_input.size(); ++i) {
+            expected[i] = evaluate_target(function_type, 2.0 * radius * normalized_input[i]);
         }
 
         return expected;
     }
 
-    void UnitTest_FEFBT(const TEST_CASE_UTCKKSRNS_FEFBT& testData, const std::string& failmsg = std::string()) {
+    void unit_test_fefbt(const TEST_CASE_UTCKKSRNS_FEFBT& test_data, const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
-            cc->EvalFEFuncBootstrapSetup(testData.levelBudget, testData.dim1, testData.slots);
+            cc->eval_fe_func_bootstrap_setup(test_data.level_budget, test_data.dim1, test_data.slots);
 
-            auto keyPair = cc->KeyGen();
-            cc->EvalBootstrapKeyGen(keyPair.secretKey, testData.slots);
-            cc->EvalMultKeyGen(keyPair.secretKey);
+            auto key_pair = cc->key_gen();
+            cc->eval_bootstrap_key_gen(key_pair.secret_key, test_data.slots);
+            cc->eval_mult_key_gen(key_pair.secret_key);
 
-            auto input = BuildNormalizedInput(testData.slots);
-            auto expected = BuildExpectedOutput(testData.functionType, input);
+            auto input = build_normalized_input(test_data.slots);
+            auto expected = build_expected_output(test_data.function_type, input);
             Plaintext plaintext =
-                    cc->MakeCKKSPackedPlaintext(input, 1, FEFBTEncodeLevel(cc, testData), nullptr, testData.slots);
-            auto ciphertext = cc->Encrypt(keyPair.publicKey, plaintext);
-            auto resultCt = cc->EvalFEFuncBootstrap(ciphertext, GetCoefficients(testData.functionType));
+                    cc->make_ckks_packed_plaintext(input, 1, fefbt_encode_level(cc, test_data), nullptr, test_data.slots);
+            auto ciphertext = cc->encrypt(key_pair.public_key, plaintext);
+            auto result_ct = cc->eval_fe_func_bootstrap(ciphertext, get_coefficients(test_data.function_type));
 
             Plaintext result;
-            cc->Decrypt(keyPair.secretKey, resultCt, &result);
-            result->SetLength(expected.size());
+            cc->decrypt(key_pair.secret_key, result_ct, &result);
+            result->set_length(expected.size());
 
-            checkEquality(result->GetRealPackedValue(), expected, eps,
+            check_equality(result->get_real_packed_value(), expected, eps,
                           failmsg + " FE functional bootstrapping failed for " +
-                                  GetFunctionName(testData.functionType) + ".");
+                                  get_function_name(test_data.function_type) + ".");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             EXPECT_TRUE(0 == 1) << failmsg;
@@ -551,57 +551,57 @@ class UTCKKSRNS_FEFBT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_FEFB
         }
     }
 
-    // Runs the FE functional bootstrapping of testData under the given scaling technique and returns the
+    // Runs the FE functional bootstrapping of test_data under the given scaling technique and returns the
     // achieved precision in bits (-log2 of the maximum slot error). Releases its own context before
     // returning so a CS-vs-FA test never holds two bootstrapping key sets at once.
-    double FEFBTPrecisionBits(const TEST_CASE_UTCKKSRNS_FEFBT& testData, ScalingTechnique scalingTechnique) {
-        auto params = testData.params;
-        params.scalTech = scalingTechnique;
-        if (scalingTechnique == COMPOSITESCALINGAUTO)
-            params.registerWordSize = REG_WORD_SIZE;
+    double fefbt_precision_bits(const TEST_CASE_UTCKKSRNS_FEFBT& test_data, ScalingTechnique scaling_technique) {
+        auto params = test_data.params;
+        params.scal_tech = scaling_technique;
+        if (scaling_technique == COMPOSITESCALINGAUTO)
+            params.register_word_size = REG_WORD_SIZE;
 
-        CryptoContext<Element> cc(UnitTestGenerateContext(params));
+        CryptoContext<Element> cc(unit_test_generate_context(params));
 
-        cc->EvalFEFuncBootstrapSetup(testData.levelBudget, testData.dim1, testData.slots);
+        cc->eval_fe_func_bootstrap_setup(test_data.level_budget, test_data.dim1, test_data.slots);
 
-        auto keyPair = cc->KeyGen();
-        cc->EvalBootstrapKeyGen(keyPair.secretKey, testData.slots);
-        cc->EvalMultKeyGen(keyPair.secretKey);
+        auto key_pair = cc->key_gen();
+        cc->eval_bootstrap_key_gen(key_pair.secret_key, test_data.slots);
+        cc->eval_mult_key_gen(key_pair.secret_key);
 
-        auto input = BuildNormalizedInput(testData.slots);
-        auto expected = BuildExpectedOutput(testData.functionType, input);
+        auto input = build_normalized_input(test_data.slots);
+        auto expected = build_expected_output(test_data.function_type, input);
         Plaintext plaintext =
-                cc->MakeCKKSPackedPlaintext(input, 1, FEFBTEncodeLevel(cc, testData), nullptr, testData.slots);
-        auto ciphertext = cc->Encrypt(keyPair.publicKey, plaintext);
-        auto resultCt = cc->EvalFEFuncBootstrap(ciphertext, GetCoefficients(testData.functionType));
+                cc->make_ckks_packed_plaintext(input, 1, fefbt_encode_level(cc, test_data), nullptr, test_data.slots);
+        auto ciphertext = cc->encrypt(key_pair.public_key, plaintext);
+        auto result_ct = cc->eval_fe_func_bootstrap(ciphertext, get_coefficients(test_data.function_type));
 
         Plaintext result;
-        cc->Decrypt(keyPair.secretKey, resultCt, &result);
-        result->SetLength(expected.size());
-        auto values = result->GetRealPackedValue();
+        cc->decrypt(key_pair.secret_key, result_ct, &result);
+        result->set_length(expected.size());
+        auto values = result->get_real_packed_value();
 
-        double maxErr = 0.0;
+        double max_err = 0.0;
         for (size_t i = 0; i < expected.size(); ++i)
-            maxErr = std::max(maxErr, std::abs(values[i] - expected[i]));
-        CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+            max_err = std::max(max_err, std::abs(values[i] - expected[i]));
+        ContextFactory<RnsPoly>::release_all_contexts();
         // a tiny floor avoids +inf when the error is ~0
-        return -std::log2(std::max(maxErr, 1e-18));
+        return -std::log2(std::max(max_err, 1e-18));
     }
 
     // Verifies that COMPOSITESCALINGAUTO does not lose precision relative to FLEXIBLEAUTO: the same FE
     // functional bootstrapping is run under both techniques and the CS precision must come within
-    // testData.gapTolBits of the FA precision (see the tolerance notes next to the test cases).
-    void UnitTest_FEFBT_CSvsFA(const TEST_CASE_UTCKKSRNS_FEFBT& testData, const std::string& failmsg = std::string()) {
+    // test_data.gap_tol_bits of the FA precision (see the tolerance notes next to the test cases).
+    void unit_test_fefbt_c_svs_fa(const TEST_CASE_UTCKKSRNS_FEFBT& test_data, const std::string& failmsg = std::string()) {
         try {
-            double faBits = FEFBTPrecisionBits(testData, FLEXIBLEAUTO);
-            double csBits = FEFBTPrecisionBits(testData, COMPOSITESCALINGAUTO);
+            double fa_bits = fefbt_precision_bits(test_data, FLEXIBLEAUTO);
+            double cs_bits = fefbt_precision_bits(test_data, COMPOSITESCALINGAUTO);
 
             // sanity floor: the accuracy tests require eps = 1e-4, i.e. ~13.3 bits
-            EXPECT_GT(csBits, 13.3) << failmsg << " CS FE functional bootstrapping precision unexpectedly low ("
-                                    << csBits << " bits) for " << GetFunctionName(testData.functionType) << ".";
-            EXPECT_GE(csBits, faBits - testData.gapTolBits)
-                    << failmsg << " CS lags FA by >" << testData.gapTolBits << " bits (CS=" << csBits
-                    << ", FA=" << faBits << ") for " << GetFunctionName(testData.functionType) << ".";
+            EXPECT_GT(cs_bits, 13.3) << failmsg << " CS FE functional bootstrapping precision unexpectedly low ("
+                                    << cs_bits << " bits) for " << get_function_name(test_data.function_type) << ".";
+            EXPECT_GE(cs_bits, fa_bits - test_data.gap_tol_bits)
+                    << failmsg << " CS lags FA by >" << test_data.gap_tol_bits << " bits (CS=" << cs_bits
+                    << ", FA=" << fa_bits << ") for " << get_function_name(test_data.function_type) << ".";
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             EXPECT_TRUE(0 == 1) << failmsg;
@@ -610,36 +610,36 @@ class UTCKKSRNS_FEFBT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_FEFB
         }
     }
 
-    void UnitTest_FEFBT_PostRotation(const TEST_CASE_UTCKKSRNS_FEFBT& testData,
+    void unit_test_fefbt_post_rotation(const TEST_CASE_UTCKKSRNS_FEFBT& test_data,
                                      const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
-            cc->EvalFEFuncBootstrapSetup(testData.levelBudget, testData.dim1, testData.slots);
+            cc->eval_fe_func_bootstrap_setup(test_data.level_budget, test_data.dim1, test_data.slots);
 
-            auto keyPair = cc->KeyGen();
-            cc->EvalBootstrapKeyGen(keyPair.secretKey, testData.slots);
-            cc->EvalAtIndexKeyGen(keyPair.secretKey, {6});
-            cc->EvalMultKeyGen(keyPair.secretKey);
+            auto key_pair = cc->key_gen();
+            cc->eval_bootstrap_key_gen(key_pair.secret_key, test_data.slots);
+            cc->eval_at_index_key_gen(key_pair.secret_key, {6});
+            cc->eval_mult_key_gen(key_pair.secret_key);
 
-            auto input = BuildNormalizedInput(testData.slots);
-            auto expected = BuildExpectedOutput(testData.functionType, input);
+            auto input = build_normalized_input(test_data.slots);
+            auto expected = build_expected_output(test_data.function_type, input);
             Plaintext plaintext =
-                    cc->MakeCKKSPackedPlaintext(input, 1, FEFBTEncodeLevel(cc, testData), nullptr, testData.slots);
-            auto ciphertext = cc->Encrypt(keyPair.publicKey, plaintext);
-            auto resultCt = cc->EvalFEFuncBootstrap(ciphertext, GetCoefficients(testData.functionType));
+                    cc->make_ckks_packed_plaintext(input, 1, fefbt_encode_level(cc, test_data), nullptr, test_data.slots);
+            auto ciphertext = cc->encrypt(key_pair.public_key, plaintext);
+            auto result_ct = cc->eval_fe_func_bootstrap(ciphertext, get_coefficients(test_data.function_type));
 
-            constexpr int32_t rotIndex = 6;
-            auto rotatedCt = cc->EvalAtIndex(resultCt, rotIndex);
-            std::rotate(expected.begin(), expected.begin() + rotIndex, expected.end());
+            constexpr int32_t rot_index = 6;
+            auto rotated_ct = cc->eval_at_index(result_ct, rot_index);
+            std::rotate(expected.begin(), expected.begin() + rot_index, expected.end());
 
             Plaintext result;
-            cc->Decrypt(keyPair.secretKey, rotatedCt, &result);
-            result->SetLength(expected.size());
+            cc->decrypt(key_pair.secret_key, rotated_ct, &result);
+            result->set_length(expected.size());
 
-            checkEquality(result->GetRealPackedValue(), expected, eps,
+            check_equality(result->get_real_packed_value(), expected, eps,
                           failmsg + " EvalAtIndex after FE functional bootstrapping failed for " +
-                                  GetFunctionName(testData.functionType) + ".");
+                                  get_function_name(test_data.function_type) + ".");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             EXPECT_TRUE(0 == 1) << failmsg;
@@ -648,90 +648,90 @@ class UTCKKSRNS_FEFBT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_FEFB
         }
     }
 
-    // One EvalFEFuncBootstrapPrecompute followed by one EvalFEFuncBootstrapWithPrecomp per function must
-    // agree, slot for slot, with running the single-shot EvalFEFuncBootstrap for each of them. The powers
-    // are precomputed for testData.functionType, the longest series of the family, and the shorter series
+    // One eval_fe_func_bootstrap_precompute followed by one eval_fe_func_bootstrap_with_precomp per function must
+    // agree, slot for slot, with running the single-shot eval_fe_func_bootstrap for each of them. The powers
+    // are precomputed for test_data.function_type, the longest series of the family, and the shorter series
     // are evaluated against those same powers.
-    void UnitTest_FEFBT_MultiValue(const TEST_CASE_UTCKKSRNS_FEFBT& testData,
+    void unit_test_fefbt_multi_value(const TEST_CASE_UTCKKSRNS_FEFBT& test_data,
                                    const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
-            cc->EvalFEFuncBootstrapSetup(testData.levelBudget, testData.dim1, testData.slots);
+            cc->eval_fe_func_bootstrap_setup(test_data.level_budget, test_data.dim1, test_data.slots);
 
-            auto keyPair = cc->KeyGen();
-            cc->EvalBootstrapKeyGen(keyPair.secretKey, testData.slots);
-            cc->EvalMultKeyGen(keyPair.secretKey);
+            auto key_pair = cc->key_gen();
+            cc->eval_bootstrap_key_gen(key_pair.secret_key, test_data.slots);
+            cc->eval_mult_key_gen(key_pair.secret_key);
 
-            auto input = BuildNormalizedInput(testData.slots);
+            auto input = build_normalized_input(test_data.slots);
             Plaintext plaintext =
-                    cc->MakeCKKSPackedPlaintext(input, 1, FEFBTEncodeLevel(cc, testData), nullptr, testData.slots);
-            auto ciphertext = cc->Encrypt(keyPair.publicKey, plaintext);
+                    cc->make_ckks_packed_plaintext(input, 1, fefbt_encode_level(cc, test_data), nullptr, test_data.slots);
+            auto ciphertext = cc->encrypt(key_pair.public_key, plaintext);
 
-            auto powers = cc->EvalFEFuncBootstrapPrecompute(ciphertext, GetCoefficients(testData.functionType));
+            auto powers = cc->eval_fe_func_bootstrap_precompute(ciphertext, get_coefficients(test_data.function_type));
 
-            for (auto functionType : {FEFBT_GELU_TANH, FEFBT_SIGMOID, FEFBT_EXP}) {
-                const auto& coefficients = GetCoefficients(functionType);
-                auto expected = BuildExpectedOutput(functionType, input);
+            for (auto function_type : {FEFBT_GELU_TANH, FEFBT_SIGMOID, FEFBT_EXP}) {
+                const auto& coefficients = get_coefficients(function_type);
+                auto expected = build_expected_output(function_type, input);
 
                 Plaintext shared;
-                auto sharedCt = cc->EvalFEFuncBootstrapWithPrecomp(powers, coefficients);
-                cc->Decrypt(keyPair.secretKey, sharedCt, &shared);
-                shared->SetLength(expected.size());
+                auto shared_ct = cc->eval_fe_func_bootstrap_with_precomp(powers, coefficients);
+                cc->decrypt(key_pair.secret_key, shared_ct, &shared);
+                shared->set_length(expected.size());
 
-                checkEquality(shared->GetRealPackedValue(), expected, eps,
+                check_equality(shared->get_real_packed_value(), expected, eps,
                               failmsg + " FE functional bootstrapping with precomputed powers failed for " +
-                                      GetFunctionName(functionType) + ".");
+                                      get_function_name(function_type) + ".");
 
                 // and the shared-powers result must match the single-shot path, not merely the target
-                Plaintext single;
-                auto singleCt = cc->EvalFEFuncBootstrap(ciphertext, coefficients);
-                cc->Decrypt(keyPair.secretKey, singleCt, &single);
-                single->SetLength(expected.size());
+                Plaintext single_value;
+                auto single_ct = cc->eval_fe_func_bootstrap(ciphertext, coefficients);
+                cc->decrypt(key_pair.secret_key, single_ct, &single_value);
+                single_value->set_length(expected.size());
 
-                checkEquality(shared->GetRealPackedValue(), single->GetRealPackedValue(), eps,
+                check_equality(shared->get_real_packed_value(), single_value->get_real_packed_value(), eps,
                               failmsg +
                                       " precomputed-powers and single-shot FE functional bootstrapping "
                                       "disagree for " +
-                                      GetFunctionName(functionType) + ".");
+                                      get_function_name(function_type) + ".");
             }
 
             // A series padded with trailing zeros denotes the same polynomial, so it must give the same
             // answer as the trimmed one rather than indexing past the end of the precomputed basis.
-            std::vector<std::complex<double>> shortPadded(10, {0.0, 0.0});
+            std::vector<std::complex<double>> short_padded(10, {0.0, 0.0});
             for (uint32_t i = 0; i < 4; ++i)
-                shortPadded[i] = {0.1 * (i + 1), 0.0};
-            const std::vector<std::complex<double>> shortTrimmed(shortPadded.cbegin(), shortPadded.cbegin() + 4);
+                short_padded[i] = {0.1 * (i + 1), 0.0};
+            const std::vector<std::complex<double>> short_trimmed(short_padded.cbegin(), short_padded.cbegin() + 4);
 
-            Plaintext fromPadded, fromTrimmed;
-            cc->Decrypt(keyPair.secretKey, cc->EvalFEFuncBootstrapWithPrecomp(powers, shortPadded), &fromPadded);
-            cc->Decrypt(keyPair.secretKey, cc->EvalFEFuncBootstrapWithPrecomp(powers, shortTrimmed), &fromTrimmed);
-            fromPadded->SetLength(testData.slots);
-            fromTrimmed->SetLength(testData.slots);
+            Plaintext from_padded, from_trimmed;
+            cc->decrypt(key_pair.secret_key, cc->eval_fe_func_bootstrap_with_precomp(powers, short_padded), &from_padded);
+            cc->decrypt(key_pair.secret_key, cc->eval_fe_func_bootstrap_with_precomp(powers, short_trimmed), &from_trimmed);
+            from_padded->set_length(test_data.slots);
+            from_trimmed->set_length(test_data.slots);
 
-            checkEquality(fromPadded->GetRealPackedValue(), fromTrimmed->GetRealPackedValue(), eps,
+            check_equality(from_padded->get_real_packed_value(), from_trimmed->get_real_packed_value(), eps,
                           failmsg + " a trailing-zero padded series did not match the trimmed one.");
 
             // A precomputation made for a short series leaves a correspondingly narrow power basis; a later
             // series that would read past it must be rejected rather than overrun it.
-            auto narrowPowers =
-                    cc->EvalFEFuncBootstrapPrecompute(ciphertext, std::vector<std::complex<double>>(7, {0.1, 0.0}));
+            auto narrow_powers =
+                    cc->eval_fe_func_bootstrap_precompute(ciphertext, std::vector<std::complex<double>>(7, {0.1, 0.0}));
             EXPECT_THROW(
-                    cc->EvalFEFuncBootstrapWithPrecomp(narrowPowers, std::vector<std::complex<double>>(5, {0.1, 0.0})),
-                    OpenFHEException)
+                    cc->eval_fe_func_bootstrap_with_precomp(narrow_powers, std::vector<std::complex<double>>(5, {0.1, 0.0})),
+                    CipherException)
                     << failmsg << " a series wider than the precomputed basis was not rejected.";
 
             // A series short enough to be evaluated straight from the power basis must leave the shared
             // powers intact: evaluate one, then check a real function again.
-            cc->EvalFEFuncBootstrapWithPrecomp(powers, std::vector<std::complex<double>>(4, {0.1, 0.0}));
+            cc->eval_fe_func_bootstrap_with_precomp(powers, std::vector<std::complex<double>>(4, {0.1, 0.0}));
 
-            auto expectedAfter = BuildExpectedOutput(FEFBT_SIGMOID, input);
+            auto expected_after = build_expected_output(FEFBT_SIGMOID, input);
             Plaintext after;
-            cc->Decrypt(keyPair.secretKey, cc->EvalFEFuncBootstrapWithPrecomp(powers, GetCoefficients(FEFBT_SIGMOID)),
+            cc->decrypt(key_pair.secret_key, cc->eval_fe_func_bootstrap_with_precomp(powers, get_coefficients(FEFBT_SIGMOID)),
                         &after);
-            after->SetLength(expectedAfter.size());
+            after->set_length(expected_after.size());
 
-            checkEquality(after->GetRealPackedValue(), expectedAfter, eps,
+            check_equality(after->get_real_packed_value(), expected_after, eps,
                           failmsg + " the shared powers did not survive evaluating a short series.");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
@@ -741,51 +741,51 @@ class UTCKKSRNS_FEFBT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_FEFB
         }
     }
 
-    // Under CKKSDataType COMPLEX the CoeffsToSlots output carries the imaginary half of the message in its
+    // Under CkksDataType COMPLEX the CoeffsToSlots output carries the imaginary half of the message in its
     // own channel, which FE functional bootstrapping drops (its result, twice the real part of a Fourier
     // series, is real-valued). This pins that contract down: the function is applied to the real part of
     // every slot, and the imaginary part of the result is zero regardless of the input's imaginary part.
-    void UnitTest_FEFBT_ComplexInput(const TEST_CASE_UTCKKSRNS_FEFBT& testData,
+    void unit_test_fefbt_complex_input(const TEST_CASE_UTCKKSRNS_FEFBT& test_data,
                                      const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
-            cc->EvalFEFuncBootstrapSetup(testData.levelBudget, testData.dim1, testData.slots);
+            cc->eval_fe_func_bootstrap_setup(test_data.level_budget, test_data.dim1, test_data.slots);
 
-            auto keyPair = cc->KeyGen();
-            cc->EvalBootstrapKeyGen(keyPair.secretKey, testData.slots);
-            cc->EvalMultKeyGen(keyPair.secretKey);
+            auto key_pair = cc->key_gen();
+            cc->eval_bootstrap_key_gen(key_pair.secret_key, test_data.slots);
+            cc->eval_mult_key_gen(key_pair.secret_key);
 
-            auto realPart = BuildNormalizedInput(testData.slots);
-            auto expected = BuildExpectedOutput(testData.functionType, realPart);
+            auto real_part = build_normalized_input(test_data.slots);
+            auto expected = build_expected_output(test_data.function_type, real_part);
 
             // imaginary parts large enough that leaking any of them into the result would break the
             // comparison below by orders of magnitude more than eps
-            std::vector<std::complex<double>> input(testData.slots);
-            for (uint32_t i = 0; i < testData.slots; ++i)
-                input[i] = {realPart[i], 0.25 * std::sin(6.0 * M_PI * i / testData.slots)};
+            std::vector<std::complex<double>> input(test_data.slots);
+            for (uint32_t i = 0; i < test_data.slots; ++i)
+                input[i] = {real_part[i], 0.25 * std::sin(6.0 * M_PI * i / test_data.slots)};
 
             Plaintext plaintext =
-                    cc->MakeCKKSPackedPlaintext(input, 1, FEFBTEncodeLevel(cc, testData), nullptr, testData.slots);
-            auto ciphertext = cc->Encrypt(keyPair.publicKey, plaintext);
-            auto resultCt = cc->EvalFEFuncBootstrap(ciphertext, GetCoefficients(testData.functionType));
+                    cc->make_ckks_packed_plaintext(input, 1, fefbt_encode_level(cc, test_data), nullptr, test_data.slots);
+            auto ciphertext = cc->encrypt(key_pair.public_key, plaintext);
+            auto result_ct = cc->eval_fe_func_bootstrap(ciphertext, get_coefficients(test_data.function_type));
 
             Plaintext result;
-            cc->Decrypt(keyPair.secretKey, resultCt, &result);
-            result->SetLength(expected.size());
+            cc->decrypt(key_pair.secret_key, result_ct, &result);
+            result->set_length(expected.size());
 
-            const auto packed = result->GetCKKSPackedValue();
-            std::vector<double> actualReal(packed.size());
-            std::vector<double> actualImag(packed.size());
+            const auto packed = result->get_ckks_packed_value();
+            std::vector<double> actual_real(packed.size());
+            std::vector<double> actual_imag(packed.size());
             for (size_t i = 0; i < packed.size(); ++i) {
-                actualReal[i] = packed[i].real();
-                actualImag[i] = packed[i].imag();
+                actual_real[i] = packed[i].real();
+                actual_imag[i] = packed[i].imag();
             }
 
-            checkEquality(actualReal, expected, eps,
+            check_equality(actual_real, expected, eps,
                           failmsg + " FE functional bootstrapping of a complex input did not apply " +
-                                  GetFunctionName(testData.functionType) + " to the real part.");
-            checkEquality(actualImag, std::vector<double>(packed.size(), 0.0), eps,
+                                  get_function_name(test_data.function_type) + " to the real part.");
+            check_equality(actual_imag, std::vector<double>(packed.size(), 0.0), eps,
                           failmsg +
                                   " FE functional bootstrapping of a complex input returned a nonzero "
                                   "imaginary part.");
@@ -797,39 +797,39 @@ class UTCKKSRNS_FEFBT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_FEFB
         }
     }
 
-    // Mixing bootstrapping variants is not supported: EvalBootstrap on a precomputation generated by
-    // EvalFEFuncBootstrapSetup must throw instead of silently using the wrong overflow bound K.
-    void UnitTest_FEFBT_VariantMix(const TEST_CASE_UTCKKSRNS_FEFBT& testData,
+    // Mixing bootstrapping variants is not supported: eval_bootstrap on a precomputation generated by
+    // eval_fe_func_bootstrap_setup must throw instead of silently using the wrong overflow bound K.
+    void unit_test_fefbt_variant_mix(const TEST_CASE_UTCKKSRNS_FEFBT& test_data,
                                    const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
-            cc->EvalFEFuncBootstrapSetup(testData.levelBudget, testData.dim1, testData.slots);
+            cc->eval_fe_func_bootstrap_setup(test_data.level_budget, test_data.dim1, test_data.slots);
 
-            auto keyPair = cc->KeyGen();
-            cc->EvalBootstrapKeyGen(keyPair.secretKey, testData.slots);
-            cc->EvalMultKeyGen(keyPair.secretKey);
+            auto key_pair = cc->key_gen();
+            cc->eval_bootstrap_key_gen(key_pair.secret_key, test_data.slots);
+            cc->eval_mult_key_gen(key_pair.secret_key);
 
-            auto input = BuildNormalizedInput(testData.slots);
+            auto input = build_normalized_input(test_data.slots);
             Plaintext plaintext =
-                    cc->MakeCKKSPackedPlaintext(input, 1, FEFBTEncodeLevel(cc, testData), nullptr, testData.slots);
-            auto ciphertext = cc->Encrypt(keyPair.publicKey, plaintext);
+                    cc->make_ckks_packed_plaintext(input, 1, fefbt_encode_level(cc, test_data), nullptr, test_data.slots);
+            auto ciphertext = cc->encrypt(key_pair.public_key, plaintext);
 
-            EXPECT_THROW(cc->EvalBootstrap(ciphertext), OpenFHEException)
+            EXPECT_THROW(cc->eval_bootstrap(ciphertext), CipherException)
                     << failmsg << " EvalBootstrap on an EvalFEFuncBootstrapSetup precomputation did not throw.";
 
             // the recompute path must not convert the FE precomputation into a regular-bootstrapping one
-            EXPECT_THROW(cc->EvalBootstrapPrecompute(testData.slots), OpenFHEException)
+            EXPECT_THROW(cc->eval_bootstrap_precompute(test_data.slots), CipherException)
                     << failmsg
                     << " EvalBootstrapPrecompute on an EvalFEFuncBootstrapSetup precomputation did not throw.";
 
             // the FE functional bootstrapping precomputation itself must remain usable
-            auto resultCt = cc->EvalFEFuncBootstrap(ciphertext, GetCoefficients(testData.functionType));
-            auto expected = BuildExpectedOutput(testData.functionType, input);
+            auto result_ct = cc->eval_fe_func_bootstrap(ciphertext, get_coefficients(test_data.function_type));
+            auto expected = build_expected_output(test_data.function_type, input);
             Plaintext result;
-            cc->Decrypt(keyPair.secretKey, resultCt, &result);
-            result->SetLength(expected.size());
-            checkEquality(result->GetRealPackedValue(), expected, eps,
+            cc->decrypt(key_pair.secret_key, result_ct, &result);
+            result->set_length(expected.size());
+            check_equality(result->get_real_packed_value(), expected, eps,
                           failmsg + " FE functional bootstrapping failed after the rejected EvalBootstrap call.");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
@@ -841,27 +841,27 @@ class UTCKKSRNS_FEFBT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_FEFB
 };
 
 TEST_P(UTCKKSRNS_FEFBT, CKKSRNS) {
-    setupSignals();
+    setup_signals();
     auto test = GetParam();
 
-    switch (test.testCaseType) {
+    switch (test.test_case_type) {
         case FEFBT_ACCURACY:
-            UnitTest_FEFBT(test, test.buildTestName());
+            unit_test_fefbt(test, test.build_test_name());
             break;
         case FEFBT_POST_ROTATION:
-            UnitTest_FEFBT_PostRotation(test, test.buildTestName());
+            unit_test_fefbt_post_rotation(test, test.build_test_name());
             break;
         case FEFBT_CS_VS_FA:
-            UnitTest_FEFBT_CSvsFA(test, test.buildTestName());
+            unit_test_fefbt_c_svs_fa(test, test.build_test_name());
             break;
         case FEFBT_COMPLEX_INPUT:
-            UnitTest_FEFBT_ComplexInput(test, test.buildTestName());
+            unit_test_fefbt_complex_input(test, test.build_test_name());
             break;
         case FEFBT_MULTI_VALUE:
-            UnitTest_FEFBT_MultiValue(test, test.buildTestName());
+            unit_test_fefbt_multi_value(test, test.build_test_name());
             break;
         case FEFBT_VARIANT_MIX:
-            UnitTest_FEFBT_VariantMix(test, test.buildTestName());
+            unit_test_fefbt_variant_mix(test, test.build_test_name());
             break;
         default:
             break;
@@ -869,6 +869,6 @@ TEST_P(UTCKKSRNS_FEFBT, CKKSRNS) {
 }
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(UTCKKSRNS_FEFBT);
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_FEFBT, ::testing::ValuesIn(testCases), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_FEFBT, ::testing::ValuesIn(test_cases), testName);
 
 }  // namespace

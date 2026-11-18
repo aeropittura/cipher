@@ -50,39 +50,39 @@
 #include "cipher/util/serializable.h"
 #include "cipher/util/utilities.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-class RingGSWACCKeyImpl;
-using RingGSWACCKey = std::shared_ptr<RingGSWACCKeyImpl>;
-using ConstRingGSWACCKey = const std::shared_ptr<const RingGSWACCKeyImpl>;
+class RingGswAccKeyImpl;
+using RingGswAccKey = std::shared_ptr<RingGswAccKeyImpl>;
+using ConstRingGswAccKey = const std::shared_ptr<const RingGswAccKeyImpl>;
 
 /**
  * @brief Class that stores the refresh key (used in bootstrapping)
  * A three-dimensional vector of RingGSW ciphertexts
  */
-class RingGSWACCKeyImpl : public Serializable {
+class RingGswAccKeyImpl : public Serializable {
   public:
-    RingGSWACCKeyImpl() = default;
+    RingGswAccKeyImpl() = default;
 
     /**
      * Allocates a dim1 x dim2 x dim3 array of (null) RingGSW evaluation keys
      *
-     * The meaning of the three dimensions depends on the bootstrapping method; see the KeyGenAcc methods of the
-     * RingGSWAccumulator classes. With s the LWE secret key of dimension n:
-     * - DM (AP): [n][baseR][digitsR], indexed [i][j][k] with i the position in s, j in [1, baseR) the value of a
-     *   base-baseR digit and k the digit position; the entry is RGSW(X^(s_i * j * baseR^k)). The entries with
+     * The meaning of the three dimensions depends on the bootstrapping method; see the key_gen_acc methods of the
+     * RingGswAccumulator classes. With s the LWE secret key of dimension n:
+     * - DM (AP): [n][base_r][digits_r], indexed [i][j][k] with i the position in s, j in [1, base_r) the value of a
+     *   base-base_r digit and k the digit position; the entry is RGSW(X^(s_i * j * base_r^k)). The entries with
      *   j = 0, and with j at or above the extent of the top digit position, stay null.
      * - CGGI (GINX): [1][2][n]; [0][0][i] encrypts 1 if s_i = 1 and 0 otherwise, [0][1][i] encrypts 1 if s_i = -1
      *   and 0 otherwise.
      * - LMKCDEY: [1][2][n]; [0][0][i] = RGSW(X^(s_i)), [0][1][0] is the automorphism key for the exponent 2N - 5
-     *   and [0][1][t] for t = 1..numAutoKeys is the automorphism key for 5^t mod 2N; the remaining [0][1] entries
+     *   and [0][1][t] for t = 1..num_auto_keys is the automorphism key for 5^t mod 2N; the remaining [0][1] entries
      *   stay null.
      *
      * @param dim1 the size of the first dimension
      * @param dim2 the size of the second dimension
      * @param dim3 the size of the third dimension
      */
-    RingGSWACCKeyImpl(uint32_t dim1, uint32_t dim2, uint32_t dim3) : m_key(dim1, dim2_t(dim2, dim3_t(dim3))) {}
+    RingGswAccKeyImpl(uint32_t dim1, uint32_t dim2, uint32_t dim3) : key_(dim1, dim2_t(dim2, dim3_t(dim3))) {}
 
     /**
      * Constructs a refresh key from a three-dimensional array of RingGSW evaluation keys
@@ -90,7 +90,7 @@ class RingGSWACCKeyImpl : public Serializable {
      * @param key the RingGSW evaluation keys, laid out per bootstrapping method as described for the constructor
      * taking the three dimensions
      */
-    explicit RingGSWACCKeyImpl(const std::vector<std::vector<std::vector<RingGSWEvalKey>>>& key) : m_key(key) {}
+    explicit RingGswAccKeyImpl(const std::vector<std::vector<std::vector<RingGswEvalKey>>>& key) : key_(key) {}
 
     /**
      * Constructs a refresh key from a three-dimensional array of RingGSW evaluation keys, moving it
@@ -98,49 +98,49 @@ class RingGSWACCKeyImpl : public Serializable {
      * @param key the RingGSW evaluation keys, laid out per bootstrapping method as described for the constructor
      * taking the three dimensions
      */
-    explicit RingGSWACCKeyImpl(std::vector<std::vector<std::vector<RingGSWEvalKey>>>&& key) noexcept
-        : m_key(std::move(key)) {}
+    explicit RingGswAccKeyImpl(std::vector<std::vector<std::vector<RingGswEvalKey>>>&& key) noexcept
+        : key_(std::move(key)) {}
 
-    RingGSWACCKeyImpl(const RingGSWACCKeyImpl& rhs) : m_key(rhs.m_key) {}
+    RingGswAccKeyImpl(const RingGswAccKeyImpl& rhs) : key_(rhs.key_) {}
 
-    RingGSWACCKeyImpl(RingGSWACCKeyImpl&& rhs) noexcept : m_key(std::move(rhs.m_key)) {}
+    RingGswAccKeyImpl(RingGswAccKeyImpl&& rhs) noexcept : key_(std::move(rhs.key_)) {}
 
-    RingGSWACCKeyImpl& operator=(const RingGSWACCKeyImpl& rhs) {
-        m_key = rhs.m_key;
+    RingGswAccKeyImpl& operator=(const RingGswAccKeyImpl& rhs) {
+        key_ = rhs.key_;
         return *this;
     }
 
-    RingGSWACCKeyImpl& operator=(RingGSWACCKeyImpl&& rhs) noexcept {
-        m_key = std::move(rhs.m_key);
+    RingGswAccKeyImpl& operator=(RingGswAccKeyImpl&& rhs) noexcept {
+        key_ = std::move(rhs.key_);
         return *this;
     }
 
-    const std::vector<std::vector<std::vector<RingGSWEvalKey>>>& GetElements() const {
-        return m_key;
+    const std::vector<std::vector<std::vector<RingGswEvalKey>>>& get_elements() const {
+        return key_;
     }
 
-    void SetElements(const std::vector<std::vector<std::vector<RingGSWEvalKey>>>& key) {
-        m_key = key;
+    void set_elements(const std::vector<std::vector<std::vector<RingGswEvalKey>>>& key) {
+        key_ = key;
     }
 
-    void SetElements(std::vector<std::vector<std::vector<RingGSWEvalKey>>>&& key) noexcept {
-        m_key = std::move(key);
+    void set_elements(std::vector<std::vector<std::vector<RingGswEvalKey>>>&& key) noexcept {
+        key_ = std::move(key);
     }
 
     /**
      * @param i the index in the first dimension
      * @return the two-dimensional slice of RingGSW evaluation keys at index i
      */
-    std::vector<std::vector<RingGSWEvalKey>>& operator[](uint32_t i) {
-        return m_key[i];
+    std::vector<std::vector<RingGswEvalKey>>& operator[](uint32_t i) {
+        return key_[i];
     }
 
     /**
      * @param i the index in the first dimension
      * @return the two-dimensional slice of RingGSW evaluation keys at index i
      */
-    const std::vector<std::vector<RingGSWEvalKey>>& operator[](uint32_t i) const {
-        return m_key[i];
+    const std::vector<std::vector<RingGswEvalKey>>& operator[](uint32_t i) const {
+        return key_[i];
     }
 
     /**
@@ -149,13 +149,13 @@ class RingGSWACCKeyImpl : public Serializable {
      * @param other the refresh key to compare with
      * @return true if both keys have the same dimensions and equal RingGSW evaluation keys in every position
      */
-    bool operator==(const RingGSWACCKeyImpl& other) const {
-        // as RingGSWEvalKey is shared_ptr<RingGSWEvalKeyImpl>, we have to loop through all elements to compare them
-        if (m_key.size() != other.m_key.size())
+    bool operator==(const RingGswAccKeyImpl& other) const {
+        // as RingGswEvalKey is shared_ptr<RingGswEvalKeyImpl>, we have to loop through all elements to compare them
+        if (key_.size() != other.key_.size())
             return false;
-        for (size_t i = 0; i < m_key.size(); ++i) {
-            const auto& l1 = m_key[i];
-            const auto& o1 = other.m_key[i];
+        for (size_t i = 0; i < key_.size(); ++i) {
+            const auto& l1 = key_[i];
+            const auto& o1 = other.key_[i];
             if (l1.size() != o1.size())
                 return false;
             for (size_t j = 0; j < l1.size(); ++j) {
@@ -183,40 +183,40 @@ class RingGSWACCKeyImpl : public Serializable {
      * @param other the refresh key to compare with
      * @return true if the dimensions or any RingGSW evaluation key differ
      */
-    bool operator!=(const RingGSWACCKeyImpl& other) const {
+    bool operator!=(const RingGswAccKeyImpl& other) const {
         return !(*this == other);
     }
 
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
-        ar(::cereal::make_nvp("k", m_key));
+        ar(::cereal::make_nvp("k", key_));
     }
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
-        ar(::cereal::make_nvp("k", m_key));
+        ar(::cereal::make_nvp("k", key_));
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "RingGSWACCKey";
     }
 
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 
   private:
-    using dim3_t = std::vector<RingGSWEvalKey>;
+    using dim3_t = std::vector<RingGswEvalKey>;
     using dim2_t = std::vector<dim3_t>;
     using dim1_t = std::vector<dim2_t>;
 
-    std::vector<std::vector<std::vector<RingGSWEvalKey>>> m_key;  ///< RingGSW evaluation keys, laid out per method
+    std::vector<std::vector<std::vector<RingGswEvalKey>>> key_;  ///< RingGSW evaluation keys, laid out per method
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_BOOLEAN_RGSW_ACC_KEY_H_

@@ -35,39 +35,39 @@
 
 #include "cipher/config.h"
 
-#ifdef WITH_DEFAULT_DIAGNOSTIC_SINK
+#ifdef CIPHER_WITH_DEFAULT_DIAGNOSTIC_SINK
 
     #include <iostream>
 
-namespace lbcrypto {
+namespace cipher {
 
 namespace {
-std::ostream* g_errStream = &std::cerr;
-std::ostream* g_outStream = &std::cout;
+std::ostream* g_err_stream = &std::cerr;
+std::ostream* g_out_stream = &std::cout;
 }  // namespace
 
 namespace internal_diagnostics {
 
-std::ostream& OpenFHEErrStream() {
-    return *g_errStream;
+std::ostream& cipher_err_stream() {
+    return *g_err_stream;
 }
-std::ostream& OpenFHEOutStream() {
-    return *g_outStream;
+std::ostream& cipher_out_stream() {
+    return *g_out_stream;
 }
 
 }  // namespace internal_diagnostics
 
-std::ostream& SetOpenFHEErrStream(std::ostream& os) {
-    std::ostream& previous = *g_errStream;
-    g_errStream = &os;
+std::ostream& set_cipher_err_stream(std::ostream& os) {
+    std::ostream& previous = *g_err_stream;
+    g_err_stream = &os;
     return previous;
 }
-std::ostream& SetOpenFHEOutStream(std::ostream& os) {
-    std::ostream& previous = *g_outStream;
-    g_outStream = &os;
+std::ostream& set_cipher_out_stream(std::ostream& os) {
+    std::ostream& previous = *g_out_stream;
+    g_out_stream = &os;
     return previous;
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
-#endif  // WITH_DEFAULT_DIAGNOSTIC_SINK
+#endif  // CIPHER_WITH_DEFAULT_DIAGNOSTIC_SINK

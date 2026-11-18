@@ -41,7 +41,7 @@
 #include "fhe/support/test_utils.h"
 #include "gtest/gtest.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 //===========================================================================================================
 enum TEST_CASE_TYPE : int {
@@ -66,23 +66,23 @@ static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
 }
 //===========================================================================================================
 struct TEST_CASE_UTBFVRNS {
-    TEST_CASE_TYPE testCaseType;
+    TEST_CASE_TYPE test_case_type;
     // test case description - MUST BE UNIQUE
     std::string description;
 
-    UnitTestCCParams params;
+    TestContextParams params;
 
     // additional test case data
     // ........
 
-    std::string buildTestName() const {
+    std::string build_test_name() const {
         std::stringstream ss;
-        ss << testCaseType << "_" << description;
+        ss << test_case_type << "_" << description;
         return ss.str();
     }
-    std::string toString() const {
+    std::string to_string_impl() const {
         std::stringstream ss;
-        ss << "testCaseType [" << testCaseType << "], " << params.toString();
+        ss << "testCaseType [" << test_case_type << "], " << params.to_string_impl();
         return ss.str();
     }
 };
@@ -90,18 +90,18 @@ struct TEST_CASE_UTBFVRNS {
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
 static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTBFVRNS>& test) {
-    return test.param.buildTestName();
+    return test.param.build_test_name();
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_UTBFVRNS& test) {
-    return os << test.toString();
+    return os << test.to_string_impl();
 }
 //===========================================================================================================
 constexpr uint32_t MULDEPTH = 7;
 constexpr uint32_t PTM = 65537;
 // clang-format off
-static std::vector<TEST_CASE_UTBFVRNS> testCases = {
-    // TestType,         Descr,  Scheme,        RDim, MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl, KSTech, ScalTech, LDigits, PtMod, StdDev, EvalAddCt, KSCt, MultTech,         EncTech, PREMode
+static std::vector<TEST_CASE_UTBFVRNS> test_cases = {
+    // TestType,         Descr,  Scheme,        RDim, MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl, KSTech, ScalTech, LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech,         EncTech, pre_mode
     { EVAL_FAST_ROTATION, "01", {BFVRNS_SCHEME, DFLT, MULDEPTH,  DFLT,     DFLT,  DFLT,    DFLT,       DFLT,          DFLT,     DFLT,   BV,     DFLT,     DFLT,    PTM,   DFLT,   DFLT,      DFLT, HPSPOVERQLEVELED, DFLT,    DFLT}},
     { EVAL_FAST_ROTATION, "02", {BFVRNS_SCHEME, DFLT, MULDEPTH,  DFLT,     DFLT,  DFLT,    DFLT,       DFLT,          DFLT,     DFLT,   HYBRID, DFLT,     DFLT,    PTM,   DFLT,   DFLT,      DFLT, HPSPOVERQLEVELED, DFLT,    DFLT}},
     { EVAL_FAST_ROTATION, "03", {BFVRNS_SCHEME, DFLT, MULDEPTH,  DFLT,     DFLT,  DFLT,    DFLT,       DFLT,          DFLT,     DFLT,   BV,     DFLT,     DFLT,    PTM,   DFLT,   DFLT,      DFLT, HPSPOVERQ, DFLT,    DFLT}},
@@ -119,7 +119,7 @@ static std::vector<TEST_CASE_UTBFVRNS> testCases = {
 // clang-format on
 //===========================================================================================================
 class UTBFVRNS : public ::testing::TestWithParam<TEST_CASE_UTBFVRNS> {
-    using Element = DCRTPoly;
+    using Element = RnsPoly;
 
     // The precision after which we consider two values equal.
     // This is necessary because BFV works for approximate numbers.
@@ -127,86 +127,86 @@ class UTBFVRNS : public ::testing::TestWithParam<TEST_CASE_UTBFVRNS> {
 
   protected:
     void SetUp() {
-        OpenFHEParallelControls.UnitTestStart();
+        cipher_parallel_controls.unit_test_start();
     }
 
     void TearDown() {
-        CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
-        OpenFHEParallelControls.UnitTestStop();
+        ContextFactory<RnsPoly>::release_all_contexts();
+        cipher_parallel_controls.unit_test_stop();
     }
 
-    void UnitTest_EvalFastRotation(const TEST_CASE_UTBFVRNS& testData, const std::string& failmsg = std::string()) {
+    void unit_test_eval_fast_rotation(const TEST_CASE_UTBFVRNS& test_data, const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
-            KeyPair<DCRTPoly> keyPair = cc->KeyGen();
+            KeyPair<RnsPoly> key_pair = cc->key_gen();
 
             // Generate the relinearization key
-            cc->EvalMultKeyGen(keyPair.secretKey);
+            cc->eval_mult_key_gen(key_pair.secret_key);
 
             // Generate the rotation evaluation keys
-            cc->EvalRotateKeyGen(keyPair.secretKey, {1, 2, -1, -2});
+            cc->eval_rotate_key_gen(key_pair.secret_key, {1, 2, -1, -2});
 
-            std::vector<int64_t> vectorOfInts1 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
-            Plaintext plaintext1 = cc->MakePackedPlaintext(vectorOfInts1);
-            auto ciphertext1 = cc->Encrypt(keyPair.publicKey, plaintext1);
+            std::vector<int64_t> vector_of_ints1 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+            Plaintext plaintext1 = cc->make_packed_plaintext(vector_of_ints1);
+            auto ciphertext1 = cc->encrypt(key_pair.public_key, plaintext1);
 
-            std::vector<int64_t> vectorOfInts2 = {3, 2, 1, 4, 5, 6, 7, 8, 9, 10, 11, 12};
-            Plaintext plaintext2 = cc->MakePackedPlaintext(vectorOfInts2);
-            auto ciphertext2 = cc->Encrypt(keyPair.publicKey, plaintext2);
+            std::vector<int64_t> vector_of_ints2 = {3, 2, 1, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+            Plaintext plaintext2 = cc->make_packed_plaintext(vector_of_ints2);
+            auto ciphertext2 = cc->encrypt(key_pair.public_key, plaintext2);
 
-            std::vector<int64_t> vectorOfInts3 = {1, 2, 5, 2, 5, 6, 7, 8, 9, 10, 11, 12};
-            Plaintext plaintext3 = cc->MakePackedPlaintext(vectorOfInts3);
-            auto ciphertext3 = cc->Encrypt(keyPair.publicKey, plaintext3);
+            std::vector<int64_t> vector_of_ints3 = {1, 2, 5, 2, 5, 6, 7, 8, 9, 10, 11, 12};
+            Plaintext plaintext3 = cc->make_packed_plaintext(vector_of_ints3);
+            auto ciphertext3 = cc->encrypt(key_pair.public_key, plaintext3);
 
             // Homomorphic multiplications (do enough to drop some levels)
-            auto ciphertextMul12 = cc->EvalMult(ciphertext1, ciphertext2);
-            auto ciphertextMultResult = cc->EvalMult(ciphertextMul12, ciphertext3);
-            ciphertextMultResult = cc->EvalSquare(ciphertextMultResult);
-            ciphertextMultResult = cc->EvalSquare(ciphertextMultResult);
+            auto ciphertext_mul12 = cc->eval_mult(ciphertext1, ciphertext2);
+            auto ciphertext_mult_result = cc->eval_mult(ciphertext_mul12, ciphertext3);
+            ciphertext_mult_result = cc->eval_square(ciphertext_mult_result);
+            ciphertext_mult_result = cc->eval_square(ciphertext_mult_result);
 
-            auto digits = cc->EvalFastRotationPrecompute(ciphertextMul12);
-            auto digits2 = cc->EvalFastRotationPrecompute(ciphertextMultResult);
-            const uint32_t M = cc->GetCyclotomicOrder();
+            auto digits = cc->eval_fast_rotation_precompute(ciphertext_mul12);
+            auto digits2 = cc->eval_fast_rotation_precompute(ciphertext_mult_result);
+            const uint32_t M = cc->get_cyclotomic_order();
 
-            auto ciphertextRot1 = cc->EvalFastRotation(ciphertextMul12, 1, M, digits);
-            auto ciphertextRot2 = cc->EvalFastRotation(ciphertextMul12, -1, M, digits);
-            auto ciphertextRot3 = cc->EvalFastRotation(ciphertextMultResult, 2, M, digits2);
-            auto ciphertextRot4 = cc->EvalFastRotation(ciphertextMultResult, -2, M, digits2);
+            auto ciphertext_rot1 = cc->eval_fast_rotation(ciphertext_mul12, 1, M, digits);
+            auto ciphertext_rot2 = cc->eval_fast_rotation(ciphertext_mul12, -1, M, digits);
+            auto ciphertext_rot3 = cc->eval_fast_rotation(ciphertext_mult_result, 2, M, digits2);
+            auto ciphertext_rot4 = cc->eval_fast_rotation(ciphertext_mult_result, -2, M, digits2);
 
             // EvalFastRotate +1 (left rotation)
-            std::vector<int64_t> expectedResults1 = {4, 3, 16, 25, 36, 49, 64, 81, 100, 121, 144, 0};
-            Plaintext plaintextRot1;
-            cc->Decrypt(keyPair.secretKey, ciphertextRot1, &plaintextRot1);
-            plaintextRot1->SetLength(vectorOfInts1.size());
-            auto results1 = plaintextRot1->GetPackedValue();
-            checkEquality(results1, expectedResults1, eps, failmsg + " EvalFastRotation(+1) failed");
+            std::vector<int64_t> expected_results1 = {4, 3, 16, 25, 36, 49, 64, 81, 100, 121, 144, 0};
+            Plaintext plaintext_rot1;
+            cc->decrypt(key_pair.secret_key, ciphertext_rot1, &plaintext_rot1);
+            plaintext_rot1->set_length(vector_of_ints1.size());
+            auto results1 = plaintext_rot1->get_packed_value();
+            check_equality(results1, expected_results1, eps, failmsg + " EvalFastRotation(+1) failed");
 
             // EvalFastRotate -1 (right rotation)
-            std::vector<int64_t> expectedResults2 = {0, 3, 4, 3, 16, 25, 36, 49, 64, 81, 100, 121};
-            Plaintext plaintextRot2;
-            cc->Decrypt(keyPair.secretKey, ciphertextRot2, &plaintextRot2);
-            plaintextRot2->SetLength(vectorOfInts1.size());
-            auto results2 = plaintextRot2->GetPackedValue();
-            checkEquality(results2, expectedResults2, eps, failmsg + " EvalFastRotation(-1) failed");
+            std::vector<int64_t> expected_results2 = {0, 3, 4, 3, 16, 25, 36, 49, 64, 81, 100, 121};
+            Plaintext plaintext_rot2;
+            cc->decrypt(key_pair.secret_key, ciphertext_rot2, &plaintext_rot2);
+            plaintext_rot2->set_length(vector_of_ints1.size());
+            auto results2 = plaintext_rot2->get_packed_value();
+            check_equality(results2, expected_results2, eps, failmsg + " EvalFastRotation(-1) failed");
 
             // EvalFastRotate +2 (left rotation)
-            std::vector<int64_t> expectedResults3 = {-14912, -16,   15300, -29119, 3875, 16,
+            std::vector<int64_t> expected_results3 = {-14912, -16,   15300, -29119, 3875, 16,
                                                      -2298,  15428, -8061, 5916,   0,    0};
-            Plaintext plaintextRot3;
-            cc->Decrypt(keyPair.secretKey, ciphertextRot3, &plaintextRot3);
-            plaintextRot3->SetLength(vectorOfInts1.size());
-            auto results3 = plaintextRot3->GetPackedValue();
-            checkEquality(results3, expectedResults3, eps, failmsg + " EvalFastRotation(+2) failed");
+            Plaintext plaintext_rot3;
+            cc->decrypt(key_pair.secret_key, ciphertext_rot3, &plaintext_rot3);
+            plaintext_rot3->set_length(vector_of_ints1.size());
+            auto results3 = plaintext_rot3->get_packed_value();
+            check_equality(results3, expected_results3, eps, failmsg + " EvalFastRotation(+2) failed");
 
             // EvalFastRotate -2 (right rotation)
-            std::vector<int64_t> expectedResults4 = {0,     0,      81,   4096, -14912, -16,
+            std::vector<int64_t> expected_results4 = {0,     0,      81,   4096, -14912, -16,
                                                      15300, -29119, 3875, 16,   -2298,  15428};
-            Plaintext plaintextRot4;
-            cc->Decrypt(keyPair.secretKey, ciphertextRot4, &plaintextRot4);
-            plaintextRot4->SetLength(vectorOfInts1.size());
-            auto results4 = plaintextRot4->GetPackedValue();
-            checkEquality(results4, expectedResults4, eps, failmsg + " EvalFastRotation(-2) failed");
+            Plaintext plaintext_rot4;
+            cc->decrypt(key_pair.secret_key, ciphertext_rot4, &plaintext_rot4);
+            plaintext_rot4->set_length(vector_of_ints1.size());
+            auto results4 = plaintext_rot4->get_packed_value();
+            check_equality(results4, expected_results4, eps, failmsg + " EvalFastRotation(-2) failed");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -216,110 +216,110 @@ class UTBFVRNS : public ::testing::TestWithParam<TEST_CASE_UTBFVRNS> {
         }
     }
 
-    void UnitTest_CompressedBFV(const TEST_CASE_UTBFVRNS& testData, const std::string& failmsg = std::string()) {
+    void unit_test_compressed_bfv(const TEST_CASE_UTBFVRNS& test_data, const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
-            KeyPair<DCRTPoly> keyPair = cc->KeyGen();
+            KeyPair<RnsPoly> key_pair = cc->key_gen();
 
             // Generate the relinearization key
-            cc->EvalMultKeyGen(keyPair.secretKey);
+            cc->eval_mult_key_gen(key_pair.secret_key);
 
             // Generate the rotation evaluation keys
-            cc->EvalRotateKeyGen(keyPair.secretKey, {1});
+            cc->eval_rotate_key_gen(key_pair.secret_key, {1});
 
-            std::vector<int64_t> vectorOfInts1 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 11, 12};
-            Plaintext plaintext1 = cc->MakePackedPlaintext(vectorOfInts1, 1, 1);
-            auto ciphertext1 = cc->Encrypt(keyPair.publicKey, plaintext1);
+            std::vector<int64_t> vector_of_ints1 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 11, 12};
+            Plaintext plaintext1 = cc->make_packed_plaintext(vector_of_ints1, 1, 1);
+            auto ciphertext1 = cc->encrypt(key_pair.public_key, plaintext1);
 
-            std::vector<int64_t> vectorOfInts2 = {3, 2, 1, 4, 5, 6, 7, 8, 9, 10, 11, 12};
-            Plaintext plaintext2 = cc->MakePackedPlaintext(vectorOfInts2, 1, 1);
-            auto ciphertext2 = cc->Encrypt(keyPair.publicKey, plaintext2);
+            std::vector<int64_t> vector_of_ints2 = {3, 2, 1, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+            Plaintext plaintext2 = cc->make_packed_plaintext(vector_of_ints2, 1, 1);
+            auto ciphertext2 = cc->encrypt(key_pair.public_key, plaintext2);
 
-            std::vector<int64_t> vectorOfInts3 = {1, 2, 5, 2, 5, 6, 7, 8, 9, 9, 11, 12};
-            Plaintext plaintext3 = cc->MakePackedPlaintext(vectorOfInts3, 1, 1);
-            auto ciphertext3 = cc->Encrypt(keyPair.publicKey, plaintext3);
+            std::vector<int64_t> vector_of_ints3 = {1, 2, 5, 2, 5, 6, 7, 8, 9, 9, 11, 12};
+            Plaintext plaintext3 = cc->make_packed_plaintext(vector_of_ints3, 1, 1);
+            auto ciphertext3 = cc->encrypt(key_pair.public_key, plaintext3);
 
             // Homomorphic multiplications (do enough to drop some levels)
-            auto ciphertextMul12 = cc->EvalMult(ciphertext1, ciphertext2);
-            auto ciphertextMultResult = cc->EvalMult(ciphertextMul12, ciphertext3);
-            auto ciphertextMultCompressed1 = cc->Compress(ciphertextMultResult, 1);
-            auto ciphertextMultCompressed2 = cc->Compress(ciphertextMultResult, 2);
-            auto ciphertextSquareResult = cc->EvalSquare(ciphertext1);
+            auto ciphertext_mul12 = cc->eval_mult(ciphertext1, ciphertext2);
+            auto ciphertext_mult_result = cc->eval_mult(ciphertext_mul12, ciphertext3);
+            auto ciphertext_mult_compressed1 = cc->compress(ciphertext_mult_result, 1);
+            auto ciphertext_mult_compressed2 = cc->compress(ciphertext_mult_result, 2);
+            auto ciphertext_square_result = cc->eval_square(ciphertext1);
 
-            auto digits = cc->EvalFastRotationPrecompute(ciphertextMul12);
-            const uint32_t M = cc->GetCyclotomicOrder();
+            auto digits = cc->eval_fast_rotation_precompute(ciphertext_mul12);
+            const uint32_t M = cc->get_cyclotomic_order();
 
-            auto ciphertextRot1 = cc->EvalFastRotation(ciphertextMul12, 1, M, digits);
-            auto ciphertextRot2 = cc->EvalRotate(ciphertextMul12, 1);
+            auto ciphertext_rot1 = cc->eval_fast_rotation(ciphertext_mul12, 1, M, digits);
+            auto ciphertext_rot2 = cc->eval_rotate(ciphertext_mul12, 1);
 
-            auto ciphertextPtxtMult = cc->EvalMult(ciphertext1, plaintext2);
+            auto ciphertext_ptxt_mult = cc->eval_mult(ciphertext1, plaintext2);
 
-            auto ciphertextPtxtAdd = cc->EvalAdd(ciphertext1, plaintext2);
+            auto ciphertext_ptxt_add = cc->eval_add(ciphertext1, plaintext2);
 
             // Multiplication
-            std::vector<int64_t> expectedResults1 = {3, 8, 15, 32, 125, 216, 343, 512, 729, 990, 1331, 1728};
-            Plaintext plaintextMult;
-            cc->Decrypt(keyPair.secretKey, ciphertextMultResult, &plaintextMult);
-            plaintextMult->SetLength(vectorOfInts1.size());
-            auto results1 = plaintextMult->GetPackedValue();
-            checkEquality(results1, expectedResults1, eps, failmsg + " EvalMult failed");
+            std::vector<int64_t> expected_results1 = {3, 8, 15, 32, 125, 216, 343, 512, 729, 990, 1331, 1728};
+            Plaintext plaintext_mult;
+            cc->decrypt(key_pair.secret_key, ciphertext_mult_result, &plaintext_mult);
+            plaintext_mult->set_length(vector_of_ints1.size());
+            auto results1 = plaintext_mult->get_packed_value();
+            check_equality(results1, expected_results1, eps, failmsg + " EvalMult failed");
 
             // Squaring
-            expectedResults1 = {1, 4, 9, 16, 25, 36, 49, 64, 81, 121, 121, 144};
-            Plaintext plaintextSquare;
-            cc->Decrypt(keyPair.secretKey, ciphertextSquareResult, &plaintextSquare);
-            plaintextSquare->SetLength(vectorOfInts1.size());
-            results1 = plaintextSquare->GetPackedValue();
-            checkEquality(results1, expectedResults1, eps, failmsg + " EvalSquare failed");
+            expected_results1 = {1, 4, 9, 16, 25, 36, 49, 64, 81, 121, 121, 144};
+            Plaintext plaintext_square;
+            cc->decrypt(key_pair.secret_key, ciphertext_square_result, &plaintext_square);
+            plaintext_square->set_length(vector_of_ints1.size());
+            results1 = plaintext_square->get_packed_value();
+            check_equality(results1, expected_results1, eps, failmsg + " EvalSquare failed");
 
             // Fast Rotation
-            expectedResults1 = {4, 3, 16, 25, 36, 49, 64, 81, 110, 121, 144, 0};
-            Plaintext plaintextRot1;
-            cc->Decrypt(keyPair.secretKey, ciphertextRot1, &plaintextRot1);
-            plaintextRot1->SetLength(vectorOfInts1.size());
-            results1 = plaintextRot1->GetPackedValue();
-            checkEquality(results1, expectedResults1, eps, failmsg + " EvalFastRotation failed");
+            expected_results1 = {4, 3, 16, 25, 36, 49, 64, 81, 110, 121, 144, 0};
+            Plaintext plaintext_rot1;
+            cc->decrypt(key_pair.secret_key, ciphertext_rot1, &plaintext_rot1);
+            plaintext_rot1->set_length(vector_of_ints1.size());
+            results1 = plaintext_rot1->get_packed_value();
+            check_equality(results1, expected_results1, eps, failmsg + " EvalFastRotation failed");
 
             // Rotation
-            expectedResults1 = {4, 3, 16, 25, 36, 49, 64, 81, 110, 121, 144, 0};
-            Plaintext plaintextRot2;
-            cc->Decrypt(keyPair.secretKey, ciphertextRot2, &plaintextRot2);
-            plaintextRot2->SetLength(vectorOfInts1.size());
-            results1 = plaintextRot2->GetPackedValue();
-            checkEquality(results1, expectedResults1, eps, failmsg + " EvalRotate failed");
+            expected_results1 = {4, 3, 16, 25, 36, 49, 64, 81, 110, 121, 144, 0};
+            Plaintext plaintext_rot2;
+            cc->decrypt(key_pair.secret_key, ciphertext_rot2, &plaintext_rot2);
+            plaintext_rot2->set_length(vector_of_ints1.size());
+            results1 = plaintext_rot2->get_packed_value();
+            check_equality(results1, expected_results1, eps, failmsg + " EvalRotate failed");
 
             // Multiplication by plaintext
-            expectedResults1 = {3, 4, 3, 16, 25, 36, 49, 64, 81, 110, 121, 144};
-            Plaintext plaintextPtxtMult;
-            cc->Decrypt(keyPair.secretKey, ciphertextPtxtMult, &plaintextPtxtMult);
-            plaintextPtxtMult->SetLength(vectorOfInts1.size());
-            results1 = plaintextPtxtMult->GetPackedValue();
-            checkEquality(results1, expectedResults1, eps, failmsg + " EvalMult with plaintext failed");
+            expected_results1 = {3, 4, 3, 16, 25, 36, 49, 64, 81, 110, 121, 144};
+            Plaintext plaintext_ptxt_mult;
+            cc->decrypt(key_pair.secret_key, ciphertext_ptxt_mult, &plaintext_ptxt_mult);
+            plaintext_ptxt_mult->set_length(vector_of_ints1.size());
+            results1 = plaintext_ptxt_mult->get_packed_value();
+            check_equality(results1, expected_results1, eps, failmsg + " EvalMult with plaintext failed");
 
             // Addition of a plaintext
-            expectedResults1 = {4, 4, 4, 8, 10, 12, 14, 16, 18, 21, 22, 24};
-            Plaintext plaintextPtxtAdd;
-            cc->Decrypt(keyPair.secretKey, ciphertextPtxtAdd, &plaintextPtxtAdd);
-            plaintextPtxtAdd->SetLength(vectorOfInts1.size());
-            results1 = plaintextPtxtAdd->GetPackedValue();
-            checkEquality(results1, expectedResults1, eps, failmsg + " EvalAdd with plaintext failed");
+            expected_results1 = {4, 4, 4, 8, 10, 12, 14, 16, 18, 21, 22, 24};
+            Plaintext plaintext_ptxt_add;
+            cc->decrypt(key_pair.secret_key, ciphertext_ptxt_add, &plaintext_ptxt_add);
+            plaintext_ptxt_add->set_length(vector_of_ints1.size());
+            results1 = plaintext_ptxt_add->get_packed_value();
+            check_equality(results1, expected_results1, eps, failmsg + " EvalAdd with plaintext failed");
 
             // Multiplication - compressed to 1
-            expectedResults1 = {3, 8, 15, 32, 125, 216, 343, 512, 729, 990, 1331, 1728};
-            Plaintext plaintextMultComp1;
-            cc->Decrypt(keyPair.secretKey, ciphertextMultCompressed1, &plaintextMultComp1);
-            plaintextMultComp1->SetLength(vectorOfInts1.size());
-            results1 = plaintextMultComp1->GetPackedValue();
-            checkEquality(results1, expectedResults1, eps, failmsg + " EvalMult compressed to 1 RNS limb failed");
+            expected_results1 = {3, 8, 15, 32, 125, 216, 343, 512, 729, 990, 1331, 1728};
+            Plaintext plaintext_mult_comp1;
+            cc->decrypt(key_pair.secret_key, ciphertext_mult_compressed1, &plaintext_mult_comp1);
+            plaintext_mult_comp1->set_length(vector_of_ints1.size());
+            results1 = plaintext_mult_comp1->get_packed_value();
+            check_equality(results1, expected_results1, eps, failmsg + " EvalMult compressed to 1 RNS limb failed");
 
             // Multiplication - compressed to 2
-            expectedResults1 = {3, 8, 15, 32, 125, 216, 343, 512, 729, 990, 1331, 1728};
-            Plaintext plaintextMultComp2;
-            cc->Decrypt(keyPair.secretKey, ciphertextMultCompressed2, &plaintextMultComp2);
-            plaintextMultComp2->SetLength(vectorOfInts1.size());
-            results1 = plaintextMultComp2->GetPackedValue();
-            checkEquality(results1, expectedResults1, eps, failmsg + " EvalMult compressed to 2 RNS limbs failed");
+            expected_results1 = {3, 8, 15, 32, 125, 216, 343, 512, 729, 990, 1331, 1728};
+            Plaintext plaintext_mult_comp2;
+            cc->decrypt(key_pair.secret_key, ciphertext_mult_compressed2, &plaintext_mult_comp2);
+            plaintext_mult_comp2->set_length(vector_of_ints1.size());
+            results1 = plaintext_mult_comp2->get_packed_value();
+            check_equality(results1, expected_results1, eps, failmsg + " EvalMult compressed to 2 RNS limbs failed");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -331,19 +331,19 @@ class UTBFVRNS : public ::testing::TestWithParam<TEST_CASE_UTBFVRNS> {
 };
 //===========================================================================================================
 TEST_P(UTBFVRNS, BFVRNS) {
-    setupSignals();
+    setup_signals();
     auto test = GetParam();
 
-    switch (test.testCaseType) {
+    switch (test.test_case_type) {
         case EVAL_FAST_ROTATION:
-            UnitTest_EvalFastRotation(test, test.buildTestName());
+            unit_test_eval_fast_rotation(test, test.build_test_name());
             break;
         case COMPRESSED_BFV:
-            UnitTest_CompressedBFV(test, test.buildTestName());
+            unit_test_compressed_bfv(test, test.build_test_name());
             break;
         default:
             break;
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTBFVRNS, ::testing::ValuesIn(testCases), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTBFVRNS, ::testing::ValuesIn(test_cases), testName);

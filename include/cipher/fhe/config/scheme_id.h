@@ -39,7 +39,7 @@
 #include <iosfwd>
 #include <string>
 
-namespace lbcrypto {
+namespace cipher {
 
 //====================================================================================================================
 /**
@@ -58,53 +58,53 @@ enum SCHEME {
  * @param str the enumerator name
  * @return the corresponding scheme identifier; throws an exception if the name is unknown
  */
-SCHEME convertToSCHEME(const std::string& str);
+SCHEME convert_to_scheme(const std::string& str);
 //====================================================================================================================
 /**
  * Converts a scheme identifier to its enumerator name.
  *
- * @param schemeId the scheme identifier
+ * @param scheme_id_value the scheme identifier
  * @return the enumerator name, or "INVALID_SCHEME[<value>]" for a value that is not a valid scheme
  */
-std::string convertToString(SCHEME schemeId) noexcept;
+std::string convert_to_string_impl(SCHEME scheme_id_value) noexcept;
 //====================================================================================================================
 /**
  * Prints the short scheme name ("CKKSRNS", "BFVRNS" or "BGVRNS").
  *
  * @param os the output stream
- * @param schemeId the scheme identifier to print; an invalid identifier causes an exception
+ * @param scheme_id_value the scheme identifier to print; an invalid identifier causes an exception
  * @return the output stream
  */
-std::ostream& operator<<(std::ostream& os, SCHEME schemeId);
+std::ostream& operator<<(std::ostream& os, SCHEME scheme_id_value);
 //====================================================================================================================
 /**
  * Checks whether a scheme identifier denotes the CKKS scheme.
  *
- * @param schemeId the scheme identifier
- * @return true if schemeId is CKKSRNS_SCHEME
+ * @param scheme_id_value the scheme identifier
+ * @return true if scheme_id_value is CKKSRNS_SCHEME
  */
-inline bool isCKKS(SCHEME schemeId) {
-    return (schemeId == CKKSRNS_SCHEME);
+inline bool is_ckks(SCHEME scheme_id_value) {
+    return (scheme_id_value == CKKSRNS_SCHEME);
 }
 /**
  * Checks whether a scheme identifier denotes the BFV scheme.
  *
- * @param schemeId the scheme identifier
- * @return true if schemeId is BFVRNS_SCHEME
+ * @param scheme_id_value the scheme identifier
+ * @return true if scheme_id_value is BFVRNS_SCHEME
  */
-inline bool isBFVRNS(SCHEME schemeId) {
-    return (schemeId == BFVRNS_SCHEME);
+inline bool is_bfvrns(SCHEME scheme_id_value) {
+    return (scheme_id_value == BFVRNS_SCHEME);
 }
 /**
  * Checks whether a scheme identifier denotes the BGV scheme.
  *
- * @param schemeId the scheme identifier
- * @return true if schemeId is BGVRNS_SCHEME
+ * @param scheme_id_value the scheme identifier
+ * @return true if scheme_id_value is BGVRNS_SCHEME
  */
-inline bool isBGVRNS(SCHEME schemeId) {
-    return (schemeId == BGVRNS_SCHEME);
+inline bool is_bgvrns(SCHEME scheme_id_value) {
+    return (scheme_id_value == BGVRNS_SCHEME);
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_CONFIG_SCHEME_ID_H_

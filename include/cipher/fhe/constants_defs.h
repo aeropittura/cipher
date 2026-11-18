@@ -33,12 +33,12 @@
 
 #include "cipher/math/backend/basic_int.h"  // for MAX_MODULUS_SIZE
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Lists all features supported by public key encryption schemes
  */
-enum PKESchemeFeature {
+enum PkeSchemeFeature {
     PKE = 0x01,
     KEYSWITCH = 0x02,
     PRE = 0x04,
@@ -114,7 +114,7 @@ enum LargeScalingFactorConstants {
     MAX_LOG_STEP = 60,
 };
 
-enum CKKSDataType {
+enum CkksDataType {
     REAL = 0,
     COMPLEX,
 };
@@ -136,7 +136,7 @@ enum NoiseFlooding {
     // number of additional moduli in NOISE_FLOODING_MULTIPARTY mode
     NUM_MODULI_MULTIPARTY = 2,
 // modulus size for additional moduli in NOISE_FLOODING_MULTIPARTY mode
-#if NATIVEINT == 128
+#if CIPHER_NATIVE_INT == 128
     MULTIPARTY_MOD_SIZE = 60,
 #else
     MULTIPARTY_MOD_SIZE = MAX_MODULUS_SIZE,
@@ -153,6 +153,6 @@ enum CompressionLevel {
     SLACK = 3     // less efficient with weaker security assumption
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_CONSTANTS_DEFS_H_

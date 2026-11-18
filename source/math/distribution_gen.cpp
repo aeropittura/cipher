@@ -47,68 +47,68 @@
     #include <dlfcn.h>
 #endif
 
-namespace lbcrypto {
+namespace cipher {
 
-#if defined(WITH_OPENMP)
-std::shared_ptr<PRNG> PseudoRandomNumberGenerator::m_prng = nullptr;
+#if defined(CIPHER_WITH_OPENMP)
+std::shared_ptr<PRNG> PseudoRandomNumberGenerator::prng_ = nullptr;
 #else
-thread_local std::shared_ptr<PRNG> m_prng = nullptr;
+thread_local std::shared_ptr<PRNG> prng_ = nullptr;
 #endif
-PseudoRandomNumberGenerator::GenPRNGEngineFuncPtr PseudoRandomNumberGenerator::genPRNGEngine = nullptr;
+PseudoRandomNumberGenerator::GenPrngEngineFuncPtr PseudoRandomNumberGenerator::gen_prng_engine = nullptr;
 
-void PseudoRandomNumberGenerator::InitPRNGEngine(const std::string& libPath) {
-    if (genPRNGEngine)  // if genPRNGEngine has already been initialized
+void PseudoRandomNumberGenerator::init_prng_engine(const std::string& lib_path) {
+    if (gen_prng_engine)  // if gen_prng_engine has already been initialized
         return;
 
-    if (libPath.empty()) {
+    if (lib_path.empty()) {
         // use the default OpenFHE PRNG that comes with the library
-        genPRNGEngine = default_prng::createEngineInstance;
-        if (!genPRNGEngine)
-            OPENFHE_THROW("Cannot find symbol: default_prng::createEngineInstance");
+        gen_prng_engine = default_prng::createEngineInstance;
+        if (!gen_prng_engine)
+            CIPHER_THROW("Cannot find symbol: default_prng::createEngineInstance");
     } else {
 #if (defined(__linux__) || defined(__unix__)) && !defined(__APPLE__) && defined(__GNUC__) && !defined(__clang__)
         // enable this code for g++ on Linux only
         // do not close libraryHandle, your application will crash if you do
-        void* libraryHandle = dlopen(libPath.c_str(), RTLD_LAZY);
+        void* libraryHandle = dlopen(lib_path.c_str(), RTLD_LAZY);
         if (!libraryHandle) {
-            std::string errMsg{std::string("Cannot open ") + libPath + ": "};
+            std::string err_msg{std::string("Cannot open ") + lib_path + ": "};
             const char* dlsym_error = dlerror();
-            errMsg += dlsym_error;
-            OPENFHE_THROW(errMsg);
+            err_msg += dlsym_error;
+            CIPHER_THROW(err_msg);
         }
-        genPRNGEngine = (GenPRNGEngineFuncPtr)dlsym(libraryHandle, "createEngineInstance");
-        if (!genPRNGEngine) {
-            std::string errMsg{std::string("Cannot load symbol createEngineInstance() from ") + libPath};
+        gen_prng_engine = (GenPrngEngineFuncPtr)dlsym(libraryHandle, "createEngineInstance");
+        if (!gen_prng_engine) {
+            std::string err_msg{std::string("Cannot load symbol createEngineInstance() from ") + lib_path};
             const char* dlsym_error = dlerror();
-            errMsg += ": ";
-            errMsg += dlsym_error;
+            err_msg += ": ";
+            err_msg += dlsym_error;
             dlclose(libraryHandle);
-            OPENFHE_THROW(errMsg);
+            CIPHER_THROW(err_msg);
         }
-        OPENFHE_DIAGNOSTIC_ERR << __FUNCTION__ << ": using external PRNG" << std::endl;
+        CIPHER_DIAGNOSTIC_ERR << __FUNCTION__ << ": using external PRNG" << std::endl;
 #else
-        OPENFHE_THROW("OpenFHE may use an external PRNG library linked with g++ on Linux only");
+        CIPHER_THROW("OpenFHE may use an external PRNG library linked with g++ on Linux only");
 #endif
     }
 }
 
-PRNG& PseudoRandomNumberGenerator::GetPRNG() {
+PRNG& PseudoRandomNumberGenerator::get_prng() {
     // initialization of PRNGs
-    if (m_prng == nullptr) {
+    if (prng_ == nullptr) {
 #pragma omp critical
         {
             // we would like to believe that the block of code below is a good defense line
-            if (!genPRNGEngine)
-                InitPRNGEngine();
-            if (!genPRNGEngine)
-                OPENFHE_THROW("Failure to initialize the PRNG engine");
+            if (!gen_prng_engine)
+                init_prng_engine();
+            if (!gen_prng_engine)
+                CIPHER_THROW("Failure to initialize the PRNG engine");
 
-            m_prng = std::shared_ptr<PRNG>(genPRNGEngine());
-            if (!m_prng)
-                OPENFHE_THROW("Cannot create a PRNG engine");
+            prng_ = std::shared_ptr<PRNG>(gen_prng_engine());
+            if (!prng_)
+                CIPHER_THROW("Cannot create a PRNG engine");
         }  // pragma omp critical
     }
-    return *m_prng;
+    return *prng_;
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher

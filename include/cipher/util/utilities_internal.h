@@ -37,16 +37,16 @@
 #include "cipher/math/backend.h"
 #include "cipher/util/utilities.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-#if defined(HAVE_INT128)
+#if defined(CIPHER_HAVE_INT128)
 /**
  * 64-bit uint multiplier, result is 128-bit
  * @param a: operand 1
  * @param b: operand 2
  * @return result: 128-bit result = a * b
  */
-inline DoubleNativeInt Mul128(uint64_t a, uint64_t b) {
+inline DoubleNativeInt mul128(uint64_t a, uint64_t b) {
     return DoubleNativeInt(a) * DoubleNativeInt(b);
 }
 
@@ -59,7 +59,7 @@ inline DoubleNativeInt Mul128(uint64_t a, uint64_t b) {
  * @param mu: 2^128/modulus (128-bit)
  * @return result: 64-bit result = a mod modulus
  */
-inline uint64_t BarrettUint128ModUint64(const DoubleNativeInt& a, uint64_t modulus, const DoubleNativeInt& mu) {
+inline uint64_t barrett_uint128_mod_uint64(const DoubleNativeInt& a, uint64_t modulus, const DoubleNativeInt& mu) {
     // (a * mu)/2^128 // we need the upper 128-bit of (256-bit product)
     uint64_t result = 0, a_lo = 0, a_hi = 0, mu_lo = 0, mu_hi = 0, left_hi = 0, middle_lo = 0, middle_hi = 0, tmp1 = 0,
              tmp2 = 0, carry = 0;
@@ -70,22 +70,22 @@ inline uint64_t BarrettUint128ModUint64(const DoubleNativeInt& a, uint64_t modul
     mu_lo = (uint64_t)mu;
     mu_hi = mu >> 64;
 
-    left_hi = (Mul128(a_lo, mu_lo)) >> 64;  // mul left parts, discard lower word
+    left_hi = (mul128(a_lo, mu_lo)) >> 64;  // mul left parts, discard lower word
 
-    middle = Mul128(a_lo, mu_hi);  // mul middle first
+    middle = mul128(a_lo, mu_hi);  // mul middle first
     middle_lo = (uint64_t)middle;
     middle_hi = middle >> 64;
 
     // accumulate and check carry
-    carry = AdditionWithCarryOut(middle_lo, left_hi, tmp1);
+    carry = addition_with_carry_out(middle_lo, left_hi, tmp1);
 
     tmp2 = middle_hi + carry;  // accumulate
 
-    middle = Mul128(a_hi, mu_lo);  // mul middle second
+    middle = mul128(a_hi, mu_lo);  // mul middle second
     middle_lo = (uint64_t)middle;
     middle_hi = middle >> 64;
 
-    carry = IsAdditionOverflow(middle_lo, tmp1);  // check carry
+    carry = is_addition_overflow(middle_lo, tmp1);  // check carry
 
     left_hi = middle_hi + carry;  // accumulate
 
@@ -102,5 +102,5 @@ inline uint64_t BarrettUint128ModUint64(const DoubleNativeInt& a, uint64_t modul
 }
 #endif
 
-}  // namespace lbcrypto
+}  // namespace cipher
 #endif  // CIPHER_UTIL_UTILITIES_INTERNAL_H_

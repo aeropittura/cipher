@@ -31,24 +31,24 @@
 
 #include "cipher/fhe/globals.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 struct GLOBALS {
-    static bool precomputeCRTTables;
+    static bool precompute_crt_tables_value;
 };
-bool GLOBALS::precomputeCRTTables = true;
+bool GLOBALS::precompute_crt_tables_value = true;
 //=============================================================================
-void EnablePrecomputeCRTTablesAfterDeserializaton() {
-    GLOBALS::precomputeCRTTables = true;
+void enable_precompute_crt_tables_after_deserializaton() {
+    GLOBALS::precompute_crt_tables_value = true;
 }
 //=============================================================================
-void DisablePrecomputeCRTTablesAfterDeserializaton() {
-    GLOBALS::precomputeCRTTables = false;
+void disable_precompute_crt_tables_after_deserializaton() {
+    GLOBALS::precompute_crt_tables_value = false;
 }
 //=============================================================================
-bool PrecomputeCRTTablesAfterDeserializaton() {
-    return GLOBALS::precomputeCRTTables;
+bool precompute_crt_tables_after_deserializaton() {
+    return GLOBALS::precompute_crt_tables_value;
 }
 //=============================================================================
 
-}  // namespace lbcrypto
+}  // namespace cipher

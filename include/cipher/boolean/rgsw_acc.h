@@ -41,39 +41,39 @@
 #include "cipher/boolean/rgsw_params.h"
 #include "cipher/boolean/rlwe_ciphertext.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Ring GSW accumulator schemes described in
  * https://eprint.iacr.org/2014/816, https://eprint.iacr.org/2020/086 and https://eprint.iacr.org/2022/198
  */
-class RingGSWAccumulator {
+class RingGswAccumulator {
   public:
-    RingGSWAccumulator() = default;
+    RingGswAccumulator() = default;
 
-#if NATIVEINT != 32
+#if CIPHER_NATIVE_INT != 32
     /**
      * Key generation for internal Ring GSW directly in the 32-bit internal key representation, used when the modulus Q
-     * fits a 32-bit word. Takes the same arguments as KeyGenAcc: the RingGSW scheme parameters, the secret key
+     * fits a 32-bit word. Takes the same arguments as key_gen_acc: the RingGSW scheme parameters, the secret key
      * polynomial in the EVALUATION representation, and the LWE secret key. The base implementation returns nullptr,
-     * meaning the accumulator does not implement it, so callers fall back to KeyGenAcc
+     * meaning the accumulator does not implement it, so callers fall back to key_gen_acc
      *
      * @return a shared pointer to the 32-bit refreshing key, or nullptr when not implemented
      */
-    virtual RingGSWACCKey32 KeyGenAcc32(const std::shared_ptr<RingGSWCryptoParams>&, const NativePoly&,
-                                        ConstLWEPrivateKey&) const {
+    virtual RingGswAccKey32 key_gen_acc32(const std::shared_ptr<RingGswCryptoParams>&, const NativePoly&,
+                                        ConstLwePrivateKey&) const {
         return nullptr;
     }
 
     /**
-     * Main accumulator function (blind rotation) on the 32-bit internal key, bit-identical to EvalAcc on the 64-bit
-     * key. Takes the same arguments as EvalAcc: the RingGSW scheme parameters, the 32-bit accumulator key, the
+     * Main accumulator function (blind rotation) on the 32-bit internal key, bit-identical to eval_acc on the 64-bit
+     * key. Takes the same arguments as eval_acc: the RingGSW scheme parameters, the 32-bit accumulator key, the
      * accumulator to update, and the value to update it with. Implemented by every accumulator that implements
-     * KeyGenAcc32; the base implementation throws
+     * key_gen_acc32; the base implementation throws
      */
-    virtual void EvalAcc32(const std::shared_ptr<RingGSWCryptoParams>&, ConstRingGSWACCKey32&, RLWECiphertext&,
+    virtual void eval_acc32(const std::shared_ptr<RingGswCryptoParams>&, ConstRingGswAccKey32&, RlweCiphertext&,
                            const NativeVector&) const {
-        OPENFHE_THROW("32-bit internal evaluation is not supported by this accumulator");
+        CIPHER_THROW("32-bit internal evaluation is not supported by this accumulator");
     }
 #endif
 
@@ -81,13 +81,13 @@ class RingGSWAccumulator {
      * Key generation for internal Ring GSW
      *
      * @param params a shared pointer to RingGSW scheme parameters
-     * @param skNTT secret key polynomial in the EVALUATION representation
-     * @param LWEsk the secret key
+     * @param sk_ntt secret key polynomial in the EVALUATION representation
+     * @param LWE_sk the secret key
      * @return a shared pointer to the resulting keys
      */
-    virtual RingGSWACCKey KeyGenAcc(const std::shared_ptr<RingGSWCryptoParams>& params, const NativePoly& skNTT,
-                                    ConstLWEPrivateKey& LWEsk) const {
-        OPENFHE_THROW("Operation not supported");
+    virtual RingGswAccKey key_gen_acc(const std::shared_ptr<RingGswCryptoParams>& params, const NativePoly& sk_ntt,
+                                    ConstLwePrivateKey& LWE_sk) const {
+        CIPHER_THROW("Operation not supported");
     }
 
     /**
@@ -98,9 +98,9 @@ class RingGSWAccumulator {
      * @param acc previous value of the accumulator
      * @param a value to update the accumulator with
      */
-    virtual void EvalAcc(const std::shared_ptr<RingGSWCryptoParams>& params, ConstRingGSWACCKey& ek,
-                         RLWECiphertext& acc, const NativeVector& a) const {
-        OPENFHE_THROW("Operation not supported");
+    virtual void eval_acc(const std::shared_ptr<RingGswCryptoParams>& params, ConstRingGswAccKey& ek,
+                         RlweCiphertext& acc, const NativeVector& a) const {
+        CIPHER_THROW("Operation not supported");
     }
 
     /**
@@ -111,7 +111,7 @@ class RingGSWAccumulator {
      * @param input input RLWE ciphertext
      * @param output output RLWE' ciphertext
      */
-    void SignedDigitDecompose(const std::shared_ptr<RingGSWCryptoParams>& params, const std::vector<NativePoly>& input,
+    void signed_digit_decompose(const std::shared_ptr<RingGswCryptoParams>& params, const std::vector<NativePoly>& input,
                               std::vector<NativePoly>& output) const;
 
     /**
@@ -123,22 +123,22 @@ class RingGSWAccumulator {
      * @param output output RLWE' ciphertext
      * @param index LWE secret-key coefficient index
      */
-    void SignedDigitDecompose(const std::shared_ptr<RingGSWCryptoParams>& params, const std::vector<NativePoly>& input,
+    void signed_digit_decompose(const std::shared_ptr<RingGswCryptoParams>& params, const std::vector<NativePoly>& input,
                               std::vector<NativePoly>& output, uint32_t index) const;
 
     /**
      * The signed digit decomposition of an RLWE ciphertext into an RLWE' ciphertext with explicit gadget parameters.
-     * Both overloads of SignedDigitDecompose for RLWE ciphertexts forward here. The excess-H decomposition produces
-     * 2(digitsG - 1) digit polynomials, the first digit being dropped by the approximate gadget decomposition
+     * Both overloads of signed_digit_decompose for RLWE ciphertexts forward here. The excess-H decomposition produces
+     * 2(digits_g - 1) digit polynomials, the first digit being dropped by the approximate gadget decomposition
      *
      * @param params a shared pointer to RingGSW scheme parameters
      * @param input input RLWE ciphertext
-     * @param output output RLWE' ciphertext, sized by the caller to 2(digitsG - 1) polynomials
+     * @param output output RLWE' ciphertext, sized by the caller to 2(digits_g - 1) polynomials
      * @param bp the gadget parameters (base, digit count, digit width) to decompose with
      */
-    void SignedDigitDecomposeImpl(const std::shared_ptr<RingGSWCryptoParams>& params,
+    void signed_digit_decompose_impl(const std::shared_ptr<RingGswCryptoParams>& params,
                                   const std::vector<NativePoly>& input, std::vector<NativePoly>& output,
-                                  const RingGSWCryptoParams::BaseGParams& bp) const;
+                                  const RingGswCryptoParams::BaseGParams& bp) const;
 
     /**
      * The signed digit decomposition which takes a ring element input and outputs a vector of its digits, i.e.,
@@ -149,10 +149,10 @@ class RingGSWAccumulator {
      * @param input input ring element
      * @param output decomposed value
      */
-    void SignedDigitDecompose(const std::shared_ptr<RingGSWCryptoParams>& params, const NativePoly& input,
+    void signed_digit_decompose(const std::shared_ptr<RingGswCryptoParams>& params, const NativePoly& input,
                               std::vector<NativePoly>& output) const;
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_BOOLEAN_RGSW_ACC_H_

@@ -38,23 +38,23 @@
 
 #include "cipher/boolean/context.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 int main() {
     // Sample Program: Step 1: Set CryptoContext
-    auto cc = BinFHEContext();
+    auto cc = BooleanContext();
 
-    cc.GenerateBinFHEContext(STD128, false);
+    cc.generate_boolean_context(STD128, false);
 
     // Sample Program: Step 2: Key Generation
 
     // Generate the secret key
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
     std::cout << "Generating the bootstrapping keys..." << std::endl;
 
     // Generate the bootstrapping keys (refresh, switching and public keys)
-    cc.BTKeyGen(sk, PUB_ENCRYPT);
+    cc.bt_key_gen(sk, PUB_ENCRYPT);
 
     std::cout << "Completed the key generation." << std::endl;
 
@@ -62,24 +62,24 @@ int main() {
 
     // Obtain the maximum plaintext space
     // With the default parameter, p = 8
-    int p = cc.GetMaxPlaintextSpace().ConvertToInt();
+    int p = cc.get_max_plaintext_space().convert_to_int();
 
     // Number of bits to round down
     auto bits = 1;
     uint32_t input = 6;
     std::cout << "Homomorphically round down the input by " << bits << " bits." << std::endl;
 
-    auto pk = cc.GetPublicKey();
+    auto pk = cc.get_public_key();
 
-    auto ct1 = cc.Encrypt(pk, input % p, SMALL_DIM, p);
+    auto ct1 = cc.encrypt(pk, input % p, SMALL_DIM, p);
 
     // Sample Program: Step 4: Evaluation
-    auto ctRounded = cc.EvalFloor(ct1, bits);
+    auto ct_rounded = cc.eval_floor(ct1, bits);
 
     // Sample Program: Step 5: Decryption
-    LWEPlaintext result;
+    LwePlaintext result;
 
-    cc.Decrypt(sk, ctRounded, &result, p / (1 << bits));
+    cc.decrypt(sk, ct_rounded, &result, p / (1 << bits));
 
     std::cout << "Input: " << input << ". Expected: " << (input >> bits) << ". Evaluated = " << result << std::endl;
 

@@ -46,10 +46,10 @@
 #include "cipher/fhe/key/public_key_fwd.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Class for public key
@@ -58,7 +58,7 @@ namespace lbcrypto {
 template <typename Element>
 class PublicKeyImpl : public Key<Element> {
   private:
-    std::vector<Element> m_h;
+    std::vector<Element> h_;
 
   public:
     PublicKeyImpl() = default;
@@ -77,7 +77,7 @@ class PublicKeyImpl : public Key<Element> {
      *@param rhs PublicKeyImpl to copy from
      */
     PublicKeyImpl(const PublicKeyImpl<Element>& rhs)
-        : Key<Element>(rhs.GetCryptoContext(), rhs.GetKeyTag()), m_h(rhs.m_h) {}
+        : Key<Element>(rhs.get_crypto_context(), rhs.get_key_tag()), h_(rhs.h_) {}
 
     /**
      * Move constructor
@@ -85,7 +85,7 @@ class PublicKeyImpl : public Key<Element> {
      *@param rhs PublicKeyImpl to move from
      */
     PublicKeyImpl(PublicKeyImpl<Element>&& rhs) noexcept
-        : Key<Element>(rhs.GetCryptoContext(), rhs.GetKeyTag()), m_h(std::move(rhs.m_h)) {}
+        : Key<Element>(rhs.get_crypto_context(), rhs.get_key_tag()), h_(std::move(rhs.h_)) {}
 
     /**
      * Checks whether the key is usable: it has a crypto context and a non-empty public element vector.
@@ -93,7 +93,7 @@ class PublicKeyImpl : public Key<Element> {
      * @return true if the key has a crypto context and at least one public element
      */
     operator bool() const {
-        return static_cast<bool>(this->context) && m_h.size() != 0;
+        return static_cast<bool>(this->context) && h_.size() != 0;
     }
 
     /**
@@ -104,7 +104,7 @@ class PublicKeyImpl : public Key<Element> {
      */
     PublicKeyImpl<Element>& operator=(const PublicKeyImpl<Element>& rhs) {
         CryptoObject<Element>::operator=(rhs);
-        m_h = rhs.m_h;
+        h_ = rhs.h_;
         return *this;
     }
 
@@ -116,7 +116,7 @@ class PublicKeyImpl : public Key<Element> {
      */
     PublicKeyImpl<Element>& operator=(PublicKeyImpl<Element>&& rhs) noexcept {
         CryptoObject<Element>::operator=(std::move(rhs));
-        m_h = std::move(rhs.m_h);
+        h_ = std::move(rhs.h_);
         return *this;
     }
 
@@ -126,8 +126,8 @@ class PublicKeyImpl : public Key<Element> {
      * Gets the computed public key
      * @return the public key element.
      */
-    const std::vector<Element>& GetPublicElements() const {
-        return m_h;
+    const std::vector<Element>& get_public_elements() const {
+        return h_;
     }
 
     // @Set Properties
@@ -136,16 +136,16 @@ class PublicKeyImpl : public Key<Element> {
      * Sets the public key vector of Element.
      * @param element is the public key Element vector to be copied.
      */
-    void SetPublicElements(const std::vector<Element>& element) {
-        m_h = element;
+    void set_public_elements(const std::vector<Element>& element) {
+        h_ = element;
     }
 
     /**
      * Sets the public key vector of Element.
      * @param element is the public key Element vector to be moved.
      */
-    void SetPublicElements(std::vector<Element>&& element) noexcept {
-        m_h = std::move(element);
+    void set_public_elements(std::vector<Element>&& element) noexcept {
+        h_ = std::move(element);
     }
 
     /**
@@ -155,7 +155,7 @@ class PublicKeyImpl : public Key<Element> {
      * @return true if the keys are equal
      */
     bool operator==(const PublicKeyImpl& rhs) const {
-        return CryptoObject<Element>::operator==(rhs) && m_h == rhs.m_h;
+        return CryptoObject<Element>::operator==(rhs) && h_ == rhs.h_;
     }
 
     /**
@@ -171,28 +171,28 @@ class PublicKeyImpl : public Key<Element> {
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
         ar(::cereal::base_class<Key<Element>>(this));
-        ar(::cereal::make_nvp("h", m_h));
+        ar(::cereal::make_nvp("h", h_));
     }
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
         ar(::cereal::base_class<Key<Element>>(this));
-        ar(::cereal::make_nvp("h", m_h));
+        ar(::cereal::make_nvp("h", h_));
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "PublicKey";
     }
 
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_KEY_PUBLIC_KEY_H_

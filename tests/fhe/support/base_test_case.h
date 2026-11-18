@@ -44,22 +44,22 @@
 
 struct BaseTestCase {
   private:
-    // std::shared_ptr<lbcrypto::Params> params;
-    lbcrypto::SCHEME scheme;
-    std::vector<std::string> paramOverrides;
+    // std::shared_ptr<cipher::Params> params;
+    cipher::SCHEME scheme;
+    std::vector<std::string> param_overrides;
 
   public:
     // there are cases when we don't support some features depending on different conditions.
-    // skipTest() is to check all those conditions, so we do not get our unit tests failed
-    bool skipTest() const {
-#if NATIVEINT == 128
-        lbcrypto::SCHEME schemeId = lbcrypto::convertToSCHEME(*paramOverrides.begin());
-        if (schemeId == lbcrypto::SCHEME::CKKSRNS_SCHEME) {
-            lbcrypto::CCParams<lbcrypto::CryptoContextCKKSRNS> parameters(paramOverrides);
-            // CKKS does not support FLEXIBLEAUTO or FLEXIBLEAUTOEXT for NATIVEINT == 128
-            switch (parameters.GetScalingTechnique()) {
-                case lbcrypto::ScalingTechnique::FLEXIBLEAUTO:
-                case lbcrypto::ScalingTechnique::FLEXIBLEAUTOEXT:
+    // skip_test() is to check all those conditions, so we do not get our unit tests failed
+    bool skip_test() const {
+#if CIPHER_NATIVE_INT == 128
+        cipher::SCHEME scheme_id_value = cipher::convert_to_scheme(*param_overrides.begin());
+        if (scheme_id_value == cipher::SCHEME::CKKSRNS_SCHEME) {
+            cipher::ContextParams<cipher::CkksRnsContext> parameters(param_overrides);
+            // CKKS does not support FLEXIBLEAUTO or FLEXIBLEAUTOEXT for CIPHER_NATIVE_INT == 128
+            switch (parameters.get_scaling_technique()) {
+                case cipher::ScalingTechnique::FLEXIBLEAUTO:
+                case cipher::ScalingTechnique::FLEXIBLEAUTOEXT:
                     return true;
                 default:
                     break;
@@ -69,16 +69,16 @@ struct BaseTestCase {
         return false;
     }
 
-    // const std::shared_ptr<lbcrypto::Params> getCryptoContextParams() const {
+    // const std::shared_ptr<cipher::Params> getCryptoContextParams() const {
     //    return params;
     // }
 
-    // void setCryptoContextParams(std::shared_ptr<lbcrypto::Params> params0) {
+    // void setCryptoContextParams(std::shared_ptr<cipher::Params> params0) {
     //    params = params0;
     // }
 
-    const std::vector<std::string>& getCryptoContextParamOverrides() const {
-        return paramOverrides;
+    const std::vector<std::string>& get_crypto_context_param_overrides() const {
+        return param_overrides;
     }
 
     /**
@@ -89,46 +89,46 @@ struct BaseTestCase {
      */
     // size_t populateCryptoContextParams(const std::vector<std::string>::const_iterator& start) {
     //    // get the total number of the parameter override values
-    //    size_t numOverrides = lbcrypto::Params::getAllParamsDataMembers().size();
+    //    size_t num_overrides = cipher::Params::get_all_params_data_members().size();
 
     //    // get the subset of elements with the parameter override values
-    //    std::vector<std::string> overrideValues(start, start + numOverrides);
+    //    std::vector<std::string> overrideValues(start, start + num_overrides);
 
-    //    lbcrypto::SCHEME scheme = lbcrypto::convertToSCHEME(*start);
+    //    cipher::SCHEME scheme = cipher::convert_to_scheme(*start);
     //    switch (scheme) {
-    //    case lbcrypto::CKKSRNS_SCHEME:
-    //        setCryptoContextParams(std::make_shared<lbcrypto::CCParams<lbcrypto::CryptoContextCKKSRNS>>(overrideValues));
+    //    case cipher::CKKSRNS_SCHEME:
+    //        setCryptoContextParams(std::make_shared<cipher::ContextParams<cipher::CkksRnsContext>>(overrideValues));
     //        break;
-    //    case lbcrypto::BFVRNS_SCHEME:
-    //        setCryptoContextParams(std::make_shared<lbcrypto::CCParams<lbcrypto::CryptoContextBFVRNS>>(overrideValues));
+    //    case cipher::BFVRNS_SCHEME:
+    //        setCryptoContextParams(std::make_shared<cipher::ContextParams<cipher::BfvRnsContext>>(overrideValues));
     //        break;
-    //    case lbcrypto::BGVRNS_SCHEME:
-    //        setCryptoContextParams(std::make_shared<lbcrypto::CCParams<lbcrypto::CryptoContextBGVRNS>>(overrideValues));
+    //    case cipher::BGVRNS_SCHEME:
+    //        setCryptoContextParams(std::make_shared<cipher::ContextParams<cipher::BgvRnsContext>>(overrideValues));
     //        break;
     //    default: {
-    //        std::string errMsg(std::string("Unknown schemeId ") + std::to_string(scheme));
-    //        OPENFHE_THROW(errMsg);
+    //        std::string err_msg(std::string("Unknown scheme_id_value ") + std::to_string(scheme));
+    //        CIPHER_THROW(err_msg);
     //    }
     //    }
 
-    //    return numOverrides;
+    //    return num_overrides;
     //}
 
-    size_t setCryptoContextParamsOverrides(const std::vector<std::string>::const_iterator& start) {
+    size_t set_crypto_context_params_overrides(const std::vector<std::string>::const_iterator& start) {
         // get the total number of the parameter override values
-        size_t numOverrides = lbcrypto::Params::getAllParamsDataMembers().size();
+        size_t num_overrides = cipher::Params::get_all_params_data_members().size();
 
-        scheme = lbcrypto::convertToSCHEME(*start);
+        scheme = cipher::convert_to_scheme(*start);
 
         // get the subset of elements with the parameter override values
         try {
-            paramOverrides = std::vector<std::string>(start, start + numOverrides);
+            param_overrides = std::vector<std::string>(start, start + num_overrides);
         } catch (...) {
-            std::string errMsg("Check the number of parameter overrides in the .csv file. It should be [" +
-                               std::to_string(numOverrides) + "]");
-            OPENFHE_THROW(errMsg);
+            std::string err_msg("Check the number of parameter overrides in the .csv file. It should be [" +
+                               std::to_string(num_overrides) + "]");
+            CIPHER_THROW(err_msg);
         }
-        return numOverrides;
+        return num_overrides;
     }
 };
 

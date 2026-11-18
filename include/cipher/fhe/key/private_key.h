@@ -49,24 +49,24 @@
 #include "cipher/fhe/key/private_key_fwd.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * Generates a random 128-bit identifier, used as the key tag of freshly generated private keys.
  *
  * @return the identifier as a 32-character lowercase hexadecimal string
  */
-inline std::string GenerateUniqueKeyID() {
-    const size_t intsInID = 128 / (sizeof(uint32_t) * 8);
+inline std::string generate_unique_key_id() {
+    const size_t ints_in_id = 128 / (sizeof(uint32_t) * 8);
     std::uniform_int_distribution<uint32_t> distribution(0, std::numeric_limits<uint32_t>::max());
     std::stringstream s;
     s.fill('0');
     s << std::hex;
-    for (size_t i = 0; i < intsInID; i++)
-        s << std::setw(8) << distribution(PseudoRandomNumberGenerator::GetPRNG());
+    for (size_t i = 0; i < ints_in_id; i++)
+        s << std::setw(8) << distribution(PseudoRandomNumberGenerator::get_prng());
     return s.str();
 }
 
@@ -77,7 +77,7 @@ inline std::string GenerateUniqueKeyID() {
 template <class Element>
 class PrivateKeyImpl : public Key<Element> {
   private:
-    Element m_sk;
+    Element sk_;
 
   public:
     /**
@@ -87,25 +87,25 @@ class PrivateKeyImpl : public Key<Element> {
 
     /**
      * Constructs an empty private key in the given crypto context and assigns it a freshly generated
-     * random key tag (see GenerateUniqueKeyID()).
+     * random key tag (see generate_unique_key_id()).
      *
      * @param cc the crypto context the key belongs to
      */
-    explicit PrivateKeyImpl(const CryptoContext<Element>& cc) : Key<Element>(cc, GenerateUniqueKeyID()) {}
+    explicit PrivateKeyImpl(const CryptoContext<Element>& cc) : Key<Element>(cc, generate_unique_key_id()) {}
 
     /**
      * Copy constructor
      *@param rhs the PrivateKeyImpl to copy from
      */
     PrivateKeyImpl(const PrivateKeyImpl<Element>& rhs)
-        : Key<Element>(rhs.GetCryptoContext(), rhs.GetKeyTag()), m_sk(rhs.m_sk) {}
+        : Key<Element>(rhs.get_crypto_context(), rhs.get_key_tag()), sk_(rhs.sk_) {}
 
     /**
      * Move constructor
      *@param rhs the PrivateKeyImpl to move from
      */
     PrivateKeyImpl(PrivateKeyImpl<Element>&& rhs) noexcept
-        : Key<Element>(rhs.GetCryptoContext(), rhs.GetKeyTag()), m_sk(std::move(rhs.m_sk)) {}
+        : Key<Element>(rhs.get_crypto_context(), rhs.get_key_tag()), sk_(std::move(rhs.sk_)) {}
 
     /**
      * Checks whether the key is attached to a crypto context.
@@ -124,7 +124,7 @@ class PrivateKeyImpl : public Key<Element> {
      */
     PrivateKeyImpl<Element>& operator=(const PrivateKeyImpl<Element>& rhs) {
         CryptoObject<Element>::operator=(rhs);
-        m_sk = rhs.m_sk;
+        sk_ = rhs.sk_;
         return *this;
     }
 
@@ -136,7 +136,7 @@ class PrivateKeyImpl : public Key<Element> {
      */
     PrivateKeyImpl<Element>& operator=(PrivateKeyImpl<Element>&& rhs) noexcept {
         CryptoObject<Element>::operator=(std::move(rhs));
-        m_sk = std::move(rhs.m_sk);
+        sk_ = std::move(rhs.sk_);
         return *this;
     }
 
@@ -144,24 +144,24 @@ class PrivateKeyImpl : public Key<Element> {
      * Implementation of the Get accessor for private element.
      * @return the private element.
      */
-    const Element& GetPrivateElement() const {
-        return m_sk;
+    const Element& get_private_element() const {
+        return sk_;
     }
 
     /**
      * Set accessor for private element.
      * @param x private element to set to.
      */
-    void SetPrivateElement(const Element& x) {
-        m_sk = x;
+    void set_private_element(const Element& x) {
+        sk_ = x;
     }
 
     /**
      * Set accessor for private element.
      * @param x private element to move from.
      */
-    void SetPrivateElement(Element&& x) noexcept {
-        m_sk = std::move(x);
+    void set_private_element(Element&& x) noexcept {
+        sk_ = std::move(x);
     }
 
     /**
@@ -171,7 +171,7 @@ class PrivateKeyImpl : public Key<Element> {
      * @return true if the keys are equal
      */
     bool operator==(const PrivateKeyImpl& other) const {
-        return CryptoObject<Element>::operator==(other) && m_sk == other.m_sk;
+        return CryptoObject<Element>::operator==(other) && sk_ == other.sk_;
     }
 
     /**
@@ -187,28 +187,28 @@ class PrivateKeyImpl : public Key<Element> {
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
         ar(::cereal::base_class<Key<Element>>(this));
-        ar(::cereal::make_nvp("s", m_sk));
+        ar(::cereal::make_nvp("s", sk_));
     }
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
         ar(::cereal::base_class<Key<Element>>(this));
-        ar(::cereal::make_nvp("s", m_sk));
+        ar(::cereal::make_nvp("s", sk_));
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "PrivateKey";
     }
 
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_KEY_PRIVATE_KEY_H_

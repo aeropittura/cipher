@@ -33,18 +33,18 @@
 #include "cipher/fhe/context.h"
 #include "cipher/fhe/crypto_object.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 template <typename Element>
-const std::shared_ptr<CryptoParametersBase<Element>> CryptoObject<Element>::GetCryptoParameters() const {
-    return context->GetCryptoParameters();
+const std::shared_ptr<BaseCryptoParams<Element>> CryptoObject<Element>::get_crypto_parameters() const {
+    return context->get_crypto_parameters();
 }
 
 template <typename Element>
-const EncodingParams CryptoObject<Element>::GetEncodingParameters() const {
-    return context->GetCryptoParameters()->GetEncodingParams();
+const EncodingParams CryptoObject<Element>::get_encoding_parameters() const {
+    return context->get_crypto_parameters()->get_encoding_params();
 }
 
-template class CryptoObject<DCRTPoly>;
+template class CryptoObject<RnsPoly>;
 
-}  // namespace lbcrypto
+}  // namespace cipher

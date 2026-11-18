@@ -44,7 +44,7 @@
 #include "cipher/math/distribution_gen.h"
 #include "cipher/math/backend.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief A generator of the Ternary Uniform Distribution.
@@ -59,11 +59,11 @@ class TernaryUniformGeneratorImpl {
     ~TernaryUniformGeneratorImpl() = default;
 
     /**
-     * @brief Generates a single value uniformly from {-1, 0, 1}, as GenerateVector does for each entry when h = 0.
+     * @brief Generates a single value uniformly from {-1, 0, 1}, as generate_vector does for each entry when h = 0.
      * @param modulus the modulus -1 is represented under
      * @return 0, 1 or modulus - 1
      */
-    typename VecType::Integer GenerateInteger(const typename VecType::Integer& modulus) const;
+    typename VecType::Integer generate_integer(const typename VecType::Integer& modulus) const;
 
     /**
      * @brief  Generates a vector of random values within the Ternary Uniform
@@ -74,7 +74,7 @@ class TernaryUniformGeneratorImpl {
      * h = 0, the distribution is NOT sparse)
      * @return A vector of random values within the Ternary Uniform Distribution.
      */
-    VecType GenerateVector(uint32_t size, const typename VecType::Integer& modulus, uint32_t h = 0) const;
+    VecType generate_vector(uint32_t size, const typename VecType::Integer& modulus, uint32_t h = 0) const;
 
     /**
      * @brief      Returns a generated vector of integers.
@@ -83,12 +83,12 @@ class TernaryUniformGeneratorImpl {
      * h = 0, the distribution is NOT sparse)
      * @return     vector of integer values generated with the distribution
      */
-    std::vector<int32_t> GenerateIntVector(uint32_t size, uint32_t h = 0) const;
+    std::vector<int32_t> generate_int_vector(uint32_t size, uint32_t h = 0) const;
 
   private:
-    static std::uniform_int_distribution<int32_t> m_distribution;
+    static std::uniform_int_distribution<int32_t> distribution_;
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_MATH_TERNARY_UNIFORM_GEN_H_

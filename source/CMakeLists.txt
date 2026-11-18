@@ -22,7 +22,7 @@ cipher_add_module(fhe     SOURCES ${CIPHER_FHE_SOURCES}     DEPENDS core boolean
 if(NOT CIPHER_WITH_DEFAULT_DIAGNOSTIC_SINK)
     add_library(cipher_diagnostic_sink INTERFACE)
     target_sources(cipher_diagnostic_sink INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/util/diagnostic_output.cpp)
-    target_compile_definitions(cipher_diagnostic_sink INTERFACE WITH_DEFAULT_DIAGNOSTIC_SINK)
+    target_compile_definitions(cipher_diagnostic_sink INTERFACE CIPHER_WITH_DEFAULT_DIAGNOSTIC_SINK)
 endif()
 
 get_property(_cipher_libs GLOBAL PROPERTY CIPHER_LIBRARY_TARGETS)

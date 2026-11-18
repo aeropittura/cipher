@@ -40,316 +40,316 @@ BFV implementation. See https://eprint.iacr.org/2021/204 for details.
 #include <memory>
 #include <vector>
 
-namespace lbcrypto {
+namespace cipher {
 
 // Precomputation of CRT tables for encryption, decryption, and homomorphic multiplication
-void CryptoParametersBFVRNS::PrecomputeCRTTables(KeySwitchTechnique ksTech, ScalingTechnique scalTech,
-                                                 EncryptionTechnique encTech, MultiplicationTechnique multTech,
-                                                 uint32_t numPartQ, uint32_t auxBits, uint32_t extraBits) {
-    CryptoParametersRNS::PrecomputeCRTTables(ksTech, scalTech, encTech, multTech, numPartQ, auxBits, extraBits);
+void BfvRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, ScalingTechnique scal_tech,
+                                                 EncryptionTechnique enc_tech, MultiplicationTechnique mult_tech,
+                                                 uint32_t num_part_q, uint32_t aux_bits, uint32_t extra_bits) {
+    RnsCryptoParams::precompute_crt_tables(ks_tech, scal_tech, enc_tech, mult_tech, num_part_q, aux_bits, extra_bits);
 
-    NativeInteger t = GetPlaintextModulus();
-    uint32_t n = GetElementParams()->GetRingDimension();
-    BigInteger modulusQ = GetElementParams()->GetModulus();
-    const auto& paramsQ = GetElementParams()->GetParams();
-    uint32_t sizeQ = paramsQ.size();
+    NativeInteger t = get_plaintext_modulus();
+    uint32_t n = get_element_params()->get_ring_dimension();
+    BigInteger modulus_q = get_element_params()->get_modulus();
+    const auto& params_q = get_element_params()->get_params();
+    uint32_t size_q = params_q.size();
 
-    m_modqBarrettMu.resize(0);
-    m_modqBarrettMu.reserve(sizeQ);
-    m_tInvModq.resize(0);
-    m_tInvModq.reserve(sizeQ);
+    modq_barrett_mu_.resize(0);
+    modq_barrett_mu_.reserve(size_q);
+    t_inv_modq_.resize(0);
+    t_inv_modq_.reserve(size_q);
 
-    std::vector<NativeInteger> moduliQ, rootsQ;
-    moduliQ.reserve(sizeQ);
-    rootsQ.reserve(sizeQ);
+    std::vector<NativeInteger> moduli_q, roots_q;
+    moduli_q.reserve(size_q);
+    roots_q.reserve(size_q);
 
-    const auto BarrettBase128Bit(BigInteger(1).LShiftEq(128));
-    for (const auto& p : paramsQ) {
-        m_tInvModq.emplace_back(t.ModInverse(p->GetModulus()));
-        m_modqBarrettMu.emplace_back((BarrettBase128Bit / BigInteger(p->GetModulus())).ConvertToInt<DoubleNativeInt>());
-        moduliQ.emplace_back(p->GetModulus());
-        rootsQ.emplace_back(p->GetRootOfUnity());
+    const auto barrett_base128_bit(BigInteger(1).l_shift_eq(128));
+    for (const auto& p : params_q) {
+        t_inv_modq_.emplace_back(t.mod_inverse(p->get_modulus()));
+        modq_barrett_mu_.emplace_back((barrett_base128_bit / BigInteger(p->get_modulus())).convert_to_int<DoubleNativeInt>());
+        moduli_q.emplace_back(p->get_modulus());
+        roots_q.emplace_back(p->get_root_of_unity());
     }
 
     /////////////////////////////////////
     // BFVrns : Encrypt
     /////////////////////////////////////
 
-    NativeInteger modulusr = PreviousPrime<NativeInteger>(moduliQ[sizeQ - 1], 2 * n);
-    NativeInteger rootr = RootOfUnity<NativeInteger>(2 * n, modulusr);
+    NativeInteger modulusr = previous_prime<NativeInteger>(moduli_q[size_q - 1], 2 * n);
+    NativeInteger rootr = root_of_unity<NativeInteger>(2 * n, modulusr);
 
-    BigInteger tmpModulusQ = modulusQ;
+    BigInteger tmp_modulus_q = modulus_q;
 
-    m_negQModt.clear();
-    m_negQModtPrecon.clear();
-    m_negQModt.resize(sizeQ);
-    m_negQModtPrecon.resize(sizeQ);
-    for (uint32_t l = 0; l < sizeQ; ++l) {
+    neg_q_modt_.clear();
+    neg_q_modt_precon_.clear();
+    neg_q_modt_.resize(size_q);
+    neg_q_modt_precon_.resize(size_q);
+    for (uint32_t l = 0; l < size_q; ++l) {
         if (l > 0)
-            tmpModulusQ = tmpModulusQ / BigInteger(moduliQ[sizeQ - l]);
+            tmp_modulus_q = tmp_modulus_q / BigInteger(moduli_q[size_q - l]);
 
-        m_negQModt[l] = tmpModulusQ.Mod(BigInteger(GetPlaintextModulus())).ConvertToInt();
-        m_negQModt[l] = t.Sub(m_negQModt[l]);
-        m_negQModtPrecon[l] = m_negQModt[l].PrepModMulConst(t);
+        neg_q_modt_[l] = tmp_modulus_q.mod(BigInteger(get_plaintext_modulus())).convert_to_int();
+        neg_q_modt_[l] = t.sub(neg_q_modt_[l]);
+        neg_q_modt_precon_[l] = neg_q_modt_[l].prep_mod_mul_const(t);
     }
 
     // BFVrns : Encrypt : With extra
-    if (encTech == EXTENDED) {
-        std::vector<NativeInteger> moduliQr(sizeQ + 1);
-        std::vector<NativeInteger> rootsQr(sizeQ + 1);
+    if (enc_tech == EXTENDED) {
+        std::vector<NativeInteger> moduli_qr_value(size_q + 1);
+        std::vector<NativeInteger> roots_qr_value(size_q + 1);
 
-        m_rInvModq.resize(sizeQ);
+        r_inv_modq_.resize(size_q);
 
-        m_tInvModqr.resize(sizeQ + 1);
+        t_inv_modqr_.resize(size_q + 1);
 
-        for (uint32_t i = 0; i < sizeQ; ++i) {
-            moduliQr[i] = moduliQ[i];
-            rootsQr[i] = rootsQ[i];
+        for (uint32_t i = 0; i < size_q; ++i) {
+            moduli_qr_value[i] = moduli_q[i];
+            roots_qr_value[i] = roots_q[i];
 
-            m_tInvModqr[i] = m_tInvModq[i];
-            m_rInvModq[i] = modulusr.ModInverse(moduliQ[i]);
+            t_inv_modqr_[i] = t_inv_modq_[i];
+            r_inv_modq_[i] = modulusr.mod_inverse(moduli_q[i]);
         }
-        moduliQr[sizeQ] = modulusr;
-        rootsQr[sizeQ] = rootr;
-        m_paramsQr = std::make_shared<ILDCRTParams<BigInteger>>(2 * n, moduliQr, rootsQr);
+        moduli_qr_value[size_q] = modulusr;
+        roots_qr_value[size_q] = rootr;
+        params_qr_ = std::make_shared<RnsParams<BigInteger>>(2 * n, moduli_qr_value, roots_qr_value);
 
-        m_tInvModqr[sizeQ] = t.ModInverse(modulusr);
+        t_inv_modqr_[size_q] = t.mod_inverse(modulusr);
 
-        BigInteger modulusQr = modulusQ.Mul(modulusr);
-        m_negQrModt = modulusQr.Mod(BigInteger(t)).ConvertToInt();
-        m_negQrModt = t.Sub(m_negQrModt);
-        m_negQrModtPrecon = m_negQrModt.PrepModMulConst(t);
+        BigInteger modulus_qr_value = modulus_q.mul(modulusr);
+        neg_qr_modt_ = modulus_qr_value.mod(BigInteger(t)).convert_to_int();
+        neg_qr_modt_ = t.sub(neg_qr_modt_);
+        neg_qr_modt_precon_ = neg_qr_modt_.prep_mod_mul_const(t);
     }
 
     /////////////////////////////////////
     // HPS Precomputation
     /////////////////////////////////////
 
-    if (multTech != BEHZ) {
-        uint32_t sizeR = (multTech == HPS) ? sizeQ + 1 : sizeQ;
-        std::vector<NativeInteger> moduliR(sizeR);
-        std::vector<NativeInteger> rootsR(sizeR);
-        m_modrBarrettMu.resize(sizeR);
+    if (mult_tech != BEHZ) {
+        uint32_t size_r = (mult_tech == HPS) ? size_q + 1 : size_q;
+        std::vector<NativeInteger> moduli_r(size_r);
+        std::vector<NativeInteger> roots_r(size_r);
+        modr_barrett_mu_.resize(size_r);
 
-        moduliR[0] = modulusr;
-        rootsR[0] = rootr;
-        m_modrBarrettMu[0] = (BarrettBase128Bit / BigInteger(moduliR[0])).ConvertToInt<DoubleNativeInt>();
+        moduli_r[0] = modulusr;
+        roots_r[0] = rootr;
+        modr_barrett_mu_[0] = (barrett_base128_bit / BigInteger(moduli_r[0])).convert_to_int<DoubleNativeInt>();
 
-        for (uint32_t j = 1; j < sizeR; ++j) {
-            moduliR[j] = PreviousPrime<NativeInteger>(moduliR[j - 1], 2 * n);
-            rootsR[j] = RootOfUnity<NativeInteger>(2 * n, moduliR[j]);
-            m_modrBarrettMu[j] = (BarrettBase128Bit / BigInteger(moduliR[j])).ConvertToInt<DoubleNativeInt>();
+        for (uint32_t j = 1; j < size_r; ++j) {
+            moduli_r[j] = previous_prime<NativeInteger>(moduli_r[j - 1], 2 * n);
+            roots_r[j] = root_of_unity<NativeInteger>(2 * n, moduli_r[j]);
+            modr_barrett_mu_[j] = (barrett_base128_bit / BigInteger(moduli_r[j])).convert_to_int<DoubleNativeInt>();
         }
 
-        ChineseRemainderTransformFTT<NativeVector>().PreCompute(rootsR, 2 * n, moduliR);
+        ChineseRemainderTransformFtt<NativeVector>().pre_compute(roots_r, 2 * n, moduli_r);
 
-        // BFVrns : Mult : ExpandCRTBasis
+        // BFVrns : Mult : expand_crt_basis
         // Pre-compute values [Ql/q_i]_{r_j}
         // Pre-compute values [(Ql/q_i)^{-1}]_{q_i}
 
-        tmpModulusQ = modulusQ;
+        tmp_modulus_q = modulus_q;
 
-        if (multTech == HPSPOVERQLEVELED || multTech == HPSPOVERQ) {
-            m_QlHatInvModq.resize(sizeQ);
-            m_QlHatInvModqPrecon.resize(sizeQ);
-            m_QlHatModr.resize(sizeQ);
+        if (mult_tech == HPSPOVERQLEVELED || mult_tech == HPSPOVERQ) {
+            ql_hat_inv_modq_.resize(size_q);
+            ql_hat_inv_modq_precon_.resize(size_q);
+            ql_hat_modr_.resize(size_q);
 
-            for (uint32_t l = 0; l < sizeQ; ++l) {
+            for (uint32_t l = 0; l < size_q; ++l) {
                 if (l > 0)
-                    tmpModulusQ = tmpModulusQ / BigInteger(moduliQ[sizeQ - l]);
+                    tmp_modulus_q = tmp_modulus_q / BigInteger(moduli_q[size_q - l]);
 
-                m_QlHatInvModq[sizeQ - l - 1].resize(sizeQ - l);
-                m_QlHatInvModqPrecon[sizeQ - l - 1].resize(sizeQ - l);
-                m_QlHatModr[sizeQ - l - 1].resize(sizeR);
+                ql_hat_inv_modq_[size_q - l - 1].resize(size_q - l);
+                ql_hat_inv_modq_precon_[size_q - l - 1].resize(size_q - l);
+                ql_hat_modr_[size_q - l - 1].resize(size_r);
 
-                for (uint32_t j = 0; j < sizeR; ++j) {
-                    m_QlHatModr[sizeQ - l - 1][j].resize(sizeQ - l);
+                for (uint32_t j = 0; j < size_r; ++j) {
+                    ql_hat_modr_[size_q - l - 1][j].resize(size_q - l);
                 }
 
-                for (uint32_t i = 0; i < sizeQ - l; ++i) {
-                    m_QlHatModr[sizeQ - l - 1][i].resize(sizeR);
-                    BigInteger QHati = tmpModulusQ / BigInteger(moduliQ[i]);
-                    BigInteger QHatInvModqi = QHati.ModInverse(moduliQ[i]);
-                    m_QlHatInvModq[sizeQ - l - 1][i] = QHatInvModqi.ConvertToInt();
-                    m_QlHatInvModqPrecon[sizeQ - l - 1][i] =
-                            m_QlHatInvModq[sizeQ - l - 1][i].PrepModMulConst(moduliQ[i]);
-                    for (uint32_t j = 0; j < sizeR; ++j) {
-                        BigInteger QlHatModrij = QHati.Mod(moduliR[j]);
-                        m_QlHatModr[sizeQ - l - 1][j][i] = QlHatModrij.ConvertToInt();
+                for (uint32_t i = 0; i < size_q - l; ++i) {
+                    ql_hat_modr_[size_q - l - 1][i].resize(size_r);
+                    BigInteger q_hati = tmp_modulus_q / BigInteger(moduli_q[i]);
+                    BigInteger q_hat_inv_modqi = q_hati.mod_inverse(moduli_q[i]);
+                    ql_hat_inv_modq_[size_q - l - 1][i] = q_hat_inv_modqi.convert_to_int();
+                    ql_hat_inv_modq_precon_[size_q - l - 1][i] =
+                            ql_hat_inv_modq_[size_q - l - 1][i].prep_mod_mul_const(moduli_q[i]);
+                    for (uint32_t j = 0; j < size_r; ++j) {
+                        BigInteger ql_hat_modrij = q_hati.mod(moduli_r[j]);
+                        ql_hat_modr_[size_q - l - 1][j][i] = ql_hat_modrij.convert_to_int();
                     }
                 }
             }
         } else {
-            m_QlHatInvModq.resize(1);
-            m_QlHatInvModqPrecon.resize(1);
+            ql_hat_inv_modq_.resize(1);
+            ql_hat_inv_modq_precon_.resize(1);
 
-            m_QlHatInvModq[0].resize(sizeQ);
-            m_QlHatInvModqPrecon[0].resize(sizeQ);
+            ql_hat_inv_modq_[0].resize(size_q);
+            ql_hat_inv_modq_precon_[0].resize(size_q);
 
-            for (uint32_t i = 0; i < sizeQ; ++i) {
-                BigInteger QHati = modulusQ / BigInteger(moduliQ[i]);
-                BigInteger QHatInvModqi = QHati.ModInverse(moduliQ[i]);
-                m_QlHatInvModq[0][i] = QHatInvModqi.ConvertToInt();
-                m_QlHatInvModqPrecon[0][i] = m_QlHatInvModq[0][i].PrepModMulConst(moduliQ[i]);
+            for (uint32_t i = 0; i < size_q; ++i) {
+                BigInteger q_hati = modulus_q / BigInteger(moduli_q[i]);
+                BigInteger q_hat_inv_modqi = q_hati.mod_inverse(moduli_q[i]);
+                ql_hat_inv_modq_[0][i] = q_hat_inv_modqi.convert_to_int();
+                ql_hat_inv_modq_precon_[0][i] = ql_hat_inv_modq_[0][i].prep_mod_mul_const(moduli_q[i]);
             }
 
-            m_QlHatModr.resize(1);
-            m_QlHatModr[0].resize(sizeR);
-            for (uint32_t j = 0; j < sizeR; ++j) {
-                m_QlHatModr[0][j].resize(sizeQ);
-                for (uint32_t i = 0; i < sizeQ; ++i) {
-                    BigInteger QHati = modulusQ / BigInteger(moduliQ[i]);
-                    m_QlHatModr[0][j][i] = QHati.Mod(moduliR[j]).ConvertToInt();
+            ql_hat_modr_.resize(1);
+            ql_hat_modr_[0].resize(size_r);
+            for (uint32_t j = 0; j < size_r; ++j) {
+                ql_hat_modr_[0][j].resize(size_q);
+                for (uint32_t i = 0; i < size_q; ++i) {
+                    BigInteger q_hati = modulus_q / BigInteger(moduli_q[i]);
+                    ql_hat_modr_[0][j][i] = q_hati.mod(moduli_r[j]).convert_to_int();
                 }
             }
         }
 
-        // BFVrns : Mult : ExpandCRTBasis
-        if (multTech == HPS) {
-            m_paramsQl.resize(1);
-            m_paramsRl.resize(1);
-            m_paramsQlRl.resize(1);
-            m_paramsQl[0] = std::make_shared<ILDCRTParams<BigInteger>>(2 * n, moduliQ, rootsQ);
-            m_paramsRl[0] = std::make_shared<ILDCRTParams<BigInteger>>(2 * n, moduliR, rootsR);
-            std::vector<NativeInteger> moduliQR(sizeQ + sizeR);
-            std::vector<NativeInteger> rootsQR(sizeQ + sizeR);
-            for (uint32_t i = 0; i < sizeQ; ++i) {
-                moduliQR[i] = moduliQ[i];
-                rootsQR[i] = rootsQ[i];
+        // BFVrns : Mult : expand_crt_basis
+        if (mult_tech == HPS) {
+            params_ql_.resize(1);
+            params_rl_.resize(1);
+            params_ql_rl_.resize(1);
+            params_ql_[0] = std::make_shared<RnsParams<BigInteger>>(2 * n, moduli_q, roots_q);
+            params_rl_[0] = std::make_shared<RnsParams<BigInteger>>(2 * n, moduli_r, roots_r);
+            std::vector<NativeInteger> moduli_qr(size_q + size_r);
+            std::vector<NativeInteger> roots_qr(size_q + size_r);
+            for (uint32_t i = 0; i < size_q; ++i) {
+                moduli_qr[i] = moduli_q[i];
+                roots_qr[i] = roots_q[i];
             }
-            for (uint32_t j = 0; j < sizeR; ++j) {
-                moduliQR[sizeQ + j] = moduliR[j];
-                rootsQR[sizeQ + j] = rootsR[j];
+            for (uint32_t j = 0; j < size_r; ++j) {
+                moduli_qr[size_q + j] = moduli_r[j];
+                roots_qr[size_q + j] = roots_r[j];
             }
-            m_paramsQlRl[0] = std::make_shared<ILDCRTParams<BigInteger>>(2 * n, moduliQR, rootsQR);
-        } else if (multTech == HPSPOVERQLEVELED || multTech == HPSPOVERQ) {
-            m_paramsQl.resize(sizeQ);
-            m_paramsRl.resize(sizeQ);
-            m_paramsQlRl.resize(sizeQ);
+            params_ql_rl_[0] = std::make_shared<RnsParams<BigInteger>>(2 * n, moduli_qr, roots_qr);
+        } else if (mult_tech == HPSPOVERQLEVELED || mult_tech == HPSPOVERQ) {
+            params_ql_.resize(size_q);
+            params_rl_.resize(size_q);
+            params_ql_rl_.resize(size_q);
 
-            std::vector<NativeInteger> moduliQl;
-            moduliQl.reserve(sizeQ);
-            std::vector<NativeInteger> rootsQl;
-            rootsQl.reserve(sizeQ);
-            std::vector<NativeInteger> moduliRl;
-            moduliRl.reserve(sizeQ);
-            std::vector<NativeInteger> rootsRl;
-            rootsRl.reserve(sizeQ);
-            std::vector<NativeInteger> moduliQlRl;
-            moduliQlRl.reserve(2 * sizeQ);
-            std::vector<NativeInteger> rootsQlRl;
-            rootsQlRl.reserve(2 * sizeQ);
+            std::vector<NativeInteger> moduli_ql;
+            moduli_ql.reserve(size_q);
+            std::vector<NativeInteger> roots_ql;
+            roots_ql.reserve(size_q);
+            std::vector<NativeInteger> moduli_rl;
+            moduli_rl.reserve(size_q);
+            std::vector<NativeInteger> roots_rl;
+            roots_rl.reserve(size_q);
+            std::vector<NativeInteger> moduli_ql_rl;
+            moduli_ql_rl.reserve(2 * size_q);
+            std::vector<NativeInteger> roots_ql_rl;
+            roots_ql_rl.reserve(2 * size_q);
 
-            for (uint32_t l = 0; l < sizeQ; ++l) {
-                moduliQl.push_back(moduliQ[l]);
-                rootsQl.push_back(rootsQ[l]);
-                m_paramsQl[l] = std::make_shared<ILDCRTParams<BigInteger>>(2 * n, moduliQl, rootsQl);
-                moduliRl.push_back(moduliR[l]);
-                rootsRl.push_back(rootsR[l]);
-                m_paramsRl[l] = std::make_shared<ILDCRTParams<BigInteger>>(2 * n, moduliRl, rootsRl);
-                moduliQlRl.insert(moduliQlRl.begin() + l, moduliQ[l]);
-                rootsQlRl.insert(rootsQlRl.begin() + l, rootsQ[l]);
-                moduliQlRl.push_back(moduliR[l]);
-                rootsQlRl.push_back(rootsR[l]);
-                m_paramsQlRl[l] = std::make_shared<ILDCRTParams<BigInteger>>(2 * n, moduliQlRl, rootsQlRl);
+            for (uint32_t l = 0; l < size_q; ++l) {
+                moduli_ql.push_back(moduli_q[l]);
+                roots_ql.push_back(roots_q[l]);
+                params_ql_[l] = std::make_shared<RnsParams<BigInteger>>(2 * n, moduli_ql, roots_ql);
+                moduli_rl.push_back(moduli_r[l]);
+                roots_rl.push_back(roots_r[l]);
+                params_rl_[l] = std::make_shared<RnsParams<BigInteger>>(2 * n, moduli_rl, roots_rl);
+                moduli_ql_rl.insert(moduli_ql_rl.begin() + l, moduli_q[l]);
+                roots_ql_rl.insert(roots_ql_rl.begin() + l, roots_q[l]);
+                moduli_ql_rl.push_back(moduli_r[l]);
+                roots_ql_rl.push_back(roots_r[l]);
+                params_ql_rl_[l] = std::make_shared<RnsParams<BigInteger>>(2 * n, moduli_ql_rl, roots_ql_rl);
             }
         }
 
-        m_modrBarrettMu.resize(sizeR);
-        for (uint32_t j = 0; j < sizeR; ++j) {
-            m_modrBarrettMu[j] = (BarrettBase128Bit / BigInteger(moduliR[j])).ConvertToInt<DoubleNativeInt>();
+        modr_barrett_mu_.resize(size_r);
+        for (uint32_t j = 0; j < size_r; ++j) {
+            modr_barrett_mu_[j] = (barrett_base128_bit / BigInteger(moduli_r[j])).convert_to_int<DoubleNativeInt>();
         }
 
-        m_qInv.resize(sizeQ);
-        for (uint32_t i = 0; i < sizeQ; ++i) {
-            m_qInv[i] = 1. / static_cast<double>(moduliQ[i].ConvertToInt());
+        q_inv_.resize(size_q);
+        for (uint32_t i = 0; i < size_q; ++i) {
+            q_inv_[i] = 1. / static_cast<double>(moduli_q[i].convert_to_int());
         }
 
         /////////////////////////////////////
-        // BFVrns : Mult : ScaleAndRound
+        // BFVrns : Mult : scale_and_round
         /////////////////////////////////////
 
-        const BigInteger modulusR = multTech == HPSPOVERQLEVELED || multTech == HPSPOVERQ ?
-                                            m_paramsRl[sizeQ - 1]->GetModulus() :
-                                            m_paramsRl[0]->GetModulus();
+        const BigInteger modulus_r = mult_tech == HPSPOVERQLEVELED || mult_tech == HPSPOVERQ ?
+                                            params_rl_[size_q - 1]->get_modulus() :
+                                            params_rl_[0]->get_modulus();
 
-        const BigInteger modulusQR = multTech == HPSPOVERQLEVELED || multTech == HPSPOVERQ ?
-                                             m_paramsQlRl[sizeQ - 1]->GetModulus() :
-                                             m_paramsQlRl[0]->GetModulus();
+        const BigInteger modulus_qr = mult_tech == HPSPOVERQLEVELED || mult_tech == HPSPOVERQ ?
+                                             params_ql_rl_[size_q - 1]->get_modulus() :
+                                             params_ql_rl_[0]->get_modulus();
 
-        const BigInteger modulust(GetPlaintextModulus());
+        const BigInteger modulust(get_plaintext_modulus());
 
-        m_tRSHatInvModsDivsFrac.resize(sizeQ);
-        for (uint32_t i = 0; i < sizeQ; ++i) {
-            BigInteger qi(moduliQ[i].ConvertToInt());
-            m_tRSHatInvModsDivsFrac[i] =
+        t_rs_hat_inv_mods_divs_frac_.resize(size_q);
+        for (uint32_t i = 0; i < size_q; ++i) {
+            BigInteger qi(moduli_q[i].convert_to_int());
+            t_rs_hat_inv_mods_divs_frac_[i] =
                     static_cast<double>(
-                            ((modulusQR.DividedBy(qi)).ModInverse(qi) * modulusR * modulust).Mod(qi).ConvertToInt()) /
-                    static_cast<double>(qi.ConvertToInt());
+                            ((modulus_qr.divided_by(qi)).mod_inverse(qi) * modulus_r * modulust).mod(qi).convert_to_int()) /
+                    static_cast<double>(qi.convert_to_int());
         }
 
-        m_tRSHatInvModsDivsModr.resize(sizeR);
-        for (uint32_t j = 0; j < sizeR; ++j) {
-            m_tRSHatInvModsDivsModr[j].reserve(sizeQ + 1);
-            BigInteger rj(moduliR[j].ConvertToInt());
-            for (uint32_t i = 0; i < sizeQ; ++i) {
-                BigInteger qi(moduliQ[i].ConvertToInt());
-                BigInteger tRSHatInvMods = modulust * modulusR * ((modulusQR.DividedBy(qi)).ModInverse(qi));
-                BigInteger tRSHatInvModsDivs = tRSHatInvMods / qi;
-                m_tRSHatInvModsDivsModr[j].push_back(tRSHatInvModsDivs.Mod(rj).ConvertToInt());
+        t_rs_hat_inv_mods_divs_modr_.resize(size_r);
+        for (uint32_t j = 0; j < size_r; ++j) {
+            t_rs_hat_inv_mods_divs_modr_[j].reserve(size_q + 1);
+            BigInteger rj(moduli_r[j].convert_to_int());
+            for (uint32_t i = 0; i < size_q; ++i) {
+                BigInteger qi(moduli_q[i].convert_to_int());
+                BigInteger t_rs_hat_inv_mods = modulust * modulus_r * ((modulus_qr.divided_by(qi)).mod_inverse(qi));
+                BigInteger t_rs_hat_inv_mods_divs = t_rs_hat_inv_mods / qi;
+                t_rs_hat_inv_mods_divs_modr_[j].push_back(t_rs_hat_inv_mods_divs.mod(rj).convert_to_int());
             }
 
-            BigInteger tRSHatInvMods = modulust * modulusR * ((modulusQR.DividedBy(rj)).ModInverse(rj));
-            BigInteger tRSHatInvModsDivs = tRSHatInvMods / rj;
-            m_tRSHatInvModsDivsModr[j].push_back(tRSHatInvModsDivs.Mod(rj).ConvertToInt());
+            BigInteger t_rs_hat_inv_mods = modulust * modulus_r * ((modulus_qr.divided_by(rj)).mod_inverse(rj));
+            BigInteger t_rs_hat_inv_mods_divs = t_rs_hat_inv_mods / rj;
+            t_rs_hat_inv_mods_divs_modr_[j].push_back(t_rs_hat_inv_mods_divs.mod(rj).convert_to_int());
         }
 
         /////////////////////////////////////
-        // BFVrns : Mult : SwitchCRTBasis
+        // BFVrns : Mult : switch_crt_basis
         /////////////////////////////////////
 
-        std::vector<BigInteger> Ql(sizeQ + 1);
-        std::vector<BigInteger> Rl(sizeQ + 1);
-        std::vector<BigInteger> QlRl(sizeQ + 1);
-        std::vector<BigInteger> QlHat(sizeQ + 1);
-        std::vector<BigInteger> RlHat(sizeQ + 1);
+        std::vector<BigInteger> ql_value(size_q + 1);
+        std::vector<BigInteger> rl_value(size_q + 1);
+        std::vector<BigInteger> ql_rl(size_q + 1);
+        std::vector<BigInteger> ql_hat(size_q + 1);
+        std::vector<BigInteger> rl_hat(size_q + 1);
 
-        if (multTech == HPSPOVERQLEVELED || multTech == HPSPOVERQ) {
-            Ql[0] = 1;
-            Rl[0] = 1;
-            QlRl[0] = 1;
-            QlHat[0] = modulusQ;
-            RlHat[0] = modulusR;
-            for (uint32_t l = 0; l < sizeQ; ++l) {
-                BigInteger ql(moduliQ[l].ConvertToInt());
-                BigInteger rl(moduliR[l].ConvertToInt());
-                Ql[l + 1] = Ql[l] * ql;
-                Rl[l + 1] = Rl[l] * rl;
-                QlRl[l + 1] = QlRl[l] * ql;
-                QlRl[l + 1] = QlRl[l + 1] * rl;
-                QlHat[l + 1] = QlHat[l] / ql;
-                RlHat[l + 1] = RlHat[l] / rl;
+        if (mult_tech == HPSPOVERQLEVELED || mult_tech == HPSPOVERQ) {
+            ql_value[0] = 1;
+            rl_value[0] = 1;
+            ql_rl[0] = 1;
+            ql_hat[0] = modulus_q;
+            rl_hat[0] = modulus_r;
+            for (uint32_t l = 0; l < size_q; ++l) {
+                BigInteger ql(moduli_q[l].convert_to_int());
+                BigInteger rl(moduli_r[l].convert_to_int());
+                ql_value[l + 1] = ql_value[l] * ql;
+                rl_value[l + 1] = rl_value[l] * rl;
+                ql_rl[l + 1] = ql_rl[l] * ql;
+                ql_rl[l + 1] = ql_rl[l + 1] * rl;
+                ql_hat[l + 1] = ql_hat[l] / ql;
+                rl_hat[l + 1] = rl_hat[l] / rl;
             }
         }
 
-        // BFVrns : Mult : ExpandCRTBasis
-        if (multTech == HPS) {
-            m_alphaQlModr.resize(1);
-            m_alphaQlModr[0].resize(sizeQ + 1, std::vector<NativeInteger>(sizeR));
-            for (uint32_t j = 0; j < sizeR; ++j) {
-                NativeInteger QModrj = modulusQ.Mod(moduliR[j]).ConvertToInt();
-                for (uint32_t i = 0; i <= sizeQ; ++i) {
-                    m_alphaQlModr[0][i][j] = QModrj.ModMul(NativeInteger(i), moduliR[j]);
+        // BFVrns : Mult : expand_crt_basis
+        if (mult_tech == HPS) {
+            alpha_ql_modr_.resize(1);
+            alpha_ql_modr_[0].resize(size_q + 1, std::vector<NativeInteger>(size_r));
+            for (uint32_t j = 0; j < size_r; ++j) {
+                NativeInteger q_modrj = modulus_q.mod(moduli_r[j]).convert_to_int();
+                for (uint32_t i = 0; i <= size_q; ++i) {
+                    alpha_ql_modr_[0][i][j] = q_modrj.mod_mul(NativeInteger(i), moduli_r[j]);
                 }
             }
-        } else if (multTech == HPSPOVERQLEVELED || multTech == HPSPOVERQ) {
-            m_alphaQlModr.resize(sizeQ);
-            for (uint32_t l = sizeQ; l > 0; l--) {
-                m_alphaQlModr[l - 1].resize(l + 1, std::vector<NativeInteger>(sizeR));
-                for (uint32_t i = 0; i < sizeR; ++i) {
-                    NativeInteger QlModri = Ql[l].Mod(moduliR[i]).ConvertToInt();
+        } else if (mult_tech == HPSPOVERQLEVELED || mult_tech == HPSPOVERQ) {
+            alpha_ql_modr_.resize(size_q);
+            for (uint32_t l = size_q; l > 0; l--) {
+                alpha_ql_modr_[l - 1].resize(l + 1, std::vector<NativeInteger>(size_r));
+                for (uint32_t i = 0; i < size_r; ++i) {
+                    NativeInteger ql_modri = ql_value[l].mod(moduli_r[i]).convert_to_int();
                     for (uint32_t j = 0; j <= l; ++j) {
-                        m_alphaQlModr[l - 1][j][i] = QlModri.ModMul(NativeInteger(j), moduliR[i]);
+                        alpha_ql_modr_[l - 1][j][i] = ql_modri.mod_mul(NativeInteger(j), moduli_r[i]);
                     }
                 }
             }
@@ -357,44 +357,44 @@ void CryptoParametersBFVRNS::PrecomputeCRTTables(KeySwitchTechnique ksTech, Scal
 
         // Pre-compute values [Rl/r_j]_{q_i}
         // Pre-compute values [(Rl/r_j)^{-1}]_{r_j}
-        if (multTech == HPS) {
-            m_RlHatInvModr.resize(1);
-            m_RlHatInvModrPrecon.resize(1);
+        if (mult_tech == HPS) {
+            rl_hat_inv_modr_.resize(1);
+            rl_hat_inv_modr_precon_.resize(1);
 
-            m_RlHatInvModr[0].resize(sizeR);
-            m_RlHatInvModrPrecon[0].resize(sizeR);
-            for (uint32_t j = 0; j < sizeR; ++j) {
-                BigInteger RHatj = modulusR / BigInteger(moduliR[j]);
-                m_RlHatInvModr[0][j] = RHatj.ModInverse(moduliR[j]).ConvertToInt();
-                m_RlHatInvModrPrecon[0][j] = m_RlHatInvModr[0][j].PrepModMulConst(moduliR[j]);
+            rl_hat_inv_modr_[0].resize(size_r);
+            rl_hat_inv_modr_precon_[0].resize(size_r);
+            for (uint32_t j = 0; j < size_r; ++j) {
+                BigInteger r_hatj = modulus_r / BigInteger(moduli_r[j]);
+                rl_hat_inv_modr_[0][j] = r_hatj.mod_inverse(moduli_r[j]).convert_to_int();
+                rl_hat_inv_modr_precon_[0][j] = rl_hat_inv_modr_[0][j].prep_mod_mul_const(moduli_r[j]);
             }
 
-            m_RlHatModq.resize(1);
-            m_RlHatModq[0].resize(sizeQ);
-            for (uint32_t i = 0; i < sizeQ; ++i) {
-                m_RlHatModq[0][i].resize(sizeR);
-                for (uint32_t j = 0; j < sizeR; ++j) {
-                    BigInteger RHatj = modulusR / BigInteger(moduliR[j]);
-                    m_RlHatModq[0][i][j] = RHatj.Mod(moduliQ[i]).ConvertToInt();
+            rl_hat_modq_.resize(1);
+            rl_hat_modq_[0].resize(size_q);
+            for (uint32_t i = 0; i < size_q; ++i) {
+                rl_hat_modq_[0][i].resize(size_r);
+                for (uint32_t j = 0; j < size_r; ++j) {
+                    BigInteger r_hatj = modulus_r / BigInteger(moduli_r[j]);
+                    rl_hat_modq_[0][i][j] = r_hatj.mod(moduli_q[i]).convert_to_int();
                 }
             }
-        } else if (multTech == HPSPOVERQ || multTech == HPSPOVERQLEVELED) {
-            m_RlHatInvModr.resize(sizeR);
-            m_RlHatInvModrPrecon.resize(sizeR);
-            m_RlHatModq.resize(sizeR);
+        } else if (mult_tech == HPSPOVERQ || mult_tech == HPSPOVERQLEVELED) {
+            rl_hat_inv_modr_.resize(size_r);
+            rl_hat_inv_modr_precon_.resize(size_r);
+            rl_hat_modq_.resize(size_r);
 
-            for (uint32_t l = sizeR; l > 0; l--) {
-                m_RlHatInvModr[l - 1].resize(l);
-                m_RlHatInvModrPrecon[l - 1].resize(l);
-                m_RlHatModq[l - 1].resize(l, std::vector<NativeInteger>(l));
+            for (uint32_t l = size_r; l > 0; l--) {
+                rl_hat_inv_modr_[l - 1].resize(l);
+                rl_hat_inv_modr_precon_[l - 1].resize(l);
+                rl_hat_modq_[l - 1].resize(l, std::vector<NativeInteger>(l));
                 for (uint32_t j = 0; j < l; ++j) {
-                    BigInteger RlHatj = Rl[l] / BigInteger(moduliR[j]);
-                    BigInteger RlHatInvModrj = RlHatj.ModInverse(moduliR[j]);
-                    m_RlHatInvModr[l - 1][j] = RlHatInvModrj.ConvertToInt();
-                    m_RlHatInvModrPrecon[l - 1][j] = m_RlHatInvModr[l - 1][j].PrepModMulConst(moduliR[j]);
+                    BigInteger rl_hatj = rl_value[l] / BigInteger(moduli_r[j]);
+                    BigInteger rl_hat_inv_modrj = rl_hatj.mod_inverse(moduli_r[j]);
+                    rl_hat_inv_modr_[l - 1][j] = rl_hat_inv_modrj.convert_to_int();
+                    rl_hat_inv_modr_precon_[l - 1][j] = rl_hat_inv_modr_[l - 1][j].prep_mod_mul_const(moduli_r[j]);
                     for (uint32_t i = 0; i < l; ++i) {
-                        BigInteger RlHatModqji = RlHatj.Mod(moduliQ[i]);
-                        m_RlHatModq[l - 1][i][j] = RlHatModqji.ConvertToInt();
+                        BigInteger rl_hat_modqji = rl_hatj.mod(moduli_q[i]);
+                        rl_hat_modq_[l - 1][i][j] = rl_hat_modqji.convert_to_int();
                     }
                 }
             }
@@ -402,190 +402,190 @@ void CryptoParametersBFVRNS::PrecomputeCRTTables(KeySwitchTechnique ksTech, Scal
 
         // compute [\alpha*Rl]_{q_i} for 0 <= alpha <= sizeRl
         // used for homomorphic multiplication
-        if (multTech == HPS) {
-            m_alphaRlModq.resize(1);
-            m_alphaRlModq[0].resize(sizeR + 1, std::vector<NativeInteger>(sizeQ));
-            for (uint32_t i = 0; i < sizeQ; ++i) {
-                NativeInteger RModqi = modulusR.Mod(moduliQ[i]).ConvertToInt();
-                for (uint32_t j = 0; j <= sizeR; ++j) {
-                    m_alphaRlModq[0][j][i] = RModqi.ModMul(NativeInteger(j), moduliQ[i]);
+        if (mult_tech == HPS) {
+            alpha_rl_modq_.resize(1);
+            alpha_rl_modq_[0].resize(size_r + 1, std::vector<NativeInteger>(size_q));
+            for (uint32_t i = 0; i < size_q; ++i) {
+                NativeInteger r_modqi = modulus_r.mod(moduli_q[i]).convert_to_int();
+                for (uint32_t j = 0; j <= size_r; ++j) {
+                    alpha_rl_modq_[0][j][i] = r_modqi.mod_mul(NativeInteger(j), moduli_q[i]);
                 }
             }
-        } else if (multTech == HPSPOVERQLEVELED || multTech == HPSPOVERQ) {
-            m_alphaRlModq.resize(sizeR);
-            for (uint32_t l = sizeR; l > 0; l--) {
-                m_alphaRlModq[l - 1].resize(l + 1, std::vector<NativeInteger>(sizeQ));
-                for (uint32_t i = 0; i < sizeQ; ++i) {
-                    NativeInteger RlModqi = Rl[l].Mod(moduliQ[i]).ConvertToInt();
+        } else if (mult_tech == HPSPOVERQLEVELED || mult_tech == HPSPOVERQ) {
+            alpha_rl_modq_.resize(size_r);
+            for (uint32_t l = size_r; l > 0; l--) {
+                alpha_rl_modq_[l - 1].resize(l + 1, std::vector<NativeInteger>(size_q));
+                for (uint32_t i = 0; i < size_q; ++i) {
+                    NativeInteger rl_modqi = rl_value[l].mod(moduli_q[i]).convert_to_int();
                     for (uint32_t j = 0; j <= l; ++j) {
-                        m_alphaRlModq[l - 1][j][i] = RlModqi.ModMul(NativeInteger(j), moduliQ[i]);
+                        alpha_rl_modq_[l - 1][j][i] = rl_modqi.mod_mul(NativeInteger(j), moduli_q[i]);
                     }
                 }
             }
         }
 
-        m_rInv.resize(sizeR);
-        for (uint32_t j = 0; j < sizeR; ++j) {
-            m_rInv[j] = 1. / static_cast<double>(moduliR[j].ConvertToInt());
+        r_inv_.resize(size_r);
+        for (uint32_t j = 0; j < size_r; ++j) {
+            r_inv_[j] = 1. / static_cast<double>(moduli_r[j].convert_to_int());
         }
 
         /////////////////////////////////////
-        // BFVrns : Decrypt : ScaleAndRound
+        // BFVrns : Decrypt : scale_and_round
         /////////////////////////////////////
 
-        uint32_t qMSB = (*std::max_element(moduliQ.begin(), moduliQ.end())).GetMSB();
+        uint32_t q_msb = (*std::max_element(moduli_q.begin(), moduli_q.end())).get_msb();
 
-        uint32_t sizeQMSB = GetMSB64(sizeQ);
+        uint32_t size_qmsb = get_msb64(size_q);
 
-        m_tQHatInvModqDivqModt.resize(sizeQ);
-        m_tQHatInvModqDivqModtPrecon.resize(sizeQ);
-        m_tQHatInvModqDivqFrac.resize(sizeQ);
-        if (qMSB + sizeQMSB < 52) {
-            for (uint32_t i = 0; i < sizeQ; ++i) {
-                BigInteger qi(moduliQ[i].ConvertToInt());
-                BigInteger tQHatInvModqi =
-                        ((modulusQ.DividedBy(qi)).ModInverse(qi) * BigInteger(GetPlaintextModulus()));
-                BigInteger tQHatInvModqDivqi = tQHatInvModqi.DividedBy(qi);
-                m_tQHatInvModqDivqModt[i] = tQHatInvModqDivqi.Mod(GetPlaintextModulus()).ConvertToInt();
-                m_tQHatInvModqDivqModtPrecon[i] = m_tQHatInvModqDivqModt[i].PrepModMulConst(GetPlaintextModulus());
+        t_q_hat_inv_modq_divq_modt_.resize(size_q);
+        t_q_hat_inv_modq_divq_modt_precon_.resize(size_q);
+        t_q_hat_inv_modq_divq_frac_.resize(size_q);
+        if (q_msb + size_qmsb < 52) {
+            for (uint32_t i = 0; i < size_q; ++i) {
+                BigInteger qi(moduli_q[i].convert_to_int());
+                BigInteger t_q_hat_inv_modqi =
+                        ((modulus_q.divided_by(qi)).mod_inverse(qi) * BigInteger(get_plaintext_modulus()));
+                BigInteger t_q_hat_inv_modq_divqi = t_q_hat_inv_modqi.divided_by(qi);
+                t_q_hat_inv_modq_divq_modt_[i] = t_q_hat_inv_modq_divqi.mod(get_plaintext_modulus()).convert_to_int();
+                t_q_hat_inv_modq_divq_modt_precon_[i] = t_q_hat_inv_modq_divq_modt_[i].prep_mod_mul_const(get_plaintext_modulus());
 
-                int64_t numerator = tQHatInvModqi.Mod(qi).ConvertToInt();
-                int64_t denominator = moduliQ[i].ConvertToInt();
-                m_tQHatInvModqDivqFrac[i] = static_cast<double>(numerator) / static_cast<double>(denominator);
+                int64_t numerator = t_q_hat_inv_modqi.mod(qi).convert_to_int();
+                int64_t denominator = moduli_q[i].convert_to_int();
+                t_q_hat_inv_modq_divq_frac_[i] = static_cast<double>(numerator) / static_cast<double>(denominator);
             }
         } else {
-            m_tQHatInvModqBDivqModt.resize(sizeQ);
-            m_tQHatInvModqBDivqModtPrecon.resize(sizeQ);
-            m_tQHatInvModqBDivqFrac.resize(sizeQ);
-            uint32_t qMSBHf = qMSB >> 1;
-            for (uint32_t i = 0; i < sizeQ; ++i) {
-                BigInteger qi(moduliQ[i].ConvertToInt());
-                BigInteger tQHatInvModqi =
-                        ((modulusQ.DividedBy(qi)).ModInverse(qi) * BigInteger(GetPlaintextModulus()));
-                BigInteger tQHatInvModqDivqi = tQHatInvModqi.DividedBy(qi);
-                m_tQHatInvModqDivqModt[i] = tQHatInvModqDivqi.Mod(GetPlaintextModulus()).ConvertToInt();
-                m_tQHatInvModqDivqModtPrecon[i] = m_tQHatInvModqDivqModt[i].PrepModMulConst(GetPlaintextModulus());
+            t_q_hat_inv_modq_b_divq_modt_.resize(size_q);
+            t_q_hat_inv_modq_b_divq_modt_precon_.resize(size_q);
+            t_q_hat_inv_modq_b_divq_frac_.resize(size_q);
+            uint32_t q_msb_hf = q_msb >> 1;
+            for (uint32_t i = 0; i < size_q; ++i) {
+                BigInteger qi(moduli_q[i].convert_to_int());
+                BigInteger t_q_hat_inv_modqi =
+                        ((modulus_q.divided_by(qi)).mod_inverse(qi) * BigInteger(get_plaintext_modulus()));
+                BigInteger t_q_hat_inv_modq_divqi = t_q_hat_inv_modqi.divided_by(qi);
+                t_q_hat_inv_modq_divq_modt_[i] = t_q_hat_inv_modq_divqi.mod(get_plaintext_modulus()).convert_to_int();
+                t_q_hat_inv_modq_divq_modt_precon_[i] = t_q_hat_inv_modq_divq_modt_[i].prep_mod_mul_const(get_plaintext_modulus());
 
-                int64_t numerator = tQHatInvModqi.Mod(qi).ConvertToInt();
-                int64_t denominator = moduliQ[i].ConvertToInt();
-                m_tQHatInvModqDivqFrac[i] = static_cast<double>(numerator) / static_cast<double>(denominator);
+                int64_t numerator = t_q_hat_inv_modqi.mod(qi).convert_to_int();
+                int64_t denominator = moduli_q[i].convert_to_int();
+                t_q_hat_inv_modq_divq_frac_[i] = static_cast<double>(numerator) / static_cast<double>(denominator);
 
-                tQHatInvModqi.LShiftEq(qMSBHf);
-                tQHatInvModqDivqi = tQHatInvModqi.DividedBy(qi);
-                m_tQHatInvModqBDivqModt[i] = tQHatInvModqDivqi.Mod(GetPlaintextModulus()).ConvertToInt();
-                m_tQHatInvModqBDivqModtPrecon[i] = m_tQHatInvModqBDivqModt[i].PrepModMulConst(GetPlaintextModulus());
+                t_q_hat_inv_modqi.l_shift_eq(q_msb_hf);
+                t_q_hat_inv_modq_divqi = t_q_hat_inv_modqi.divided_by(qi);
+                t_q_hat_inv_modq_b_divq_modt_[i] = t_q_hat_inv_modq_divqi.mod(get_plaintext_modulus()).convert_to_int();
+                t_q_hat_inv_modq_b_divq_modt_precon_[i] = t_q_hat_inv_modq_b_divq_modt_[i].prep_mod_mul_const(get_plaintext_modulus());
 
-                numerator = tQHatInvModqi.Mod(qi).ConvertToInt();
-                m_tQHatInvModqBDivqFrac[i] = static_cast<double>(numerator) / static_cast<double>(denominator);
+                numerator = t_q_hat_inv_modqi.mod(qi).convert_to_int();
+                t_q_hat_inv_modq_b_divq_frac_[i] = static_cast<double>(numerator) / static_cast<double>(denominator);
             }
         }
 
         /////////////////////////////////////
-        // BFVrns : Mult : FastExpandCRTBasisPloverQ
+        // BFVrns : Mult : fast_expand_crt_basis_plover_q
         /////////////////////////////////////
 
-        if (multTech == HPSPOVERQ || multTech == HPSPOVERQLEVELED) {
+        if (mult_tech == HPSPOVERQ || mult_tech == HPSPOVERQLEVELED) {
             // Scenario when we go from Q to P_l
-            m_negRlQHatInvModq.resize(sizeR);
-            m_negRlQHatInvModqPrecon.resize(sizeR);
-            for (uint32_t l = sizeR; l > 0; l--) {
-                m_negRlQHatInvModq[l - 1].resize(sizeQ);
-                m_negRlQHatInvModqPrecon[l - 1].resize(sizeQ);
-                for (uint32_t i = 0; i < sizeQ; ++i) {
-                    BigInteger QHati = modulusQ / BigInteger(moduliQ[i]);
-                    BigInteger QHatInvModqi = QHati.ModInverse(moduliQ[i]);
-                    m_negRlQHatInvModq[l - 1][i] = Rl[l].ModMul(QHatInvModqi, moduliQ[i]).ConvertToInt();
-                    m_negRlQHatInvModq[l - 1][i] = moduliQ[i].Sub(m_negRlQHatInvModq[l - 1][i]);
-                    m_negRlQHatInvModqPrecon[l - 1][i] = m_negRlQHatInvModq[l - 1][i].PrepModMulConst(moduliQ[i]);
+            neg_rl_q_hat_inv_modq_.resize(size_r);
+            neg_rl_q_hat_inv_modq_precon_.resize(size_r);
+            for (uint32_t l = size_r; l > 0; l--) {
+                neg_rl_q_hat_inv_modq_[l - 1].resize(size_q);
+                neg_rl_q_hat_inv_modq_precon_[l - 1].resize(size_q);
+                for (uint32_t i = 0; i < size_q; ++i) {
+                    BigInteger q_hati = modulus_q / BigInteger(moduli_q[i]);
+                    BigInteger q_hat_inv_modqi = q_hati.mod_inverse(moduli_q[i]);
+                    neg_rl_q_hat_inv_modq_[l - 1][i] = rl_value[l].mod_mul(q_hat_inv_modqi, moduli_q[i]).convert_to_int();
+                    neg_rl_q_hat_inv_modq_[l - 1][i] = moduli_q[i].sub(neg_rl_q_hat_inv_modq_[l - 1][i]);
+                    neg_rl_q_hat_inv_modq_precon_[l - 1][i] = neg_rl_q_hat_inv_modq_[l - 1][i].prep_mod_mul_const(moduli_q[i]);
                 }
             }
 
             // Scenario when we go from Q_l to P_l
-            m_negRlQlHatInvModq.resize(sizeR);
-            m_negRlQlHatInvModqPrecon.resize(sizeR);
-            BigInteger modulusQtmp = modulusQ;
-            for (uint32_t l = sizeR; l > 0; l--) {
-                m_negRlQlHatInvModq[l - 1].resize(l);
-                m_negRlQlHatInvModqPrecon[l - 1].resize(l);
+            neg_rl_ql_hat_inv_modq_.resize(size_r);
+            neg_rl_ql_hat_inv_modq_precon_.resize(size_r);
+            BigInteger modulus_qtmp = modulus_q;
+            for (uint32_t l = size_r; l > 0; l--) {
+                neg_rl_ql_hat_inv_modq_[l - 1].resize(l);
+                neg_rl_ql_hat_inv_modq_precon_[l - 1].resize(l);
                 for (uint32_t i = 0; i < l; ++i) {
-                    BigInteger QlHati = modulusQtmp / BigInteger(moduliQ[i]);
-                    BigInteger QlHatInvModqi = QlHati.ModInverse(moduliQ[i]);
-                    m_negRlQlHatInvModq[l - 1][i] = Rl[l].ModMul(QlHatInvModqi, moduliQ[i]).ConvertToInt();
-                    m_negRlQlHatInvModq[l - 1][i] = moduliQ[i].Sub(m_negRlQlHatInvModq[l - 1][i]);
-                    m_negRlQlHatInvModqPrecon[l - 1][i] = m_negRlQlHatInvModq[l - 1][i].PrepModMulConst(moduliQ[i]);
+                    BigInteger ql_hati = modulus_qtmp / BigInteger(moduli_q[i]);
+                    BigInteger ql_hat_inv_modqi = ql_hati.mod_inverse(moduli_q[i]);
+                    neg_rl_ql_hat_inv_modq_[l - 1][i] = rl_value[l].mod_mul(ql_hat_inv_modqi, moduli_q[i]).convert_to_int();
+                    neg_rl_ql_hat_inv_modq_[l - 1][i] = moduli_q[i].sub(neg_rl_ql_hat_inv_modq_[l - 1][i]);
+                    neg_rl_ql_hat_inv_modq_precon_[l - 1][i] = neg_rl_ql_hat_inv_modq_[l - 1][i].prep_mod_mul_const(moduli_q[i]);
                 }
-                modulusQtmp = modulusQtmp / BigInteger(moduliQ[l - 1]);
+                modulus_qtmp = modulus_qtmp / BigInteger(moduli_q[l - 1]);
             }
         }
 
-        m_qInvModr.resize(sizeQ);
-        for (uint32_t i = 0; i < sizeQ; ++i) {
-            m_qInvModr[i].resize(sizeR);
-            for (uint32_t j = 0; j < sizeR; ++j) {
-                m_qInvModr[i][j] = moduliQ[i].ModInverse(moduliR[j]);
+        q_inv_modr_.resize(size_q);
+        for (uint32_t i = 0; i < size_q; ++i) {
+            q_inv_modr_[i].resize(size_r);
+            for (uint32_t j = 0; j < size_r; ++j) {
+                q_inv_modr_[i][j] = moduli_q[i].mod_inverse(moduli_r[j]);
             }
         }
 
-        modulusQ = GetElementParams()->GetModulus();
+        modulus_q = get_element_params()->get_modulus();
 
         /////////////////////////////////////
         // BFVrns : Mult : ScaleAndRoundP
         /////////////////////////////////////
 
-        if (multTech == HPS) {
-            m_tQlSlHatInvModsDivsFrac.resize(1);
+        if (mult_tech == HPS) {
+            t_ql_sl_hat_inv_mods_divs_frac_.resize(1);
 
-            m_tQlSlHatInvModsDivsFrac[0].resize(sizeR);
-            for (uint32_t j = 0; j < sizeR; ++j) {
-                BigInteger rj(moduliR[j].ConvertToInt());
-                m_tQlSlHatInvModsDivsFrac[0][j] =
-                        static_cast<double>(((modulusQR.DividedBy(rj)).ModInverse(rj) * modulusQ * modulust)
-                                                    .Mod(rj)
-                                                    .ConvertToInt()) /
-                        static_cast<double>(rj.ConvertToInt());
+            t_ql_sl_hat_inv_mods_divs_frac_[0].resize(size_r);
+            for (uint32_t j = 0; j < size_r; ++j) {
+                BigInteger rj(moduli_r[j].convert_to_int());
+                t_ql_sl_hat_inv_mods_divs_frac_[0][j] =
+                        static_cast<double>(((modulus_qr.divided_by(rj)).mod_inverse(rj) * modulus_q * modulust)
+                                                    .mod(rj)
+                                                    .convert_to_int()) /
+                        static_cast<double>(rj.convert_to_int());
             }
-            m_tQlSlHatInvModsDivsModq.resize(1);
-            m_tQlSlHatInvModsDivsModq[0].resize(sizeQ, std::vector<NativeInteger>(sizeR + 1));
-            for (uint32_t i = 0; i < sizeQ; ++i) {
-                BigInteger qi(moduliQ[i].ConvertToInt());
-                for (uint32_t j = 0; j < sizeR; ++j) {
-                    BigInteger rj(moduliR[j].ConvertToInt());
-                    BigInteger tQlSlHatInvMods = modulust * modulusQ * ((modulusQR.DividedBy(rj)).ModInverse(rj));
-                    BigInteger tQlSlHatInvModsDivs = tQlSlHatInvMods / rj;
-                    m_tQlSlHatInvModsDivsModq[0][i][j] = tQlSlHatInvModsDivs.Mod(qi).ConvertToInt();
+            t_ql_sl_hat_inv_mods_divs_modq_.resize(1);
+            t_ql_sl_hat_inv_mods_divs_modq_[0].resize(size_q, std::vector<NativeInteger>(size_r + 1));
+            for (uint32_t i = 0; i < size_q; ++i) {
+                BigInteger qi(moduli_q[i].convert_to_int());
+                for (uint32_t j = 0; j < size_r; ++j) {
+                    BigInteger rj(moduli_r[j].convert_to_int());
+                    BigInteger t_ql_sl_hat_inv_mods = modulust * modulus_q * ((modulus_qr.divided_by(rj)).mod_inverse(rj));
+                    BigInteger t_ql_sl_hat_inv_mods_divs = t_ql_sl_hat_inv_mods / rj;
+                    t_ql_sl_hat_inv_mods_divs_modq_[0][i][j] = t_ql_sl_hat_inv_mods_divs.mod(qi).convert_to_int();
                 }
 
-                BigInteger tQlSlHatInvMods = modulust * modulusQ * ((modulusQR.DividedBy(qi)).ModInverse(qi));
-                BigInteger tQlSlHatInvModsDivs = tQlSlHatInvMods / qi;
-                m_tQlSlHatInvModsDivsModq[0][i][sizeR] = tQlSlHatInvModsDivs.Mod(qi).ConvertToInt();
+                BigInteger t_ql_sl_hat_inv_mods = modulust * modulus_q * ((modulus_qr.divided_by(qi)).mod_inverse(qi));
+                BigInteger t_ql_sl_hat_inv_mods_divs = t_ql_sl_hat_inv_mods / qi;
+                t_ql_sl_hat_inv_mods_divs_modq_[0][i][size_r] = t_ql_sl_hat_inv_mods_divs.mod(qi).convert_to_int();
             }
-        } else if ((multTech == HPSPOVERQ) || (multTech == HPSPOVERQLEVELED)) {
-            m_tQlSlHatInvModsDivsFrac.resize(sizeQ);
-            m_tQlSlHatInvModsDivsModq.resize(sizeQ);
+        } else if ((mult_tech == HPSPOVERQ) || (mult_tech == HPSPOVERQLEVELED)) {
+            t_ql_sl_hat_inv_mods_divs_frac_.resize(size_q);
+            t_ql_sl_hat_inv_mods_divs_modq_.resize(size_q);
 
-            for (uint32_t l = sizeQ; l > 0; l--) {
-                m_tQlSlHatInvModsDivsFrac[l - 1].resize(l);
+            for (uint32_t l = size_q; l > 0; l--) {
+                t_ql_sl_hat_inv_mods_divs_frac_[l - 1].resize(l);
                 for (uint32_t j = 0; j < l; ++j) {
-                    BigInteger rj(moduliR[j].ConvertToInt());
-                    m_tQlSlHatInvModsDivsFrac[l - 1][j] =
-                            static_cast<double>(((QlRl[l].DividedBy(rj)).ModInverse(rj) * Ql[l] * modulust)
-                                                        .Mod(rj)
-                                                        .ConvertToInt()) /
-                            static_cast<double>(rj.ConvertToInt());
+                    BigInteger rj(moduli_r[j].convert_to_int());
+                    t_ql_sl_hat_inv_mods_divs_frac_[l - 1][j] =
+                            static_cast<double>(((ql_rl[l].divided_by(rj)).mod_inverse(rj) * ql_value[l] * modulust)
+                                                        .mod(rj)
+                                                        .convert_to_int()) /
+                            static_cast<double>(rj.convert_to_int());
                 }
-                m_tQlSlHatInvModsDivsModq[l - 1].resize(l, std::vector<NativeInteger>(l + 1));
+                t_ql_sl_hat_inv_mods_divs_modq_[l - 1].resize(l, std::vector<NativeInteger>(l + 1));
                 for (uint32_t i = 0; i < l; ++i) {
-                    BigInteger qi(moduliQ[i].ConvertToInt());
+                    BigInteger qi(moduli_q[i].convert_to_int());
                     for (uint32_t j = 0; j < l; ++j) {
-                        BigInteger rj(moduliR[j].ConvertToInt());
-                        BigInteger tQlSlHatInvMods = modulust * Ql[l] * ((QlRl[l].DividedBy(rj)).ModInverse(rj));
-                        BigInteger tQlSlHatInvModsDivs = tQlSlHatInvMods / rj;
-                        m_tQlSlHatInvModsDivsModq[l - 1][i][j] = tQlSlHatInvModsDivs.Mod(qi).ConvertToInt();
+                        BigInteger rj(moduli_r[j].convert_to_int());
+                        BigInteger t_ql_sl_hat_inv_mods = modulust * ql_value[l] * ((ql_rl[l].divided_by(rj)).mod_inverse(rj));
+                        BigInteger t_ql_sl_hat_inv_mods_divs = t_ql_sl_hat_inv_mods / rj;
+                        t_ql_sl_hat_inv_mods_divs_modq_[l - 1][i][j] = t_ql_sl_hat_inv_mods_divs.mod(qi).convert_to_int();
                     }
 
-                    BigInteger tQlSlHatInvMods = modulust * Ql[l] * ((QlRl[l].DividedBy(qi)).ModInverse(qi));
-                    BigInteger tQlSlHatInvModsDivs = tQlSlHatInvMods / qi;
-                    m_tQlSlHatInvModsDivsModq[l - 1][i][l] = tQlSlHatInvModsDivs.Mod(qi).ConvertToInt();
+                    BigInteger t_ql_sl_hat_inv_mods = modulust * ql_value[l] * ((ql_rl[l].divided_by(qi)).mod_inverse(qi));
+                    BigInteger t_ql_sl_hat_inv_mods_divs = t_ql_sl_hat_inv_mods / qi;
+                    t_ql_sl_hat_inv_mods_divs_modq_[l - 1][i][l] = t_ql_sl_hat_inv_mods_divs.mod(qi).convert_to_int();
                 }
             }
         }
@@ -594,62 +594,62 @@ void CryptoParametersBFVRNS::PrecomputeCRTTables(KeySwitchTechnique ksTech, Scal
         // BFVrns : Mult : ScaleAndRoundQl
         /////////////////////////////////////
 
-        m_QlQHatInvModqDivqModq.resize(sizeQ);
-        m_QlQHatInvModqDivqFrac.resize(sizeQ);
-        for (uint32_t l = sizeQ; l > 0; l--) {
-            m_QlQHatInvModqDivqFrac[l - 1].resize(sizeQ - l);
-            for (uint32_t j = 0; j < sizeQ - l; ++j) {
-                BigInteger qj(moduliQ[j + l].ConvertToInt());
-                m_QlQHatInvModqDivqFrac[l - 1][j] =
-                        static_cast<double>(((modulusQ.DividedBy(qj)).ModInverse(qj) * Ql[l]).Mod(qj).ConvertToInt()) /
-                        static_cast<double>(qj.ConvertToInt());
+        ql_q_hat_inv_modq_divq_modq_.resize(size_q);
+        ql_q_hat_inv_modq_divq_frac_.resize(size_q);
+        for (uint32_t l = size_q; l > 0; l--) {
+            ql_q_hat_inv_modq_divq_frac_[l - 1].resize(size_q - l);
+            for (uint32_t j = 0; j < size_q - l; ++j) {
+                BigInteger qj(moduli_q[j + l].convert_to_int());
+                ql_q_hat_inv_modq_divq_frac_[l - 1][j] =
+                        static_cast<double>(((modulus_q.divided_by(qj)).mod_inverse(qj) * ql_value[l]).mod(qj).convert_to_int()) /
+                        static_cast<double>(qj.convert_to_int());
             }
-            m_QlQHatInvModqDivqModq[l - 1].resize(l);
+            ql_q_hat_inv_modq_divq_modq_[l - 1].resize(l);
             for (uint32_t i = 0; i < l; ++i) {
-                m_QlQHatInvModqDivqModq[l - 1][i].resize(sizeQ - l + 1);
-                BigInteger qi(moduliQ[i].ConvertToInt());
-                for (uint32_t j = 0; j < sizeQ - l; ++j) {
-                    BigInteger qj(moduliQ[l + j].ConvertToInt());
-                    BigInteger QlQHatInvModq = Ql[l] * ((modulusQ.DividedBy(qj)).ModInverse(qj));
-                    BigInteger QlQHatInvModqDivq = QlQHatInvModq / qj;
-                    m_QlQHatInvModqDivqModq[l - 1][i][j] = QlQHatInvModqDivq.Mod(qi).ConvertToInt();
+                ql_q_hat_inv_modq_divq_modq_[l - 1][i].resize(size_q - l + 1);
+                BigInteger qi(moduli_q[i].convert_to_int());
+                for (uint32_t j = 0; j < size_q - l; ++j) {
+                    BigInteger qj(moduli_q[l + j].convert_to_int());
+                    BigInteger ql_q_hat_inv_modq = ql_value[l] * ((modulus_q.divided_by(qj)).mod_inverse(qj));
+                    BigInteger ql_q_hat_inv_modq_divq = ql_q_hat_inv_modq / qj;
+                    ql_q_hat_inv_modq_divq_modq_[l - 1][i][j] = ql_q_hat_inv_modq_divq.mod(qi).convert_to_int();
                 }
-                BigInteger QlQHatInvModq = Ql[l] * ((modulusQ.DividedBy(qi)).ModInverse(qi));
-                BigInteger QlQHatInvModqDivq = QlQHatInvModq / qi;
-                m_QlQHatInvModqDivqModq[l - 1][i][sizeQ - l] = QlQHatInvModqDivq.Mod(qi).ConvertToInt();
+                BigInteger ql_q_hat_inv_modq = ql_value[l] * ((modulus_q.divided_by(qi)).mod_inverse(qi));
+                BigInteger ql_q_hat_inv_modq_divq = ql_q_hat_inv_modq / qi;
+                ql_q_hat_inv_modq_divq_modq_[l - 1][i][size_q - l] = ql_q_hat_inv_modq_divq.mod(qi).convert_to_int();
             }
         }
 
         /////////////////////////////////////
-        // BFVrns : Mult : ExpandCRTBasisQlHat
+        // BFVrns : Mult : expand_crt_basis_ql_hat
         /////////////////////////////////////
 
-        m_QlHatModq.resize(sizeQ);
-        m_QlHatModqPrecon.resize(sizeQ);
-        for (uint32_t l = sizeQ; l > 0; l--) {
-            m_QlHatModq[l - 1].resize(l);
-            m_QlHatModqPrecon[l - 1].resize(l);
+        ql_hat_modq_.resize(size_q);
+        ql_hat_modq_precon_.resize(size_q);
+        for (uint32_t l = size_q; l > 0; l--) {
+            ql_hat_modq_[l - 1].resize(l);
+            ql_hat_modq_precon_[l - 1].resize(l);
             for (uint32_t i = 0; i < l; ++i) {
-                BigInteger qi(moduliQ[i].ConvertToInt());
-                m_QlHatModq[l - 1][i] = QlHat[l].Mod(qi).ConvertToInt();
-                m_QlHatModqPrecon[l - 1][i] = m_QlHatModq[l - 1][i].PrepModMulConst(qi);
+                BigInteger qi(moduli_q[i].convert_to_int());
+                ql_hat_modq_[l - 1][i] = ql_hat[l].mod(qi).convert_to_int();
+                ql_hat_modq_precon_[l - 1][i] = ql_hat_modq_[l - 1][i].prep_mod_mul_const(qi);
             }
         }
 
         /////////////////////////////////////
-        // DropLastElementAndScale
+        // drop_last_element_and_scale
         /////////////////////////////////////
 
         // Pre-compute values for rescaling in RNS
-        m_qlInvModq.resize(sizeQ - 1);
-        m_qlInvModqPrecon.resize(sizeQ - 1);
-        for (uint32_t k = 0; k < sizeQ - 1; ++k) {
-            uint32_t l = sizeQ - (k + 1);
-            m_qlInvModq[k].resize(l);
-            m_qlInvModqPrecon[k].resize(l);
+        ql_inv_modq_.resize(size_q - 1);
+        ql_inv_modq_precon_.resize(size_q - 1);
+        for (uint32_t k = 0; k < size_q - 1; ++k) {
+            uint32_t l = size_q - (k + 1);
+            ql_inv_modq_[k].resize(l);
+            ql_inv_modq_precon_[k].resize(l);
             for (uint32_t i = 0; i < l; ++i) {
-                m_qlInvModq[k][i] = moduliQ[l].ModInverse(moduliQ[i]);
-                m_qlInvModqPrecon[k][i] = m_qlInvModq[k][i].PrepModMulConst(moduliQ[i]);
+                ql_inv_modq_[k][i] = moduli_q[l].mod_inverse(moduli_q[i]);
+                ql_inv_modq_precon_[k][i] = ql_inv_modq_[k][i].prep_mod_mul_const(moduli_q[i]);
             }
         }
     }
@@ -658,224 +658,224 @@ void CryptoParametersBFVRNS::PrecomputeCRTTables(KeySwitchTechnique ksTech, Scal
     // BEHZ Precomputation
     /////////////////////////////////////
 
-    if (multTech == BEHZ) {
-        m_moduliQ = moduliQ;
-        m_numq = sizeQ;
+    if (mult_tech == BEHZ) {
+        moduli_q_ = moduli_q;
+        numq_ = size_q;
 
-        std::vector<std::shared_ptr<ILNativeParams>> params;
-        params.reserve(2 * sizeQ + 1);
-        m_moduliB.reserve(m_numq);
-        m_rootsBsk.reserve(m_numq + 1);
-        for (uint32_t i = 0; i < m_numq; ++i)
-            params.emplace_back(std::make_shared<ILNativeParams>(2 * n, moduliQ[i]));
+        std::vector<std::shared_ptr<NativePolyParams>> params;
+        params.reserve(2 * size_q + 1);
+        moduli_b_.reserve(numq_);
+        roots_bsk_.reserve(numq_ + 1);
+        for (uint32_t i = 0; i < numq_; ++i)
+            params.emplace_back(std::make_shared<NativePolyParams>(2 * n, moduli_q[i]));
 
-        m_moduliB.push_back(PreviousPrime<NativeInteger>(moduliQ.back(), 2 * n));
-        m_rootsBsk.push_back(RootOfUnity<NativeInteger>(2 * n, m_moduliB.back()));
-        params.emplace_back(std::make_shared<ILNativeParams>(2 * n, m_moduliB.back(), m_rootsBsk.back()));
-        BigInteger B(m_moduliB.back());
+        moduli_b_.push_back(previous_prime<NativeInteger>(moduli_q.back(), 2 * n));
+        roots_bsk_.push_back(root_of_unity<NativeInteger>(2 * n, moduli_b_.back()));
+        params.emplace_back(std::make_shared<NativePolyParams>(2 * n, moduli_b_.back(), roots_bsk_.back()));
+        BigInteger B(moduli_b_.back());
 
-        for (uint32_t i = 1; i < m_numq; ++i) {  // we already added one prime
-            m_moduliB.push_back(PreviousPrime<NativeInteger>(m_moduliB.back(), 2 * n));
-            m_rootsBsk.push_back(RootOfUnity<NativeInteger>(2 * n, m_moduliB.back()));
-            params.emplace_back(std::make_shared<ILNativeParams>(2 * n, m_moduliB.back(), m_rootsBsk.back()));
-            B = B * BigInteger(m_moduliB.back());
+        for (uint32_t i = 1; i < numq_; ++i) {  // we already added one prime
+            moduli_b_.push_back(previous_prime<NativeInteger>(moduli_b_.back(), 2 * n));
+            roots_bsk_.push_back(root_of_unity<NativeInteger>(2 * n, moduli_b_.back()));
+            params.emplace_back(std::make_shared<NativePolyParams>(2 * n, moduli_b_.back(), roots_bsk_.back()));
+            B = B * BigInteger(moduli_b_.back());
         }
 
-        m_numb = m_numq;
-        m_msk = PreviousPrime<NativeInteger>(m_moduliB[m_numq - 1], 2 * n);
-        uint32_t s = m_msk.GetMSB();
+        numb_ = numq_;
+        msk_ = previous_prime<NativeInteger>(moduli_b_[numq_ - 1], 2 * n);
+        uint32_t s = msk_.get_msb();
 
-        BigInteger Q(GetElementParams()->GetModulus());
-        BigInteger maxConvolutionValue(BigInteger(2 * n) * BigInteger(GetPlaintextModulus()) * Q);
+        BigInteger Q(get_element_params()->get_modulus());
+        BigInteger max_convolution_value(BigInteger(2 * n) * BigInteger(get_plaintext_modulus()) * Q);
         // check msk is large enough
-        while (B * BigInteger(m_msk) < maxConvolutionValue) {
-            // TODO: revisit this logic. Maybe change to m_msk = LastPrime<NativeInteger>(++s, 2 * n);
-            auto firstInteger{FirstPrime<NativeInteger>(++s, 2 * n)};
-            m_msk = NextPrime<NativeInteger>(firstInteger, 2 * n);
+        while (B * BigInteger(msk_) < max_convolution_value) {
+            // TODO: revisit this logic. Maybe change to msk_ = last_prime<NativeInteger>(++s, 2 * n);
+            auto first_integer{first_prime<NativeInteger>(++s, 2 * n)};
+            msk_ = next_prime<NativeInteger>(first_integer, 2 * n);
         }
-        m_rootsBsk.push_back(RootOfUnity<NativeInteger>(2 * n, m_msk));
+        roots_bsk_.push_back(root_of_unity<NativeInteger>(2 * n, msk_));
 
-        m_moduliBsk.reserve(m_numq + 1);
-        m_moduliBsk = m_moduliB;
-        m_moduliBsk.push_back(m_msk);
+        moduli_bsk_.reserve(numq_ + 1);
+        moduli_bsk_ = moduli_b_;
+        moduli_bsk_.push_back(msk_);
 
-        params.emplace_back(std::make_shared<ILNativeParams>(2 * n, m_moduliBsk.back(), m_rootsBsk.back()));
-        m_paramsQBsk = std::make_shared<ILDCRTParams<BigInteger>>(2 * n, params);
+        params.emplace_back(std::make_shared<NativePolyParams>(2 * n, moduli_bsk_.back(), roots_bsk_.back()));
+        params_q_bsk_ = std::make_shared<RnsParams<BigInteger>>(2 * n, params);
 
-        ChineseRemainderTransformFTT<NativeVector>().PreCompute(m_rootsBsk, 2 * n, m_moduliBsk);
+        ChineseRemainderTransformFtt<NativeVector>().pre_compute(roots_bsk_, 2 * n, moduli_bsk_);
 
         // populate Barrett constant for m_BskModuli
-        m_modbskBarrettMu.resize(m_moduliBsk.size());
-        for (size_t i = 0; i < m_modbskBarrettMu.size(); ++i) {
-            m_modbskBarrettMu[i] = (BarrettBase128Bit / BigInteger(m_moduliBsk[i])).ConvertToInt<DoubleNativeInt>();
+        modbsk_barrett_mu_.resize(moduli_bsk_.size());
+        for (size_t i = 0; i < modbsk_barrett_mu_.size(); ++i) {
+            modbsk_barrett_mu_[i] = (barrett_base128_bit / BigInteger(moduli_bsk_[i])).convert_to_int<DoubleNativeInt>();
         }
 
         // Populate [t*(Q/q_i)^-1]_{q_i}
-        m_tQHatInvModq.resize(m_numq);
-        m_tQHatInvModqPrecon.resize(m_numq);
-        for (uint32_t i = 0; i < m_numq; ++i) {
-            BigInteger tQHatInvModqi;
-            tQHatInvModqi = Q.DividedBy(moduliQ[i]);
-            tQHatInvModqi = tQHatInvModqi.Mod(moduliQ[i]);
-            tQHatInvModqi = tQHatInvModqi.ModInverse(moduliQ[i]);
-            tQHatInvModqi = tQHatInvModqi.ModMul(t.ConvertToInt(), moduliQ[i]);
-            m_tQHatInvModq[i] = tQHatInvModqi.ConvertToInt();
-            m_tQHatInvModqPrecon[i] = m_tQHatInvModq[i].PrepModMulConst(moduliQ[i]);
+        t_q_hat_inv_modq_.resize(numq_);
+        t_q_hat_inv_modq_precon_.resize(numq_);
+        for (uint32_t i = 0; i < numq_; ++i) {
+            BigInteger t_q_hat_inv_modqi;
+            t_q_hat_inv_modqi = Q.divided_by(moduli_q[i]);
+            t_q_hat_inv_modqi = t_q_hat_inv_modqi.mod(moduli_q[i]);
+            t_q_hat_inv_modqi = t_q_hat_inv_modqi.mod_inverse(moduli_q[i]);
+            t_q_hat_inv_modqi = t_q_hat_inv_modqi.mod_mul(t.convert_to_int(), moduli_q[i]);
+            t_q_hat_inv_modq_[i] = t_q_hat_inv_modqi.convert_to_int();
+            t_q_hat_inv_modq_precon_[i] = t_q_hat_inv_modq_[i].prep_mod_mul_const(moduli_q[i]);
         }
 
         // Populate [Q/q_i]_{bsk_j, mtilde}
-        m_QHatModbsk.resize(m_numq);
-        m_QHatModmtilde.resize(m_numq);
-        for (uint32_t i = 0; i < m_numq; ++i) {
-            m_QHatModbsk[i].resize(m_numb + 1);
+        q_hat_modbsk_.resize(numq_);
+        q_hat_modmtilde_.resize(numq_);
+        for (uint32_t i = 0; i < numq_; ++i) {
+            q_hat_modbsk_[i].resize(numb_ + 1);
 
-            BigInteger QHati = Q.DividedBy(moduliQ[i]);
-            for (size_t j = 0; j < m_QHatModbsk[i].size(); ++j) {
-                BigInteger QHatiModbskj = QHati.Mod(m_moduliBsk[j]);
-                m_QHatModbsk[i][j] = QHatiModbskj.ConvertToInt();
+            BigInteger q_hati = Q.divided_by(moduli_q[i]);
+            for (size_t j = 0; j < q_hat_modbsk_[i].size(); ++j) {
+                BigInteger q_hati_modbskj = q_hati.mod(moduli_bsk_[j]);
+                q_hat_modbsk_[i][j] = q_hati_modbskj.convert_to_int();
             }
-            m_QHatModmtilde[i] = QHati.Mod(m_mtilde).ConvertToInt();
+            q_hat_modmtilde_[i] = q_hati.mod(mtilde_).convert_to_int();
         }
 
         // Populate [1/q_i]_{bsk_j}
-        m_qInvModbsk.resize(m_numq);
-        for (uint32_t i = 0; i < m_numq; ++i) {
-            m_qInvModbsk[i].resize(m_numb + 1);
-            for (uint32_t j = 0; j <= m_numb; ++j)
-                m_qInvModbsk[i][j] = moduliQ[i].ModInverse(m_moduliBsk[j]);
+        q_inv_modbsk_.resize(numq_);
+        for (uint32_t i = 0; i < numq_; ++i) {
+            q_inv_modbsk_[i].resize(numb_ + 1);
+            for (uint32_t j = 0; j <= numb_; ++j)
+                q_inv_modbsk_[i][j] = moduli_q[i].mod_inverse(moduli_bsk_[j]);
         }
 
         // Populate [mtilde*(Q/q_i)^{-1}]_{q_i}
-        m_mtildeQHatInvModq.resize(m_numq);
-        m_mtildeQHatInvModqPrecon.resize(m_numq);
+        mtilde_q_hat_inv_modq_.resize(numq_);
+        mtilde_q_hat_inv_modq_precon_.resize(numq_);
 
-        BigInteger bmtilde(m_mtilde);
-        for (uint32_t i = 0; i < m_numq; ++i) {
-            BigInteger mtildeQHatInvModqi = Q.DividedBy(moduliQ[i]);
-            mtildeQHatInvModqi = mtildeQHatInvModqi.Mod(moduliQ[i]);
-            mtildeQHatInvModqi = mtildeQHatInvModqi.ModInverse(moduliQ[i]);
-            mtildeQHatInvModqi = mtildeQHatInvModqi * bmtilde;
-            mtildeQHatInvModqi = mtildeQHatInvModqi.Mod(moduliQ[i]);
-            m_mtildeQHatInvModq[i] = mtildeQHatInvModqi.ConvertToInt();
-            m_mtildeQHatInvModqPrecon[i] = m_mtildeQHatInvModq[i].PrepModMulConst(moduliQ[i]);
+        BigInteger bmtilde(mtilde_);
+        for (uint32_t i = 0; i < numq_; ++i) {
+            BigInteger mtilde_q_hat_inv_modqi = Q.divided_by(moduli_q[i]);
+            mtilde_q_hat_inv_modqi = mtilde_q_hat_inv_modqi.mod(moduli_q[i]);
+            mtilde_q_hat_inv_modqi = mtilde_q_hat_inv_modqi.mod_inverse(moduli_q[i]);
+            mtilde_q_hat_inv_modqi = mtilde_q_hat_inv_modqi * bmtilde;
+            mtilde_q_hat_inv_modqi = mtilde_q_hat_inv_modqi.mod(moduli_q[i]);
+            mtilde_q_hat_inv_modq_[i] = mtilde_q_hat_inv_modqi.convert_to_int();
+            mtilde_q_hat_inv_modq_precon_[i] = mtilde_q_hat_inv_modq_[i].prep_mod_mul_const(moduli_q[i]);
         }
 
         // Populate [-Q^{-1}]_{mtilde}
-        BigInteger negQInvModmtilde = (BigInteger(m_mtilde - 1) * Q.ModInverse(m_mtilde));
-        negQInvModmtilde = negQInvModmtilde.Mod(m_mtilde);
-        m_negQInvModmtilde = negQInvModmtilde.ConvertToInt();
+        BigInteger neg_q_inv_modmtilde = (BigInteger(mtilde_ - 1) * Q.mod_inverse(mtilde_));
+        neg_q_inv_modmtilde = neg_q_inv_modmtilde.mod(mtilde_);
+        neg_q_inv_modmtilde_ = neg_q_inv_modmtilde.convert_to_int();
 
         // Populate [Q]_{bski_j}
-        m_QModbsk.resize(m_numq + 1);
-        m_QModbskPrecon.resize(m_numq + 1);
+        q_modbsk_.resize(numq_ + 1);
+        q_modbsk_precon_.resize(numq_ + 1);
 
-        for (uint32_t j = 0; j <= m_numq; ++j) {
-            BigInteger QModbskij = Q.Mod(m_moduliBsk[j]);
-            m_QModbsk[j] = QModbskij.ConvertToInt();
-            m_QModbskPrecon[j] = m_QModbsk[j].PrepModMulConst(m_moduliBsk[j]);
+        for (uint32_t j = 0; j <= numq_; ++j) {
+            BigInteger q_modbskij = Q.mod(moduli_bsk_[j]);
+            q_modbsk_[j] = q_modbskij.convert_to_int();
+            q_modbsk_precon_[j] = q_modbsk_[j].prep_mod_mul_const(moduli_bsk_[j]);
         }
 
         // Populate [mtilde^{-1}]_{bsk_j}
-        m_mtildeInvModbsk.resize(m_numb + 1);
-        m_mtildeInvModbskPrecon.resize(m_numb + 1);
-        for (uint32_t j = 0; j <= m_numb; ++j) {
-            BigInteger mtildeInvModbskij = m_mtilde % m_moduliBsk[j];
-            mtildeInvModbskij = mtildeInvModbskij.ModInverse(m_moduliBsk[j]);
-            m_mtildeInvModbsk[j] = mtildeInvModbskij.ConvertToInt();
-            m_mtildeInvModbskPrecon[j] = m_mtildeInvModbsk[j].PrepModMulConst(m_moduliBsk[j]);
+        mtilde_inv_modbsk_.resize(numb_ + 1);
+        mtilde_inv_modbsk_precon_.resize(numb_ + 1);
+        for (uint32_t j = 0; j <= numb_; ++j) {
+            BigInteger mtilde_inv_modbskij = mtilde_ % moduli_bsk_[j];
+            mtilde_inv_modbskij = mtilde_inv_modbskij.mod_inverse(moduli_bsk_[j]);
+            mtilde_inv_modbsk_[j] = mtilde_inv_modbskij.convert_to_int();
+            mtilde_inv_modbsk_precon_[j] = mtilde_inv_modbsk_[j].prep_mod_mul_const(moduli_bsk_[j]);
         }
 
         // Populate {t/Q}_{bsk_j}
-        m_tQInvModbsk.resize(m_numb + 1);
-        m_tQInvModbskPrecon.resize(m_numb + 1);
+        t_q_inv_modbsk_.resize(numb_ + 1);
+        t_q_inv_modbsk_precon_.resize(numb_ + 1);
 
-        for (uint32_t i = 0; i <= m_numb; ++i) {
-            BigInteger tDivqModBski = Q.ModInverse(m_moduliBsk[i]);
-            tDivqModBski.ModMulEq(t.ConvertToInt(), m_moduliBsk[i]);
-            m_tQInvModbsk[i] = tDivqModBski.ConvertToInt();
-            m_tQInvModbskPrecon[i] = m_tQInvModbsk[i].PrepModMulConst(m_moduliBsk[i]);
+        for (uint32_t i = 0; i <= numb_; ++i) {
+            BigInteger t_divq_mod_bski = Q.mod_inverse(moduli_bsk_[i]);
+            t_divq_mod_bski.mod_mul_eq(t.convert_to_int(), moduli_bsk_[i]);
+            t_q_inv_modbsk_[i] = t_divq_mod_bski.convert_to_int();
+            t_q_inv_modbsk_precon_[i] = t_q_inv_modbsk_[i].prep_mod_mul_const(moduli_bsk_[i]);
         }
 
         // Populate [(B/b_j)^{-1}]_{b_j}
-        m_BHatInvModb.resize(m_numb);
-        m_BHatInvModbPrecon.resize(m_numb);
+        b_hat_inv_modb_.resize(numb_);
+        b_hat_inv_modb_precon_.resize(numb_);
 
-        for (uint32_t i = 0; i < m_numb; ++i) {
-            BigInteger BDivBi;
-            BDivBi = B.DividedBy(m_moduliB[i]);
-            BDivBi = BDivBi.Mod(m_moduliB[i]);
-            BDivBi = BDivBi.ModInverse(m_moduliB[i]);
-            m_BHatInvModb[i] = BDivBi.ConvertToInt();
-            m_BHatInvModbPrecon[i] = m_BHatInvModb[i].PrepModMulConst(m_moduliB[i]);
+        for (uint32_t i = 0; i < numb_; ++i) {
+            BigInteger b_div_bi;
+            b_div_bi = B.divided_by(moduli_b_[i]);
+            b_div_bi = b_div_bi.mod(moduli_b_[i]);
+            b_div_bi = b_div_bi.mod_inverse(moduli_b_[i]);
+            b_hat_inv_modb_[i] = b_div_bi.convert_to_int();
+            b_hat_inv_modb_precon_[i] = b_hat_inv_modb_[i].prep_mod_mul_const(moduli_b_[i]);
         }
 
         // Populate [B/b_j]_{q_i}
-        m_BHatModq.resize(m_numb);
-        for (uint32_t i = 0; i < m_numb; ++i) {
-            m_BHatModq[i].resize(m_numq);
-            BigInteger BDivBi = B.DividedBy(m_moduliB[i]);
-            for (uint32_t j = 0; j < m_numq; ++j) {
-                BigInteger BDivBiModqj = BDivBi.Mod(moduliQ[j]);
-                m_BHatModq[i][j] = BDivBiModqj.ConvertToInt();
+        b_hat_modq_.resize(numb_);
+        for (uint32_t i = 0; i < numb_; ++i) {
+            b_hat_modq_[i].resize(numq_);
+            BigInteger b_div_bi = B.divided_by(moduli_b_[i]);
+            for (uint32_t j = 0; j < numq_; ++j) {
+                BigInteger b_div_bi_modqj = b_div_bi.mod(moduli_q[j]);
+                b_hat_modq_[i][j] = b_div_bi_modqj.convert_to_int();
             }
         }
 
         // Populate [B/b_j]_{msk}
-        m_BHatModmsk.resize(m_numb);
-        for (uint32_t i = 0; i < m_numb; ++i) {
-            BigInteger BDivBi = B.DividedBy(m_moduliB[i]);
-            m_BHatModmsk[i] = (BDivBi.Mod(m_msk)).ConvertToInt();
+        b_hat_modmsk_.resize(numb_);
+        for (uint32_t i = 0; i < numb_; ++i) {
+            BigInteger b_div_bi = B.divided_by(moduli_b_[i]);
+            b_hat_modmsk_[i] = (b_div_bi.mod(msk_)).convert_to_int();
         }
 
         // Populate [B^{-1}]_{msk}
-        m_BInvModmsk = (B.ModInverse(m_msk)).ConvertToInt();
-        m_BInvModmskPrecon = m_BInvModmsk.PrepModMulConst(m_msk);
+        b_inv_modmsk_ = (B.mod_inverse(msk_)).convert_to_int();
+        b_inv_modmsk_precon_ = b_inv_modmsk_.prep_mod_mul_const(msk_);
 
         // Populate [B]_{q_i}
-        m_BModq.resize(m_numq);
-        m_BModqPrecon.resize(m_numq);
-        for (uint32_t i = 0; i < m_numq; ++i) {
-            m_BModq[i] = (B.Mod(moduliQ[i])).ConvertToInt();
-            m_BModqPrecon[i] = m_BModq[i].PrepModMulConst(moduliQ[i]);
+        b_modq_.resize(numq_);
+        b_modq_precon_.resize(numq_);
+        for (uint32_t i = 0; i < numq_; ++i) {
+            b_modq_[i] = (B.mod(moduli_q[i])).convert_to_int();
+            b_modq_precon_[i] = b_modq_[i].prep_mod_mul_const(moduli_q[i]);
         }
 
         // Populate Decrns lookup tables
 
-        NativeInteger tgamma = NativeInteger(t.ConvertToInt() * m_gamma);  // t*gamma
+        NativeInteger tgamma = NativeInteger(t.convert_to_int() * gamma_);  // t*gamma
 
-        m_tgamma = tgamma;
+        tgamma_ = tgamma;
 
         // Populate [-1/q_i]_{t*gamma} (t*gamma < 2^58)
-        m_negInvqModtgamma.resize(m_numq);
-        m_negInvqModtgammaPrecon.resize(m_numq);
-        for (uint32_t i = 0; i < m_numq; ++i) {
-            BigInteger imod(moduliQ[i]);
-            BigInteger negInvqi = BigInteger((tgamma - 1)) * imod.ModInverse(tgamma);
+        neg_invq_modtgamma_.resize(numq_);
+        neg_invq_modtgamma_precon_.resize(numq_);
+        for (uint32_t i = 0; i < numq_; ++i) {
+            BigInteger imod(moduli_q[i]);
+            BigInteger neg_invqi = BigInteger((tgamma - 1)) * imod.mod_inverse(tgamma);
 
-            BigInteger negInvqiModtgamma = negInvqi.Mod(tgamma);
-            m_negInvqModtgamma[i] = negInvqiModtgamma.ConvertToInt();
-            m_negInvqModtgammaPrecon[i] = m_negInvqModtgamma[i].PrepModMulConst(tgamma);
+            BigInteger neg_invqi_modtgamma = neg_invqi.mod(tgamma);
+            neg_invq_modtgamma_[i] = neg_invqi_modtgamma.convert_to_int();
+            neg_invq_modtgamma_precon_[i] = neg_invq_modtgamma_[i].prep_mod_mul_const(tgamma);
         }
 
         // populate [t*gamma*(Q/q_i)^(-1)]_{q_i}
-        m_tgammaQHatInvModq.resize(m_numq);
-        m_tgammaQHatInvModqPrecon.resize(m_numq);
+        tgamma_q_hat_inv_modq_.resize(numq_);
+        tgamma_q_hat_inv_modq_precon_.resize(numq_);
 
-        BigInteger bmgamma(m_gamma);
-        for (uint32_t i = 0; i < m_numq; ++i) {
-            BigInteger qDivqi = Q.DividedBy(moduliQ[i]);
-            BigInteger imod(moduliQ[i]);
-            qDivqi = qDivqi.ModInverse(moduliQ[i]);
-            BigInteger gammaqDivqi = (qDivqi * bmgamma) % imod;
-            BigInteger tgammaqDivqi = (gammaqDivqi * BigInteger(t)) % imod;
-            m_tgammaQHatInvModq[i] = tgammaqDivqi.ConvertToInt();
-            m_tgammaQHatInvModqPrecon[i] = m_tgammaQHatInvModq[i].PrepModMulConst(moduliQ[i]);
+        BigInteger bmgamma(gamma_);
+        for (uint32_t i = 0; i < numq_; ++i) {
+            BigInteger q_divqi = Q.divided_by(moduli_q[i]);
+            BigInteger imod(moduli_q[i]);
+            q_divqi = q_divqi.mod_inverse(moduli_q[i]);
+            BigInteger gammaq_divqi = (q_divqi * bmgamma) % imod;
+            BigInteger tgammaq_divqi = (gammaq_divqi * BigInteger(t)) % imod;
+            tgamma_q_hat_inv_modq_[i] = tgammaq_divqi.convert_to_int();
+            tgamma_q_hat_inv_modq_precon_[i] = tgamma_q_hat_inv_modq_[i].prep_mod_mul_const(moduli_q[i]);
         }
     }
 }
 
-uint64_t CryptoParametersBFVRNS::FindAuxPrimeStep() const {
-    return 2 * GetElementParams()->GetRingDimension();
+uint64_t BfvRnsCryptoParams::find_aux_prime_step() const {
+    return 2 * get_element_params()->get_ring_dimension();
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher

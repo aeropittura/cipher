@@ -31,6 +31,6 @@
 #include "cipher/fhe/key/relin_key.h"
 
 // the code below is from evalkeyrelin-impl.cpp
-namespace lbcrypto {
-template class EvalKeyRelinImpl<DCRTPoly>;
-}  // namespace lbcrypto
+namespace cipher {
+template class EvalKeyRelinImpl<RnsPoly>;
+}  // namespace cipher

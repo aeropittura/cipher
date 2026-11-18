@@ -36,7 +36,7 @@
 
 /**
  * @brief get_call_stack() is a function to get the call stack.
- * @attention it must not throw an exception as it is called from OpenFHEException
+ * @attention it must not throw an exception as it is called from CipherException
  * @return a vector with call stack (demangled function names)
  */
 std::vector<std::string> get_call_stack() noexcept;

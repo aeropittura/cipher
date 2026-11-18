@@ -35,37 +35,37 @@
 #include "cipher/fhe/bfv/ser.h"
 #include "cipher/fhe/bfv/context_gen.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 class UTBFVRNS_SER : public ::testing::Test {
   protected:
     void SetUp() {
-        OpenFHEParallelControls.UnitTestStart();
+        cipher_parallel_controls.unit_test_start();
     }
 
     void TearDown() {
-        CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
-        OpenFHEParallelControls.UnitTestStop();
+        ContextFactory<RnsPoly>::release_all_contexts();
+        cipher_parallel_controls.unit_test_stop();
     }
 };
 
 template <typename T>
-void UnitTestContext(CryptoContext<T> cc) {
-    UnitTestContextWithSertype(cc, SerType::JSON, "json");
-    UnitTestContextWithSertype(cc, SerType::BINARY, "binary");
+void unit_test_context(CryptoContext<T> cc) {
+    unit_test_context_with_sertype(cc, SerType::JSON, "json");
+    unit_test_context_with_sertype(cc, SerType::BINARY, "binary");
 }
 
 TEST_F(UTBFVRNS_SER, BFVRNS_SERIAL) {
-    CCParams<CryptoContextBFVRNS> parameters;
-    parameters.SetPlaintextModulus(16);
-    parameters.SetStandardDeviation(4);
-    parameters.SetScalingModSize(60);
+    ContextParams<BfvRnsContext> parameters;
+    parameters.set_plaintext_modulus(16);
+    parameters.set_standard_deviation(4);
+    parameters.set_scaling_mod_size(60);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
 
-    UnitTestContext<DCRTPoly>(cc);
+    unit_test_context<RnsPoly>(cc);
 }

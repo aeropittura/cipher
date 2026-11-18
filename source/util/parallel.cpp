@@ -35,8 +35,8 @@
 
 #include "cipher/util/parallel.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-ParallelControls OpenFHEParallelControls;
+ParallelControls cipher_parallel_controls;
 
 }

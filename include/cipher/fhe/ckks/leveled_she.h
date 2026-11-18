@@ -42,10 +42,10 @@
 #include "cipher/fhe/rns/leveled_she.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief CKKS implementation of the leveled SHE capability: operations with real and complex constants (encoded
@@ -53,16 +53,16 @@ namespace lbcrypto {
  * and COMPOSITESCALING* techniques, integer multiplication without scaling, and the CKKS (complex) automorphism
  * indexing used by rotations and conjugation.
  */
-class LeveledSHECKKSRNS : public LeveledSHERNS {
+class CkksRnsLeveledShe : public RnsLeveledShe {
   public:
-    virtual ~LeveledSHECKKSRNS() = default;
+    virtual ~CkksRnsLeveledShe() = default;
 
     /////////////////////////////////////////
     // SHE ADDITION
     /////////////////////////////////////////
 
-    using LeveledSHERNS::EvalAdd;
-    using LeveledSHERNS::EvalAddInPlace;
+    using RnsLeveledShe::eval_add;
+    using RnsLeveledShe::eval_add_in_place;
 
     /////////////////////////////////////////
     // SHE ADDITION PLAINTEXT
@@ -80,15 +80,15 @@ class LeveledSHECKKSRNS : public LeveledSHERNS {
      * @param operand the constant to add
      * @return the sum
      */
-    Ciphertext<DCRTPoly> EvalAdd(ConstCiphertext<DCRTPoly>& ciphertext, double operand) const override;
+    Ciphertext<RnsPoly> eval_add(ConstCiphertext<RnsPoly>& ciphertext, double operand) const override;
 
     /**
-     * Adds a real constant to a ciphertext in place (see EvalAdd).
+     * Adds a real constant to a ciphertext in place (see eval_add).
      *
      * @param ciphertext the input ciphertext, replaced by the sum
      * @param operand the constant to add
      */
-    void EvalAddInPlace(Ciphertext<DCRTPoly>& ciphertext, double operand) const override;
+    void eval_add_in_place(Ciphertext<RnsPoly>& ciphertext, double operand) const override;
 
     /**
      * Adds a complex constant to a ciphertext. The constant is scaled by the scaling factor of the ciphertext's
@@ -98,15 +98,15 @@ class LeveledSHECKKSRNS : public LeveledSHERNS {
      * @param operand the constant to add
      * @return the sum
      */
-    Ciphertext<DCRTPoly> EvalAdd(ConstCiphertext<DCRTPoly>& ciphertext, std::complex<double> operand) const override;
+    Ciphertext<RnsPoly> eval_add(ConstCiphertext<RnsPoly>& ciphertext, std::complex<double> operand) const override;
 
     /**
-     * Adds a complex constant to a ciphertext in place (see EvalAdd).
+     * Adds a complex constant to a ciphertext in place (see eval_add).
      *
      * @param ciphertext the input ciphertext, replaced by the sum
      * @param operand the constant to add
      */
-    void EvalAddInPlace(Ciphertext<DCRTPoly>& ciphertext, std::complex<double> operand) const override;
+    void eval_add_in_place(Ciphertext<RnsPoly>& ciphertext, std::complex<double> operand) const override;
 
     /////////////////////////////////////////
     // SHE SUBTRACTION
@@ -120,8 +120,8 @@ class LeveledSHECKKSRNS : public LeveledSHERNS {
     // SHE SUBTRACTION CONSTANT
     /////////////////////////////////////////
 
-    using LeveledSHERNS::EvalSub;
-    using LeveledSHERNS::EvalSubInPlace;
+    using RnsLeveledShe::eval_sub;
+    using RnsLeveledShe::eval_sub_in_place;
 
     /**
      * Subtracts a real constant from a ciphertext. The constant is scaled by the scaling factor of the
@@ -132,15 +132,15 @@ class LeveledSHECKKSRNS : public LeveledSHERNS {
      * @param operand the constant to subtract
      * @return the difference
      */
-    Ciphertext<DCRTPoly> EvalSub(ConstCiphertext<DCRTPoly>& ciphertext, double operand) const override;
+    Ciphertext<RnsPoly> eval_sub(ConstCiphertext<RnsPoly>& ciphertext, double operand) const override;
 
     /**
-     * Subtracts a real constant from a ciphertext in place (see EvalSub).
+     * Subtracts a real constant from a ciphertext in place (see eval_sub).
      *
      * @param ciphertext the input ciphertext, replaced by the difference
      * @param operand the constant to subtract
      */
-    void EvalSubInPlace(Ciphertext<DCRTPoly>& ciphertext, double operand) const override;
+    void eval_sub_in_place(Ciphertext<RnsPoly>& ciphertext, double operand) const override;
 
     /////////////////////////////////////////
     // SHE MULTIPLICATION
@@ -154,8 +154,8 @@ class LeveledSHECKKSRNS : public LeveledSHERNS {
     // SHE MULTIPLICATION CONSTANT
     /////////////////////////////////////////
 
-    using LeveledSHEBase<DCRTPoly>::EvalMult;
-    using LeveledSHEBase<DCRTPoly>::EvalMultInPlace;
+    using BaseLeveledShe<RnsPoly>::eval_mult;
+    using BaseLeveledShe<RnsPoly>::eval_mult_in_place;
 
     /**
      * Multiplies a ciphertext by a real constant. The constant is encoded at the scaling factor of the
@@ -166,15 +166,15 @@ class LeveledSHECKKSRNS : public LeveledSHERNS {
      * @param operand the constant to multiply by
      * @return the product
      */
-    Ciphertext<DCRTPoly> EvalMult(ConstCiphertext<DCRTPoly>& ciphertext, double operand) const override;
+    Ciphertext<RnsPoly> eval_mult(ConstCiphertext<RnsPoly>& ciphertext, double operand) const override;
 
     /**
-     * Multiplies a ciphertext by a real constant in place (see EvalMult).
+     * Multiplies a ciphertext by a real constant in place (see eval_mult).
      *
      * @param ciphertext the input ciphertext, replaced by the product
      * @param operand the constant to multiply by
      */
-    void EvalMultInPlace(Ciphertext<DCRTPoly>& ciphertext, double operand) const override;
+    void eval_mult_in_place(Ciphertext<RnsPoly>& ciphertext, double operand) const override;
 
     /**
      * Multiplies a ciphertext by a plaintext in place and updates the scaling factor of the product: for the
@@ -185,7 +185,7 @@ class LeveledSHECKKSRNS : public LeveledSHERNS {
      * @param ciphertext the input ciphertext, replaced by the product
      * @param plaintext the plaintext to multiply by
      */
-    void EvalMultInPlace(Ciphertext<DCRTPoly>& ciphertext, ConstPlaintext& plaintext) const override;
+    void eval_mult_in_place(Ciphertext<RnsPoly>& ciphertext, ConstPlaintext& plaintext) const override;
 
     /**
      * Multiplies a ciphertext by a complex constant. The constant is encoded at the scaling factor of the
@@ -196,15 +196,15 @@ class LeveledSHECKKSRNS : public LeveledSHERNS {
      * @param operand the constant to multiply by
      * @return the product
      */
-    Ciphertext<DCRTPoly> EvalMult(ConstCiphertext<DCRTPoly>& ciphertext, std::complex<double> operand) const override;
+    Ciphertext<RnsPoly> eval_mult(ConstCiphertext<RnsPoly>& ciphertext, std::complex<double> operand) const override;
 
     /**
-     * Multiplies a ciphertext by a complex constant in place (see EvalMult).
+     * Multiplies a ciphertext by a complex constant in place (see eval_mult).
      *
      * @param ciphertext the input ciphertext, replaced by the product
      * @param operand the constant to multiply by
      */
-    void EvalMultInPlace(Ciphertext<DCRTPoly>& ciphertext, std::complex<double> operand) const override;
+    void eval_mult_in_place(Ciphertext<RnsPoly>& ciphertext, std::complex<double> operand) const override;
 
     /**
      * Multiplies a ciphertext by an unscaled integer: the ciphertext elements are multiplied by the integer directly,
@@ -214,15 +214,15 @@ class LeveledSHECKKSRNS : public LeveledSHERNS {
      * @param integer the integer to multiply by
      * @return the product
      */
-    Ciphertext<DCRTPoly> MultByInteger(ConstCiphertext<DCRTPoly>& ciphertext, uint64_t integer) const override;
+    Ciphertext<RnsPoly> mult_by_integer(ConstCiphertext<RnsPoly>& ciphertext, uint64_t integer) const override;
 
     /**
-     * Multiplies a ciphertext by an unscaled integer in place (see MultByInteger).
+     * Multiplies a ciphertext by an unscaled integer in place (see mult_by_integer).
      *
      * @param ciphertext the input ciphertext, replaced by the product
      * @param integer the integer to multiply by
      */
-    void MultByIntegerInPlace(Ciphertext<DCRTPoly>& ciphertext, uint64_t integer) const override;
+    void mult_by_integer_in_place(Ciphertext<RnsPoly>& ciphertext, uint64_t integer) const override;
 
     /////////////////////////////////////
     // AUTOMORPHISM
@@ -232,18 +232,18 @@ class LeveledSHECKKSRNS : public LeveledSHERNS {
      * Hoisted rotation whose result stays in the extended basis Ql*P of HYBRID key switching: the digit
      * decomposition is multiplied by the automorphism key of the rotation, optionally the first ciphertext element
      * (scaled by P) is added, and the automorphism is applied. Several such results can be accumulated with
-     * EvalAddExt before a single KeySwitchDown.
+     * eval_add_ext before a single key_switch_down.
      *
-     * @param ciphertext the input ciphertext (provides the first element when addFirst is true)
+     * @param ciphertext the input ciphertext (provides the first element when add_first is true)
      * @param index the rotation index
-     * @param digits the digit decomposition of the second ciphertext element from EvalFastRotationPrecompute
-     * @param addFirst whether to add the first ciphertext element to the result before the automorphism
-     * @param evalKeys map of automorphism keys
+     * @param digits the digit decomposition of the second ciphertext element from eval_fast_rotation_precompute
+     * @param add_first whether to add the first ciphertext element to the result before the automorphism
+     * @param eval_keys map of automorphism keys
      * @return the rotated ciphertext in the extended basis Ql*P
      */
-    Ciphertext<DCRTPoly> EvalFastRotationExt(ConstCiphertext<DCRTPoly>& ciphertext, uint32_t index,
-                                             const std::shared_ptr<std::vector<DCRTPoly>> digits, bool addFirst,
-                                             const std::map<uint32_t, EvalKey<DCRTPoly>>& evalKeys) const override;
+    Ciphertext<RnsPoly> eval_fast_rotation_ext(ConstCiphertext<RnsPoly>& ciphertext, uint32_t index,
+                                             const std::shared_ptr<std::vector<RnsPoly>> digits, bool add_first,
+                                             const std::map<uint32_t, EvalKey<RnsPoly>>& eval_keys) const override;
 
     /**
      * Finds the automorphism index of a CKKS slot rotation (5^index mod m, with the sign convention of the complex
@@ -253,7 +253,7 @@ class LeveledSHECKKSRNS : public LeveledSHERNS {
      * @param m the cyclotomic order
      * @return the automorphism index
      */
-    uint32_t FindAutomorphismIndex(uint32_t index, uint32_t m) const override;
+    uint32_t find_automorphism_index(uint32_t index, uint32_t m) const override;
 
     /////////////////////////////////////
     // Mod Reduce
@@ -266,7 +266,7 @@ class LeveledSHECKKSRNS : public LeveledSHERNS {
      * @param levels the number of towers to drop.
      * @details \p ciphertext will have modulus reduction performed in-place.
      */
-    void ModReduceInternalInPlace(Ciphertext<DCRTPoly>& ciphertext, size_t levels) const override;
+    void mod_reduce_internal_in_place(Ciphertext<RnsPoly>& ciphertext, size_t levels) const override;
 
     /////////////////////////////////////
     // Level Reduce
@@ -280,7 +280,7 @@ class LeveledSHECKKSRNS : public LeveledSHERNS {
      * @param ciphertext is the ciphertext to be level reduced in-place
      * @param levels the number of towers to drop.
      */
-    void LevelReduceInternalInPlace(Ciphertext<DCRTPoly>& ciphertext, size_t levels) const override;
+    void level_reduce_internal_in_place(Ciphertext<RnsPoly>& ciphertext, size_t levels) const override;
 
     /////////////////////////////////////
     // Compress
@@ -291,7 +291,7 @@ class LeveledSHECKKSRNS : public LeveledSHERNS {
     /////////////////////////////////////
 
     /**
-     * Core of the multiplication by a real constant, without the preliminary rescaling of EvalMultInPlace:
+     * Core of the multiplication by a real constant, without the preliminary rescaling of eval_mult_in_place:
      * multiplies the ciphertext elements by the constant encoded at the scaling factor of the current level,
      * increases the noise scale degree by one and multiplies the scaling factor of the ciphertext by that of the
      * level.
@@ -299,7 +299,7 @@ class LeveledSHECKKSRNS : public LeveledSHERNS {
      * @param ciphertext the input ciphertext, replaced by the product
      * @param operand the constant to multiply by
      */
-    void EvalMultCoreInPlace(Ciphertext<DCRTPoly>& ciphertext, double operand) const;
+    void eval_mult_core_in_place(Ciphertext<RnsPoly>& ciphertext, double operand) const;
 
     /**
      * Core of the multiplication by a complex constant (see the real overload).
@@ -307,7 +307,7 @@ class LeveledSHECKKSRNS : public LeveledSHERNS {
      * @param ciphertext the input ciphertext, replaced by the product
      * @param operand the constant to multiply by
      */
-    void EvalMultCoreInPlace(Ciphertext<DCRTPoly>& ciphertext, std::complex<double> operand) const;
+    void eval_mult_core_in_place(Ciphertext<RnsPoly>& ciphertext, std::complex<double> operand) const;
 
     /**
      * Brings two ciphertexts to the same level and noise scale degree before a binary operation. For FIXEDMANUAL
@@ -319,18 +319,18 @@ class LeveledSHECKKSRNS : public LeveledSHERNS {
      * @param ciphertext1 the first ciphertext (modified in place)
      * @param ciphertext2 the second ciphertext (modified in place)
      */
-    void AdjustLevelsAndDepthInPlace(Ciphertext<DCRTPoly>& ciphertext1,
-                                     Ciphertext<DCRTPoly>& ciphertext2) const override;
+    void adjust_levels_and_depth_in_place(Ciphertext<RnsPoly>& ciphertext1,
+                                     Ciphertext<RnsPoly>& ciphertext2) const override;
 
     /**
-     * Same as AdjustLevelsAndDepthInPlace, followed by a rescaling of both ciphertexts to noise scale degree 1 if
+     * Same as adjust_levels_and_depth_in_place, followed by a rescaling of both ciphertexts to noise scale degree 1 if
      * they ended up at degree 2.
      *
      * @param ciphertext1 the first ciphertext (modified in place)
      * @param ciphertext2 the second ciphertext (modified in place)
      */
-    void AdjustLevelsAndDepthToOneInPlace(Ciphertext<DCRTPoly>& ciphertext1,
-                                          Ciphertext<DCRTPoly>& ciphertext2) const override;
+    void adjust_levels_and_depth_to_one_in_place(Ciphertext<RnsPoly>& ciphertext1,
+                                          Ciphertext<RnsPoly>& ciphertext2) const override;
 
     /**
      * Encodes a non-negative real constant for addition to or subtraction from a ciphertext: the constant is scaled
@@ -341,7 +341,7 @@ class LeveledSHECKKSRNS : public LeveledSHERNS {
      * @param operand the constant
      * @return the CRT representation of the scaled constant, one residue per tower
      */
-    std::vector<DCRTPoly::Integer> GetElementForEvalAddOrSub(ConstCiphertext<DCRTPoly>& ciphertext,
+    std::vector<RnsPoly::Integer> get_element_for_eval_add_or_sub(ConstCiphertext<RnsPoly>& ciphertext,
                                                              double operand) const;
 
     /**
@@ -353,7 +353,7 @@ class LeveledSHECKKSRNS : public LeveledSHERNS {
      * @param operand the constant
      * @return the CRT representation of the scaled constant, one residue per tower
      */
-    std::vector<DCRTPoly::Integer> GetElementForEvalMult(ConstCiphertext<DCRTPoly>& ciphertext, double operand) const;
+    std::vector<RnsPoly::Integer> get_element_for_eval_mult(ConstCiphertext<RnsPoly>& ciphertext, double operand) const;
 
     /////////////////////////////////////
     // SERIALIZATION
@@ -361,19 +361,19 @@ class LeveledSHECKKSRNS : public LeveledSHERNS {
 
     template <class Archive>
     void save(Archive& ar) const {
-        ar(cereal::base_class<LeveledSHERNS>(this));
+        ar(cereal::base_class<RnsLeveledShe>(this));
     }
 
     template <class Archive>
     void load(Archive& ar) {
-        ar(cereal::base_class<LeveledSHERNS>(this));
+        ar(cereal::base_class<RnsLeveledShe>(this));
     }
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "LeveledSHECKKSRNS";
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_CKKS_LEVELED_SHE_H_

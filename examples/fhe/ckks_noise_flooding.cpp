@@ -56,62 +56,62 @@
 
 #include "cipher/cipher.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 // Demo function for NOISE_FLOODING_DECRYPT mode in CKKS
-void CKKSNoiseFloodingDemo();
+void ckks_noise_flooding_demo();
 
 /**
  * We recommend putting part of the CryptoContext inside a function because
  * you must make sure all parameters are the same, except EXECUTION_MODE and NOISE_ESTIMATE.
  *
- * @param cryptoParams Crypto parameters that already have their execution mode set (and noise estimate, if in EXEC_EVALUATION mode).
- * @return the cryptoContext.
+ * @param crypto_params Crypto parameters that already have their execution mode set (and noise estimate, if in EXEC_EVALUATION mode).
+ * @return the crypto_context.
  */
-CryptoContext<DCRTPoly> GetCryptoContext(CCParams<CryptoContextCKKSRNS>& cryptoParams);
+CryptoContext<RnsPoly> get_crypto_context(ContextParams<CkksRnsContext>& crypto_params);
 
 /**
  * We recommend putting the encrypted computation you wish to perform inside a function because
  * you have to perform it twice. In this example, we perform two multiplications and an addition.
  *
- * @param cryptoContext Crypto context.
- * @param publicKey Public key for encryption.
+ * @param crypto_context Crypto context.
+ * @param public_key Public key for encryption.
  * @return the ciphertext result. The first iteration will return a ciphertext that contains a noise measurement.
  * The second iteration will return the actual encrypted computation.
  */
-Ciphertext<DCRTPoly> EncryptedComputation(CryptoContext<DCRTPoly>& cryptoContext, PublicKey<DCRTPoly> publicKey);
+Ciphertext<RnsPoly> encrypted_computation(CryptoContext<RnsPoly>& crypto_context, PublicKey<RnsPoly> public_key);
 
 int main(int argc, char* argv[]) {
-    CKKSNoiseFloodingDemo();
+    ckks_noise_flooding_demo();
     return 0;
 }
 
-void CKKSNoiseFloodingDemo() {
+void ckks_noise_flooding_demo() {
     // ----------------------- Setup first CryptoContext -----------------------------
     // Phase 1 will be for noise estimation.
     // -------------------------------------------------------------------------------
     std::cout << "---------------------------------- PHASE 1: NOISE ESTIMATION ----------------------------------"
               << std::endl;
-    CCParams<CryptoContextCKKSRNS> parametersNoiseEstimation;
+    ContextParams<CkksRnsContext> parameters_noise_estimation;
     // EXEC_NOISE_ESTIMATION indicates that the resulting plaintext will estimate the amount of noise in the computation.
-    parametersNoiseEstimation.SetExecutionMode(EXEC_NOISE_ESTIMATION);
+    parameters_noise_estimation.set_execution_mode(EXEC_NOISE_ESTIMATION);
 
-    auto cryptoContextNoiseEstimation = GetCryptoContext(parametersNoiseEstimation);
+    auto crypto_context_noise_estimation = get_crypto_context(parameters_noise_estimation);
 
-    uint32_t ringDim = cryptoContextNoiseEstimation->GetRingDimension();
-    std::cout << "CKKS scheme is using ring dimension " << ringDim << std::endl << std::endl;
+    uint32_t ring_dim = crypto_context_noise_estimation->get_ring_dimension();
+    std::cout << "CKKS scheme is using ring dimension " << ring_dim << std::endl << std::endl;
 
     // Key Generation
-    auto keyPairNoiseEstimation = cryptoContextNoiseEstimation->KeyGen();
-    cryptoContextNoiseEstimation->EvalMultKeyGen(keyPairNoiseEstimation.secretKey);
+    auto key_pair_noise_estimation = crypto_context_noise_estimation->key_gen();
+    crypto_context_noise_estimation->eval_mult_key_gen(key_pair_noise_estimation.secret_key);
 
     // We run the encrypted computation the first time.
-    auto noiseCiphertext = EncryptedComputation(cryptoContextNoiseEstimation, keyPairNoiseEstimation.publicKey);
+    auto noise_ciphertext = encrypted_computation(crypto_context_noise_estimation, key_pair_noise_estimation.public_key);
 
     // Decrypt  noise
-    Plaintext noisePlaintext;
-    cryptoContextNoiseEstimation->Decrypt(keyPairNoiseEstimation.secretKey, noiseCiphertext, &noisePlaintext);
-    double noise = noisePlaintext->GetLogError();
+    Plaintext noise_plaintext;
+    crypto_context_noise_estimation->decrypt(key_pair_noise_estimation.secret_key, noise_ciphertext, &noise_plaintext);
+    double noise = noise_plaintext->get_log_error();
     std::cout << "Noise \n\t" << noise << std::endl;
 
     // ----------------------- Setup second CryptoContext -----------------------------
@@ -121,94 +121,94 @@ void CKKSNoiseFloodingDemo() {
     // -------------------------------------------------------------------------------
     std::cout << "---------------------------------- PHASE 2: EVALUATION ----------------------------------"
               << std::endl;
-    CCParams<CryptoContextCKKSRNS> parametersEvaluation;
+    ContextParams<CkksRnsContext> parameters_evaluation;
     // EXEC_EVALUATION indicates that we are in phase 2 of computation, and wil5 obtain the actual result.
-    parametersEvaluation.SetExecutionMode(EXEC_EVALUATION);
+    parameters_evaluation.set_execution_mode(EXEC_EVALUATION);
     // Here, we set the noise of our previous computation
-    parametersEvaluation.SetNoiseEstimate(noise);
+    parameters_evaluation.set_noise_estimate(noise);
 
     // We can set our desired precision for 128-bit CKKS only. For NATIVE_SIZE=64, we ignore this parameter.
-    parametersEvaluation.SetDesiredPrecision(25);
+    parameters_evaluation.set_desired_precision(25);
 
     // We can set the statistical security and number of adversarial queries, but we can also
     // leave these lines out, as we are setting them to the default values here.
-    parametersEvaluation.SetStatisticalSecurity(30);
-    parametersEvaluation.SetNumAdversarialQueries(1);
+    parameters_evaluation.set_statistical_security(30);
+    parameters_evaluation.set_num_adversarial_queries(1);
 
     // The remaining parameters must be the same as the first CryptoContext. Note that we can choose to run the
-    // first computation with NATIVEINT = 64 to estimate noise, and the second computation with NATIVEINT = 128,
+    // first computation with CIPHER_NATIVE_INT = 64 to estimate noise, and the second computation with CIPHER_NATIVE_INT = 128,
     // or vice versa, if we wish.
-    auto cryptoContextEvaluation = GetCryptoContext(parametersEvaluation);
+    auto crypto_context_evaluation = get_crypto_context(parameters_evaluation);
 
     // IMPORTANT: Generate new keys
-    auto keyPairEvaluation = cryptoContextEvaluation->KeyGen();
-    cryptoContextEvaluation->EvalMultKeyGen(keyPairEvaluation.secretKey);
+    auto key_pair_evaluation = crypto_context_evaluation->key_gen();
+    crypto_context_evaluation->eval_mult_key_gen(key_pair_evaluation.secret_key);
 
     // We run the encrypted computation the second time.
-    auto ciphertextResult = EncryptedComputation(cryptoContextEvaluation, keyPairEvaluation.publicKey);
+    auto ciphertext_result = encrypted_computation(crypto_context_evaluation, key_pair_evaluation.public_key);
 
     // Decrypt final result
     Plaintext result;
-    cryptoContextEvaluation->Decrypt(keyPairEvaluation.secretKey, ciphertextResult, &result);
-    size_t vecSize = 8;
-    result->SetLength(vecSize);
-    std::cout << "Final output \n\t" << result->GetCKKSPackedValue() << std::endl;
+    crypto_context_evaluation->decrypt(key_pair_evaluation.secret_key, ciphertext_result, &result);
+    size_t vec_size = 8;
+    result->set_length(vec_size);
+    std::cout << "Final output \n\t" << result->get_ckks_packed_value() << std::endl;
 
-    std::vector<std::complex<double>> expectedResult = {1.01, 1.04, 0, 0, 1.25, 0, 0, 1.64};
-    std::cout << "Expected result\n\t " << expectedResult << std::endl;
+    std::vector<std::complex<double>> expected_result = {1.01, 1.04, 0, 0, 1.25, 0, 0, 1.64};
+    std::cout << "Expected result\n\t " << expected_result << std::endl;
 }
 
-CryptoContext<DCRTPoly> GetCryptoContext(CCParams<CryptoContextCKKSRNS>& parameters) {
+CryptoContext<RnsPoly> get_crypto_context(ContextParams<CkksRnsContext>& parameters) {
     // This demo is to illustrate how to use the security mode NOISE_FLOODING_DECRYPT to achieve enhanced security.
-    parameters.SetDecryptionNoiseMode(NOISE_FLOODING_DECRYPT);
+    parameters.set_decryption_noise_mode(NOISE_FLOODING_DECRYPT);
 
     // Specify main parameters
-    parameters.SetSecretKeyDist(UNIFORM_TERNARY);
+    parameters.set_secret_key_dist(UNIFORM_TERNARY);
 
     /* Desired security level based on FHE standards. Note that this is different than NoiseDecryptionMode,
      * which also gives us enhanced security in CKKS when using NOISE_FLOODING_DECRYPT.
      * We must always use the same ring dimension in both iterations, so we set the security level to HEStd_NotSet,
      * and manually set the ring dimension.
      */
-    parameters.SetSecurityLevel(HEStd_NotSet);
-    parameters.SetRingDim(1 << 16);
+    parameters.set_security_level(HEStd_NotSet);
+    parameters.set_ring_dim(1 << 16);
 
-    ScalingTechnique rescaleTech = FIXEDAUTO;
-    uint32_t dcrtBits = 59;
-    uint32_t firstMod = 60;
+    ScalingTechnique rescale_tech = FIXEDAUTO;
+    uint32_t dcrt_bits = 59;
+    uint32_t first_mod = 60;
 
-    parameters.SetScalingTechnique(rescaleTech);
-    parameters.SetScalingModSize(dcrtBits);
-    parameters.SetFirstModSize(firstMod);
+    parameters.set_scaling_technique(rescale_tech);
+    parameters.set_scaling_mod_size(dcrt_bits);
+    parameters.set_first_mod_size(first_mod);
 
     // In this example, we perform two multiplications and an addition.
-    parameters.SetMultiplicativeDepth(2);
+    parameters.set_multiplicative_depth(2);
 
     // Generate crypto context.
-    CryptoContext<DCRTPoly> cryptoContext = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> crypto_context = make_crypto_context(parameters);
 
     // Enable features that you wish to use.
-    cryptoContext->Enable(PKE);
-    cryptoContext->Enable(LEVELEDSHE);
+    crypto_context->enable(PKE);
+    crypto_context->enable(LEVELEDSHE);
 
-    return cryptoContext;
+    return crypto_context;
 }
 
-Ciphertext<DCRTPoly> EncryptedComputation(CryptoContext<DCRTPoly>& cryptoContext, PublicKey<DCRTPoly> publicKey) {
+Ciphertext<RnsPoly> encrypted_computation(CryptoContext<RnsPoly>& crypto_context, PublicKey<RnsPoly> public_key) {
     // Encoding and encryption of inputs
     // Generate random input
     std::vector<double> vec1 = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8};
     std::vector<double> vec2 = {1, 1, 0, 0, 1, 0, 0, 1};
 
     // Encoding as plaintexts and encrypt
-    Plaintext ptxt1 = cryptoContext->MakeCKKSPackedPlaintext(vec1);
-    Plaintext ptxt2 = cryptoContext->MakeCKKSPackedPlaintext(vec2);
-    Ciphertext<DCRTPoly> ciph1 = cryptoContext->Encrypt(publicKey, ptxt1);
-    Ciphertext<DCRTPoly> ciph2 = cryptoContext->Encrypt(publicKey, ptxt2);
+    Plaintext ptxt1 = crypto_context->make_ckks_packed_plaintext(vec1);
+    Plaintext ptxt2 = crypto_context->make_ckks_packed_plaintext(vec2);
+    Ciphertext<RnsPoly> ciph1 = crypto_context->encrypt(public_key, ptxt1);
+    Ciphertext<RnsPoly> ciph2 = crypto_context->encrypt(public_key, ptxt2);
 
-    Ciphertext<DCRTPoly> ciphMult = cryptoContext->EvalMult(ciph1, ciph2);
-    Ciphertext<DCRTPoly> ciphMult2 = cryptoContext->EvalMult(ciphMult, ciph1);
-    Ciphertext<DCRTPoly> ciphResult = cryptoContext->EvalAdd(ciphMult2, ciph2);
+    Ciphertext<RnsPoly> ciph_mult = crypto_context->eval_mult(ciph1, ciph2);
+    Ciphertext<RnsPoly> ciph_mult2 = crypto_context->eval_mult(ciph_mult, ciph1);
+    Ciphertext<RnsPoly> ciph_result = crypto_context->eval_add(ciph_mult2, ciph2);
 
-    return ciphResult;
+    return ciph_result;
 }

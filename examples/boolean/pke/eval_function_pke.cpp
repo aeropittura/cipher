@@ -37,29 +37,29 @@
 
 #include "cipher/boolean/context.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 int main() {
     // Sample Program: Step 1: Set CryptoContext
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(STD128, true, 12);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(STD128, true, 12);
 
     // Sample Program: Step 2: Key Generation
 
     // Generate the secret key
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
     std::cout << "Generating the bootstrapping keys..." << std::endl;
 
     // Generate the bootstrapping keys (refresh, switching and public keys)
-    cc.BTKeyGen(sk, PUB_ENCRYPT);
+    cc.bt_key_gen(sk, PUB_ENCRYPT);
 
-    auto pk = cc.GetPublicKey();
+    auto pk = cc.get_public_key();
 
     std::cout << "Completed the key generation." << std::endl;
 
     // Sample Program: Step 3: Create the to-be-evaluated funciton and obtain its corresponding LUT
-    int p = cc.GetMaxPlaintextSpace().ConvertToInt();  // Obtain the maximum plaintext space
+    int p = cc.get_max_plaintext_space().convert_to_int();  // Obtain the maximum plaintext space
 
     // Initialize Function f(x) = x^3 % p
     auto fp = [](NativeInteger m, NativeInteger p1) -> NativeInteger {
@@ -70,19 +70,19 @@ int main() {
     };
 
     // Generate LUT from function f(x)
-    auto lut = cc.GenerateLUTviaFunction(fp, p);
+    auto lut = cc.generate_lut_via_function(fp, p);
     std::cout << "Evaluate x^3%" << p << "." << std::endl;
 
     // Sample Program: Step 4: evalute f(x) homomorphically and decrypt
     // Note that we check for all the possible plaintexts.
     for (int i = 0; i < p; i++) {
-        auto ct1 = cc.Encrypt(pk, i % p, SMALL_DIM, p);
+        auto ct1 = cc.encrypt(pk, i % p, SMALL_DIM, p);
 
-        auto ct_cube = cc.EvalFunc(ct1, lut);
+        auto ct_cube = cc.eval_func(ct1, lut);
 
-        LWEPlaintext result;
+        LwePlaintext result;
 
-        cc.Decrypt(sk, ct_cube, &result, p);
+        cc.decrypt(sk, ct_cube, &result, p);
 
         std::cout << "Input: " << i << ". Expected: " << fp(i, p) << ". Evaluated = " << result << std::endl;
     }

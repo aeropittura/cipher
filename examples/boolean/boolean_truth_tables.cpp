@@ -37,11 +37,11 @@
 
 #include "cipher/boolean/context.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 int main() {
     // Sample Program: Step 1: Set CryptoContext
-    auto cc = BinFHEContext();
+    auto cc = BooleanContext();
 
     std::cerr << "Generate cryptocontext" << std::endl;
 
@@ -49,19 +49,19 @@ int main() {
     // and HE standard. Other options are TOY, MEDIUM, STD192, and STD256. MEDIUM
     // corresponds to the level of more than 100 bits for both quantum and
     // classical computer attacks.
-    cc.GenerateBinFHEContext(STD128);
+    cc.generate_boolean_context(STD128);
 
     std::cerr << "Finished generating cryptocontext" << std::endl;
 
     // Sample Program: Step 2: Key Generation
 
     // Generate the secret key
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
     std::cout << "Generating the bootstrapping keys..." << std::endl;
 
     // Generate the bootstrapping keys (refresh and switching keys)
-    cc.BTKeyGen(sk);
+    cc.bt_key_gen(sk);
 
     std::cout << "Completed the key generation."
               << "\n"
@@ -70,126 +70,126 @@ int main() {
     // Sample Program: Step 3: Encryption
 
     // Encrypt two ciphertexts representing Boolean True (1)
-    auto ct10 = cc.Encrypt(sk, 1);
-    auto ct11 = cc.Encrypt(sk, 1);
+    auto ct10 = cc.encrypt(sk, 1);
+    auto ct11 = cc.encrypt(sk, 1);
     // Encrypt two ciphertexts representing Boolean False (0)
-    auto ct00 = cc.Encrypt(sk, 0);
-    auto ct01 = cc.Encrypt(sk, 0);
+    auto ct00 = cc.encrypt(sk, 0);
+    auto ct01 = cc.encrypt(sk, 0);
 
     // Sample Program: Step 4: Evaluation of NAND gates
 
-    auto ctNAND1 = cc.EvalBinGate(NAND, ct10, ct11);
-    auto ctNAND2 = cc.EvalBinGate(NAND, ct10, ct01);
-    auto ctNAND3 = cc.EvalBinGate(NAND, ct00, ct01);
-    auto ctNAND4 = cc.EvalBinGate(NAND, ct00, ct11);
+    auto ct_nand1 = cc.eval_bin_gate(NAND, ct10, ct11);
+    auto ct_nand2 = cc.eval_bin_gate(NAND, ct10, ct01);
+    auto ct_nand3 = cc.eval_bin_gate(NAND, ct00, ct01);
+    auto ct_nand4 = cc.eval_bin_gate(NAND, ct00, ct11);
 
-    LWEPlaintext result;
+    LwePlaintext result;
 
-    cc.Decrypt(sk, ctNAND1, &result);
+    cc.decrypt(sk, ct_nand1, &result);
     std::cout << "1 NAND 1 = " << result << std::endl;
 
-    cc.Decrypt(sk, ctNAND2, &result);
+    cc.decrypt(sk, ct_nand2, &result);
     std::cout << "1 NAND 0 = " << result << std::endl;
 
-    cc.Decrypt(sk, ctNAND3, &result);
+    cc.decrypt(sk, ct_nand3, &result);
     std::cout << "0 NAND 0 = " << result << std::endl;
 
-    cc.Decrypt(sk, ctNAND4, &result);
+    cc.decrypt(sk, ct_nand4, &result);
     std::cout << "0 NAND 1 = " << result << "\n" << std::endl;
 
     // Sample Program: Step 5: Evaluation of AND gates
 
-    auto ctAND1 = cc.EvalBinGate(AND, ct10, ct11);
-    auto ctAND2 = cc.EvalBinGate(AND, ct10, ct01);
-    auto ctAND3 = cc.EvalBinGate(AND, ct00, ct01);
-    auto ctAND4 = cc.EvalBinGate(AND, ct00, ct11);
+    auto ct_and1 = cc.eval_bin_gate(AND, ct10, ct11);
+    auto ct_and2 = cc.eval_bin_gate(AND, ct10, ct01);
+    auto ct_and3 = cc.eval_bin_gate(AND, ct00, ct01);
+    auto ct_and4 = cc.eval_bin_gate(AND, ct00, ct11);
 
-    cc.Decrypt(sk, ctAND1, &result);
+    cc.decrypt(sk, ct_and1, &result);
     std::cout << "1 AND 1 = " << result << std::endl;
 
-    cc.Decrypt(sk, ctAND2, &result);
+    cc.decrypt(sk, ct_and2, &result);
     std::cout << "1 AND 0 = " << result << std::endl;
 
-    cc.Decrypt(sk, ctAND3, &result);
+    cc.decrypt(sk, ct_and3, &result);
     std::cout << "0 AND 0 = " << result << std::endl;
 
-    cc.Decrypt(sk, ctAND4, &result);
+    cc.decrypt(sk, ct_and4, &result);
     std::cout << "0 AND 1 = " << result << "\n" << std::endl;
 
     // Sample Program: Step 6: Evaluation of OR gates
 
-    auto ctOR1 = cc.EvalBinGate(OR, ct10, ct11);
-    auto ctOR2 = cc.EvalBinGate(OR, ct10, ct01);
-    auto ctOR3 = cc.EvalBinGate(OR, ct00, ct01);
-    auto ctOR4 = cc.EvalBinGate(OR, ct00, ct11);
+    auto ct_or1 = cc.eval_bin_gate(OR, ct10, ct11);
+    auto ct_or2 = cc.eval_bin_gate(OR, ct10, ct01);
+    auto ct_or3 = cc.eval_bin_gate(OR, ct00, ct01);
+    auto ct_or4 = cc.eval_bin_gate(OR, ct00, ct11);
 
-    cc.Decrypt(sk, ctOR1, &result);
+    cc.decrypt(sk, ct_or1, &result);
     std::cout << "1 OR 1 = " << result << std::endl;
 
-    cc.Decrypt(sk, ctOR2, &result);
+    cc.decrypt(sk, ct_or2, &result);
     std::cout << "1 OR 0 = " << result << std::endl;
 
-    cc.Decrypt(sk, ctOR3, &result);
+    cc.decrypt(sk, ct_or3, &result);
     std::cout << "0 OR 0 = " << result << std::endl;
 
-    cc.Decrypt(sk, ctOR4, &result);
+    cc.decrypt(sk, ct_or4, &result);
     std::cout << "0 OR 1 = " << result << "\n" << std::endl;
 
     // Sample Program: Step 7: Evaluation of NOR gates
 
-    auto ctNOR1 = cc.EvalBinGate(NOR, ct10, ct11);
-    auto ctNOR2 = cc.EvalBinGate(NOR, ct10, ct01);
-    auto ctNOR3 = cc.EvalBinGate(NOR, ct00, ct01);
-    auto ctNOR4 = cc.EvalBinGate(NOR, ct00, ct11);
+    auto ct_nor1 = cc.eval_bin_gate(NOR, ct10, ct11);
+    auto ct_nor2 = cc.eval_bin_gate(NOR, ct10, ct01);
+    auto ct_nor3 = cc.eval_bin_gate(NOR, ct00, ct01);
+    auto ct_nor4 = cc.eval_bin_gate(NOR, ct00, ct11);
 
-    cc.Decrypt(sk, ctNOR1, &result);
+    cc.decrypt(sk, ct_nor1, &result);
     std::cout << "1 NOR 1 = " << result << std::endl;
 
-    cc.Decrypt(sk, ctNOR2, &result);
+    cc.decrypt(sk, ct_nor2, &result);
     std::cout << "1 NOR 0 = " << result << std::endl;
 
-    cc.Decrypt(sk, ctNOR3, &result);
+    cc.decrypt(sk, ct_nor3, &result);
     std::cout << "0 NOR 0 = " << result << std::endl;
 
-    cc.Decrypt(sk, ctNOR4, &result);
+    cc.decrypt(sk, ct_nor4, &result);
     std::cout << "0 NOR 1 = " << result << "\n" << std::endl;
 
     // Sample Program: Step 8: Evaluation of XOR gates
 
-    auto ctXOR1 = cc.EvalBinGate(XOR, ct10, ct11);
-    auto ctXOR2 = cc.EvalBinGate(XOR, ct10, ct01);
-    auto ctXOR3 = cc.EvalBinGate(XOR, ct00, ct01);
-    auto ctXOR4 = cc.EvalBinGate(XOR, ct00, ct11);
+    auto ct_xor1 = cc.eval_bin_gate(XOR, ct10, ct11);
+    auto ct_xor2 = cc.eval_bin_gate(XOR, ct10, ct01);
+    auto ct_xor3 = cc.eval_bin_gate(XOR, ct00, ct01);
+    auto ct_xor4 = cc.eval_bin_gate(XOR, ct00, ct11);
 
-    cc.Decrypt(sk, ctXOR1, &result);
+    cc.decrypt(sk, ct_xor1, &result);
     std::cout << "1 XOR 1 = " << result << std::endl;
 
-    cc.Decrypt(sk, ctXOR2, &result);
+    cc.decrypt(sk, ct_xor2, &result);
     std::cout << "1 XOR 0 = " << result << std::endl;
 
-    cc.Decrypt(sk, ctXOR3, &result);
+    cc.decrypt(sk, ct_xor3, &result);
     std::cout << "0 XOR 0 = " << result << std::endl;
 
-    cc.Decrypt(sk, ctXOR4, &result);
+    cc.decrypt(sk, ct_xor4, &result);
     std::cout << "0 XOR 1 = " << result << "\n" << std::endl;
 
     // Sample Program: Step 9: Evaluation of XNOR gates
 
-    auto ctXNOR1 = cc.EvalBinGate(XNOR, ct10, ct11);
-    auto ctXNOR2 = cc.EvalBinGate(XNOR, ct10, ct01);
-    auto ctXNOR3 = cc.EvalBinGate(XNOR, ct00, ct01);
-    auto ctXNOR4 = cc.EvalBinGate(XNOR, ct00, ct11);
+    auto ct_xnor1 = cc.eval_bin_gate(XNOR, ct10, ct11);
+    auto ct_xnor2 = cc.eval_bin_gate(XNOR, ct10, ct01);
+    auto ct_xnor3 = cc.eval_bin_gate(XNOR, ct00, ct01);
+    auto ct_xnor4 = cc.eval_bin_gate(XNOR, ct00, ct11);
 
-    cc.Decrypt(sk, ctXNOR1, &result);
+    cc.decrypt(sk, ct_xnor1, &result);
     std::cout << "1 XNOR 1 = " << result << std::endl;
 
-    cc.Decrypt(sk, ctXNOR2, &result);
+    cc.decrypt(sk, ct_xnor2, &result);
     std::cout << "1 XNOR 0 = " << result << std::endl;
 
-    cc.Decrypt(sk, ctXNOR3, &result);
+    cc.decrypt(sk, ct_xnor3, &result);
     std::cout << "0 XNOR 0 = " << result << std::endl;
 
-    cc.Decrypt(sk, ctXNOR4, &result);
+    cc.decrypt(sk, ct_xnor4, &result);
     std::cout << "0 XNOR 1 = " << result << "\n" << std::endl;
 
     return 0;

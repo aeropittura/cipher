@@ -57,7 +57,7 @@
 #include "cipher/fhe/ckks/ser.h"
 #include "fhe/support/scheme_switching_data.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 /////////////////////////////////////////////////////////////////
 // NOTE:
@@ -71,7 +71,7 @@ using namespace lbcrypto;
 const std::string DATAFOLDER = "data";
 
 // Save-load locations for evaluated ciphertext
-std::string cipherArgminLocation = "/ciphertextArgmin.txt";
+std::string cipher_argmin_location = "/ciphertextArgmin.txt";
 
 /**
  * Demarcate - Visual separator between the sections of code
@@ -85,87 +85,87 @@ void demarcate(const std::string& msg) {
 }
 
 /**
- * serverVerification
+ * server_verification
  *  - deserialize data from the client.
  *  - Verify that the results are as we expect
  * @param cc cryptocontext that was previously generated
  * @param kp keypair that was previously generated
- * @param vectorSize vector size of the vectors supplied
+ * @param vector_size vector size of the vectors supplied
  * @return
  *  5-tuple of the plaintexts of various operations
  */
 
-Plaintext serverVerification(CryptoContext<DCRTPoly>& cc, KeyPair<DCRTPoly>& kp, int vectorSize) {
-    Ciphertext<DCRTPoly> serverCiphertextFromClient_Argmin;
+Plaintext server_verification(CryptoContext<RnsPoly>& cc, KeyPair<RnsPoly>& kp, int vector_size) {
+    Ciphertext<RnsPoly> server_ciphertext_from_client_argmin;
 
-    Serial::DeserializeFromFile(DATAFOLDER + cipherArgminLocation, serverCiphertextFromClient_Argmin, SerType::BINARY);
+    serialization::deserialize_from_file(DATAFOLDER + cipher_argmin_location, server_ciphertext_from_client_argmin, SerType::BINARY);
     std::cout << "Deserialized all data from client on server" << '\n' << std::endl;
 
     demarcate("Part 5: Correctness verification");
 
-    Plaintext serverPlaintextFromClient_Argmin;
-    cc->Decrypt(kp.secretKey, serverCiphertextFromClient_Argmin, &serverPlaintextFromClient_Argmin);
+    Plaintext server_plaintext_from_client_argmin;
+    cc->decrypt(kp.secret_key, server_ciphertext_from_client_argmin, &server_plaintext_from_client_argmin);
 
-    serverPlaintextFromClient_Argmin->SetLength(vectorSize);
+    server_plaintext_from_client_argmin->set_length(vector_size);
 
-    return serverPlaintextFromClient_Argmin;
+    return server_plaintext_from_client_argmin;
 }
 
 /**
- * serverSetupAndWrite
+ * server_setup_and_write
  *  - simulates a server at startup where we generate a cryptocontext and keys.
  *  - then, we generate some data (akin to loading raw data on an enclave)
  * before encrypting the data
- * @param ringDim - ring dimension
- * @param batchSize - batch size to use
- * @param multDepth - multiplication depth
- * @param logQ_LWE - number of bits of the ciphertext modulus in FHEW
- * @param oneHot - flag to indicate one hot encoding of the result
- * @return Tuple<cryptoContext, keyPair>
+ * @param ring_dim - ring dimension
+ * @param batch_size - batch size to use
+ * @param mult_depth_value - multiplication depth
+ * @param log_q_lwe - number of bits of the ciphertext modulus in FHEW
+ * @param one_hot - flag to indicate one hot encoding of the result
+ * @return Tuple<crypto_context, key_pair>
  */
-std::tuple<CryptoContext<DCRTPoly>, KeyPair<DCRTPoly>, int> serverSetupAndWrite(uint32_t ringDim, uint32_t batchSize,
-                                                                                uint32_t multDepth,
-                                                                                uint32_t scaleModSize,
-                                                                                uint32_t firstModSize,
-                                                                                uint32_t logQ_LWE, bool oneHot) {
+std::tuple<CryptoContext<RnsPoly>, KeyPair<RnsPoly>, int> server_setup_and_write(uint32_t ring_dim, uint32_t batch_size,
+                                                                                uint32_t mult_depth_value,
+                                                                                uint32_t scale_mod_size,
+                                                                                uint32_t first_mod_size_value,
+                                                                                uint32_t log_q_lwe, bool one_hot) {
     SecurityLevel sl = HEStd_NotSet;
-    BINFHE_PARAMSET slBin = TOY;
+    BINFHE_PARAMSET sl_bin = TOY;
 
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(multDepth);
-    parameters.SetSecurityLevel(sl);
-    parameters.SetRingDim(ringDim);
-    parameters.SetBatchSize(batchSize);
-    parameters.SetScalingModSize(scaleModSize);
-    parameters.SetFirstModSize(firstModSize);
-    parameters.SetScalingTechnique(FLEXIBLEAUTO);
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_multiplicative_depth(mult_depth_value);
+    parameters.set_security_level(sl);
+    parameters.set_ring_dim(ring_dim);
+    parameters.set_batch_size(batch_size);
+    parameters.set_scaling_mod_size(scale_mod_size);
+    parameters.set_first_mod_size(first_mod_size_value);
+    parameters.set_scaling_technique(FLEXIBLEAUTO);
 
-    CryptoContext<DCRTPoly> serverCC = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> server_cc = make_crypto_context(parameters);
 
     // Enable the features that you wish to use
-    serverCC->Enable(PKE);
-    serverCC->Enable(KEYSWITCH);
-    serverCC->Enable(LEVELEDSHE);
-    serverCC->Enable(ADVANCEDSHE);
-    serverCC->Enable(FHE);
-    serverCC->Enable(SCHEMESWITCH);
+    server_cc->enable(PKE);
+    server_cc->enable(KEYSWITCH);
+    server_cc->enable(LEVELEDSHE);
+    server_cc->enable(ADVANCEDSHE);
+    server_cc->enable(FHE);
+    server_cc->enable(SCHEMESWITCH);
 
     std::cout << "Cryptocontext generated" << std::endl;
 
-    KeyPair<DCRTPoly> serverKP = serverCC->KeyGen();
+    KeyPair<RnsPoly> server_kp = server_cc->key_gen();
     std::cout << "Keypair generated" << std::endl;
 
     SchSwchParams params;
-    params.SetSecurityLevelCKKS(sl);
-    params.SetSecurityLevelFHEW(slBin);
-    params.SetCtxtModSizeFHEWLargePrec(logQ_LWE);
-    params.SetNumSlotsCKKS(batchSize);
-    params.SetNumValues(batchSize);
-    params.SetComputeArgmin(true);
-    params.SetOneHotEncoding(oneHot);
-    auto privateKeyFHEW = serverCC->EvalSchemeSwitchingSetup(params);
+    params.set_security_level_ckks(sl);
+    params.set_security_level_fhew(sl_bin);
+    params.set_ctxt_mod_size_fhew_large_prec(log_q_lwe);
+    params.set_num_slots_ckks(batch_size);
+    params.set_num_values(batch_size);
+    params.set_compute_argmin(true);
+    params.set_one_hot_encoding(one_hot);
+    auto private_key_fhew = server_cc->eval_scheme_switching_setup(params);
 
-    serverCC->EvalSchemeSwitchingKeyGen(serverKP, privateKeyFHEW);
+    server_cc->eval_scheme_switching_key_gen(server_kp, private_key_fhew);
 
     std::vector<std::complex<double>> vec = {1.0, 2.0, 3.0, 4.0};
     std::cout << "\nDisplaying data vector: ";
@@ -176,13 +176,13 @@ std::tuple<CryptoContext<DCRTPoly>, KeyPair<DCRTPoly>, int> serverSetupAndWrite(
 
     std::cout << '\n' << std::endl;
 
-    Plaintext serverP = serverCC->MakeCKKSPackedPlaintext(vec);
+    Plaintext server_p = server_cc->make_ckks_packed_plaintext(vec);
 
-    std::cout << "Plaintext version of vector: " << serverP << std::endl;
+    std::cout << "Plaintext version of vector: " << server_p << std::endl;
 
     std::cout << "Plaintexts have been generated from complex-double vectors" << std::endl;
 
-    auto serverC = serverCC->Encrypt(serverKP.publicKey, serverP);
+    auto server_c = server_cc->encrypt(server_kp.public_key, server_p);
 
     std::cout << "Ciphertext have been generated from Plaintext" << std::endl;
 
@@ -202,45 +202,45 @@ std::tuple<CryptoContext<DCRTPoly>, KeyPair<DCRTPoly>, int> serverSetupAndWrite(
 
     demarcate("Scheme Switching Part 2: Data Serialization (server)");
 
-    SchemeSwitchingDataSerializer serializer(serverCC, serverKP.publicKey, serverC);
-    serializer.Serialize();
+    SchemeSwitchingDataSerializer serializer(server_cc, server_kp.public_key, server_c);
+    serializer.to_stream();
 
-    return std::make_tuple(serverCC, serverKP, vec.size());
+    return std::make_tuple(server_cc, server_kp, vec.size());
 }
 
 /**
- * clientProcess
+ * client_process
  *  - deserialize data from a file which simulates receiving data from a server
  * after making a request
  *  - we then process the data
  */
 
-void clientProcess(uint32_t modulus_LWE) {
-    CryptoContextImpl<DCRTPoly>::ClearEvalMultKeys();
-    CryptoContextImpl<DCRTPoly>::ClearEvalSumKeys();
-    CryptoContextImpl<DCRTPoly>::ClearEvalAutomorphismKeys();
-    CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+void client_process(uint32_t modulus_lwe) {
+    CryptoContextImpl<RnsPoly>::clear_eval_mult_keys();
+    CryptoContextImpl<RnsPoly>::clear_eval_sum_keys();
+    CryptoContextImpl<RnsPoly>::clear_eval_automorphism_keys();
+    ContextFactory<RnsPoly>::release_all_contexts();
 
     SchemeSwitchingDataDeserializer deserializer;
-    deserializer.Deserialize();
+    deserializer.from_stream();
 
-    CryptoContext<DCRTPoly> clientCC{deserializer.getCryptoContext()};
-    PublicKey<DCRTPoly> clientPublicKey{deserializer.getPublicKey()};
-    std::shared_ptr<lbcrypto::BinFHEContext> clientBinCC{clientCC->GetBinCCForSchemeSwitch()};
-    Ciphertext<DCRTPoly> clientC{deserializer.getRAWCiphertext()};
+    CryptoContext<RnsPoly> client_cc{deserializer.get_crypto_context_impl()};
+    PublicKey<RnsPoly> client_public_key{deserializer.get_public_key_impl()};
+    std::shared_ptr<cipher::BooleanContext> client_bin_cc{client_cc->get_bin_cc_for_scheme_switch()};
+    Ciphertext<RnsPoly> client_c{deserializer.get_raw_ciphertext()};
 
     // Scale the inputs to ensure their difference is correctly represented after switching to FHEW
-    double scaleSign = 512.0;
-    auto beta = clientBinCC->GetBeta().ConvertToInt();
-    auto pLWE = modulus_LWE / (2 * beta);  // Large precision
+    double scale_sign = 512.0;
+    auto beta = client_bin_cc->get_beta().convert_to_int();
+    auto p_lwe = modulus_lwe / (2 * beta);  // Large precision
 
-    clientCC->EvalCompareSwitchPrecompute(pLWE, scaleSign, false);
+    client_cc->eval_compare_switch_precompute(p_lwe, scale_sign, false);
 
     std::cout << "Done with precomputations" << '\n' << std::endl;
 
     // Compute on the ciphertext
-    auto clientCiphertextArgmin =
-            clientCC->EvalMinSchemeSwitching(clientC, clientPublicKey, clientC->GetSlots(), clientC->GetSlots(), 0, 1);
+    auto client_ciphertext_argmin =
+            client_cc->eval_min_scheme_switching(client_c, client_public_key, client_c->get_slots(), client_c->get_slots(), 0, 1);
 
     std::cout << "Done with argmin computation" << '\n' << std::endl;
 
@@ -248,7 +248,7 @@ void clientProcess(uint32_t modulus_LWE) {
     // decrypt. E.g weights of a machine learning algorithm
     demarcate("Part 3.5: Client Serialization of data that has been operated on");
 
-    Serial::SerializeToFile(DATAFOLDER + cipherArgminLocation, clientCiphertextArgmin[1], SerType::BINARY);
+    serialization::serialize_to_file(DATAFOLDER + cipher_argmin_location, client_ciphertext_argmin[1], SerType::BINARY);
 
     std::cout << "Serialized ciphertext from client" << '\n' << std::endl;
 }
@@ -258,38 +258,38 @@ int main() {
               << "an error writing serializations." << std::endl;
 
     // Set main params
-    uint32_t ringDim = 64;
-    uint32_t batchSize = 4;
-    uint32_t multDepth = 13 + static_cast<int>(std::log2(batchSize));
-    uint32_t logQ_ccLWE = 25;
-    bool oneHot = true;
-    uint32_t scaleModSize = 50;
-    uint32_t firstModSize = 60;
+    uint32_t ring_dim = 64;
+    uint32_t batch_size = 4;
+    uint32_t mult_depth_value = 13 + static_cast<int>(std::log2(batch_size));
+    uint32_t log_q_cc_lwe = 25;
+    bool one_hot = true;
+    uint32_t scale_mod_size = 50;
+    uint32_t first_mod_size_value = 60;
 
-    const int cryptoContextIdx = 0;
-    const int keyPairIdx = 1;
-    const int vectorSizeIdx = 2;
+    const int crypto_context_idx = 0;
+    const int key_pair_idx = 1;
+    const int vector_size_idx = 2;
 
     demarcate(
             "Scheme switching Part 1: Cryptocontext generation, key generation, data encryption "
             "(server)");
 
-    auto tupleCryptoContext_KeyPair =
-            serverSetupAndWrite(ringDim, batchSize, multDepth, scaleModSize, firstModSize, logQ_ccLWE, oneHot);
+    auto tuple_crypto_context_key_pair =
+            server_setup_and_write(ring_dim, batch_size, mult_depth_value, scale_mod_size, first_mod_size_value, log_q_cc_lwe, one_hot);
 
-    auto cc = std::get<cryptoContextIdx>(tupleCryptoContext_KeyPair);
-    auto kp = std::get<keyPairIdx>(tupleCryptoContext_KeyPair);
-    auto vectorSize = std::get<vectorSizeIdx>(tupleCryptoContext_KeyPair);
+    auto cc = std::get<crypto_context_idx>(tuple_crypto_context_key_pair);
+    auto kp = std::get<key_pair_idx>(tuple_crypto_context_key_pair);
+    auto vector_size = std::get<vector_size_idx>(tuple_crypto_context_key_pair);
 
     demarcate("Scheme switching Part 3: Client deserialize all data");
 
-    clientProcess(1 << logQ_ccLWE);
+    client_process(1 << log_q_cc_lwe);
 
     demarcate("Scheme switching Part 4: Server deserialization of data from client. ");
 
-    auto ArgminRes = serverVerification(cc, kp, vectorSize);
+    auto argmin_res = server_verification(cc, kp, vector_size);
 
     // vec1: {1,2,3,4}
 
-    std::cout << ArgminRes << std::endl;  // EXPECT: 1.0, 0.0, 0.0, 0.0
+    std::cout << argmin_res << std::endl;  // EXPECT: 1.0, 0.0, 0.0, 0.0
 }

@@ -49,18 +49,18 @@
 #include "cipher/util/serializable.h"
 #include "cipher/util/utilities.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-class RLWECiphertextImpl;
-using RLWECiphertext = std::shared_ptr<RLWECiphertextImpl>;
-using ConstRLWECiphertext = const std::shared_ptr<const RLWECiphertextImpl>;
+class RlweCiphertextImpl;
+using RlweCiphertext = std::shared_ptr<RlweCiphertextImpl>;
+using ConstRlweCiphertext = const std::shared_ptr<const RlweCiphertextImpl>;
 
 /**
  * @brief Class that stores an RLWE ciphertext; a vector of ring elements
  */
-class RLWECiphertextImpl : public Serializable {
+class RlweCiphertextImpl : public Serializable {
   public:
-    RLWECiphertextImpl() = default;
+    RlweCiphertextImpl() = default;
 
     /**
      * Constructs an RLWE ciphertext from its ring elements
@@ -68,7 +68,7 @@ class RLWECiphertextImpl : public Serializable {
      * @param elements the RLWE pair (a, b) as a vector of two ring elements, elements[0] = a and elements[1] = b,
      * where b = a * s + e + encoded message for the RLWE secret key s
      */
-    explicit RLWECiphertextImpl(const std::vector<NativePoly>& elements) : m_elements(elements) {}
+    explicit RlweCiphertextImpl(const std::vector<NativePoly>& elements) : elements_(elements) {}
 
     /**
      * Constructs an RLWE ciphertext from its ring elements, moving them
@@ -76,28 +76,28 @@ class RLWECiphertextImpl : public Serializable {
      * @param elements the RLWE pair (a, b) as a vector of two ring elements, elements[0] = a and elements[1] = b,
      * where b = a * s + e + encoded message for the RLWE secret key s
      */
-    explicit RLWECiphertextImpl(std::vector<NativePoly>&& elements) noexcept : m_elements(std::move(elements)) {}
+    explicit RlweCiphertextImpl(std::vector<NativePoly>&& elements) noexcept : elements_(std::move(elements)) {}
 
-    RLWECiphertextImpl(const RLWECiphertextImpl& rhs) : m_elements(rhs.m_elements) {}
+    RlweCiphertextImpl(const RlweCiphertextImpl& rhs) : elements_(rhs.elements_) {}
 
-    RLWECiphertextImpl(RLWECiphertextImpl&& rhs) noexcept : m_elements(std::move(rhs.m_elements)) {}
+    RlweCiphertextImpl(RlweCiphertextImpl&& rhs) noexcept : elements_(std::move(rhs.elements_)) {}
 
-    RLWECiphertextImpl& operator=(const RLWECiphertextImpl& rhs) {
-        m_elements = rhs.m_elements;
+    RlweCiphertextImpl& operator=(const RlweCiphertextImpl& rhs) {
+        elements_ = rhs.elements_;
         return *this;
     }
 
-    RLWECiphertextImpl& operator=(RLWECiphertextImpl&& rhs) noexcept {
-        m_elements = std::move(rhs.m_elements);
+    RlweCiphertextImpl& operator=(RlweCiphertextImpl&& rhs) noexcept {
+        elements_ = std::move(rhs.elements_);
         return *this;
     }
 
-    const std::vector<NativePoly>& GetElements() const {
-        return m_elements;
+    const std::vector<NativePoly>& get_elements() const {
+        return elements_;
     }
 
-    std::vector<NativePoly>& GetElements() {
-        return m_elements;
+    std::vector<NativePoly>& get_elements() {
+        return elements_;
     }
 
     /**
@@ -105,53 +105,53 @@ class RLWECiphertextImpl : public Serializable {
      *
      * @param format the representation to switch the ring elements to
      */
-    void SetFormat(const Format format) {
-        for (size_t i = 0; i < m_elements.size(); ++i)
-            m_elements[i].SetFormat(format);
+    void set_format(const Format format) {
+        for (size_t i = 0; i < elements_.size(); ++i)
+            elements_[i].set_format(format);
     }
 
     /**
      * @param other the RLWE ciphertext to compare with
      * @return true if both ciphertexts have equal ring elements
      */
-    bool operator==(const RLWECiphertextImpl& other) const {
-        return m_elements == other.m_elements;
+    bool operator==(const RlweCiphertextImpl& other) const {
+        return elements_ == other.elements_;
     }
 
     /**
      * @param other the RLWE ciphertext to compare with
      * @return true if the ring elements differ
      */
-    bool operator!=(const RLWECiphertextImpl& other) const {
+    bool operator!=(const RlweCiphertextImpl& other) const {
         return !(*this == other);
     }
 
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
-        ar(::cereal::make_nvp("elements", m_elements));
+        ar(::cereal::make_nvp("elements", elements_));
     }
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
-        ar(::cereal::make_nvp("elements", m_elements));
+        ar(::cereal::make_nvp("elements", elements_));
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "RLWECiphertext";
     }
 
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 
   private:
-    std::vector<NativePoly> m_elements;  ///< the ring elements (a, b) of the ciphertext
+    std::vector<NativePoly> elements_;  ///< the ring elements (a, b) of the ciphertext
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_BOOLEAN_RLWE_CIPHERTEXT_H_

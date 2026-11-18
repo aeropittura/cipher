@@ -51,14 +51,14 @@
 #include "cipher/core.h"
 #include "time.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 // define the main sections of the test
-void test_NTT(void);  // test code
+void test_ntt(void);  // test code
 
 // main()   need this for Kurts' makefile to ignore this.
 int main(int argc, char* argv[]) {
-    test_NTT();
+    test_ntt();
     return 0;
 }
 
@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
                 res = (fn);                                                                                 \
             }                                                                                               \
             time2 = TOC(t);                                                                                 \
-            OPENFHE_DEBUG(#t << ": " << nloop << " loops " << #res << " = " << #fn << " computation time: " \
+            CIPHER_DEBUG(#t << ": " << nloop << " loops " << #res << " = " << #fn << " computation time: " \
                              << "\t" << time2 << " us");                                                    \
             if (res != testval) {                                                                           \
                 std::cout << "Bad " << #res << " = " << #fn << std::endl;                                   \
@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
     } while (0);
 
 // helper function that bulds BigVector from a vector of strings
-BigVector BBVfromStrvec(std::vector<std::string>& s) {
+BigVector bbv_from_strvec(std::vector<std::string>& s) {
     BigVector a(s.size());
     for (uint32_t i = 0; i < s.size(); i++) {
         a[i] = s[i];
@@ -96,7 +96,7 @@ BigVector BBVfromStrvec(std::vector<std::string>& s) {
 
 // function to compare two BigVectors and print differing indicies
 void vec_diff(BigVector& a, BigVector& b) {
-    for (uint32_t i = 0; i < a.GetLength(); ++i) {
+    for (uint32_t i = 0; i < a.get_length(); ++i) {
         if (a.at(i) != b.at(i)) {
             std::cout << "i: " << i << std::endl;
             std::cout << "first vector " << std::endl;
@@ -122,7 +122,7 @@ bool clonetest(Poly& a, Poly& b, std::string name) {
 }
 
 // main NTT test suite.
-void test_NTT() {
+void test_ntt() {
     // Code to test NTT at three different numbers of limbs.
 
     int nloop = 100;  // number of times to run each test for timing.
@@ -137,7 +137,7 @@ void test_NTT() {
     double time2br, time2bf;
     double time3br, time3bf;
 
-    std::cout << "testing NTT backend " << MATHBACKEND << std::endl;
+    std::cout << "testing NTT backend " << CIPHER_MATH_BACKEND << std::endl;
 
     TIC(t_total);
     // there are three test cases, 1) small modulus 2) approx 48 bits.
@@ -154,8 +154,8 @@ void test_NTT() {
 
     // this fails too!!! BigVector a1(a1string);
     // so I wrote this function
-    BigVector a1 = BBVfromStrvec(a1strvec);
-    a1.SetModulus(q1);
+    BigVector a1 = bbv_from_strvec(a1strvec);
+    a1.set_modulus(q1);
 
     // b:
     std::vector<std::string> b1strvec = {
@@ -163,8 +163,8 @@ void test_NTT() {
             "135782", "030844", "088634", "099407", "053647", "111689", "028502", "026401",
     };
 
-    BigVector b1 = BBVfromStrvec(b1strvec);
-    b1.SetModulus(q1);
+    BigVector b1 = bbv_from_strvec(b1strvec);
+    b1.set_modulus(q1);
 
     // test case 2
     BigInteger q2("00004057816419532801");
@@ -176,8 +176,8 @@ void test_NTT() {
             "00000375749152798379", "00003933203511673255", "00002293434116159938", "00001201413067178193",
     };
 
-    BigVector a2 = BBVfromStrvec(a2strvec);
-    a2.SetModulus(q2);
+    BigVector a2 = bbv_from_strvec(a2strvec);
+    a2.set_modulus(q2);
 
     std::vector<std::string> b2strvec = {
             "00000698898215124963", "00000039832572186149", "00001835473200214782", "00001041547470449968",
@@ -186,8 +186,8 @@ void test_NTT() {
             "00003976652902630043", "00003238750424196678", "00002978742255253796", "00002124827461185795",
     };
 
-    BigVector b2 = BBVfromStrvec(b2strvec);
-    b2.SetModulus(q2);
+    BigVector b2 = bbv_from_strvec(b2strvec);
+    b2.set_modulus(q2);
 
     // test case 3
 
@@ -223,8 +223,8 @@ void test_NTT() {
             "047202030175469239142902723134737621108313142071558385068315554041062888"
             "072990"};
 
-    BigVector a3 = BBVfromStrvec(a3strvec);
-    a3.SetModulus(q3);
+    BigVector a3 = bbv_from_strvec(a3strvec);
+    a3.set_modulus(q3);
 
     std::vector<std::string> b3strvec = {
             "174640495219258626838115152142237214318214552597783670042038223724040064"
@@ -252,8 +252,8 @@ void test_NTT() {
             "690441206392939162889560305016204867157725209170345968349185675785497832"
             "527174"};
 
-    BigVector b3 = BBVfromStrvec(b3strvec);
-    b3.SetModulus(q3);
+    BigVector b3 = bbv_from_strvec(b3strvec);
+    b3.set_modulus(q3);
 
 #if 1
     uint32_t m = 32;
@@ -262,62 +262,62 @@ void test_NTT() {
 
     //  NextQ(modulus, BigInteger("2"), m1, BigInteger("4"), BigInteger("4"));
     #ifdef TEST1
-    BigInteger rootOfUnity1(RootOfUnity<BigInteger>(m, q1));
-    ILParams params1(m, q1, rootOfUnity1);
-    auto x1p = std::make_shared<ILParams>(params1);
+    BigInteger root_of_unity1(root_of_unity<BigInteger>(m, q1));
+    PolyParams params1(m, q1, root_of_unity1);
+    auto x1p = std::make_shared<PolyParams>(params1);
 
     Poly x1a(x1p, Format::COEFFICIENT);
-    // a1.SetModulus(modulus); //note setting modulus does not perform a modulus.
-    // a1.Mod(modulus);
-    x1a.SetValues(a1, Format::COEFFICIENT);
+    // a1.set_modulus(modulus); //note setting modulus does not perform a modulus.
+    // a1.mod(modulus);
+    x1a.set_values(a1, Format::COEFFICIENT);
 
     Poly x1b(x1p, Format::COEFFICIENT);
-    // b1.SetModulus(modulus);
-    // b1.Mod(modulus);
-    x1b.SetValues(b1, Format::COEFFICIENT);
+    // b1.set_modulus(modulus);
+    // b1.mod(modulus);
+    x1b.set_values(b1, Format::COEFFICIENT);
 
-    Poly x1aClone(x1a);
-    Poly x1bClone(x1b);
+    Poly x1a_clone(x1a);
+    Poly x1b_clone(x1b);
     #endif
     #ifdef TEST2
-    BigInteger rootOfUnity2(RootOfUnity<BigInteger>(m, q2));
-    ILParams params2(m, q2, rootOfUnity2);
-    auto x2p = std::make_shared<ILParams>(params2);
+    BigInteger root_of_unity2(root_of_unity<BigInteger>(m, q2));
+    PolyParams params2(m, q2, root_of_unity2);
+    auto x2p = std::make_shared<PolyParams>(params2);
 
     Poly x2a(x2p, Format::COEFFICIENT);
-    // a2.SetModulus(modulus); //note setting modulus does not perform a modulus.
-    // a2.Mod(modulus);
-    x2a.SetValues(a2, Format::COEFFICIENT);
+    // a2.set_modulus(modulus); //note setting modulus does not perform a modulus.
+    // a2.mod(modulus);
+    x2a.set_values(a2, Format::COEFFICIENT);
 
     Poly x2b(x2p, Format::COEFFICIENT);
-    // b2.SetModulus(modulus);
-    // b2.Mod(modulus);
-    x2b.SetValues(b2, Format::COEFFICIENT);
+    // b2.set_modulus(modulus);
+    // b2.mod(modulus);
+    x2b.set_values(b2, Format::COEFFICIENT);
 
-    Poly x2aClone(x2a);
-    Poly x2bClone(x2b);
+    Poly x2a_clone(x2a);
+    Poly x2b_clone(x2b);
     #endif
     #ifdef TEST3
     NextQ(q3, BigInteger("2"), m, BigInteger("4"), BigInteger("4"));
-    std::cout << "q3 : " << q3.ToString() << std::endl;
+    std::cout << "q3 : " << q3.to_string() << std::endl;
 
-    BigInteger rootOfUnity3(RootOfUnity<BigInteger>(m, q3));
-    std::cout << "rootOfUnity3 : " << rootOfUnity3.ToString() << std::endl;
-    ILParams params3(m, q3, rootOfUnity3);
-    auto x3p = std::make_shared<ILParams>(params3);
+    BigInteger root_of_unity3(root_of_unity<BigInteger>(m, q3));
+    std::cout << "rootOfUnity3 : " << root_of_unity3.to_string() << std::endl;
+    PolyParams params3(m, q3, root_of_unity3);
+    auto x3p = std::make_shared<PolyParams>(params3);
 
     Poly x3a(x3p, Format::COEFFICIENT);
-    // a3.SetModulus(modulus); //note setting modulus does not perform a modulus.
-    // a3.Mod(modulus);
-    x3a.SetValues(a3, Format::COEFFICIENT);
+    // a3.set_modulus(modulus); //note setting modulus does not perform a modulus.
+    // a3.mod(modulus);
+    x3a.set_values(a3, Format::COEFFICIENT);
 
     Poly x3b(x3p, Format::COEFFICIENT);
-    // b3.SetModulus(modulus);
-    // b3.Mod(modulus);
-    x3b.SetValues(b3, Format::COEFFICIENT);
+    // b3.set_modulus(modulus);
+    // b3.mod(modulus);
+    x3b.set_values(b3, Format::COEFFICIENT);
 
-    Poly x3aClone(x3a);
-    Poly x3bClone(x3b);
+    Poly x3a_clone(x3a);
+    Poly x3b_clone(x3b);
     #endif
 
     time1af = 0.0;
@@ -348,69 +348,69 @@ void test_NTT() {
     #ifdef TEST1
         // forward
         TIC(t1);
-        x1a.SwitchFormat();
+        x1a.switch_format();
         time1af += TOC_US(t1);
 
         TIC(t1);
-        x1b.SwitchFormat();
+        x1b.switch_format();
         time1bf += TOC_US(t1);
     #endif
     #ifdef TEST2
         TIC(t1);
-        x2a.SwitchFormat();
+        x2a.switch_format();
         time2af += TOC_US(t1);
 
         TIC(t1);
-        x2b.SwitchFormat();
+        x2b.switch_format();
         time2bf += TOC_US(t1);
     #endif
     #ifdef TEST3
         TIC(t1);
-        x3a.SwitchFormat();
+        x3a.switch_format();
         time3af += TOC_US(t1);
 
         TIC(t1);
-        x3b.SwitchFormat();
+        x3b.switch_format();
         time3bf += TOC_US(t1);
     #endif
     #ifdef TEST1  // reverse
         TIC(t1);
-        x1a.SwitchFormat();
+        x1a.switch_format();
         time1ar += TOC_US(t1);
 
         TIC(t1);
-        x1b.SwitchFormat();
+        x1b.switch_format();
         time1br += TOC_US(t1);
     #endif
     #ifdef TEST2
         TIC(t1);
-        x2a.SwitchFormat();
+        x2a.switch_format();
         time2ar += TOC_US(t1);
 
         TIC(t1);
-        x2b.SwitchFormat();
+        x2b.switch_format();
         time2br += TOC_US(t1);
     #endif
     #ifdef TEST3
         TIC(t1);
-        x3a.SwitchFormat();
+        x3a.switch_format();
         time3ar += TOC_US(t1);
 
         TIC(t1);
-        x3b.SwitchFormat();
+        x3b.switch_format();
         time3br += TOC_US(t1);
     #endif
     #ifdef TEST1
-        failed |= clonetest(x1a, x1aClone, "x1a");
-        failed |= clonetest(x1b, x1bClone, "x1b");
+        failed |= clonetest(x1a, x1a_clone, "x1a");
+        failed |= clonetest(x1b, x1b_clone, "x1b");
     #endif
     #ifdef TEST2
-        failed |= clonetest(x2a, x2aClone, "x2a");
-        failed |= clonetest(x2b, x2bClone, "x2b");
+        failed |= clonetest(x2a, x2a_clone, "x2a");
+        failed |= clonetest(x2b, x2b_clone, "x2b");
     #endif
     #ifdef TEST3
-        failed |= clonetest(x3a, x3aClone, "x3a");
-        failed |= clonetest(x3b, x3bClone, "x3b");
+        failed |= clonetest(x3a, x3a_clone, "x3a");
+        failed |= clonetest(x3b, x3b_clone, "x3b");
     #endif
     }
 

@@ -42,7 +42,7 @@
 #include <cstdint>
 
 #include "cipher/config.h"
-#ifdef WITH_BE4
+#ifdef CIPHER_WITH_BE4
 
     #include <functional>
     #include <limits>
@@ -62,7 +62,7 @@
 
     // clang-format off
         // TODO: fix shifting issue when limb_t == Dlimb_t
-        #if (NATIVEINT >= 64 && defined(HAVE_INT128))
+        #if (CIPHER_NATIVE_INT >= 64 && defined(CIPHER_HAVE_INT128))
             using expdtype = uint64_t;
         #else
             using expdtype = uint32_t;
@@ -72,7 +72,7 @@
     #define _SECURE_SCL 0  // to speed up VS
     #define NO_BARRETT     // currently barrett is slower than mod
 
-namespace bigintdyn {
+namespace dynamic_int {
 
 template <typename limb_t>
 class ubint;
@@ -119,7 +119,7 @@ struct DataTypes<uint32_t> {
 template <>
 struct DataTypes<uint64_t> {
     using SignedType = int64_t;
-    #if defined(HAVE_INT128)
+    #if defined(CIPHER_HAVE_INT128)
     using DoubleType = uint128_t;
     using SignedDoubleType = int128_t;
     #else
@@ -127,7 +127,7 @@ struct DataTypes<uint64_t> {
     using SignedDoubleType = int64_t;
     #endif
 };
-    #if defined(HAVE_INT128)
+    #if defined(CIPHER_HAVE_INT128)
 template <>
 struct DataTypes<uint128_t> {
     using SignedType = int128_t;
@@ -137,18 +137,18 @@ struct DataTypes<uint128_t> {
     #endif
 
 template <typename limb_t>
-class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
+class ubint final : public cipher::BigIntegerInterface<ubint<limb_t>> {
   private:
     // variable that stores the MOST SIGNIFICANT BIT position in the
-    uint32_t m_MSB{0};
+    uint32_t msb_{0};
     // vector storing the native integers. stored little endian
-    std::vector<limb_t> m_value{0};
+    std::vector<limb_t> value_{0};
     // variable to store the maximum value of the limb data type
-    static constexpr limb_t m_MaxLimb{std::numeric_limits<limb_t>::max()};
+    static constexpr limb_t max_limb_{std::numeric_limits<limb_t>::max()};
     // variable to store the bitlength of the limb data type
-    static constexpr uint32_t m_limbBitLength{sizeof(limb_t) * 8};
+    static constexpr uint32_t limb_bit_length_{sizeof(limb_t) * 8};
     // variable to store the log2 of the number of bits in the limb data type
-    static constexpr uint32_t m_log2LimbBitLength{Log2<sizeof(limb_t) * 8>::value};
+    static constexpr uint32_t log2_limb_bit_length_{Log2<sizeof(limb_t) * 8>::value};
 
     friend class mubintvec<ubint<limb_t>>;
 
@@ -161,27 +161,27 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
     ubint() = default;
 
     explicit operator bool() noexcept {
-        return m_MSB != 0;
+        return msb_ != 0;
     }
 
     /**
      * Copy constructor.
      * @param val is the ubint to be copied.
      */
-    ubint(const ubint& val) noexcept : m_MSB{val.m_MSB}, m_value{val.m_value} {}
+    ubint(const ubint& val) noexcept : msb_{val.msb_}, value_{val.value_} {}
 
-    ubint(const std::vector<limb_t>& v) noexcept : m_value{v} {
-        this->ubint::NormalizeLimbs();
+    ubint(const std::vector<limb_t>& v) noexcept : value_{v} {
+        this->ubint::normalize_limbs();
     }
 
     /**
      * Move constructor.
      * @param val is the ubint to be moved.
      */
-    ubint(ubint&& val) noexcept : m_MSB{std::move(val.m_MSB)}, m_value{std::move(val.m_value)} {}
+    ubint(ubint&& val) noexcept : msb_{std::move(val.msb_)}, value_{std::move(val.value_)} {}
 
-    ubint(std::vector<limb_t>&& v) noexcept : m_value{std::move(v)} {
-        this->ubint::NormalizeLimbs();
+    ubint(std::vector<limb_t>&& v) noexcept : value_{std::move(v)} {
+        this->ubint::normalize_limbs();
     }
 
     /**
@@ -189,10 +189,10 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param strval is the initial integer represented as a string.
      */
     explicit ubint(const std::string& strval) {
-        this->ubint::SetValue(strval);
+        this->ubint::set_value(strval);
     }
     explicit ubint(const char* strval) {
-        this->ubint::SetValue(std::string(strval));
+        this->ubint::set_value(std::string(strval));
     }
     explicit ubint(const char strval) : ubint(limb_t(strval - '0')) {}
 
@@ -201,12 +201,12 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param val is the initial integer represented as an integral type T.
      */
     template <typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
-    ubint(T val) : m_MSB{lbcrypto::GetMSB(val)}, m_value{limb_t(val)} {
+    ubint(T val) : msb_{cipher::get_msb(val)}, value_{limb_t(val)} {
         if constexpr (sizeof(T) > sizeof(limb_t)) {
-            if ((val >>= m_limbBitLength) > 0) {
-                m_value.resize(ubint::MSBToLimbs(m_MSB));
-                for (size_t i{1}; i < m_value.size(); ++i, val >>= m_limbBitLength)
-                    m_value[i] = limb_t(val);
+            if ((val >>= limb_bit_length_) > 0) {
+                value_.resize(ubint::msb_to_limbs(msb_));
+                for (size_t i{1}; i < value_.size(); ++i, val >>= limb_bit_length_)
+                    value_[i] = limb_t(val);
             }
         }
     }
@@ -224,22 +224,22 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @return assigned ubint ref.
      */
     ubint& operator=(const ubint& val) noexcept {
-        m_MSB = val.m_MSB;
-        m_value = val.m_value;
+        msb_ = val.msb_;
+        value_ = val.value_;
         return *this;
     }
 
     ubint& operator=(const limb_t& val) noexcept {
-        m_MSB = lbcrypto::GetMSB(val);
-        m_value.resize(1);
-        m_value[0] = val;
+        msb_ = cipher::get_msb(val);
+        value_.resize(1);
+        value_[0] = val;
         return *this;
     }
 
     ubint& operator=(ubint&& val) noexcept {
         if (this != &val) {
-            m_MSB = std::move(val.m_MSB);
-            m_value = std::move(val.m_value);
+            msb_ = std::move(val.msb_);
+            value_ = std::move(val.value_);
         }
         return *this;
     }
@@ -259,21 +259,21 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * Basic set method for setting the value of a ubint
      * @param strval is the string representation of the ubint to be copied.
      */
-    void SetValue(const std::string& strval);
+    void set_value(const std::string& strval);
 
     /**
      * Basic set method for setting the value of a ubint
      * @param val is the ubint representation of the ubint to be assigned.
      */
-    void SetValue(const ubint& val) noexcept {
-        m_MSB = val.m_MSB;
-        m_value = val.m_value;
+    void set_value(const ubint& val) noexcept {
+        msb_ = val.msb_;
+        value_ = val.value_;
     }
 
-    void SetIdentity() noexcept {
-        m_MSB = 1;
-        m_value.resize(1);
-        m_value[0] = 1;
+    void set_identity() noexcept {
+        msb_ = 1;
+        value_.resize(1);
+        value_[0] = 1;
     }
 
     /**
@@ -282,8 +282,8 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param b is the value to add.
      * @return result of the addition operation.
      */
-    ubint Add(const ubint& b) const;
-    ubint& AddEq(const ubint& b);
+    ubint add(const ubint& b) const;
+    ubint& add_eq(const ubint& b);
 
     /**
      * Subtraction operation.
@@ -291,13 +291,13 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param b is the value to subtract.
      * @return is the result of the subtraction operation.
      */
-    ubint Sub(const ubint& b) const;
-    ubint& SubEq(const ubint& b);
+    ubint sub(const ubint& b) const;
+    ubint& sub_eq(const ubint& b);
 
     // this is a negation operator which really doesn't make sense for ubint
     // TODO: returns zero due to saturated subtraction
     ubint operator-() const {
-        // return ubint().Sub(*this);
+        // return ubint().sub(*this);
         return ubint();
     }
 
@@ -307,9 +307,9 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param b is the value to multiply with.
      * @return is the result of the multiplication operation.
      */
-    ubint Mul(const ubint& b) const;
-    ubint& MulEq(const ubint& b) {
-        return *this = this->ubint::Mul(b);
+    ubint mul(const ubint& b) const;
+    ubint& mul_eq(const ubint& b) {
+        return *this = this->ubint::mul(b);
     }
 
     /**
@@ -318,8 +318,8 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param b is the value to divide by.
      * @return is the result of the division operation.
      */
-    ubint DividedBy(const ubint& b) const;
-    ubint& DividedByEq(const ubint& b);
+    ubint divided_by(const ubint& b) const;
+    ubint& divided_by_eq(const ubint& b);
 
     /**
      * Exponentiation operation. Returns x^p.
@@ -328,7 +328,7 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @return is the result of the exponentiation operation.
      */
     ubint Exp(uint32_t p) const;
-    ubint& ExpEq(uint32_t p) {
+    ubint& exp_eq(uint32_t p) {
         return *this = this->ubint::Exp(p);
     }
 
@@ -340,9 +340,9 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param q is the denominator to be divided.
      * @return is the result of multiply and round operation.
      */
-    ubint MultiplyAndRound(const ubint& p, const ubint& q) const;
-    ubint& MultiplyAndRoundEq(const ubint& p, const ubint& q) {
-        return *this = this->ubint::MultiplyAndRound(p, q);
+    ubint multiply_and_round(const ubint& p, const ubint& q) const;
+    ubint& multiply_and_round_eq(const ubint& p, const ubint& q) {
+        return *this = this->ubint::multiply_and_round(p, q);
     }
 
     /**
@@ -352,9 +352,9 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param q is the denominator to be divided.
      * @return is the result of divide and round operation.
      */
-    ubint DivideAndRound(const ubint& q) const;
-    ubint& DivideAndRoundEq(const ubint& q) {
-        return *this = this->ubint::DivideAndRound(q);
+    ubint divide_and_round(const ubint& q) const;
+    ubint& divide_and_round_eq(const ubint& q) {
+        return *this = this->ubint::divide_and_round(q);
     }
 
     /**
@@ -363,16 +363,16 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param modulus is the modulus to perform.
      * @return is the result of the modulus operation.
      */
-    ubint Mod(const ubint& modulus) const;
-    ubint& ModEq(const ubint& modulus);
+    ubint mod(const ubint& modulus) const;
+    ubint& mod_eq(const ubint& modulus);
 
     /**
      * Pre-computes the mu factor that is used in Barrett modulo reduction
      *
      * @return the value of mu
      */
-    ubint ComputeMu() const {
-        return (ubint(1) << (2 * m_MSB + 3)).DividedBy(*this);
+    ubint compute_mu() const {
+        return (ubint(1) << (2 * msb_ + 3)).divided_by(*this);
     }
 
     /**
@@ -385,46 +385,46 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @return is the result of the modulus operation.
      */
     template <typename T = limb_t>
-    ubint Mod(const ubint& modulus, const ubint& mu,
+    ubint mod(const ubint& modulus, const ubint& mu,
               typename std::enable_if_t<!std::is_same_v<T, Dlimb_t>, bool> = true) const {
-        return this->ubint::Mod(modulus);
+        return this->ubint::mod(modulus);
     }
 
     template <typename T = limb_t>
-    ubint Mod(const ubint& modulus, const ubint& mu,
+    ubint mod(const ubint& modulus, const ubint& mu,
               typename std::enable_if_t<std::is_same_v<T, Dlimb_t>, bool> = true) const {
         if (*this < modulus)
             return *this;
-        int n(modulus.m_MSB);
+        int n(modulus.msb_);
         int alpha(n + 3);
         int beta(-2);
-        ubint q(mu * this->ubint::RShift(n + beta));
+        ubint q(mu * this->ubint::r_shift(n + beta));
         q >>= alpha - beta;
-        ubint z(this->ubint::Sub(q * modulus));
+        ubint z(this->ubint::sub(q * modulus));
         if (z >= modulus)
-            return z.Sub(modulus);
+            return z.sub(modulus);
         return z;
     }
 
     template <typename T = limb_t>
-    ubint& ModEq(const ubint& modulus, const ubint& mu,
+    ubint& mod_eq(const ubint& modulus, const ubint& mu,
                  typename std::enable_if_t<!std::is_same_v<T, Dlimb_t>, bool> = true) {
-        return this->ubint::ModEq(modulus);
+        return this->ubint::mod_eq(modulus);
     }
 
     template <typename T = limb_t>
-    ubint& ModEq(const ubint& modulus, const ubint& mu,
+    ubint& mod_eq(const ubint& modulus, const ubint& mu,
                  typename std::enable_if_t<std::is_same_v<T, Dlimb_t>, bool> = true) {
         if (*this < modulus)
             return *this;
-        int n(modulus.m_MSB);
+        int n(modulus.msb_);
         int alpha(n + 3);
         int beta(-2);
-        ubint q(mu * this->ubint::RShift(n + beta));
+        ubint q(mu * this->ubint::r_shift(n + beta));
         q >>= alpha - beta;
-        this->ubint::SubEq(q * modulus);
+        this->ubint::sub_eq(q * modulus);
         if (*this >= modulus)
-            return this->ubint::SubEq(modulus);
+            return this->ubint::sub_eq(modulus);
         return *this;
     }
 
@@ -435,8 +435,8 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus addition operation.
      */
-    ubint ModAdd(const ubint& b, const ubint& modulus) const;
-    ubint& ModAddEq(const ubint& b, const ubint& modulus);
+    ubint mod_add(const ubint& b, const ubint& modulus) const;
+    ubint& mod_add_eq(const ubint& b, const ubint& modulus);
 
     /**
      * Modulus addition where operands are < modulus.
@@ -445,8 +445,8 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus addition operation.
      */
-    ubint ModAddFast(const ubint& b, const ubint& modulus) const;
-    ubint& ModAddFastEq(const ubint& b, const ubint& modulus);
+    ubint mod_add_fast(const ubint& b, const ubint& modulus) const;
+    ubint& mod_add_fast_eq(const ubint& b, const ubint& modulus);
 
     /**
      * Barrett modulus addition operation.
@@ -457,27 +457,27 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @return is the result of the modulus addition operation.
      */
     template <typename T = limb_t>
-    ubint ModAdd(const ubint& b, const ubint& modulus, const ubint& mu,
+    ubint mod_add(const ubint& b, const ubint& modulus, const ubint& mu,
                  typename std::enable_if_t<!std::is_same_v<T, Dlimb_t>, bool> = true) const {
-        return b.ModAdd(*this, modulus);
+        return b.mod_add(*this, modulus);
     }
 
     template <typename T = limb_t>
-    ubint ModAdd(const ubint& b, const ubint& modulus, const ubint& mu,
+    ubint mod_add(const ubint& b, const ubint& modulus, const ubint& mu,
                  typename std::enable_if_t<std::is_same_v<T, Dlimb_t>, bool> = true) const {
-        return b.Add(*this).Mod(modulus, mu);
+        return b.add(*this).mod(modulus, mu);
     }
 
     template <typename T = limb_t>
-    ubint& ModAddEq(const ubint& b, const ubint& modulus, const ubint& mu,
+    ubint& mod_add_eq(const ubint& b, const ubint& modulus, const ubint& mu,
                     typename std::enable_if_t<!std::is_same_v<T, Dlimb_t>, bool> = true) {
-        return this->ubint::ModAddEq(b, modulus);
+        return this->ubint::mod_add_eq(b, modulus);
     }
 
     template <typename T = limb_t>
-    ubint& ModAddEq(const ubint& b, const ubint& modulus, const ubint& mu,
+    ubint& mod_add_eq(const ubint& b, const ubint& modulus, const ubint& mu,
                     typename std::enable_if_t<std::is_same_v<T, Dlimb_t>, bool> = true) {
-        return *this = b.Add(*this).Mod(modulus, mu);
+        return *this = b.add(*this).mod(modulus, mu);
     }
 
     /**
@@ -487,8 +487,8 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus subtraction operation.
      */
-    ubint ModSub(const ubint& b, const ubint& modulus) const;
-    ubint& ModSubEq(const ubint& b, const ubint& modulus);
+    ubint mod_sub(const ubint& b, const ubint& modulus) const;
+    ubint& mod_sub_eq(const ubint& b, const ubint& modulus);
 
     /**
      * Modulus subtraction where operands are < modulus.
@@ -497,8 +497,8 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus subtraction operation.
      */
-    ubint ModSubFast(const ubint& b, const ubint& modulus) const;
-    ubint& ModSubFastEq(const ubint& b, const ubint& modulus);
+    ubint mod_sub_fast(const ubint& b, const ubint& modulus) const;
+    ubint& mod_sub_fast_eq(const ubint& b, const ubint& modulus);
 
     /**
      * Barrett modulus subtraction operation.
@@ -509,42 +509,42 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @return is the result of the modulus subtraction operation.
      */
     template <typename T = limb_t>
-    ubint ModSub(const ubint& b, const ubint& modulus, const ubint& mu,
+    ubint mod_sub(const ubint& b, const ubint& modulus, const ubint& mu,
                  typename std::enable_if_t<!std::is_same_v<T, Dlimb_t>, bool> = true) const {
-        return this->ubint::ModSub(b, modulus);
+        return this->ubint::mod_sub(b, modulus);
     }
 
     template <typename T = limb_t>
-    ubint ModSub(const ubint& b, const ubint& modulus, const ubint& mu,
+    ubint mod_sub(const ubint& b, const ubint& modulus, const ubint& mu,
                  typename std::enable_if_t<std::is_same_v<T, Dlimb_t>, bool> = true) const {
         auto bv(b);
         auto av(*this);
         if (bv >= modulus)
-            bv.ModEq(modulus, mu);
+            bv.mod_eq(modulus, mu);
         if (av >= modulus)
-            av.ModEq(modulus, mu);
+            av.mod_eq(modulus, mu);
         if (av < bv)
-            av = modulus.Add(av);
-        return av.SubEq(bv);
+            av = modulus.add(av);
+        return av.sub_eq(bv);
     }
 
     template <typename T = limb_t>
-    ubint& ModSubEq(const ubint& b, const ubint& modulus, const ubint& mu,
+    ubint& mod_sub_eq(const ubint& b, const ubint& modulus, const ubint& mu,
                     typename std::enable_if_t<!std::is_same_v<T, Dlimb_t>, bool> = true) {
-        return this->ubint::ModSubEq(b, modulus);
+        return this->ubint::mod_sub_eq(b, modulus);
     }
 
     template <typename T = limb_t>
-    ubint& ModSubEq(const ubint& b, const ubint& modulus, const ubint& mu,
+    ubint& mod_sub_eq(const ubint& b, const ubint& modulus, const ubint& mu,
                     typename std::enable_if_t<std::is_same_v<T, Dlimb_t>, bool> = true) {
         auto bv(b);
         if (bv >= modulus)
-            bv.ModEq(modulus, mu);
+            bv.mod_eq(modulus, mu);
         if (*this >= modulus)
-            this->ubint::ModEq(modulus, mu);
+            this->ubint::mod_eq(modulus, mu);
         if (*this < bv)
-            *this = modulus.Add(*this);
-        return this->ubint::SubEq(bv);
+            *this = modulus.add(*this);
+        return this->ubint::sub_eq(bv);
     }
 
     /**
@@ -555,38 +555,38 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @return is the result of the modulus multiplication operation.
      */
     template <typename T = limb_t>
-    ubint ModMul(const ubint& b, const ubint& modulus,
+    ubint mod_mul(const ubint& b, const ubint& modulus,
                  typename std::enable_if_t<!std::is_same_v<T, Dlimb_t>, bool> = true) const {
         auto bv(b);
         auto av(*this);
         if (bv >= modulus)
-            bv.ModEq(modulus);
+            bv.mod_eq(modulus);
         if (av >= modulus)
-            av.ModEq(modulus);
-        return av.ModMulFast(bv, modulus);
+            av.mod_eq(modulus);
+        return av.mod_mul_fast(bv, modulus);
     }
 
     template <typename T = limb_t>
-    ubint ModMul(const ubint& b, const ubint& modulus,
+    ubint mod_mul(const ubint& b, const ubint& modulus,
                  typename std::enable_if_t<std::is_same_v<T, Dlimb_t>, bool> = true) const {
-        return b.ModMul(*this, modulus, modulus.ComputeMu());
+        return b.mod_mul(*this, modulus, modulus.compute_mu());
     }
 
     template <typename T = limb_t>
-    ubint& ModMulEq(const ubint& b, const ubint& modulus,
+    ubint& mod_mul_eq(const ubint& b, const ubint& modulus,
                     typename std::enable_if_t<!std::is_same_v<T, Dlimb_t>, bool> = true) {
         auto bv(b);
         if (bv >= modulus)
-            bv.ModEq(modulus);
+            bv.mod_eq(modulus);
         if (*this >= modulus)
-            this->ubint::ModEq(modulus);
-        return *this = bv.ModMulFast(*this, modulus);
+            this->ubint::mod_eq(modulus);
+        return *this = bv.mod_mul_fast(*this, modulus);
     }
 
     template <typename T = limb_t>
-    ubint& ModMulEq(const ubint& b, const ubint& modulus,
+    ubint& mod_mul_eq(const ubint& b, const ubint& modulus,
                     typename std::enable_if_t<std::is_same_v<T, Dlimb_t>, bool> = true) {
-        return *this = b.ModMul(*this, modulus, modulus.ComputeMu());
+        return *this = b.mod_mul(*this, modulus, modulus.compute_mu());
     }
 
     /**
@@ -597,23 +597,23 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param mu is the Barrett value.
      * @return is the result of the modulus multiplication operation.
      */
-    ubint ModMul(const ubint& b, const ubint& modulus, const ubint& mu) const {
+    ubint mod_mul(const ubint& b, const ubint& modulus, const ubint& mu) const {
         auto bv(b);
         auto av(*this);
         if (bv >= modulus)
-            bv.ModEq(modulus, mu);
+            bv.mod_eq(modulus, mu);
         if (av >= modulus)
-            av.ModEq(modulus, mu);
-        return av.Mul(bv).Mod(modulus, mu);
+            av.mod_eq(modulus, mu);
+        return av.mul(bv).mod(modulus, mu);
     }
 
-    ubint& ModMulEq(const ubint& b, const ubint& modulus, ubint& mu) {
+    ubint& mod_mul_eq(const ubint& b, const ubint& modulus, ubint& mu) {
         auto bv(b);
         if (bv >= modulus)
-            bv.ModEq(modulus, mu);
+            bv.mod_eq(modulus, mu);
         if (*this >= modulus)
-            this->ubint::ModEq(modulus, mu);
-        return *this = bv.Mul(*this).Mod(modulus, mu);
+            this->ubint::mod_eq(modulus, mu);
+        return *this = bv.mul(*this).mod(modulus, mu);
     }
 
     /**
@@ -623,9 +623,9 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus multiplication operation.
      */
-    ubint ModMulFast(const ubint& b, const ubint& modulus) const;
-    ubint& ModMulFastEq(const ubint& b, const ubint& modulus) {
-        return *this = this->ubint::ModMulFast(b, modulus);
+    ubint mod_mul_fast(const ubint& b, const ubint& modulus) const;
+    ubint& mod_mul_fast_eq(const ubint& b, const ubint& modulus) {
+        return *this = this->ubint::mod_mul_fast(b, modulus);
     }
 
     /**
@@ -636,19 +636,19 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param mu is the Barrett value.
      * @return is the result of the modulus multiplication operation.
      */
-    ubint ModMulFast(const ubint& b, const ubint& modulus, const ubint& mu) const {
-        return b.Mul(*this).Mod(modulus, mu);
+    ubint mod_mul_fast(const ubint& b, const ubint& modulus, const ubint& mu) const {
+        return b.mul(*this).mod(modulus, mu);
     }
 
-    ubint& ModMulFastEq(const ubint& b, const ubint& modulus, const ubint& mu) {
-        return *this = b.Mul(*this).Mod(modulus, mu);
+    ubint& mod_mul_fast_eq(const ubint& b, const ubint& modulus, const ubint& mu) {
+        return *this = b.mul(*this).mod(modulus, mu);
     }
 
-    ubint ModMulFastConst(const ubint& b, const ubint& modulus, const ubint& bInv) const {
-        OPENFHE_THROW("ModMulFastConst is not implemented for backend 4");
+    ubint mod_mul_fast_const(const ubint& b, const ubint& modulus, const ubint& b_inv) const {
+        CIPHER_THROW("ModMulFastConst is not implemented for backend 4");
     }
-    ubint& ModMulFastConstEq(const ubint& b, const ubint& modulus, const ubint& bInv) {
-        OPENFHE_THROW("ModMulFastConstEq is not implemented for backend 4");
+    ubint& mod_mul_fast_const_eq(const ubint& b, const ubint& modulus, const ubint& b_inv) {
+        CIPHER_THROW("ModMulFastConstEq is not implemented for backend 4");
     }
 
     /**
@@ -658,9 +658,9 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus exponentiation operation.
      */
-    ubint ModExp(const ubint& b, const ubint& modulus) const;
-    ubint& ModExpEq(const ubint& b, const ubint& modulus) {
-        return *this = this->ubint::ModExp(b, modulus);
+    ubint mod_exp(const ubint& b, const ubint& modulus) const;
+    ubint& mod_exp_eq(const ubint& b, const ubint& modulus) {
+        return *this = this->ubint::mod_exp(b, modulus);
     }
 
     /**
@@ -669,9 +669,9 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param modulus is the modulus to perform.
      * @return is the result of the modulus inverse operation.
      */
-    ubint ModInverse(const ubint& modulus) const;
-    ubint& ModInverseEq(const ubint& modulus) {
-        return *this = this->ubint::ModInverse(modulus);
+    ubint mod_inverse(const ubint& modulus) const;
+    ubint& mod_inverse_eq(const ubint& modulus) {
+        return *this = this->ubint::mod_inverse(modulus);
     }
 
     /**
@@ -680,8 +680,8 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param shift # of bits.
      * @return result of the shift operation.
      */
-    ubint LShift(uint16_t shift) const;
-    ubint& LShiftEq(uint16_t shift);
+    ubint l_shift(uint16_t shift) const;
+    ubint& l_shift_eq(uint16_t shift);
 
     /**
      * Right shift operation.
@@ -689,8 +689,8 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param shift # of bits.
      * @return result of the shift operation.
      */
-    ubint RShift(uint16_t shift) const;
-    ubint& RShiftEq(uint16_t shift);
+    ubint r_shift(uint16_t shift) const;
+    ubint& r_shift_eq(uint16_t shift);
 
     /**
      * Compares the current ubint to ubint a.
@@ -700,30 +700,30 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * greater than conditons.
      */
     int Compare(const ubint& a) const noexcept {
-        if (m_MSB < a.m_MSB)
+        if (msb_ < a.msb_)
             return -1;
-        if (m_MSB > a.m_MSB)
+        if (msb_ > a.msb_)
             return 1;
-        for (int i = m_value.size() - 1; i >= 0; --i) {
-            if (m_value[i] < a.m_value[i])
+        for (int i = value_.size() - 1; i >= 0; --i) {
+            if (value_[i] < a.value_[i])
                 return -1;
-            if (m_value[i] > a.m_value[i])
+            if (value_[i] > a.value_[i])
                 return 1;
         }
         return 0;
     }
 
     template <typename T = BasicInteger>
-    T ConvertToInt() const noexcept {
+    T convert_to_int() const noexcept {
         constexpr uint32_t limblen{sizeof(T) * 8};
-        if constexpr (m_limbBitLength >= limblen) {
-            return static_cast<T>(m_value[0]);
+        if constexpr (limb_bit_length_ >= limblen) {
+            return static_cast<T>(value_[0]);
         }
-        if constexpr (m_limbBitLength < limblen) {
-            auto ceilInt = MSBToLimbs(limblen > m_MSB ? m_MSB : limblen);
-            auto result = static_cast<T>(m_value[0]);
-            for (uint32_t i{1}; i < ceilInt; ++i)
-                result |= static_cast<T>(m_value[i]) << (i * m_limbBitLength);
+        if constexpr (limb_bit_length_ < limblen) {
+            auto ceil_int = msb_to_limbs(limblen > msb_ ? msb_ : limblen);
+            auto result = static_cast<T>(value_[0]);
+            for (uint32_t i{1}; i < ceil_int; ++i)
+                result |= static_cast<T>(value_[i]) << (i * limb_bit_length_);
             return result;
         }
     }
@@ -734,30 +734,30 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * if the ubint is larger than the max value representable
      * or if conversion fails, and error is reported to cerr
      */
-    float ConvertToFloat() const;
-    double ConvertToDouble() const;
+    float convert_to_float() const;
+    double convert_to_double() const;
 
     /**
      * Convert a string representation of a binary number to a ubint.
-     * @param bitString the binary num in string.
+     * @param bit_string the binary num in string.
      * @return the  number represented as a ubint.
      */
-    static ubint FromBinaryString(const std::string& bitString);
+    static ubint from_binary_string(const std::string& bit_string);
 
     /**
      * Returns the MSB location of the value.
      * @return the index of the most significant bit.
      */
-    uint32_t GetMSB() const {
-        return m_MSB;
+    uint32_t get_msb() const {
+        return msb_;
     }
 
     /**
      * Returns the size of the underlying vector of Limbs
      * @return the size
      */
-    size_t GetNumberOfLimbs() const {
-        return m_value.size();
+    size_t get_number_of_limbs() const {
+        return value_.size();
     }
 
     /*
@@ -768,16 +768,16 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      */
     /*
     static bool isPowerOfTwo(const ubint& x) {
-        if (x.m_MSB == 0)
+        if (x.msb_ == 0)
             return false;
-        const size_t limbs{x.m_value.size() - 1};
+        const size_t limbs{x.value_.size() - 1};
         for (size_t i = 0; i < limbs; ++i) {
-            if (0 != x.m_value[i])
+            if (0 != x.value_[i])
                 return false;
         }
-        auto msb{lbcrypto::GetMSB(x.m_value[limbs]) - 1};
+        auto msb{cipher::get_msb(x.value_[limbs]) - 1};
         auto mask{(1 << msb) - 1};
-        return (0 == (x.m_value[limbs] & mask));
+        return (0 == (x.value_[limbs] & mask));
     }
 */
 
@@ -790,8 +790,8 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      */
 
     // TODO hardcoded for base 2?
-    uint32_t GetLengthForBase(uint32_t base) const {
-        return m_MSB;
+    uint32_t get_length_for_base(uint32_t base) const {
+        return msb_;
     }
 
     /**
@@ -809,7 +809,7 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param base is the base with which to determine length in.
      * @return is the requested digit.
      */
-    uint32_t GetDigitAtIndexForBase(uint32_t index, uint32_t base) const;
+    uint32_t get_digit_at_index_for_base(uint32_t index, uint32_t base) const;
 
     /**
      * Gets the bit at the specified index.
@@ -817,13 +817,13 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param index is the index of the bit to get.
      * @return resulting bit.
      */
-    uint8_t GetBitAtIndex(uint32_t index) const;
+    uint8_t get_bit_at_index(uint32_t index) const;
 
     /**
      * A zero allocator that is called by the Matrix class. It is used to
      * initialize a Matrix of ubint objects.
      */
-    static ubint Allocator() noexcept {
+    static ubint allocator() noexcept {
         return ubint();
     }
 
@@ -835,9 +835,9 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      *
      * @return value of this ubint in base 10 represented as a string.
      */
-    const std::string ToString() const;
+    const std::string to_string() const;
 
-    static const std::string IntegerTypeName() {
+    static const std::string integer_type_name() {
         if constexpr (std::is_same_v<limb_t, uint32_t>)
             return "UBDYNINT_32";
         if constexpr (std::is_same_v<limb_t, uint64_t>)
@@ -852,11 +852,11 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * Used primarily for debugging
      * @return string with the space-separated limb values, least significant limb first
      */
-    std::string GetInternalRepresentation() const {
+    std::string get_internal_representation() const {
         std::string ret{};
-        for (size_t i = 0; i < m_value.size(); i++) {
-            ret += std::to_string(m_value[i]);
-            if (i < (m_value.size() - 1)) {
+        for (size_t i = 0; i < value_.size(); i++) {
+            ret += std::to_string(value_[i]);
+            if (i < (value_.size() - 1)) {
                 ret += " ";
             }
         }
@@ -871,31 +871,31 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @return is the returned ostream object.
      */
     friend std::ostream& operator<<(std::ostream& os, const ubint& ptr_obj) {
-        os << ptr_obj.ToString();
+        os << ptr_obj.to_string();
         return os;
     }
 
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
-        ar(::cereal::make_nvp("v", m_value));
-        ar(::cereal::make_nvp("m", m_MSB));
+        ar(::cereal::make_nvp("v", value_));
+        ar(::cereal::make_nvp("m", msb_));
     }
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
-        ar(::cereal::make_nvp("v", m_value));
-        ar(::cereal::make_nvp("m", m_MSB));
+        ar(::cereal::make_nvp("v", value_));
+        ar(::cereal::make_nvp("m", msb_));
     }
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "DYNInteger";
     }
 
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 
@@ -903,9 +903,9 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
     /**
      * Sets the MSB to the correct value as computed from the internal value.
      */
-    void SetMSB() {
-        m_MSB = m_limbBitLength * static_cast<uint32_t>(m_value.size() - 1);
-        m_MSB += lbcrypto::GetMSB(m_value.back());
+    void set_msb() {
+        msb_ = limb_bit_length_ * static_cast<uint32_t>(value_.size() - 1);
+        msb_ += cipher::get_msb(value_.back());
     }
 
     /**
@@ -913,12 +913,12 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * significant limb is non-zero (all higher zero limbs are
      * removed).
      */
-    void NormalizeLimbs() {
-        auto size = m_value.size() - 1;
-        while (size > 0 && m_value[size--] == 0)
-            m_value.pop_back();
-        m_MSB = m_limbBitLength * static_cast<uint32_t>(m_value.size() - 1);
-        m_MSB += lbcrypto::GetMSB(m_value.back());
+    void normalize_limbs() {
+        auto size = value_.size() - 1;
+        while (size > 0 && value_[size--] == 0)
+            value_.pop_back();
+        msb_ = limb_bit_length_ * static_cast<uint32_t>(value_.size() - 1);
+        msb_ += cipher::get_msb(value_.back());
     }
 
     /**
@@ -939,11 +939,11 @@ class ubint final : public lbcrypto::BigIntegerInterface<ubint<limb_t>> {
      * @param msb is the number of bits to be divided.
      * @return the ceiling of msb/(bits in the limb data type)
      */
-    static constexpr uint32_t MSBToLimbs(uint32_t msb) noexcept {
-        constexpr uint32_t mask{m_limbBitLength - 1};
+    static constexpr uint32_t msb_to_limbs(uint32_t msb) noexcept {
+        constexpr uint32_t mask{limb_bit_length_ - 1};
         if (msb == 0)
             return 1;
-        return (msb >> m_log2LimbBitLength) + ((msb & mask) != 0);
+        return (msb >> log2_limb_bit_length_) + ((msb & mask) != 0);
     }
 };
 

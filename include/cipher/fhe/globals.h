@@ -37,28 +37,28 @@
 #ifndef CIPHER_FHE_GLOBALS_H_
 #define CIPHER_FHE_GLOBALS_H_
 
-namespace lbcrypto {
+namespace cipher {
 /**
- * Tells whether PrecomputeCRTTables() will be executed during CryptoContext deserialization.
+ * Tells whether precompute_crt_tables() will be executed during CryptoContext deserialization.
  * Deserializing without this precomputation can speed up the procedure by a factor of 100.
  *
- * @return true (default value) if PrecomputeCRTTables() will be executed during deserialization,
+ * @return true (default value) if precompute_crt_tables() will be executed during deserialization,
  *         false if it will not
  */
-bool PrecomputeCRTTablesAfterDeserializaton();
+bool precompute_crt_tables_after_deserializaton();
 
 /**
- * Makes PrecomputeCRTTablesAfterDeserializaton() return true, so CRT tables are precomputed during
+ * Makes precompute_crt_tables_after_deserializaton() return true, so CRT tables are precomputed during
  * CryptoContext deserialization (the default behavior).
  */
-void EnablePrecomputeCRTTablesAfterDeserializaton();
+void enable_precompute_crt_tables_after_deserializaton();
 
 /**
- * Makes PrecomputeCRTTablesAfterDeserializaton() return false, so CRT tables are not precomputed during
+ * Makes precompute_crt_tables_after_deserializaton() return false, so CRT tables are not precomputed during
  * CryptoContext deserialization.
  */
-void DisablePrecomputeCRTTablesAfterDeserializaton();
+void disable_precompute_crt_tables_after_deserializaton();
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_GLOBALS_H_

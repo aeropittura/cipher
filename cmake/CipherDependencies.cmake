@@ -40,7 +40,7 @@ endif()
 # OpenMP or plain threads
 #--------------------------------------------------------------------
 if(CIPHER_WITH_OPENMP)
-    add_definitions(-DPARALLEL)
+    add_definitions(-DCIPHER_PARALLEL)
     if(APPLE)
         # Apple clang ships without OpenMP; point it at libomp from Homebrew or MacPorts.
         if(CIPHER_USE_MACPORTS)

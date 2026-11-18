@@ -38,90 +38,90 @@
 #include "cipher/math/dft.h"
 #include "cipher/math/distribution_gen.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 /**
- * GenerateRandNumberVector generates a vector of real values in the range (-1,1)
- * @param vecSize is number of elements in the returned vector
+ * generate_rand_number_vector generates a vector of real values in the range (-1,1)
+ * @param vec_size is number of elements in the returned vector
  * @return generated vector
  */
-std::vector<std::complex<double>> GenerateRandNumberVector(size_t vecSize) {
-    std::vector<std::complex<double>> result(vecSize);
+std::vector<std::complex<double>> generate_rand_number_vector(size_t vec_size) {
+    std::vector<std::complex<double>> result(vec_size);
 
     std::uniform_real_distribution<double> uniform_real(-1.0, 1.0);
-    for (size_t i = 0; i < vecSize; ++i) {
-        result[i] = std::complex<double>(uniform_real(PseudoRandomNumberGenerator::GetPRNG()), 0);
+    for (size_t i = 0; i < vec_size; ++i) {
+        result[i] = std::complex<double>(uniform_real(PseudoRandomNumberGenerator::get_prng()), 0);
     }
 
     return result;
 }
 
 //=====================================================================================================================
-void FFTSpecial_RingDim4096(benchmark::State& state) {
-    const uint32_t ringDim = 4096;
-    std::vector<std::complex<double>> vals = GenerateRandNumberVector(ringDim / 4);
-    DiscreteFourierTransform::Initialize(ringDim * 2, ringDim / 2);
+void fft_special_ring_dim4096(benchmark::State& state) {
+    const uint32_t ring_dim = 4096;
+    std::vector<std::complex<double>> vals = generate_rand_number_vector(ring_dim / 4);
+    DiscreteFourierTransform::Initialize(ring_dim * 2, ring_dim / 2);
 
     while (state.KeepRunning()) {
-        DiscreteFourierTransform::FFTSpecial(vals, ringDim * 2);
+        DiscreteFourierTransform::fft_special(vals, ring_dim * 2);
     }
 }
-BENCHMARK(FFTSpecial_RingDim4096)->Unit(benchmark::kMicrosecond);
+BENCHMARK(fft_special_ring_dim4096)->Unit(benchmark::kMicrosecond);
 //=====================================================================================================================
-void FFTSpecialInv_RingDim4096(benchmark::State& state) {
-    const uint32_t ringDim = 4096;
-    std::vector<std::complex<double>> vals = GenerateRandNumberVector(ringDim / 4);
-    DiscreteFourierTransform::Initialize(ringDim * 2, ringDim / 2);
+void fft_special_inv_ring_dim4096(benchmark::State& state) {
+    const uint32_t ring_dim = 4096;
+    std::vector<std::complex<double>> vals = generate_rand_number_vector(ring_dim / 4);
+    DiscreteFourierTransform::Initialize(ring_dim * 2, ring_dim / 2);
 
     while (state.KeepRunning()) {
-        DiscreteFourierTransform::FFTSpecialInv(vals, ringDim * 2);
+        DiscreteFourierTransform::fft_special_inv(vals, ring_dim * 2);
     }
 }
-BENCHMARK(FFTSpecialInv_RingDim4096)->Unit(benchmark::kMicrosecond);
+BENCHMARK(fft_special_inv_ring_dim4096)->Unit(benchmark::kMicrosecond);
 //=====================================================================================================================
-void FFTSpecial_RingDim16384(benchmark::State& state) {
-    const uint32_t ringDim = 16384;
-    std::vector<std::complex<double>> vals = GenerateRandNumberVector(ringDim / 4);
-    DiscreteFourierTransform::Initialize(ringDim * 2, ringDim / 2);
+void fft_special_ring_dim16384(benchmark::State& state) {
+    const uint32_t ring_dim = 16384;
+    std::vector<std::complex<double>> vals = generate_rand_number_vector(ring_dim / 4);
+    DiscreteFourierTransform::Initialize(ring_dim * 2, ring_dim / 2);
 
     while (state.KeepRunning()) {
-        DiscreteFourierTransform::FFTSpecial(vals, ringDim * 2);
+        DiscreteFourierTransform::fft_special(vals, ring_dim * 2);
     }
 }
-BENCHMARK(FFTSpecial_RingDim16384)->Unit(benchmark::kMicrosecond);
+BENCHMARK(fft_special_ring_dim16384)->Unit(benchmark::kMicrosecond);
 //=====================================================================================================================
-void FFTSpecialInv_RingDim16384(benchmark::State& state) {
-    const uint32_t ringDim = 16384;
-    std::vector<std::complex<double>> vals = GenerateRandNumberVector(ringDim / 4);
-    DiscreteFourierTransform::Initialize(ringDim * 2, ringDim / 2);
+void fft_special_inv_ring_dim16384(benchmark::State& state) {
+    const uint32_t ring_dim = 16384;
+    std::vector<std::complex<double>> vals = generate_rand_number_vector(ring_dim / 4);
+    DiscreteFourierTransform::Initialize(ring_dim * 2, ring_dim / 2);
 
     while (state.KeepRunning()) {
-        DiscreteFourierTransform::FFTSpecialInv(vals, ringDim * 2);
+        DiscreteFourierTransform::fft_special_inv(vals, ring_dim * 2);
     }
 }
-BENCHMARK(FFTSpecialInv_RingDim16384)->Unit(benchmark::kMicrosecond);
+BENCHMARK(fft_special_inv_ring_dim16384)->Unit(benchmark::kMicrosecond);
 //=====================================================================================================================
-void FFTSpecial_RingDim65536(benchmark::State& state) {
-    const uint32_t ringDim = 65536;
-    std::vector<std::complex<double>> vals = GenerateRandNumberVector(ringDim / 4);
-    DiscreteFourierTransform::Initialize(ringDim * 2, ringDim / 2);
+void fft_special_ring_dim65536(benchmark::State& state) {
+    const uint32_t ring_dim = 65536;
+    std::vector<std::complex<double>> vals = generate_rand_number_vector(ring_dim / 4);
+    DiscreteFourierTransform::Initialize(ring_dim * 2, ring_dim / 2);
 
     while (state.KeepRunning()) {
-        DiscreteFourierTransform::FFTSpecial(vals, ringDim * 2);
+        DiscreteFourierTransform::fft_special(vals, ring_dim * 2);
     }
 }
-BENCHMARK(FFTSpecial_RingDim65536)->Unit(benchmark::kMicrosecond);
+BENCHMARK(fft_special_ring_dim65536)->Unit(benchmark::kMicrosecond);
 //=====================================================================================================================
-void FFTSpecialInv_RingDim65536(benchmark::State& state) {
-    const uint32_t ringDim = 65536;
-    std::vector<std::complex<double>> vals = GenerateRandNumberVector(ringDim / 4);
-    DiscreteFourierTransform::Initialize(ringDim * 2, ringDim / 2);
+void fft_special_inv_ring_dim65536(benchmark::State& state) {
+    const uint32_t ring_dim = 65536;
+    std::vector<std::complex<double>> vals = generate_rand_number_vector(ring_dim / 4);
+    DiscreteFourierTransform::Initialize(ring_dim * 2, ring_dim / 2);
 
     while (state.KeepRunning()) {
-        DiscreteFourierTransform::FFTSpecialInv(vals, ringDim * 2);
+        DiscreteFourierTransform::fft_special_inv(vals, ring_dim * 2);
     }
 }
-BENCHMARK(FFTSpecialInv_RingDim65536)->Unit(benchmark::kMicrosecond);
+BENCHMARK(fft_special_inv_ring_dim65536)->Unit(benchmark::kMicrosecond);
 //=====================================================================================================================
 
 BENCHMARK_MAIN();

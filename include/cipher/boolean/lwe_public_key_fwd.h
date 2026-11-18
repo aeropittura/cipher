@@ -33,13 +33,13 @@
 
 #include <memory>
 
-namespace lbcrypto {
+namespace cipher {
 
-class LWEPublicKeyImpl;
+class LwePublicKeyImpl;
 
-using LWEPublicKey = std::shared_ptr<LWEPublicKeyImpl>;
-using ConstLWEPublicKey = const std::shared_ptr<const LWEPublicKeyImpl>;
+using LwePublicKey = std::shared_ptr<LwePublicKeyImpl>;
+using ConstLwePublicKey = const std::shared_ptr<const LwePublicKeyImpl>;
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_BOOLEAN_LWE_PUBLIC_KEY_FWD_H_

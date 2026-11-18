@@ -72,7 +72,7 @@ std::string typeName(const T& ptr) {
 // returns the actual type of the object ptr points to.
 template <typename T,
           typename std::enable_if<std::is_pointer<T>::value || is_shared_pointer<T>::value, bool>::type = true>
-std::string objectTypeName(const T& ptr) {
+std::string object_type_name(const T& ptr) {
     return demangle(typeid(*ptr).name());
 }
 //=============================================================================

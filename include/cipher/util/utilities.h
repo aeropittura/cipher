@@ -43,10 +43,10 @@
 #include "cipher/util/inttypes.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * Determines if a number is a power of 2.
@@ -55,8 +55,8 @@ namespace lbcrypto {
  * @return is true if the unsigned int is a power of 2.
  */
 template <typename T, std::enable_if_t<std::is_integral_v<T> && std::is_unsigned_v<T>, bool> = true>
-inline constexpr bool IsPowerOfTwo(T Input) {
-    return Input && !(Input & (Input - 1));
+inline constexpr bool is_power_of_two(T input_value) {
+    return input_value && !(input_value & (input_value - 1));
 }
 
 /**
@@ -80,7 +80,7 @@ std::string replaceChar(std::string str, char in, char out);
  * @param b: operand 2
  * @return 1 if overflow occurs, 0 otherwise
  */
-inline uint64_t IsAdditionOverflow(uint64_t a, uint64_t b) {
+inline uint64_t is_addition_overflow(uint64_t a, uint64_t b) {
     return (a + b) < b;
 }
 
@@ -92,39 +92,39 @@ inline uint64_t IsAdditionOverflow(uint64_t a, uint64_t b) {
  * @return 1 if overflow occurs, 0 otherwise
  */
 
-inline uint64_t AdditionWithCarryOut(uint64_t a, uint64_t b, uint64_t& c) {
+inline uint64_t addition_with_carry_out(uint64_t a, uint64_t b, uint64_t& c) {
     return (c = a + b) < b;
 }
 
-// TODO (dsuponit): the name of this function Max64BitValue() is misleading as it returns the largest value
+// TODO (dsuponit): the name of this function max64_bit_value() is misleading as it returns the largest value
 // that can be converted from double to int64_t and not the max value of int64_t. The function must be renamed!!!
 /**
  * @brief Returns the largest magnitude, 2^63 - 2^9 - 1, that a double is allowed to have when it is converted
  * to int64_t; this is not the maximum int64_t value.
  * @return the conversion bound
  */
-inline constexpr int64_t Max64BitValue() {
+inline constexpr int64_t max64_bit_value() {
     return static_cast<int64_t>((uint64_t(1) << 63) - (uint64_t(1) << 9) - 1);
 }
 
-// TODO (dsuponit): the name of this function is64BitOverflow() is misleading as it checks if double can be
+// TODO (dsuponit): the name of this function is64_bit_overflow() is misleading as it checks if double can be
 // converted to int64_t. The name should reflect that. Something like isConvertableToInt64(). The function must be renamed!!!
 /**
  * @brief Checks whether a double is too large in magnitude to be converted to int64_t.
  * @param d value to test
- * @return true if |d| exceeds Max64BitValue()
+ * @return true if |d| exceeds max64_bit_value()
  */
-inline bool is64BitOverflow(double d) {
-    return std::abs(d) > static_cast<double>(Max64BitValue());
+inline bool is64_bit_overflow(double d) {
+    return std::abs(d) > static_cast<double>(max64_bit_value());
 }
 
-#if NATIVEINT == 128
+#if CIPHER_NATIVE_INT == 128
 /**
  * @brief Returns the largest magnitude, 2^127 - 2^73 - 1, that a double is allowed to have when it is converted
  * to a 128-bit signed integer.
  * @return the conversion bound
  */
-inline constexpr __int128 Max128BitValue() {
+inline constexpr __int128 max128_bit_value() {
     return static_cast<int128_t>((static_cast<uint128_t>(1) << 127) - (static_cast<uint128_t>(1) << 73) -
                                  static_cast<uint128_t>(1));
 }
@@ -132,10 +132,10 @@ inline constexpr __int128 Max128BitValue() {
 /**
  * @brief Checks whether a double is too large in magnitude to be converted to a 128-bit signed integer.
  * @param d value to test
- * @return true if |d| exceeds Max128BitValue()
+ * @return true if |d| exceeds max128_bit_value()
  */
-inline bool is128BitOverflow(double d) {
-    return std::abs(d) > static_cast<double>(Max128BitValue());
+inline bool is128_bit_overflow(double d) {
+    return std::abs(d) > static_cast<double>(max128_bit_value());
 }
 
 enum { MAX_DOUBLE_PRECISION = 52 };
@@ -148,7 +148,7 @@ enum { MAX_DOUBLE_PRECISION = 52 };
  * @param modulus the modulus to reduce against, non-zero.
  * @return value modulo modulus, in [0, modulus).
  */
-inline uint64_t SignedToResidue(int64_t value, uint64_t modulus) {
+inline uint64_t signed_to_residue(int64_t value, uint64_t modulus) {
     const bool negative = value < 0;
     const uint64_t magnitude = negative ? uint64_t(0) - static_cast<uint64_t>(value) : static_cast<uint64_t>(value);
     const uint64_t residue = (magnitude < modulus) ? magnitude : magnitude % modulus;
@@ -163,9 +163,9 @@ inline uint64_t SignedToResidue(int64_t value, uint64_t modulus) {
  * @return value modulo modulus, in [0, modulus).
  */
 template <typename IntType, std::enable_if_t<!std::is_integral_v<IntType>, bool> = true>
-IntType SignedToResidue(int64_t value, const IntType& modulus) {
-    if (modulus.GetMSB() <= 64)
-        return IntType(SignedToResidue(value, modulus.template ConvertToInt<uint64_t>()));
+IntType signed_to_residue(int64_t value, const IntType& modulus) {
+    if (modulus.get_msb() <= 64)
+        return IntType(signed_to_residue(value, modulus.template convert_to_int<uint64_t>()));
     if (value >= 0)
         return IntType(static_cast<uint64_t>(value));
     const uint64_t magnitude = uint64_t(0) - static_cast<uint64_t>(value);
@@ -174,21 +174,21 @@ IntType SignedToResidue(int64_t value, const IntType& modulus) {
 
 /**
  * @brief Checks whether a double fits the signed range of the native integer type: int32_t max for 32-bit
- * NativeInteger, Max64BitValue() for 64-bit, Max128BitValue() for 128-bit.
+ * NativeInteger, max64_bit_value() for 64-bit, max128_bit_value() for 128-bit.
  * @param d value to test
- * @return true if |d| is within the bound for the configured NATIVEINT size
+ * @return true if |d| is within the bound for the configured CIPHER_NATIVE_INT size
  */
-inline bool isConvertableToNativeInt(double d) {
-    if constexpr (NATIVEINT == 32)
+inline bool is_convertable_to_native_int(double d) {
+    if constexpr (CIPHER_NATIVE_INT == 32)
         return std::abs(d) <= static_cast<double>(std::numeric_limits<int32_t>::max());
-    if constexpr (NATIVEINT == 64)
-        return std::abs(d) <= static_cast<double>(Max64BitValue());
-#if NATIVEINT == 128
-    if constexpr (NATIVEINT == 128)
-        return std::abs(d) <= static_cast<double>(Max128BitValue());
+    if constexpr (CIPHER_NATIVE_INT == 64)
+        return std::abs(d) <= static_cast<double>(max64_bit_value());
+#if CIPHER_NATIVE_INT == 128
+    if constexpr (CIPHER_NATIVE_INT == 128)
+        return std::abs(d) <= static_cast<double>(max128_bit_value());
 #endif
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_UTIL_UTILITIES_H_

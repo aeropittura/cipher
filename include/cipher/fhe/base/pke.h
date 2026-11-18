@@ -42,10 +42,10 @@
 #include "cipher/fhe/key/public_key_fwd.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 template <class Element>
 class KeyPair;
 
@@ -54,7 +54,7 @@ class KeyPair;
  * @tparam Element a ring element.
  */
 template <class Element>
-class PKEBase {
+class BasePke {
     using ParmType = typename Element::Params;
     using IntType = typename Element::Integer;
     using DugType = typename Element::DugType;
@@ -62,66 +62,66 @@ class PKEBase {
     using TugType = typename Element::TugType;
 
   public:
-    virtual ~PKEBase() = default;
+    virtual ~BasePke() = default;
 
     /**
      * Function to generate public and private keys
      *
      * @param cc the crypto context the keys are generated for.
-     * @param makeSparse set to true to generate a sparse (ring-reduction) key; no longer supported.
+     * @param make_sparse_value set to true to generate a sparse (ring-reduction) key; no longer supported.
      * @return the generated key pair.
      */
-    virtual KeyPair<Element> KeyGenInternal(CryptoContext<Element> cc, bool makeSparse) const;
+    virtual KeyPair<Element> key_gen_internal(CryptoContext<Element> cc, bool make_sparse_value) const;
 
-    //  virtual KeyPair<Element> KeyGen(CryptoContext<Element> cc,
-    //                                    bool makeSparse,
+    //  virtual KeyPair<Element> key_gen(CryptoContext<Element> cc,
+    //                                    bool make_sparse_value,
     //                                    PublicKey<Element>
-    // publicKey);
+    // public_key);
 
     /**
      * Method for encrypting plaintext using LBC
      *
      * @param plaintext copy of the plaintext input. NOTE a copy is passed! That
      * is NOT an error!
-     * @param privateKey private key used for encryption.
+     * @param private_key private key used for encryption.
      * @return ciphertext which results from encryption.
      */
-    virtual Ciphertext<Element> Encrypt(Element plaintext, const PrivateKey<Element> privateKey) const;
+    virtual Ciphertext<Element> encrypt(Element plaintext, const PrivateKey<Element> private_key) const;
 
     /**
      * Method for encrypting plaintext using LBC
      *
      * @param plaintext copy of the plaintext element. NOTE a copy is passed!
      * That is NOT an error!
-     * @param publicKey public key used for encryption.
+     * @param public_key public key used for encryption.
      * @return ciphertext which results from encryption.
      */
-    virtual Ciphertext<Element> Encrypt(Element plaintext, const PublicKey<Element> publicKey) const;
+    virtual Ciphertext<Element> encrypt(Element plaintext, const PublicKey<Element> public_key) const;
 
     /**
      * Method for decrypting plaintext using LBC
      *
      * @param ciphertext ciphertext to be decrypted.
-     * @param privateKey private key used for decryption.
+     * @param private_key private key used for decryption.
      * @param plaintext the plaintext output.
      * @return the decoding result.
      */
-    virtual DecryptResult Decrypt(ConstCiphertext<Element> ciphertext, const PrivateKey<Element> privateKey,
+    virtual DecryptResult decrypt(ConstCiphertext<Element> ciphertext, const PrivateKey<Element> private_key,
                                   NativePoly* plaintext) const {
-        OPENFHE_THROW("Not supported for NativePoly");
+        CIPHER_THROW("Not supported for NativePoly");
     }
 
     /**
      * Method for decrypting plaintext using LBC
      *
      * @param ciphertext ciphertext to be decrypted.
-     * @param privateKey private key used for decryption.
+     * @param private_key private key used for decryption.
      * @param plaintext the plaintext output.
      * @return the decoding result.
      */
-    virtual DecryptResult Decrypt(ConstCiphertext<Element> ciphertext, const PrivateKey<Element> privateKey,
+    virtual DecryptResult decrypt(ConstCiphertext<Element> ciphertext, const PrivateKey<Element> private_key,
                                   Poly* plaintext) const {
-        OPENFHE_THROW("Not supported for Poly");
+        CIPHER_THROW("Not supported for Poly");
     }
 
     /////////////////////////////////////////
@@ -132,12 +132,12 @@ class PKEBase {
      * Generates a fresh encryption of zero under the secret key: {b = ns*e - a*s, a}, where a is uniform,
      * e is sampled from the discrete Gaussian generator and ns is the noise scale of the crypto parameters.
      *
-     * @param privateKey the private key s.
+     * @param private_key the private key s.
      * @param params the element parameters of the encryption (nullptr = the element parameters of the
      * crypto parameters).
      * @return the two elements {b, a} of the encryption of zero in EVALUATION format.
      */
-    virtual std::shared_ptr<std::vector<Element>> EncryptZeroCore(const PrivateKey<Element> privateKey,
+    virtual std::shared_ptr<std::vector<Element>> encrypt_zero_core(const PrivateKey<Element> private_key,
                                                                   const std::shared_ptr<ParmType> params) const;
 
     /**
@@ -145,12 +145,12 @@ class PKEBase {
      * where v is sampled from the secret key distribution, e0 and e1 from the discrete Gaussian generator
      * and ns is the noise scale. Towers of the public key beyond those in \p params are dropped.
      *
-     * @param publicKey the public key.
+     * @param public_key the public key.
      * @param params the element parameters of the encryption (nullptr = the element parameters of the
      * crypto parameters).
      * @return the two elements of the encryption of zero in EVALUATION format.
      */
-    virtual std::shared_ptr<std::vector<Element>> EncryptZeroCore(const PublicKey<Element> publicKey,
+    virtual std::shared_ptr<std::vector<Element>> encrypt_zero_core(const PublicKey<Element> public_key,
                                                                   const std::shared_ptr<ParmType> params) const;
 
     /**
@@ -158,12 +158,12 @@ class PKEBase {
      * elements, in EVALUATION format; the scheme-specific Decrypt then scales and rounds it.
      *
      * @param cv the elements of the ciphertext.
-     * @param privateKey the private key s.
+     * @param private_key the private key s.
      * @return the decryption polynomial (message plus noise, still scaled).
      */
-    virtual Element DecryptCore(const std::vector<Element>& cv, const PrivateKey<Element> privateKey) const;
+    virtual Element decrypt_core(const std::vector<Element>& cv, const PrivateKey<Element> private_key) const;
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_BASE_PKE_H_

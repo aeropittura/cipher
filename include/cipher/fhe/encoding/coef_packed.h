@@ -45,7 +45,7 @@
 
 #include "cipher/fhe/encoding/plaintext.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @class CoefPackedEncoding
@@ -58,24 +58,24 @@ class CoefPackedEncoding : public PlaintextImpl {
 
   protected:
     /**
-     * @brief PrintValue() is called by operator<<
+     * @brief print_value() is called by operator<<
      * @param out stream to print to
      */
-    void PrintValue(std::ostream& out) const override {
+    void print_value(std::ostream& out) const override {
         out << "(";
 
         // for sanity's sake: get rid of all trailing zeroes and print "..." instead
         size_t i = value.size();
-        bool allZeroes = true;
+        bool all_zeroes = true;
         while (i > 0) {
             --i;
             if (value[i] != 0) {
-                allZeroes = false;
+                all_zeroes = false;
                 break;
             }
         }
 
-        if (allZeroes == false) {
+        if (all_zeroes == false) {
             for (size_t j = 0; j <= i; ++j)
                 out << value[j] << ", ";
         }
@@ -89,7 +89,7 @@ class CoefPackedEncoding : public PlaintextImpl {
      * @param rhs - the other plaintext to compare to.
      * @return whether the two plaintext are equivalent.
      */
-    bool CompareTo(const PlaintextImpl& rhs) const override {
+    bool compare_to(const PlaintextImpl& rhs) const override {
         if (typeid(rhs) != typeid(CoefPackedEncoding))
             return false;
 
@@ -100,48 +100,48 @@ class CoefPackedEncoding : public PlaintextImpl {
   public:
     /**
      * @brief Constructs an empty coefficient-packed plaintext over the given element parameters.
-     * @param vp element parameters of the polynomial (Poly, NativePoly or DCRTPoly parameters)
+     * @param vp element parameters of the polynomial (Poly, NativePoly or RnsPoly parameters)
      * @param ep encoding parameters
-     * @param schemeId scheme the plaintext is created for
+     * @param scheme_id_value scheme the plaintext is created for
      */
     template <typename T, typename std::enable_if<std::is_same<T, Poly::Params>::value ||
                                                           std::is_same<T, NativePoly::Params>::value ||
-                                                          std::is_same<T, DCRTPoly::Params>::value,
+                                                          std::is_same<T, RnsPoly::Params>::value,
                                                   bool>::type = true>
-    CoefPackedEncoding(std::shared_ptr<T> vp, EncodingParams ep, SCHEME schemeId = SCHEME::INVALID_SCHEME)
-        : PlaintextImpl(vp, ep, COEF_PACKED_ENCODING, schemeId) {}
+    CoefPackedEncoding(std::shared_ptr<T> vp, EncodingParams ep, SCHEME scheme_id_value = SCHEME::INVALID_SCHEME)
+        : PlaintextImpl(vp, ep, COEF_PACKED_ENCODING, scheme_id_value) {}
 
     /**
      * @brief Constructs a coefficient-packed plaintext holding the given coefficients (not encoded yet; call
      * Encode).
-     * @param vp element parameters of the polynomial (Poly, NativePoly or DCRTPoly parameters)
+     * @param vp element parameters of the polynomial (Poly, NativePoly or RnsPoly parameters)
      * @param ep encoding parameters
      * @param coeffs the integer coefficients
-     * @param schemeId scheme the plaintext is created for
+     * @param scheme_id_value scheme the plaintext is created for
      */
     template <typename T, typename std::enable_if<std::is_same<T, Poly::Params>::value ||
                                                           std::is_same<T, NativePoly::Params>::value ||
-                                                          std::is_same<T, DCRTPoly::Params>::value,
+                                                          std::is_same<T, RnsPoly::Params>::value,
                                                   bool>::type = true>
     CoefPackedEncoding(std::shared_ptr<T> vp, EncodingParams ep, const std::vector<int64_t>& coeffs,
-                       SCHEME schemeId = SCHEME::INVALID_SCHEME)
-        : PlaintextImpl(vp, ep, COEF_PACKED_ENCODING, schemeId), value(coeffs) {}
+                       SCHEME scheme_id_value = SCHEME::INVALID_SCHEME)
+        : PlaintextImpl(vp, ep, COEF_PACKED_ENCODING, scheme_id_value), value(coeffs) {}
 
     ~CoefPackedEncoding() override = default;
 
     /**
-     * GetCoefPackedValue
+     * get_coef_packed_value
      * @return the un-encoded integer vector
      */
-    const std::vector<int64_t>& GetCoefPackedValue() const override {
+    const std::vector<int64_t>& get_coef_packed_value() const override {
         return value;
     }
 
     /**
-     * SetIntVectorValue
+     * set_int_vector_value
      * @param val integer vector to initialize the plaintext
      */
-    void SetIntVectorValue(const std::vector<int64_t>& val) override {
+    void set_int_vector_value(const std::vector<int64_t>& val) override {
         value = val;
     }
 
@@ -149,32 +149,32 @@ class CoefPackedEncoding : public PlaintextImpl {
      * Encode the plaintext into the Poly
      * @return true on success
      */
-    bool Encode() override;
+    bool encode() override;
 
     /**
      * Decode the Poly into the string
      * @return true on success
      */
-    bool Decode() override;
+    bool decode() override;
 
     /**
      * Get length of the plaintext
      *
      * @return number of elements in this plaintext
      */
-    size_t GetLength() const override {
+    size_t get_length() const override {
         return value.size();
     }
 
     /**
-     * SetLength of the plaintext to the given size
+     * set_length of the plaintext to the given size
      * @param siz the new number of elements
      */
-    void SetLength(size_t siz) override {
+    void set_length(size_t siz) override {
         value.resize(siz);
     }
 };
 
-} /* namespace lbcrypto */
+} /* namespace cipher */
 
 #endif  // CIPHER_FHE_ENCODING_COEF_PACKED_H_

@@ -41,11 +41,11 @@
 #include "cipher/config.h"
 
 /**
- * GetOPENFHEVersion - Returns the library version string ("major.minor.patch").
+ * library_version - Returns the library version string ("major.minor.patch").
  * The value comes from the generated configuration header, so it is correct in
  * consumer code as well as inside the library build.
  */
-inline std::string GetOPENFHEVersion() {
+inline std::string library_version() {
     return CIPHER_VERSION_STRING;
 }
 

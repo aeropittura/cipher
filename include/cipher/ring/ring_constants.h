@@ -36,7 +36,7 @@
 #include <iosfwd>
 #include <string>
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Lists all modes for RLWE schemes, such as BGV and BFV, and for LWE schemes, such as DM and TFHE
@@ -55,13 +55,13 @@ enum SecretKeyDist {
  * @param str the name of the distribution, spelled as the enumerator.
  * @return the corresponding SecretKeyDist; throws if the name is unknown.
  */
-SecretKeyDist convertToSecretKeyDist(const std::string& str);
+SecretKeyDist convert_to_secret_key_dist(const std::string& str);
 /**
  * @brief Converts the numeric value of a secret key distribution to the enum value.
  * @param num the numeric value of the distribution.
  * @return the corresponding SecretKeyDist; throws if the value is not a valid enumerator.
  */
-SecretKeyDist convertToSecretKeyDist(uint32_t num);
+SecretKeyDist convert_to_secret_key_dist(uint32_t num);
 
 /**
  * @brief Writes the name of a secret key distribution to an output stream.
@@ -71,6 +71,6 @@ SecretKeyDist convertToSecretKeyDist(uint32_t num);
  */
 std::ostream& operator<<(std::ostream& s, SecretKeyDist m);
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_RING_RING_CONSTANTS_H_

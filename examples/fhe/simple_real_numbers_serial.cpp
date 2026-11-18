@@ -55,7 +55,7 @@
 #include "cipher/fhe/key/key_ser.h"
 #include "cipher/fhe/ckks/ser.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 /////////////////////////////////////////////////////////////////
 // NOTE:
@@ -67,21 +67,21 @@ using namespace lbcrypto;
 
 // Save-Load locations for keys
 const std::string DATAFOLDER = "data";
-std::string ccLocation = "/cryptocontext.txt";
-std::string pubKeyLocation = "/key_pub.txt";    // Pub key
-std::string multKeyLocation = "/key_mult.txt";  // relinearization key
-std::string rotKeyLocation = "/key_rot.txt";    // automorphism / rotation key
+std::string cc_location = "/cryptocontext.txt";
+std::string pub_key_location = "/key_pub.txt";    // Pub key
+std::string mult_key_location = "/key_mult.txt";  // relinearization key
+std::string rot_key_location = "/key_rot.txt";    // automorphism / rotation key
 
 // Save-load locations for RAW ciphertexts
-std::string cipherOneLocation = "/ciphertext1.txt";
-std::string cipherTwoLocation = "/ciphertext2.txt";
+std::string cipher_one_location = "/ciphertext1.txt";
+std::string cipher_two_location = "/ciphertext2.txt";
 
 // Save-load locations for evaluated ciphertexts
-std::string cipherMultLocation = "/ciphertextMult.txt";
-std::string cipherAddLocation = "/ciphertextAdd.txt";
-std::string cipherRotLocation = "/ciphertextRot.txt";
-std::string cipherRotNegLocation = "/ciphertextRotNegLocation.txt";
-std::string clientVectorLocation = "/ciphertextVectorFromClient.txt";
+std::string cipher_mult_location = "/ciphertextMult.txt";
+std::string cipher_add_location = "/ciphertextAdd.txt";
+std::string cipher_rot_location = "/ciphertextRot.txt";
+std::string cipher_rot_neg_location = "/ciphertextRotNegLocation.txt";
+std::string client_vector_location = "/ciphertextVectorFromClient.txt";
 
 /**
  * Demarcate - Visual separator between the sections of code
@@ -95,38 +95,38 @@ void demarcate(const std::string& msg) {
 }
 
 /**
- * serverSetupAndWrite
+ * server_setup_and_write
  *  - simulates a server at startup where we generate a cryptocontext and keys.
  *  - then, we generate some data (akin to loading raw data on an enclave)
  * before encrypting the data
- * @param multDepth - multiplication depth
- * @param scaleModSize - number of bits to use in the scale factor (not the
+ * @param mult_depth_value - multiplication depth
+ * @param scale_mod_size - number of bits to use in the scale factor (not the
  * scale factor itself)
- * @param batchSize - batch size to use
- * @return Tuple<cryptoContext, keyPair>
+ * @param batch_size - batch size to use
+ * @return Tuple<crypto_context, key_pair>
  */
-std::tuple<CryptoContext<DCRTPoly>, KeyPair<DCRTPoly>, int> serverSetupAndWrite(int multDepth, int scaleModSize,
-                                                                                int batchSize) {
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(multDepth);
-    parameters.SetScalingModSize(scaleModSize);
-    parameters.SetBatchSize(batchSize);
+std::tuple<CryptoContext<RnsPoly>, KeyPair<RnsPoly>, int> server_setup_and_write(int mult_depth_value, int scale_mod_size,
+                                                                                int batch_size) {
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_multiplicative_depth(mult_depth_value);
+    parameters.set_scaling_mod_size(scale_mod_size);
+    parameters.set_batch_size(batch_size);
 
-    CryptoContext<DCRTPoly> serverCC = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> server_cc = make_crypto_context(parameters);
 
-    serverCC->Enable(PKE);
-    serverCC->Enable(KEYSWITCH);
-    serverCC->Enable(LEVELEDSHE);
+    server_cc->enable(PKE);
+    server_cc->enable(KEYSWITCH);
+    server_cc->enable(LEVELEDSHE);
 
     std::cout << "Cryptocontext generated" << std::endl;
 
-    KeyPair<DCRTPoly> serverKP = serverCC->KeyGen();
+    KeyPair<RnsPoly> server_kp = server_cc->key_gen();
     std::cout << "Keypair generated" << std::endl;
 
-    serverCC->EvalMultKeyGen(serverKP.secretKey);
+    server_cc->eval_mult_key_gen(server_kp.secret_key);
     std::cout << "Eval Mult Keys/ Relinearization keys have been generated" << std::endl;
 
-    serverCC->EvalRotateKeyGen(serverKP.secretKey, {1, 2, -1, -2});
+    server_cc->eval_rotate_key_gen(server_kp.secret_key, {1, 2, -1, -2});
     std::cout << "Rotation keys generated" << std::endl;
 
     std::vector<std::complex<double>> vec1 = {1.0, 2.0, 3.0, 4.0};
@@ -140,17 +140,17 @@ std::tuple<CryptoContext<DCRTPoly>, KeyPair<DCRTPoly>, int> serverSetupAndWrite(
 
     std::cout << '\n' << std::endl;
 
-    Plaintext serverP1 = serverCC->MakeCKKSPackedPlaintext(vec1);
-    Plaintext serverP2 = serverCC->MakeCKKSPackedPlaintext(vec2);
-    Plaintext serverP3 = serverCC->MakeCKKSPackedPlaintext(vec3);
+    Plaintext server_p1 = server_cc->make_ckks_packed_plaintext(vec1);
+    Plaintext server_p2 = server_cc->make_ckks_packed_plaintext(vec2);
+    Plaintext server_p3 = server_cc->make_ckks_packed_plaintext(vec3);
 
-    std::cout << "Plaintext version of first vector: " << serverP1 << std::endl;
+    std::cout << "Plaintext version of first vector: " << server_p1 << std::endl;
 
     std::cout << "Plaintexts have been generated from complex-double vectors" << std::endl;
 
-    auto serverC1 = serverCC->Encrypt(serverKP.publicKey, serverP1);
-    auto serverC2 = serverCC->Encrypt(serverKP.publicKey, serverP2);
-    auto serverC3 = serverCC->Encrypt(serverKP.publicKey, serverP3);
+    auto server_c1 = server_cc->encrypt(server_kp.public_key, server_p1);
+    auto server_c2 = server_cc->encrypt(server_kp.public_key, server_p2);
+    auto server_c3 = server_cc->encrypt(server_kp.public_key, server_p3);
 
     std::cout << "Ciphertexts have been generated from Plaintexts" << std::endl;
 
@@ -168,7 +168,7 @@ std::tuple<CryptoContext<DCRTPoly>, KeyPair<DCRTPoly>, int> serverSetupAndWrite(
 
     demarcate("Part 2: Data Serialization (server)");
 
-    if (!Serial::SerializeToFile(DATAFOLDER + ccLocation, serverCC, SerType::BINARY)) {
+    if (!serialization::serialize_to_file(DATAFOLDER + cc_location, server_cc, SerType::BINARY)) {
         std::cerr << "Error writing serialization of the crypto context to "
                      "cryptocontext.txt"
                   << std::endl;
@@ -177,28 +177,28 @@ std::tuple<CryptoContext<DCRTPoly>, KeyPair<DCRTPoly>, int> serverSetupAndWrite(
 
     std::cout << "Cryptocontext serialized" << std::endl;
 
-    if (!Serial::SerializeToFile(DATAFOLDER + pubKeyLocation, serverKP.publicKey, SerType::BINARY)) {
+    if (!serialization::serialize_to_file(DATAFOLDER + pub_key_location, server_kp.public_key, SerType::BINARY)) {
         std::cerr << "Exception writing public key to pubkey.txt" << std::endl;
         std::exit(1);
     }
     std::cout << "Public key serialized" << std::endl;
 
-    std::ofstream multKeyFile(DATAFOLDER + multKeyLocation, std::ios::out | std::ios::binary);
-    if (multKeyFile.is_open()) {
-        if (!serverCC->SerializeEvalMultKey(multKeyFile, SerType::BINARY)) {
+    std::ofstream mult_key_file(DATAFOLDER + mult_key_location, std::ios::out | std::ios::binary);
+    if (mult_key_file.is_open()) {
+        if (!server_cc->serialize_eval_mult_key(mult_key_file, SerType::BINARY)) {
             std::cerr << "Error writing eval mult keys" << std::endl;
             std::exit(1);
         }
         std::cout << "EvalMult/ relinearization keys have been serialized" << std::endl;
-        multKeyFile.close();
+        mult_key_file.close();
     } else {
         std::cerr << "Error serializing EvalMult keys" << std::endl;
         std::exit(1);
     }
 
-    std::ofstream rotationKeyFile(DATAFOLDER + rotKeyLocation, std::ios::out | std::ios::binary);
-    if (rotationKeyFile.is_open()) {
-        if (!serverCC->SerializeEvalAutomorphismKey(rotationKeyFile, SerType::BINARY)) {
+    std::ofstream rotation_key_file(DATAFOLDER + rot_key_location, std::ios::out | std::ios::binary);
+    if (rotation_key_file.is_open()) {
+        if (!server_cc->serialize_eval_automorphism_key(rotation_key_file, SerType::BINARY)) {
             std::cerr << "Error writing rotation keys" << std::endl;
             std::exit(1);
         }
@@ -208,19 +208,19 @@ std::tuple<CryptoContext<DCRTPoly>, KeyPair<DCRTPoly>, int> serverSetupAndWrite(
         std::exit(1);
     }
 
-    if (!Serial::SerializeToFile(DATAFOLDER + cipherOneLocation, serverC1, SerType::BINARY)) {
+    if (!serialization::serialize_to_file(DATAFOLDER + cipher_one_location, server_c1, SerType::BINARY)) {
         std::cerr << " Error writing ciphertext 1" << std::endl;
     }
 
-    if (!Serial::SerializeToFile(DATAFOLDER + cipherTwoLocation, serverC2, SerType::BINARY)) {
+    if (!serialization::serialize_to_file(DATAFOLDER + cipher_two_location, server_c2, SerType::BINARY)) {
         std::cerr << " Error writing ciphertext 2" << std::endl;
     }
 
-    return std::make_tuple(serverCC, serverKP, vec1.size());
+    return std::make_tuple(server_cc, server_kp, vec1.size());
 }
 
 /**
- * clientProcess
+ * client_process
  *  - deserialize data from a file which simulates receiving data from a server
  * after making a request
  *  - we then process the data by doing operations (multiplication, addition,
@@ -228,180 +228,180 @@ std::tuple<CryptoContext<DCRTPoly>, KeyPair<DCRTPoly>, int> serverSetupAndWrite(
  *  - !! We also create an object and encrypt it in this function before sending
  * it off to the server to be decrypted
  */
-void clientProcess() {
-    CryptoContext<DCRTPoly> clientCC;
-    clientCC->ClearEvalMultKeys();
-    clientCC->ClearEvalAutomorphismKeys();
-    lbcrypto::CryptoContextFactory<lbcrypto::DCRTPoly>::ReleaseAllContexts();
-    if (!Serial::DeserializeFromFile(DATAFOLDER + ccLocation, clientCC, SerType::BINARY)) {
+void client_process() {
+    CryptoContext<RnsPoly> client_cc;
+    client_cc->clear_eval_mult_keys();
+    client_cc->clear_eval_automorphism_keys();
+    cipher::ContextFactory<cipher::RnsPoly>::release_all_contexts();
+    if (!serialization::deserialize_from_file(DATAFOLDER + cc_location, client_cc, SerType::BINARY)) {
         std::cerr << "I cannot read serialized data from: " << DATAFOLDER << "/cryptocontext.txt" << std::endl;
         std::exit(1);
     }
     std::cout << "Client CC deserialized";
 
-    KeyPair<DCRTPoly> clientKP;  // We do NOT have a secret key. The client
+    KeyPair<RnsPoly> client_kp;  // We do NOT have a secret key. The client
     // should not have access to this
-    PublicKey<DCRTPoly> clientPublicKey;
-    if (!Serial::DeserializeFromFile(DATAFOLDER + pubKeyLocation, clientPublicKey, SerType::BINARY)) {
+    PublicKey<RnsPoly> client_public_key;
+    if (!serialization::deserialize_from_file(DATAFOLDER + pub_key_location, client_public_key, SerType::BINARY)) {
         std::cerr << "I cannot read serialized data from: " << DATAFOLDER << "/cryptocontext.txt" << std::endl;
         std::exit(1);
     }
     std::cout << "Client KP deserialized" << '\n' << std::endl;
 
-    std::ifstream multKeyIStream(DATAFOLDER + multKeyLocation, std::ios::in | std::ios::binary);
-    if (!multKeyIStream.is_open()) {
-        std::cerr << "Cannot read serialization from " << DATAFOLDER + multKeyLocation << std::endl;
+    std::ifstream mult_key_i_stream(DATAFOLDER + mult_key_location, std::ios::in | std::ios::binary);
+    if (!mult_key_i_stream.is_open()) {
+        std::cerr << "Cannot read serialization from " << DATAFOLDER + mult_key_location << std::endl;
         std::exit(1);
     }
-    if (!clientCC->DeserializeEvalMultKey(multKeyIStream, SerType::BINARY)) {
+    if (!client_cc->deserialize_eval_mult_key(mult_key_i_stream, SerType::BINARY)) {
         std::cerr << "Could not deserialize eval mult key file" << std::endl;
         std::exit(1);
     }
 
     std::cout << "Deserialized eval mult keys" << '\n' << std::endl;
-    std::ifstream rotKeyIStream(DATAFOLDER + rotKeyLocation, std::ios::in | std::ios::binary);
-    if (!rotKeyIStream.is_open()) {
-        std::cerr << "Cannot read serialization from " << DATAFOLDER + multKeyLocation << std::endl;
+    std::ifstream rot_key_i_stream(DATAFOLDER + rot_key_location, std::ios::in | std::ios::binary);
+    if (!rot_key_i_stream.is_open()) {
+        std::cerr << "Cannot read serialization from " << DATAFOLDER + mult_key_location << std::endl;
         std::exit(1);
     }
-    if (!clientCC->DeserializeEvalAutomorphismKey(rotKeyIStream, SerType::BINARY)) {
+    if (!client_cc->deserialize_eval_automorphism_key(rot_key_i_stream, SerType::BINARY)) {
         std::cerr << "Could not deserialize eval rot key file" << std::endl;
         std::exit(1);
     }
 
-    Ciphertext<DCRTPoly> clientC1;
-    Ciphertext<DCRTPoly> clientC2;
-    if (!Serial::DeserializeFromFile(DATAFOLDER + cipherOneLocation, clientC1, SerType::BINARY)) {
-        std::cerr << "Cannot read serialization from " << DATAFOLDER + cipherOneLocation << std::endl;
+    Ciphertext<RnsPoly> client_c1;
+    Ciphertext<RnsPoly> client_c2;
+    if (!serialization::deserialize_from_file(DATAFOLDER + cipher_one_location, client_c1, SerType::BINARY)) {
+        std::cerr << "Cannot read serialization from " << DATAFOLDER + cipher_one_location << std::endl;
         std::exit(1);
     }
     std::cout << "Deserialized ciphertext1" << '\n' << std::endl;
 
-    if (!Serial::DeserializeFromFile(DATAFOLDER + cipherTwoLocation, clientC2, SerType::BINARY)) {
-        std::cerr << "Cannot read serialization from " << DATAFOLDER + cipherTwoLocation << std::endl;
+    if (!serialization::deserialize_from_file(DATAFOLDER + cipher_two_location, client_c2, SerType::BINARY)) {
+        std::cerr << "Cannot read serialization from " << DATAFOLDER + cipher_two_location << std::endl;
         std::exit(1);
     }
 
     std::cout << "Deserialized ciphertext1" << '\n' << std::endl;
-    auto clientCiphertextMult = clientCC->EvalMult(clientC1, clientC2);
-    auto clientCiphertextAdd = clientCC->EvalAdd(clientC1, clientC2);
-    auto clientCiphertextRot = clientCC->EvalRotate(clientC1, 1);
-    auto clientCiphertextRotNeg = clientCC->EvalRotate(clientC1, -1);
+    auto client_ciphertext_mult = client_cc->eval_mult(client_c1, client_c2);
+    auto client_ciphertext_add = client_cc->eval_add(client_c1, client_c2);
+    auto client_ciphertext_rot = client_cc->eval_rotate(client_c1, 1);
+    auto client_ciphertext_rot_neg = client_cc->eval_rotate(client_c1, -1);
 
     // Now, we want to simulate a client who is encrypting data for the server to
     // decrypt. E.g weights of a machine learning algorithm
     demarcate("Part 3.5: Client Serialization of data that has been operated on");
 
-    std::vector<std::complex<double>> clientVector1 = {1.0, 2.0, 3.0, 4.0};
-    auto clientPlaintext1 = clientCC->MakeCKKSPackedPlaintext(clientVector1);
-    auto clientInitiatedEncryption = clientCC->Encrypt(clientPublicKey, clientPlaintext1);
-    Serial::SerializeToFile(DATAFOLDER + cipherMultLocation, clientCiphertextMult, SerType::BINARY);
-    Serial::SerializeToFile(DATAFOLDER + cipherAddLocation, clientCiphertextAdd, SerType::BINARY);
-    Serial::SerializeToFile(DATAFOLDER + cipherRotLocation, clientCiphertextRot, SerType::BINARY);
-    Serial::SerializeToFile(DATAFOLDER + cipherRotNegLocation, clientCiphertextRotNeg, SerType::BINARY);
-    Serial::SerializeToFile(DATAFOLDER + clientVectorLocation, clientInitiatedEncryption, SerType::BINARY);
+    std::vector<std::complex<double>> client_vector1 = {1.0, 2.0, 3.0, 4.0};
+    auto client_plaintext1 = client_cc->make_ckks_packed_plaintext(client_vector1);
+    auto client_initiated_encryption = client_cc->encrypt(client_public_key, client_plaintext1);
+    serialization::serialize_to_file(DATAFOLDER + cipher_mult_location, client_ciphertext_mult, SerType::BINARY);
+    serialization::serialize_to_file(DATAFOLDER + cipher_add_location, client_ciphertext_add, SerType::BINARY);
+    serialization::serialize_to_file(DATAFOLDER + cipher_rot_location, client_ciphertext_rot, SerType::BINARY);
+    serialization::serialize_to_file(DATAFOLDER + cipher_rot_neg_location, client_ciphertext_rot_neg, SerType::BINARY);
+    serialization::serialize_to_file(DATAFOLDER + client_vector_location, client_initiated_encryption, SerType::BINARY);
 
     std::cout << "Serialized all ciphertexts from client" << '\n' << std::endl;
 }
 
 /**
- * serverVerification
+ * server_verification
  *  - deserialize data from the client.
  *  - Verify that the results are as we expect
  * @param cc cryptocontext that was previously generated
  * @param kp keypair that was previously generated
- * @param vectorSize vector size of the vectors supplied
+ * @param vector_size vector size of the vectors supplied
  * @return
  *  5-tuple of the plaintexts of various operations
  */
 
-std::tuple<Plaintext, Plaintext, Plaintext, Plaintext, Plaintext> serverVerification(CryptoContext<DCRTPoly>& cc,
-                                                                                     KeyPair<DCRTPoly>& kp,
-                                                                                     int vectorSize) {
-    Ciphertext<DCRTPoly> serverCiphertextFromClient_Mult;
-    Ciphertext<DCRTPoly> serverCiphertextFromClient_Add;
-    Ciphertext<DCRTPoly> serverCiphertextFromClient_Rot;
-    Ciphertext<DCRTPoly> serverCiphertextFromClient_RogNeg;
-    Ciphertext<DCRTPoly> serverCiphertextFromClient_Vec;
+std::tuple<Plaintext, Plaintext, Plaintext, Plaintext, Plaintext> server_verification(CryptoContext<RnsPoly>& cc,
+                                                                                     KeyPair<RnsPoly>& kp,
+                                                                                     int vector_size) {
+    Ciphertext<RnsPoly> server_ciphertext_from_client_mult;
+    Ciphertext<RnsPoly> server_ciphertext_from_client_add;
+    Ciphertext<RnsPoly> server_ciphertext_from_client_rot;
+    Ciphertext<RnsPoly> server_ciphertext_from_client_rog_neg;
+    Ciphertext<RnsPoly> server_ciphertext_from_client_vec;
 
-    Serial::DeserializeFromFile(DATAFOLDER + cipherMultLocation, serverCiphertextFromClient_Mult, SerType::BINARY);
-    Serial::DeserializeFromFile(DATAFOLDER + cipherAddLocation, serverCiphertextFromClient_Add, SerType::BINARY);
-    Serial::DeserializeFromFile(DATAFOLDER + cipherRotLocation, serverCiphertextFromClient_Rot, SerType::BINARY);
-    Serial::DeserializeFromFile(DATAFOLDER + cipherRotNegLocation, serverCiphertextFromClient_RogNeg, SerType::BINARY);
-    Serial::DeserializeFromFile(DATAFOLDER + clientVectorLocation, serverCiphertextFromClient_Vec, SerType::BINARY);
+    serialization::deserialize_from_file(DATAFOLDER + cipher_mult_location, server_ciphertext_from_client_mult, SerType::BINARY);
+    serialization::deserialize_from_file(DATAFOLDER + cipher_add_location, server_ciphertext_from_client_add, SerType::BINARY);
+    serialization::deserialize_from_file(DATAFOLDER + cipher_rot_location, server_ciphertext_from_client_rot, SerType::BINARY);
+    serialization::deserialize_from_file(DATAFOLDER + cipher_rot_neg_location, server_ciphertext_from_client_rog_neg, SerType::BINARY);
+    serialization::deserialize_from_file(DATAFOLDER + client_vector_location, server_ciphertext_from_client_vec, SerType::BINARY);
     std::cout << "Deserialized all data from client on server" << '\n' << std::endl;
 
     demarcate("Part 5: Correctness verification");
 
-    Plaintext serverPlaintextFromClient_Mult;
-    Plaintext serverPlaintextFromClient_Add;
-    Plaintext serverPlaintextFromClient_Rot;
-    Plaintext serverPlaintextFromClient_RotNeg;
-    Plaintext serverPlaintextFromClient_Vec;
+    Plaintext server_plaintext_from_client_mult;
+    Plaintext server_plaintext_from_client_add;
+    Plaintext server_plaintext_from_client_rot;
+    Plaintext server_plaintext_from_client_rot_neg;
+    Plaintext server_plaintext_from_client_vec;
 
-    cc->Decrypt(kp.secretKey, serverCiphertextFromClient_Mult, &serverPlaintextFromClient_Mult);
-    cc->Decrypt(kp.secretKey, serverCiphertextFromClient_Add, &serverPlaintextFromClient_Add);
-    cc->Decrypt(kp.secretKey, serverCiphertextFromClient_Rot, &serverPlaintextFromClient_Rot);
-    cc->Decrypt(kp.secretKey, serverCiphertextFromClient_RogNeg, &serverPlaintextFromClient_RotNeg);
-    cc->Decrypt(kp.secretKey, serverCiphertextFromClient_Vec, &serverPlaintextFromClient_Vec);
+    cc->decrypt(kp.secret_key, server_ciphertext_from_client_mult, &server_plaintext_from_client_mult);
+    cc->decrypt(kp.secret_key, server_ciphertext_from_client_add, &server_plaintext_from_client_add);
+    cc->decrypt(kp.secret_key, server_ciphertext_from_client_rot, &server_plaintext_from_client_rot);
+    cc->decrypt(kp.secret_key, server_ciphertext_from_client_rog_neg, &server_plaintext_from_client_rot_neg);
+    cc->decrypt(kp.secret_key, server_ciphertext_from_client_vec, &server_plaintext_from_client_vec);
 
-    serverPlaintextFromClient_Mult->SetLength(vectorSize);
-    serverPlaintextFromClient_Add->SetLength(vectorSize);
-    serverPlaintextFromClient_Vec->SetLength(vectorSize);
-    serverPlaintextFromClient_Rot->SetLength(vectorSize + 1);
-    serverPlaintextFromClient_RotNeg->SetLength(vectorSize + 1);
+    server_plaintext_from_client_mult->set_length(vector_size);
+    server_plaintext_from_client_add->set_length(vector_size);
+    server_plaintext_from_client_vec->set_length(vector_size);
+    server_plaintext_from_client_rot->set_length(vector_size + 1);
+    server_plaintext_from_client_rot_neg->set_length(vector_size + 1);
 
-    return std::make_tuple(serverPlaintextFromClient_Mult, serverPlaintextFromClient_Add, serverPlaintextFromClient_Vec,
-                           serverPlaintextFromClient_Rot, serverPlaintextFromClient_RotNeg);
+    return std::make_tuple(server_plaintext_from_client_mult, server_plaintext_from_client_add, server_plaintext_from_client_vec,
+                           server_plaintext_from_client_rot, server_plaintext_from_client_rot_neg);
 }
 int main() {
     std::cout << "This program requres the subdirectory `" << DATAFOLDER << "' to exist, otherwise you will get "
               << "an error writing serializations." << std::endl;
 
     // Set main params
-    const int multDepth = 5;
-    const int scaleModSize = 40;
-    const uint32_t batchSize = 32;
+    const int mult_depth_value = 5;
+    const int scale_mod_size = 40;
+    const uint32_t batch_size = 32;
 
-    const int cryptoContextIdx = 0;
-    const int keyPairIdx = 1;
-    const int vectorSizeIdx = 2;
+    const int crypto_context_idx = 0;
+    const int key_pair_idx = 1;
+    const int vector_size_idx = 2;
 
-    const int cipherMultResIdx = 0;
-    const int cipherAddResIdx = 1;
-    const int cipherVecResIdx = 2;
-    const int cipherRotResIdx = 3;
-    const int cipherRotNegResIdx = 4;
+    const int cipher_mult_res_idx = 0;
+    const int cipher_add_res_idx = 1;
+    const int cipher_vec_res_idx = 2;
+    const int cipher_rot_res_idx = 3;
+    const int cipher_rot_neg_res_idx = 4;
 
     demarcate(
             "Part 1: Cryptocontext generation, key generation, data encryption "
             "(server)");
 
-    auto tupleCryptoContext_KeyPair = serverSetupAndWrite(multDepth, scaleModSize, batchSize);
-    auto cc = std::get<cryptoContextIdx>(tupleCryptoContext_KeyPair);
-    auto kp = std::get<keyPairIdx>(tupleCryptoContext_KeyPair);
-    int vectorSize = std::get<vectorSizeIdx>(tupleCryptoContext_KeyPair);
+    auto tuple_crypto_context_key_pair = server_setup_and_write(mult_depth_value, scale_mod_size, batch_size);
+    auto cc = std::get<crypto_context_idx>(tuple_crypto_context_key_pair);
+    auto kp = std::get<key_pair_idx>(tuple_crypto_context_key_pair);
+    int vector_size = std::get<vector_size_idx>(tuple_crypto_context_key_pair);
 
     demarcate("Part 3: Client deserialize all data");
-    clientProcess();
+    client_process();
 
     demarcate("Part 4: Server deserialization of data from client. ");
 
-    auto tupleRes = serverVerification(cc, kp, vectorSize);
-    auto multRes = std::get<cipherMultResIdx>(tupleRes);
-    auto addRes = std::get<cipherAddResIdx>(tupleRes);
-    auto vecRes = std::get<cipherVecResIdx>(tupleRes);
-    auto rotRes = std::get<cipherRotResIdx>(tupleRes);
-    auto rotNegRes = std::get<cipherRotNegResIdx>(tupleRes);
+    auto tuple_res = server_verification(cc, kp, vector_size);
+    auto mult_res = std::get<cipher_mult_res_idx>(tuple_res);
+    auto add_res = std::get<cipher_add_res_idx>(tuple_res);
+    auto vec_res = std::get<cipher_vec_res_idx>(tuple_res);
+    auto rot_res = std::get<cipher_rot_res_idx>(tuple_res);
+    auto rot_neg_res = std::get<cipher_rot_neg_res_idx>(tuple_res);
 
     // vec1: {1,2,3,4}
     // vec2: {12.5, 13.5, 14.5, 15.5}
 
-    std::cout << multRes << std::endl;  // EXPECT: 12.5, 27.0, 43.5, 62
-    std::cout << addRes << std::endl;   // EXPECT: 13.5, 15.5, 17.5, 19.5
-    std::cout << vecRes << std::endl;   // EXPECT:  {1,2,3,4}
+    std::cout << mult_res << std::endl;  // EXPECT: 12.5, 27.0, 43.5, 62
+    std::cout << add_res << std::endl;   // EXPECT: 13.5, 15.5, 17.5, 19.5
+    std::cout << vec_res << std::endl;   // EXPECT:  {1,2,3,4}
 
     std::cout << "Displaying 5 elements of a 4-element vector to illustrate rotation" << '\n';
-    std::cout << rotRes << std::endl;     // EXPECT: {2, 3, 4, noise, noise}
-    std::cout << rotNegRes << std::endl;  // EXPECT: {noise, 1, 2, 3, 4}
+    std::cout << rot_res << std::endl;     // EXPECT: {2, 3, 4, noise, noise}
+    std::cout << rot_neg_res << std::endl;  // EXPECT: {noise, 1, 2, 3, 4}
 }

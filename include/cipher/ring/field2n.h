@@ -48,7 +48,7 @@
 #include "cipher/util/inttypes.h"
 #include "cipher/util/serializable.h"
 
-namespace lbcrypto {
+namespace cipher {
 /**
  * @class Field2n
  * @brief A class to represent field elements with power-of-2 dimension.
@@ -75,11 +75,11 @@ class Field2n : public std::vector<std::complex<double>>, public Serializable {
      * @param size element size
      * @param f format/representation of the element.  Initially set to
      * Format::EVALUATION representation.
-     * @param initializeElementToZero flag for initializing values to zero.  It is
+     * @param initialize_element_to_zero flag for initializing values to zero.  It is
      * set to false by default.
      */
-    Field2n(uint32_t size, Format f = Format::EVALUATION, bool initializeElementToZero = false)  // NOLINT
-        : std::vector<std::complex<double>>(size, initializeElementToZero ? 0 : -std::numeric_limits<double>::max()),
+    Field2n(uint32_t size, Format f = Format::EVALUATION, bool initialize_element_to_zero = false)  // NOLINT
+        : std::vector<std::complex<double>>(size, initialize_element_to_zero ? 0 : -std::numeric_limits<double>::max()),
           format(f) {}
 
     /**
@@ -95,10 +95,10 @@ class Field2n : public std::vector<std::complex<double>>, public Serializable {
     explicit Field2n(const NativePoly& element);
 
     /**
-     * @brief Constructor from DCRTPoly ring element
+     * @brief Constructor from RnsPoly ring element
      * @param element ring element
      */
-    explicit Field2n(const DCRTPoly& element);
+    explicit Field2n(const RnsPoly& element);
 
     /**
      * @brief Constructor from a ring element matrix
@@ -111,7 +111,7 @@ class Field2n : public std::vector<std::complex<double>>, public Serializable {
      *
      * @return format/representation of the field element
      */
-    Format GetFormat() const {
+    Format get_format() const {
         return format;
     }
 
@@ -120,7 +120,7 @@ class Field2n : public std::vector<std::complex<double>>, public Serializable {
      *
      * @return the inverse field element
      */
-    Field2n Inverse() const;
+    Field2n inverse() const;
 
     /**
      * @brief Addition operation for field elements
@@ -128,7 +128,7 @@ class Field2n : public std::vector<std::complex<double>>, public Serializable {
      * @param rhs right hand side element for operation
      * @return result of the operation
      */
-    Field2n Plus(const Field2n& rhs) const;
+    Field2n plus_impl(const Field2n& rhs) const;
 
     /**
      * @brief Scalar addition operation for field elements
@@ -136,7 +136,7 @@ class Field2n : public std::vector<std::complex<double>>, public Serializable {
      * @param rhs right hand side element for operation
      * @return result of the operation
      */
-    Field2n Plus(double rhs) const;
+    Field2n plus_impl(double rhs) const;
 
     /**
      * @brief Subtraction operation for field elements
@@ -144,7 +144,7 @@ class Field2n : public std::vector<std::complex<double>>, public Serializable {
      * @param rhs right hand side element for operation
      * @return result of the operation
      */
-    Field2n Minus(const Field2n& rhs) const;
+    Field2n minus_impl(const Field2n& rhs) const;
 
     /**
      * @brief Multiplication operation for field elements
@@ -159,7 +159,7 @@ class Field2n : public std::vector<std::complex<double>>, public Serializable {
      *
      * @return the shifted field element
      */
-    Field2n ShiftRight();
+    Field2n shift_right();
 
     /**
      * @brief Performs an automorphism transform operation and returns the result.
@@ -167,7 +167,7 @@ class Field2n : public std::vector<std::complex<double>>, public Serializable {
      * @param i is the automorphism index (an odd integer) to apply.
      * @return is the result of the automorphism transform.
      */
-    Field2n AutomorphismTransform(size_t i) const;
+    Field2n automorphism_transform(size_t i) const;
 
     /**
      * @brief Transpose operation defined in section VI.B4 of
@@ -175,21 +175,21 @@ class Field2n : public std::vector<std::complex<double>>, public Serializable {
      *
      * @return the transpose of the element
      */
-    Field2n Transpose() const;
+    Field2n transposed() const;
 
     /**
      * @brief Function for extracting odd factors of the field element
      *
      * @return the field element with odd parts of the initial element
      */
-    Field2n ExtractOdd() const;
+    Field2n extract_odd() const;
 
     /**
      * @brief Function for extracting even factors of the field element
      *
      * @return the field element with even parts of the initial element
      */
-    Field2n ExtractEven() const;
+    Field2n extract_even() const;
 
     /**
      * @brief Permutation operation defined in Algorithm 4 of
@@ -197,7 +197,7 @@ class Field2n : public std::vector<std::complex<double>>, public Serializable {
      *
      * @return permuted new field element
      */
-    Field2n Permute() const;
+    Field2n permute() const;
 
     /**
      * @brief Inverse operation for permutation operation defined in
@@ -205,7 +205,7 @@ class Field2n : public std::vector<std::complex<double>>, public Serializable {
      *
      * @return non permuted version of the element
      */
-    Field2n InversePermute() const;
+    Field2n inverse_permute() const;
 
     /**
      * @brief Operation for scalar multiplication
@@ -213,12 +213,12 @@ class Field2n : public std::vector<std::complex<double>>, public Serializable {
      * @param d scalar for multiplication
      * @return the field element with the scalar multiplication
      */
-    Field2n ScalarMult(double d);
+    Field2n scalar_mult(double d);
 
     /**
      * @brief Method for switching format of the field elements
      */
-    void SwitchFormat();
+    void switch_format();
 
     /**
      * @brief Sets the evaluation or coefficient representation of the field
@@ -226,9 +226,9 @@ class Field2n : public std::vector<std::complex<double>>, public Serializable {
      * @param f the enum value corresponding to coefficient or evaluation
      * representation
      */
-    inline void SetFormat(Format f) {
+    inline void set_format(Format f) {
         if (format != f)
-            SwitchFormat();
+            switch_format();
     }
 
     /**
@@ -267,7 +267,7 @@ class Field2n : public std::vector<std::complex<double>>, public Serializable {
      * @return result of the operation
      */
     Field2n& operator+=(const Field2n& element) {
-        return *this = this->Plus(element);
+        return *this = this->plus_impl(element);
     }
 
     /**
@@ -277,7 +277,7 @@ class Field2n : public std::vector<std::complex<double>>, public Serializable {
      * @return result of the operation
      */
     Field2n& operator-=(const Field2n& element) {
-        return *this = this->Minus(element);
+        return *this = this->minus_impl(element);
     }
 
     /**
@@ -285,7 +285,7 @@ class Field2n : public std::vector<std::complex<double>>, public Serializable {
      * @return negation of the field element.
      */
     Field2n operator-() const {
-        return Field2n(size(), this->GetFormat(), true) - *this;
+        return Field2n(size(), this->get_format(), true) - *this;
     }
 
     /**
@@ -296,7 +296,7 @@ class Field2n : public std::vector<std::complex<double>>, public Serializable {
      * @return result of the subtraction operation
      */
     friend inline Field2n operator-(const Field2n& a, const Field2n& b) {
-        return a.Minus(b);
+        return a.minus_impl(b);
     }
 
     /**
@@ -307,7 +307,7 @@ class Field2n : public std::vector<std::complex<double>>, public Serializable {
      * @return result of the addition operation
      */
     friend inline Field2n operator+(const Field2n& a, const Field2n& b) {
-        return a.Plus(b);
+        return a.plus_impl(b);
     }
 
     /**
@@ -318,7 +318,7 @@ class Field2n : public std::vector<std::complex<double>>, public Serializable {
      * @return result of the addition operation
      */
     friend inline Field2n operator+(const Field2n& a, double scalar) {
-        return a.Plus(scalar);
+        return a.plus_impl(scalar);
     }
 
     /**
@@ -340,18 +340,18 @@ class Field2n : public std::vector<std::complex<double>>, public Serializable {
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
         ar(::cereal::base_class<std::vector<std::complex<double>>>(this));
         ar(::cereal::make_nvp("f", format));
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "Field2n";
     }
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 };
@@ -371,6 +371,6 @@ inline std::ostream& operator<<(std::ostream& os, const Field2n& m) {
     return os;
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_RING_FIELD2N_H_

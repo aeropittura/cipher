@@ -75,8 +75,8 @@ endif()
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     string(APPEND _cipher_cxx_flags " -Wno-parentheses")
     # GCC provides __builtin_LINE(), __builtin_FUNCTION() and __builtin_FILE() for diagnostics.
-    add_definitions(-DBUILTIN_INFO_AVAILABLE)
-    message(STATUS "BUILTIN_INFO_AVAILABLE is defined")
+    add_definitions(-DCIPHER_HAVE_BUILTIN_INFO)
+    message(STATUS "CIPHER_HAVE_BUILTIN_INFO is defined")
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_BUILD_TYPE STREQUAL "Debug")
     string(APPEND _cipher_cxx_flags " -Wno-unused-private-field -Wno-shift-op-parentheses")
 endif()
@@ -108,7 +108,7 @@ string(APPEND CMAKE_CXX_FLAGS " ${_cipher_cxx_flags}")
 # The math backend selection must be identical for the library and everything compiled
 # against it, so it travels with the targets (see source/CMakeLists.txt) and, for
 # compatibility with flag-based consumers, with Cipher_CXX_FLAGS in the package config.
-set(CIPHER_BACKEND_FLAGS "-DMATHBACKEND=${CIPHER_MATH_BACKEND}")
+set(CIPHER_BACKEND_FLAGS "-DCIPHER_MATH_BACKEND=${CIPHER_MATH_BACKEND}")
 string(APPEND CMAKE_CXX_FLAGS " ${CIPHER_BACKEND_FLAGS}")
 string(APPEND CMAKE_C_FLAGS " ${CIPHER_BACKEND_FLAGS}")
 

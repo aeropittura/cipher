@@ -34,30 +34,30 @@
 #include "cipher/boolean/context.h"
 #include "gtest/gtest.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 // ---------------  TESTING METHODS OF FHEW ---------------
 
 // Checks the truth table for NOT
 TEST(UNITTestFHEWPKEAP, NOT) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(TOY, AP);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(TOY, AP);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
-    cc.BTKeyGen(sk, PUB_ENCRYPT);
+    cc.bt_key_gen(sk, PUB_ENCRYPT);
 
-    auto ct1 = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0 = cc.Encrypt(cc.GetPublicKey(), 0);
+    auto ct1 = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0 = cc.encrypt(cc.get_public_key(), 0);
 
-    auto ct1Not = cc.EvalNOT(ct1);
-    auto ct0Not = cc.EvalNOT(ct0);
+    auto ct1_not = cc.eval_not(ct1);
+    auto ct0_not = cc.eval_not(ct0);
 
-    LWEPlaintext result1;
-    cc.Decrypt(sk, ct1Not, &result1);
+    LwePlaintext result1;
+    cc.decrypt(sk, ct1_not, &result1);
 
-    LWEPlaintext result0;
-    cc.Decrypt(sk, ct0Not, &result0);
+    LwePlaintext result0;
+    cc.decrypt(sk, ct0_not, &result0);
 
     EXPECT_EQ(0, result1) << "NOT failed";
 
@@ -66,23 +66,23 @@ TEST(UNITTestFHEWPKEAP, NOT) {
 
 // Checks the truth table for NOT
 TEST(UNITTestFHEWPKEGINX, NOT) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(TOY, GINX);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(TOY, GINX);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
-    cc.BTKeyGen(sk, PUB_ENCRYPT);
-    auto ct1 = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0 = cc.Encrypt(cc.GetPublicKey(), 0);
+    cc.bt_key_gen(sk, PUB_ENCRYPT);
+    auto ct1 = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0 = cc.encrypt(cc.get_public_key(), 0);
 
-    auto ct1Not = cc.EvalNOT(ct1);
-    auto ct0Not = cc.EvalNOT(ct0);
+    auto ct1_not = cc.eval_not(ct1);
+    auto ct0_not = cc.eval_not(ct0);
 
-    LWEPlaintext result1;
-    cc.Decrypt(sk, ct1Not, &result1);
+    LwePlaintext result1;
+    cc.decrypt(sk, ct1_not, &result1);
 
-    LWEPlaintext result0;
-    cc.Decrypt(sk, ct0Not, &result0);
+    LwePlaintext result0;
+    cc.decrypt(sk, ct0_not, &result0);
 
     EXPECT_EQ(0, result1) << "NOT failed";
 
@@ -91,23 +91,23 @@ TEST(UNITTestFHEWPKEGINX, NOT) {
 
 // Checks the truth table for AND
 TEST(UNITTestFHEWPKEAP, Bootstrap) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(TOY, AP);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(TOY, AP);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
-    cc.BTKeyGen(sk, PUB_ENCRYPT);
+    cc.bt_key_gen(sk, PUB_ENCRYPT);
 
-    auto ct1 = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0 = cc.Encrypt(cc.GetPublicKey(), 0);
+    auto ct1 = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0 = cc.encrypt(cc.get_public_key(), 0);
 
-    auto ct11 = cc.Bootstrap(ct1);
-    auto ct01 = cc.Bootstrap(ct0);
+    auto ct11 = cc.bootstrap(ct1);
+    auto ct01 = cc.bootstrap(ct0);
 
-    LWEPlaintext result11;
-    cc.Decrypt(sk, ct11, &result11);
-    LWEPlaintext result01;
-    cc.Decrypt(sk, ct01, &result01);
+    LwePlaintext result11;
+    cc.decrypt(sk, ct11, &result11);
+    LwePlaintext result01;
+    cc.decrypt(sk, ct01, &result01);
 
     std::string failed = "Bootstrapping failed";
 
@@ -117,23 +117,23 @@ TEST(UNITTestFHEWPKEAP, Bootstrap) {
 
 // Checks the truth table for AND
 TEST(UNITTestFHEWPKEGINX, Bootstrap) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(TOY, GINX);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(TOY, GINX);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
-    cc.BTKeyGen(sk, PUB_ENCRYPT);
+    cc.bt_key_gen(sk, PUB_ENCRYPT);
 
-    auto ct1 = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0 = cc.Encrypt(cc.GetPublicKey(), 0);
+    auto ct1 = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0 = cc.encrypt(cc.get_public_key(), 0);
 
-    auto ct11 = cc.Bootstrap(ct1);
-    auto ct01 = cc.Bootstrap(ct0);
+    auto ct11 = cc.bootstrap(ct1);
+    auto ct01 = cc.bootstrap(ct0);
 
-    LWEPlaintext result11;
-    cc.Decrypt(sk, ct11, &result11);
-    LWEPlaintext result01;
-    cc.Decrypt(sk, ct01, &result01);
+    LwePlaintext result11;
+    cc.decrypt(sk, ct11, &result11);
+    LwePlaintext result01;
+    cc.decrypt(sk, ct01, &result01);
 
     std::string failed = "Bootstrapping failed";
 
@@ -143,31 +143,31 @@ TEST(UNITTestFHEWPKEGINX, Bootstrap) {
 
 // Checks the truth table for AND
 TEST(UNITTestFHEWPKEAP, AND) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(TOY, AP);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(TOY, AP);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
-    cc.BTKeyGen(sk, PUB_ENCRYPT);
+    cc.bt_key_gen(sk, PUB_ENCRYPT);
 
-    auto ct1 = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0 = cc.Encrypt(cc.GetPublicKey(), 0);
-    auto ct1Alt = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0Alt = cc.Encrypt(cc.GetPublicKey(), 0);
+    auto ct1 = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0 = cc.encrypt(cc.get_public_key(), 0);
+    auto ct1_alt = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0_alt = cc.encrypt(cc.get_public_key(), 0);
 
-    auto ct11 = cc.EvalBinGate(AND, ct1, ct1Alt);
-    auto ct01 = cc.EvalBinGate(AND, ct0, ct1);
-    auto ct10 = cc.EvalBinGate(AND, ct1, ct0);
-    auto ct00 = cc.EvalBinGate(AND, ct0, ct0Alt);
+    auto ct11 = cc.eval_bin_gate(AND, ct1, ct1_alt);
+    auto ct01 = cc.eval_bin_gate(AND, ct0, ct1);
+    auto ct10 = cc.eval_bin_gate(AND, ct1, ct0);
+    auto ct00 = cc.eval_bin_gate(AND, ct0, ct0_alt);
 
-    LWEPlaintext result11;
-    cc.Decrypt(sk, ct11, &result11);
-    LWEPlaintext result01;
-    cc.Decrypt(sk, ct01, &result01);
-    LWEPlaintext result10;
-    cc.Decrypt(sk, ct10, &result10);
-    LWEPlaintext result00;
-    cc.Decrypt(sk, ct00, &result00);
+    LwePlaintext result11;
+    cc.decrypt(sk, ct11, &result11);
+    LwePlaintext result01;
+    cc.decrypt(sk, ct01, &result01);
+    LwePlaintext result10;
+    cc.decrypt(sk, ct10, &result10);
+    LwePlaintext result00;
+    cc.decrypt(sk, ct00, &result00);
 
     std::string failed = "AND failed";
 
@@ -179,31 +179,31 @@ TEST(UNITTestFHEWPKEAP, AND) {
 
 // Checks the truth table for AND
 TEST(UNITTestFHEWPKEGINX, AND) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(TOY, GINX);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(TOY, GINX);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
-    cc.BTKeyGen(sk, PUB_ENCRYPT);
+    cc.bt_key_gen(sk, PUB_ENCRYPT);
 
-    auto ct1 = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0 = cc.Encrypt(cc.GetPublicKey(), 0);
-    auto ct1Alt = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0Alt = cc.Encrypt(cc.GetPublicKey(), 0);
+    auto ct1 = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0 = cc.encrypt(cc.get_public_key(), 0);
+    auto ct1_alt = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0_alt = cc.encrypt(cc.get_public_key(), 0);
 
-    auto ct11 = cc.EvalBinGate(AND, ct1, ct1Alt);
-    auto ct01 = cc.EvalBinGate(AND, ct0, ct1);
-    auto ct10 = cc.EvalBinGate(AND, ct1, ct0);
-    auto ct00 = cc.EvalBinGate(AND, ct0, ct0Alt);
+    auto ct11 = cc.eval_bin_gate(AND, ct1, ct1_alt);
+    auto ct01 = cc.eval_bin_gate(AND, ct0, ct1);
+    auto ct10 = cc.eval_bin_gate(AND, ct1, ct0);
+    auto ct00 = cc.eval_bin_gate(AND, ct0, ct0_alt);
 
-    LWEPlaintext result11;
-    cc.Decrypt(sk, ct11, &result11);
-    LWEPlaintext result01;
-    cc.Decrypt(sk, ct01, &result01);
-    LWEPlaintext result10;
-    cc.Decrypt(sk, ct10, &result10);
-    LWEPlaintext result00;
-    cc.Decrypt(sk, ct00, &result00);
+    LwePlaintext result11;
+    cc.decrypt(sk, ct11, &result11);
+    LwePlaintext result01;
+    cc.decrypt(sk, ct01, &result01);
+    LwePlaintext result10;
+    cc.decrypt(sk, ct10, &result10);
+    LwePlaintext result00;
+    cc.decrypt(sk, ct00, &result00);
 
     std::string failed = "AND failed";
 
@@ -215,33 +215,33 @@ TEST(UNITTestFHEWPKEGINX, AND) {
 
 // Checks GINX for the parameter set
 // that exercises the signed modular reduction
-// implementation in SignedDigitDecompose
+// implementation in signed_digit_decompose
 TEST(UNITTestFHEWPKEGINX, SIGNED_MOD) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(SIGNED_MOD_TEST, GINX);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(SIGNED_MOD_TEST, GINX);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
-    cc.BTKeyGen(sk, PUB_ENCRYPT);
+    cc.bt_key_gen(sk, PUB_ENCRYPT);
 
-    auto ct1 = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0 = cc.Encrypt(cc.GetPublicKey(), 0);
-    auto ct1Alt = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0Alt = cc.Encrypt(cc.GetPublicKey(), 0);
+    auto ct1 = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0 = cc.encrypt(cc.get_public_key(), 0);
+    auto ct1_alt = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0_alt = cc.encrypt(cc.get_public_key(), 0);
 
-    auto ct11 = cc.EvalBinGate(AND, ct1, ct1Alt);
-    auto ct01 = cc.EvalBinGate(AND, ct0, ct1);
-    auto ct10 = cc.EvalBinGate(AND, ct1, ct0);
-    auto ct00 = cc.EvalBinGate(AND, ct0, ct0Alt);
+    auto ct11 = cc.eval_bin_gate(AND, ct1, ct1_alt);
+    auto ct01 = cc.eval_bin_gate(AND, ct0, ct1);
+    auto ct10 = cc.eval_bin_gate(AND, ct1, ct0);
+    auto ct00 = cc.eval_bin_gate(AND, ct0, ct0_alt);
 
-    LWEPlaintext result11;
-    cc.Decrypt(sk, ct11, &result11);
-    LWEPlaintext result01;
-    cc.Decrypt(sk, ct01, &result01);
-    LWEPlaintext result10;
-    cc.Decrypt(sk, ct10, &result10);
-    LWEPlaintext result00;
-    cc.Decrypt(sk, ct00, &result00);
+    LwePlaintext result11;
+    cc.decrypt(sk, ct11, &result11);
+    LwePlaintext result01;
+    cc.decrypt(sk, ct01, &result01);
+    LwePlaintext result10;
+    cc.decrypt(sk, ct10, &result10);
+    LwePlaintext result00;
+    cc.decrypt(sk, ct00, &result00);
 
     std::string failed = "AND failed for SIGNED_MOD_TEST";
 
@@ -253,31 +253,31 @@ TEST(UNITTestFHEWPKEGINX, SIGNED_MOD) {
 
 // Checks the truth table for OR
 TEST(UNITTestFHEWPKEAP, OR) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(TOY, AP);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(TOY, AP);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
-    cc.BTKeyGen(sk, PUB_ENCRYPT);
+    cc.bt_key_gen(sk, PUB_ENCRYPT);
 
-    auto ct1 = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0 = cc.Encrypt(cc.GetPublicKey(), 0);
-    auto ct1Alt = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0Alt = cc.Encrypt(cc.GetPublicKey(), 0);
+    auto ct1 = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0 = cc.encrypt(cc.get_public_key(), 0);
+    auto ct1_alt = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0_alt = cc.encrypt(cc.get_public_key(), 0);
 
-    auto ct11 = cc.EvalBinGate(OR, ct1, ct1Alt);
-    auto ct01 = cc.EvalBinGate(OR, ct0, ct1);
-    auto ct10 = cc.EvalBinGate(OR, ct1, ct0);
-    auto ct00 = cc.EvalBinGate(OR, ct0, ct0Alt);
+    auto ct11 = cc.eval_bin_gate(OR, ct1, ct1_alt);
+    auto ct01 = cc.eval_bin_gate(OR, ct0, ct1);
+    auto ct10 = cc.eval_bin_gate(OR, ct1, ct0);
+    auto ct00 = cc.eval_bin_gate(OR, ct0, ct0_alt);
 
-    LWEPlaintext result11;
-    cc.Decrypt(sk, ct11, &result11);
-    LWEPlaintext result01;
-    cc.Decrypt(sk, ct01, &result01);
-    LWEPlaintext result10;
-    cc.Decrypt(sk, ct10, &result10);
-    LWEPlaintext result00;
-    cc.Decrypt(sk, ct00, &result00);
+    LwePlaintext result11;
+    cc.decrypt(sk, ct11, &result11);
+    LwePlaintext result01;
+    cc.decrypt(sk, ct01, &result01);
+    LwePlaintext result10;
+    cc.decrypt(sk, ct10, &result10);
+    LwePlaintext result00;
+    cc.decrypt(sk, ct00, &result00);
 
     std::string failed = "OR failed";
 
@@ -289,31 +289,31 @@ TEST(UNITTestFHEWPKEAP, OR) {
 
 // Checks the truth table for OR
 TEST(UNITTestFHEWPKEGINX, OR) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(TOY, GINX);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(TOY, GINX);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
-    cc.BTKeyGen(sk, PUB_ENCRYPT);
+    cc.bt_key_gen(sk, PUB_ENCRYPT);
 
-    auto ct1 = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0 = cc.Encrypt(cc.GetPublicKey(), 0);
-    auto ct1Alt = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0Alt = cc.Encrypt(cc.GetPublicKey(), 0);
+    auto ct1 = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0 = cc.encrypt(cc.get_public_key(), 0);
+    auto ct1_alt = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0_alt = cc.encrypt(cc.get_public_key(), 0);
 
-    auto ct11 = cc.EvalBinGate(OR, ct1, ct1Alt);
-    auto ct01 = cc.EvalBinGate(OR, ct0, ct1);
-    auto ct10 = cc.EvalBinGate(OR, ct1, ct0);
-    auto ct00 = cc.EvalBinGate(OR, ct0, ct0Alt);
+    auto ct11 = cc.eval_bin_gate(OR, ct1, ct1_alt);
+    auto ct01 = cc.eval_bin_gate(OR, ct0, ct1);
+    auto ct10 = cc.eval_bin_gate(OR, ct1, ct0);
+    auto ct00 = cc.eval_bin_gate(OR, ct0, ct0_alt);
 
-    LWEPlaintext result11;
-    cc.Decrypt(sk, ct11, &result11);
-    LWEPlaintext result01;
-    cc.Decrypt(sk, ct01, &result01);
-    LWEPlaintext result10;
-    cc.Decrypt(sk, ct10, &result10);
-    LWEPlaintext result00;
-    cc.Decrypt(sk, ct00, &result00);
+    LwePlaintext result11;
+    cc.decrypt(sk, ct11, &result11);
+    LwePlaintext result01;
+    cc.decrypt(sk, ct01, &result01);
+    LwePlaintext result10;
+    cc.decrypt(sk, ct10, &result10);
+    LwePlaintext result00;
+    cc.decrypt(sk, ct00, &result00);
 
     std::string failed = "OR failed";
 
@@ -325,31 +325,31 @@ TEST(UNITTestFHEWPKEGINX, OR) {
 
 // Checks the truth table for AND
 TEST(UNITTestFHEWPKEAP, NAND) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(TOY, AP);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(TOY, AP);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
-    cc.BTKeyGen(sk, PUB_ENCRYPT);
+    cc.bt_key_gen(sk, PUB_ENCRYPT);
 
-    auto ct1 = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0 = cc.Encrypt(cc.GetPublicKey(), 0);
-    auto ct1Alt = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0Alt = cc.Encrypt(cc.GetPublicKey(), 0);
+    auto ct1 = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0 = cc.encrypt(cc.get_public_key(), 0);
+    auto ct1_alt = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0_alt = cc.encrypt(cc.get_public_key(), 0);
 
-    auto ct11 = cc.EvalBinGate(NAND, ct1, ct1Alt);
-    auto ct01 = cc.EvalBinGate(NAND, ct0, ct1);
-    auto ct10 = cc.EvalBinGate(NAND, ct1, ct0);
-    auto ct00 = cc.EvalBinGate(NAND, ct0, ct0Alt);
+    auto ct11 = cc.eval_bin_gate(NAND, ct1, ct1_alt);
+    auto ct01 = cc.eval_bin_gate(NAND, ct0, ct1);
+    auto ct10 = cc.eval_bin_gate(NAND, ct1, ct0);
+    auto ct00 = cc.eval_bin_gate(NAND, ct0, ct0_alt);
 
-    LWEPlaintext result11;
-    cc.Decrypt(sk, ct11, &result11);
-    LWEPlaintext result01;
-    cc.Decrypt(sk, ct01, &result01);
-    LWEPlaintext result10;
-    cc.Decrypt(sk, ct10, &result10);
-    LWEPlaintext result00;
-    cc.Decrypt(sk, ct00, &result00);
+    LwePlaintext result11;
+    cc.decrypt(sk, ct11, &result11);
+    LwePlaintext result01;
+    cc.decrypt(sk, ct01, &result01);
+    LwePlaintext result10;
+    cc.decrypt(sk, ct10, &result10);
+    LwePlaintext result00;
+    cc.decrypt(sk, ct00, &result00);
 
     std::string failed = "NAND failed";
 
@@ -361,31 +361,31 @@ TEST(UNITTestFHEWPKEAP, NAND) {
 
 // Checks the truth table for AND
 TEST(UNITTestFHEWPKEGINX, NAND) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(TOY, GINX);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(TOY, GINX);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
-    cc.BTKeyGen(sk, PUB_ENCRYPT);
+    cc.bt_key_gen(sk, PUB_ENCRYPT);
 
-    auto ct1 = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0 = cc.Encrypt(cc.GetPublicKey(), 0);
-    auto ct1Alt = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0Alt = cc.Encrypt(cc.GetPublicKey(), 0);
+    auto ct1 = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0 = cc.encrypt(cc.get_public_key(), 0);
+    auto ct1_alt = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0_alt = cc.encrypt(cc.get_public_key(), 0);
 
-    auto ct11 = cc.EvalBinGate(NAND, ct1, ct1Alt);
-    auto ct01 = cc.EvalBinGate(NAND, ct0, ct1);
-    auto ct10 = cc.EvalBinGate(NAND, ct1, ct0);
-    auto ct00 = cc.EvalBinGate(NAND, ct0, ct0Alt);
+    auto ct11 = cc.eval_bin_gate(NAND, ct1, ct1_alt);
+    auto ct01 = cc.eval_bin_gate(NAND, ct0, ct1);
+    auto ct10 = cc.eval_bin_gate(NAND, ct1, ct0);
+    auto ct00 = cc.eval_bin_gate(NAND, ct0, ct0_alt);
 
-    LWEPlaintext result11;
-    cc.Decrypt(sk, ct11, &result11);
-    LWEPlaintext result01;
-    cc.Decrypt(sk, ct01, &result01);
-    LWEPlaintext result10;
-    cc.Decrypt(sk, ct10, &result10);
-    LWEPlaintext result00;
-    cc.Decrypt(sk, ct00, &result00);
+    LwePlaintext result11;
+    cc.decrypt(sk, ct11, &result11);
+    LwePlaintext result01;
+    cc.decrypt(sk, ct01, &result01);
+    LwePlaintext result10;
+    cc.decrypt(sk, ct10, &result10);
+    LwePlaintext result00;
+    cc.decrypt(sk, ct00, &result00);
 
     std::string failed = "NAND failed";
 
@@ -397,31 +397,31 @@ TEST(UNITTestFHEWPKEGINX, NAND) {
 
 // Checks the truth table for AND
 TEST(UNITTestFHEWPKEAP, NOR) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(TOY, AP);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(TOY, AP);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
-    cc.BTKeyGen(sk, PUB_ENCRYPT);
+    cc.bt_key_gen(sk, PUB_ENCRYPT);
 
-    auto ct1 = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0 = cc.Encrypt(cc.GetPublicKey(), 0);
-    auto ct1Alt = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0Alt = cc.Encrypt(cc.GetPublicKey(), 0);
+    auto ct1 = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0 = cc.encrypt(cc.get_public_key(), 0);
+    auto ct1_alt = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0_alt = cc.encrypt(cc.get_public_key(), 0);
 
-    auto ct11 = cc.EvalBinGate(NOR, ct1, ct1Alt);
-    auto ct01 = cc.EvalBinGate(NOR, ct0, ct1);
-    auto ct10 = cc.EvalBinGate(NOR, ct1, ct0);
-    auto ct00 = cc.EvalBinGate(NOR, ct0, ct0Alt);
+    auto ct11 = cc.eval_bin_gate(NOR, ct1, ct1_alt);
+    auto ct01 = cc.eval_bin_gate(NOR, ct0, ct1);
+    auto ct10 = cc.eval_bin_gate(NOR, ct1, ct0);
+    auto ct00 = cc.eval_bin_gate(NOR, ct0, ct0_alt);
 
-    LWEPlaintext result11;
-    cc.Decrypt(sk, ct11, &result11);
-    LWEPlaintext result01;
-    cc.Decrypt(sk, ct01, &result01);
-    LWEPlaintext result10;
-    cc.Decrypt(sk, ct10, &result10);
-    LWEPlaintext result00;
-    cc.Decrypt(sk, ct00, &result00);
+    LwePlaintext result11;
+    cc.decrypt(sk, ct11, &result11);
+    LwePlaintext result01;
+    cc.decrypt(sk, ct01, &result01);
+    LwePlaintext result10;
+    cc.decrypt(sk, ct10, &result10);
+    LwePlaintext result00;
+    cc.decrypt(sk, ct00, &result00);
 
     std::string failed = "NOR failed";
 
@@ -433,31 +433,31 @@ TEST(UNITTestFHEWPKEAP, NOR) {
 
 // Checks the truth table for AND
 TEST(UNITTestFHEWPKEGINX, NOR) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(TOY, GINX);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(TOY, GINX);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
-    cc.BTKeyGen(sk, PUB_ENCRYPT);
+    cc.bt_key_gen(sk, PUB_ENCRYPT);
 
-    auto ct1 = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0 = cc.Encrypt(cc.GetPublicKey(), 0);
-    auto ct1Alt = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0Alt = cc.Encrypt(cc.GetPublicKey(), 0);
+    auto ct1 = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0 = cc.encrypt(cc.get_public_key(), 0);
+    auto ct1_alt = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0_alt = cc.encrypt(cc.get_public_key(), 0);
 
-    auto ct11 = cc.EvalBinGate(NOR, ct1, ct1Alt);
-    auto ct01 = cc.EvalBinGate(NOR, ct0, ct1);
-    auto ct10 = cc.EvalBinGate(NOR, ct1, ct0);
-    auto ct00 = cc.EvalBinGate(NOR, ct0, ct0Alt);
+    auto ct11 = cc.eval_bin_gate(NOR, ct1, ct1_alt);
+    auto ct01 = cc.eval_bin_gate(NOR, ct0, ct1);
+    auto ct10 = cc.eval_bin_gate(NOR, ct1, ct0);
+    auto ct00 = cc.eval_bin_gate(NOR, ct0, ct0_alt);
 
-    LWEPlaintext result11;
-    cc.Decrypt(sk, ct11, &result11);
-    LWEPlaintext result01;
-    cc.Decrypt(sk, ct01, &result01);
-    LWEPlaintext result10;
-    cc.Decrypt(sk, ct10, &result10);
-    LWEPlaintext result00;
-    cc.Decrypt(sk, ct00, &result00);
+    LwePlaintext result11;
+    cc.decrypt(sk, ct11, &result11);
+    LwePlaintext result01;
+    cc.decrypt(sk, ct01, &result01);
+    LwePlaintext result10;
+    cc.decrypt(sk, ct10, &result10);
+    LwePlaintext result00;
+    cc.decrypt(sk, ct00, &result00);
 
     std::string failed = "NOR failed";
 
@@ -469,31 +469,31 @@ TEST(UNITTestFHEWPKEGINX, NOR) {
 
 // Checks the truth table for XOR
 TEST(UNITTestFHEWPKEAP, XOR) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(TOY, AP);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(TOY, AP);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
-    cc.BTKeyGen(sk, PUB_ENCRYPT);
+    cc.bt_key_gen(sk, PUB_ENCRYPT);
 
-    auto ct1 = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0 = cc.Encrypt(cc.GetPublicKey(), 0);
-    auto ct1Alt = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0Alt = cc.Encrypt(cc.GetPublicKey(), 0);
+    auto ct1 = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0 = cc.encrypt(cc.get_public_key(), 0);
+    auto ct1_alt = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0_alt = cc.encrypt(cc.get_public_key(), 0);
 
-    auto ct11 = cc.EvalBinGate(XOR, ct1, ct1Alt);
-    auto ct01 = cc.EvalBinGate(XOR, ct0, ct1);
-    auto ct10 = cc.EvalBinGate(XOR, ct1, ct0);
-    auto ct00 = cc.EvalBinGate(XOR, ct0, ct0Alt);
+    auto ct11 = cc.eval_bin_gate(XOR, ct1, ct1_alt);
+    auto ct01 = cc.eval_bin_gate(XOR, ct0, ct1);
+    auto ct10 = cc.eval_bin_gate(XOR, ct1, ct0);
+    auto ct00 = cc.eval_bin_gate(XOR, ct0, ct0_alt);
 
-    LWEPlaintext result11;
-    cc.Decrypt(sk, ct11, &result11);
-    LWEPlaintext result01;
-    cc.Decrypt(sk, ct01, &result01);
-    LWEPlaintext result10;
-    cc.Decrypt(sk, ct10, &result10);
-    LWEPlaintext result00;
-    cc.Decrypt(sk, ct00, &result00);
+    LwePlaintext result11;
+    cc.decrypt(sk, ct11, &result11);
+    LwePlaintext result01;
+    cc.decrypt(sk, ct01, &result01);
+    LwePlaintext result10;
+    cc.decrypt(sk, ct10, &result10);
+    LwePlaintext result00;
+    cc.decrypt(sk, ct00, &result00);
 
     std::string failed = "XOR failed";
 
@@ -505,31 +505,31 @@ TEST(UNITTestFHEWPKEAP, XOR) {
 
 // Checks the truth table for XOR
 TEST(UNITTestFHEWPKEGINX, XOR) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(TOY, GINX);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(TOY, GINX);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
-    cc.BTKeyGen(sk, PUB_ENCRYPT);
+    cc.bt_key_gen(sk, PUB_ENCRYPT);
 
-    auto ct1 = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0 = cc.Encrypt(cc.GetPublicKey(), 0);
-    auto ct1Alt = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0Alt = cc.Encrypt(cc.GetPublicKey(), 0);
+    auto ct1 = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0 = cc.encrypt(cc.get_public_key(), 0);
+    auto ct1_alt = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0_alt = cc.encrypt(cc.get_public_key(), 0);
 
-    auto ct11 = cc.EvalBinGate(XOR, ct1, ct1Alt);
-    auto ct01 = cc.EvalBinGate(XOR, ct0, ct1);
-    auto ct10 = cc.EvalBinGate(XOR, ct1, ct0);
-    auto ct00 = cc.EvalBinGate(XOR, ct0, ct0Alt);
+    auto ct11 = cc.eval_bin_gate(XOR, ct1, ct1_alt);
+    auto ct01 = cc.eval_bin_gate(XOR, ct0, ct1);
+    auto ct10 = cc.eval_bin_gate(XOR, ct1, ct0);
+    auto ct00 = cc.eval_bin_gate(XOR, ct0, ct0_alt);
 
-    LWEPlaintext result11;
-    cc.Decrypt(sk, ct11, &result11);
-    LWEPlaintext result01;
-    cc.Decrypt(sk, ct01, &result01);
-    LWEPlaintext result10;
-    cc.Decrypt(sk, ct10, &result10);
-    LWEPlaintext result00;
-    cc.Decrypt(sk, ct00, &result00);
+    LwePlaintext result11;
+    cc.decrypt(sk, ct11, &result11);
+    LwePlaintext result01;
+    cc.decrypt(sk, ct01, &result01);
+    LwePlaintext result10;
+    cc.decrypt(sk, ct10, &result10);
+    LwePlaintext result00;
+    cc.decrypt(sk, ct00, &result00);
 
     std::string failed = "XOR failed";
 
@@ -541,31 +541,31 @@ TEST(UNITTestFHEWPKEGINX, XOR) {
 
 // Checks the truth table for XOR
 TEST(UNITTestFHEWPKEAP, XNOR) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(TOY, AP);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(TOY, AP);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
-    cc.BTKeyGen(sk, PUB_ENCRYPT);
+    cc.bt_key_gen(sk, PUB_ENCRYPT);
 
-    auto ct1 = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0 = cc.Encrypt(cc.GetPublicKey(), 0);
-    auto ct1Alt = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0Alt = cc.Encrypt(cc.GetPublicKey(), 0);
+    auto ct1 = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0 = cc.encrypt(cc.get_public_key(), 0);
+    auto ct1_alt = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0_alt = cc.encrypt(cc.get_public_key(), 0);
 
-    auto ct11 = cc.EvalBinGate(XNOR, ct1, ct1Alt);
-    auto ct01 = cc.EvalBinGate(XNOR, ct0, ct1);
-    auto ct10 = cc.EvalBinGate(XNOR, ct1, ct0);
-    auto ct00 = cc.EvalBinGate(XNOR, ct0, ct0Alt);
+    auto ct11 = cc.eval_bin_gate(XNOR, ct1, ct1_alt);
+    auto ct01 = cc.eval_bin_gate(XNOR, ct0, ct1);
+    auto ct10 = cc.eval_bin_gate(XNOR, ct1, ct0);
+    auto ct00 = cc.eval_bin_gate(XNOR, ct0, ct0_alt);
 
-    LWEPlaintext result11;
-    cc.Decrypt(sk, ct11, &result11);
-    LWEPlaintext result01;
-    cc.Decrypt(sk, ct01, &result01);
-    LWEPlaintext result10;
-    cc.Decrypt(sk, ct10, &result10);
-    LWEPlaintext result00;
-    cc.Decrypt(sk, ct00, &result00);
+    LwePlaintext result11;
+    cc.decrypt(sk, ct11, &result11);
+    LwePlaintext result01;
+    cc.decrypt(sk, ct01, &result01);
+    LwePlaintext result10;
+    cc.decrypt(sk, ct10, &result10);
+    LwePlaintext result00;
+    cc.decrypt(sk, ct00, &result00);
 
     std::string failed = "XNOR failed";
 
@@ -577,31 +577,31 @@ TEST(UNITTestFHEWPKEAP, XNOR) {
 
 // Checks the truth table for XOR
 TEST(UNITTestFHEWPKEGINX, XNOR) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(TOY, GINX);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(TOY, GINX);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
-    cc.BTKeyGen(sk, PUB_ENCRYPT);
+    cc.bt_key_gen(sk, PUB_ENCRYPT);
 
-    auto ct1 = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0 = cc.Encrypt(cc.GetPublicKey(), 0);
-    auto ct1Alt = cc.Encrypt(cc.GetPublicKey(), 1);
-    auto ct0Alt = cc.Encrypt(cc.GetPublicKey(), 0);
+    auto ct1 = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0 = cc.encrypt(cc.get_public_key(), 0);
+    auto ct1_alt = cc.encrypt(cc.get_public_key(), 1);
+    auto ct0_alt = cc.encrypt(cc.get_public_key(), 0);
 
-    auto ct11 = cc.EvalBinGate(XNOR, ct1, ct1Alt);
-    auto ct01 = cc.EvalBinGate(XNOR, ct0, ct1);
-    auto ct10 = cc.EvalBinGate(XNOR, ct1, ct0);
-    auto ct00 = cc.EvalBinGate(XNOR, ct0, ct0Alt);
+    auto ct11 = cc.eval_bin_gate(XNOR, ct1, ct1_alt);
+    auto ct01 = cc.eval_bin_gate(XNOR, ct0, ct1);
+    auto ct10 = cc.eval_bin_gate(XNOR, ct1, ct0);
+    auto ct00 = cc.eval_bin_gate(XNOR, ct0, ct0_alt);
 
-    LWEPlaintext result11;
-    cc.Decrypt(sk, ct11, &result11);
-    LWEPlaintext result01;
-    cc.Decrypt(sk, ct01, &result01);
-    LWEPlaintext result10;
-    cc.Decrypt(sk, ct10, &result10);
-    LWEPlaintext result00;
-    cc.Decrypt(sk, ct00, &result00);
+    LwePlaintext result11;
+    cc.decrypt(sk, ct11, &result11);
+    LwePlaintext result01;
+    cc.decrypt(sk, ct01, &result01);
+    LwePlaintext result10;
+    cc.decrypt(sk, ct10, &result10);
+    LwePlaintext result00;
+    cc.decrypt(sk, ct00, &result00);
 
     std::string failed = "XNOR failed";
 

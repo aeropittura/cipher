@@ -38,23 +38,23 @@
 #include "cipher/fhe/base/pre.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Abstract interface class for LBC PRE algorithms
  */
-class PRERNS : public PREBase<DCRTPoly> {
-    using ParmType = typename DCRTPoly::Params;
-    using IntType = typename DCRTPoly::Integer;
-    using DugType = typename DCRTPoly::DugType;
-    using DggType = typename DCRTPoly::DggType;
-    using TugType = typename DCRTPoly::TugType;
+class RnsPre : public BasePre<RnsPoly> {
+    using ParmType = typename RnsPoly::Params;
+    using IntType = typename RnsPoly::Integer;
+    using DugType = typename RnsPoly::DugType;
+    using DggType = typename RnsPoly::DggType;
+    using TugType = typename RnsPoly::TugType;
 
   public:
-    virtual ~PRERNS() = default;
+    virtual ~RnsPre() = default;
 
     /////////////////////////////////////
     // SERIALIZATION
@@ -62,19 +62,19 @@ class PRERNS : public PREBase<DCRTPoly> {
 
     template <class Archive>
     void save(Archive& ar) const {
-        ar(cereal::base_class<PREBase<DCRTPoly>>(this));
+        ar(cereal::base_class<BasePre<RnsPoly>>(this));
     }
 
     template <class Archive>
     void load(Archive& ar) {
-        ar(cereal::base_class<PREBase<DCRTPoly>>(this));
+        ar(cereal::base_class<BasePre<RnsPoly>>(this));
     }
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "PRERNS";
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_RNS_PRE_H_

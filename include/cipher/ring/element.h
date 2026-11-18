@@ -47,7 +47,7 @@
 #include "cipher/util/inttypes.h"
 #include "cipher/util/serializable.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Interface for ideal lattices
@@ -58,7 +58,7 @@ namespace lbcrypto {
  * contains no data to construct.
  */
 template <typename Element, typename VecType>
-class ILElement : public Serializable {
+class RingElement : public Serializable {
     using IntType = typename VecType::Integer;
 
   public:
@@ -66,19 +66,19 @@ class ILElement : public Serializable {
      * @brief Clone the object by making a copy of it and returning the copy
      * @return new Element
      */
-    virtual Element Clone() const = 0;
+    virtual Element clone() const = 0;
 
     /**
      * @brief Clone the object, but have it contain nothing
      * @return new Element
      */
-    virtual Element CloneEmpty() const = 0;
+    virtual Element clone_empty() const = 0;
 
     /**
      * @brief Clones the element's parameters, leaves vector initialized to 0
      * @return new Element
      */
-    virtual Element CloneParametersOnly() const = 0;
+    virtual Element clone_parameters_only() const = 0;
 
     /**
      * @brief Clones the element with parameters and with noise for the vector
@@ -86,12 +86,12 @@ class ILElement : public Serializable {
      * @param format the format of the resulting element
      * @return new Element
      */
-    virtual Element CloneWithNoise(const DiscreteGaussianGeneratorImpl<VecType>& dgg, Format format) const = 0;
+    virtual Element clone_with_noise(const DiscreteGaussianGeneratorImpl<VecType>& dgg, Format format) const = 0;
 
     /**
      * @brief Standard destructor
      */
-    virtual ~ILElement() = default;
+    virtual ~RingElement() = default;
 
     // Assignment operators
     /**
@@ -119,35 +119,35 @@ class ILElement : public Serializable {
      *
      * @return Format is either COEFFICIENT or EVALUATION
      */
-    virtual Format GetFormat() const = 0;
+    virtual Format get_format() const = 0;
 
     /**
      * @brief Get the length of the element.
      *
      * @return length
      */
-    virtual uint32_t GetLength() const = 0;
+    virtual uint32_t get_length() const = 0;
 
     /**
      * @brief Get modulus of the element
      *
      * @return the modulus.
      */
-    virtual const IntType& GetModulus() const = 0;
+    virtual const IntType& get_modulus() const = 0;
 
     /**
      * @brief Get the values for the element
      *
      * @return the vector.
      */
-    virtual const VecType& GetValues() const = 0;
+    virtual const VecType& get_values() const = 0;
 
     /**
      * @brief Get the cyclotomic order
      *
      * @return order
      */
-    virtual uint32_t GetCyclotomicOrder() const = 0;
+    virtual uint32_t get_cyclotomic_order() const = 0;
 
     /**
      * @brief Gets the Value in the Element that is At Index and returns it.
@@ -158,7 +158,7 @@ class ILElement : public Serializable {
      * @return will throw an error.
      */
     virtual IntType& at(uint32_t i) {
-        OPENFHE_THROW("at() not implemented");
+        CIPHER_THROW("at() not implemented");
     }
     /**
      * @brief Const version of at(); the default implementation throws an exception.
@@ -167,7 +167,7 @@ class ILElement : public Serializable {
      * @return will throw an error.
      */
     virtual const IntType& at(uint32_t i) const {
-        OPENFHE_THROW("const at() not implemented");
+        CIPHER_THROW("const at() not implemented");
     }
     /**
      * @brief Unchecked access to the value at index i; the default implementation throws an exception.
@@ -176,7 +176,7 @@ class ILElement : public Serializable {
      * @return will throw an error.
      */
     virtual IntType& operator[](uint32_t i) {
-        OPENFHE_THROW("[] not implemented");
+        CIPHER_THROW("[] not implemented");
     }
     /**
      * @brief Const version of operator[](); the default implementation throws an exception.
@@ -185,10 +185,10 @@ class ILElement : public Serializable {
      * @return will throw an error.
      */
     virtual const IntType& operator[](uint32_t i) const {
-        OPENFHE_THROW("const [] not implemented");
+        CIPHER_THROW("const [] not implemented");
     }
 
-    //  virtual NativePoly DecryptionCRTInterpolate(PlaintextModulus ptm) const
+    //  virtual NativePoly decryption_crt_interpolate(PlaintextModulus ptm) const
     //= 0;
 
     // OPERATORS
@@ -205,7 +205,7 @@ class ILElement : public Serializable {
      * @param element is the integer to add.
      * @return is the return of the addition operation.
      */
-    virtual Element Plus(const IntType& element) const = 0;
+    virtual Element plus_impl(const IntType& element) const = 0;
 
     /**
      * @brief Scalar subtraction - subtract an element from all entries.
@@ -213,7 +213,7 @@ class ILElement : public Serializable {
      * @param element is the element to subtract entry-wise.
      * @return is the return value of the minus operation.
      */
-    virtual Element Minus(const IntType& element) const = 0;
+    virtual Element minus_impl(const IntType& element) const = 0;
 
     /**
      * @brief Scalar multiplication - multiply all entries.
@@ -237,7 +237,7 @@ class ILElement : public Serializable {
      * @param element is the element to add with.
      * @return is the result of the addition.
      */
-    virtual Element Plus(const Element& element) const = 0;
+    virtual Element plus_impl(const Element& element) const = 0;
 
     /**
      * @brief Performs a subtraction operation and returns the result.
@@ -245,7 +245,7 @@ class ILElement : public Serializable {
      * @param element is the element to subtract with.
      * @return is the result of the subtraction.
      */
-    virtual Element Minus(const Element& element) const = 0;
+    virtual Element minus_impl(const Element& element) const = 0;
 
     /**
      * @brief Performs a multiplication operation and returns the result.
@@ -323,7 +323,7 @@ class ILElement : public Serializable {
     /**
      * @brief Adds one to every entry of the Element, in place
      */
-    virtual void AddILElementOne() = 0;
+    virtual void add_il_element_one() = 0;
 
     /**
      * @brief Performs an automorphism transform operation and returns the result.
@@ -331,7 +331,7 @@ class ILElement : public Serializable {
      * @param i is the automorphism index (an odd integer) to apply.
      * @return is the result of the automorphism transform.
      */
-    virtual Element AutomorphismTransform(uint32_t i) const = 0;
+    virtual Element automorphism_transform(uint32_t i) const = 0;
 
     /**
      * @brief Performs an automorphism transform operation using precomputed bit
@@ -341,14 +341,14 @@ class ILElement : public Serializable {
      * @param vec a vector with precomputed indices
      * @return is the result of the automorphism transform.
      */
-    virtual Element AutomorphismTransform(uint32_t i, const std::vector<uint32_t>& vec) const = 0;
+    virtual Element automorphism_transform(uint32_t i, const std::vector<uint32_t>& vec) const = 0;
 
     /**
      * @brief Transpose the ring element using the automorphism operation
      *
      * @return is the result of the transposition.
      */
-    virtual Element Transpose() const = 0;
+    virtual Element transposed() const = 0;
 
     /**
      * @brief Write the element as \f$ \sum\limits{i=0}^{\lfloor {\log q/base}
@@ -357,12 +357,12 @@ class ILElement : public Serializable {
      * {\log q/base} \rceil}} \f$; This is used as a subroutine in the
      * relinearization procedure.
      *
-     * @param baseBits is the number of bits in the base, i.e., base = 2^baseBits
-     * @param evalModeAnswer - if true, convert the resultant polynomials to
+     * @param base_bits is the number of bits in the base, i.e., base = 2^base_bits
+     * @param eval_mode_answer - if true, convert the resultant polynomials to
      * evaluation mode
      * @result is the pointer where the base decomposition vector is stored
      */
-    virtual std::vector<Element> BaseDecompose(uint32_t baseBits, bool evalModeAnswer) const = 0;
+    virtual std::vector<Element> base_decompose(uint32_t base_bits, bool eval_mode_answer) const = 0;
 
     /**
      * @brief Scalar division followed by rounding operation - operation on all
@@ -371,14 +371,14 @@ class ILElement : public Serializable {
      * @param q is the element to divide entry-wise.
      * @return is the return value of the divide, followed by rounding operation.
      */
-    virtual Element DivideAndRound(const IntType& q) const = 0;
+    virtual Element divide_and_round(const IntType& q) const = 0;
 
     /**
      * @brief Determines if inverse exists
      *
      * @return true if there exists a multiplicative inverse.
      */
-    virtual bool InverseExists() const = 0;
+    virtual bool inverse_exists() const = 0;
 
     /**
      * @brief Returns the infinity norm, basically the largest value in the ring
@@ -386,37 +386,37 @@ class ILElement : public Serializable {
      *
      * @return the largest value in the ring element.
      */
-    virtual double Norm() const = 0;
+    virtual double norm() const = 0;
 
     /**
-     * @brief Returns true if the vector is empty/ m_values==nullptr
+     * @brief Returns true if the vector is empty/ values_==nullptr
      *
      * @return true if the vector is empty and all values nullptr.  false
      * otherwise.
      */
-    virtual bool IsEmpty() const = 0;
+    virtual bool is_empty() const = 0;
 
     /**
-     * @brief Make the element Sparse for SHE KeyGen operations.
-     * Sets every index not equal to zero mod the wFactor to zero.
+     * @brief Make the element Sparse for SHE key_gen operations.
+     * Sets every index not equal to zero mod the w_factor to zero.
      *
-     * @param wFactor ratio between the original element's ring dimension and the
+     * @param w_factor ratio between the original element's ring dimension and the
      * new ring dimension.
      */
-    virtual void MakeSparse(uint32_t wFactor) = 0;
+    virtual void make_sparse(uint32_t w_factor) = 0;
 
     /**
      * @brief Calculate Element mod 2
      *
      * @return result of performing a mod-2 operation on the element.
      */
-    virtual Element ModByTwo() const = 0;
+    virtual Element mod_by_two() const = 0;
 
     /**
      * @brief Calculate and return the Multiplicative Inverse of the element
      * @return the multiplicative inverse of the element, if it exists.
      */
-    virtual Element MultiplicativeInverse() const = 0;
+    virtual Element multiplicative_inverse() const = 0;
 
     /**
      * @brief Scalar multiplication followed by division and rounding operation -
@@ -427,16 +427,16 @@ class ILElement : public Serializable {
      * @return is the return value of the multiply, divide and followed by
      * rounding operation.
      */
-    virtual Element MultiplyAndRound(const IntType& p, const IntType& q) const = 0;
+    virtual Element multiply_and_round(const IntType& p, const IntType& q) const = 0;
 
     /**
      * @brief Calculate a vector of elements by raising the base element to
      * successive powers
      *
-     * @param baseBits is the number of bits in the base, i.e., base = 2^baseBits
+     * @param base_bits is the number of bits in the base, i.e., base = 2^base_bits
      * @return the vector of elements {x, base*x, base^2*x, ...}
      */
-    virtual std::vector<Element> PowersOfBase(uint32_t baseBits) const = 0;
+    virtual std::vector<Element> powers_of_base(uint32_t base_bits) const = 0;
 
     /**
      * @brief Mod - perform a modulus operation.
@@ -445,39 +445,39 @@ class ILElement : public Serializable {
      * @param modulus is the modulus to use.
      * @return is the return value of the modulus.
      */
-    virtual Element Mod(const IntType& modulus) const = 0;
+    virtual Element mod(const IntType& modulus) const = 0;
 
     /**
      * @brief Switch modulus and adjust the values
      *
      * @param modulus is the modulus to be set.
-     * @param rootOfUnity is the corresponding root of unity for the modulus
-     * @param modulusArb is the modulus used for arbitrary cyclotomics CRT
-     * @param rootOfUnityArb is the corresponding root of unity for the modulus
+     * @param root_of_unity_value is the corresponding root of unity for the modulus
+     * @param modulus_arb is the modulus used for arbitrary cyclotomics CRT
+     * @param root_of_unity_arb is the corresponding root of unity for the modulus
      * ASSUMPTION: This method assumes that the caller provides the correct
-     * rootOfUnity for the modulus.
+     * root_of_unity_value for the modulus.
      */
-    virtual void SwitchModulus(const IntType& modulus, const IntType& rootOfUnity, const IntType& modulusArb,
-                               const IntType& rootOfUnityArb) = 0;
+    virtual void switch_modulus(const IntType& modulus, const IntType& root_of_unity_value, const IntType& modulus_arb,
+                               const IntType& root_of_unity_arb) = 0;
 
     /**
      * @brief Convert from Coefficient to CRT or vice versa; calls FFT and inverse FFT.
      * @param thread_limit number of threads to request for the per-tower loop; 0 requests one per tower.
      */
-    virtual void SwitchFormat(uint32_t thread_limit = 0) = 0;
+    virtual void switch_format(uint32_t thread_limit = 0) = 0;
 
     /**
      * @brief Sets the format/representation of the element.
      * @param format the format/representation to set.
      * @param thread_limit number of threads to request for the per-tower loop; 0 requests one per tower.
      */
-    inline void SetFormat(const Format format, uint32_t thread_limit = 0) {
-        if (this->GetFormat() != format) {
-            this->SwitchFormat(thread_limit);
+    inline void set_format(const Format format, uint32_t thread_limit = 0) {
+        if (this->get_format() != format) {
+            this->switch_format(thread_limit);
         }
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_RING_ELEMENT_H_

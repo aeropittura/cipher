@@ -38,21 +38,21 @@
 
 #include "cipher/core.h"
 // #include <vld.h>
-using namespace lbcrypto;
+using namespace cipher;
 
 int main() {
     // double std = 1000;
     // double std = 10000;
 
-    double stdBase = 34;
+    double std_base = 34;
     double std = (1 << 22);
     int CENTER_COUNT = 1024;
 
     // Random bit generator required by the base samplers
     BitGenerator bg;
     DiscreteGaussianGeneratorImpl<NativeVector> dgg(4);
-    DiscreteGaussianGeneratorImpl<NativeVector> dggRejection(4);
-    DiscreteGaussianGeneratorImpl<NativeVector> dgg4(stdBase);  // for Peikert's method
+    DiscreteGaussianGeneratorImpl<NativeVector> dgg_rejection(4);
+    DiscreteGaussianGeneratorImpl<NativeVector> dgg4(std_base);  // for Peikert's method
     double start, finish;
     size_t count = 1000;
     double SMOOTHING_PARAMETER = 6;
@@ -70,63 +70,63 @@ int main() {
         // Base sampler takes the parameters mean of the distribution, standard
         // deviation of distribution, bit generator used for random bits and the
         // type of the sampler
-        peikert_samplers[i] = new BaseSampler(static_cast<double>(center), stdBase, &bg, PEIKERT);
-        ky_samplers[i] = new BaseSampler(static_cast<double>(center), stdBase, &bg, KNUTH_YAO);
+        peikert_samplers[i] = new BaseSampler(static_cast<double>(center), std_base, &bg, PEIKERT);
+        ky_samplers[i] = new BaseSampler(static_cast<double>(center), std_base, &bg, KNUTH_YAO);
     }
     std::cout << "Ended creating base samplers, Started sampling" << std::endl;
 
-    start = currentDateTime();
+    start = current_date_time();
     for (int k = 0; k < CENTER_COUNT; k++) {
         double center = k / static_cast<double>(CENTER_COUNT);
         for (size_t i = 0; i < count; i++) {
-            dggRejection.GenerateInteger(center, std, 8192);
+            dgg_rejection.generate_integer(center, std, 8192);
         }
     }
-    finish = currentDateTime();
+    finish = current_date_time();
     std::cout << "Sampling " << std::to_string(count) << " integers (Rejection): " << (finish - start) / CENTER_COUNT
               << " ms\n";
 
-    start = currentDateTime();
+    start = current_date_time();
     for (int k = 0; k < CENTER_COUNT; k++) {
         double center = k / static_cast<double>(CENTER_COUNT);
         for (size_t i = 0; i < count; i++) {
-            dgg.GenerateIntegerKarney(center, std);
+            dgg.generate_integer_karney(center, std);
         }
     }
 
-    finish = currentDateTime();
+    finish = current_date_time();
     std::cout << "Sampling " << std::to_string(count) << " integers (Karney): " << (finish - start) / CENTER_COUNT
               << " ms\n";
 
     int base = std::log2(CENTER_COUNT);
     // Initialization for the generic sampler, takes the parameters array of base
     // samplers, standard deviation of the base sampler base=(which is log2(number
-    // of cosets or centers)) and smoothing parameter Make sure that stdBase>= 4 *
+    // of cosets or centers)) and smoothing parameter Make sure that std_base>= 4 *
     // sqrt(2) * smoothing parameter
-    DiscreteGaussianGeneratorGeneric dgg2(peikert_samplers, stdBase, base, SMOOTHING_PARAMETER);
-    start = currentDateTime();
+    DiscreteGaussianGeneratorGeneric dgg2(peikert_samplers, std_base, base, SMOOTHING_PARAMETER);
+    start = current_date_time();
     for (int k = 0; k < CENTER_COUNT; k++) {
         double center = k / static_cast<double>(CENTER_COUNT);
         for (size_t i = 0; i < count; i++) {
             // To generate integer with the generic sampler, parameters are mean of
             // the distribution and the standard deviation of the distribution
-            dgg2.GenerateInteger(center, std);  // k/CENTER_COUNT
+            dgg2.generate_integer(center, std);  // k/CENTER_COUNT
         }
     }
-    finish = currentDateTime();
+    finish = current_date_time();
     std::cout << "Sampling " << std::to_string(count)
               << " integers (Generic - Peikert): " << (finish - start) / CENTER_COUNT << " ms\n";
 
-    DiscreteGaussianGeneratorGeneric dgg3(ky_samplers, stdBase, base, SMOOTHING_PARAMETER);
-    start = currentDateTime();
+    DiscreteGaussianGeneratorGeneric dgg3(ky_samplers, std_base, base, SMOOTHING_PARAMETER);
+    start = current_date_time();
     for (int k = 0; k < CENTER_COUNT; k++) {
         double center = k / static_cast<double>(CENTER_COUNT);
         for (size_t i = 0; i < count; i++) {
-            dgg3.GenerateInteger(center, std);
+            dgg3.generate_integer(center, std);
             // dgg3.GenerateIntegerKnuthYaoAlt(0);
         }
     }
-    finish = currentDateTime();
+    finish = current_date_time();
     std::cout << "Sampling " << std::to_string(count)
               << " integers (Generic - Knuth Yao): " << (finish - start) / CENTER_COUNT << " ms\n";
 }

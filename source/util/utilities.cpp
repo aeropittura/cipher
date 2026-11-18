@@ -37,7 +37,7 @@
 
 #include <string>
 
-namespace lbcrypto {
+namespace cipher {
 
 // auxiliary function to replace a specific character "in" with another character "out"
 std::string replaceChar(std::string str, char in, char out) {
@@ -49,4 +49,4 @@ std::string replaceChar(std::string str, char in, char out) {
     return str;
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher

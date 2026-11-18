@@ -46,7 +46,7 @@
     #define M_PI 3.14159265358979323846
 #endif
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Discrete Fourier Transform FFT implementation.
@@ -59,7 +59,7 @@ class DiscreteFourierTransform {
      * @param A is the element to perform the transform on.
      * @return is the output result of the transform.
      */
-    static std::vector<std::complex<double>> FFTForwardTransform(std::vector<std::complex<double>>& A);
+    static std::vector<std::complex<double>> fft_forward_transform(std::vector<std::complex<double>>& A);
 
     /**
      * FFT inverse transform.
@@ -67,7 +67,7 @@ class DiscreteFourierTransform {
      * @param A is the element to perform the inverse transform on.
      * @return is the output result of the inverse transform.
      */
-    static std::vector<std::complex<double>> FFTInverseTransform(std::vector<std::complex<double>>& A);
+    static std::vector<std::complex<double>> fft_inverse_transform(std::vector<std::complex<double>>& A);
 
     /**
      * Forward transform.
@@ -75,7 +75,7 @@ class DiscreteFourierTransform {
      * @param A is the element to perform the transform on.
      * @return is the output result of the transform.
      */
-    static std::vector<std::complex<double>> ForwardTransform(std::vector<std::complex<double>> A);
+    static std::vector<std::complex<double>> forward_transform(std::vector<std::complex<double>> A);
 
     /**
      * Inverse transform.
@@ -83,30 +83,30 @@ class DiscreteFourierTransform {
      * @param A is the element to perform the inverse transform on.
      * @return is the output result of the inverse transform.
      */
-    static std::vector<std::complex<double>> InverseTransform(std::vector<std::complex<double>> A);
+    static std::vector<std::complex<double>> inverse_transform(std::vector<std::complex<double>> A);
 
     /**
      * In-place FFT-like algorithm used in CKKS encoding. For more details,
      * see Algorithm 1 in https://eprint.iacr.org/2018/1043.pdf.
      *
      * @param vals is a vector of complex numbers.
-     * @param cyclOrder is the cyclotomic order for which Initialize() precomputed the tables.
+     * @param cycl_order is the cyclotomic order for which Initialize() precomputed the tables.
      */
-    static void FFTSpecialInv(std::vector<std::complex<double>>& vals, uint32_t cyclOrder);
+    static void fft_special_inv(std::vector<std::complex<double>>& vals, uint32_t cycl_order);
 
     /**
      * In-place FFT-like algorithm used in CKKS decoding. For more details,
      * see Algorithm 1 in https://eprint.iacr.org/2018/1043.pdf.
      *
      * @param vals is a vector of complex numbers.
-     * @param cyclOrder is the cyclotomic order for which Initialize() precomputed the tables.
+     * @param cycl_order is the cyclotomic order for which Initialize() precomputed the tables.
      */
-    static void FFTSpecial(std::vector<std::complex<double>>& vals, uint32_t cyclOrder);
+    static void fft_special(std::vector<std::complex<double>>& vals, uint32_t cycl_order);
 
     /**
      * Reset cached values for the transform to empty.
      */
-    static void Reset();
+    static void reset();
 
     /**
      * Resets and rebuilds the table of the s complex roots of unity exp(-2*pi*i*j/s),
@@ -114,50 +114,50 @@ class DiscreteFourierTransform {
      *
      * @param s is the size of the table (the transform length).
      */
-    static void PreComputeTable(uint32_t s);
+    static void pre_compute_table(uint32_t s);
 
     /**
      * Precomputes, once per cyclotomic order, the rotation group, the powers of the primitive
-     * m-th root of unity, and the per-stage butterfly twiddles used by FFTSpecial() and
-     * FFTSpecialInv() on vectors of length nh. Thread-safe; a no-op if the order is already
+     * m-th root of unity, and the per-stage butterfly twiddles used by fft_special() and
+     * fft_special_inv() on vectors of length nh. Thread-safe; a no-op if the order is already
      * initialized.
      *
      * @param m is the cyclotomic order.
      * @param nh is the number of slots (half the ring dimension), the length of the vectors
-     * passed to FFTSpecial() and FFTSpecialInv().
+     * passed to fft_special() and fft_special_inv().
      */
     static void Initialize(uint32_t m, uint32_t nh);
 
   private:
-    static std::complex<double>* rootOfUnityTable;
+    static std::complex<double>* root_of_unity_table;
 
     // structure to keep values precomputed by Initialize() for every cyclotomic order value
     struct PrecomputedValues {
         // cyclotomic order
-        uint32_t m_M;
-        uint32_t m_Nh;
+        uint32_t M_;
+        uint32_t nh_;
         // rotation group indexes
-        std::vector<uint32_t> m_rotGroup;
+        std::vector<uint32_t> rot_group_;
         // ksi powers
-        std::vector<std::complex<double>> m_ksiPows;
-        // per-stage butterfly twiddles for FFTSpecial/FFTSpecialInv, stored contiguously:
+        std::vector<std::complex<double>> ksi_pows_;
+        // per-stage butterfly twiddles for fft_special/fft_special_inv, stored contiguously:
         // the stage with half-length lenh (a power of two <= Nh/2) occupies [lenh - 1, 2*lenh - 1)
-        std::vector<std::complex<double>> m_fwdTw;
-        std::vector<std::complex<double>> m_invTw;
+        std::vector<std::complex<double>> fwd_tw_;
+        std::vector<std::complex<double>> inv_tw_;
 
         PrecomputedValues(uint32_t m, uint32_t nh);
     };
-    // precomputedValues: key - cyclotomic order, data - values precomputed for the given cyclotomic order
-    static std::unordered_map<uint32_t, PrecomputedValues> precomputedValues;
+    // precomputed_values: key - cyclotomic order, data - values precomputed for the given cyclotomic order
+    static std::unordered_map<uint32_t, PrecomputedValues> precomputed_values;
 
-    // guards precomputedValues; map nodes are reference-stable, so readers may use the
+    // guards precomputed_values; map nodes are reference-stable, so readers may use the
     // returned reference after the shared lock is released
-    static std::shared_mutex& PrecompMutex();
-    static const PrecomputedValues& GetPrecomp(uint32_t cyclOrder);
+    static std::shared_mutex& precomp_mutex();
+    static const PrecomputedValues& get_precomp(uint32_t cycl_order);
 
     static void BitReverse(std::vector<std::complex<double>>& vals);
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_MATH_DFT_H_

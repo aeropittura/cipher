@@ -53,29 +53,29 @@
 #include "cipher/ring/backend.h"
 #include "cipher/boolean/rgsw_acc_common.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-void RingGSWAccumulator::SignedDigitDecompose(const std::shared_ptr<RingGSWCryptoParams>& params,
+void RingGswAccumulator::signed_digit_decompose(const std::shared_ptr<RingGswCryptoParams>& params,
                                               const std::vector<NativePoly>& input,
                                               std::vector<NativePoly>& output) const {
-    SignedDigitDecomposeImpl(params, input, output, params->GetDefaultBaseGParams());
+    signed_digit_decompose_impl(params, input, output, params->get_default_base_g_params());
 }
 
-void RingGSWAccumulator::SignedDigitDecompose(const std::shared_ptr<RingGSWCryptoParams>& params,
+void RingGswAccumulator::signed_digit_decompose(const std::shared_ptr<RingGswCryptoParams>& params,
                                               const std::vector<NativePoly>& input, std::vector<NativePoly>& output,
                                               uint32_t index) const {
-    SignedDigitDecomposeImpl(params, input, output, params->GetBaseGParams(index));
+    signed_digit_decompose_impl(params, input, output, params->get_base_g_params(index));
 }
 
-void RingGSWAccumulator::SignedDigitDecomposeImpl(const std::shared_ptr<RingGSWCryptoParams>& params,
+void RingGswAccumulator::signed_digit_decompose_impl(const std::shared_ptr<RingGswCryptoParams>& params,
                                                   const std::vector<NativePoly>& input, std::vector<NativePoly>& output,
-                                                  const RingGSWCryptoParams::BaseGParams& bp) const {
-    ExcessHDigitDecompose(params->GetQ().ConvertToInt<BasicInteger>(), bp, input, output);
+                                                  const RingGswCryptoParams::BaseGParams& bp) const {
+    excess_h_digit_decompose(params->get_Q().convert_to_int<BasicInteger>(), bp, input, output);
 }
 
-void RingGSWAccumulator::SignedDigitDecompose(const std::shared_ptr<RingGSWCryptoParams>& params,
+void RingGswAccumulator::signed_digit_decompose(const std::shared_ptr<RingGswCryptoParams>& params,
                                               const NativePoly& input, std::vector<NativePoly>& output) const {
-    ExcessHDigitDecompose(params->GetQ().ConvertToInt<BasicInteger>(), params->GetDefaultBaseGParams(), input, output);
+    excess_h_digit_decompose(params->get_Q().convert_to_int<BasicInteger>(), params->get_default_base_g_params(), input, output);
 }
 
-};  // namespace lbcrypto
+};  // namespace cipher

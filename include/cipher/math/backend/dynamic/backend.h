@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  This file contains the definitions for MATHBACKEND 4 also known as the dynamic multi-precision backend.
+  This file contains the definitions for CIPHER_MATH_BACKEND 4 also known as the dynamic multi-precision backend.
   This backend supports arbitrary bitwidths; no memory pool is used; can grow up to RAM limitation.
   Configurable type of underlying integer (either 32 or 64 bit)
  */
@@ -39,17 +39,17 @@
 #define CIPHER_MATH_BACKEND_DYNAMIC_BACKEND_H_
 
 #include "cipher/config.h"
-#ifdef WITH_BE4
+#ifdef CIPHER_WITH_BE4
 
     #include "cipher/math/backend/dynamic/mod_vector.h"  // rings of ubints
     #include "cipher/math/backend/dynamic/transform.h"  // transforms for dynamic
     #include "cipher/math/backend/dynamic/integer.h"      // dynamically sized unsigned big integers or ubints
 
-// Global alias for MATHBACKEND 4 Integer
-using M4Integer = bigintdyn::BigInteger;
+// Global alias for CIPHER_MATH_BACKEND 4 Integer
+using M4Integer = dynamic_int::BigInteger;
 
-// Global alias for MATHBACKEND 4 Vector
-using M4Vector = bigintdyn::BigVector;
+// Global alias for CIPHER_MATH_BACKEND 4 Vector
+using M4Vector = dynamic_int::BigVector;
 #else
 using M4Integer = void;
 #endif

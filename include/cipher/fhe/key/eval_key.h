@@ -41,10 +41,10 @@
 #include "cipher/fhe/key/key.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Abstract interface for evaluation/proxy keys
@@ -84,8 +84,8 @@ class EvalKeyImpl : public Key<Element> {
      * @param a is the Element vector to be copied.
      */
 
-    virtual void SetAVector(const std::vector<Element>& a) {
-        OPENFHE_THROW(NOT_SUPPORTED_ERROR);
+    virtual void set_a_vector(const std::vector<Element>& a) {
+        CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
     /**
@@ -95,8 +95,8 @@ class EvalKeyImpl : public Key<Element> {
      * @param a is the Element vector to be moved.
      */
 
-    virtual void SetAVector(std::vector<Element>&& a) {
-        OPENFHE_THROW(NOT_SUPPORTED_ERROR);
+    virtual void set_a_vector(std::vector<Element>&& a) {
+        CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
     /**
@@ -106,8 +106,8 @@ class EvalKeyImpl : public Key<Element> {
      * @return Element vector A.
      */
 
-    virtual const std::vector<Element>& GetAVector() const {
-        OPENFHE_THROW(NOT_SUPPORTED_ERROR);
+    virtual const std::vector<Element>& get_a_vector() const {
+        CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
     /**
@@ -117,8 +117,8 @@ class EvalKeyImpl : public Key<Element> {
      * @param b is the Element vector to be copied.
      */
 
-    virtual void SetBVector(const std::vector<Element>& b) {
-        OPENFHE_THROW(NOT_SUPPORTED_ERROR);
+    virtual void set_b_vector(const std::vector<Element>& b) {
+        CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
     /**
@@ -128,8 +128,8 @@ class EvalKeyImpl : public Key<Element> {
      * @param b is the Element vector to be moved.
      */
 
-    virtual void SetBVector(std::vector<Element>&& b) {
-        OPENFHE_THROW(NOT_SUPPORTED_ERROR);
+    virtual void set_b_vector(std::vector<Element>&& b) {
+        CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
     /**
@@ -139,16 +139,16 @@ class EvalKeyImpl : public Key<Element> {
      * @return  Element vector B.
      */
 
-    virtual const std::vector<Element>& GetBVector() const {
-        OPENFHE_THROW(NOT_SUPPORTED_ERROR);
+    virtual const std::vector<Element>& get_b_vector() const {
+        CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
     /**
      * Releases the key material held by the evaluation key.
      * Throws exception, to be overridden by derived class.
      */
-    virtual void ClearKeys() {
-        OPENFHE_THROW(NOT_SUPPORTED_ERROR);
+    virtual void clear_keys() {
+        CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
     /**
@@ -194,11 +194,11 @@ class EvalKeyImpl : public Key<Element> {
         ar(::cereal::base_class<Key<Element>>(this));
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "EvalKey";
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_KEY_EVAL_KEY_H_

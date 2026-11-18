@@ -41,43 +41,43 @@
 
 #include "cipher/cipher.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
-void ThresholdFHE(enum ScalingTechnique rescaleTech);
-void Chebyshev(enum ScalingTechnique rescaleTech);
+void threshold_fhe(enum ScalingTechnique rescale_tech);
+void chebyshev(enum ScalingTechnique rescale_tech);
 
 int main(int argc, char* argv[]) {
     // the scaling technigue can be changed to FIXEDMANUAL, FIXEDAUTO, or FLEXIBLEAUTOEXT
-    ThresholdFHE(FLEXIBLEAUTO);
-    Chebyshev(FLEXIBLEAUTO);
+    threshold_fhe(FLEXIBLEAUTO);
+    chebyshev(FLEXIBLEAUTO);
     return 0;
 }
 
-void ThresholdFHE(enum ScalingTechnique rescaleTech) {
-    std::cout << "\nThreshold FHE example " << rescaleTech << std::endl;
+void threshold_fhe(enum ScalingTechnique rescale_tech) {
+    std::cout << "\nThreshold FHE example " << rescale_tech << std::endl;
 
-    CCParams<CryptoContextCKKSRNS> parameters;
+    ContextParams<CkksRnsContext> parameters;
 
     // 1 extra level needs to be added for FIXED* modes (2 extra levels for FLEXIBLE* modes) to the multiplicative depth
     // to support 2-party interactive bootstrapping
     uint32_t depth = 7;
-    parameters.SetMultiplicativeDepth(depth);
-    parameters.SetScalingModSize(50);
-    parameters.SetBatchSize(16);
-    parameters.SetScalingTechnique(rescaleTech);
+    parameters.set_multiplicative_depth(depth);
+    parameters.set_scaling_mod_size(50);
+    parameters.set_batch_size(16);
+    parameters.set_scaling_technique(rescale_tech);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
     // enable features that you wish to use
-    cc->Enable(PKE);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
-    cc->Enable(MULTIPARTY);
+    cc->enable(PKE);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
+    cc->enable(MULTIPARTY);
 
     // Initialize Public Key Containers
-    KeyPair<DCRTPoly> kp1;
-    KeyPair<DCRTPoly> kp2;
+    KeyPair<RnsPoly> kp1;
+    KeyPair<RnsPoly> kp2;
 
-    KeyPair<DCRTPoly> kpMultiparty;
+    KeyPair<RnsPoly> kp_multiparty;
 
     ////////////////////////////////////////////////////////////
     // Perform Key Generation Operation
@@ -89,10 +89,10 @@ void ThresholdFHE(enum ScalingTechnique rescaleTech) {
 
     std::cout << "Round 1 (party A) started." << std::endl;
 
-    kp1 = cc->KeyGen();
+    kp1 = cc->key_gen();
 
     // Generate evalmult key part for A
-    auto evalMultKey = cc->KeySwitchGen(kp1.secretKey, kp1.secretKey);
+    auto eval_mult_key = cc->key_switch_gen(kp1.secret_key, kp1.secret_key);
 
     std::cout << "Round 1 of key generation completed." << std::endl;
 
@@ -101,87 +101,87 @@ void ThresholdFHE(enum ScalingTechnique rescaleTech) {
     std::cout << "Round 2 (party B) started." << std::endl;
 
     std::cout << "Joint public key for (s_a + s_b) is generated..." << std::endl;
-    kp2 = cc->MultipartyKeyGen(kp1.publicKey);
+    kp2 = cc->multiparty_key_gen(kp1.public_key);
 
     std::vector<std::complex<double>> input({-0.9, -0.8, -0.6, -0.4, -0.2, 0., 0.2, 0.4, 0.6, 0.8, 0.9});
 
     // This plaintext only has 3 RNS limbs, the minimum needed to perform 2-party interactive bootstrapping
     // for FLEXIBLEAUTO
-    Plaintext plaintext1 = cc->MakeCKKSPackedPlaintext(input, 1, depth - 2);
+    Plaintext plaintext1 = cc->make_ckks_packed_plaintext(input, 1, depth - 2);
 
-    auto ciphertext1 = cc->Encrypt(kp2.publicKey, plaintext1);
+    auto ciphertext1 = cc->encrypt(kp2.public_key, plaintext1);
 
     // INTERACTIVE BOOTSTRAPPING STARTS
 
     // under the hood it reduces to two towers
-    ciphertext1 = cc->IntBootAdjustScale(ciphertext1);
+    ciphertext1 = cc->int_boot_adjust_scale(ciphertext1);
     std::cout << "IntBootAdjustScale Succeeded" << std::endl;
 
     // masked decryption on the server: c0 = b + a*s0
-    auto ciphertextOutput1 = cc->IntBootDecrypt(kp1.secretKey, ciphertext1);
+    auto ciphertext_output1 = cc->int_boot_decrypt(kp1.secret_key, ciphertext1);
     std::cout << "IntBootDecrypt on Server Succeeded" << std::endl;
 
-    auto ciphertext2 = ciphertext1->Clone();
-    ciphertext2->SetElements({ciphertext2->GetElements()[1]});
+    auto ciphertext2 = ciphertext1->clone();
+    ciphertext2->set_elements({ciphertext2->get_elements()[1]});
 
     // masked decryption on the client: c1 = a*s1
-    auto ciphertextOutput2 = cc->IntBootDecrypt(kp2.secretKey, ciphertext2);
+    auto ciphertext_output2 = cc->int_boot_decrypt(kp2.secret_key, ciphertext2);
     std::cout << "IntBootDecrypt on Client Succeeded" << std::endl;
 
     // Encryption of masked decryption c1 = a*s1
-    ciphertextOutput2 = cc->IntBootEncrypt(kp2.publicKey, ciphertextOutput2);
+    ciphertext_output2 = cc->int_boot_encrypt(kp2.public_key, ciphertext_output2);
     std::cout << "IntBootEncrypt on Client Succeeded" << std::endl;
 
     // Compute Enc(c1) + c0
-    auto ciphertextOutput = cc->IntBootAdd(ciphertextOutput2, ciphertextOutput1);
+    auto ciphertext_output = cc->int_boot_add(ciphertext_output2, ciphertext_output1);
     std::cout << "IntBootAdd on Server Succeeded" << std::endl;
 
     // INTERACTIVE BOOTSTRAPPING ENDS
 
     // distributed decryption
 
-    auto ciphertextPartial1 = cc->MultipartyDecryptLead({ciphertextOutput}, kp1.secretKey);
+    auto ciphertext_partial1 = cc->multiparty_decrypt_lead({ciphertext_output}, kp1.secret_key);
 
-    auto ciphertextPartial2 = cc->MultipartyDecryptMain({ciphertextOutput}, kp2.secretKey);
+    auto ciphertext_partial2 = cc->multiparty_decrypt_main({ciphertext_output}, kp2.secret_key);
 
-    std::vector<Ciphertext<DCRTPoly>> partialCiphertextVec;
-    partialCiphertextVec.push_back(ciphertextPartial1[0]);
-    partialCiphertextVec.push_back(ciphertextPartial2[0]);
+    std::vector<Ciphertext<RnsPoly>> partial_ciphertext_vec;
+    partial_ciphertext_vec.push_back(ciphertext_partial1[0]);
+    partial_ciphertext_vec.push_back(ciphertext_partial2[0]);
 
-    Plaintext plaintextMultiparty;
+    Plaintext plaintext_multiparty;
 
-    cc->MultipartyDecryptFusion(partialCiphertextVec, &plaintextMultiparty);
+    cc->multiparty_decrypt_fusion(partial_ciphertext_vec, &plaintext_multiparty);
 
-    plaintextMultiparty->SetLength(input.size());
+    plaintext_multiparty->set_length(input.size());
 
-    std::cout << "Original plaintext \n\t" << plaintext1->GetCKKSPackedValue() << std::endl;
-    std::cout << "Result after bootstrapping \n\t" << plaintextMultiparty->GetCKKSPackedValue() << std::endl;
+    std::cout << "Original plaintext \n\t" << plaintext1->get_ckks_packed_value() << std::endl;
+    std::cout << "Result after bootstrapping \n\t" << plaintext_multiparty->get_ckks_packed_value() << std::endl;
 }
 
-void Chebyshev(enum ScalingTechnique rescaleTech) {
-    std::cout << "\nThreshold FHE example " << rescaleTech << std::endl;
+void chebyshev(enum ScalingTechnique rescale_tech) {
+    std::cout << "\nThreshold FHE example " << rescale_tech << std::endl;
 
-    CCParams<CryptoContextCKKSRNS> parameters;
+    ContextParams<CkksRnsContext> parameters;
 
     // 1 extra level needs to be added for FIXED* modes (2 extra levels for FLEXIBLE* modes) to the multiplicative depth
     // to support 2-party interactive bootstrapping
-    parameters.SetMultiplicativeDepth(8);
-    parameters.SetScalingModSize(50);
-    parameters.SetBatchSize(16);
-    parameters.SetScalingTechnique(rescaleTech);
+    parameters.set_multiplicative_depth(8);
+    parameters.set_scaling_mod_size(50);
+    parameters.set_batch_size(16);
+    parameters.set_scaling_technique(rescale_tech);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
     // enable features that you wish to use
-    cc->Enable(PKE);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
-    cc->Enable(MULTIPARTY);
+    cc->enable(PKE);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
+    cc->enable(MULTIPARTY);
 
     // Initialize Public Key Containers
-    KeyPair<DCRTPoly> kp1;
-    KeyPair<DCRTPoly> kp2;
+    KeyPair<RnsPoly> kp1;
+    KeyPair<RnsPoly> kp2;
 
-    KeyPair<DCRTPoly> kpMultiparty;
+    KeyPair<RnsPoly> kp_multiparty;
 
     ////////////////////////////////////////////////////////////
     // Perform Key Generation Operation
@@ -193,15 +193,15 @@ void Chebyshev(enum ScalingTechnique rescaleTech) {
 
     std::cout << "Round 1 (party A) started." << std::endl;
 
-    kp1 = cc->KeyGen();
+    kp1 = cc->key_gen();
 
     // Generate evalmult key part for A
-    auto evalMultKey = cc->KeySwitchGen(kp1.secretKey, kp1.secretKey);
+    auto eval_mult_key = cc->key_switch_gen(kp1.secret_key, kp1.secret_key);
 
     // Generate evalsum key part for A
-    cc->EvalSumKeyGen(kp1.secretKey);
-    auto evalSumKeys =
-            std::make_shared<std::map<uint32_t, EvalKey<DCRTPoly>>>(cc->GetEvalSumKeyMap(kp1.secretKey->GetKeyTag()));
+    cc->eval_sum_key_gen(kp1.secret_key);
+    auto eval_sum_keys =
+            std::make_shared<std::map<uint32_t, EvalKey<RnsPoly>>>(cc->get_eval_sum_key_map(kp1.secret_key->get_key_tag()));
 
     std::cout << "Round 1 of key generation completed." << std::endl;
 
@@ -210,38 +210,38 @@ void Chebyshev(enum ScalingTechnique rescaleTech) {
     std::cout << "Round 2 (party B) started." << std::endl;
 
     std::cout << "Joint public key for (s_a + s_b) is generated..." << std::endl;
-    kp2 = cc->MultipartyKeyGen(kp1.publicKey);
+    kp2 = cc->multiparty_key_gen(kp1.public_key);
 
-    auto evalMultKey2 = cc->MultiKeySwitchGen(kp2.secretKey, kp2.secretKey, evalMultKey);
+    auto eval_mult_key2 = cc->multi_key_switch_gen(kp2.secret_key, kp2.secret_key, eval_mult_key);
 
     std::cout << "Joint evaluation multiplication key for (s_a + s_b) is generated..." << std::endl;
-    auto evalMultAB = cc->MultiAddEvalKeys(evalMultKey, evalMultKey2, kp2.publicKey->GetKeyTag());
+    auto eval_mult_ab = cc->multi_add_eval_keys(eval_mult_key, eval_mult_key2, kp2.public_key->get_key_tag());
 
     std::cout << "Joint evaluation multiplication key (s_a + s_b) is transformed "
                  "into s_b*(s_a + s_b)..."
               << std::endl;
-    auto evalMultBAB = cc->MultiMultEvalKey(kp2.secretKey, evalMultAB, kp2.publicKey->GetKeyTag());
+    auto eval_mult_bab = cc->multi_mult_eval_key(kp2.secret_key, eval_mult_ab, kp2.public_key->get_key_tag());
 
-    auto evalSumKeysB = cc->MultiEvalSumKeyGen(kp2.secretKey, evalSumKeys, kp2.publicKey->GetKeyTag());
+    auto eval_sum_keys_b = cc->multi_eval_sum_key_gen(kp2.secret_key, eval_sum_keys, kp2.public_key->get_key_tag());
 
     std::cout << "Joint evaluation summation key for (s_a + s_b) is generated..." << std::endl;
-    auto evalSumKeysJoin = cc->MultiAddEvalSumKeys(evalSumKeys, evalSumKeysB, kp2.publicKey->GetKeyTag());
+    auto eval_sum_keys_join = cc->multi_add_eval_sum_keys(eval_sum_keys, eval_sum_keys_b, kp2.public_key->get_key_tag());
 
-    cc->InsertEvalSumKey(evalSumKeysJoin);
+    cc->insert_eval_sum_key(eval_sum_keys_join);
 
     std::cout << "Round 2 of key generation completed." << std::endl;
 
     std::cout << "Round 3 (party A) started." << std::endl;
 
     std::cout << "Joint key (s_a + s_b) is transformed into s_a*(s_a + s_b)..." << std::endl;
-    auto evalMultAAB = cc->MultiMultEvalKey(kp1.secretKey, evalMultAB, kp2.publicKey->GetKeyTag());
+    auto eval_mult_aab = cc->multi_mult_eval_key(kp1.secret_key, eval_mult_ab, kp2.public_key->get_key_tag());
 
     std::cout << "Computing the final evaluation multiplication key for (s_a + "
                  "s_b)*(s_a + s_b)..."
               << std::endl;
-    auto evalMultFinal = cc->MultiAddEvalMultKeys(evalMultAAB, evalMultBAB, evalMultAB->GetKeyTag());
+    auto eval_mult_final = cc->multi_add_eval_mult_keys(eval_mult_aab, eval_mult_bab, eval_mult_ab->get_key_tag());
 
-    cc->InsertEvalMultKey({evalMultFinal});
+    cc->insert_eval_mult_key({eval_mult_final});
 
     std::cout << "Round 3 of key generation completed." << std::endl;
 
@@ -253,61 +253,61 @@ void Chebyshev(enum ScalingTechnique rescaleTech) {
     double a = -4;
     double b = 4;
 
-    Plaintext plaintext1 = cc->MakeCKKSPackedPlaintext(input);
+    Plaintext plaintext1 = cc->make_ckks_packed_plaintext(input);
 
-    auto ciphertext1 = cc->Encrypt(kp2.publicKey, plaintext1);
+    auto ciphertext1 = cc->encrypt(kp2.public_key, plaintext1);
 
     // The Chebyshev series interpolation requires 6 levels
-    ciphertext1 = cc->EvalChebyshevSeries(ciphertext1, coefficients, a, b);
+    ciphertext1 = cc->eval_chebyshev_series(ciphertext1, coefficients, a, b);
     std::cout << "Ran Chebyshev interpolation" << std::endl;
 
     // INTERACTIVE BOOTSTRAPPING STARTS
 
-    ciphertext1 = cc->IntBootAdjustScale(ciphertext1);
+    ciphertext1 = cc->int_boot_adjust_scale(ciphertext1);
     std::cout << "IntBootAdjustScale Succeeded" << std::endl;
 
     // masked decryption on the server: c0 = b + a*s0
-    auto ciphertextOutput1 = cc->IntBootDecrypt(kp1.secretKey, ciphertext1);
+    auto ciphertext_output1 = cc->int_boot_decrypt(kp1.secret_key, ciphertext1);
     std::cout << "IntBootDecrypt on Server Succeeded" << std::endl;
 
-    auto ciphertext2 = ciphertext1->Clone();
-    ciphertext2->SetElements({ciphertext2->GetElements()[1]});
+    auto ciphertext2 = ciphertext1->clone();
+    ciphertext2->set_elements({ciphertext2->get_elements()[1]});
 
     // masked decryption on the client: c1 = a*s1
-    auto ciphertextOutput2 = cc->IntBootDecrypt(kp2.secretKey, ciphertext2);
+    auto ciphertext_output2 = cc->int_boot_decrypt(kp2.secret_key, ciphertext2);
     std::cout << "IntBootDecrypt on Client Succeeded" << std::endl;
 
     // Encryption of masked decryption c1 = a*s1
-    ciphertextOutput2 = cc->IntBootEncrypt(kp2.publicKey, ciphertextOutput2);
+    ciphertext_output2 = cc->int_boot_encrypt(kp2.public_key, ciphertext_output2);
     std::cout << "IntBootEncrypt on Client Succeeded" << std::endl;
 
     // Compute Enc(c1) + c0
-    auto ciphertextOutput = cc->IntBootAdd(ciphertextOutput2, ciphertextOutput1);
+    auto ciphertext_output = cc->int_boot_add(ciphertext_output2, ciphertext_output1);
     std::cout << "IntBootAdd on Server Succeeded" << std::endl;
 
     // INTERACTIVE BOOTSTRAPPING ENDS
 
     // distributed decryption
 
-    auto ciphertextPartial1 = cc->MultipartyDecryptLead({ciphertextOutput}, kp1.secretKey);
+    auto ciphertext_partial1 = cc->multiparty_decrypt_lead({ciphertext_output}, kp1.secret_key);
 
-    auto ciphertextPartial2 = cc->MultipartyDecryptMain({ciphertextOutput}, kp2.secretKey);
+    auto ciphertext_partial2 = cc->multiparty_decrypt_main({ciphertext_output}, kp2.secret_key);
 
-    std::vector<Ciphertext<DCRTPoly>> partialCiphertextVec;
-    partialCiphertextVec.push_back(ciphertextPartial1[0]);
-    partialCiphertextVec.push_back(ciphertextPartial2[0]);
+    std::vector<Ciphertext<RnsPoly>> partial_ciphertext_vec;
+    partial_ciphertext_vec.push_back(ciphertext_partial1[0]);
+    partial_ciphertext_vec.push_back(ciphertext_partial2[0]);
 
-    Plaintext plaintextMultiparty;
+    Plaintext plaintext_multiparty;
 
-    cc->MultipartyDecryptFusion(partialCiphertextVec, &plaintextMultiparty);
+    cc->multiparty_decrypt_fusion(partial_ciphertext_vec, &plaintext_multiparty);
 
-    plaintextMultiparty->SetLength(input.size());
+    plaintext_multiparty->set_length(input.size());
 
     std::cout << "\n Original Plaintext #1: \n";
     std::cout << plaintext1 << std::endl;
 
     std::cout << "\n Results of evaluating the polynomial with coefficients " << coefficients << " \n";
-    std::cout << "\n Ciphertext result:" << plaintextMultiparty << std::endl;
+    std::cout << "\n Ciphertext result:" << plaintext_multiparty << std::endl;
 
     std::cout
             << "\n Plaintext result: ( 0.0179885, 0.0474289, 0.119205, 0.268936, 0.5, 0.731064, 0.880795, 0.952571, 0.982011 ) \n";
@@ -317,24 +317,24 @@ void Chebyshev(enum ScalingTechnique rescaleTech) {
 
     std::cout << "\n Another round of Chebyshev interpolation after interactive bootstrapping: \n";
 
-    ciphertextOutput = cc->EvalChebyshevSeries(ciphertextOutput, coefficients, a, b);
+    ciphertext_output = cc->eval_chebyshev_series(ciphertext_output, coefficients, a, b);
     std::cout << "Ran Chebyshev interpolation" << std::endl;
 
     // distributed decryption
 
-    ciphertextPartial1 = cc->MultipartyDecryptLead({ciphertextOutput}, kp1.secretKey);
+    ciphertext_partial1 = cc->multiparty_decrypt_lead({ciphertext_output}, kp1.secret_key);
 
-    ciphertextPartial2 = cc->MultipartyDecryptMain({ciphertextOutput}, kp2.secretKey);
+    ciphertext_partial2 = cc->multiparty_decrypt_main({ciphertext_output}, kp2.secret_key);
 
-    partialCiphertextVec.resize(0);
-    partialCiphertextVec.push_back(ciphertextPartial1[0]);
-    partialCiphertextVec.push_back(ciphertextPartial2[0]);
+    partial_ciphertext_vec.resize(0);
+    partial_ciphertext_vec.push_back(ciphertext_partial1[0]);
+    partial_ciphertext_vec.push_back(ciphertext_partial2[0]);
 
-    cc->MultipartyDecryptFusion(partialCiphertextVec, &plaintextMultiparty);
+    cc->multiparty_decrypt_fusion(partial_ciphertext_vec, &plaintext_multiparty);
 
-    plaintextMultiparty->SetLength(input.size());
+    plaintext_multiparty->set_length(input.size());
 
-    std::cout << "\n Ciphertext result:" << plaintextMultiparty << std::endl;
+    std::cout << "\n Ciphertext result:" << plaintext_multiparty << std::endl;
 
     std::cout
             << "\n Plaintext result: ( 0.504497, 0.511855, 0.529766, 0.566832, 0.622459, 0.675039, 0.706987, 0.721632, 0.727508 ) \n";

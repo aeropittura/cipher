@@ -41,10 +41,10 @@
 #include "cipher/util/serial.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 /**
  * @brief Abstract interface class for  Keys
  *
@@ -93,6 +93,6 @@ class Key : public CryptoObject<Element>, public Serializable {
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_KEY_KEY_H_

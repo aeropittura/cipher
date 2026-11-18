@@ -47,60 +47,60 @@
 #include "cipher/math/matrix_impl.h"
 #include "cipher/util/debug.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 // On-line stage of pre-image sampling (includes only G-sampling)
 
 template <class Element>
-Matrix<Element> RLWETrapdoorUtility<Element>::GaussSampOnline(size_t n, size_t k, const Matrix<Element>& A,
-                                                              const RLWETrapdoorPair<Element>& T, const Element& u,
-                                                              DggType& dgg, const std::shared_ptr<Matrix<Element>> pHat,
+Matrix<Element> RlweTrapdoorUtility<Element>::gauss_samp_online(size_t n, size_t k, const Matrix<Element>& A,
+                                                              const RlweTrapdoorPair<Element>& T, const Element& u,
+                                                              DggType& dgg, const std::shared_ptr<Matrix<Element>> p_hat,
                                                               int64_t base) {
-    const std::shared_ptr<ParmType> params = u.GetParams();
-    auto zero_alloc = Element::Allocator(params, Format::EVALUATION);
+    const std::shared_ptr<ParmType> params = u.get_params();
+    auto zero_alloc = Element::allocator(params, Format::EVALUATION);
 
     double c = (base + 1) * SIGMA;
 
-    const IntType& modulus = A(0, 0).GetModulus();
+    const IntType& modulus = A(0, 0).get_modulus();
 
-    // It is assumed that A has dimension 1 x (k + 2) and pHat has the dimension
-    // of (k + 2) x 1 perturbedSyndrome is in the Format::EVALUATION
+    // It is assumed that A has dimension 1 x (k + 2) and p_hat has the dimension
+    // of (k + 2) x 1 perturbed_syndrome is in the Format::EVALUATION
     // representation
-    Element perturbedSyndrome = u - (A.Mult(*pHat))(0, 0);
+    Element perturbed_syndrome = u - (A.mult(*p_hat))(0, 0);
 
-    Matrix<int64_t> zHatBBI([]() { return 0; }, k, n);
+    Matrix<int64_t> z_hat_bbi([]() { return 0; }, k, n);
 
-    perturbedSyndrome.SetFormat(Format::COEFFICIENT);
+    perturbed_syndrome.set_format(Format::COEFFICIENT);
 
-    LatticeGaussSampUtility<Element>::GaussSampGqArbBase(perturbedSyndrome, c, k, modulus, base, dgg, &zHatBBI);
+    LatticeGaussSampUtility<Element>::gauss_samp_gq_arb_base(perturbed_syndrome, c, k, modulus, base, dgg, &z_hat_bbi);
 
-    // Convert zHat from a matrix of integers to a vector of Element ring elements
-    // zHat is in the coefficient representation
-    Matrix<Element> zHat = SplitInt64AltIntoElements<Element>(zHatBBI, n, params);
+    // Convert z_hat from a matrix of integers to a vector of Element ring elements
+    // z_hat is in the coefficient representation
+    Matrix<Element> z_hat = split_int64_alt_into_elements<Element>(z_hat_bbi, n, params);
     // Now converting it to the Format::EVALUATION representation before
     // multiplication
-    zHat.SetFormat(Format::EVALUATION);
+    z_hat.set_format(Format::EVALUATION);
 
-    Matrix<Element> zHatPrime(zero_alloc, k + 2, 1);
+    Matrix<Element> z_hat_prime(zero_alloc, k + 2, 1);
 
-    zHatPrime(0, 0) = (*pHat)(0, 0) + T.m_e.Mult(zHat)(0, 0);
-    zHatPrime(1, 0) = (*pHat)(1, 0) + T.m_r.Mult(zHat)(0, 0);
+    z_hat_prime(0, 0) = (*p_hat)(0, 0) + T.e_.mult(z_hat)(0, 0);
+    z_hat_prime(1, 0) = (*p_hat)(1, 0) + T.r_.mult(z_hat)(0, 0);
 
     for (size_t row = 2; row < k + 2; ++row)
-        zHatPrime(row, 0) = (*pHat)(row, 0) + zHat(row - 2, 0);
+        z_hat_prime(row, 0) = (*p_hat)(row, 0) + z_hat(row - 2, 0);
 
-    return zHatPrime;
+    return z_hat_prime;
 }
 
 // Offline stage of pre-image sampling (perturbation sampling)
 
 template <class Element>
-std::shared_ptr<Matrix<Element>> RLWETrapdoorUtility<Element>::GaussSampOffline(size_t n, size_t k,
-                                                                                const RLWETrapdoorPair<Element>& T,
-                                                                                DggType& dgg, DggType& dggLargeSigma,
+std::shared_ptr<Matrix<Element>> RlweTrapdoorUtility<Element>::gauss_samp_offline(size_t n, size_t k,
+                                                                                const RlweTrapdoorPair<Element>& T,
+                                                                                DggType& dgg, DggType& dgg_large_sigma,
                                                                                 int64_t base) {
-    const std::shared_ptr<ParmType> params = T.m_e(0, 0).GetParams();
-    auto zero_alloc = Element::Allocator(params, Format::EVALUATION);
+    const std::shared_ptr<ParmType> params = T.e_(0, 0).get_params();
+    auto zero_alloc = Element::allocator(params, Format::EVALUATION);
 
     double c = (base + 1) * SIGMA;
 
@@ -109,43 +109,43 @@ std::shared_ptr<Matrix<Element>> RLWETrapdoorUtility<Element>::GaussSampOffline(
 
     // perturbation vector in evaluation representation
     auto result = std::make_shared<Matrix<Element>>(zero_alloc, k + 2, 1);
-    ZSampleSigmaP(n, s, c, T, dgg, dggLargeSigma, result);
+    z_sample_sigma_p(n, s, c, T, dgg, dgg_large_sigma, result);
 
     return result;
 }
 
 /**
- * @brief Perturbation generation (Algorithm 4 of https://eprint.iacr.org/2017/844.pdf) specialized for DCRTPoly:
+ * @brief Perturbation generation (Algorithm 4 of https://eprint.iacr.org/2017/844.pdf) specialized for RnsPoly:
  * the covariance polynomials and the trapdoor products are computed on the first CRT tower as NativePoly, and the
- * sampled integer vectors are split back into DCRTPoly elements.
+ * sampled integer vectors are split back into RnsPoly elements.
  * @param n ring dimension
  * @param s spectral bound (Gaussian parameter of the preimage)
  * @param sigma standard deviation of the trapdoor noise, (base + 1) * SIGMA
  * @param Tprime trapdoor pair (r, e)
  * @param dgg discrete Gaussian generator for the 2x2 sampling and for Karney sampling above KARNEY_THRESHOLD
- * @param dggLargeSigma discrete Gaussian generator with parameter sqrt(s^2 - sigma^2), used for the k lower
+ * @param dgg_large_sigma discrete Gaussian generator with parameter sqrt(s^2 - sigma^2), used for the k lower
  * entries when that parameter is at most KARNEY_THRESHOLD
- * @param perturbationVector output: (k + 2) x 1 perturbation vector in evaluation representation
+ * @param perturbation_vector output: (k + 2) x 1 perturbation vector in evaluation representation
  */
 template <>
-inline void RLWETrapdoorUtility<DCRTPoly>::ZSampleSigmaP(size_t n, double s, double sigma,
-                                                         const RLWETrapdoorPair<DCRTPoly>& Tprime,
-                                                         const DCRTPoly::DggType& dgg,
-                                                         const DCRTPoly::DggType& dggLargeSigma,
-                                                         std::shared_ptr<Matrix<DCRTPoly>> perturbationVector) {
-    OPENFHE_DEBUG_FLAG(false);
+inline void RlweTrapdoorUtility<RnsPoly>::z_sample_sigma_p(size_t n, double s, double sigma,
+                                                         const RlweTrapdoorPair<RnsPoly>& tprime,
+                                                         const RnsPoly::DggType& dgg,
+                                                         const RnsPoly::DggType& dgg_large_sigma,
+                                                         std::shared_ptr<Matrix<RnsPoly>> perturbation_vector) {
+    CIPHER_DEBUG_FLAG(false);
     TimeVar t1, t1_tot;
 
     TIC(t1);
     TIC(t1_tot);
-    Matrix<DCRTPoly> Tprime0 = Tprime.m_e;
-    Matrix<DCRTPoly> Tprime1 = Tprime.m_r;
+    Matrix<RnsPoly> tprime0 = tprime.e_;
+    Matrix<RnsPoly> tprime1 = tprime.r_;
     // k is the bit length
-    size_t k = Tprime0.GetCols();
+    size_t k = tprime0.get_cols();
 
-    const std::shared_ptr<DCRTPoly::Params> params = Tprime0(0, 0).GetParams();
+    const std::shared_ptr<RnsPoly::Params> params = tprime0(0, 0).get_params();
 
-    OPENFHE_DEBUG("z1a: " << TOC(t1));  // 0
+    CIPHER_DEBUG("z1a: " << TOC(t1));  // 0
     TIC(t1);
     // all three Polynomials are initialized with "0" coefficients
     NativePoly va((*params)[0], Format::EVALUATION, 1);
@@ -153,117 +153,117 @@ inline void RLWETrapdoorUtility<DCRTPoly>::ZSampleSigmaP(size_t n, double s, dou
     NativePoly vd((*params)[0], Format::EVALUATION, 1);
 
     for (size_t i = 0; i < k; i++) {
-        va += (NativePoly)Tprime0(0, i).GetElementAtIndex(0) * Tprime0(0, i).Transpose().GetElementAtIndex(0);
-        vb += (NativePoly)Tprime1(0, i).GetElementAtIndex(0) * Tprime0(0, i).Transpose().GetElementAtIndex(0);
-        vd += (NativePoly)Tprime1(0, i).GetElementAtIndex(0) * Tprime1(0, i).Transpose().GetElementAtIndex(0);
+        va += (NativePoly)tprime0(0, i).get_element_at_index(0) * tprime0(0, i).transposed().get_element_at_index(0);
+        vb += (NativePoly)tprime1(0, i).get_element_at_index(0) * tprime0(0, i).transposed().get_element_at_index(0);
+        vd += (NativePoly)tprime1(0, i).get_element_at_index(0) * tprime1(0, i).transposed().get_element_at_index(0);
     }
-    OPENFHE_DEBUG("z1b: " << TOC(t1));  // 9
+    CIPHER_DEBUG("z1b: " << TOC(t1));  // 9
     TIC(t1);
 
     // Switch the ring elements (Polynomials) to coefficient representation
-    va.SetFormat(Format::COEFFICIENT);
-    vb.SetFormat(Format::COEFFICIENT);
-    vd.SetFormat(Format::COEFFICIENT);
+    va.set_format(Format::COEFFICIENT);
+    vb.set_format(Format::COEFFICIENT);
+    vd.set_format(Format::COEFFICIENT);
 
-    OPENFHE_DEBUG("z1c: " << TOC(t1));  // 5
+    CIPHER_DEBUG("z1c: " << TOC(t1));  // 5
     TIC(t1);
 
     // Create field elements from ring elements
     Field2n a(va), b(vb), d(vd);
 
-    double scalarFactor = -s * s * sigma * sigma / (s * s - sigma * sigma);
+    double scalar_factor = -s * s * sigma * sigma / (s * s - sigma * sigma);
 
-    a = a.ScalarMult(scalarFactor);
-    b = b.ScalarMult(scalarFactor);
-    d = d.ScalarMult(scalarFactor);
+    a = a.scalar_mult(scalar_factor);
+    b = b.scalar_mult(scalar_factor);
+    d = d.scalar_mult(scalar_factor);
 
     a = a + s * s;
     d = d + s * s;
-    OPENFHE_DEBUG("z1d: " << TOC(t1));  // 0
+    CIPHER_DEBUG("z1d: " << TOC(t1));  // 0
     TIC(t1);
 
     // converts the field elements to DFT representation
-    a.SetFormat(Format::EVALUATION);
-    b.SetFormat(Format::EVALUATION);
-    d.SetFormat(Format::EVALUATION);
-    OPENFHE_DEBUG("z1e: " << TOC(t1));  // 0
+    a.set_format(Format::EVALUATION);
+    b.set_format(Format::EVALUATION);
+    d.set_format(Format::EVALUATION);
+    CIPHER_DEBUG("z1e: " << TOC(t1));  // 0
     TIC(t1);
 
-    Matrix<int64_t> p2ZVector([]() { return 0; }, n * k, 1);
+    Matrix<int64_t> p2_z_vector([]() { return 0; }, n * k, 1);
 
-    double sigmaLarge = std::sqrt(s * s - sigma * sigma);
+    double sigma_large = std::sqrt(s * s - sigma * sigma);
 
     // for distribution parameters up to KARNEY_THRESHOLD (experimentally found
     // threshold) use the Peikert's inversion method otherwise, use Karney's
     // method
-    if (sigmaLarge > KARNEY_THRESHOLD) {
+    if (sigma_large > KARNEY_THRESHOLD) {
         // Karney rejection sampling method
         for (size_t i = 0; i < n * k; i++) {
-            p2ZVector(i, 0) = dgg.GenerateIntegerKarney(0, sigmaLarge);
+            p2_z_vector(i, 0) = dgg.generate_integer_karney(0, sigma_large);
         }
     } else {
         // Peikert's inversion sampling method
-        auto dggVector = dggLargeSigma.GenerateIntVector(n * k);
+        auto dgg_vector = dgg_large_sigma.generate_int_vector(n * k);
         for (size_t i = 0; i < n * k; i++)
-            p2ZVector(i, 0) = dggVector[i];
+            p2_z_vector(i, 0) = dgg_vector[i];
     }
-    OPENFHE_DEBUG("z1f1: " << TOC(t1));
+    CIPHER_DEBUG("z1f1: " << TOC(t1));
     TIC(t1);
 
     // create k ring elements in coefficient representation
-    Matrix<DCRTPoly> p2 = SplitInt64IntoElements<DCRTPoly>(p2ZVector, n, params);
-    OPENFHE_DEBUG("z1f2: " << TOC(t1));
+    Matrix<RnsPoly> p2 = split_int64_into_elements<RnsPoly>(p2_z_vector, n, params);
+    CIPHER_DEBUG("z1f2: " << TOC(t1));
     TIC(t1);
 
     // now converting to Format::EVALUATION representation before multiplication
-    p2.SetFormat(Format::EVALUATION);
+    p2.set_format(Format::EVALUATION);
 
-    OPENFHE_DEBUG("z1g: " << TOC(t1));  // 17
+    CIPHER_DEBUG("z1g: " << TOC(t1));  // 17
 
     TIC(t1);
 
-    auto zero_alloc = NativePoly::Allocator((*params)[0], Format::EVALUATION);
-    Matrix<NativePoly> Tp2(zero_alloc, 2, 1);
+    auto zero_alloc = NativePoly::allocator((*params)[0], Format::EVALUATION);
+    Matrix<NativePoly> tp2(zero_alloc, 2, 1);
     for (unsigned int i = 0; i < k; i++) {
-        Tp2(0, 0) += Tprime0(0, i).GetElementAtIndex(0) * (NativePoly)p2(i, 0).GetElementAtIndex(0);
-        Tp2(1, 0) += Tprime1(0, i).GetElementAtIndex(0) * (NativePoly)p2(i, 0).GetElementAtIndex(0);
+        tp2(0, 0) += tprime0(0, i).get_element_at_index(0) * (NativePoly)p2(i, 0).get_element_at_index(0);
+        tp2(1, 0) += tprime1(0, i).get_element_at_index(0) * (NativePoly)p2(i, 0).get_element_at_index(0);
     }
 
-    OPENFHE_DEBUG("z1h2: " << TOC(t1));
+    CIPHER_DEBUG("z1h2: " << TOC(t1));
     TIC(t1);
     // change to coefficient representation before converting to field elements
-    Tp2.SetFormat(Format::COEFFICIENT);
-    OPENFHE_DEBUG("z1h3: " << TOC(t1));
+    tp2.set_format(Format::COEFFICIENT);
+    CIPHER_DEBUG("z1h3: " << TOC(t1));
     TIC(t1);
 
     Matrix<Field2n> c([]() { return Field2n(); }, 2, 1);
 
-    c(0, 0) = Field2n(Tp2(0, 0)).ScalarMult(-sigma * sigma / (s * s - sigma * sigma));
-    c(1, 0) = Field2n(Tp2(1, 0)).ScalarMult(-sigma * sigma / (s * s - sigma * sigma));
+    c(0, 0) = Field2n(tp2(0, 0)).scalar_mult(-sigma * sigma / (s * s - sigma * sigma));
+    c(1, 0) = Field2n(tp2(1, 0)).scalar_mult(-sigma * sigma / (s * s - sigma * sigma));
 
-    auto p1ZVector = std::make_shared<Matrix<int64_t>>([]() { return 0; }, n * 2, 1);
-    OPENFHE_DEBUG("z1i: " << TOC(t1));
+    auto p1_z_vector = std::make_shared<Matrix<int64_t>>([]() { return 0; }, n * 2, 1);
+    CIPHER_DEBUG("z1i: " << TOC(t1));
     TIC(t1);
 
-    LatticeGaussSampUtility<DCRTPoly>::ZSampleSigma2x2(a, b, d, c, dgg, p1ZVector);
-    OPENFHE_DEBUG("z1j1: " << TOC(t1));  // 14
+    LatticeGaussSampUtility<RnsPoly>::z_sample_sigma2x2(a, b, d, c, dgg, p1_z_vector);
+    CIPHER_DEBUG("z1j1: " << TOC(t1));  // 14
     TIC(t1);
 
     // create 2 ring elements in coefficient representation
-    Matrix<DCRTPoly> p1 = SplitInt64IntoElements<DCRTPoly>(*p1ZVector, n, params);
-    OPENFHE_DEBUG("z1j2: " << TOC(t1));
+    Matrix<RnsPoly> p1 = split_int64_into_elements<RnsPoly>(*p1_z_vector, n, params);
+    CIPHER_DEBUG("z1j2: " << TOC(t1));
     TIC(t1);
 
-    p1.SetFormat(Format::EVALUATION);
-    OPENFHE_DEBUG("z1j3: " << TOC(t1));
+    p1.set_format(Format::EVALUATION);
+    CIPHER_DEBUG("z1j3: " << TOC(t1));
     TIC(t1);
 
-    *perturbationVector = p1.VStack(p2);
-    OPENFHE_DEBUG("z1j4: " << TOC(t1));
+    *perturbation_vector = p1.v_stack(p2);
+    CIPHER_DEBUG("z1j4: " << TOC(t1));
     TIC(t1);
-    OPENFHE_DEBUG("z1tot: " << TOC(t1_tot));
+    CIPHER_DEBUG("z1tot: " << TOC(t1_tot));
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_RING_TRAPDOOR_IMPL_H_

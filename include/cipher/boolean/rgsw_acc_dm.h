@@ -37,52 +37,52 @@
 
 #include "cipher/boolean/rgsw_acc.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Ring GSW accumulator schemes described in
  * https://eprint.iacr.org/2014/816 and https://eprint.iacr.org/2020/086
  */
-class RingGSWAccumulatorDM final : public RingGSWAccumulator {
+class RingGswAccumulatorDm final : public RingGswAccumulator {
   public:
-    RingGSWAccumulatorDM() = default;
+    RingGswAccumulatorDm() = default;
 
     /**
      * Key generation for internal Ring GSW as described in https://eprint.iacr.org/2020/086
      *
      * @param params a shared pointer to RingGSW scheme parameters
-     * @param skNTT secret key polynomial in the EVALUATION representation
-     * @param LWEsk the secret key
+     * @param sk_ntt secret key polynomial in the EVALUATION representation
+     * @param LWE_sk the secret key
      * @return a shared pointer to the resulting keys
      */
-    RingGSWACCKey KeyGenAcc(const std::shared_ptr<RingGSWCryptoParams>& params, const NativePoly& skNTT,
-                            ConstLWEPrivateKey& LWEsk) const override;
+    RingGswAccKey key_gen_acc(const std::shared_ptr<RingGswCryptoParams>& params, const NativePoly& sk_ntt,
+                            ConstLwePrivateKey& LWE_sk) const override;
 
-#if NATIVEINT != 32
+#if CIPHER_NATIVE_INT != 32
     /**
      * Key generation for internal Ring GSW as described in https://eprint.iacr.org/2020/086, producing the refreshing
      * key directly in its 32-bit internal form: the RGSW encryptions are sampled on 32-bit words, so the 64-bit key
-     * is never materialised. Used when Q fits a 32-bit word (RingGSWACCKey32Impl::Fits)
+     * is never materialised. Used when Q fits a 32-bit word (RingGswAccKey32Impl::Fits)
      *
      * @param params a shared pointer to RingGSW scheme parameters
-     * @param skNTT secret key polynomial in the EVALUATION representation
-     * @param LWEsk the secret key
-     * @return a shared pointer to the resulting 32-bit keys, laid out as [n][baseR][digitsR] like the 64-bit key
+     * @param sk_ntt secret key polynomial in the EVALUATION representation
+     * @param LWE_sk the secret key
+     * @return a shared pointer to the resulting 32-bit keys, laid out as [n][base_r][digits_r] like the 64-bit key
      */
-    RingGSWACCKey32 KeyGenAcc32(const std::shared_ptr<RingGSWCryptoParams>& params, const NativePoly& skNTT,
-                                ConstLWEPrivateKey& LWEsk) const override;
+    RingGswAccKey32 key_gen_acc32(const std::shared_ptr<RingGswCryptoParams>& params, const NativePoly& sk_ntt,
+                                ConstLwePrivateKey& LWE_sk) const override;
 
     /**
      * Main accumulator function used in bootstrapping - AP variant on the 32-bit internal key. The accumulator is
      * narrowed to 32 bits, updated with 32-bit external products, and widened back; the result is bit-identical to
-     * EvalAcc on the 64-bit key
+     * eval_acc on the 64-bit key
      *
      * @param params a shared pointer to RingGSW scheme parameters
      * @param ek the 32-bit accumulator key
      * @param acc previous value of the accumulator
      * @param a value to update the accumulator with
      */
-    void EvalAcc32(const std::shared_ptr<RingGSWCryptoParams>& params, ConstRingGSWACCKey32& ek, RLWECiphertext& acc,
+    void eval_acc32(const std::shared_ptr<RingGswCryptoParams>& params, ConstRingGswAccKey32& ek, RlweCiphertext& acc,
                    const NativeVector& a) const override;
 #endif
 
@@ -94,7 +94,7 @@ class RingGSWAccumulatorDM final : public RingGSWAccumulator {
      * @param acc previous value of the accumulator
      * @param a value to update the accumulator with
      */
-    void EvalAcc(const std::shared_ptr<RingGSWCryptoParams>& params, ConstRingGSWACCKey& ek, RLWECiphertext& acc,
+    void eval_acc(const std::shared_ptr<RingGswCryptoParams>& params, ConstRingGswAccKey& ek, RlweCiphertext& acc,
                  const NativeVector& a) const override;
 
   private:
@@ -102,12 +102,12 @@ class RingGSWAccumulatorDM final : public RingGSWAccumulator {
      * DM Key generation for internal Ring GSW as described in https://eprint.iacr.org/2014/816
      *
      * @param params a shared pointer to RingGSW scheme parameters
-     * @param skNTT secret key polynomial in the EVALUATION representation
+     * @param sk_ntt secret key polynomial in the EVALUATION representation
      * @param m a plaintext
      * @param index LWE secret-key coefficient index
      * @return a shared pointer to the resulting keys
      */
-    RingGSWEvalKey KeyGenDM(const std::shared_ptr<RingGSWCryptoParams>& params, const NativePoly& skNTT, LWEPlaintext m,
+    RingGswEvalKey key_gen_dm(const std::shared_ptr<RingGswCryptoParams>& params, const NativePoly& sk_ntt, LwePlaintext m,
                             uint32_t index) const;
 
     /**
@@ -118,10 +118,10 @@ class RingGSWAccumulatorDM final : public RingGSWAccumulator {
      * @param acc previous value of the accumulator
      * @param index LWE secret-key coefficient index
      */
-    void AddToAccDM(const std::shared_ptr<RingGSWCryptoParams>& params, ConstRingGSWEvalKey& ek, RLWECiphertext& acc,
+    void add_to_acc_dm(const std::shared_ptr<RingGswCryptoParams>& params, ConstRingGswEvalKey& ek, RlweCiphertext& acc,
                     uint32_t index) const;
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_BOOLEAN_RGSW_ACC_DM_H_

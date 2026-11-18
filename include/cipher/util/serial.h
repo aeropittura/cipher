@@ -88,7 +88,7 @@
 
 #include "cipher/util/ser_type.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 // ATTN: the code below (including "namespace internal_cc_traits") was added to make sure that some functions
 // from this file are NOT called if the object type they get as a parameter is CryptoContextImpl/CryptoContext.
@@ -119,14 +119,14 @@ struct is_crypto_context_impl : is_crypto_context_like<std::decay_t<T>> {};
 // when cryptocontext-ser.h has been included and the type has been enabled.
 #define CHECK_CC_SERIALIZATION_ENABLED(T)                                                             \
     do {                                                                                              \
-        if constexpr (::lbcrypto::internal_cc_traits::is_crypto_context_impl<T>::value) {             \
+        if constexpr (::cipher::internal_cc_traits::is_crypto_context_impl<T>::value) {             \
             using DecayedT = std::decay_t<T>;                                                         \
-            static_assert(::lbcrypto::internal_cc_traits::cc_ser_enabled<DecayedT>::value,            \
+            static_assert(::cipher::internal_cc_traits::cc_ser_enabled<DecayedT>::value,            \
                           "CryptoContext serialization is disabled. Include <cryptocontext-ser.h>."); \
         }                                                                                             \
     } while (0)
 
-namespace Serial {
+namespace serialization {
 //========================== BINARY serialization ==========================
 /**
  * Serialize an object
@@ -135,7 +135,7 @@ namespace Serial {
  * @param st - type of serialization (BINARY)
  */
 template <typename T>
-void Serialize(const T& obj, std::ostream& stream, const SerType::SERBINARY& st) {
+void to_stream(const T& obj, std::ostream& stream, const SerType::SERBINARY& st) {
     cereal::PortableBinaryOutputArchive archive(stream);
     archive(obj);
 }
@@ -147,7 +147,7 @@ void Serialize(const T& obj, std::ostream& stream, const SerType::SERBINARY& st)
  * @param st - type of de-serialization (BINARY)
  */
 template <typename T>
-void Deserialize(T& obj, std::istream& stream, const SerType::SERBINARY& st) {
+void from_stream(T& obj, std::istream& stream, const SerType::SERBINARY& st) {
     CHECK_CC_SERIALIZATION_ENABLED(T);
 
     cereal::PortableBinaryInputArchive archive(stream);
@@ -155,12 +155,12 @@ void Deserialize(T& obj, std::istream& stream, const SerType::SERBINARY& st) {
 }
 
 template <typename T>
-bool SerializeToFile(const std::string& filename, const T& obj, const SerType::SERBINARY& sertype) {
+bool serialize_to_file(const std::string& filename, const T& obj, const SerType::SERBINARY& sertype) {
     CHECK_CC_SERIALIZATION_ENABLED(T);
 
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     if (file.is_open()) {
-        Serial::Serialize(obj, file, sertype);
+        serialization::to_stream(obj, file, sertype);
         file.close();
         return true;
     }
@@ -168,12 +168,12 @@ bool SerializeToFile(const std::string& filename, const T& obj, const SerType::S
 }
 
 template <typename T>
-bool DeserializeFromFile(const std::string& filename, T& obj, const SerType::SERBINARY& sertype) {
+bool deserialize_from_file(const std::string& filename, T& obj, const SerType::SERBINARY& sertype) {
     CHECK_CC_SERIALIZATION_ENABLED(T);
 
     std::ifstream file(filename, std::ios::in | std::ios::binary);
     if (file.is_open()) {
-        Serial::Deserialize(obj, file, sertype);
+        serialization::from_stream(obj, file, sertype);
         file.close();
         return true;
     }
@@ -188,7 +188,7 @@ bool DeserializeFromFile(const std::string& filename, T& obj, const SerType::SER
  * @param ser - type of serialization (JSON)
  */
 template <typename T>
-void Serialize(const T& obj, std::ostream& stream, const SerType::SERJSON& ser) {
+void to_stream(const T& obj, std::ostream& stream, const SerType::SERJSON& ser) {
     cereal::JSONOutputArchive archive(stream);
     archive(obj);
 }
@@ -200,7 +200,7 @@ void Serialize(const T& obj, std::ostream& stream, const SerType::SERJSON& ser) 
  * @param ser - type of de-serialization (JSON)
  */
 template <typename T>
-void Deserialize(T& obj, std::istream& stream, const SerType::SERJSON& ser) {
+void from_stream(T& obj, std::istream& stream, const SerType::SERJSON& ser) {
     CHECK_CC_SERIALIZATION_ENABLED(T);
 
     cereal::JSONInputArchive archive(stream);
@@ -208,12 +208,12 @@ void Deserialize(T& obj, std::istream& stream, const SerType::SERJSON& ser) {
 }
 
 template <typename T>
-bool SerializeToFile(const std::string& filename, const T& obj, const SerType::SERJSON& sertype) {
+bool serialize_to_file(const std::string& filename, const T& obj, const SerType::SERJSON& sertype) {
     CHECK_CC_SERIALIZATION_ENABLED(T);
 
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     if (file.is_open()) {
-        Serial::Serialize(obj, file, sertype);
+        serialization::to_stream(obj, file, sertype);
         file.close();
         return true;
     }
@@ -221,12 +221,12 @@ bool SerializeToFile(const std::string& filename, const T& obj, const SerType::S
 }
 
 template <typename T>
-bool DeserializeFromFile(const std::string& filename, T& obj, const SerType::SERJSON& sertype) {
+bool deserialize_from_file(const std::string& filename, T& obj, const SerType::SERJSON& sertype) {
     CHECK_CC_SERIALIZATION_ENABLED(T);
 
     std::ifstream file(filename, std::ios::in | std::ios::binary);
     if (file.is_open()) {
-        Serial::Deserialize(obj, file, sertype);
+        serialization::from_stream(obj, file, sertype);
         file.close();
         return true;
     }
@@ -234,36 +234,36 @@ bool DeserializeFromFile(const std::string& filename, T& obj, const SerType::SER
 }
 
 /**
- * SerializeToString - serialize the object to a JSON string and return the
+ * serialize_to_string - serialize the object to a JSON string and return the
  * string
  * @param t - any serializable object
  * @return JSON string
  */
 template <typename T>
-std::string SerializeToString(const T& t) {
+std::string serialize_to_string(const T& t) {
     CHECK_CC_SERIALIZATION_ENABLED(T);
 
     std::stringstream s;
-    Serialize(t, s, SerType::JSON);
+    to_stream(t, s, SerType::JSON);
     return s.str();
 }
 
 /**
- * DeserializeFromString - deserialize the object from a JSON string
+ * deserialize_from_string - deserialize the object from a JSON string
  * @param obj - any object to deserialize into
  * @param json - JSON string
  */
 template <typename T>
-void DeserializeFromString(T& obj, const std::string& json) {
+void deserialize_from_string(T& obj, const std::string& json) {
     CHECK_CC_SERIALIZATION_ENABLED(T);
 
     std::stringstream s;
     s << json;
-    Serial::Deserialize(obj, s, SerType::JSON);
+    serialization::from_stream(obj, s, SerType::JSON);
 }
 
 }  // namespace Serial
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_UTIL_SERIAL_H_

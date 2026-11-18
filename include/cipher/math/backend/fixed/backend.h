@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  This file contains the definitions for MATHBACKEND 2 also known as the fixed multi-precision backend.
+  This file contains the definitions for CIPHER_MATH_BACKEND 2 also known as the fixed multi-precision backend.
   This backend supports fixed bitwidths; Uses bigintfxd:: definition as default;
   Implemented as a vector of integers.
   Configurable maximum bit length and type of underlying integer
@@ -40,19 +40,19 @@
 #define CIPHER_MATH_BACKEND_FIXED_BACKEND_H_
 
 #include "cipher/config.h"
-#ifdef WITH_BE2
+#ifdef CIPHER_WITH_BE2
 
     #include "cipher/math/backend/fixed/mod_vector.h"
     #include "cipher/math/backend/fixed/transform.h"
     #include "cipher/math/backend/fixed/integer.h"
 
-static_assert(bigintfxd::DataTypeChecker<integral_dtype>::value, "Data type provided is not supported in BigInteger");
+static_assert(fixed_int::DataTypeChecker<integral_dtype>::value, "Data type provided is not supported in BigInteger");
 
-// Global alias for MATHBACKEND 2 Integer
-using M2Integer = bigintfxd::BigInteger;
+// Global alias for CIPHER_MATH_BACKEND 2 Integer
+using M2Integer = fixed_int::BigInteger;
 
-// Global alias for MATHBACKEND 2 Vector
-using M2Vector = bigintfxd::BigVector;
+// Global alias for CIPHER_MATH_BACKEND 2 Vector
+using M2Vector = fixed_int::BigVector;
 #else
 using M2Integer = void;
 #endif

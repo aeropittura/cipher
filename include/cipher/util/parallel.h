@@ -36,19 +36,19 @@
 #ifndef CIPHER_UTIL_PARALLEL_H_
 #define CIPHER_UTIL_PARALLEL_H_
 
-#ifdef PARALLEL
+#ifdef CIPHER_PARALLEL
     #include <omp.h>
 
     #include <atomic>
 #endif
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Runtime control of the number of OpenMP threads OpenFHE uses. Holds the thread count reported by the
  * system at construction (machine threads) and a current thread limit in [1, machine threads] that the library's
- * parallel regions consult through GetThreadLimit(). Without the PARALLEL build option every query returns 1 and
- * the setters are no-ops. A single global instance, OpenFHEParallelControls, is used throughout the library.
+ * parallel regions consult through get_thread_limit(). Without the CIPHER_PARALLEL build option every query returns 1 and
+ * the setters are no-ops. A single global instance, cipher_parallel_controls, is used throughout the library.
  */
 class ParallelControls {
   public:
@@ -57,40 +57,40 @@ class ParallelControls {
      * OpenMP environment variables) and allows all of them by default.
      */
     ParallelControls() {
-#ifdef PARALLEL
-        machineThreads = omp_get_max_threads();
-        threadLimit.store(machineThreads, std::memory_order_relaxed);
+#ifdef CIPHER_PARALLEL
+        machine_threads = omp_get_max_threads();
+        threadLimit.store(machine_threads, std::memory_order_relaxed);
 #endif
     }
 
     /**
      * @brief Enables parallel operation by setting the thread limit to the number of machine threads.
      */
-    void Enable() {
-        SetNumThreads(machineThreads);
+    void enable() {
+        set_num_threads(machine_threads);
     }
 
     /**
      * @brief Disables parallel operation by setting the thread limit to 1.
      */
-    void Disable() {
-        SetNumThreads(1);
+    void disable() {
+        set_num_threads(1);
     }
 
     /**
      * @brief Returns the number of machine threads latched at construction.
-     * @return number of machine threads (1 without PARALLEL)
+     * @return number of machine threads (1 without CIPHER_PARALLEL)
      */
-    int GetMachineThreads() const {
-        return machineThreads;
+    int get_machine_threads() const {
+        return machine_threads;
     }
 
     /**
      * @brief Returns the number of processors available to the process, as reported by OpenMP.
-     * @return number of processors (1 without PARALLEL)
+     * @return number of processors (1 without CIPHER_PARALLEL)
      */
-    static int GetNumProcs() {
-#ifdef PARALLEL
+    static int get_num_procs() {
+#ifdef CIPHER_PARALLEL
         return omp_get_num_procs();
 #else
         return 1;
@@ -99,10 +99,10 @@ class ParallelControls {
 
     /**
      * @brief Returns the current thread limit.
-     * @return number of threads the library may currently use (1 without PARALLEL)
+     * @return number of threads the library may currently use (1 without CIPHER_PARALLEL)
      */
-    int GetNumThreads() const {
-#ifdef PARALLEL
+    int get_num_threads() const {
+#ifdef CIPHER_PARALLEL
         return threadLimit.load(std::memory_order_relaxed);
 #else
         return 1;
@@ -112,10 +112,10 @@ class ParallelControls {
     /**
      * @brief Reports whether the caller is inside an active OpenMP parallel region, where a nested region would
      * get one thread.
-     * @return true inside an active parallel region; false otherwise and without PARALLEL
+     * @return true inside an active parallel region; false otherwise and without CIPHER_PARALLEL
      */
-    static bool InParallelRegion() {
-#ifdef PARALLEL
+    static bool in_parallel_region() {
+#ifdef CIPHER_PARALLEL
         return omp_in_parallel() != 0;
 #else
         return false;
@@ -126,10 +126,10 @@ class ParallelControls {
      * @brief Clamps a requested thread count to [1, current thread limit]; used as the num_threads value of the
      * library's parallel regions.
      * @param n requested number of threads (typically the amount of independent work available)
-     * @return n clamped to [1, current thread limit] (1 without PARALLEL)
+     * @return n clamped to [1, current thread limit] (1 without CIPHER_PARALLEL)
      */
-    int GetThreadLimit(int n) const {
-#ifdef PARALLEL
+    int get_thread_limit(int n) const {
+#ifdef CIPHER_PARALLEL
         int lim = threadLimit.load(std::memory_order_relaxed);
         return n > lim ? lim : (n < 1 ? 1 : n);
 #else
@@ -141,12 +141,12 @@ class ParallelControls {
      * @brief Sets the thread limit, clamped to [1, machine threads], and passes it to omp_set_num_threads().
      * @param nthreads requested number of threads
      */
-    void SetNumThreads(int nthreads) {
-#ifdef PARALLEL
+    void set_num_threads(int nthreads) {
+#ifdef CIPHER_PARALLEL
         if (nthreads < 1)
             nthreads = 1;
-        else if (nthreads > machineThreads)
-            nthreads = machineThreads;
+        else if (nthreads > machine_threads)
+            nthreads = machine_threads;
         threadLimit.store(nthreads, std::memory_order_relaxed);
         omp_set_num_threads(nthreads);
 #endif
@@ -154,35 +154,35 @@ class ParallelControls {
 
     /**
      * @brief Saves the current thread limit and caps it at half the processors for the duration of unit tests;
-     * the saved value is restored by UnitTestStop().
+     * the saved value is restored by unit_test_stop().
      */
-    void UnitTestStart() {
-#ifdef PARALLEL
+    void unit_test_start() {
+#ifdef CIPHER_PARALLEL
         savedLimit = threadLimit.load(std::memory_order_relaxed);
-        SetNumThreads(GetNumProcs() / 2);
+        set_num_threads(get_num_procs() / 2);
 #endif
     }
 
     /**
-     * @brief Restores the thread limit saved by UnitTestStart().
+     * @brief Restores the thread limit saved by unit_test_start().
      */
-    void UnitTestStop() {
-#ifdef PARALLEL
-        SetNumThreads(savedLimit);
+    void unit_test_stop() {
+#ifdef CIPHER_PARALLEL
+        set_num_threads(savedLimit);
 #endif
     }
 
   private:
-#ifdef PARALLEL
+#ifdef CIPHER_PARALLEL
     std::atomic<int> threadLimit{1};
     int savedLimit{1};
 #endif
-    int machineThreads{1};
+    int machine_threads{1};
 };
 
 /** the global instance consulted by all parallel regions in the library */
-extern ParallelControls OpenFHEParallelControls;
+extern ParallelControls cipher_parallel_controls;
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_UTIL_PARALLEL_H_

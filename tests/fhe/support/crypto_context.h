@@ -37,9 +37,9 @@
 #include "cipher/fhe/context.h"
 #include "cipher/fhe/base/scheme.h"
 
-using Element = lbcrypto::DCRTPoly;
+using Element = cipher::RnsPoly;
 
-lbcrypto::CryptoContext<Element> UnitTestGenerateContext(const UnitTestCCParams& testData);
-lbcrypto::CryptoContext<Element> UnitTestGenerateContext(const BaseTestCase& testCase);
+cipher::CryptoContext<Element> unit_test_generate_context(const TestContextParams& test_data);
+cipher::CryptoContext<Element> unit_test_generate_context(const BaseTestCase& test_case_value);
 
 #endif  // CIPHER_TESTS_FHE_SUPPORT_CRYPTO_CONTEXT_H_

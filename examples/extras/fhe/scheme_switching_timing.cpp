@@ -48,118 +48,118 @@
 #include "cipher/boolean/context.h"
 #include "cipher/cipher.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
-void SwitchCKKSToFHEW(uint32_t depth, uint32_t slots, uint32_t numValues);
-void SwitchFHEWtoCKKS(uint32_t depth, uint32_t slots, uint32_t numValues);
-void ComparisonViaSchemeSwitching(uint32_t depth, uint32_t slots, uint32_t numValues);
-void ArgminViaSchemeSwitching(uint32_t depth, uint32_t slots, uint32_t numValues);
-void ArgminViaSchemeSwitchingAlt(uint32_t depth, uint32_t slots, uint32_t numValues);
-void Argmin(uint32_t depth, uint32_t slots, uint32_t numValues, uint32_t ringDim);
-void ArgminAlt(uint32_t depth, uint32_t slots, uint32_t numValues, uint32_t ringDim);
-void Comparison(uint32_t depth, uint32_t slots, uint32_t numValues, uint32_t ringDim);
+void switch_ckks_to_fhew(uint32_t depth, uint32_t slots, uint32_t num_values);
+void switch_fhew_to_ckks(uint32_t depth, uint32_t slots, uint32_t num_values);
+void comparison_via_scheme_switching(uint32_t depth, uint32_t slots, uint32_t num_values);
+void argmin_via_scheme_switching(uint32_t depth, uint32_t slots, uint32_t num_values);
+void argmin_via_scheme_switching_alt(uint32_t depth, uint32_t slots, uint32_t num_values);
+void argmin(uint32_t depth, uint32_t slots, uint32_t num_values, uint32_t ring_dim);
+void argmin_alt(uint32_t depth, uint32_t slots, uint32_t num_values, uint32_t ring_dim);
+void Comparison(uint32_t depth, uint32_t slots, uint32_t num_values, uint32_t ring_dim);
 
 int main() {
     // // all examples set 128-bit security
-    SwitchCKKSToFHEW(24, 1024, 1024);
-    SwitchFHEWtoCKKS(24, 1024, 1024);
-    ComparisonViaSchemeSwitching(24, 1024, 1024);
+    switch_ckks_to_fhew(24, 1024, 1024);
+    switch_fhew_to_ckks(24, 1024, 1024);
+    comparison_via_scheme_switching(24, 1024, 1024);
 
-    // // depth >= 13 + log2(numValues);
-    ArgminViaSchemeSwitching(24, 1024, 1024);
-    ArgminViaSchemeSwitchingAlt(24, 1024, 1024);
+    // // depth >= 13 + log2(num_values);
+    argmin_via_scheme_switching(24, 1024, 1024);
+    argmin_via_scheme_switching_alt(24, 1024, 1024);
 
-    Argmin(39, 256, 256, 1 << 17);
-    ArgminAlt(39, 256, 256, 1 << 17);
+    argmin(39, 256, 256, 1 << 17);
+    argmin_alt(39, 256, 256, 1 << 17);
     Comparison(39, 256, 256, 1 << 17);
 
     return 0;
 }
 
-void SwitchCKKSToFHEW(uint32_t depth, uint32_t slots, uint32_t numValues) {
+void switch_ckks_to_fhew(uint32_t depth, uint32_t slots, uint32_t num_values) {
     /*
   Example of switching a packed ciphertext from CKKS to multiple FHEW ciphertexts.
  */
     std::cout << "\n-----SwitchCKKSToFHEW-----\n" << std::endl;
 
-    TimeVar t, tTotal;
-    double timeKeyGen(0.0), timeSetup(0.0), timePrecomp(0.0), timeEval(0.0);
+    TimeVar t, t_total_value;
+    double time_key_gen(0.0), time_setup(0.0), time_precomp(0.0), time_eval(0.0);
 
-    TIC(tTotal);
+    TIC(t_total_value);
 
     // Step 1: Setup CryptoContext for CKKS
 
     // Specify main parameters
-    uint32_t firstModSize = 60;
-    uint32_t scaleModSize = 50;
-    uint32_t logQ_ccLWE = 26;
-    uint32_t batchSize = slots;
+    uint32_t first_mod_size_value = 60;
+    uint32_t scale_mod_size = 50;
+    uint32_t log_q_cc_lwe = 26;
+    uint32_t batch_size = slots;
 
-    CCParams<CryptoContextCKKSRNS> parameters;
+    ContextParams<CkksRnsContext> parameters;
 
-    parameters.SetMultiplicativeDepth(depth);
-    parameters.SetFirstModSize(firstModSize);
-    parameters.SetScalingModSize(scaleModSize);
-    parameters.SetScalingTechnique(FIXEDMANUAL);
-    parameters.SetBatchSize(batchSize);
+    parameters.set_multiplicative_depth(depth);
+    parameters.set_first_mod_size(first_mod_size_value);
+    parameters.set_scaling_mod_size(scale_mod_size);
+    parameters.set_scaling_technique(FIXEDMANUAL);
+    parameters.set_batch_size(batch_size);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
 
     // Enable the features that you wish to use
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(SCHEMESWITCH);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(SCHEMESWITCH);
 
-    std::cout << "CKKS scheme is using ring dimension " << cc->GetRingDimension();
+    std::cout << "CKKS scheme is using ring dimension " << cc->get_ring_dimension();
     std::cout << ", number of slots " << slots << ", and supports a multiplicative depth of " << depth << std::endl
               << std::endl;
 
     // Generate encryption keys
-    auto keys = cc->KeyGen();
+    auto keys = cc->key_gen();
 
     // Step 2: Prepare the FHEW cryptocontext and keys for FHEW and scheme switching
     SchSwchParams params;
-    params.SetCtxtModSizeFHEWLargePrec(logQ_ccLWE);
-    params.SetNumSlotsCKKS(slots);
+    params.set_ctxt_mod_size_fhew_large_prec(log_q_cc_lwe);
+    params.set_num_slots_ckks(slots);
     TIC(t);
-    auto privateKeyFHEW = cc->EvalCKKStoFHEWSetup(params);
-    auto ccLWE = cc->GetBinCCForSchemeSwitch();
-    timeSetup = TOC(t);
-    std::cout << "Time to compute the CKKS to FHEW switching setup: " << timeSetup / 1000 << " s" << std::endl;
+    auto private_key_fhew = cc->eval_ckks_to_fhew_setup(params);
+    auto cc_lwe = cc->get_bin_cc_for_scheme_switch();
+    time_setup = TOC(t);
+    std::cout << "Time to compute the CKKS to FHEW switching setup: " << time_setup / 1000 << " s" << std::endl;
 
     TIC(t);
-    cc->EvalCKKStoFHEWKeyGen(keys, privateKeyFHEW);
+    cc->eval_ckks_to_fhew_key_gen(keys, private_key_fhew);
     // Generate bootstrapping key for timing
-    ccLWE->BTKeyGen(privateKeyFHEW);
-    timeKeyGen = TOC(t);
-    std::cout << "Time to compute the CKKS to FHEW switching key generation (+BTKey): " << timeKeyGen / 60000 << " min"
+    cc_lwe->bt_key_gen(private_key_fhew);
+    time_key_gen = TOC(t);
+    std::cout << "Time to compute the CKKS to FHEW switching key generation (+BTKey): " << time_key_gen / 60000 << " min"
               << std::endl;
 
-    std::cout << "FHEW scheme is using lattice parameter " << ccLWE->GetParams()->GetLWEParams()->Getn();
-    std::cout << ", logQ " << logQ_ccLWE;
-    std::cout << ", and modulus q " << ccLWE->GetParams()->GetLWEParams()->Getq() << std::endl << std::endl;
+    std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
+    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
-    std::cout << numValues << " slots are being switched." << std::endl << std::endl;
+    std::cout << num_values << " slots are being switched." << std::endl << std::endl;
 
     // Perform the precomputation for switching
     TIC(t);
     // Compute the scaling factor to decrypt correctly in FHEW; the LWE mod switch is performed on the ciphertext at the last level
-    const auto cryptoParams = std::dynamic_pointer_cast<CryptoParametersCKKSRNS>(cc->GetCryptoParameters());
-    ILDCRTParams<DCRTPoly::Integer> elementParams = *(cryptoParams->GetElementParams());
-    auto paramsQ = elementParams.GetParams();
-    auto modulus_CKKS_from = paramsQ[0]->GetModulus();
+    const auto crypto_params = std::dynamic_pointer_cast<CkksRnsCryptoParams>(cc->get_crypto_parameters());
+    RnsParams<RnsPoly::Integer> element_params = *(crypto_params->get_element_params());
+    auto params_q = element_params.get_params();
+    auto modulus_ckks_from = params_q[0]->get_modulus();
 
-    auto pLWE = 1 << (logQ_ccLWE - 12);  // Large precision
+    auto p_lwe = 1 << (log_q_cc_lwe - 12);  // Large precision
 
-    double scFactor = cryptoParams->GetScalingFactorReal(0);
-    if (cryptoParams->GetScalingTechnique() == FLEXIBLEAUTOEXT)
-        scFactor = cryptoParams->GetScalingFactorReal(1);
-    double scale = modulus_CKKS_from.ConvertToInt() / (scFactor * pLWE);
+    double sc_factor = crypto_params->get_scaling_factor_real(0);
+    if (crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT)
+        sc_factor = crypto_params->get_scaling_factor_real(1);
+    double scale = modulus_ckks_from.convert_to_int() / (sc_factor * p_lwe);
 
-    cc->EvalCKKStoFHEWPrecompute(scale);
-    timePrecomp = TOC(t);
-    std::cout << "Time to do the precomputations for the CKKS to FHEW switching: " << timePrecomp / 1000 << " s"
+    cc->eval_ckks_to_fhew_precompute(scale);
+    time_precomp = TOC(t);
+    std::cout << "Time to do the precomputations for the CKKS to FHEW switching: " << time_precomp / 1000 << " s"
               << std::endl;
 
     // Step 3: Encoding and encryption of inputs
@@ -172,121 +172,121 @@ void SwitchCKKSToFHEW(uint32_t depth, uint32_t slots, uint32_t numValues) {
     }
 
     // Encoding as plaintexts
-    Plaintext ptxt = cc->MakeCKKSPackedPlaintext(x, 1, 0, nullptr);
+    Plaintext ptxt = cc->make_ckks_packed_plaintext(x, 1, 0, nullptr);
 
     // Encrypt the encoded vectors
-    auto ct = cc->Encrypt(keys.publicKey, ptxt);
+    auto ct = cc->encrypt(keys.public_key, ptxt);
 
     // Step 4: Scheme switching from CKKS to FHEW
 
     // Transform the ciphertext from CKKS to FHEW
     TIC(t);
-    auto cTemp = cc->EvalCKKStoFHEW(ct, numValues);
-    timeEval = TOC(t);
-    std::cout << "Time to evaluate the scheme switching from CKKS to FHEW: " << timeEval / 1000 << " s" << std::endl;
+    auto c_temp = cc->eval_ckks_to_fhew(ct, num_values);
+    time_eval = TOC(t);
+    std::cout << "Time to evaluate the scheme switching from CKKS to FHEW: " << time_eval / 1000 << " s" << std::endl;
 
-    std::vector<int32_t> xInt(slots);
-    std::transform(x.begin(), x.end(), xInt.begin(), [&](const double& elem) {
-        return static_cast<int32_t>(static_cast<int32_t>(std::round(elem)) % pLWE);
+    std::vector<int32_t> x_int(slots);
+    std::transform(x.begin(), x.end(), x_int.begin(), [&](const double& elem) {
+        return static_cast<int32_t>(static_cast<int32_t>(std::round(elem)) % p_lwe);
     });
-    ptxt->SetLength(slots);
+    ptxt->set_length(slots);
     if (slots < 64) {
-        std::cout << "Input: " << ptxt->GetRealPackedValue() << "; which rounds to: " << xInt << std::endl;
+        std::cout << "Input: " << ptxt->get_real_packed_value() << "; which rounds to: " << x_int << std::endl;
         std::cout << "FHEW decryption: ";
-        LWEPlaintext result;
-        for (uint32_t i = 0; i < cTemp.size(); ++i) {
-            ccLWE->Decrypt(privateKeyFHEW, cTemp[i], &result, pLWE);
+        LwePlaintext result;
+        for (uint32_t i = 0; i < c_temp.size(); ++i) {
+            cc_lwe->decrypt(private_key_fhew, c_temp[i], &result, p_lwe);
             std::cout << result << " ";
         }
         std::cout << "\n" << std::endl;
     } else {  // Suppress output
-        LWEPlaintext result;
-        for (uint32_t i = 0; i < cTemp.size(); ++i) {
-            ccLWE->Decrypt(privateKeyFHEW, cTemp[i], &result, pLWE);
+        LwePlaintext result;
+        for (uint32_t i = 0; i < c_temp.size(); ++i) {
+            cc_lwe->decrypt(private_key_fhew, c_temp[i], &result, p_lwe);
         }
     }
 
-    double totalTime = TOC(tTotal);
-    std::cout << "\nTotal time: " << totalTime / 60000 << " min" << std::endl;
+    double total_time = TOC(t_total_value);
+    std::cout << "\nTotal time: " << total_time / 60000 << " min" << std::endl;
 
-    cc->ClearStaticMapsAndVectors();
+    cc->clear_static_maps_and_vectors();
 }
 
-void SwitchFHEWtoCKKS(uint32_t depth, uint32_t slots, uint32_t numValues) {
+void switch_fhew_to_ckks(uint32_t depth, uint32_t slots, uint32_t num_values) {
     /*
   Example of switching multiple FHEW ciphertexts to a packed CKKS ciphertext.
  */
     std::cout << "\n-----SwitchFHEWtoCKKS-----\n" << std::endl;
     std::cout << "Output precision is only wrt the operations in CKKS after switching back.\n" << std::endl;
 
-    TimeVar t, tTotal;
-    double timeKeyGen(0.0), timeSetup(0.0), timeEval(0.0);
+    TimeVar t, t_total_value;
+    double time_key_gen(0.0), time_setup(0.0), time_eval(0.0);
 
-    TIC(tTotal);
+    TIC(t_total_value);
 
     // Step 1: Setup CryptoContext for CKKS to be switched into
 
     // A. Specify main parameters
-    ScalingTechnique scTech = FIXEDAUTO;
-    if (scTech == FLEXIBLEAUTOEXT)
+    ScalingTechnique sc_tech = FIXEDAUTO;
+    if (sc_tech == FLEXIBLEAUTOEXT)
         depth += 1;
-    uint32_t scaleModSize = 50;
-    uint32_t logQ_ccLWE = 26;
-    uint32_t batchSize = slots;
+    uint32_t scale_mod_size = 50;
+    uint32_t log_q_cc_lwe = 26;
+    uint32_t batch_size = slots;
 
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(depth);
-    parameters.SetScalingModSize(scaleModSize);
-    parameters.SetScalingTechnique(scTech);
-    parameters.SetBatchSize(batchSize);
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_multiplicative_depth(depth);
+    parameters.set_scaling_mod_size(scale_mod_size);
+    parameters.set_scaling_technique(sc_tech);
+    parameters.set_batch_size(batch_size);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
 
     // Enable the features that you wish to use
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
-    cc->Enable(SCHEMESWITCH);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
+    cc->enable(SCHEMESWITCH);
 
-    std::cout << "CKKS scheme is using ring dimension " << cc->GetRingDimension();
+    std::cout << "CKKS scheme is using ring dimension " << cc->get_ring_dimension();
     std::cout << ", number of slots " << slots << ", and supports a multiplicative depth of " << depth << std::endl
               << std::endl;
 
     // Generate encryption keys.
-    auto keys = cc->KeyGen();
+    auto keys = cc->key_gen();
 
     // Step 2: Prepare the FHEW cryptocontext and keys for FHEW and scheme switching
-    auto ccLWE = std::make_shared<BinFHEContext>();
-    ccLWE->BinFHEContext::GenerateBinFHEContext(STD128, false, logQ_ccLWE, 0, GINX, false);
+    auto cc_lwe = std::make_shared<BooleanContext>();
+    cc_lwe->BooleanContext::generate_boolean_context(STD128, false, log_q_cc_lwe, 0, GINX, false);
 
-    std::cout << "FHEW scheme is using lattice parameter " << ccLWE->GetParams()->GetLWEParams()->Getn();
-    std::cout << ", logQ " << logQ_ccLWE;
-    std::cout << ", and modulus q " << ccLWE->GetParams()->GetLWEParams()->Getq() << std::endl << std::endl;
+    std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
+    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
-    std::cout << numValues << " slots are being switched." << std::endl << std::endl;
+    std::cout << num_values << " slots are being switched." << std::endl << std::endl;
 
     // Step 3. Precompute the necessary keys and information for switching from FHEW to CKKS
     TIC(t);
-    cc->EvalFHEWtoCKKSSetup(ccLWE, slots, logQ_ccLWE);
-    timeSetup = TOC(t);
-    std::cout << "Time to compute the FHEW to CKKS switching setup: " << timeSetup / 1000 << " s" << std::endl;
+    cc->eval_fhew_to_ckks_setup(cc_lwe, slots, log_q_cc_lwe);
+    time_setup = TOC(t);
+    std::cout << "Time to compute the FHEW to CKKS switching setup: " << time_setup / 1000 << " s" << std::endl;
 
     TIC(t);
     // LWE private key
-    LWEPrivateKey lwesk;
-    lwesk = ccLWE->KeyGen();
-    cc->EvalFHEWtoCKKSKeyGen(keys, lwesk, slots);
+    LwePrivateKey lwesk;
+    lwesk = cc_lwe->key_gen();
+    cc->eval_fhew_to_ckks_key_gen(keys, lwesk, slots);
     // Generate bootstrapping key for timing
-    ccLWE->BTKeyGen(lwesk);
-    timeKeyGen = TOC(t);
-    std::cout << "Time to compute the FHEW to CKKS switching key generation (+ BT key): " << timeKeyGen / 60000
+    cc_lwe->bt_key_gen(lwesk);
+    time_key_gen = TOC(t);
+    std::cout << "Time to compute the FHEW to CKKS switching key generation (+ BT key): " << time_key_gen / 60000
               << " min" << std::endl;
 
     // Step 4: Encoding and encryption of inputs
     // For correct CKKS decryption, the messages have to be much smaller than the FHEW plaintext modulus!
-    auto modulus_LWE = 1 << logQ_ccLWE;
-    auto pLWE = 1 << (logQ_ccLWE - 12);  // Large precision
+    auto modulus_lwe = 1 << log_q_cc_lwe;
+    auto p_lwe = 1 << (log_q_cc_lwe - 12);  // Large precision
 
     // Inputs
     std::vector<int> x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
@@ -296,114 +296,114 @@ void SwitchFHEWtoCKKS(uint32_t depth, uint32_t slots, uint32_t numValues) {
     }
 
     // Encrypt
-    std::vector<LWECiphertext> ctxtsLWE(slots);
+    std::vector<LweCiphertext> ctxts_lwe(slots);
     for (uint32_t i = 0; i < slots; i++) {
         // encrypted under large plaintext modulus and large ciphertext modulus
-        ctxtsLWE[i] = ccLWE->Encrypt(lwesk, x[i], LARGE_DIM, pLWE, modulus_LWE);
+        ctxts_lwe[i] = cc_lwe->encrypt(lwesk, x[i], LARGE_DIM, p_lwe, modulus_lwe);
     }
 
     // Step 5. Perform the scheme switching
-    std::setprecision(logQ_ccLWE + 10);
+    std::setprecision(log_q_cc_lwe + 10);
     TIC(t);
-    auto cTemp = cc->EvalFHEWtoCKKS(ctxtsLWE, numValues, slots, pLWE, 0, pLWE);
-    timeEval = TOC(t);
-    std::cout << "Time to evaluate the scheme switching from FHEW to CKKS: " << timeEval / 60000 << " min" << std::endl;
+    auto c_temp = cc->eval_fhew_to_ckks(ctxts_lwe, num_values, slots, p_lwe, 0, p_lwe);
+    time_eval = TOC(t);
+    std::cout << "Time to evaluate the scheme switching from FHEW to CKKS: " << time_eval / 60000 << " min" << std::endl;
 
     // Step 6. Decrypt
-    Plaintext plaintextDec;
-    cc->Decrypt(keys.secretKey, cTemp, &plaintextDec);
-    plaintextDec->SetLength(numValues);
+    Plaintext plaintext_dec;
+    cc->decrypt(keys.secret_key, c_temp, &plaintext_dec);
+    plaintext_dec->set_length(num_values);
 
-    if (numValues <= 64) {  // Otherwise, supress output
-        std::cout << "\nInput: " << x << " encrypted under p = " << NativeInteger(pLWE)
-                  << " and Q = " << ctxtsLWE[0]->GetModulus() << std::endl;
-        std::cout << "Switched CKKS decryption: " << plaintextDec << std::endl;
+    if (num_values <= 64) {  // Otherwise, supress output
+        std::cout << "\nInput: " << x << " encrypted under p = " << NativeInteger(p_lwe)
+                  << " and Q = " << ctxts_lwe[0]->get_modulus() << std::endl;
+        std::cout << "Switched CKKS decryption: " << plaintext_dec << std::endl;
     }
 
-    double totalTime = TOC(tTotal);
-    std::cout << "\nTotal time: " << totalTime / 60000 << " min" << std::endl;
+    double total_time = TOC(t_total_value);
+    std::cout << "\nTotal time: " << total_time / 60000 << " min" << std::endl;
 
-    cc->ClearStaticMapsAndVectors();
+    cc->clear_static_maps_and_vectors();
 }
 
-void ComparisonViaSchemeSwitching(uint32_t depth, uint32_t slots, uint32_t numValues) {
+void comparison_via_scheme_switching(uint32_t depth, uint32_t slots, uint32_t num_values) {
     /*
   Example of comparing two CKKS ciphertexts via scheme switching.
  */
     std::cout << "\n-----ComparisonViaSchemeSwitching-----\n" << std::endl;
     std::cout << "Output precision is only wrt the operations in CKKS after switching back.\n" << std::endl;
 
-    TimeVar t, tTotal;
-    double timeKeyGen(0.0), timeSetup(0.0), timePrecomp(0.0), timeEval(0.0);
+    TimeVar t, t_total_value;
+    double time_key_gen(0.0), time_setup(0.0), time_precomp(0.0), time_eval(0.0);
 
-    TIC(tTotal);
+    TIC(t_total_value);
 
     // Step 1: Setup CryptoContext for CKKS
-    ScalingTechnique scTech = FIXEDAUTO;
-    if (scTech == FLEXIBLEAUTOEXT)
+    ScalingTechnique sc_tech = FIXEDAUTO;
+    if (sc_tech == FLEXIBLEAUTOEXT)
         depth += 1;
 
-    uint32_t scaleModSize = 50;
-    uint32_t firstModSize = 60;
-    uint32_t logQ_ccLWE = 26;
-    uint32_t batchSize = slots;
+    uint32_t scale_mod_size = 50;
+    uint32_t first_mod_size_value = 60;
+    uint32_t log_q_cc_lwe = 26;
+    uint32_t batch_size = slots;
 
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(depth);
-    parameters.SetScalingModSize(scaleModSize);
-    parameters.SetFirstModSize(firstModSize);
-    parameters.SetScalingTechnique(scTech);
-    parameters.SetBatchSize(batchSize);
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_multiplicative_depth(depth);
+    parameters.set_scaling_mod_size(scale_mod_size);
+    parameters.set_first_mod_size(first_mod_size_value);
+    parameters.set_scaling_technique(sc_tech);
+    parameters.set_batch_size(batch_size);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
 
     // Enable the features that you wish to use
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
-    cc->Enable(SCHEMESWITCH);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
+    cc->enable(SCHEMESWITCH);
 
-    std::cout << "CKKS scheme is using ring dimension " << cc->GetRingDimension();
+    std::cout << "CKKS scheme is using ring dimension " << cc->get_ring_dimension();
     std::cout << ", number of slots " << slots << ", and supports a multiplicative depth of " << depth << std::endl
               << std::endl;
 
     // Generate encryption keys.
-    auto keys = cc->KeyGen();
+    auto keys = cc->key_gen();
 
     // Step 2: Prepare the FHEW cryptocontext and keys for FHEW and scheme switching
     SchSwchParams params;
-    params.SetCtxtModSizeFHEWLargePrec(logQ_ccLWE);
-    params.SetNumSlotsCKKS(slots);
-    params.SetNumValues(slots);
+    params.set_ctxt_mod_size_fhew_large_prec(log_q_cc_lwe);
+    params.set_num_slots_ckks(slots);
+    params.set_num_values(slots);
     TIC(t);
-    auto privateKeyFHEW = cc->EvalSchemeSwitchingSetup(params);
-    timeSetup = TOC(t);
-    std::cout << "Time to compute the scheme switching setup: " << timeSetup / 1000 << " s" << std::endl;
+    auto private_key_fhew = cc->eval_scheme_switching_setup(params);
+    time_setup = TOC(t);
+    std::cout << "Time to compute the scheme switching setup: " << time_setup / 1000 << " s" << std::endl;
 
-    auto ccLWE = cc->GetBinCCForSchemeSwitch();
+    auto cc_lwe = cc->get_bin_cc_for_scheme_switch();
 
     TIC(t);
-    cc->EvalSchemeSwitchingKeyGen(keys, privateKeyFHEW);
-    timeKeyGen = TOC(t);
-    std::cout << "Time to compute the scheme switching key generation: " << timeKeyGen / 60000 << " min" << std::endl
+    cc->eval_scheme_switching_key_gen(keys, private_key_fhew);
+    time_key_gen = TOC(t);
+    std::cout << "Time to compute the scheme switching key generation: " << time_key_gen / 60000 << " min" << std::endl
               << std::endl;
 
-    std::cout << "FHEW scheme is using lattice parameter " << ccLWE->GetParams()->GetLWEParams()->Getn();
-    std::cout << ", logQ " << logQ_ccLWE;
-    std::cout << ", and modulus q " << ccLWE->GetParams()->GetLWEParams()->Getq() << std::endl << std::endl;
+    std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
+    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
-    std::cout << numValues << " slots are being switched." << std::endl;
+    std::cout << num_values << " slots are being switched." << std::endl;
 
     TIC(t);
     // Pre-computations
-    auto modulus_LWE = 1 << logQ_ccLWE;
-    auto beta = ccLWE->GetBeta().ConvertToInt();
-    auto pLWE = modulus_LWE / (2 * beta);
-    double scaleSignFHEW = 8.0;
-    cc->EvalCompareSwitchPrecompute(pLWE, scaleSignFHEW);
-    timePrecomp = TOC(t);
-    std::cout << "Time to perform precomputations: " << timePrecomp / 1000 << " s" << std::endl;
+    auto modulus_lwe = 1 << log_q_cc_lwe;
+    auto beta = cc_lwe->get_beta().convert_to_int();
+    auto p_lwe = modulus_lwe / (2 * beta);
+    double scale_sign_fhew = 8.0;
+    cc->eval_compare_switch_precompute(p_lwe, scale_sign_fhew);
+    time_precomp = TOC(t);
+    std::cout << "Time to perform precomputations: " << time_precomp / 1000 << " s" << std::endl;
 
     // Step 3: Encoding and encryption of inputs
     // Inputs
@@ -419,134 +419,134 @@ void ComparisonViaSchemeSwitching(uint32_t depth, uint32_t slots, uint32_t numVa
     }
 
     // Encoding as plaintexts
-    Plaintext ptxt1 = cc->MakeCKKSPackedPlaintext(x1, 1, 0, nullptr);
-    Plaintext ptxt2 = cc->MakeCKKSPackedPlaintext(x2, 1, 0, nullptr);
+    Plaintext ptxt1 = cc->make_ckks_packed_plaintext(x1, 1, 0, nullptr);
+    Plaintext ptxt2 = cc->make_ckks_packed_plaintext(x2, 1, 0, nullptr);
 
     // Encrypt the encoded vectors
-    auto c1 = cc->Encrypt(keys.publicKey, ptxt1);
-    auto c2 = cc->Encrypt(keys.publicKey, ptxt2);
+    auto c1 = cc->encrypt(keys.public_key, ptxt1);
+    auto c2 = cc->encrypt(keys.public_key, ptxt2);
 
     // Compute the difference to compare to zero
-    auto cDiff = cc->EvalSub(c1, c2);
+    auto c_diff = cc->eval_sub(c1, c2);
 
-    Plaintext pDiff;
-    cc->Decrypt(keys.secretKey, cDiff, &pDiff);
-    pDiff->SetLength(slots);
+    Plaintext p_diff;
+    cc->decrypt(keys.secret_key, c_diff, &p_diff);
+    p_diff->set_length(slots);
     if (slots <= 64) {  // Otherwise, supress output
         std::cout << "Difference of inputs: ";
-        auto pDiff_rpv = pDiff->GetRealPackedValue();
+        auto p_diff_rpv = p_diff->get_real_packed_value();
         for (uint32_t i = 0; i < slots; ++i) {
-            std::cout << pDiff_rpv[i] << " ";
+            std::cout << p_diff_rpv[i] << " ";
         }
     }
 
-    if (numValues <= 64) {  // Otherwise, supress output
+    if (num_values <= 64) {  // Otherwise, supress output
         const double eps = 0.0001;
         std::cout << "\nExpected sign result from CKKS: ";
-        auto pDiff_rpv = pDiff->GetRealPackedValue();
-        for (uint32_t i = 0; i < numValues; ++i) {
-            std::cout << int(std::round(pDiff_rpv[i] / eps) * eps < 0) << " ";
+        auto p_diff_rpv = p_diff->get_real_packed_value();
+        for (uint32_t i = 0; i < num_values; ++i) {
+            std::cout << int(std::round(p_diff_rpv[i] / eps) * eps < 0) << " ";
         }
         std::cout << "\n";
     }
 
     // Step 4: Comparison via CKKS->FHEW->CKKS
     TIC(t);
-    auto cResult = cc->EvalCompareSchemeSwitching(c1, c2, numValues, slots);
-    timeEval = TOC(t);
-    std::cout << "Time to perform comparison via scheme switching: " << timeEval / 60000 << " min" << std::endl;
+    auto c_result = cc->eval_compare_scheme_switching(c1, c2, num_values, slots);
+    time_eval = TOC(t);
+    std::cout << "Time to perform comparison via scheme switching: " << time_eval / 60000 << " min" << std::endl;
 
-    Plaintext plaintextDec3;
-    cc->Decrypt(keys.secretKey, cResult, &plaintextDec3);
-    plaintextDec3->SetLength(numValues);
+    Plaintext plaintext_dec3;
+    cc->decrypt(keys.secret_key, c_result, &plaintext_dec3);
+    plaintext_dec3->set_length(num_values);
 
-    if (numValues <= 64) {  // Otherwise, supress output
-        std::cout << "Decrypted switched result: " << plaintextDec3 << std::endl;
+    if (num_values <= 64) {  // Otherwise, supress output
+        std::cout << "Decrypted switched result: " << plaintext_dec3 << std::endl;
     }
 
-    double totalTime = TOC(tTotal);
-    std::cout << "\nTotal time: " << totalTime / 60000 << " min" << std::endl;
+    double total_time = TOC(t_total_value);
+    std::cout << "\nTotal time: " << total_time / 60000 << " min" << std::endl;
 
-    cc->ClearStaticMapsAndVectors();
+    cc->clear_static_maps_and_vectors();
 }
 
-void ArgminViaSchemeSwitching(uint32_t depth, uint32_t slots, uint32_t numValues) {
+void argmin_via_scheme_switching(uint32_t depth, uint32_t slots, uint32_t num_values) {
     /*
   Example of computing the min and argmin of the vector packed in a CKKS ciphertext.
  */
     std::cout << "\n-----ArgminViaSchemeSwitching-----\n" << std::endl;
     std::cout << "Output precision is only wrt the operations in CKKS after switching back\n" << std::endl;
 
-    TimeVar t, tTotal;
-    double timeKeyGen(0.0), timeSetup(0.0), timePrecomp(0.0), timeEvalMin(0.0);  // timeEvalMax(0.0);
+    TimeVar t, t_total_value;
+    double time_key_gen(0.0), time_setup(0.0), time_precomp(0.0), time_eval_min(0.0);  // timeEvalMax(0.0);
 
-    TIC(tTotal);
+    TIC(t_total_value);
 
     // Step 1: Setup CryptoContext for CKKS
-    uint32_t scaleModSize = 50;
-    uint32_t firstModSize = 60;
-    uint32_t logQ_ccLWE = 26;
-    bool oneHot = true;  // Change to false if the output should not be one-hot encoded
+    uint32_t scale_mod_size = 50;
+    uint32_t first_mod_size_value = 60;
+    uint32_t log_q_cc_lwe = 26;
+    bool one_hot = true;  // Change to false if the output should not be one-hot encoded
 
-    uint32_t batchSize = slots;
-    ScalingTechnique scTech = FLEXIBLEAUTO;
-    if (scTech == FLEXIBLEAUTOEXT)
+    uint32_t batch_size = slots;
+    ScalingTechnique sc_tech = FLEXIBLEAUTO;
+    if (sc_tech == FLEXIBLEAUTOEXT)
         depth += 1;
 
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(depth);
-    parameters.SetScalingModSize(scaleModSize);
-    parameters.SetFirstModSize(firstModSize);
-    parameters.SetScalingTechnique(scTech);
-    parameters.SetBatchSize(batchSize);
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_multiplicative_depth(depth);
+    parameters.set_scaling_mod_size(scale_mod_size);
+    parameters.set_first_mod_size(first_mod_size_value);
+    parameters.set_scaling_technique(sc_tech);
+    parameters.set_batch_size(batch_size);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
 
     // Enable the features that you wish to use
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
-    cc->Enable(SCHEMESWITCH);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
+    cc->enable(SCHEMESWITCH);
 
-    std::cout << "CKKS scheme is using ring dimension " << cc->GetRingDimension();
+    std::cout << "CKKS scheme is using ring dimension " << cc->get_ring_dimension();
     std::cout << ", and number of slots " << slots << ", and supports a depth of " << depth << std::endl << std::endl;
 
     // Generate encryption keys
-    auto keys = cc->KeyGen();
+    auto keys = cc->key_gen();
 
     // Step 2: Prepare the FHEW cryptocontext and keys for FHEW and scheme switching
     SchSwchParams params;
-    params.SetCtxtModSizeFHEWLargePrec(logQ_ccLWE);
-    params.SetNumSlotsCKKS(slots);
-    params.SetNumValues(numValues);
-    params.SetComputeArgmin(true);
-    params.SetOneHotEncoding(oneHot);
+    params.set_ctxt_mod_size_fhew_large_prec(log_q_cc_lwe);
+    params.set_num_slots_ckks(slots);
+    params.set_num_values(num_values);
+    params.set_compute_argmin(true);
+    params.set_one_hot_encoding(one_hot);
     TIC(t);
-    auto privateKeyFHEW = cc->EvalSchemeSwitchingSetup(params);
-    timeSetup = TOC(t);
-    std::cout << "Time to compute the scheme switching setup: " << timeSetup / 1000 << " s" << std::endl;
+    auto private_key_fhew = cc->eval_scheme_switching_setup(params);
+    time_setup = TOC(t);
+    std::cout << "Time to compute the scheme switching setup: " << time_setup / 1000 << " s" << std::endl;
 
-    auto ccLWE = cc->GetBinCCForSchemeSwitch();
+    auto cc_lwe = cc->get_bin_cc_for_scheme_switch();
 
     TIC(t);
-    cc->EvalSchemeSwitchingKeyGen(keys, privateKeyFHEW);
-    timeKeyGen = TOC(t);
-    std::cout << "Time to compute the scheme switching key generation: " << timeKeyGen / 60000 << " min" << std::endl;
+    cc->eval_scheme_switching_key_gen(keys, private_key_fhew);
+    time_key_gen = TOC(t);
+    std::cout << "Time to compute the scheme switching key generation: " << time_key_gen / 60000 << " min" << std::endl;
 
-    std::cout << "FHEW scheme is using lattice parameter " << ccLWE->GetParams()->GetLWEParams()->Getn();
-    std::cout << ", logQ " << logQ_ccLWE;
-    std::cout << ", and modulus q " << ccLWE->GetParams()->GetLWEParams()->Getq() << std::endl << std::endl;
+    std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
+    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
-    std::cout << numValues << " slots are being switched." << std::endl << std::endl;
+    std::cout << num_values << " slots are being switched." << std::endl << std::endl;
 
     TIC(t);
     // Scale the inputs to ensure their difference is correctly represented after switching to FHEW
-    double scaleSign = 512.0;
-    auto pLWE = 1 << (logQ_ccLWE - 12);  // Large precision
-    cc->EvalCompareSwitchPrecompute(pLWE, scaleSign);
-    timePrecomp = TOC(t);
-    std::cout << "Time to do the precomputations: " << timePrecomp / 1000 << " s" << std::endl;
+    double scale_sign = 512.0;
+    auto p_lwe = 1 << (log_q_cc_lwe - 12);  // Large precision
+    cc->eval_compare_switch_precompute(p_lwe, scale_sign);
+    time_precomp = TOC(t);
+    std::cout << "Time to do the precomputations: " << time_precomp / 1000 << " s" << std::endl;
 
     // Step 3: Encoding and encryption of inputs
     // Inputs
@@ -557,146 +557,146 @@ void ArgminViaSchemeSwitching(uint32_t depth, uint32_t slots, uint32_t numValues
         x.insert(x.end(), zeros.begin(), zeros.end());
     }
 
-    std::cout << "Expected minimum value " << *(std::min_element(x.begin(), x.begin() + numValues)) << " at location "
-              << std::min_element(x.begin(), x.begin() + numValues) - x.begin() << std::endl;
-    std::cout << "Expected maximum value " << *(std::max_element(x.begin(), x.begin() + numValues)) << " at location "
-              << std::max_element(x.begin(), x.begin() + numValues) - x.begin() << std::endl;
+    std::cout << "Expected minimum value " << *(std::min_element(x.begin(), x.begin() + num_values)) << " at location "
+              << std::min_element(x.begin(), x.begin() + num_values) - x.begin() << std::endl;
+    std::cout << "Expected maximum value " << *(std::max_element(x.begin(), x.begin() + num_values)) << " at location "
+              << std::max_element(x.begin(), x.begin() + num_values) - x.begin() << std::endl;
     std::cout << std::endl;
 
     // Encoding as plaintexts
-    Plaintext ptxt1 = cc->MakeCKKSPackedPlaintext(x);
+    Plaintext ptxt1 = cc->make_ckks_packed_plaintext(x);
 
     // Encrypt the encoded vectors
-    auto c1 = cc->Encrypt(keys.publicKey, ptxt1);
+    auto c1 = cc->encrypt(keys.public_key, ptxt1);
 
     // Step 4: Argmin evaluation
     TIC(t);
-    auto result = cc->EvalMinSchemeSwitching(c1, keys.publicKey, numValues, slots);
-    timeEvalMin = TOC(t);
+    auto result = cc->eval_min_scheme_switching(c1, keys.public_key, num_values, slots);
+    time_eval_min = TOC(t);
 
-    Plaintext ptxtMin;
-    cc->Decrypt(keys.secretKey, result[0], &ptxtMin);
-    ptxtMin->SetLength(1);
-    std::cout << "Minimum value: " << ptxtMin << std::endl;
-    cc->Decrypt(keys.secretKey, result[1], &ptxtMin);
+    Plaintext ptxt_min;
+    cc->decrypt(keys.secret_key, result[0], &ptxt_min);
+    ptxt_min->set_length(1);
+    std::cout << "Minimum value: " << ptxt_min << std::endl;
+    cc->decrypt(keys.secret_key, result[1], &ptxt_min);
 
-    if (numValues <= 64) {  // Otherwise, supress output
-        if (oneHot) {
-            ptxtMin->SetLength(numValues);
-            std::cout << "Argmin indicator vector: " << ptxtMin << std::endl;
+    if (num_values <= 64) {  // Otherwise, supress output
+        if (one_hot) {
+            ptxt_min->set_length(num_values);
+            std::cout << "Argmin indicator vector: " << ptxt_min << std::endl;
         } else {
-            ptxtMin->SetLength(1);
-            std::cout << "Argmin: " << ptxtMin << std::endl;
+            ptxt_min->set_length(1);
+            std::cout << "Argmin: " << ptxt_min << std::endl;
         }
     }
-    std::cout << "Time to compute min and argmin via scheme switching: " << timeEvalMin / 60000 << " min" << std::endl;
+    std::cout << "Time to compute min and argmin via scheme switching: " << time_eval_min / 60000 << " min" << std::endl;
 
     // TIC(t);
-    // result      = cc->EvalMaxSchemeSwitching(c1, keys.publicKey, numValues, slots);
+    // result      = cc->eval_max_scheme_switching(c1, keys.public_key, num_values, slots);
     // timeEvalMax = TOC(t);
 
-    // Plaintext ptxtMax;
-    // cc->Decrypt(keys.secretKey, result[0], &ptxtMax);
-    // ptxtMax->SetLength(1);
-    // std::cout << "Maximum value: " << ptxtMax << std::endl;
-    // cc->Decrypt(keys.secretKey, result[1], &ptxtMax);
+    // Plaintext ptxt_max;
+    // cc->decrypt(keys.secret_key, result[0], &ptxt_max);
+    // ptxt_max->set_length(1);
+    // std::cout << "Maximum value: " << ptxt_max << std::endl;
+    // cc->decrypt(keys.secret_key, result[1], &ptxt_max);
 
-    // if (numValues <= 64) {  // Otherwise, supress output
-    //     if (oneHot) {
-    //         ptxtMax->SetLength(numValues);
-    //         std::cout << "Argmax indicator vector: " << ptxtMax << std::endl;
+    // if (num_values <= 64) {  // Otherwise, supress output
+    //     if (one_hot) {
+    //         ptxt_max->set_length(num_values);
+    //         std::cout << "Argmax indicator vector: " << ptxt_max << std::endl;
     //     }
     //     else {
-    //         ptxtMax->SetLength(1);
-    //         std::cout << "Argmax: " << ptxtMax << std::endl;
+    //         ptxt_max->set_length(1);
+    //         std::cout << "Argmax: " << ptxt_max << std::endl;
     //     }
     // }
     // std::cout << "Time to compute max and argmax via scheme switching: " << timeEvalMax/ 60000 << " min" << std::endl;
 
-    double totalTime = TOC(tTotal);
-    std::cout << "\nTotal time: " << totalTime / 60000 << " min" << std::endl;
+    double total_time = TOC(t_total_value);
+    std::cout << "\nTotal time: " << total_time / 60000 << " min" << std::endl;
 
-    cc->ClearStaticMapsAndVectors();
+    cc->clear_static_maps_and_vectors();
 }
 
-void ArgminViaSchemeSwitchingAlt(uint32_t depth, uint32_t slots, uint32_t numValues) {
+void argmin_via_scheme_switching_alt(uint32_t depth, uint32_t slots, uint32_t num_values) {
     /*
   Example of computing the min and argmin of the vector packed in a CKKS ciphertext.
  */
     std::cout << "\n-----ArgminViaSchemeSwitchingAlt-----\n" << std::endl;
     std::cout << "Output precision is only wrt the operations in CKKS after switching back\n" << std::endl;
 
-    TimeVar t, tTotal;
-    double timeKeyGen(0.0), timeSetup(0.0), timePrecomp(0.0), timeEvalMin(0.0);  // timeEvalMax(0.0);
+    TimeVar t, t_total_value;
+    double time_key_gen(0.0), time_setup(0.0), time_precomp(0.0), time_eval_min(0.0);  // timeEvalMax(0.0);
 
-    TIC(tTotal);
+    TIC(t_total_value);
 
     // Step 1: Setup CryptoContext for CKKS
-    uint32_t scaleModSize = 50;
-    uint32_t firstModSize = 60;
-    uint32_t logQ_ccLWE = 26;
-    bool oneHot = true;  // Change to false if the output should not be one-hot encoded
+    uint32_t scale_mod_size = 50;
+    uint32_t first_mod_size_value = 60;
+    uint32_t log_q_cc_lwe = 26;
+    bool one_hot = true;  // Change to false if the output should not be one-hot encoded
 
-    uint32_t batchSize = slots;
-    ScalingTechnique scTech = FLEXIBLEAUTO;
-    if (scTech == FLEXIBLEAUTOEXT)
+    uint32_t batch_size = slots;
+    ScalingTechnique sc_tech = FLEXIBLEAUTO;
+    if (sc_tech == FLEXIBLEAUTOEXT)
         depth += 1;
 
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(depth);
-    parameters.SetScalingModSize(scaleModSize);
-    parameters.SetFirstModSize(firstModSize);
-    parameters.SetScalingTechnique(scTech);
-    parameters.SetBatchSize(batchSize);
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_multiplicative_depth(depth);
+    parameters.set_scaling_mod_size(scale_mod_size);
+    parameters.set_first_mod_size(first_mod_size_value);
+    parameters.set_scaling_technique(sc_tech);
+    parameters.set_batch_size(batch_size);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
 
     // Enable the features that you wish to use
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
-    cc->Enable(SCHEMESWITCH);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
+    cc->enable(SCHEMESWITCH);
 
-    std::cout << "CKKS scheme is using ring dimension " << cc->GetRingDimension();
+    std::cout << "CKKS scheme is using ring dimension " << cc->get_ring_dimension();
     std::cout << ", and number of slots " << slots << ", and supports a depth of " << depth << std::endl << std::endl;
 
     // Generate encryption keys
-    auto keys = cc->KeyGen();
+    auto keys = cc->key_gen();
 
     // Step 2: Prepare the FHEW cryptocontext and keys for FHEW and scheme switching
     SchSwchParams params;
-    params.SetCtxtModSizeFHEWLargePrec(logQ_ccLWE);
-    params.SetNumSlotsCKKS(slots);
-    params.SetNumValues(numValues);
-    params.SetComputeArgmin(true);
-    params.SetOneHotEncoding(oneHot);
-    params.SetUseAltArgmin(true);
+    params.set_ctxt_mod_size_fhew_large_prec(log_q_cc_lwe);
+    params.set_num_slots_ckks(slots);
+    params.set_num_values(num_values);
+    params.set_compute_argmin(true);
+    params.set_one_hot_encoding(one_hot);
+    params.set_use_alt_argmin(true);
     TIC(t);
-    auto privateKeyFHEW = cc->EvalSchemeSwitchingSetup(params);
-    timeSetup = TOC(t);
-    std::cout << "Time to compute the scheme switching setup: " << timeSetup / 1000 << " s" << std::endl;
+    auto private_key_fhew = cc->eval_scheme_switching_setup(params);
+    time_setup = TOC(t);
+    std::cout << "Time to compute the scheme switching setup: " << time_setup / 1000 << " s" << std::endl;
 
-    auto ccLWE = cc->GetBinCCForSchemeSwitch();
+    auto cc_lwe = cc->get_bin_cc_for_scheme_switch();
 
     TIC(t);
-    cc->EvalSchemeSwitchingKeyGen(keys, privateKeyFHEW);
-    timeKeyGen = TOC(t);
-    std::cout << "Time to compute the scheme switching key generation: " << timeKeyGen / 60000 << " min" << std::endl;
+    cc->eval_scheme_switching_key_gen(keys, private_key_fhew);
+    time_key_gen = TOC(t);
+    std::cout << "Time to compute the scheme switching key generation: " << time_key_gen / 60000 << " min" << std::endl;
 
-    std::cout << "FHEW scheme is using lattice parameter " << ccLWE->GetParams()->GetLWEParams()->Getn();
-    std::cout << ", logQ " << logQ_ccLWE;
-    std::cout << ", and modulus q " << ccLWE->GetParams()->GetLWEParams()->Getq() << std::endl << std::endl;
+    std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
+    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
-    std::cout << numValues << " slots are being switched." << std::endl << std::endl;
+    std::cout << num_values << " slots are being switched." << std::endl << std::endl;
 
     TIC(t);
     // Scale the inputs to ensure their difference is correctly represented after switching to FHEW
-    double scaleSign = 512.0;
-    auto pLWE = 1 << (logQ_ccLWE - 12);  // Large precision
-    cc->EvalCompareSwitchPrecompute(pLWE, scaleSign);
-    timePrecomp = TOC(t);
-    std::cout << "Time to do the precomputations: " << timePrecomp / 1000 << " s" << std::endl;
+    double scale_sign = 512.0;
+    auto p_lwe = 1 << (log_q_cc_lwe - 12);  // Large precision
+    cc->eval_compare_switch_precompute(p_lwe, scale_sign);
+    time_precomp = TOC(t);
+    std::cout << "Time to do the precomputations: " << time_precomp / 1000 << " s" << std::endl;
 
     // Step 3: Encoding and encryption of inputs
 
@@ -708,147 +708,147 @@ void ArgminViaSchemeSwitchingAlt(uint32_t depth, uint32_t slots, uint32_t numVal
         x.insert(x.end(), zeros.begin(), zeros.end());
     }
 
-    std::cout << "Expected minimum value " << *(std::min_element(x.begin(), x.begin() + numValues)) << " at location "
-              << std::min_element(x.begin(), x.begin() + numValues) - x.begin() << std::endl;
-    // std::cout << "Expected maximum value " << *(std::max_element(x.begin(), x.begin() + numValues)) << " at location "
-    //   << std::max_element(x.begin(), x.begin() + numValues) - x.begin() << std::endl;
+    std::cout << "Expected minimum value " << *(std::min_element(x.begin(), x.begin() + num_values)) << " at location "
+              << std::min_element(x.begin(), x.begin() + num_values) - x.begin() << std::endl;
+    // std::cout << "Expected maximum value " << *(std::max_element(x.begin(), x.begin() + num_values)) << " at location "
+    //   << std::max_element(x.begin(), x.begin() + num_values) - x.begin() << std::endl;
     std::cout << std::endl;
 
     // Encoding as plaintexts
-    Plaintext ptxt1 = cc->MakeCKKSPackedPlaintext(x);
+    Plaintext ptxt1 = cc->make_ckks_packed_plaintext(x);
 
     // Encrypt the encoded vectors
-    auto c1 = cc->Encrypt(keys.publicKey, ptxt1);
+    auto c1 = cc->encrypt(keys.public_key, ptxt1);
 
     // Step 4: Argmin evaluation
     TIC(t);
-    auto result = cc->EvalMinSchemeSwitchingAlt(c1, keys.publicKey, numValues, slots);
-    timeEvalMin = TOC(t);
+    auto result = cc->eval_min_scheme_switching_alt(c1, keys.public_key, num_values, slots);
+    time_eval_min = TOC(t);
 
-    Plaintext ptxtMin;
-    cc->Decrypt(keys.secretKey, result[0], &ptxtMin);
-    ptxtMin->SetLength(1);
-    std::cout << "Minimum value: " << ptxtMin << std::endl;
-    cc->Decrypt(keys.secretKey, result[1], &ptxtMin);
+    Plaintext ptxt_min;
+    cc->decrypt(keys.secret_key, result[0], &ptxt_min);
+    ptxt_min->set_length(1);
+    std::cout << "Minimum value: " << ptxt_min << std::endl;
+    cc->decrypt(keys.secret_key, result[1], &ptxt_min);
 
-    if (numValues <= 64) {  // Otherwise, supress output
-        if (oneHot) {
-            ptxtMin->SetLength(numValues);
-            std::cout << "Argmin indicator vector: " << ptxtMin << std::endl;
+    if (num_values <= 64) {  // Otherwise, supress output
+        if (one_hot) {
+            ptxt_min->set_length(num_values);
+            std::cout << "Argmin indicator vector: " << ptxt_min << std::endl;
         } else {
-            ptxtMin->SetLength(1);
-            std::cout << "Argmin: " << ptxtMin << std::endl;
+            ptxt_min->set_length(1);
+            std::cout << "Argmin: " << ptxt_min << std::endl;
         }
     }
-    std::cout << "Time to compute min and argmin via scheme switching: " << timeEvalMin / 60000 << " min" << std::endl;
+    std::cout << "Time to compute min and argmin via scheme switching: " << time_eval_min / 60000 << " min" << std::endl;
 
     // TIC(t);
-    // result      = cc->EvalMaxSchemeSwitchingAlt(c1, keys.publicKey, numValues, slots);
+    // result      = cc->eval_max_scheme_switching_alt(c1, keys.public_key, num_values, slots);
     // timeEvalMax = TOC(t);
 
-    // Plaintext ptxtMax;
-    // cc->Decrypt(keys.secretKey, result[0], &ptxtMax);
-    // ptxtMax->SetLength(1);
-    // std::cout << "Maximum value: " << ptxtMax << std::endl;
-    // cc->Decrypt(keys.secretKey, result[1], &ptxtMax);
+    // Plaintext ptxt_max;
+    // cc->decrypt(keys.secret_key, result[0], &ptxt_max);
+    // ptxt_max->set_length(1);
+    // std::cout << "Maximum value: " << ptxt_max << std::endl;
+    // cc->decrypt(keys.secret_key, result[1], &ptxt_max);
 
-    // if (numValues <= 64) {  // Otherwise, supress output
-    //     if (oneHot) {
-    //         ptxtMax->SetLength(numValues);
-    //         std::cout << "Argmax indicator vector: " << ptxtMax << std::endl;
+    // if (num_values <= 64) {  // Otherwise, supress output
+    //     if (one_hot) {
+    //         ptxt_max->set_length(num_values);
+    //         std::cout << "Argmax indicator vector: " << ptxt_max << std::endl;
     //     }
     //     else {
-    //         ptxtMax->SetLength(1);
-    //         std::cout << "Argmax: " << ptxtMax << std::endl;
+    //         ptxt_max->set_length(1);
+    //         std::cout << "Argmax: " << ptxt_max << std::endl;
     //     }
     // }
     // std::cout << "Time to compute max and argmax via scheme switching: " << timeEvalMax/ 60000 << " min" << std::endl;
 
-    double totalTime = TOC(tTotal);
-    std::cout << "\nTotal time: " << totalTime / 60000 << " min" << std::endl;
+    double total_time = TOC(t_total_value);
+    std::cout << "\nTotal time: " << total_time / 60000 << " min" << std::endl;
 
-    cc->ClearStaticMapsAndVectors();
+    cc->clear_static_maps_and_vectors();
 }
 
-void Argmin(uint32_t depth, uint32_t slots, uint32_t numValues, uint32_t ringDim) {
+void argmin(uint32_t depth, uint32_t slots, uint32_t num_values, uint32_t ring_dim) {
     /*
   Example of computing the min and argmin of the vector packed in a CKKS ciphertext.
  */
     std::cout << "\n-----ArgminViaSchemeSwitching-----\n" << std::endl;
     std::cout << "Output precision is only wrt the operations in CKKS after switching back\n" << std::endl;
 
-    TimeVar t, tTotal;
-    double timeKeyGen(0.0), timeSetup(0.0), timePrecomp(0.0), timeEvalMin(0.0);  // timeEvalMax(0.0);
+    TimeVar t, t_total_value;
+    double time_key_gen(0.0), time_setup(0.0), time_precomp(0.0), time_eval_min(0.0);  // timeEvalMax(0.0);
 
-    TIC(tTotal);
+    TIC(t_total_value);
 
     // Step 1: Setup CryptoContext for CKKS
-    uint32_t scaleModSize = 52;
-    uint32_t firstModSize = 60;
-    uint32_t logQ_ccLWE = 26;
-    bool oneHot = true;  // Change to false if the output should not be one-hot encoded
+    uint32_t scale_mod_size = 52;
+    uint32_t first_mod_size_value = 60;
+    uint32_t log_q_cc_lwe = 26;
+    bool one_hot = true;  // Change to false if the output should not be one-hot encoded
 
-    uint32_t batchSize = slots;
-    ScalingTechnique scTech = FLEXIBLEAUTO;
-    if (scTech == FLEXIBLEAUTOEXT)
+    uint32_t batch_size = slots;
+    ScalingTechnique sc_tech = FLEXIBLEAUTO;
+    if (sc_tech == FLEXIBLEAUTOEXT)
         depth += 1;
 
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(depth);
-    parameters.SetScalingModSize(scaleModSize);
-    parameters.SetFirstModSize(firstModSize);
-    parameters.SetScalingTechnique(scTech);
-    parameters.SetBatchSize(batchSize);
-    parameters.SetRingDim(ringDim);
-    parameters.SetSecurityLevel(HEStd_NotSet);
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_multiplicative_depth(depth);
+    parameters.set_scaling_mod_size(scale_mod_size);
+    parameters.set_first_mod_size(first_mod_size_value);
+    parameters.set_scaling_technique(sc_tech);
+    parameters.set_batch_size(batch_size);
+    parameters.set_ring_dim(ring_dim);
+    parameters.set_security_level(HEStd_NotSet);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
 
     // Enable the features that you wish to use
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
-    cc->Enable(SCHEMESWITCH);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
+    cc->enable(SCHEMESWITCH);
 
-    std::cout << "CKKS scheme is using ring dimension " << cc->GetRingDimension();
+    std::cout << "CKKS scheme is using ring dimension " << cc->get_ring_dimension();
     std::cout << ", and number of slots " << slots << ", and supports a depth of " << depth << std::endl << std::endl;
 
     // Generate encryption keys
-    auto keys = cc->KeyGen();
+    auto keys = cc->key_gen();
 
     // Step 2: Prepare the FHEW cryptocontext and keys for FHEW and scheme switching
     SchSwchParams params;
-    params.SetCtxtModSizeFHEWLargePrec(logQ_ccLWE);
-    params.SetNumSlotsCKKS(slots);
-    params.SetNumValues(numValues);
-    params.SetComputeArgmin(true);
-    params.SetOneHotEncoding(oneHot);
+    params.set_ctxt_mod_size_fhew_large_prec(log_q_cc_lwe);
+    params.set_num_slots_ckks(slots);
+    params.set_num_values(num_values);
+    params.set_compute_argmin(true);
+    params.set_one_hot_encoding(one_hot);
     TIC(t);
-    auto privateKeyFHEW = cc->EvalSchemeSwitchingSetup(params);
-    timeSetup = TOC(t);
-    std::cout << "Time to compute the scheme switching setup: " << timeSetup / 1000 << " s" << std::endl;
+    auto private_key_fhew = cc->eval_scheme_switching_setup(params);
+    time_setup = TOC(t);
+    std::cout << "Time to compute the scheme switching setup: " << time_setup / 1000 << " s" << std::endl;
 
-    auto ccLWE = cc->GetBinCCForSchemeSwitch();
+    auto cc_lwe = cc->get_bin_cc_for_scheme_switch();
 
     TIC(t);
-    cc->EvalSchemeSwitchingKeyGen(keys, privateKeyFHEW);
-    timeKeyGen = TOC(t);
-    std::cout << "Time to compute the scheme switching key generation: " << timeKeyGen / 60000 << " min" << std::endl;
+    cc->eval_scheme_switching_key_gen(keys, private_key_fhew);
+    time_key_gen = TOC(t);
+    std::cout << "Time to compute the scheme switching key generation: " << time_key_gen / 60000 << " min" << std::endl;
 
-    std::cout << "FHEW scheme is using lattice parameter " << ccLWE->GetParams()->GetLWEParams()->Getn();
-    std::cout << ", logQ " << logQ_ccLWE;
-    std::cout << ", and modulus q " << ccLWE->GetParams()->GetLWEParams()->Getq() << std::endl << std::endl;
+    std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
+    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
-    std::cout << numValues << " slots are being switched." << std::endl << std::endl;
+    std::cout << num_values << " slots are being switched." << std::endl << std::endl;
 
     TIC(t);
     // Scale the inputs to ensure their difference is correctly represented after switching to FHEW
-    double scaleSign = 512.0;
-    auto pLWE = 1 << (logQ_ccLWE - 12);  // Large precision
-    cc->EvalCompareSwitchPrecompute(pLWE, scaleSign);
-    timePrecomp = TOC(t);
-    std::cout << "Time to do the precomputations: " << timePrecomp / 1000 << " s" << std::endl;
+    double scale_sign = 512.0;
+    auto p_lwe = 1 << (log_q_cc_lwe - 12);  // Large precision
+    cc->eval_compare_switch_precompute(p_lwe, scale_sign);
+    time_precomp = TOC(t);
+    std::cout << "Time to do the precomputations: " << time_precomp / 1000 << " s" << std::endl;
 
     // Step 3: Encoding and encryption of inputs
     // Inputs
@@ -859,153 +859,153 @@ void Argmin(uint32_t depth, uint32_t slots, uint32_t numValues, uint32_t ringDim
         x.insert(x.end(), zeros.begin(), zeros.end());
     }
 
-    std::cout << "Expected minimum value " << *(std::min_element(x.begin(), x.begin() + numValues)) << " at location "
-              << std::min_element(x.begin(), x.begin() + numValues) - x.begin() << std::endl;
-    std::cout << "Expected maximum value " << *(std::max_element(x.begin(), x.begin() + numValues)) << " at location "
-              << std::max_element(x.begin(), x.begin() + numValues) - x.begin() << std::endl;
+    std::cout << "Expected minimum value " << *(std::min_element(x.begin(), x.begin() + num_values)) << " at location "
+              << std::min_element(x.begin(), x.begin() + num_values) - x.begin() << std::endl;
+    std::cout << "Expected maximum value " << *(std::max_element(x.begin(), x.begin() + num_values)) << " at location "
+              << std::max_element(x.begin(), x.begin() + num_values) - x.begin() << std::endl;
     std::cout << std::endl;
 
     // Encoding as plaintexts
-    Plaintext ptxt1 = cc->MakeCKKSPackedPlaintext(x);
+    Plaintext ptxt1 = cc->make_ckks_packed_plaintext(x);
 
     // Encrypt the encoded vectors
-    auto c1 = cc->Encrypt(keys.publicKey, ptxt1);
+    auto c1 = cc->encrypt(keys.public_key, ptxt1);
 
     // Step 4: Argmin evaluation
     TIC(t);
-    auto result = cc->EvalMinSchemeSwitching(c1, keys.publicKey, numValues, slots);
-    timeEvalMin = TOC(t);
+    auto result = cc->eval_min_scheme_switching(c1, keys.public_key, num_values, slots);
+    time_eval_min = TOC(t);
 
-    Plaintext ptxtMin;
-    cc->Decrypt(keys.secretKey, result[0], &ptxtMin);
-    ptxtMin->SetLength(1);
-    std::cout << "Minimum value: " << ptxtMin << std::endl;
-    cc->Decrypt(keys.secretKey, result[1], &ptxtMin);
+    Plaintext ptxt_min;
+    cc->decrypt(keys.secret_key, result[0], &ptxt_min);
+    ptxt_min->set_length(1);
+    std::cout << "Minimum value: " << ptxt_min << std::endl;
+    cc->decrypt(keys.secret_key, result[1], &ptxt_min);
 
-    if (numValues <= 64) {  // Otherwise, supress output
-        if (oneHot) {
-            ptxtMin->SetLength(numValues);
-            std::cout << "Argmin indicator vector: " << ptxtMin << std::endl;
+    if (num_values <= 64) {  // Otherwise, supress output
+        if (one_hot) {
+            ptxt_min->set_length(num_values);
+            std::cout << "Argmin indicator vector: " << ptxt_min << std::endl;
         } else {
-            ptxtMin->SetLength(1);
-            std::cout << "Argmin: " << ptxtMin << std::endl;
+            ptxt_min->set_length(1);
+            std::cout << "Argmin: " << ptxt_min << std::endl;
         }
     }
-    std::cout << "Time to compute min and argmin via scheme switching: " << timeEvalMin / 60000 << " min" << std::endl;
+    std::cout << "Time to compute min and argmin via scheme switching: " << time_eval_min / 60000 << " min" << std::endl;
 
     // TIC(t);
-    // result      = cc->EvalMaxSchemeSwitching(c1, keys.publicKey, numValues, slots);
+    // result      = cc->eval_max_scheme_switching(c1, keys.public_key, num_values, slots);
     // timeEvalMax = TOC(t);
 
-    // Plaintext ptxtMax;
-    // cc->Decrypt(keys.secretKey, result[0], &ptxtMax);
-    // ptxtMax->SetLength(1);
-    // std::cout << "Maximum value: " << ptxtMax << std::endl;
-    // cc->Decrypt(keys.secretKey, result[1], &ptxtMax);
+    // Plaintext ptxt_max;
+    // cc->decrypt(keys.secret_key, result[0], &ptxt_max);
+    // ptxt_max->set_length(1);
+    // std::cout << "Maximum value: " << ptxt_max << std::endl;
+    // cc->decrypt(keys.secret_key, result[1], &ptxt_max);
 
-    // if (numValues <= 64) {  // Otherwise, supress output
-    //     if (oneHot) {
-    //         ptxtMax->SetLength(numValues);
-    //         std::cout << "Argmax indicator vector: " << ptxtMax << std::endl;
+    // if (num_values <= 64) {  // Otherwise, supress output
+    //     if (one_hot) {
+    //         ptxt_max->set_length(num_values);
+    //         std::cout << "Argmax indicator vector: " << ptxt_max << std::endl;
     //     }
     //     else {
-    //         ptxtMax->SetLength(1);
-    //         std::cout << "Argmax: " << ptxtMax << std::endl;
+    //         ptxt_max->set_length(1);
+    //         std::cout << "Argmax: " << ptxt_max << std::endl;
     //     }
     // }
     // std::cout << "Time to compute max and argmax via scheme switching: " << timeEvalMax/ 60000 << " min" << std::endl;
 
-    double totalTime = TOC(tTotal);
-    std::cout << "\nTotal time: " << totalTime / 60000 << " min" << std::endl;
+    double total_time = TOC(t_total_value);
+    std::cout << "\nTotal time: " << total_time / 60000 << " min" << std::endl;
 
-    cc->ClearStaticMapsAndVectors();
+    cc->clear_static_maps_and_vectors();
 }
 
-void ArgminAlt(uint32_t depth, uint32_t slots, uint32_t numValues, uint32_t ringDim) {
+void argmin_alt(uint32_t depth, uint32_t slots, uint32_t num_values, uint32_t ring_dim) {
     /*
   Example of computing the min and argmin of the vector packed in a CKKS ciphertext.
  */
     std::cout << "\n-----ArgminViaSchemeSwitchingAlt-----\n" << std::endl;
     std::cout << "Output precision is only wrt the operations in CKKS after switching back\n" << std::endl;
 
-    TimeVar t, tTotal;
-    double timeKeyGen(0.0), timeSetup(0.0), timePrecomp(0.0), timeEvalMin(0.0);  // timeEvalMax(0.0);
+    TimeVar t, t_total_value;
+    double time_key_gen(0.0), time_setup(0.0), time_precomp(0.0), time_eval_min(0.0);  // timeEvalMax(0.0);
 
-    TIC(tTotal);
+    TIC(t_total_value);
 
     // Step 1: Setup CryptoContext for CKKS
-    uint32_t scaleModSize = 52;
-    uint32_t firstModSize = 60;
-    uint32_t logQ_ccLWE = 26;
-    bool oneHot = true;  // Change to false if the output should not be one-hot encoded
+    uint32_t scale_mod_size = 52;
+    uint32_t first_mod_size_value = 60;
+    uint32_t log_q_cc_lwe = 26;
+    bool one_hot = true;  // Change to false if the output should not be one-hot encoded
 
-    uint32_t batchSize = slots;
-    ScalingTechnique scTech = FLEXIBLEAUTO;
-    if (scTech == FLEXIBLEAUTOEXT)
+    uint32_t batch_size = slots;
+    ScalingTechnique sc_tech = FLEXIBLEAUTO;
+    if (sc_tech == FLEXIBLEAUTOEXT)
         depth += 1;
 
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(depth);
-    parameters.SetScalingModSize(scaleModSize);
-    parameters.SetFirstModSize(firstModSize);
-    parameters.SetScalingTechnique(scTech);
-    parameters.SetBatchSize(batchSize);
-    parameters.SetRingDim(ringDim);
-    parameters.SetSecurityLevel(HEStd_NotSet);
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_multiplicative_depth(depth);
+    parameters.set_scaling_mod_size(scale_mod_size);
+    parameters.set_first_mod_size(first_mod_size_value);
+    parameters.set_scaling_technique(sc_tech);
+    parameters.set_batch_size(batch_size);
+    parameters.set_ring_dim(ring_dim);
+    parameters.set_security_level(HEStd_NotSet);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
 
     // Enable the features that you wish to use
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
-    cc->Enable(SCHEMESWITCH);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
+    cc->enable(SCHEMESWITCH);
 
-    std::cout << "CKKS scheme is using ring dimension " << cc->GetRingDimension();
+    std::cout << "CKKS scheme is using ring dimension " << cc->get_ring_dimension();
     std::cout << ", and number of slots " << slots << ", and supports a depth of " << depth << std::endl << std::endl;
 
     // Generate encryption keys
-    auto keys = cc->KeyGen();
+    auto keys = cc->key_gen();
 
     // Step 2: Prepare the FHEW cryptocontext and keys for FHEW and scheme switching
     SchSwchParams params;
-    params.SetCtxtModSizeFHEWLargePrec(logQ_ccLWE);
-    params.SetNumSlotsCKKS(slots);
-    params.SetNumValues(numValues);
-    params.SetComputeArgmin(true);
-    params.SetOneHotEncoding(oneHot);
-    params.SetUseAltArgmin(true);
+    params.set_ctxt_mod_size_fhew_large_prec(log_q_cc_lwe);
+    params.set_num_slots_ckks(slots);
+    params.set_num_values(num_values);
+    params.set_compute_argmin(true);
+    params.set_one_hot_encoding(one_hot);
+    params.set_use_alt_argmin(true);
     TIC(t);
-    auto privateKeyFHEW = cc->EvalSchemeSwitchingSetup(params);
-    timeSetup = TOC(t);
-    std::cout << "Time to compute the scheme switching setup: " << timeSetup / 1000 << " s" << std::endl;
+    auto private_key_fhew = cc->eval_scheme_switching_setup(params);
+    time_setup = TOC(t);
+    std::cout << "Time to compute the scheme switching setup: " << time_setup / 1000 << " s" << std::endl;
 
-    auto ccLWE = cc->GetBinCCForSchemeSwitch();
+    auto cc_lwe = cc->get_bin_cc_for_scheme_switch();
 
     TIC(t);
-    cc->EvalSchemeSwitchingKeyGen(keys, privateKeyFHEW);
-    timeKeyGen = TOC(t);
-    std::cout << "Time to compute the scheme switching key generation: " << timeKeyGen / 60000 << " min" << std::endl;
+    cc->eval_scheme_switching_key_gen(keys, private_key_fhew);
+    time_key_gen = TOC(t);
+    std::cout << "Time to compute the scheme switching key generation: " << time_key_gen / 60000 << " min" << std::endl;
 
-    std::cout << "FHEW scheme is using lattice parameter " << ccLWE->GetParams()->GetLWEParams()->Getn();
-    std::cout << ", logQ " << logQ_ccLWE;
-    std::cout << ", and modulus q " << ccLWE->GetParams()->GetLWEParams()->Getq() << std::endl << std::endl;
+    std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
+    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
-    std::cout << numValues << " slots are being switched." << std::endl << std::endl;
+    std::cout << num_values << " slots are being switched." << std::endl << std::endl;
 
     TIC(t);
     // Scale the inputs to ensure their difference is correctly represented after switching to FHEW
-    double scaleSign = 512.0;
-    auto pLWE = 1 << (logQ_ccLWE - 12);  // Large precision
+    double scale_sign = 512.0;
+    auto p_lwe = 1 << (log_q_cc_lwe - 12);  // Large precision
 
     uint32_t init_level = 0;
-    const auto cryptoParams = std::dynamic_pointer_cast<CryptoParametersCKKSRNS>(cc->GetCryptoParameters());
-    if (cryptoParams->GetScalingTechnique() == FLEXIBLEAUTOEXT)
+    const auto crypto_params = std::dynamic_pointer_cast<CkksRnsCryptoParams>(cc->get_crypto_parameters());
+    if (crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT)
         init_level = 1;
-    cc->EvalCompareSwitchPrecompute(pLWE, init_level, scaleSign);
-    timePrecomp = TOC(t);
-    std::cout << "Time to do the precomputations: " << timePrecomp / 1000 << " s" << std::endl;
+    cc->eval_compare_switch_precompute(p_lwe, init_level, scale_sign);
+    time_precomp = TOC(t);
+    std::cout << "Time to do the precomputations: " << time_precomp / 1000 << " s" << std::endl;
 
     // Step 3: Encoding and encryption of inputs
     // Inputs
@@ -1016,153 +1016,153 @@ void ArgminAlt(uint32_t depth, uint32_t slots, uint32_t numValues, uint32_t ring
         x.insert(x.end(), zeros.begin(), zeros.end());
     }
 
-    std::cout << "Expected minimum value " << *(std::min_element(x.begin(), x.begin() + numValues)) << " at location "
-              << std::min_element(x.begin(), x.begin() + numValues) - x.begin() << std::endl;
-    std::cout << "Expected maximum value " << *(std::max_element(x.begin(), x.begin() + numValues)) << " at location "
-              << std::max_element(x.begin(), x.begin() + numValues) - x.begin() << std::endl;
+    std::cout << "Expected minimum value " << *(std::min_element(x.begin(), x.begin() + num_values)) << " at location "
+              << std::min_element(x.begin(), x.begin() + num_values) - x.begin() << std::endl;
+    std::cout << "Expected maximum value " << *(std::max_element(x.begin(), x.begin() + num_values)) << " at location "
+              << std::max_element(x.begin(), x.begin() + num_values) - x.begin() << std::endl;
     std::cout << std::endl;
 
     // Encoding as plaintexts
-    Plaintext ptxt1 = cc->MakeCKKSPackedPlaintext(x);
+    Plaintext ptxt1 = cc->make_ckks_packed_plaintext(x);
 
     // Encrypt the encoded vectors
-    auto c1 = cc->Encrypt(keys.publicKey, ptxt1);
+    auto c1 = cc->encrypt(keys.public_key, ptxt1);
 
     // Step 4: Argmin evaluation
     TIC(t);
-    auto result = cc->EvalMinSchemeSwitchingAlt(c1, keys.publicKey, numValues, slots);
-    timeEvalMin = TOC(t);
+    auto result = cc->eval_min_scheme_switching_alt(c1, keys.public_key, num_values, slots);
+    time_eval_min = TOC(t);
 
-    Plaintext ptxtMin;
-    cc->Decrypt(keys.secretKey, result[0], &ptxtMin);
-    ptxtMin->SetLength(1);
-    std::cout << "Minimum value: " << ptxtMin << std::endl;
-    cc->Decrypt(keys.secretKey, result[1], &ptxtMin);
+    Plaintext ptxt_min;
+    cc->decrypt(keys.secret_key, result[0], &ptxt_min);
+    ptxt_min->set_length(1);
+    std::cout << "Minimum value: " << ptxt_min << std::endl;
+    cc->decrypt(keys.secret_key, result[1], &ptxt_min);
 
-    if (numValues <= 64) {  // Otherwise, supress output
-        if (oneHot) {
-            ptxtMin->SetLength(numValues);
-            std::cout << "Argmin indicator vector: " << ptxtMin << std::endl;
+    if (num_values <= 64) {  // Otherwise, supress output
+        if (one_hot) {
+            ptxt_min->set_length(num_values);
+            std::cout << "Argmin indicator vector: " << ptxt_min << std::endl;
         } else {
-            ptxtMin->SetLength(1);
-            std::cout << "Argmin: " << ptxtMin << std::endl;
+            ptxt_min->set_length(1);
+            std::cout << "Argmin: " << ptxt_min << std::endl;
         }
     }
-    std::cout << "Time to compute min and argmin via scheme switching: " << timeEvalMin / 60000 << " min" << std::endl;
+    std::cout << "Time to compute min and argmin via scheme switching: " << time_eval_min / 60000 << " min" << std::endl;
 
     // TIC(t);
-    // result      = cc->EvalMaxSchemeSwitchingAlt(c1, keys.publicKey, numValues, slots);
+    // result      = cc->eval_max_scheme_switching_alt(c1, keys.public_key, num_values, slots);
     // timeEvalMax = TOC(t);
 
-    // Plaintext ptxtMax;
-    // cc->Decrypt(keys.secretKey, result[0], &ptxtMax);
-    // ptxtMax->SetLength(1);
-    // std::cout << "Maximum value: " << ptxtMax << std::endl;
-    // cc->Decrypt(keys.secretKey, result[1], &ptxtMax);
+    // Plaintext ptxt_max;
+    // cc->decrypt(keys.secret_key, result[0], &ptxt_max);
+    // ptxt_max->set_length(1);
+    // std::cout << "Maximum value: " << ptxt_max << std::endl;
+    // cc->decrypt(keys.secret_key, result[1], &ptxt_max);
 
-    // if (numValues <= 64) {  // Otherwise, supress output
-    //     if (oneHot) {
-    //         ptxtMax->SetLength(numValues);
-    //         std::cout << "Argmax indicator vector: " << ptxtMax << std::endl;
+    // if (num_values <= 64) {  // Otherwise, supress output
+    //     if (one_hot) {
+    //         ptxt_max->set_length(num_values);
+    //         std::cout << "Argmax indicator vector: " << ptxt_max << std::endl;
     //     }
     //     else {
-    //         ptxtMax->SetLength(1);
-    //         std::cout << "Argmax: " << ptxtMax << std::endl;
+    //         ptxt_max->set_length(1);
+    //         std::cout << "Argmax: " << ptxt_max << std::endl;
     //     }
     // }
     // std::cout << "Time to compute max and argmax via scheme switching: " << timeEvalMax/ 60000 << " min" << std::endl;
 
-    double totalTime = TOC(tTotal);
-    std::cout << "\nTotal time: " << totalTime / 60000 << " min" << std::endl;
+    double total_time = TOC(t_total_value);
+    std::cout << "\nTotal time: " << total_time / 60000 << " min" << std::endl;
 
-    cc->ClearStaticMapsAndVectors();
+    cc->clear_static_maps_and_vectors();
 }
 
-void Comparison(uint32_t depth, uint32_t slots, uint32_t numValues, uint32_t ringDim) {
+void Comparison(uint32_t depth, uint32_t slots, uint32_t num_values, uint32_t ring_dim) {
     /*
   Example of comparing two CKKS ciphertexts via scheme switching.
  */
     std::cout << "\n-----ComparisonViaSchemeSwitching-----\n" << std::endl;
     std::cout << "Output precision is only wrt the operations in CKKS after switching back.\n" << std::endl;
 
-    TimeVar t, tTotal;
-    double timeKeyGen(0.0), timeSetup(0.0), timePrecomp(0.0), timeEval(0.0);
+    TimeVar t, t_total_value;
+    double time_key_gen(0.0), time_setup(0.0), time_precomp(0.0), time_eval(0.0);
 
-    TIC(tTotal);
+    TIC(t_total_value);
 
     // Step 1: Setup CryptoContext for CKKS
-    ScalingTechnique scTech = FIXEDAUTO;
-    if (scTech == FLEXIBLEAUTOEXT)
+    ScalingTechnique sc_tech = FIXEDAUTO;
+    if (sc_tech == FLEXIBLEAUTOEXT)
         depth += 1;
 
-    uint32_t scaleModSize = 52;
-    uint32_t firstModSize = 60;
-    uint32_t logQ_ccLWE = 26;
-    uint32_t batchSize = slots;
+    uint32_t scale_mod_size = 52;
+    uint32_t first_mod_size_value = 60;
+    uint32_t log_q_cc_lwe = 26;
+    uint32_t batch_size = slots;
 
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(depth);
-    parameters.SetScalingModSize(scaleModSize);
-    parameters.SetFirstModSize(firstModSize);
-    parameters.SetScalingTechnique(scTech);
-    parameters.SetBatchSize(batchSize);
-    parameters.SetRingDim(ringDim);
-    parameters.SetSecurityLevel(HEStd_NotSet);
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_multiplicative_depth(depth);
+    parameters.set_scaling_mod_size(scale_mod_size);
+    parameters.set_first_mod_size(first_mod_size_value);
+    parameters.set_scaling_technique(sc_tech);
+    parameters.set_batch_size(batch_size);
+    parameters.set_ring_dim(ring_dim);
+    parameters.set_security_level(HEStd_NotSet);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
 
     // Enable the features that you wish to use
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
-    cc->Enable(SCHEMESWITCH);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
+    cc->enable(SCHEMESWITCH);
 
-    std::cout << "CKKS scheme is using ring dimension " << cc->GetRingDimension();
+    std::cout << "CKKS scheme is using ring dimension " << cc->get_ring_dimension();
     std::cout << ", number of slots " << slots << ", and supports a multiplicative depth of " << depth << std::endl
               << std::endl;
 
     // Generate encryption keys.
-    auto keys = cc->KeyGen();
+    auto keys = cc->key_gen();
 
     // Step 2: Prepare the FHEW cryptocontext and keys for FHEW and scheme switching
     SchSwchParams params;
-    params.SetCtxtModSizeFHEWLargePrec(logQ_ccLWE);
-    params.SetNumSlotsCKKS(slots);
-    params.SetNumValues(slots);
+    params.set_ctxt_mod_size_fhew_large_prec(log_q_cc_lwe);
+    params.set_num_slots_ckks(slots);
+    params.set_num_values(slots);
     TIC(t);
-    auto privateKeyFHEW = cc->EvalSchemeSwitchingSetup(params);
-    timeSetup = TOC(t);
-    std::cout << "Time to compute the scheme switching setup: " << timeSetup / 1000 << " s" << std::endl;
+    auto private_key_fhew = cc->eval_scheme_switching_setup(params);
+    time_setup = TOC(t);
+    std::cout << "Time to compute the scheme switching setup: " << time_setup / 1000 << " s" << std::endl;
 
-    auto ccLWE = cc->GetBinCCForSchemeSwitch();
+    auto cc_lwe = cc->get_bin_cc_for_scheme_switch();
 
     TIC(t);
-    cc->EvalSchemeSwitchingKeyGen(keys, privateKeyFHEW);
-    timeKeyGen = TOC(t);
-    std::cout << "Time to compute the scheme switching key generation: " << timeKeyGen / 60000 << " min" << std::endl
+    cc->eval_scheme_switching_key_gen(keys, private_key_fhew);
+    time_key_gen = TOC(t);
+    std::cout << "Time to compute the scheme switching key generation: " << time_key_gen / 60000 << " min" << std::endl
               << std::endl;
 
-    std::cout << "FHEW scheme is using lattice parameter " << ccLWE->GetParams()->GetLWEParams()->Getn();
-    std::cout << ", logQ " << logQ_ccLWE;
-    std::cout << ", and modulus q " << ccLWE->GetParams()->GetLWEParams()->Getq() << std::endl << std::endl;
+    std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
+    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
-    std::cout << numValues << " slots are being switched." << std::endl;
+    std::cout << num_values << " slots are being switched." << std::endl;
 
     TIC(t);
     // Pre-computations
-    auto modulus_LWE = 1 << logQ_ccLWE;
-    auto beta = ccLWE->GetBeta().ConvertToInt();
-    auto pLWE = modulus_LWE / (2 * beta);
+    auto modulus_lwe = 1 << log_q_cc_lwe;
+    auto beta = cc_lwe->get_beta().convert_to_int();
+    auto p_lwe = modulus_lwe / (2 * beta);
 
-    double scaleSignFHEW = 8.0;
-    const auto cryptoParams = std::dynamic_pointer_cast<CryptoParametersCKKSRNS>(cc->GetCryptoParameters());
+    double scale_sign_fhew = 8.0;
+    const auto crypto_params = std::dynamic_pointer_cast<CkksRnsCryptoParams>(cc->get_crypto_parameters());
     uint32_t init_level = 0;
-    if (cryptoParams->GetScalingTechnique() == FLEXIBLEAUTOEXT)
+    if (crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT)
         init_level = 1;
-    cc->EvalCompareSwitchPrecompute(pLWE, init_level, scaleSignFHEW);
-    timePrecomp = TOC(t);
-    std::cout << "Time to perform precomputations: " << timePrecomp / 1000 << " s" << std::endl;
+    cc->eval_compare_switch_precompute(p_lwe, init_level, scale_sign_fhew);
+    time_precomp = TOC(t);
+    std::cout << "Time to perform precomputations: " << time_precomp / 1000 << " s" << std::endl;
 
     // Step 3: Encoding and encryption of inputs
     // Inputs
@@ -1178,51 +1178,51 @@ void Comparison(uint32_t depth, uint32_t slots, uint32_t numValues, uint32_t rin
     }
 
     // Encoding as plaintexts
-    Plaintext ptxt1 = cc->MakeCKKSPackedPlaintext(x1, 1, 0, nullptr);
-    Plaintext ptxt2 = cc->MakeCKKSPackedPlaintext(x2, 1, 0, nullptr);
+    Plaintext ptxt1 = cc->make_ckks_packed_plaintext(x1, 1, 0, nullptr);
+    Plaintext ptxt2 = cc->make_ckks_packed_plaintext(x2, 1, 0, nullptr);
 
     // Encrypt the encoded vectors
-    auto c1 = cc->Encrypt(keys.publicKey, ptxt1);
-    auto c2 = cc->Encrypt(keys.publicKey, ptxt2);
+    auto c1 = cc->encrypt(keys.public_key, ptxt1);
+    auto c2 = cc->encrypt(keys.public_key, ptxt2);
 
     // Compute the difference to compare to zero
-    auto cDiff = cc->EvalSub(c1, c2);
+    auto c_diff = cc->eval_sub(c1, c2);
 
-    Plaintext pDiff;
-    cc->Decrypt(keys.secretKey, cDiff, &pDiff);
-    pDiff->SetLength(slots);
+    Plaintext p_diff;
+    cc->decrypt(keys.secret_key, c_diff, &p_diff);
+    p_diff->set_length(slots);
     if (slots <= 64) {  // Otherwise, supress output
         std::cout << "Difference of inputs: ";
-        auto pDiff_rpv = pDiff->GetRealPackedValue();
+        auto p_diff_rpv = p_diff->get_real_packed_value();
         for (uint32_t i = 0; i < slots; ++i) {
-            std::cout << pDiff_rpv[i] << " ";
+            std::cout << p_diff_rpv[i] << " ";
         }
     }
 
-    if (numValues <= 64) {  // Otherwise, supress output
+    if (num_values <= 64) {  // Otherwise, supress output
         const double eps = 0.0001;
         std::cout << "\nExpected sign result from CKKS: ";
-        auto pDiff_rpv = pDiff->GetRealPackedValue();
-        for (uint32_t i = 0; i < numValues; ++i) {
-            std::cout << int(std::round(pDiff_rpv[i] / eps) * eps < 0) << " ";
+        auto p_diff_rpv = p_diff->get_real_packed_value();
+        for (uint32_t i = 0; i < num_values; ++i) {
+            std::cout << int(std::round(p_diff_rpv[i] / eps) * eps < 0) << " ";
         }
         std::cout << "\n";
     }
 
     // Step 4: Comparison via CKKS->FHEW->CKKS
     TIC(t);
-    auto cResult = cc->EvalCompareSchemeSwitching(c1, c2, numValues, slots);
-    timeEval = TOC(t);
-    std::cout << "Time to perform comparison via scheme switching: " << timeEval / 60000 << " min" << std::endl;
+    auto c_result = cc->eval_compare_scheme_switching(c1, c2, num_values, slots);
+    time_eval = TOC(t);
+    std::cout << "Time to perform comparison via scheme switching: " << time_eval / 60000 << " min" << std::endl;
 
-    Plaintext plaintextDec3;
-    cc->Decrypt(keys.secretKey, cResult, &plaintextDec3);
-    plaintextDec3->SetLength(numValues);
+    Plaintext plaintext_dec3;
+    cc->decrypt(keys.secret_key, c_result, &plaintext_dec3);
+    plaintext_dec3->set_length(num_values);
 
-    if (numValues <= 64) {  // Otherwise, supress output
-        std::cout << "Decrypted switched result: " << plaintextDec3 << std::endl;
+    if (num_values <= 64) {  // Otherwise, supress output
+        std::cout << "Decrypted switched result: " << plaintext_dec3 << std::endl;
     }
 
-    double totalTime = TOC(tTotal);
-    std::cout << "\nTotal time: " << totalTime / 60000 << " min" << std::endl;
+    double total_time = TOC(t_total_value);
+    std::cout << "\nTotal time: " << total_time / 60000 << " min" << std::endl;
 }

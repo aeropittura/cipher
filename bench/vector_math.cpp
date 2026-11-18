@@ -47,122 +47,122 @@
 #include "cipher/math/number_theory.h"
 #include "cipher/math/ternary_uniform_gen.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 constexpr size_t VEC_POOL = 8;
 constexpr size_t VEC_POOL_M1 = VEC_POOL - 1;
 
 template <typename V>
-static std::vector<V> MakeVecPool(uint32_t n, const typename V::Integer& q) {
+static std::vector<V> make_vec_pool(uint32_t n, const typename V::Integer& q) {
     DiscreteUniformGeneratorImpl<V> dug;
     std::vector<V> pool;
     pool.reserve(VEC_POOL);
     for (size_t k = 0; k < VEC_POOL; ++k)
-        pool.push_back(dug.GenerateVector(n, q));
+        pool.push_back(dug.generate_vector(n, q));
     return pool;
 }
 
 template <typename V>
-static void add_BigVec(const V& a, const V& b) {
+static void add_big_vec(const V& a, const V& b) {
     V c = a + b;
 }
 
 template <typename V>
-static void BM_BigVec_Add(benchmark::State& state) {
+static void bm_big_vec_add(benchmark::State& state) {
     auto p = state.range(0);
-    auto q = LastPrime<typename V::Integer>(MAX_MODULUS_SIZE, p);
-    auto a = MakeVecPool<V>(p, q);
-    auto b = MakeVecPool<V>(p, q);
+    auto q = last_prime<typename V::Integer>(MAX_MODULUS_SIZE, p);
+    auto a = make_vec_pool<V>(p, q);
+    auto b = make_vec_pool<V>(p, q);
     size_t i{VEC_POOL_M1};
     while (state.KeepRunning()) {
         i = (i + 1) & VEC_POOL_M1;
-        add_BigVec<V>(a[i], b[i]);
+        add_big_vec<V>(a[i], b[i]);
     }
 }
 
 template <typename V>
-static void addeq_BigVec(V& a, const V& b) {
+static void addeq_big_vec(V& a, const V& b) {
     a += b;
 }
 
 template <typename V>
-static void BM_BigVec_Addeq(benchmark::State& state) {
+static void bm_big_vec_addeq(benchmark::State& state) {
     auto p = state.range(0);
-    auto q = LastPrime<typename V::Integer>(MAX_MODULUS_SIZE, p);
-    auto a = MakeVecPool<V>(p, q);
-    auto b = MakeVecPool<V>(p, q);
+    auto q = last_prime<typename V::Integer>(MAX_MODULUS_SIZE, p);
+    auto a = make_vec_pool<V>(p, q);
+    auto b = make_vec_pool<V>(p, q);
     size_t i{VEC_POOL_M1};
     V acc{a[0]};
     while (state.KeepRunning()) {
-        addeq_BigVec<V>(acc, b[i = (i + 1) & VEC_POOL_M1]);
+        addeq_big_vec<V>(acc, b[i = (i + 1) & VEC_POOL_M1]);
     }
 }
 
 template <typename V>
-static void mult_BigVec(const V& a, const V& b) {
+static void mult_big_vec(const V& a, const V& b) {
     V c = a * b;
 }
 
 template <typename V>
-static void BM_BigVec_Mult(benchmark::State& state) {
+static void bm_big_vec_mult(benchmark::State& state) {
     auto p = state.range(0);
-    auto q = LastPrime<typename V::Integer>(MAX_MODULUS_SIZE, p);
-    auto a = MakeVecPool<V>(p, q);
-    auto b = MakeVecPool<V>(p, q);
+    auto q = last_prime<typename V::Integer>(MAX_MODULUS_SIZE, p);
+    auto a = make_vec_pool<V>(p, q);
+    auto b = make_vec_pool<V>(p, q);
     size_t i{VEC_POOL_M1};
     while (state.KeepRunning()) {
         i = (i + 1) & VEC_POOL_M1;
-        mult_BigVec<V>(a[i], b[i]);
+        mult_big_vec<V>(a[i], b[i]);
     }
 }
 
 template <typename V>
-static void multeq_BigVec(V& a, const V& b) {
+static void multeq_big_vec(V& a, const V& b) {
     a *= b;
 }
 
 template <typename V>
-static void BM_BigVec_Multeq(benchmark::State& state) {
+static void bm_big_vec_multeq(benchmark::State& state) {
     auto p = state.range(0);
-    auto q = LastPrime<typename V::Integer>(MAX_MODULUS_SIZE, p);
-    auto a = MakeVecPool<V>(p, q);
-    auto b = MakeVecPool<V>(p, q);
+    auto q = last_prime<typename V::Integer>(MAX_MODULUS_SIZE, p);
+    auto a = make_vec_pool<V>(p, q);
+    auto b = make_vec_pool<V>(p, q);
     size_t i{VEC_POOL_M1};
     V acc{a[0]};
     while (state.KeepRunning()) {
-        multeq_BigVec<V>(acc, b[i = (i + 1) & VEC_POOL_M1]);
+        multeq_big_vec<V>(acc, b[i = (i + 1) & VEC_POOL_M1]);
     }
 }
 
 template <typename V>
-static void BM_Sample_Uniform(benchmark::State& state) {
+static void bm_sample_uniform(benchmark::State& state) {
     auto p = state.range(0);
-    auto q = LastPrime<typename V::Integer>(MAX_MODULUS_SIZE, p);
+    auto q = last_prime<typename V::Integer>(MAX_MODULUS_SIZE, p);
     DiscreteUniformGeneratorImpl<V> dug;
     while (state.KeepRunning()) {
-        V v = dug.GenerateVector(p, q);
+        V v = dug.generate_vector(p, q);
         benchmark::DoNotOptimize(v[0]);
     }
 }
 
 template <typename V>
-static void BM_Sample_Ternary(benchmark::State& state) {
+static void bm_sample_ternary(benchmark::State& state) {
     auto p = state.range(0);
-    auto q = LastPrime<typename V::Integer>(MAX_MODULUS_SIZE, p);
+    auto q = last_prime<typename V::Integer>(MAX_MODULUS_SIZE, p);
     TernaryUniformGeneratorImpl<V> tug;
     while (state.KeepRunning()) {
-        V v = tug.GenerateVector(p, q);
+        V v = tug.generate_vector(p, q);
         benchmark::DoNotOptimize(v[0]);
     }
 }
 
 template <typename V>
-static void BM_Sample_Gaussian(benchmark::State& state) {
+static void bm_sample_gaussian(benchmark::State& state) {
     auto p = state.range(0);
-    auto q = LastPrime<typename V::Integer>(MAX_MODULUS_SIZE, p);
+    auto q = last_prime<typename V::Integer>(MAX_MODULUS_SIZE, p);
     DiscreteGaussianGeneratorImpl<V> dgg(3.19);
     while (state.KeepRunning()) {
-        V v = dgg.GenerateVector(p, q);
+        V v = dgg.generate_vector(p, q);
         benchmark::DoNotOptimize(v[0]);
     }
 }
@@ -176,33 +176,33 @@ static void BM_Sample_Gaussian(benchmark::State& state) {
     BENCHMARK_TEMPLATE(X, Y)->Unit(benchmark::kMicrosecond)->ArgName("parm_16384")->Arg(16384); \
     BENCHMARK_TEMPLATE(X, Y)->Unit(benchmark::kMicrosecond)->ArgName("parm_32768")->Arg(32768);
 
-DO_VECTOR_BENCHMARK(BM_BigVec_Add, NativeVector)
-DO_VECTOR_BENCHMARK(BM_BigVec_Addeq, NativeVector)
-DO_VECTOR_BENCHMARK(BM_BigVec_Mult, NativeVector)
-DO_VECTOR_BENCHMARK(BM_BigVec_Multeq, NativeVector)
-DO_VECTOR_BENCHMARK(BM_Sample_Uniform, NativeVector)
-DO_VECTOR_BENCHMARK(BM_Sample_Ternary, NativeVector)
-DO_VECTOR_BENCHMARK(BM_Sample_Gaussian, NativeVector)
+DO_VECTOR_BENCHMARK(bm_big_vec_add, NativeVector)
+DO_VECTOR_BENCHMARK(bm_big_vec_addeq, NativeVector)
+DO_VECTOR_BENCHMARK(bm_big_vec_mult, NativeVector)
+DO_VECTOR_BENCHMARK(bm_big_vec_multeq, NativeVector)
+DO_VECTOR_BENCHMARK(bm_sample_uniform, NativeVector)
+DO_VECTOR_BENCHMARK(bm_sample_ternary, NativeVector)
+DO_VECTOR_BENCHMARK(bm_sample_gaussian, NativeVector)
 
-#ifdef WITH_BE2
-DO_VECTOR_BENCHMARK(BM_BigVec_Add, M2Vector)
-DO_VECTOR_BENCHMARK(BM_BigVec_Addeq, M2Vector)
-DO_VECTOR_BENCHMARK(BM_BigVec_Mult, M2Vector)
-DO_VECTOR_BENCHMARK(BM_BigVec_Multeq, M2Vector)
+#ifdef CIPHER_WITH_BE2
+DO_VECTOR_BENCHMARK(bm_big_vec_add, M2Vector)
+DO_VECTOR_BENCHMARK(bm_big_vec_addeq, M2Vector)
+DO_VECTOR_BENCHMARK(bm_big_vec_mult, M2Vector)
+DO_VECTOR_BENCHMARK(bm_big_vec_multeq, M2Vector)
 #endif
 
-#ifdef WITH_BE4
-DO_VECTOR_BENCHMARK(BM_BigVec_Add, M4Vector)
-DO_VECTOR_BENCHMARK(BM_BigVec_Addeq, M4Vector)
-DO_VECTOR_BENCHMARK(BM_BigVec_Mult, M4Vector)
-DO_VECTOR_BENCHMARK(BM_BigVec_Multeq, M4Vector)
+#ifdef CIPHER_WITH_BE4
+DO_VECTOR_BENCHMARK(bm_big_vec_add, M4Vector)
+DO_VECTOR_BENCHMARK(bm_big_vec_addeq, M4Vector)
+DO_VECTOR_BENCHMARK(bm_big_vec_mult, M4Vector)
+DO_VECTOR_BENCHMARK(bm_big_vec_multeq, M4Vector)
 #endif
 
-#ifdef WITH_NTL
-DO_VECTOR_BENCHMARK(BM_BigVec_Add, M6Vector)
-DO_VECTOR_BENCHMARK(BM_BigVec_Addeq, M6Vector)
-DO_VECTOR_BENCHMARK(BM_BigVec_Mult, M6Vector)
-DO_VECTOR_BENCHMARK(BM_BigVec_Multeq, M6Vector)
+#ifdef CIPHER_WITH_NTL
+DO_VECTOR_BENCHMARK(bm_big_vec_add, M6Vector)
+DO_VECTOR_BENCHMARK(bm_big_vec_addeq, M6Vector)
+DO_VECTOR_BENCHMARK(bm_big_vec_mult, M6Vector)
+DO_VECTOR_BENCHMARK(bm_big_vec_multeq, M6Vector)
 #endif
 
 // execute the benchmarks

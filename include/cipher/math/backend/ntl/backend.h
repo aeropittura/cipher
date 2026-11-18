@@ -30,31 +30,31 @@
 //==================================================================================
 
 /*
-  This file contains the definitions for MATHBACKEND 6 also known as the NTL multi-precision backend.
+  This file contains the definitions for CIPHER_MATH_BACKEND 6 also known as the NTL multi-precision backend.
   This backend uses bigintntl:: definition as default.
   requires GMP 6.1.2 / NTL 10.3.0 backend
  */
 
 //==================================================================================
-// This file is included only if WITH_NTL is set to ON in CMakeLists.txt
+// This file is included only if CIPHER_WITH_NTL is set to ON in CMakeLists.txt
 //==================================================================================
 #ifndef CIPHER_MATH_BACKEND_NTL_BACKEND_H_
 #define CIPHER_MATH_BACKEND_NTL_BACKEND_H_
 
 #include "cipher/config.h"
-#ifdef WITH_NTL
+#ifdef CIPHER_WITH_NTL
 
     #include "cipher/math/backend/ntl/mod_vector.h"  // rings of such
     #include "cipher/math/backend/ntl/transform.h"  // transforms for NTL
     #include "cipher/math/backend/ntl/integer.h"      // experimental gmp unsigned big ints
 
-// Global alias for MATHBACKEND 6 Integer
+// Global alias for CIPHER_MATH_BACKEND 6 Integer
 using M6Integer = NTL::BigInteger;
 
-// Global alias for MATHBACKEND 6 Vector
+// Global alias for CIPHER_MATH_BACKEND 6 Vector
 using M6Vector = NTL::BigVector;
 #else
 using M6Integer = void;
-#endif  // WITH_NTL
+#endif  // CIPHER_WITH_NTL
 
 #endif  // CIPHER_MATH_BACKEND_NTL_BACKEND_H_

@@ -43,7 +43,7 @@
     #include <malloc.h>
 #endif
 
-#if defined(WITH_NUMA_INTERLEAVE) && defined(__linux__) && defined(PARALLEL)
+#if defined(CIPHER_WITH_NUMA_INTERLEAVE) && defined(__linux__) && defined(CIPHER_PARALLEL)
     #include <omp.h>
     #include <sys/syscall.h>
     #include <unistd.h>
@@ -52,14 +52,14 @@
     #include <cstring>
 #endif
 
-namespace lbcrypto {
+namespace cipher {
 
-#if defined(WITH_MALLOC_TUNING)
+#if defined(CIPHER_WITH_MALLOC_TUNING)
 // Tune the process allocator to retain freed memory for reuse. OpenFHE operations allocate and
 // free many large (~0.5-30 MB) buffers; on allocators that return freed buffers to the OS right
 // away, re-faulting the pages on the next operation can dominate single-threaded runtime. Any
 // tuning below runs once, process-wide, at library load. NOTE: retained memory shows up as a
-// higher resident set size for workloads with large transient allocation peaks. Use AllocTrim()
+// higher resident set size for workloads with large transient allocation peaks. Use alloc_trim()
 // after large allocations are freed if this becomes an issue, or build with
 // -DWITH_MALLOC_TUNING=OFF to disable this tuning entirely.
 namespace {
@@ -67,7 +67,7 @@ namespace {
     // Nothing to tune: macOS libmalloc already retains freed memory in-process. Freed pages of
     // small/medium allocations stay mapped and are marked reusable (the kernel reclaims them only
     // under memory pressure), and freed large allocations are held in the default zone's cache.
-    // There is no public API to tune this behavior further; AllocTrim() releases these caches.
+    // There is no public API to tune this behavior further; alloc_trim() releases these caches.
     #elif defined(__GLIBC__)
 // By default glibc returns freed large buffers to the OS (brk heap-trim / munmap) and re-faults
 // the pages on the next operation. Keeping large allocations on the heap (M_MMAP_MAX=0) and
@@ -87,7 +87,7 @@ namespace {
 }  // namespace
 #endif
 
-#if defined(WITH_NUMA_INTERLEAVE) && defined(__linux__) && defined(PARALLEL)
+#if defined(CIPHER_WITH_NUMA_INTERLEAVE) && defined(__linux__) && defined(CIPHER_PARALLEL)
 // Interleave this process's pages across the NUMA nodes it is allowed to use. The polynomial
 // buffers are written by whichever thread first touches them and then read by every thread in
 // the next parallel region, so under the default first-touch policy a buffer allocated on one
@@ -103,10 +103,10 @@ namespace {
 namespace {
 using MemPolicyWord = unsigned long;  // NOLINT(runtime/int) -- kernel nodemask word
 
-constexpr int OPENFHE_MPOL_DEFAULT = 0;
-constexpr int OPENFHE_MPOL_INTERLEAVE = 3;
-constexpr int OPENFHE_MPOL_F_MEMS_ALLOWED = 4;
-constexpr MemPolicyWord OPENFHE_MAXNODE = 1024;
+constexpr int CIPHER_MPOL_DEFAULT = 0;
+constexpr int CIPHER_MPOL_INTERLEAVE = 3;
+constexpr int CIPHER_MPOL_F_MEMS_ALLOWED = 4;
+constexpr MemPolicyWord CIPHER_MAXNODE = 1024;
 
 [[maybe_unused]] const bool ofheNumaInterleaved = []() noexcept {
     const char* opt = std::getenv("OPENFHE_NUMA_INTERLEAVE");
@@ -121,11 +121,11 @@ constexpr MemPolicyWord OPENFHE_MAXNODE = 1024;
     int mode = 0;
     if (syscall(SYS_get_mempolicy, &mode, nullptr, 0UL, nullptr, 0) != 0)
         return false;  // no NUMA support in this kernel
-    if (mode != OPENFHE_MPOL_DEFAULT)
+    if (mode != CIPHER_MPOL_DEFAULT)
         return false;
 
-    MemPolicyWord mask[OPENFHE_MAXNODE / (8 * sizeof(MemPolicyWord))] = {0};
-    if (syscall(SYS_get_mempolicy, nullptr, mask, OPENFHE_MAXNODE, nullptr, OPENFHE_MPOL_F_MEMS_ALLOWED) != 0)
+    MemPolicyWord mask[CIPHER_MAXNODE / (8 * sizeof(MemPolicyWord))] = {0};
+    if (syscall(SYS_get_mempolicy, nullptr, mask, CIPHER_MAXNODE, nullptr, CIPHER_MPOL_F_MEMS_ALLOWED) != 0)
         return false;
 
     uint32_t nodes = 0;
@@ -135,14 +135,14 @@ constexpr MemPolicyWord OPENFHE_MAXNODE = 1024;
     if (nodes < 2)
         return false;  // single node: interleaving is a no-op at best
 
-    return syscall(SYS_set_mempolicy, OPENFHE_MPOL_INTERLEAVE, mask, OPENFHE_MAXNODE) == 0;
+    return syscall(SYS_set_mempolicy, CIPHER_MPOL_INTERLEAVE, mask, CIPHER_MAXNODE) == 0;
 }();
 }  // namespace
 #endif
 
-// AllocTrim() asks the allocator to return free (unused) heap memory to the OS. It is the
+// alloc_trim() asks the allocator to return free (unused) heap memory to the OS. It is the
 // companion to the retain-by-default malloc tuning above: call it at a quiescent point after a
-// large transient-footprint operation (e.g. EvalBootstrap) to reclaim peak scratch memory.
+// large transient-footprint operation (e.g. eval_bootstrap) to reclaim peak scratch memory.
 //
 // WARNING: this is a performance / RSS tool, NOT a security primitive. It does not erase data --
 // it only releases already-free chunks (the bytes are not scrubbed; the kernel zero-fills pages
@@ -151,7 +151,7 @@ constexpr MemPolicyWord OPENFHE_MAXNODE = 1024;
 //
 // Not async-signal-safe and acquires allocator locks; call only from normal execution context,
 // never from a signal handler. Returns true if a trim was attempted, false on unsupported builds.
-bool AllocTrim() {
+bool alloc_trim() {
 #if defined(__APPLE__)
     malloc_zone_pressure_relief(nullptr, 0);
     return true;
@@ -174,4 +174,4 @@ void secure_memset(volatile void* mem, uint8_t c, size_t len) {
         *(ptr + i) = c;
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher

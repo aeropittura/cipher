@@ -41,23 +41,23 @@
 #include "cipher/fhe/keyswitch/base.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
- * @brief Abstract base of the RNS (DCRTPoly) key switching methods.
+ * @brief Abstract base of the RNS (RnsPoly) key switching methods.
  *
- * Adds serialization to KeySwitchBase<DCRTPoly>; the key switching operations themselves are implemented by the
- * derived classes KeySwitchBV and KeySwitchHYBRID.
+ * Adds serialization to KeySwitchBase<RnsPoly>; the key switching operations themselves are implemented by the
+ * derived classes KeySwitchBv and KeySwitchHybrid.
  */
-class KeySwitchRNS : public KeySwitchBase<DCRTPoly> {
+class RnsKeySwitch : public KeySwitchBase<RnsPoly> {
   public:
     /**
      * Virtual destructor.
      */
-    virtual ~KeySwitchRNS() = default;
+    virtual ~RnsKeySwitch() = default;
 
     /////////////////////////////////////////
     // SERIALIZATION
@@ -70,7 +70,7 @@ class KeySwitchRNS : public KeySwitchBase<DCRTPoly> {
      */
     template <class Archive>
     void save(Archive& ar) const {
-        ar(cereal::base_class<KeySwitchBase<DCRTPoly>>(this));
+        ar(cereal::base_class<KeySwitchBase<RnsPoly>>(this));
     }
 
     /**
@@ -80,7 +80,7 @@ class KeySwitchRNS : public KeySwitchBase<DCRTPoly> {
      */
     template <class Archive>
     void load(Archive& ar) {
-        ar(cereal::base_class<KeySwitchBase<DCRTPoly>>(this));
+        ar(cereal::base_class<KeySwitchBase<RnsPoly>>(this));
     }
 
     /**
@@ -88,11 +88,11 @@ class KeySwitchRNS : public KeySwitchBase<DCRTPoly> {
      *
      * @return the name of the class
      */
-    virtual std::string SerializedObjectName() const {
+    virtual std::string serialized_object_name() const {
         return "KeySwitchRNS";
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_KEYSWITCH_RNS_H_

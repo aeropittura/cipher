@@ -41,17 +41,17 @@
 #include "cipher/fhe/base/crypto_params.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Abstract interface for parameter generation algorithm
  * @tparam Element a ring element.
  */
 template <class Element>
-class ParameterGenerationBase {
+class BaseParamGen {
     using ParmType = typename Element::Params;
     using IntType = typename Element::Integer;
     using DugType = typename Element::DugType;
@@ -59,74 +59,74 @@ class ParameterGenerationBase {
     using TugType = typename Element::TugType;
 
   public:
-    virtual ~ParameterGenerationBase() = default;
+    virtual ~BaseParamGen() = default;
 
     /**
      * Method for computing all derived parameters based on chosen primitive
      * parameters
      *
-     * @param cryptoParams the crypto parameters object to be populated with
+     * @param crypto_params the crypto parameters object to be populated with
      * parameters.
-     * @param evalAddCount number of EvalAdds assuming no EvalMult and KeySwitch
+     * @param eval_add_count number of EvalAdds assuming no eval_mult and key_switch
      * operations are performed.
-     * @param multiplicativeDepth number of EvalMults assuming no EvalAdd and
-     * KeySwitch operations are performed.
-     * @param keySwitchCount number of KeySwitch operations assuming no EvalAdd
-     * and EvalMult operations are performed.
-     * @param dcrtBits number of bits in each CRT modulus*
+     * @param multiplicative_depth number of EvalMults assuming no eval_add and
+     * key_switch operations are performed.
+     * @param key_switch_count number of key_switch operations assuming no eval_add
+     * and eval_mult operations are performed.
+     * @param dcrt_bits number of bits in each CRT modulus*
      * @param n ring dimension in case the user wants to use a custom ring
      * dimension
-     * @param numPartQ number of partitions of Q for HYBRID key switching
+     * @param num_part_q number of partitions of Q for HYBRID key switching
      * @return true if the parameters were generated successfully (errors are reported by throwing).
      */
-    virtual bool ParamsGenBFVRNSInternal(std::shared_ptr<CryptoParametersBase<Element>> cryptoParams,
-                                         uint32_t evalAddCount, uint32_t multiplicativeDepth, uint32_t keySwitchCount,
-                                         size_t dcrtBits, uint32_t n, uint32_t numPartQ) const {
-        OPENFHE_THROW("Not supported for this scheme.");
+    virtual bool params_gen_bfvrns_internal(std::shared_ptr<BaseCryptoParams<Element>> crypto_params,
+                                         uint32_t eval_add_count, uint32_t multiplicative_depth, uint32_t key_switch_count,
+                                         size_t dcrt_bits, uint32_t n, uint32_t num_part_q) const {
+        CIPHER_THROW("Not supported for this scheme.");
     }
 
     /**
      * Method for computing all derived parameters based on chosen primitive
      * parameters.
      *
-     * @param cryptoParams the crypto parameters object to be populated with
+     * @param crypto_params the crypto parameters object to be populated with
      * parameters.
-     * @param cyclOrder the cyclotomic order.
-     * @param numPrimes number of modulus towers to support.
-     * @param scalingModSize the bit-width for plaintexts and DCRTPoly's.
-     * @param firstModSize the bit-size of the first modulus
-     * @param numPartQ number of partitions of Q for HYBRID key switching
-     * @param mPIntBootCiphertextCompressionLevel compression level of the ciphertexts used in
+     * @param cycl_order the cyclotomic order.
+     * @param num_primes_value number of modulus towers to support.
+     * @param scaling_mod_size the bit-width for plaintexts and RnsPoly's.
+     * @param first_mod_size_value the bit-size of the first modulus
+     * @param num_part_q number of partitions of Q for HYBRID key switching
+     * @param m_p_int_boot_ciphertext_compression_level compression level of the ciphertexts used in
      * multi-party interactive bootstrapping
      * @return true if the parameters were generated successfully (errors are reported by throwing).
      */
-    virtual bool ParamsGenCKKSRNSInternal(std::shared_ptr<CryptoParametersBase<Element>> cryptoParams,
-                                          uint32_t cyclOrder, uint32_t numPrimes, uint32_t scalingModSize,
-                                          uint32_t firstModSize, uint32_t numPartQ,
-                                          CompressionLevel mPIntBootCiphertextCompressionLevel) const {
-        OPENFHE_THROW("Not supported for this scheme.");
+    virtual bool params_gen_ckksrns_internal(std::shared_ptr<BaseCryptoParams<Element>> crypto_params,
+                                          uint32_t cycl_order, uint32_t num_primes_value, uint32_t scaling_mod_size,
+                                          uint32_t first_mod_size_value, uint32_t num_part_q,
+                                          CompressionLevel m_p_int_boot_ciphertext_compression_level) const {
+        CIPHER_THROW("Not supported for this scheme.");
     }
 
     /**
      * Method for computing all derived parameters based on chosen primitive
      * parameters. This is intended for BGVrns
-     * @param cryptoParams the crypto parameters object to be populated with
+     * @param crypto_params the crypto parameters object to be populated with
      * parameters.
-     * @param evalAddCount number of EvalAdds per level.
-     * @param keySwitchCount number of KeySwitch operations per level.
-     * @param cyclOrder the cyclotomic order.
-     * @param numPrimes number of modulus towers to support.
-     * @param firstModSize the bit-size of the first modulus
-     * @param dcrtBits the bit-width of moduli
-     * @param numPartQ number of partitions of Q for HYBRID key switching
-     * @param PRENumHops bound for the HRA-secure mode of PRE
+     * @param eval_add_count number of EvalAdds per level.
+     * @param key_switch_count number of key_switch operations per level.
+     * @param cycl_order the cyclotomic order.
+     * @param num_primes_value number of modulus towers to support.
+     * @param first_mod_size_value the bit-size of the first modulus
+     * @param dcrt_bits the bit-width of moduli
+     * @param num_part_q number of partitions of Q for HYBRID key switching
+     * @param pre_num_hops bound for the HRA-secure mode of PRE
      * @return true if the parameters were generated successfully (errors are reported by throwing).
      */
-    virtual bool ParamsGenBGVRNSInternal(std::shared_ptr<CryptoParametersBase<DCRTPoly>> cryptoParams,
-                                         uint32_t evalAddCount, uint32_t keySwitchCount, uint32_t cyclOrder,
-                                         uint32_t numPrimes, uint32_t firstModSize, uint32_t dcrtBits,
-                                         uint32_t numPartQ, uint32_t PRENumHops) const {
-        OPENFHE_THROW("Not supported for this scheme.");
+    virtual bool params_gen_bgvrns_internal(std::shared_ptr<BaseCryptoParams<RnsPoly>> crypto_params,
+                                         uint32_t eval_add_count, uint32_t key_switch_count, uint32_t cycl_order,
+                                         uint32_t num_primes_value, uint32_t first_mod_size_value, uint32_t dcrt_bits,
+                                         uint32_t num_part_q, uint32_t pre_num_hops) const {
+        CIPHER_THROW("Not supported for this scheme.");
     }
 
     template <class Archive>
@@ -135,11 +135,11 @@ class ParameterGenerationBase {
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {}
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "ParameterGenerationBase";
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_BASE_PARAM_GEN_H_

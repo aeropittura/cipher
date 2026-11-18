@@ -45,21 +45,21 @@
 
 typedef std::numeric_limits<double> dbl;
 
-using namespace lbcrypto;
+using namespace cipher;
 
 // Poly tests
-void SHERun();
+void she_run();
 
 int main() {
-    SHERun();
+    she_run();
 
     // cin.get();
     return 0;
 }
 
-void SHERun() {
-    std::cerr << "Running with " << ParallelControls::GetNumProcs() << " processors and "
-              << ParallelControls().GetNumThreads() << " threads. " << std::endl;
+void she_run() {
+    std::cerr << "Running with " << ParallelControls::get_num_procs() << " processors and "
+              << ParallelControls().get_num_threads() << " threads. " << std::endl;
 
     std::cout << "\n===========BENCHMARKING FOR BFVRNS===============: " << std::endl;
 
@@ -75,23 +75,23 @@ void SHERun() {
 
     size_t count = 100;
 
-    CCParams<CryptoContextBFVRNS> parameters;
-    parameters.SetPlaintextModulus(2);
-    parameters.SetMultiplicativeDepth(5);
-    parameters.SetMaxRelinSkDeg(3);
-    parameters.SetScalingModSize(55);
+    ContextParams<BfvRnsContext> parameters;
+    parameters.set_plaintext_modulus(2);
+    parameters.set_multiplicative_depth(5);
+    parameters.set_max_relin_sk_deg(3);
+    parameters.set_scaling_mod_size(55);
 
-    CryptoContext<DCRTPoly> cryptoContext = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> crypto_context = make_crypto_context(parameters);
     // enable features that you wish to use
-    cryptoContext->Enable(PKE);
-    cryptoContext->Enable(KEYSWITCH);
-    cryptoContext->Enable(LEVELEDSHE);
+    crypto_context->enable(PKE);
+    crypto_context->enable(KEYSWITCH);
+    crypto_context->enable(LEVELEDSHE);
 
-    auto params = cryptoContext->GetCryptoParameters();
+    auto params = crypto_context->get_crypto_parameters();
 
-    std::cout << "p = " << params->GetPlaintextModulus() << std::endl;
-    std::cout << "n = " << params->GetElementParams()->GetCyclotomicOrder() / 2 << std::endl;
-    std::cout << "log2 q = " << params->GetElementParams()->GetModulus().GetMSB() << std::endl;
+    std::cout << "p = " << params->get_plaintext_modulus() << std::endl;
+    std::cout << "n = " << params->get_element_params()->get_cyclotomic_order() / 2 << std::endl;
+    std::cout << "log2 q = " << params->get_element_params()->get_modulus().get_msb() << std::endl;
 
     ////////////////////////////////////////////////////////////
     // Perform Key Generation Operation
@@ -99,64 +99,64 @@ void SHERun() {
 
     std::cout << "Running key generation (used for source data)..." << std::endl;
 
-    double start = currentDateTime();
+    double start = current_date_time();
 
-    KeyPair<DCRTPoly> keyPair = cryptoContext->KeyGen();
+    KeyPair<RnsPoly> key_pair = crypto_context->key_gen();
 
-    double finish = currentDateTime();
+    double finish = current_date_time();
     double diff = finish - start;
     std::cout << "Key generation time: "
               << "\t" << diff << " ms" << std::endl;
 
-    if (!keyPair.good()) {
+    if (!key_pair.good()) {
         std::cout << "Key generation failed!" << std::endl;
         exit(1);
     }
 
-    cryptoContext->EvalMultKeyGen(keyPair.secretKey);
+    crypto_context->eval_mult_key_gen(key_pair.secret_key);
 
     ////////////////////////////////////////////////////////////
     // Encode source data
     ////////////////////////////////////////////////////////////
 
-    std::vector<int64_t> vectorOfInts1 = {1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0};
-    Plaintext plaintext1 = cryptoContext->MakeCoefPackedPlaintext(vectorOfInts1);
+    std::vector<int64_t> vector_of_ints1 = {1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0};
+    Plaintext plaintext1 = crypto_context->make_coef_packed_plaintext(vector_of_ints1);
 
-    std::vector<int64_t> vectorOfInts2 = {1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0};
-    Plaintext plaintext2 = cryptoContext->MakeCoefPackedPlaintext(vectorOfInts2);
+    std::vector<int64_t> vector_of_ints2 = {1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0};
+    Plaintext plaintext2 = crypto_context->make_coef_packed_plaintext(vector_of_ints2);
 
-    double timeDecrypt(0.0);
-    double timeMult(0.0);
-    double timeRelin(0.0);
+    double time_decrypt(0.0);
+    double time_mult(0.0);
+    double time_relin(0.0);
 
     for (size_t k = 0; k < count; k++) {
-        TimeVar tDecrypt;
-        TimeVar tMult;
-        TimeVar tRelin;
+        TimeVar t_decrypt;
+        TimeVar t_mult;
+        TimeVar t_relin;
 
-        auto ciphertext1 = cryptoContext->Encrypt(keyPair.publicKey, plaintext1);
+        auto ciphertext1 = crypto_context->encrypt(key_pair.public_key, plaintext1);
 
-        auto ciphertext2 = cryptoContext->Encrypt(keyPair.publicKey, plaintext2);
+        auto ciphertext2 = crypto_context->encrypt(key_pair.public_key, plaintext2);
 
-        Plaintext plaintextDec1;
-        cryptoContext->Decrypt(keyPair.secretKey, ciphertext1, &plaintextDec1);
+        Plaintext plaintext_dec1;
+        crypto_context->decrypt(key_pair.secret_key, ciphertext1, &plaintext_dec1);
 
-        Plaintext plaintextDec2;
-        TIC(tDecrypt);
-        cryptoContext->Decrypt(keyPair.secretKey, ciphertext2, &plaintextDec2);
-        timeDecrypt += TOC_US(tDecrypt);
+        Plaintext plaintext_dec2;
+        TIC(t_decrypt);
+        crypto_context->decrypt(key_pair.secret_key, ciphertext2, &plaintext_dec2);
+        time_decrypt += TOC_US(t_decrypt);
 
-        TIC(tMult);
-        auto ciphertextMul = cryptoContext->EvalMultNoRelin(ciphertext1, ciphertext2);
-        timeMult += TOC_US(tMult);
+        TIC(t_mult);
+        auto ciphertext_mul = crypto_context->eval_mult_no_relin(ciphertext1, ciphertext2);
+        time_mult += TOC_US(t_mult);
 
-        TIC(tRelin);
-        auto ciphertextMulRelin = cryptoContext->EvalMult(ciphertext1, ciphertext2);
-        timeRelin += TOC_US(tRelin);
+        TIC(t_relin);
+        auto ciphertext_mul_relin = crypto_context->eval_mult(ciphertext1, ciphertext2);
+        time_relin += TOC_US(t_relin);
     }
 
-    std::cout << "Average decryption time:\t" << timeDecrypt / (1000 * count) << " ms" << std::endl;
-    std::cout << "Average multiplication time:\t" << timeMult / (1000 * count) << " ms" << std::endl;
-    std::cout << "Average relinearization time:\t" << (timeRelin - timeMult) / (1000 * count) << " ms" << std::endl;
-    std::cout << "Average multiplication + relinearization time:\t" << timeRelin / (1000 * count) << " ms" << std::endl;
+    std::cout << "Average decryption time:\t" << time_decrypt / (1000 * count) << " ms" << std::endl;
+    std::cout << "Average multiplication time:\t" << time_mult / (1000 * count) << " ms" << std::endl;
+    std::cout << "Average relinearization time:\t" << (time_relin - time_mult) / (1000 * count) << " ms" << std::endl;
+    std::cout << "Average multiplication + relinearization time:\t" << time_relin / (1000 * count) << " ms" << std::endl;
 }

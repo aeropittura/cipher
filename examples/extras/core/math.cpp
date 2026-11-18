@@ -47,11 +47,11 @@
 #include "cipher/core.h"
 #include "time.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 // define the main sections of the test
 
-void test_BigVector(uint32_t nloop);  // test old version of big int vector
+void test_big_vector(uint32_t nloop);  // test old version of big int vector
 
 // main()   need this for Kurts' makefile to ignore this.
 int main(int argc, char* argv[]) {
@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
         nloop = 1;
     std::cout << "running " << argv[0] << " nloop = " << nloop << std::endl;
 
-    test_BigVector(nloop);
+    test_big_vector(nloop);
     return 0;
 }
 
@@ -91,7 +91,7 @@ int main(int argc, char* argv[]) {
     } while (0);
 
 // helper function that bulds BigVector from a vector of strings
-BigVector BBVfromStrvec(std::vector<std::string>& s) {
+BigVector bbv_from_strvec(std::vector<std::string>& s) {
     BigVector a(s.size());
     for (uint32_t i = 0; i < s.size(); i++) {
         a.at(i) = s[i];
@@ -101,7 +101,7 @@ BigVector BBVfromStrvec(std::vector<std::string>& s) {
 
 // function to compare two BigVectors and print differing indicies
 void vec_diff(BigVector& a, BigVector& b) {
-    for (uint32_t i = 0; i < a.GetLength(); ++i) {
+    for (uint32_t i = 0; i < a.get_length(); ++i) {
         if (a.at(i) != b.at(i)) {
             std::cout << "i: " << i << std::endl;
             std::cout << "first vector " << std::endl;
@@ -115,7 +115,7 @@ void vec_diff(BigVector& a, BigVector& b) {
 }
 
 // main BigVector test suite. tests math
-void test_BigVector(uint32_t nloop) {
+void test_big_vector(uint32_t nloop) {
     std::cout << "testing BigVector" << std::endl;
 
     TimeVar t1, t2, t3;  // timers for TIC() TOC()
@@ -137,8 +137,8 @@ void test_BigVector(uint32_t nloop) {
 
     // this fails too!!! BigVector a1(a1string);
     // so I wrote this function
-    BigVector a1 = BBVfromStrvec(a1strvec);
-    a1.SetModulus(q1);
+    BigVector a1 = bbv_from_strvec(a1strvec);
+    a1.set_modulus(q1);
 
     // b:
     std::vector<std::string> b1strvec = {
@@ -148,8 +148,8 @@ void test_BigVector(uint32_t nloop) {
             "00000000000000053647", "00000000000000111689", "00000000000000028502", "00000000000000026401",
     };
 
-    BigVector b1 = BBVfromStrvec(b1strvec);
-    b1.SetModulus(q1);
+    BigVector b1 = bbv_from_strvec(b1strvec);
+    b1.set_modulus(q1);
 
     // now test all mod functions Note BigVector implies modulus ALWAYS
 
@@ -161,8 +161,8 @@ void test_BigVector(uint32_t nloop) {
             "00000000000000097913", "00000000000000033395", "00000000000000038630", "00000000000000047611",
             "00000000000000154600", "00000000000000025200", "00000000000000160515", "00000000000000083430",
     };
-    BigVector modsum1 = BBVfromStrvec(modsum1strvec);
-    modsum1.SetModulus(q1);
+    BigVector modsum1 = bbv_from_strvec(modsum1strvec);
+    modsum1.set_modulus(q1);
 
     // modsub:
     std::vector<std::string> moddiff1strvec = {
@@ -171,8 +171,8 @@ void test_BigVector(uint32_t nloop) {
             "00000000000000154031", "00000000000000135548", "00000000000000025203", "00000000000000012638",
             "00000000000000047306", "00000000000000129504", "00000000000000103511", "00000000000000030628",
     };
-    BigVector moddiff1 = BBVfromStrvec(moddiff1strvec);
-    moddiff1.SetModulus(q1);
+    BigVector moddiff1 = bbv_from_strvec(moddiff1strvec);
+    moddiff1.set_modulus(q1);
     // modmul:
 
     std::vector<std::string> modmul1strvec = {
@@ -182,8 +182,8 @@ void test_BigVector(uint32_t nloop) {
             "00000000000000061336", "00000000000000031598", "00000000000000025961", "00000000000000087680",
     };
 
-    BigVector modmul1 = BBVfromStrvec(modmul1strvec);
-    modmul1.SetModulus(q1);
+    BigVector modmul1 = bbv_from_strvec(modmul1strvec);
+    modmul1.set_modulus(q1);
 
     BigVector c1, c2, c3;  // result vectors
 
@@ -191,11 +191,11 @@ void test_BigVector(uint32_t nloop) {
 
 #if 1
     TESTIT(t1, c1, a1 + b1, modsum1, nloop);
-    TESTIT(t1, c1, a1.ModAdd(b1), modsum1, nloop);
+    TESTIT(t1, c1, a1.mod_add(b1), modsum1, nloop);
     TESTIT(t1, c1, a1 - b1, moddiff1, nloop);
-    TESTIT(t1, c1, a1.ModSub(b1), moddiff1, nloop);
+    TESTIT(t1, c1, a1.mod_sub(b1), moddiff1, nloop);
     TESTIT(t1, c1, a1 * b1, modmul1, nloop);
-    TESTIT(t1, c1, a1.ModMul(b1), modmul1, nloop);
+    TESTIT(t1, c1, a1.mod_mul(b1), modmul1, nloop);
 #endif
     // test case 2
     BigInteger q2("00004057816419532801");
@@ -207,8 +207,8 @@ void test_BigVector(uint32_t nloop) {
             "00000375749152798379", "00003933203511673255", "00002293434116159938", "00001201413067178193",
     };
 
-    BigVector a2 = BBVfromStrvec(a2strvec);
-    a2.SetModulus(q2);
+    BigVector a2 = bbv_from_strvec(a2strvec);
+    a2.set_modulus(q2);
 
     std::vector<std::string> b2strvec = {
             "00000698898215124963", "00000039832572186149", "00001835473200214782", "00001041547470449968",
@@ -217,8 +217,8 @@ void test_BigVector(uint32_t nloop) {
             "00003976652902630043", "00003238750424196678", "00002978742255253796", "00002124827461185795",
     };
 
-    BigVector b2 = BBVfromStrvec(b2strvec);
-    b2.SetModulus(q2);
+    BigVector b2 = bbv_from_strvec(b2strvec);
+    b2.set_modulus(q2);
 
     std::vector<std::string> modsum2strvec = {
             "00000884123387923218", "00000138712237895312", "00001275066812033239", "00000996162984426422",
@@ -226,8 +226,8 @@ void test_BigVector(uint32_t nloop) {
             "00000930588339595881", "00001137334268426157", "00001348899997572826", "00002152306408779744",
             "00000294585635895621", "00003114137516337132", "00001214359951880933", "00003326240528363988",
     };
-    BigVector modsum2 = BBVfromStrvec(modsum2strvec);
-    modsum2.SetModulus(q2);
+    BigVector modsum2 = bbv_from_strvec(modsum2strvec);
+    modsum2.set_modulus(q2);
 
     std::vector<std::string> moddiff2strvec = {
             "00003544143377206093", "00000059047093523014", "00001661936831136476", "00002970884463059287",
@@ -235,8 +235,8 @@ void test_BigVector(uint32_t nloop) {
             "00003479109686999230", "00003790954706492578", "00001202588881034661", "00001912733630447884",
             "00000456912669701137", "00000694453087476577", "00003372508280438943", "00003134402025525199",
     };
-    BigVector moddiff2 = BBVfromStrvec(moddiff2strvec);
-    moddiff2.SetModulus(q2);
+    BigVector moddiff2 = bbv_from_strvec(moddiff2strvec);
+    moddiff2.set_modulus(q2);
 
     std::vector<std::string> modmul2strvec = {
             "00000585473140075497", "00003637571624495703", "00001216097920193708", "00001363577444007558",
@@ -245,15 +245,15 @@ void test_BigVector(uint32_t nloop) {
             "00000781959737898673", "00002334258943108700", "00002573793300043944", "00001273980645866111",
     };
 
-    BigVector modmul2 = BBVfromStrvec(modmul2strvec);
-    modmul2.SetModulus(q2);
+    BigVector modmul2 = bbv_from_strvec(modmul2strvec);
+    modmul2.set_modulus(q2);
 #if 1
     TESTIT(t2, c2, a2 + b2, modsum2, nloop);
-    TESTIT(t2, c2, a2.ModAdd(b2), modsum2, nloop);
+    TESTIT(t2, c2, a2.mod_add(b2), modsum2, nloop);
     TESTIT(t2, c2, a2 - b2, moddiff2, nloop);
-    TESTIT(t2, c2, a2.ModSub(b2), moddiff2, nloop);
+    TESTIT(t2, c2, a2.mod_sub(b2), moddiff2, nloop);
     TESTIT(t2, c2, a2 * b2, modmul2, nloop);
-    TESTIT(t2, c2, a2.ModMul(b2), modmul2, nloop);
+    TESTIT(t2, c2, a2.mod_mul(b2), modmul2, nloop);
 #endif
 
     // test case 3
@@ -290,8 +290,8 @@ void test_BigVector(uint32_t nloop) {
             "047202030175469239142902723134737621108313142071558385068315554041062888"
             "072990"};
 
-    BigVector a3 = BBVfromStrvec(a3strvec);
-    a3.SetModulus(q3);
+    BigVector a3 = bbv_from_strvec(a3strvec);
+    a3.set_modulus(q3);
 
     std::vector<std::string> b3strvec = {
             "174640495219258626838115152142237214318214552597783670042038223724040064"
@@ -319,8 +319,8 @@ void test_BigVector(uint32_t nloop) {
             "690441206392939162889560305016204867157725209170345968349185675785497832"
             "527174"};
 
-    BigVector b3 = BBVfromStrvec(b3strvec);
-    b3.SetModulus(q3);
+    BigVector b3 = bbv_from_strvec(b3strvec);
+    b3.set_modulus(q3);
 
     std::vector<std::string> modsum3strvec = {
             "732016832092609303033733946488851575508905224089926209249817078392018535"
@@ -348,8 +348,8 @@ void test_BigVector(uint32_t nloop) {
             "737643236568408402032463028150942488266038351241904353417501229826560720"
             "600164",
     };
-    BigVector modsum3 = BBVfromStrvec(modsum3strvec);
-    modsum3.SetModulus(q3);
+    BigVector modsum3 = bbv_from_strvec(modsum3strvec);
+    modsum3.set_modulus(q3);
 
     std::vector<std::string> moddiff3strvec = {
             "512597535603578636284620600471706441361256218177317597892343972007351046"
@@ -377,8 +377,8 @@ void test_BigVector(uint32_t nloop) {
             "356760823782530076253342418118532753950587932901212416719129878255565055"
             "545816",
     };
-    BigVector moddiff3 = BBVfromStrvec(moddiff3strvec);
-    moddiff3.SetModulus(q3);
+    BigVector moddiff3 = bbv_from_strvec(moddiff3strvec);
+    moddiff3.set_modulus(q3);
 
     std::vector<std::string> modmul3strvec = {
             "103105474514584305682070594578091411828214431081734131021002064062543199"
@@ -407,17 +407,17 @@ void test_BigVector(uint32_t nloop) {
             "023658",
     };
 
-    BigVector modmul3 = BBVfromStrvec(modmul3strvec);
-    modmul3.SetModulus(q3);
+    BigVector modmul3 = bbv_from_strvec(modmul3strvec);
+    modmul3.set_modulus(q3);
 
 #if 1
     TESTIT(t3, c3, a3 + b3, modsum3, nloop);
-    TESTIT(t3, c3, a3.ModAdd(b3), modsum3, nloop);
+    TESTIT(t3, c3, a3.mod_add(b3), modsum3, nloop);
     TESTIT(t3, c3, a3 - b3, moddiff3, nloop);
-    TESTIT(t3, c3, a3.ModSub(b3), moddiff3, nloop);
+    TESTIT(t3, c3, a3.mod_sub(b3), moddiff3, nloop);
 #endif
     TESTIT(t3, c3, a3 * b3, modmul3, nloop);
-    TESTIT(t3, c3, a3.ModMul(b3), modmul3, nloop);
+    TESTIT(t3, c3, a3.mod_mul(b3), modmul3, nloop);
 
     return;
 }

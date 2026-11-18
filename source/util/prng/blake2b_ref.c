@@ -21,7 +21,7 @@
 #include "cipher/util/prng/blake2.h"
 #include "cipher/util/prng/blake2_impl.h"
 
-static const uint64_t blake2b_IV[8] = {
+static const uint64_t blake2b_iv[8] = {
     0x6a09e667f3bcc908ULL, 0xbb67ae8584caa73bULL, 0x3c6ef372fe94f82bULL,
     0xa54ff53a5f1d36f1ULL, 0x510e527fade682d1ULL, 0x9b05688c2b3e6c1fULL,
     0x1f83d9abfb41bd6bULL, 0x5be0cd19137e2179ULL};
@@ -60,7 +60,7 @@ static void blake2b_init0(blake2b_state *S) {
   size_t i;
   memset(S, 0, sizeof(blake2b_state));
 
-  for (i = 0; i < 8; ++i) S->h[i] = blake2b_IV[i];
+  for (i = 0; i < 8; ++i) S->h[i] = blake2b_iv[i];
 }
 
 /* init xors IV with input parameter block */
@@ -168,14 +168,14 @@ static void blake2b_compress(blake2b_state *S,
     v[i] = S->h[i];
   }
 
-  v[8] = blake2b_IV[0];
-  v[9] = blake2b_IV[1];
-  v[10] = blake2b_IV[2];
-  v[11] = blake2b_IV[3];
-  v[12] = blake2b_IV[4] ^ S->t[0];
-  v[13] = blake2b_IV[5] ^ S->t[1];
-  v[14] = blake2b_IV[6] ^ S->f[0];
-  v[15] = blake2b_IV[7] ^ S->f[1];
+  v[8] = blake2b_iv[0];
+  v[9] = blake2b_iv[1];
+  v[10] = blake2b_iv[2];
+  v[11] = blake2b_iv[3];
+  v[12] = blake2b_iv[4] ^ S->t[0];
+  v[13] = blake2b_iv[5] ^ S->t[1];
+  v[14] = blake2b_iv[6] ^ S->f[0];
+  v[15] = blake2b_iv[7] ^ S->f[1];
 
   ROUND(0);
   ROUND(1);
@@ -313,24 +313,24 @@ int main(void) {
       blake2b_state S;
       uint8_t *p = buf;
       size_t mlen = i;
-      int err = 0;
+      int err_value = 0;
 
-      if ((err = blake2b_init_key(&S, BLAKE2B_OUTBYTES, key,
+      if ((err_value = blake2b_init_key(&S, BLAKE2B_OUTBYTES, key,
                                   BLAKE2B_KEYBYTES)) < 0) {
         goto fail;
       }
 
       while (mlen >= step) {
-        if ((err = blake2b_update(&S, p, step)) < 0) {
+        if ((err_value = blake2b_update(&S, p, step)) < 0) {
           goto fail;
         }
         mlen -= step;
         p += step;
       }
-      if ((err = blake2b_update(&S, p, mlen)) < 0) {
+      if ((err_value = blake2b_update(&S, p, mlen)) < 0) {
         goto fail;
       }
-      if ((err = blake2b_final(&S, hash, BLAKE2B_OUTBYTES)) < 0) {
+      if ((err_value = blake2b_final(&S, hash, BLAKE2B_OUTBYTES)) < 0) {
         goto fail;
       }
 

@@ -37,17 +37,17 @@
 #include "cipher/fhe/rns/fhe.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief BFV instantiation of the FHE (bootstrapping) component; it inherits the RNS implementation without changes.
  */
-class FHEBFVRNS : public FHERNS {
+class BfvRnsFhe : public RnsFhe {
   public:
-    virtual ~FHEBFVRNS() {}
+    virtual ~BfvRnsFhe() {}
 
     /////////////////////////////////////
     // SERIALIZATION
@@ -55,18 +55,18 @@ class FHEBFVRNS : public FHERNS {
 
     template <class Archive>
     void save(Archive& ar) const {
-        ar(cereal::base_class<FHERNS>(this));
+        ar(cereal::base_class<RnsFhe>(this));
     }
 
     template <class Archive>
     void load(Archive& ar) {
-        ar(cereal::base_class<FHERNS>(this));
+        ar(cereal::base_class<RnsFhe>(this));
     }
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "FHEBFVRNS";
     }
 };
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_BFV_FHE_H_

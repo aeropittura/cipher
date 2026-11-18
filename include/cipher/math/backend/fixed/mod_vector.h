@@ -41,7 +41,7 @@
 #include <type_traits>
 
 #include "cipher/config.h"
-#ifdef WITH_BE2
+#ifdef CIPHER_WITH_BE2
 
     #include <ostream>
     #include <string>
@@ -55,7 +55,7 @@
  * @namespace bigintfxd
  * The namespace of bigintfxd
  */
-namespace bigintfxd {
+namespace fixed_int {
 
 // Forward declare this class for aliases
 template <typename IntegerType>
@@ -67,11 +67,11 @@ using BigVector = BigVectorFixedT<BigInteger>;
  * @brief The class for representing vectors of big binary integers.
  */
 template <class IntegerType>
-class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixedT<IntegerType>, IntegerType>,
-                              public lbcrypto::Serializable {
+class BigVectorFixedT final : public cipher::BigVectorInterface<BigVectorFixedT<IntegerType>, IntegerType>,
+                              public cipher::Serializable {
   public:
     ~BigVectorFixedT() {
-        delete[] m_data;
+        delete[] data_;
     }
 
     /**
@@ -79,7 +79,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      */
     BigVectorFixedT();
 
-    static inline BigVectorFixedT Single(const IntegerType& val, const IntegerType& modulus) {
+    static inline BigVectorFixedT single(const IntegerType& val, const IntegerType& modulus) {
         BigVectorFixedT vec(1, modulus);
         vec[0] = val;
         return vec;
@@ -95,23 +95,23 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
     explicit BigVectorFixedT(uint32_t length, const IntegerType& modulus = 0);
 
     BigVectorFixedT(uint32_t length, const IntegerType& modulus, const IntegerType& value)
-        : m_data(new IntegerType[length]()), m_length{length}, m_modulus{modulus} {
-        std::fill(m_data, m_data + m_length, value);
+        : data_(new IntegerType[length]()), length_{length}, modulus_{modulus} {
+        std::fill(data_, data_ + length_, value);
     }
 
     /**
      * Basic constructor for copying a vector
      *
-     * @param bigVector is the big binary vector to be copied.
+     * @param big_vector is the big binary vector to be copied.
      */
-    BigVectorFixedT(const BigVectorFixedT& bigVector);
+    BigVectorFixedT(const BigVectorFixedT& big_vector);
 
     /**
      * Basic move constructor for moving a vector
      *
-     * @param bigVector is the big binary vector to be moved.
+     * @param big_vector is the big binary vector to be moved.
      */
-    BigVectorFixedT(BigVectorFixedT&& bigVector);  // move copy constructor
+    BigVectorFixedT(BigVectorFixedT&& big_vector);  // move copy constructor
 
     /**
      * Basic constructor for specifying the length of the vector
@@ -177,12 +177,12 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @return Assigned BigVectorFixedT.
      */
     BigVectorFixedT& operator=(uint64_t val) {
-        m_data[0] = val;
-        if (m_modulus != 0) {
-            m_data[0] %= m_modulus;
+        data_[0] = val;
+        if (modulus_ != 0) {
+            data_[0] %= modulus_;
         }
-        for (size_t i = 1; i < m_length; ++i) {
-            m_data[i] = 0;
+        for (size_t i = 1; i < length_; ++i) {
+            data_[i] = 0;
         }
         return *this;
     }
@@ -197,17 +197,17 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @return is a reference to the entry at the index.
      */
     IntegerType& at(size_t i) {
-        if (!IndexCheck(i)) {
-            OPENFHE_THROW("BigVector index out of range");
+        if (!index_check(i)) {
+            CIPHER_THROW("BigVector index out of range");
         }
-        return m_data[i];
+        return data_[i];
     }
 
     const IntegerType& at(size_t i) const {
-        if (!IndexCheck(i)) {
-            OPENFHE_THROW("BigVector index out of range");
+        if (!index_check(i)) {
+            CIPHER_THROW("BigVector index out of range");
         }
-        return m_data[i];
+        return data_[i];
     }
 
     /**
@@ -216,11 +216,11 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @return is the value at the index.
      */
     IntegerType& operator[](size_t idx) {
-        return m_data[idx];
+        return data_[idx];
     }
 
     const IntegerType& operator[](size_t idx) const {
-        return m_data[idx];
+        return data_[idx];
     }
 
     /**
@@ -228,8 +228,8 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      *
      * @param value is the modulus value to set.
      */
-    void SetModulus(const IntegerType& value) {
-        m_modulus = value;
+    void set_modulus(const IntegerType& value) {
+        modulus_ = value;
     }
 
     /**
@@ -237,14 +237,14 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      *
      * @param value is the value to set.
      */
-    void SwitchModulus(const IntegerType& value);
-    void LazySwitchModulus(const IntegerType& value);
+    void switch_modulus(const IntegerType& value);
+    void lazy_switch_modulus(const IntegerType& value);
 
-    BigVectorFixedT& MultAccEqNoCheck(const BigVectorFixedT& a, const BigVectorFixedT& b) {
-        OPENFHE_THROW("MultAccEqNoCheck() not implemented for mubintvecfxd");
+    BigVectorFixedT& mult_acc_eq_no_check(const BigVectorFixedT& a, const BigVectorFixedT& b) {
+        CIPHER_THROW("MultAccEqNoCheck() not implemented for mubintvecfxd");
     }
-    BigVectorFixedT& MultAccEqNoCheck(const BigVectorFixedT& v, const IntegerType& i) {
-        OPENFHE_THROW("MultAccEqNoCheck() not implemented for mubintvecfxd");
+    BigVectorFixedT& mult_acc_eq_no_check(const BigVectorFixedT& v, const IntegerType& i) {
+        CIPHER_THROW("MultAccEqNoCheck() not implemented for mubintvecfxd");
     }
 
     /**
@@ -252,8 +252,8 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      *
      * @return the vector modulus.
      */
-    const IntegerType& GetModulus() const {
-        return m_modulus;
+    const IntegerType& get_modulus() const {
+        return modulus_;
     }
 
     /**
@@ -261,8 +261,8 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      *
      * @return vector length.
      */
-    size_t GetLength() const {
-        return m_length;
+    size_t get_length() const {
+        return length_;
     }
 
     // MODULAR ARITHMETIC OPERATIONS
@@ -273,7 +273,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param modulus is the modulus to perform on the current vector entries.
      * @return is the result of the modulus operation on current vector.
      */
-    BigVectorFixedT Mod(const IntegerType& modulus) const;
+    BigVectorFixedT mod(const IntegerType& modulus) const;
 
     /**
      * Vector modulus operator. In-place variant.
@@ -281,7 +281,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param modulus is the modulus to perform on the current vector entries.
      * @return is the result of the modulus operation on current vector.
      */
-    BigVectorFixedT& ModEq(const IntegerType& modulus);
+    BigVectorFixedT& mod_eq(const IntegerType& modulus);
 
     /**
      * Scalar-to-vector modulus addition operation.
@@ -289,7 +289,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus addition operation.
      */
-    BigVectorFixedT ModAdd(const IntegerType& b) const;
+    BigVectorFixedT mod_add(const IntegerType& b) const;
 
     /**
      * Scalar-to-vector modulus addition operation. In-place variant.
@@ -297,7 +297,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus addition operation.
      */
-    BigVectorFixedT& ModAddEq(const IntegerType& b);
+    BigVectorFixedT& mod_add_eq(const IntegerType& b);
 
     /**
      * Scalar modulus addition at a particular index.
@@ -306,7 +306,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param b is the scalar to add.
      * @return is the result of the modulus addition operation.
      */
-    BigVectorFixedT ModAddAtIndex(uint32_t i, const IntegerType& b) const;
+    BigVectorFixedT mod_add_at_index(uint32_t i, const IntegerType& b) const;
 
     /**
      * Scalar modulus addition at a particular index. In-place variant.
@@ -315,7 +315,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param b is the scalar to add.
      * @return is the result of the modulus addition operation.
      */
-    BigVectorFixedT& ModAddAtIndexEq(uint32_t i, const IntegerType& b);
+    BigVectorFixedT& mod_add_at_index_eq(uint32_t i, const IntegerType& b);
 
     /**
      * Vector component wise modulus addition.
@@ -323,7 +323,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param b is the vector to perform operation with.
      * @return is the result of the component wise modulus addition operation.
      */
-    BigVectorFixedT ModAdd(const BigVectorFixedT& b) const;
+    BigVectorFixedT mod_add(const BigVectorFixedT& b) const;
 
     /**
      * Vector component wise modulus addition. In-place variant.
@@ -331,8 +331,8 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param b is the vector to perform operation with.
      * @return is the result of the component wise modulus addition operation.
      */
-    BigVectorFixedT& ModAddEq(const BigVectorFixedT& b);
-    BigVectorFixedT& ModAddNoCheckEq(const BigVectorFixedT& b);
+    BigVectorFixedT& mod_add_eq(const BigVectorFixedT& b);
+    BigVectorFixedT& mod_add_no_check_eq(const BigVectorFixedT& b);
 
     /**
      * Scalar-from-vector modulus subtraction operation.
@@ -340,7 +340,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus subtraction operation.
      */
-    BigVectorFixedT ModSub(const IntegerType& b) const;
+    BigVectorFixedT mod_sub(const IntegerType& b) const;
 
     /**
      * Scalar-from-vector modulus subtraction operation. In-place variant.
@@ -348,7 +348,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus subtraction operation.
      */
-    BigVectorFixedT& ModSubEq(const IntegerType& b);
+    BigVectorFixedT& mod_sub_eq(const IntegerType& b);
 
     /**
      * Vector component wise modulus subtraction.
@@ -356,7 +356,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param b is the vector to perform operation with.
      * @return is the result of the component wise modulus subtraction operation.
      */
-    BigVectorFixedT ModSub(const BigVectorFixedT& b) const;
+    BigVectorFixedT mod_sub(const BigVectorFixedT& b) const;
 
     /**
      * Vector component wise modulus subtraction. In-place variant.
@@ -364,7 +364,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param b is the vector to perform operation with.
      * @return is the result of the component wise modulus subtraction operation.
      */
-    BigVectorFixedT& ModSubEq(const BigVectorFixedT& b);
+    BigVectorFixedT& mod_sub_eq(const BigVectorFixedT& b);
 
     /**
      * Scalar-to-vector modulus multiplication operation.
@@ -373,7 +373,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus multiplication operation.
      */
-    BigVectorFixedT ModMul(const IntegerType& b) const;
+    BigVectorFixedT mod_mul(const IntegerType& b) const;
 
     /**
      * Scalar-to-vector modulus multiplication operation. In-place variant.
@@ -382,7 +382,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus multiplication operation.
      */
-    BigVectorFixedT& ModMulEq(const IntegerType& b);
+    BigVectorFixedT& mod_mul_eq(const IntegerType& b);
 
     /**
      * Vector component wise modulus multiplication.
@@ -391,7 +391,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @return is the result of the component wise modulus multiplication
      * operation.
      */
-    BigVectorFixedT ModMul(const BigVectorFixedT& b) const;
+    BigVectorFixedT mod_mul(const BigVectorFixedT& b) const;
 
     /**
      * Vector component wise modulus multiplication. In-place variant.
@@ -400,8 +400,8 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @return is the result of the component wise modulus multiplication
      * operation.
      */
-    BigVectorFixedT& ModMulEq(const BigVectorFixedT& b);
-    BigVectorFixedT& ModMulNoCheckEq(const BigVectorFixedT& b);
+    BigVectorFixedT& mod_mul_eq(const BigVectorFixedT& b);
+    BigVectorFixedT& mod_mul_no_check_eq(const BigVectorFixedT& b);
 
     /**
      * Scalar modulus exponentiation operation.
@@ -409,7 +409,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus exponentiation operation.
      */
-    BigVectorFixedT ModExp(const IntegerType& b) const;
+    BigVectorFixedT mod_exp(const IntegerType& b) const;
 
     /**
      * Scalar modulus exponentiation operation. In-place variant.
@@ -417,21 +417,21 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus exponentiation operation.
      */
-    BigVectorFixedT& ModExpEq(const IntegerType& b);
+    BigVectorFixedT& mod_exp_eq(const IntegerType& b);
 
     /**
      * Modulus inverse operation.
      *
      * @return is the result of the component wise modulus inverse operation.
      */
-    BigVectorFixedT ModInverse() const;
+    BigVectorFixedT mod_inverse() const;
 
     /**
      * Modulus inverse operation. In-place variant.
      *
      * @return is the result of the component wise modulus inverse operation.
      */
-    BigVectorFixedT& ModInverseEq();
+    BigVectorFixedT& mod_inverse_eq();
 
     /**
      * Modulus 2 operation, also a least significant bit.
@@ -439,7 +439,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @return is the result of the component wise modulus 2 operation, also a
      * least significant bit.
      */
-    BigVectorFixedT ModByTwo() const;
+    BigVectorFixedT mod_by_two() const;
 
     /**
      * Modulus 2 operation, also a least significant bit. In-place variant.
@@ -447,7 +447,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @return is the result of the component wise modulus 2 operation, also a
      * least significant bit.
      */
-    BigVectorFixedT& ModByTwoEq();
+    BigVectorFixedT& mod_by_two_eq();
 
     /**
      * Vector multiplication without applying the modulus operation.
@@ -455,7 +455,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param b is the vector to multiply.
      * @return is the result of the multiplication operation.
      */
-    BigVectorFixedT MultWithOutMod(const BigVectorFixedT& b) const;
+    BigVectorFixedT mult_with_out_mod(const BigVectorFixedT& b) const;
 
     /**
      * Vector multiplication without applying the modulus operation. In-place
@@ -464,7 +464,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param b is the vector to multiply.
      * @return is the result of the multiplication operation.
      */
-    BigVectorFixedT& MultWithOutModEq(const BigVectorFixedT& b);
+    BigVectorFixedT& mult_with_out_mod_eq(const BigVectorFixedT& b);
 
     /**
      * Multiply and Rounding operation. Returns [x*p/q] where [] is the rounding
@@ -474,7 +474,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param q is the denominator to be divided.
      * @return is the result of multiply and round operation.
      */
-    BigVectorFixedT MultiplyAndRound(const IntegerType& p, const IntegerType& q) const;
+    BigVectorFixedT multiply_and_round(const IntegerType& p, const IntegerType& q) const;
 
     /**
      * Multiply and Rounding operation. Returns [x*p/q] where [] is the rounding
@@ -484,7 +484,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param q is the denominator to be divided.
      * @return is the result of multiply and round operation.
      */
-    BigVectorFixedT& MultiplyAndRoundEq(const IntegerType& p, const IntegerType& q);
+    BigVectorFixedT& multiply_and_round_eq(const IntegerType& p, const IntegerType& q);
 
     /**
      * Divide and Rounding operation. Returns [x/q] where [] is the rounding
@@ -493,7 +493,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param q is the denominator to be divided.
      * @return is the result of divide and round operation.
      */
-    BigVectorFixedT DivideAndRound(const IntegerType& q) const;
+    BigVectorFixedT divide_and_round(const IntegerType& q) const;
 
     /**
      * Divide and Rounding operation. Returns [x/q] where [] is the rounding
@@ -502,7 +502,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param q is the denominator to be divided.
      * @return is the result of divide and round operation.
      */
-    BigVectorFixedT& DivideAndRoundEq(const IntegerType& q);
+    BigVectorFixedT& divide_and_round_eq(const IntegerType& q);
 
     // OTHER FUNCTIONS
 
@@ -523,7 +523,7 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @return is the digit at a specific index for all entries for a given number
      * base
      */
-    BigVectorFixedT GetDigitAtIndexForBase(uint32_t index, uint32_t base) const;
+    BigVectorFixedT get_digit_at_index_for_base(uint32_t index, uint32_t base) const;
 
     // STRINGS & STREAMS
 
@@ -534,15 +534,15 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
      * @param ptr_obj is the BigVectorFixedT object to be printed.
      * @return std ostream object which captures the vector values.
      */
-    template <class IntegerType_c>
-    friend std::ostream& operator<<(std::ostream& os, const BigVectorFixedT<IntegerType_c>& ptr_obj) {
-        auto len = ptr_obj.m_length;
+    template <class IntegerTypeC>
+    friend std::ostream& operator<<(std::ostream& os, const BigVectorFixedT<IntegerTypeC>& ptr_obj) {
+        auto len = ptr_obj.length_;
         os << "[";
         for (uint32_t i = 0; i < len; i++) {
-            os << ptr_obj.m_data[i];
+            os << ptr_obj.data_[i];
             os << ((i == (len - 1)) ? "]" : " ");
         }
-        os << " modulus: " << ptr_obj.m_modulus;
+        os << " modulus: " << ptr_obj.modulus_;
         return os;
     }
 
@@ -551,68 +551,68 @@ class BigVectorFixedT final : public lbcrypto::BigVectorInterface<BigVectorFixed
     template <class Archive>
     typename std::enable_if<!cereal::traits::is_text_archive<Archive>::value, void>::type save(
             Archive& ar, std::uint32_t const version) const {
-        ar(::cereal::make_nvp("m", m_modulus));
-        ar(::cereal::make_nvp("l", m_length));
-        ar(::cereal::binary_data(m_data, sizeof(IntegerType) * m_length));
+        ar(::cereal::make_nvp("m", modulus_));
+        ar(::cereal::make_nvp("l", length_));
+        ar(::cereal::binary_data(data_, sizeof(IntegerType) * length_));
     }
 
     template <class Archive>
     typename std::enable_if<cereal::traits::is_text_archive<Archive>::value, void>::type save(
             Archive& ar, std::uint32_t const version) const {
-        ar(::cereal::make_nvp("m", m_modulus));
-        ar(::cereal::make_nvp("l", m_length));
-        for (size_t i = 0; i < m_length; i++) {
-            ar(m_data[i]);
+        ar(::cereal::make_nvp("m", modulus_));
+        ar(::cereal::make_nvp("l", length_));
+        for (size_t i = 0; i < length_; i++) {
+            ar(data_[i]);
         }
     }
 
     template <class Archive>
     typename std::enable_if<!cereal::traits::is_text_archive<Archive>::value, void>::type load(
             Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
-        ar(::cereal::make_nvp("m", m_modulus));
-        ar(::cereal::make_nvp("l", m_length));
-        m_data = new IntegerType[m_length]();
-        ar(::cereal::binary_data(m_data, sizeof(IntegerType) * m_length));
+        ar(::cereal::make_nvp("m", modulus_));
+        ar(::cereal::make_nvp("l", length_));
+        data_ = new IntegerType[length_]();
+        ar(::cereal::binary_data(data_, sizeof(IntegerType) * length_));
     }
 
     template <class Archive>
     typename std::enable_if<cereal::traits::is_text_archive<Archive>::value, void>::type load(
             Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
-        ar(::cereal::make_nvp("m", m_modulus));
-        ar(::cereal::make_nvp("l", m_length));
-        m_data = new IntegerType[m_length]();
-        for (size_t i = 0; i < m_length; i++) {
-            ar(m_data[i]);
+        ar(::cereal::make_nvp("m", modulus_));
+        ar(::cereal::make_nvp("l", length_));
+        data_ = new IntegerType[length_]();
+        for (size_t i = 0; i < length_; i++) {
+            ar(data_[i]);
         }
     }
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "FXDInteger";
     }
 
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 
   private:
-    // m_data is a pointer to the vector
-    IntegerType* m_data;
-    // m_length stores the length of the vector
-    uint32_t m_length;
-    // m_modulus stores the internal modulus of the vector.
-    IntegerType m_modulus = 0;
+    // data_ is a pointer to the vector
+    IntegerType* data_;
+    // length_ stores the length of the vector
+    uint32_t length_;
+    // modulus_ stores the internal modulus of the vector.
+    IntegerType modulus_ = 0;
 
     // function to check if the index is a valid index.
-    bool IndexCheck(uint32_t length) const {
-        return length < m_length;
+    bool index_check(uint32_t length) const {
+        return length < length_;
     }
 };
 

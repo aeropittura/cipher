@@ -44,7 +44,7 @@
 #include "cipher/fhe/base/decrypt_result.h"
 #include "cipher/util/exception.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 //===========================================================================================================
 enum TEST_CASE_TYPE : int {
@@ -69,22 +69,22 @@ static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
 }
 //===========================================================================================================
 struct TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT {
-    TEST_CASE_TYPE testCaseType;
+    TEST_CASE_TYPE test_case_type;
     // test case description - MUST BE UNIQUE
     std::string description;
 
-    UnitTestCCParams params;
+    TestContextParams params;
 
     // additional test case data
 
-    std::string buildTestName() const {
+    std::string build_test_name() const {
         std::stringstream ss;
-        ss << testCaseType << "_" << description;
+        ss << test_case_type << "_" << description;
         return ss.str();
     }
-    std::string toString() const {
+    std::string to_string_impl() const {
         std::stringstream ss;
-        ss << "testCaseType [" << testCaseType << "], " << params.toString();
+        ss << "testCaseType [" << test_case_type << "], " << params.to_string_impl();
         return ss.str();
     }
 };
@@ -92,18 +92,18 @@ struct TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT {
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
 static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT>& test) {
-    return test.param.buildTestName();
+    return test.param.build_test_name();
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT& test) {
-    return os << test.toString();
+    return os << test.to_string_impl();
 }
 //===========================================================================================================
 constexpr uint32_t BATCH = 16;
 constexpr uint32_t BV_DSIZE = 4;
 // clang-format off
-static std::vector<TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT> testCases = {
-    // TestType,  Descr, Scheme,         RDim, MultDepth, SModSize, DSize,    BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, StdDev, EvalAddCt, KSCt, MultTech,         EncTech,  PREMode
+static std::vector<TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT> test_cases = {
+    // TestType,  Descr, Scheme,         RDim, MultDepth, SModSize, DSize,    BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech,         EncTech,  pre_mode
     { STRING_TEST, "01", {BGVRNS_SCHEME, 256,  2,         DFLT,     BV_DSIZE, BATCH,   GAUSSIAN,        1,             60,       HEStd_NotSet, BV,     FIXEDMANUAL,     DFLT,    256,   DFLT,   DFLT,      DFLT, DFLT,             STANDARD, DFLT} },
     { STRING_TEST, "02", {BGVRNS_SCHEME, 256,  2,         DFLT,     BV_DSIZE, BATCH,   GAUSSIAN,        1,             DFLT,     HEStd_NotSet, BV,     FIXEDAUTO,       DFLT,    256,   DFLT,   DFLT,      DFLT, DFLT,             STANDARD, DFLT} },
     { STRING_TEST, "03", {BGVRNS_SCHEME, 256,  2,         DFLT,     BV_DSIZE, BATCH,   GAUSSIAN,        1,             DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTO,    DFLT,    256,   DFLT,   DFLT,      DFLT, DFLT,             STANDARD, DFLT} },
@@ -121,7 +121,7 @@ static std::vector<TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT> testCases = {
     { STRING_TEST, "15", {BFVRNS_SCHEME, DFLT, DFLT,      DFLT,     20,       BATCH,   GAUSSIAN,        DFLT,          DFLT,     DFLT,         BV,     FIXEDMANUAL,     DFLT,    256,   DFLT,   DFLT,      DFLT, HPSPOVERQ,        EXTENDED, DFLT} },
     { STRING_TEST, "16", {BFVRNS_SCHEME, DFLT, DFLT,      DFLT,     20,       BATCH,   GAUSSIAN,        DFLT,          DFLT,     DFLT,         BV,     FIXEDMANUAL,     DFLT,    256,   DFLT,   DFLT,      DFLT, HPSPOVERQLEVELED, EXTENDED, DFLT} },
     // ==========================================
-    // TestType,       Descr, Scheme,         RDim, MultDepth, SModSize, DSize,    BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, StdDev, EvalAddCt, KSCt, MultTech,         EncTech,  PREMode
+    // TestType,       Descr, Scheme,         RDim, MultDepth, SModSize, DSize,    BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech,         EncTech,  pre_mode
     { COEF_PACKED_TEST, "01", {BGVRNS_SCHEME, 64,   2,         DFLT,     BV_DSIZE, BATCH,   GAUSSIAN,        1,             60,       HEStd_NotSet, BV,     FIXEDMANUAL,     DFLT,    512,   DFLT,   DFLT,      DFLT, DFLT,             STANDARD, DFLT} },
     { COEF_PACKED_TEST, "02", {BGVRNS_SCHEME, 64,   2,         DFLT,     BV_DSIZE, BATCH,   GAUSSIAN,        1,             DFLT,     HEStd_NotSet, BV,     FIXEDAUTO,       DFLT,    512,   DFLT,   DFLT,      DFLT, DFLT,             STANDARD, DFLT} },
     { COEF_PACKED_TEST, "03", {BGVRNS_SCHEME, 64,   2,         DFLT,     BV_DSIZE, BATCH,   GAUSSIAN,        1,             DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTO,    DFLT,    512,   DFLT,   DFLT,      DFLT, DFLT,             STANDARD, DFLT} },
@@ -142,33 +142,33 @@ static std::vector<TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT> testCases = {
 // clang-format on
 //===========================================================================================================
 class UTGENERAL_ENCRYPT_DECRYPT : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT> {
-    using Element = DCRTPoly;
+    using Element = RnsPoly;
 
   protected:
     void SetUp() {
-        OpenFHEParallelControls.UnitTestStart();
+        cipher_parallel_controls.unit_test_start();
     }
 
     void TearDown() {
-        CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
-        OpenFHEParallelControls.UnitTestStop();
+        ContextFactory<RnsPoly>::release_all_contexts();
+        cipher_parallel_controls.unit_test_stop();
     }
 
-    void EncryptionString(const TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT& testData,
+    void encryption_string(const TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT& test_data,
                           const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
             std::string value = "You keep using that word. I do not think it means what you think it means";
-            Plaintext plaintext = cc->MakeStringPlaintext(value);
+            Plaintext plaintext = cc->make_string_plaintext(value);
 
-            KeyPair<Element> kp = cc->KeyGen();
+            KeyPair<Element> kp = cc->key_gen();
             EXPECT_EQ(kp.good(), true) << failmsg << " key generation for string encrypt/decrypt failed";
 
-            Ciphertext<Element> ciphertext = cc->Encrypt(kp.publicKey, plaintext);
-            Plaintext plaintextNew;
-            cc->Decrypt(kp.secretKey, ciphertext, &plaintextNew);
-            EXPECT_EQ(*plaintext, *plaintextNew) << failmsg << " string encrypt/decrypt failed";
+            Ciphertext<Element> ciphertext = cc->encrypt(kp.public_key, plaintext);
+            Plaintext plaintext_new;
+            cc->decrypt(kp.secret_key, ciphertext, &plaintext_new);
+            EXPECT_EQ(*plaintext, *plaintext_new) << failmsg << " string encrypt/decrypt failed";
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -178,42 +178,42 @@ class UTGENERAL_ENCRYPT_DECRYPT : public ::testing::TestWithParam<TEST_CASE_UTGE
         }
     }
 
-    void EncryptionCoefPacked(const TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT& testData,
+    void encryption_coef_packed(const TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT& test_data,
                               const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
-            size_t intSize = cc->GetRingDimension();
-            auto ptm = cc->GetCryptoParameters()->GetPlaintextModulus();
+            size_t int_size = cc->get_ring_dimension();
+            auto ptm = cc->get_crypto_parameters()->get_plaintext_modulus();
             int half = ptm / 2;
 
             std::vector<int64_t> intvec;
-            for (size_t ii = 0; ii < intSize; ii++)
+            for (size_t ii = 0; ii < int_size; ii++)
                 intvec.push_back(rand() % half);  // NOLINT
-            Plaintext plaintextInt = cc->MakeCoefPackedPlaintext(intvec);
+            Plaintext plaintext_int = cc->make_coef_packed_plaintext(intvec);
 
             std::vector<int64_t> sintvec;
-            for (size_t ii = 0; ii < intSize; ii++) {
+            for (size_t ii = 0; ii < int_size; ii++) {
                 int rnum = rand() % half;  // NOLINT
                 if (rand() % 2)            // NOLINT
                     rnum *= -1;
                 sintvec.push_back(rnum);
             }
-            Plaintext plaintextSInt = cc->MakeCoefPackedPlaintext(sintvec);
+            Plaintext plaintext_s_int = cc->make_coef_packed_plaintext(sintvec);
 
-            KeyPair<Element> kp = cc->KeyGen();
+            KeyPair<Element> kp = cc->key_gen();
             EXPECT_EQ(kp.good(), true) << failmsg << " key generation for coef packed encrypt/decrypt failed";
 
-            Ciphertext<Element> ciphertext4 = cc->Encrypt(kp.publicKey, plaintextInt);
-            Plaintext plaintextIntNew;
-            cc->Decrypt(kp.secretKey, ciphertext4, &plaintextIntNew);
-            EXPECT_EQ(*plaintextIntNew, *plaintextInt)
+            Ciphertext<Element> ciphertext4 = cc->encrypt(kp.public_key, plaintext_int);
+            Plaintext plaintext_int_new;
+            cc->decrypt(kp.secret_key, ciphertext4, &plaintext_int_new);
+            EXPECT_EQ(*plaintext_int_new, *plaintext_int)
                     << failmsg << "coef packed encrypt/decrypt failed for integer plaintext";
 
-            Ciphertext<Element> ciphertext5 = cc->Encrypt(kp.publicKey, plaintextSInt);
-            Plaintext plaintextSIntNew;
-            cc->Decrypt(kp.secretKey, ciphertext5, &plaintextSIntNew);
-            EXPECT_EQ(*plaintextSIntNew, *plaintextSInt)
+            Ciphertext<Element> ciphertext5 = cc->encrypt(kp.public_key, plaintext_s_int);
+            Plaintext plaintext_s_int_new;
+            cc->decrypt(kp.secret_key, ciphertext5, &plaintext_s_int_new);
+            EXPECT_EQ(*plaintext_s_int_new, *plaintext_s_int)
                     << failmsg << "coef packed encrypt/decrypt failed for signed integer plaintext";
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
@@ -226,20 +226,20 @@ class UTGENERAL_ENCRYPT_DECRYPT : public ::testing::TestWithParam<TEST_CASE_UTGE
 };
 //===========================================================================================================
 TEST_P(UTGENERAL_ENCRYPT_DECRYPT, ENCRYPT) {
-    setupSignals();
+    setup_signals();
     auto test = GetParam();
-    if (test.testCaseType == STRING_TEST)
-        EncryptionString(test, test.buildTestName());
-    else if (test.testCaseType == COEF_PACKED_TEST)
-        EncryptionCoefPacked(test, test.buildTestName());
+    if (test.test_case_type == STRING_TEST)
+        encryption_string(test, test.build_test_name());
+    else if (test.test_case_type == COEF_PACKED_TEST)
+        encryption_coef_packed(test, test.build_test_name());
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTGENERAL_ENCRYPT_DECRYPT, ::testing::ValuesIn(testCases), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTGENERAL_ENCRYPT_DECRYPT, ::testing::ValuesIn(test_cases), testName);
 
 // Default-initializes T in storage pre-filled with 0xFF bytes, so a member without an initializer
 // keeps a non-zero garbage value instead of passing the check by chance.
 template <typename T, typename Check>
-static void CheckDefaultInitOnDirtyStorage(Check check) {
+static void check_default_init_on_dirty_storage(Check check) {
     alignas(T) unsigned char storage[sizeof(T)];
     std::memset(storage, 0xFF, sizeof(storage));
     T* obj = ::new (static_cast<void*>(storage)) T;  // no parentheses: default-, not value-initialization
@@ -248,14 +248,14 @@ static void CheckDefaultInitOnDirtyStorage(Check check) {
 }
 
 TEST(UnitTestENCRYPT, ResultDefaultsAreInvalidAndEmpty) {
-    CheckDefaultInitOnDirtyStorage<EncryptResult>([](const EncryptResult& r) {
-        EXPECT_FALSE(r.isValid);
-        EXPECT_EQ(0u, r.numBytesEncrypted);
+    check_default_init_on_dirty_storage<EncryptResult>([](const EncryptResult& r) {
+        EXPECT_FALSE(r.is_valid);
+        EXPECT_EQ(0u, r.num_bytes_encrypted);
     });
 
-    CheckDefaultInitOnDirtyStorage<DecryptResult>([](const DecryptResult& r) {
-        EXPECT_FALSE(r.isValid);
-        EXPECT_EQ(0u, r.messageLength);
-        EXPECT_EQ(NativeInteger(1), r.scalingFactorInt);
+    check_default_init_on_dirty_storage<DecryptResult>([](const DecryptResult& r) {
+        EXPECT_FALSE(r.is_valid);
+        EXPECT_EQ(0u, r.message_length);
+        EXPECT_EQ(NativeInteger(1), r.scaling_factor_int);
     });
 }

@@ -37,45 +37,45 @@
 #include "cipher/fhe/rns/pke.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief CKKS implementation of the public key encryption capability; adds the noise flooding used by the
  * NOISE_FLOODING_DECRYPT mode to the RNS decryption.
  */
-class PKECKKSRNS : public PKERNS {
-    using ParmType = typename DCRTPoly::Params;
-    using IntType = typename DCRTPoly::Integer;
-    using DugType = typename DCRTPoly::DugType;
-    using DggType = typename DCRTPoly::DggType;
-    using TugType = typename DCRTPoly::TugType;
+class CkksRnsPke : public RnsPke {
+    using ParmType = typename RnsPoly::Params;
+    using IntType = typename RnsPoly::Integer;
+    using DugType = typename RnsPoly::DugType;
+    using DggType = typename RnsPoly::DggType;
+    using TugType = typename RnsPoly::TugType;
 
   public:
-    virtual ~PKECKKSRNS() = default;
+    virtual ~CkksRnsPke() = default;
 
     /**
      * Method for decrypting plaintext with noise flooding
      *
      * @param ciphertext ciphertext to be decrypted.
-     * @param privateKey private key used for decryption.
+     * @param private_key private key used for decryption.
      * @param plaintext the plaintext output.
      * @return the decoding result.
      */
-    DecryptResult Decrypt(ConstCiphertext<DCRTPoly> ciphertext, const PrivateKey<DCRTPoly> privateKey,
+    DecryptResult decrypt(ConstCiphertext<RnsPoly> ciphertext, const PrivateKey<RnsPoly> private_key,
                           NativePoly* plaintext) const override;
 
     /**
      * Method for decrypting plaintext with noise flooding
      *
      * @param ciphertext ciphertext to be decrypted.
-     * @param privateKey private key used for decryption.
+     * @param private_key private key used for decryption.
      * @param plaintext the plaintext output.
      * @return the decoding result.
      */
-    DecryptResult Decrypt(ConstCiphertext<DCRTPoly> ciphertext, const PrivateKey<DCRTPoly> privateKey,
+    DecryptResult decrypt(ConstCiphertext<RnsPoly> ciphertext, const PrivateKey<RnsPoly> private_key,
                           Poly* plaintext) const override;
 
     /////////////////////////////////////
@@ -84,19 +84,19 @@ class PKECKKSRNS : public PKERNS {
 
     template <class Archive>
     void save(Archive& ar) const {
-        ar(cereal::base_class<PKERNS>(this));
+        ar(cereal::base_class<RnsPke>(this));
     }
 
     template <class Archive>
     void load(Archive& ar) {
-        ar(cereal::base_class<PKERNS>(this));
+        ar(cereal::base_class<RnsPke>(this));
     }
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "PKECKKSRNS";
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_CKKS_PKE_H_

@@ -43,7 +43,7 @@
 
 #include "cipher/math/distribution_gen.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /// smallest value of one 32-bit chunk drawn from the PRNG
 constexpr uint32_t DUG_CHUNK_MIN{0};
@@ -62,7 +62,7 @@ class DiscreteUniformGeneratorImpl {
     ~DiscreteUniformGeneratorImpl() = default;
 
     /**
-     * @brief         Constructor that sets the modulus (see SetModulus).
+     * @brief         Constructor that sets the modulus (see set_modulus).
      * @param modulus The modulus of the distribution.
      */
     explicit DiscreteUniformGeneratorImpl(const typename VecType::Integer& modulus);
@@ -71,41 +71,41 @@ class DiscreteUniformGeneratorImpl {
      * @brief         Sets the modulus.
      * @param modulus The new modulus.
      */
-    void SetModulus(const typename VecType::Integer& modulus);
+    void set_modulus(const typename VecType::Integer& modulus);
 
     /**
      * @brief Generates a random integer based on the modulus set for the Discrete
      * Uniform Generator object.
      * @return A random integer uniformly distributed in [0, modulus).
      */
-    typename VecType::Integer GenerateInteger() const;
+    typename VecType::Integer generate_integer() const;
 
     /**
-     * @brief Generates a vector of random integers using GenerateInteger()
+     * @brief Generates a vector of random integers using generate_integer()
      * @param size The number of values to generate.
      * @return A vector of random integers uniformly distributed in [0, modulus).
      */
-    VecType GenerateVector(const uint32_t size) const;
+    VecType generate_vector(const uint32_t size) const;
 
     /**
      * @brief Sets the modulus of the generator and then generates a vector of random integers
-     * using GenerateInteger()
+     * using generate_integer()
      * @param size The number of values to generate.
      * @param modulus The new modulus, kept by the generator for subsequent calls.
      * @return A vector of random integers uniformly distributed in [0, modulus).
      */
-    VecType GenerateVector(const uint32_t size, const typename VecType::Integer& modulus);
+    VecType generate_vector(const uint32_t size, const typename VecType::Integer& modulus);
 
   private:
-    typename VecType::Integer GenerateIntegerWith(PRNG& prng, std::uniform_int_distribution<uint32_t>& dist) const;
+    typename VecType::Integer generate_integer_with(PRNG& prng, std::uniform_int_distribution<uint32_t>& dist) const;
 
-    typename VecType::Integer m_modulus{};
-    // the largest multiple of the modulus in the draw domain 2^(32 * m_chunks): draws at or
+    typename VecType::Integer modulus_{};
+    // the largest multiple of the modulus in the draw domain 2^(32 * chunks_): draws at or
     // above it are the surplus representatives of their residues and are rejected
-    typename VecType::Integer m_limit{};
-    uint32_t m_chunks{};
+    typename VecType::Integer limit_{};
+    uint32_t chunks_{};
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_MATH_DISCRETE_UNIFORM_GEN_H_

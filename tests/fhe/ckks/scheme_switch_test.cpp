@@ -51,7 +51,7 @@
 #include "cipher/fhe/ckks/utils.h"
 #include "fhe/support/scheme_switching_data.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 //===========================================================================================================
 enum TEST_CASE_TYPE : int {
@@ -93,28 +93,28 @@ static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
 }
 //===========================================================================================================
 struct TEST_CASE_UTCKKSRNS_SCHEMESWITCH {
-    TEST_CASE_TYPE testCaseType;
+    TEST_CASE_TYPE test_case_type;
     // test case description - MUST BE UNIQUE
     std::string description;
 
-    UnitTestCCParams params;
+    TestContextParams params;
 
     // additional test case data
     // ........
     std::vector<uint32_t> dim1;  // dim1_CF, dim1_FC
-    uint32_t logQ;
-    uint32_t numValues;
+    uint32_t log_q;
+    uint32_t num_values;
     uint32_t slots;
-    bool oneHot;
+    bool one_hot;
 
-    std::string buildTestName() const {
+    std::string build_test_name() const {
         std::stringstream ss;
-        ss << testCaseType << "_" << description;
+        ss << test_case_type << "_" << description;
         return ss.str();
     }
-    std::string toString() const {
+    std::string to_string_impl() const {
         std::stringstream ss;
-        ss << "testCaseType [" << testCaseType << "], " << params.toString();
+        ss << "testCaseType [" << test_case_type << "], " << params.to_string_impl();
         return ss.str();
     }
 };
@@ -122,11 +122,11 @@ struct TEST_CASE_UTCKKSRNS_SCHEMESWITCH {
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
 static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNS_SCHEMESWITCH>& test) {
-    return test.param.buildTestName();
+    return test.param.build_test_name();
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_UTCKKSRNS_SCHEMESWITCH& test) {
-    return os << test.toString();
+    return os << test.to_string_impl();
 }
 //===========================================================================================================
 
@@ -135,7 +135,7 @@ constexpr uint32_t MULT_DEPTH1 = 13;
 constexpr uint32_t RDIM = 64;
 constexpr uint32_t NUM_LRG_DIGS = 3;
 
-#if NATIVEINT == 128
+#if CIPHER_NATIVE_INT == 128
 constexpr uint32_t SMODSIZE = 70;
 constexpr uint32_t FMODSIZE = 80;
 #else
@@ -144,8 +144,8 @@ constexpr uint32_t FMODSIZE = 60;
 #endif
 
 // clang-format off
-static std::vector<TEST_CASE_UTCKKSRNS_SCHEMESWITCH> testCases = {
-    // TestType,              Descr, Scheme,          RDim, MultDepth,   SModSize,     DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, ScalTech,        LDigits,      PtMod, StdDev, EvalAddCt, KSCt, MultTech, EncTech, PREMode, Dim1,     LogQ, NumValues, Slots
+static std::vector<TEST_CASE_UTCKKSRNS_SCHEMESWITCH> test_cases = {
+    // TestType,              Descr, Scheme,          RDim, MultDepth,   SModSize,     DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, ScalTech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, Dim1,     LogQ, NumValues, Slots
     { SCHEME_SWITCH_CKKS_FHEW, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8 },
     { SCHEME_SWITCH_CKKS_FHEW, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8 },
     { SCHEME_SWITCH_CKKS_FHEW, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2 },
@@ -154,7 +154,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_SCHEMESWITCH> testCases = {
     { SCHEME_SWITCH_CKKS_FHEW, "06", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    SPARSE_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8 },
     { SCHEME_SWITCH_CKKS_FHEW, "07", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    SPARSE_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2 },
     { SCHEME_SWITCH_CKKS_FHEW, "08", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    SPARSE_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2 },
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
     { SCHEME_SWITCH_CKKS_FHEW, "09", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8 },
     { SCHEME_SWITCH_CKKS_FHEW, "10", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8 },
     { SCHEME_SWITCH_CKKS_FHEW, "11", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2 },
@@ -166,7 +166,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_SCHEMESWITCH> testCases = {
 
 #endif
     // ==========================================
-    // TestType,              Descr, Scheme,          RDim, MultDepth,   SModSize,     DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, ScalTech,        LDigits,      PtMod, StdDev, EvalAddCt, KSCt, MultTech, EncTech, PREMode, Dim1,     LogQ, NumValues, Slots
+    // TestType,              Descr, Scheme,          RDim, MultDepth,   SModSize,     DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, ScalTech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, Dim1,     LogQ, NumValues, Slots
     { SCHEME_SWITCH_FHEW_CKKS, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 27, 8, 8 },
     { SCHEME_SWITCH_FHEW_CKKS, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 27, 8, 8 },
     { SCHEME_SWITCH_FHEW_CKKS, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 27, 8, RDIM/2 },
@@ -176,7 +176,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_SCHEMESWITCH> testCases = {
     { SCHEME_SWITCH_FHEW_CKKS, "07", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    SPARSE_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 27, 8, RDIM/2 },
     { SCHEME_SWITCH_FHEW_CKKS, "08", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    SPARSE_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 27, 8, RDIM/2 },
 
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
     { SCHEME_SWITCH_FHEW_CKKS, "09", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 27, 8, 8 },
     { SCHEME_SWITCH_FHEW_CKKS, "10", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 27, 8, 8 },
     { SCHEME_SWITCH_FHEW_CKKS, "11", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 27, 8, RDIM/2 },
@@ -188,12 +188,12 @@ static std::vector<TEST_CASE_UTCKKSRNS_SCHEMESWITCH> testCases = {
 
 #endif
     // ==========================================
-    // TestType,               Descr, Scheme,          RDim, MultDepth,   SModSize,     DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, ScalTech,        LDigits,      PtMod, StdDev, EvalAddCt, KSCt, MultTech, EncTech, PREMode, Dim1,     LogQ, NumValues, Slots
+    // TestType,               Descr, Scheme,          RDim, MultDepth,   SModSize,     DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, ScalTech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, Dim1,     LogQ, NumValues, Slots
     { SCHEME_SWITCH_COMPARISON, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8 },
     { SCHEME_SWITCH_COMPARISON, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8 },
     { SCHEME_SWITCH_COMPARISON, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2 },
     { SCHEME_SWITCH_COMPARISON, "04", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2 },
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
     { SCHEME_SWITCH_COMPARISON, "05", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8 },
     { SCHEME_SWITCH_COMPARISON, "06", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8 },
     { SCHEME_SWITCH_COMPARISON, "07", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2 },
@@ -201,7 +201,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_SCHEMESWITCH> testCases = {
 #endif
 
     // ==========================================
-    // TestType,     Descr, Scheme,          RDim, MultDepth,  SModSize,     DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, ScalTech,        LDigits,      PtMod, StdDev, EvalAddCt, KSCt, MultTech, EncTech, PREMode, Dim1, LogQ, NumValues, Slots, OneHot
+    // TestType,     Descr, Scheme,          RDim, MultDepth,  SModSize,     DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, ScalTech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, Dim1, LogQ, NumValues, Slots, OneHot
     { SCHEME_SWITCH_ARGMIN, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8, true },
     { SCHEME_SWITCH_ARGMIN, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8, true },
     { SCHEME_SWITCH_ARGMIN, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2, true },
@@ -210,7 +210,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_SCHEMESWITCH> testCases = {
     { SCHEME_SWITCH_ARGMIN, "06", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8, false },
     { SCHEME_SWITCH_ARGMIN, "07", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2, false },
     { SCHEME_SWITCH_ARGMIN, "08", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2, false },
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
     { SCHEME_SWITCH_ARGMIN, "09", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8, true },
     { SCHEME_SWITCH_ARGMIN, "10", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8, true },
     { SCHEME_SWITCH_ARGMIN, "11", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8, false },
@@ -221,7 +221,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_SCHEMESWITCH> testCases = {
     // { SCHEME_SWITCH_ARGMIN, "16", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2, false },
 #endif
     // ==========================================
-    // TestType,     Descr, Scheme,          RDim, MultDepth,  SModSize,     DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, ScalTech,        LDigits,      PtMod, StdDev, EvalAddCt, KSCt, MultTech, EncTech, PREMode, Dim1, LogQ, NumValues, Slots, OneHot
+    // TestType,     Descr, Scheme,          RDim, MultDepth,  SModSize,     DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, ScalTech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, Dim1, LogQ, NumValues, Slots, OneHot
     { SCHEME_SWITCH_ALT_ARGMIN, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8, true },
     { SCHEME_SWITCH_ALT_ARGMIN, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8, true },
     { SCHEME_SWITCH_ALT_ARGMIN, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2, true },
@@ -230,7 +230,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_SCHEMESWITCH> testCases = {
     { SCHEME_SWITCH_ALT_ARGMIN, "06", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8, false },
     { SCHEME_SWITCH_ALT_ARGMIN, "07", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2, false },
     { SCHEME_SWITCH_ALT_ARGMIN, "08", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2, false },
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
     { SCHEME_SWITCH_ALT_ARGMIN, "09", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8, true },
     { SCHEME_SWITCH_ALT_ARGMIN, "10", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8, true },
     { SCHEME_SWITCH_ALT_ARGMIN, "11", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8, false },
@@ -241,12 +241,12 @@ static std::vector<TEST_CASE_UTCKKSRNS_SCHEMESWITCH> testCases = {
     // { SCHEME_SWITCH_ALT_ARGMIN, "16", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2, false },
 #endif
     // ==========================================
-    // TestType,     Descr, Scheme,          RDim, MultDepth,  SModSize,     DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, ScalTech,        LDigits,      PtMod, StdDev, EvalAddCt, KSCt, MultTech, EncTech, PREMode, Dim1, LogQ, NumValues, Slots
+    // TestType,     Descr, Scheme,          RDim, MultDepth,  SModSize,     DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, ScalTech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, Dim1, LogQ, NumValues, Slots
     { SCHEME_SWITCH_SERIALIZE, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8},
     { SCHEME_SWITCH_SERIALIZE, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8},
     { SCHEME_SWITCH_SERIALIZE, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2},
     { SCHEME_SWITCH_SERIALIZE, "04", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2},
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
     { SCHEME_SWITCH_SERIALIZE, "05", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8},
     { SCHEME_SWITCH_SERIALIZE, "06", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8},
 #endif
@@ -254,7 +254,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_SCHEMESWITCH> testCases = {
 // clang-format on
 //===========================================================================================================
 class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_SCHEMESWITCH> {
-    using Element = DCRTPoly;
+    using Element = RnsPoly;
 
     // The precision after which we consider two values equal.
     // This is necessary because CKKS works for approximate numbers.
@@ -263,92 +263,92 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
     // When working with conversion to FHEW of larger values, since it implies multiplying by a large value and modular approximation around zero
     const double eps2 = 0.05;
 
-    // CalculateApproximationError() calculates the precision number (or approximation error).
+    // calculate_approximation_error() calculates the precision number (or approximation error).
     // The higher the precision, the less the error.
-    double CalculateApproximationError(const std::vector<std::complex<double>>& result,
-                                       const std::vector<std::complex<double>>& expectedResult) {
-        if (result.size() != expectedResult.size())
-            OPENFHE_THROW("Cannot compare vectors with different numbers of elements");
+    double calculate_approximation_error(const std::vector<std::complex<double>>& result,
+                                       const std::vector<std::complex<double>>& expected_result) {
+        if (result.size() != expected_result.size())
+            CIPHER_THROW("Cannot compare vectors with different numbers of elements");
 
         // using the infinity norm
-        double maxError = 0;
+        double max_error = 0;
         for (size_t i = 0; i < result.size(); ++i) {
-            double error = std::abs(result[i] - expectedResult[i]);
-            if (maxError < error)
-                maxError = error;
+            double error = std::abs(result[i] - expected_result[i]);
+            if (max_error < error)
+                max_error = error;
         }
 
-        return std::abs(std::log2(maxError));
+        return std::abs(std::log2(max_error));
     }
 
-    double CalculateApproximationErrorInt(const std::vector<int32_t>& result,
-                                          const std::vector<int32_t>& expectedResult) {
-        if (result.size() != expectedResult.size())
-            OPENFHE_THROW("Cannot compare vectors with different numbers of elements");
+    double calculate_approximation_error_int(const std::vector<int32_t>& result,
+                                          const std::vector<int32_t>& expected_result) {
+        if (result.size() != expected_result.size())
+            CIPHER_THROW("Cannot compare vectors with different numbers of elements");
 
         // using the infinity norm
-        double maxError = 0;
+        double max_error = 0;
         for (size_t i = 0; i < result.size(); ++i) {
-            double error = std::abs(result[i] - expectedResult[i]);
-            if (maxError < error)
-                maxError = error;
+            double error = std::abs(result[i] - expected_result[i]);
+            if (max_error < error)
+                max_error = error;
         }
 
-        return std::abs(std::log2(maxError));
+        return std::abs(std::log2(max_error));
     }
 
   protected:
     void SetUp() {
-        OpenFHEParallelControls.UnitTestStart();
+        cipher_parallel_controls.unit_test_start();
     }
 
     void TearDown() {
-        CryptoContextFactory<Element>::ReleaseAllContexts();
-        OpenFHEParallelControls.UnitTestStop();
+        ContextFactory<Element>::release_all_contexts();
+        cipher_parallel_controls.unit_test_stop();
     }
 
-    void UnitTest_SchemeSwitch_CKKS_FHEW(const TEST_CASE_UTCKKSRNS_SCHEMESWITCH& testData,
+    void unit_test_scheme_switch_ckks_fhew(const TEST_CASE_UTCKKSRNS_SCHEMESWITCH& test_data,
                                          const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
-            cc->Enable(SCHEMESWITCH);
+            cc->enable(SCHEMESWITCH);
 
-            auto keyPair = cc->KeyGen();
+            auto key_pair = cc->key_gen();
 
             SchSwchParams params;
-            params.SetSecurityLevelCKKS(HEStd_NotSet);
-            params.SetSecurityLevelFHEW(TOY);
-            params.SetCtxtModSizeFHEWLargePrec(testData.logQ);
-            params.SetNumSlotsCKKS(testData.slots);
-            params.SetBStepLTrCKKStoFHEW(testData.dim1[0]);
-            auto privateKeyFHEW = cc->EvalCKKStoFHEWSetup(params);
-            auto ccLWE = cc->GetBinCCForSchemeSwitch();
-            cc->EvalCKKStoFHEWKeyGen(keyPair, privateKeyFHEW);
+            params.set_security_level_ckks(HEStd_NotSet);
+            params.set_security_level_fhew(TOY);
+            params.set_ctxt_mod_size_fhew_large_prec(test_data.log_q);
+            params.set_num_slots_ckks(test_data.slots);
+            params.set_b_step_l_tr_ckks_to_fhew(test_data.dim1[0]);
+            auto private_key_fhew = cc->eval_ckks_to_fhew_setup(params);
+            auto cc_lwe = cc->get_bin_cc_for_scheme_switch();
+            cc->eval_ckks_to_fhew_key_gen(key_pair, private_key_fhew);
 
-            auto modulus_LWE = 1 << testData.logQ;
-            auto pLWE = modulus_LWE / (2 * ccLWE->GetBeta().ConvertToInt());
-            double scale = 1.0 / pLWE;
-            cc->EvalCKKStoFHEWPrecompute(scale);
+            auto modulus_lwe = 1 << test_data.log_q;
+            auto p_lwe = modulus_lwe / (2 * cc_lwe->get_beta().convert_to_int());
+            double scale = 1.0 / p_lwe;
+            cc->eval_ckks_to_fhew_precompute(scale);
 
-            auto input(Fill<double>({0, 1, -2, -3, pLWE / 8.0, pLWE / 4.0, pLWE / 2.0, pLWE / 1.0}, testData.slots));
+            auto input(Fill<double>({0, 1, -2, -3, p_lwe / 8.0, p_lwe / 4.0, p_lwe / 2.0, p_lwe / 1.0}, test_data.slots));
 
-            size_t encodedLength = input.size();
-            std::vector<int32_t> inputInt(encodedLength);
-            std::transform(input.begin(), input.end(), inputInt.begin(), [&](const std::complex<double>& elem) {
-                return static_cast<int32_t>(static_cast<int32_t>(std::round(elem.real())) % pLWE);
+            size_t encoded_length = input.size();
+            std::vector<int32_t> input_int(encoded_length);
+            std::transform(input.begin(), input.end(), input_int.begin(), [&](const std::complex<double>& elem) {
+                return static_cast<int32_t>(static_cast<int32_t>(std::round(elem.real())) % p_lwe);
             });
 
-            Plaintext plaintext1 = cc->MakeCKKSPackedPlaintext(input, 1, 0, nullptr, testData.slots);
-            auto ciphertext1 = cc->Encrypt(keyPair.publicKey, plaintext1);
-            auto ciphertextAfter = cc->EvalCKKStoFHEW(ciphertext1, testData.numValues);
+            Plaintext plaintext1 = cc->make_ckks_packed_plaintext(input, 1, 0, nullptr, test_data.slots);
+            auto ciphertext1 = cc->encrypt(key_pair.public_key, plaintext1);
+            auto ciphertext_after = cc->eval_ckks_to_fhew(ciphertext1, test_data.num_values);
 
             std::string failed = " Scheme switching from CKKS to FHEW for sparsely packed ciphertexts fails.";
 
-            LWEPlaintext result;
-            for (uint32_t i = 0; i < ciphertextAfter.size(); ++i) {
-                ccLWE->Decrypt(privateKeyFHEW, ciphertextAfter[i], &result, pLWE);
-                EXPECT_EQ(result, inputInt[i]) << failed;
+            LwePlaintext result;
+            for (uint32_t i = 0; i < ciphertext_after.size(); ++i) {
+                cc_lwe->decrypt(private_key_fhew, ciphertext_after[i], &result, p_lwe);
+                EXPECT_EQ(result, input_int[i]) << failed;
             }
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
@@ -359,57 +359,57 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
         }
     }
 
-    void UnitTest_SchemeSwitch_FHEW_CKKS(const TEST_CASE_UTCKKSRNS_SCHEMESWITCH& testData,
+    void unit_test_scheme_switch_fhew_ckks(const TEST_CASE_UTCKKSRNS_SCHEMESWITCH& test_data,
                                          const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
-            cc->Enable(SCHEMESWITCH);
+            cc->enable(SCHEMESWITCH);
 
-            auto keyPair = cc->KeyGen();
+            auto key_pair = cc->key_gen();
 
-            auto ccLWE = std::make_shared<BinFHEContext>();
-            ccLWE->BinFHEContext::GenerateBinFHEContext(TOY, false, testData.logQ, 0, GINX, false);
-            LWEPrivateKey lwesk = ccLWE->KeyGen();
+            auto cc_lwe = std::make_shared<BooleanContext>();
+            cc_lwe->BooleanContext::generate_boolean_context(TOY, false, test_data.log_q, 0, GINX, false);
+            LwePrivateKey lwesk = cc_lwe->key_gen();
 
-            std::vector<int32_t> x1(testData.slots);
+            std::vector<int32_t> x1(test_data.slots);
             std::vector<int32_t> x1_values{0, 0, 1, 1, 0, 0, 1, 1};
             std::copy(x1_values.begin(), x1_values.end(), x1.begin());
-            std::vector<LWECiphertext> ctxtsLWE1(testData.slots);
-            auto modulus_LWE = 1 << testData.logQ;
-            for (uint32_t i = 0; i < testData.slots; i++) {
+            std::vector<LweCiphertext> ctxts_lwe1(test_data.slots);
+            auto modulus_lwe = 1 << test_data.log_q;
+            for (uint32_t i = 0; i < test_data.slots; i++) {
                 // encrypted under small plantext modulus p = 4 and ciphertext modulus
-                ctxtsLWE1[i] = ccLWE->Encrypt(lwesk, x1[i], LARGE_DIM, 4, modulus_LWE);
+                ctxts_lwe1[i] = cc_lwe->encrypt(lwesk, x1[i], LARGE_DIM, 4, modulus_lwe);
             }
 
-            std::vector<int32_t> x2(testData.slots);
+            std::vector<int32_t> x2(test_data.slots);
             std::vector<int32_t> x2_values{0, -1, 2, -3, 4, -8, 16, -32};
             std::copy(x2_values.begin(), x2_values.end(), x2.begin());
-            std::vector<LWECiphertext> ctxtsLWE2(testData.slots);
-            uint32_t pLWE = 1 << (testData.logQ - 12);
-            for (uint32_t i = 0; i < testData.slots; i++) {
+            std::vector<LweCiphertext> ctxts_lwe2(test_data.slots);
+            uint32_t p_lwe = 1 << (test_data.log_q - 12);
+            for (uint32_t i = 0; i < test_data.slots; i++) {
                 // encrypted under larger plaintext modulus and large ciphertext modulus
-                ctxtsLWE2[i] = ccLWE->Encrypt(lwesk, x2[i], LARGE_DIM, pLWE, modulus_LWE);
+                ctxts_lwe2[i] = cc_lwe->encrypt(lwesk, x2[i], LARGE_DIM, p_lwe, modulus_lwe);
             }
 
-            cc->EvalFHEWtoCKKSSetup(ccLWE, testData.slots, testData.logQ);
-            cc->EvalFHEWtoCKKSKeyGen(keyPair, lwesk, testData.numValues, testData.numValues, testData.dim1[1]);
+            cc->eval_fhew_to_ckks_setup(cc_lwe, test_data.slots, test_data.log_q);
+            cc->eval_fhew_to_ckks_key_gen(key_pair, lwesk, test_data.num_values, test_data.num_values, test_data.dim1[1]);
 
-            auto cTemp = cc->EvalFHEWtoCKKS(ctxtsLWE1, testData.numValues, testData.slots);
+            auto c_temp = cc->eval_fhew_to_ckks(ctxts_lwe1, test_data.num_values, test_data.slots);
 
-            Plaintext plaintextDec;
-            cc->Decrypt(keyPair.secretKey, cTemp, &plaintextDec);
-            plaintextDec->SetLength(testData.numValues);
+            Plaintext plaintext_dec;
+            cc->decrypt(key_pair.secret_key, c_temp, &plaintext_dec);
+            plaintext_dec->set_length(test_data.num_values);
 
-            checkEquality(plaintextDec->GetCKKSPackedValue(), toComplexDoubleVec(x1_values), eps1,
+            check_equality(plaintext_dec->get_ckks_packed_value(), to_complex_double_vec(x1_values), eps1,
                           failmsg + " FHEW to CKKS fails for binary messages.");
 
-            cTemp = cc->EvalFHEWtoCKKS(ctxtsLWE2, testData.numValues, testData.slots, pLWE, 0, pLWE);
+            c_temp = cc->eval_fhew_to_ckks(ctxts_lwe2, test_data.num_values, test_data.slots, p_lwe, 0, p_lwe);
 
-            cc->Decrypt(keyPair.secretKey, cTemp, &plaintextDec);
-            plaintextDec->SetLength(testData.numValues);
+            cc->decrypt(key_pair.secret_key, c_temp, &plaintext_dec);
+            plaintext_dec->set_length(test_data.num_values);
 
-            checkEquality(plaintextDec->GetCKKSPackedValue(), toComplexDoubleVec(x2_values), eps2,
+            check_equality(plaintext_dec->get_ckks_packed_value(), to_complex_double_vec(x2_values), eps2,
                           failmsg + " FHEW to CKKS fails for larger messages.");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
@@ -420,63 +420,63 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
         }
     }
 
-    void UnitTest_SchemeSwitch_Comparison(const TEST_CASE_UTCKKSRNS_SCHEMESWITCH& testData,
+    void unit_test_scheme_switch_comparison(const TEST_CASE_UTCKKSRNS_SCHEMESWITCH& test_data,
                                           const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
-            cc->Enable(SCHEMESWITCH);
+            cc->enable(SCHEMESWITCH);
 
-            auto keyPair = cc->KeyGen();
+            auto key_pair = cc->key_gen();
 
             SchSwchParams params;
-            params.SetSecurityLevelCKKS(HEStd_NotSet);
-            params.SetSecurityLevelFHEW(TOY);
-            params.SetCtxtModSizeFHEWLargePrec(testData.logQ);
-            params.SetNumSlotsCKKS(testData.slots);
-            params.SetNumValues(testData.numValues);
-            params.SetOneHotEncoding(testData.oneHot);
-            params.SetBStepLTrCKKStoFHEW(testData.dim1[0]);
-            params.SetBStepLTrFHEWtoCKKS(testData.dim1[1]);
-            auto privateKeyFHEW = cc->EvalSchemeSwitchingSetup(params);
-            auto ccLWE = cc->GetBinCCForSchemeSwitch();
+            params.set_security_level_ckks(HEStd_NotSet);
+            params.set_security_level_fhew(TOY);
+            params.set_ctxt_mod_size_fhew_large_prec(test_data.log_q);
+            params.set_num_slots_ckks(test_data.slots);
+            params.set_num_values(test_data.num_values);
+            params.set_one_hot_encoding(test_data.one_hot);
+            params.set_b_step_l_tr_ckks_to_fhew(test_data.dim1[0]);
+            params.set_b_step_l_tr_fhew_to_ckks(test_data.dim1[1]);
+            auto private_key_fhew = cc->eval_scheme_switching_setup(params);
+            auto cc_lwe = cc->get_bin_cc_for_scheme_switch();
 
-            ccLWE->BTKeyGen(privateKeyFHEW);
+            cc_lwe->bt_key_gen(private_key_fhew);
 
-            cc->EvalSchemeSwitchingKeyGen(keyPair, privateKeyFHEW);
+            cc->eval_scheme_switching_key_gen(key_pair, private_key_fhew);
 
             std::vector<double> x1 = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
-            std::vector<double> x2(testData.slots, 5.25);
+            std::vector<double> x2(test_data.slots, 5.25);
 
-            Plaintext ptxt1 = cc->MakeCKKSPackedPlaintext(x1, 1, 0, nullptr, testData.slots);
-            Plaintext ptxt2 = cc->MakeCKKSPackedPlaintext(x2, 1, 0, nullptr, testData.slots);
+            Plaintext ptxt1 = cc->make_ckks_packed_plaintext(x1, 1, 0, nullptr, test_data.slots);
+            Plaintext ptxt2 = cc->make_ckks_packed_plaintext(x2, 1, 0, nullptr, test_data.slots);
 
-            auto c1 = cc->Encrypt(keyPair.publicKey, ptxt1);
-            auto c2 = cc->Encrypt(keyPair.publicKey, ptxt2);
+            auto c1 = cc->encrypt(key_pair.public_key, ptxt1);
+            auto c2 = cc->encrypt(key_pair.public_key, ptxt2);
 
-            auto cDiff = cc->EvalSub(c1, c2);
+            auto c_diff = cc->eval_sub(c1, c2);
 
-            auto modulus_LWE = 1 << testData.logQ;
-            auto pLWE = modulus_LWE / (2 * ccLWE->GetBeta().ConvertToInt());
-            double scaleSignFHEW = 8.0;
-            cc->EvalCompareSwitchPrecompute(pLWE, scaleSignFHEW);
+            auto modulus_lwe = 1 << test_data.log_q;
+            auto p_lwe = modulus_lwe / (2 * cc_lwe->get_beta().convert_to_int());
+            double scale_sign_fhew = 8.0;
+            cc->eval_compare_switch_precompute(p_lwe, scale_sign_fhew);
 
-            Plaintext pDiff;
-            cc->Decrypt(keyPair.secretKey, cDiff, &pDiff);
-            std::vector<std::complex<double>> inputSign(testData.numValues);
-            pDiff->SetLength(testData.numValues);
-            std::vector<double> vDiff(pDiff->GetRealPackedValue());
-            std::transform(vDiff.begin(), vDiff.end(), inputSign.begin(), [&](const std::complex<double>& elem) {
+            Plaintext p_diff;
+            cc->decrypt(key_pair.secret_key, c_diff, &p_diff);
+            std::vector<std::complex<double>> input_sign(test_data.num_values);
+            p_diff->set_length(test_data.num_values);
+            std::vector<double> v_diff(p_diff->get_real_packed_value());
+            std::transform(v_diff.begin(), v_diff.end(), input_sign.begin(), [&](const std::complex<double>& elem) {
                 return std::complex<double>(static_cast<int32_t>(std::round(elem.real() / eps1) * eps1 < 0), 0);
             });
 
-            auto cResult = cc->EvalCompareSchemeSwitching(c1, c2, testData.numValues, testData.slots);
+            auto c_result = cc->eval_compare_scheme_switching(c1, c2, test_data.num_values, test_data.slots);
 
-            Plaintext plaintextDec;
-            cc->Decrypt(keyPair.secretKey, cResult, &plaintextDec);
-            plaintextDec->SetLength(testData.numValues);
+            Plaintext plaintext_dec;
+            cc->decrypt(key_pair.secret_key, c_result, &plaintext_dec);
+            plaintext_dec->set_length(test_data.num_values);
 
-            checkEquality(plaintextDec->GetCKKSPackedValue(), inputSign, eps1, failmsg + " EvalCompare fails.");
+            check_equality(plaintext_dec->get_ckks_packed_value(), input_sign, eps1, failmsg + " EvalCompare fails.");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -486,87 +486,87 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
         }
     }
 
-    void UnitTest_SchemeSwitch_Argmin(const TEST_CASE_UTCKKSRNS_SCHEMESWITCH& testData,
+    void unit_test_scheme_switch_argmin(const TEST_CASE_UTCKKSRNS_SCHEMESWITCH& test_data,
                                       const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
-            cc->Enable(SCHEMESWITCH);
+            cc->enable(SCHEMESWITCH);
 
-            auto keyPair = cc->KeyGen();
+            auto key_pair = cc->key_gen();
 
             SchSwchParams params;
-            params.SetSecurityLevelCKKS(HEStd_NotSet);
-            params.SetSecurityLevelFHEW(TOY);
-            params.SetCtxtModSizeFHEWLargePrec(testData.logQ);
-            params.SetNumSlotsCKKS(testData.slots);
-            params.SetNumValues(testData.numValues);
-            params.SetComputeArgmin(true);
-            params.SetOneHotEncoding(testData.oneHot);
-            params.SetBStepLTrCKKStoFHEW(testData.dim1[0]);
-            params.SetBStepLTrFHEWtoCKKS(testData.dim1[1]);
-            auto privateKeyFHEW = cc->EvalSchemeSwitchingSetup(params);
-            auto ccLWE = cc->GetBinCCForSchemeSwitch();
+            params.set_security_level_ckks(HEStd_NotSet);
+            params.set_security_level_fhew(TOY);
+            params.set_ctxt_mod_size_fhew_large_prec(test_data.log_q);
+            params.set_num_slots_ckks(test_data.slots);
+            params.set_num_values(test_data.num_values);
+            params.set_compute_argmin(true);
+            params.set_one_hot_encoding(test_data.one_hot);
+            params.set_b_step_l_tr_ckks_to_fhew(test_data.dim1[0]);
+            params.set_b_step_l_tr_fhew_to_ckks(test_data.dim1[1]);
+            auto private_key_fhew = cc->eval_scheme_switching_setup(params);
+            auto cc_lwe = cc->get_bin_cc_for_scheme_switch();
 
-            cc->EvalSchemeSwitchingKeyGen(keyPair, privateKeyFHEW);
+            cc->eval_scheme_switching_key_gen(key_pair, private_key_fhew);
 
-            double scaleSign = 128.0;
+            double scale_sign = 128.0;
 
-            auto modulus_LWE = 1 << testData.logQ;
-            auto pLWE = modulus_LWE / (2 * ccLWE->GetBeta().ConvertToInt());
-            cc->EvalCompareSwitchPrecompute(pLWE, scaleSign);
+            auto modulus_lwe = 1 << test_data.log_q;
+            auto p_lwe = modulus_lwe / (2 * cc_lwe->get_beta().convert_to_int());
+            cc->eval_compare_switch_precompute(p_lwe, scale_sign);
 
             std::vector<double> x1 = {-1.1, -1.05, 5.0, 6.0, -1.0, 2.0, 8.0, -1.0};
-            auto xmin = *std::min_element(x1.begin(), x1.begin() + testData.numValues);
-            auto xargmin = std::min_element(x1.begin(), x1.begin() + testData.numValues) - x1.begin();
+            auto xmin = *std::min_element(x1.begin(), x1.begin() + test_data.num_values);
+            auto xargmin = std::min_element(x1.begin(), x1.begin() + test_data.num_values) - x1.begin();
 
-            Plaintext p1 = cc->MakeCKKSPackedPlaintext(x1, 1, 0, nullptr, testData.slots);
-            auto c1 = cc->Encrypt(keyPair.publicKey, p1);
+            Plaintext p1 = cc->make_ckks_packed_plaintext(x1, 1, 0, nullptr, test_data.slots);
+            auto c1 = cc->encrypt(key_pair.public_key, p1);
 
-            auto result = cc->EvalMinSchemeSwitching(c1, keyPair.publicKey, testData.numValues, testData.slots);
+            auto result = cc->eval_min_scheme_switching(c1, key_pair.public_key, test_data.num_values, test_data.slots);
 
-            Plaintext ptxtMin;
-            cc->Decrypt(keyPair.secretKey, result[0], &ptxtMin);
-            ptxtMin->SetLength(1);
+            Plaintext ptxt_min;
+            cc->decrypt(key_pair.secret_key, result[0], &ptxt_min);
+            ptxt_min->set_length(1);
 
-            checkEquality(ptxtMin->GetRealPackedValue()[0], xmin, eps1);
+            check_equality(ptxt_min->get_real_packed_value()[0], xmin, eps1);
 
-            cc->Decrypt(keyPair.secretKey, result[1], &ptxtMin);
-            if (testData.oneHot) {
-                ptxtMin->SetLength(testData.numValues);
+            cc->decrypt(key_pair.secret_key, result[1], &ptxt_min);
+            if (test_data.one_hot) {
+                ptxt_min->set_length(test_data.num_values);
 
-                std::vector<std::complex<double>> xargminOH(testData.numValues);
-                xargminOH[xargmin] = 1;
-                checkEquality(ptxtMin->GetCKKSPackedValue(), xargminOH, eps1,
+                std::vector<std::complex<double>> xargmin_oh(test_data.num_values);
+                xargmin_oh[xargmin] = 1;
+                check_equality(ptxt_min->get_ckks_packed_value(), xargmin_oh, eps1,
                               failmsg + " EvalMinSchemeSwitching fails.");
             } else {
-                ptxtMin->SetLength(1);
-                checkEquality(ptxtMin->GetRealPackedValue()[0], static_cast<double>(xargmin), eps1);
+                ptxt_min->set_length(1);
+                check_equality(ptxt_min->get_real_packed_value()[0], static_cast<double>(xargmin), eps1);
             }
 
             // Uncomment to test the max+argmax functionality
-            /* auto xmax    = *std::max_element(x1.begin(), x1.begin() + testData.numValues);
-            auto xargmax = std::max_element(x1.begin(), x1.begin() + testData.numValues) - x1.begin();
+            /* auto xmax    = *std::max_element(x1.begin(), x1.begin() + test_data.num_values);
+            auto xargmax = std::max_element(x1.begin(), x1.begin() + test_data.num_values) - x1.begin();
 
             result =
-                cc->EvalMaxSchemeSwitching(c1, keyPair.publicKey, testData.numValues, testData.slots);
+                cc->eval_max_scheme_switching(c1, key_pair.public_key, test_data.num_values, test_data.slots);
 
-            Plaintext ptxtMax;
-            cc->Decrypt(keyPair.secretKey, result[0], &ptxtMax);
-            ptxtMax->SetLength(1);
-            checkEquality(ptxtMax->GetRealPackedValue()[0], xmax, eps1);
+            Plaintext ptxt_max;
+            cc->decrypt(key_pair.secret_key, result[0], &ptxt_max);
+            ptxt_max->set_length(1);
+            check_equality(ptxt_max->get_real_packed_value()[0], xmax, eps1);
 
-            cc->Decrypt(keyPair.secretKey, result[1], &ptxtMax);
-            if (testData.oneHot) {
-                ptxtMax->SetLength(testData.numValues);
-                std::vector<std::complex<double>> xargmaxOH(testData.numValues);
+            cc->decrypt(key_pair.secret_key, result[1], &ptxt_max);
+            if (test_data.one_hot) {
+                ptxt_max->set_length(test_data.num_values);
+                std::vector<std::complex<double>> xargmaxOH(test_data.num_values);
                 xargmaxOH[xargmax] = 1;
-                checkEquality(ptxtMax->GetCKKSPackedValue(), xargmaxOH, eps1,
-                              failmsg + "EvalMinSchemeSwitching fails.");
+                check_equality(ptxt_max->get_ckks_packed_value(), xargmaxOH, eps1,
+                              failmsg + "eval_min_scheme_switching fails.");
             }
             else {
-                ptxtMax->SetLength(1);
-                checkEquality(ptxtMax->GetRealPackedValue()[0], static_cast<double>(xargmax), eps1);
+                ptxt_max->set_length(1);
+                check_equality(ptxt_max->get_real_packed_value()[0], static_cast<double>(xargmax), eps1);
             }
             */
         } catch (std::exception& e) {
@@ -578,86 +578,86 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
         }
     }
 
-    void UnitTest_SchemeSwitch_AltArgmin(const TEST_CASE_UTCKKSRNS_SCHEMESWITCH& testData,
+    void unit_test_scheme_switch_alt_argmin(const TEST_CASE_UTCKKSRNS_SCHEMESWITCH& test_data,
                                          const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
-            cc->Enable(SCHEMESWITCH);
+            cc->enable(SCHEMESWITCH);
 
-            auto keyPair = cc->KeyGen();
+            auto key_pair = cc->key_gen();
 
             SchSwchParams params;
-            params.SetSecurityLevelCKKS(HEStd_NotSet);
-            params.SetSecurityLevelFHEW(TOY);
-            params.SetCtxtModSizeFHEWLargePrec(testData.logQ);
-            params.SetNumSlotsCKKS(testData.slots);
-            params.SetNumValues(testData.numValues);
-            params.SetComputeArgmin(true);
-            params.SetOneHotEncoding(testData.oneHot);
-            params.SetUseAltArgmin(true);
-            params.SetBStepLTrCKKStoFHEW(testData.dim1[0]);
-            params.SetBStepLTrFHEWtoCKKS(testData.dim1[1]);
-            auto privateKeyFHEW = cc->EvalSchemeSwitchingSetup(params);
-            auto ccLWE = cc->GetBinCCForSchemeSwitch();
+            params.set_security_level_ckks(HEStd_NotSet);
+            params.set_security_level_fhew(TOY);
+            params.set_ctxt_mod_size_fhew_large_prec(test_data.log_q);
+            params.set_num_slots_ckks(test_data.slots);
+            params.set_num_values(test_data.num_values);
+            params.set_compute_argmin(true);
+            params.set_one_hot_encoding(test_data.one_hot);
+            params.set_use_alt_argmin(true);
+            params.set_b_step_l_tr_ckks_to_fhew(test_data.dim1[0]);
+            params.set_b_step_l_tr_fhew_to_ckks(test_data.dim1[1]);
+            auto private_key_fhew = cc->eval_scheme_switching_setup(params);
+            auto cc_lwe = cc->get_bin_cc_for_scheme_switch();
 
-            cc->EvalSchemeSwitchingKeyGen(keyPair, privateKeyFHEW);
+            cc->eval_scheme_switching_key_gen(key_pair, private_key_fhew);
 
-            double scaleSign = 128.0;
+            double scale_sign = 128.0;
 
-            auto modulus_LWE = 1 << testData.logQ;
-            auto pLWE = modulus_LWE / (2 * ccLWE->GetBeta().ConvertToInt());
-            cc->EvalCompareSwitchPrecompute(pLWE, scaleSign);
+            auto modulus_lwe = 1 << test_data.log_q;
+            auto p_lwe = modulus_lwe / (2 * cc_lwe->get_beta().convert_to_int());
+            cc->eval_compare_switch_precompute(p_lwe, scale_sign);
 
             std::vector<double> x1 = {-1.1, -1.05, 5.0, 6.0, -1.0, 2.0, 8.0, -1.0};
-            auto xmin = *std::min_element(x1.begin(), x1.begin() + testData.numValues);
-            auto xargmin = std::min_element(x1.begin(), x1.begin() + testData.numValues) - x1.begin();
+            auto xmin = *std::min_element(x1.begin(), x1.begin() + test_data.num_values);
+            auto xargmin = std::min_element(x1.begin(), x1.begin() + test_data.num_values) - x1.begin();
 
-            Plaintext p1 = cc->MakeCKKSPackedPlaintext(x1, 1, 0, nullptr, testData.slots);
-            auto c1 = cc->Encrypt(keyPair.publicKey, p1);
+            Plaintext p1 = cc->make_ckks_packed_plaintext(x1, 1, 0, nullptr, test_data.slots);
+            auto c1 = cc->encrypt(key_pair.public_key, p1);
 
-            auto result = cc->EvalMinSchemeSwitchingAlt(c1, keyPair.publicKey, testData.numValues, testData.slots);
+            auto result = cc->eval_min_scheme_switching_alt(c1, key_pair.public_key, test_data.num_values, test_data.slots);
 
-            Plaintext ptxtMin;
-            cc->Decrypt(keyPair.secretKey, result[0], &ptxtMin);
-            ptxtMin->SetLength(1);
+            Plaintext ptxt_min;
+            cc->decrypt(key_pair.secret_key, result[0], &ptxt_min);
+            ptxt_min->set_length(1);
 
-            checkEquality(ptxtMin->GetRealPackedValue()[0], xmin, eps1);
+            check_equality(ptxt_min->get_real_packed_value()[0], xmin, eps1);
 
-            cc->Decrypt(keyPair.secretKey, result[1], &ptxtMin);
-            if (testData.oneHot) {
-                ptxtMin->SetLength(testData.numValues);
-                std::vector<std::complex<double>> xargminOH(testData.numValues);
-                xargminOH[xargmin] = 1;
-                checkEquality(ptxtMin->GetCKKSPackedValue(), xargminOH, eps1,
+            cc->decrypt(key_pair.secret_key, result[1], &ptxt_min);
+            if (test_data.one_hot) {
+                ptxt_min->set_length(test_data.num_values);
+                std::vector<std::complex<double>> xargmin_oh(test_data.num_values);
+                xargmin_oh[xargmin] = 1;
+                check_equality(ptxt_min->get_ckks_packed_value(), xargmin_oh, eps1,
                               failmsg + " EvalMinSchemeSwitching fails.");
             } else {
-                ptxtMin->SetLength(1);
-                checkEquality(ptxtMin->GetRealPackedValue()[0], static_cast<double>(xargmin), eps1);
+                ptxt_min->set_length(1);
+                check_equality(ptxt_min->get_real_packed_value()[0], static_cast<double>(xargmin), eps1);
             }
 
             // Uncomment to test the max+argmax functionality
-            /* auto xmax    = *std::max_element(x1.begin(), x1.begin() + testData.numValues);
-            auto xargmax = std::max_element(x1.begin(), x1.begin() + testData.numValues) - x1.begin();
+            /* auto xmax    = *std::max_element(x1.begin(), x1.begin() + test_data.num_values);
+            auto xargmax = std::max_element(x1.begin(), x1.begin() + test_data.num_values) - x1.begin();
 
-            result = cc->EvalMaxSchemeSwitchingAlt(c1, keyPair.publicKey, testData.numValues, testData.slots);
+            result = cc->eval_max_scheme_switching_alt(c1, key_pair.public_key, test_data.num_values, test_data.slots);
 
-            Plaintext ptxtMax;
-            cc->Decrypt(keyPair.secretKey, result[0], &ptxtMax);
-            ptxtMax->SetLength(1);
-            checkEquality(ptxtMax->GetRealPackedValue()[0], xmax, eps1);
+            Plaintext ptxt_max;
+            cc->decrypt(key_pair.secret_key, result[0], &ptxt_max);
+            ptxt_max->set_length(1);
+            check_equality(ptxt_max->get_real_packed_value()[0], xmax, eps1);
 
-            cc->Decrypt(keyPair.secretKey, result[1], &ptxtMax);
-            if (testData.oneHot) {
-                ptxtMax->SetLength(testData.numValues);
-                std::vector<std::complex<double>> xargmaxOH(testData.numValues);
+            cc->decrypt(key_pair.secret_key, result[1], &ptxt_max);
+            if (test_data.one_hot) {
+                ptxt_max->set_length(test_data.num_values);
+                std::vector<std::complex<double>> xargmaxOH(test_data.num_values);
                 xargmaxOH[xargmax] = 1;
-                checkEquality(ptxtMax->GetCKKSPackedValue(), xargmaxOH, eps1,
-                              failmsg + "EvalMinSchemeSwitching fails.");
+                check_equality(ptxt_max->get_ckks_packed_value(), xargmaxOH, eps1,
+                              failmsg + "eval_min_scheme_switching fails.");
             }
             else {
-                ptxtMax->SetLength(1);
-                checkEquality(ptxtMax->GetRealPackedValue()[0], static_cast<double>(xargmax), eps1);
+                ptxt_max->set_length(1);
+                check_equality(ptxt_max->get_real_packed_value()[0], static_cast<double>(xargmax), eps1);
             }
             */
         } catch (std::exception& e) {
@@ -669,89 +669,89 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
         }
     }
 
-    void UnitTest_SchemeSwitch_Serialize(const TEST_CASE_UTCKKSRNS_SCHEMESWITCH& testData,
+    void unit_test_scheme_switch_serialize(const TEST_CASE_UTCKKSRNS_SCHEMESWITCH& test_data,
                                          const std::string& failmsg = std::string()) {
         try {
-            CryptoContextImpl<Element>::ClearEvalMultKeys();
-            CryptoContextImpl<Element>::ClearEvalSumKeys();
-            CryptoContextImpl<Element>::ClearEvalAutomorphismKeys();
-            CryptoContextFactory<Element>::ReleaseAllContexts();
+            CryptoContextImpl<Element>::clear_eval_mult_keys();
+            CryptoContextImpl<Element>::clear_eval_sum_keys();
+            CryptoContextImpl<Element>::clear_eval_automorphism_keys();
+            ContextFactory<Element>::release_all_contexts();
 
-            CryptoContext<Element> ccInit(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc_init(unit_test_generate_context(test_data.params));
 
-            ccInit->Enable(SCHEMESWITCH);
+            cc_init->enable(SCHEMESWITCH);
 
             SchSwchParams params;
-            params.SetSecurityLevelCKKS(HEStd_NotSet);
-            params.SetSecurityLevelFHEW(TOY);
-            params.SetCtxtModSizeFHEWLargePrec(testData.logQ);
-            params.SetNumSlotsCKKS(testData.slots);
-            params.SetNumValues(testData.numValues);
-            params.SetComputeArgmin(true);
-            params.SetBStepLTrCKKStoFHEW(testData.dim1[0]);
-            params.SetBStepLTrFHEWtoCKKS(testData.dim1[1]);
-            auto privateKeyFHEWInit = ccInit->EvalSchemeSwitchingSetup(params);
-            auto ccLWEInit = ccInit->GetBinCCForSchemeSwitch();
+            params.set_security_level_ckks(HEStd_NotSet);
+            params.set_security_level_fhew(TOY);
+            params.set_ctxt_mod_size_fhew_large_prec(test_data.log_q);
+            params.set_num_slots_ckks(test_data.slots);
+            params.set_num_values(test_data.num_values);
+            params.set_compute_argmin(true);
+            params.set_b_step_l_tr_ckks_to_fhew(test_data.dim1[0]);
+            params.set_b_step_l_tr_fhew_to_ckks(test_data.dim1[1]);
+            auto private_key_fhew_init = cc_init->eval_scheme_switching_setup(params);
+            auto cc_lwe_init = cc_init->get_bin_cc_for_scheme_switch();
 
-            auto keyPairInit = ccInit->KeyGen();
+            auto key_pair_init = cc_init->key_gen();
 
-            ccInit->EvalSchemeSwitchingKeyGen(keyPairInit, privateKeyFHEWInit);
-            auto swkFHEWtoCKKSInit = ccInit->GetSwkFC();
+            cc_init->eval_scheme_switching_key_gen(key_pair_init, private_key_fhew_init);
+            auto swk_fhew_to_ckks_init = cc_init->get_swk_fc();
 
             std::vector<double> x1 = {-1.1, -1.05, 5.0, 6.0, -1.0, 2.0, 8.0, -1.0};
-            auto xmin = *std::min_element(x1.begin(), x1.begin() + testData.numValues);
-            auto xargmin = std::min_element(x1.begin(), x1.begin() + testData.numValues) - x1.begin();
+            auto xmin = *std::min_element(x1.begin(), x1.begin() + test_data.num_values);
+            auto xargmin = std::min_element(x1.begin(), x1.begin() + test_data.num_values) - x1.begin();
 
-            Plaintext p1 = ccInit->MakeCKKSPackedPlaintext(x1, 1, 0, nullptr, testData.slots);
-            auto c1 = ccInit->Encrypt(keyPairInit.publicKey, p1);
+            Plaintext p1 = cc_init->make_ckks_packed_plaintext(x1, 1, 0, nullptr, test_data.slots);
+            auto c1 = cc_init->encrypt(key_pair_init.public_key, p1);
 
             // Serialize all necessary objects
-            SchemeSwitchingDataSerializer serializer(ccInit, keyPairInit.publicKey, c1);
-            serializer.Serialize();
+            SchemeSwitchingDataSerializer serializer(cc_init, key_pair_init.public_key, c1);
+            serializer.to_stream();
 
             // Serialize secret key to verify correctness
-            std::stringstream secretKey_stream;
-            Serial::Serialize(keyPairInit.secretKey, secretKey_stream, SerType::BINARY);
+            std::stringstream secret_key_stream;
+            serialization::to_stream(key_pair_init.secret_key, secret_key_stream, SerType::BINARY);
 
             //====================================================================================================
             // Removed the serialized objects from the memory
-            CryptoContextImpl<Element>::ClearEvalMultKeys();
-            CryptoContextImpl<Element>::ClearEvalSumKeys();
-            CryptoContextImpl<Element>::ClearEvalAutomorphismKeys();
-            CryptoContextFactory<Element>::ReleaseAllContexts();
+            CryptoContextImpl<Element>::clear_eval_mult_keys();
+            CryptoContextImpl<Element>::clear_eval_sum_keys();
+            CryptoContextImpl<Element>::clear_eval_automorphism_keys();
+            ContextFactory<Element>::release_all_contexts();
             //====================================================================================================
             // Deserialize all necessary objects
             SchemeSwitchingDataDeserializer deserializer;
-            deserializer.Deserialize();
+            deserializer.from_stream();
 
-            CryptoContext<DCRTPoly> cc{deserializer.getCryptoContext()};
-            PublicKey<DCRTPoly> clientPublicKey{deserializer.getPublicKey()};
-            std::shared_ptr<lbcrypto::BinFHEContext> ccLWE{cc->GetBinCCForSchemeSwitch()};
-            Ciphertext<DCRTPoly> clientC{deserializer.getRAWCiphertext()};
+            CryptoContext<RnsPoly> cc{deserializer.get_crypto_context_impl()};
+            PublicKey<RnsPoly> client_public_key{deserializer.get_public_key_impl()};
+            std::shared_ptr<cipher::BooleanContext> cc_lwe{cc->get_bin_cc_for_scheme_switch()};
+            Ciphertext<RnsPoly> client_c{deserializer.get_raw_ciphertext()};
 
             // Deserialize the secret key for verification
-            PrivateKey<Element> secretKeyForVerification;
-            Serial::Deserialize(secretKeyForVerification, secretKey_stream, SerType::BINARY);
+            PrivateKey<Element> secret_key_for_verification;
+            serialization::from_stream(secret_key_for_verification, secret_key_stream, SerType::BINARY);
 
-            double scaleSign = 128.0;
-            auto modulus_LWE = 1 << testData.logQ;
-            auto pLWE = modulus_LWE / (2 * ccLWE->GetBeta().ConvertToInt());
-            cc->EvalCompareSwitchPrecompute(pLWE, scaleSign);
+            double scale_sign = 128.0;
+            auto modulus_lwe = 1 << test_data.log_q;
+            auto p_lwe = modulus_lwe / (2 * cc_lwe->get_beta().convert_to_int());
+            cc->eval_compare_switch_precompute(p_lwe, scale_sign);
 
-            auto result = cc->EvalMinSchemeSwitching(clientC, clientPublicKey, testData.numValues, testData.slots);
+            auto result = cc->eval_min_scheme_switching(client_c, client_public_key, test_data.num_values, test_data.slots);
 
-            Plaintext ptxtMin;
-            cc->Decrypt(secretKeyForVerification, result[0], &ptxtMin);
-            ptxtMin->SetLength(1);
+            Plaintext ptxt_min;
+            cc->decrypt(secret_key_for_verification, result[0], &ptxt_min);
+            ptxt_min->set_length(1);
 
-            checkEquality(ptxtMin->GetRealPackedValue()[0], xmin, eps1);
+            check_equality(ptxt_min->get_real_packed_value()[0], xmin, eps1);
 
-            cc->Decrypt(secretKeyForVerification, result[1], &ptxtMin);
-            ptxtMin->SetLength(testData.numValues);
+            cc->decrypt(secret_key_for_verification, result[1], &ptxt_min);
+            ptxt_min->set_length(test_data.num_values);
 
-            std::vector<std::complex<double>> xargminOH(testData.numValues);
-            xargminOH[xargmin] = 1;
-            checkEquality(ptxtMin->GetCKKSPackedValue(), xargminOH, eps1,
+            std::vector<std::complex<double>> xargmin_oh(test_data.num_values);
+            xargmin_oh[xargmin] = 1;
+            check_equality(ptxt_min->get_ckks_packed_value(), xargmin_oh, eps1,
                           failmsg + " Serialization for scheme switching fails.");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
@@ -765,31 +765,31 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
 
 //===========================================================================================================
 TEST_P(UTCKKSRNS_SCHEMESWITCH, CKKSRNS) {
-    setupSignals();
+    setup_signals();
     auto test = GetParam();
 
-    switch (test.testCaseType) {
+    switch (test.test_case_type) {
         case SCHEME_SWITCH_CKKS_FHEW:
-            UnitTest_SchemeSwitch_CKKS_FHEW(test, test.buildTestName());
+            unit_test_scheme_switch_ckks_fhew(test, test.build_test_name());
             break;
         case SCHEME_SWITCH_FHEW_CKKS:
-            UnitTest_SchemeSwitch_FHEW_CKKS(test, test.buildTestName());
+            unit_test_scheme_switch_fhew_ckks(test, test.build_test_name());
             break;
         case SCHEME_SWITCH_COMPARISON:
-            UnitTest_SchemeSwitch_Comparison(test, test.buildTestName());
+            unit_test_scheme_switch_comparison(test, test.build_test_name());
             break;
         case SCHEME_SWITCH_ARGMIN:
-            UnitTest_SchemeSwitch_Argmin(test, test.buildTestName());
+            unit_test_scheme_switch_argmin(test, test.build_test_name());
             break;
         case SCHEME_SWITCH_ALT_ARGMIN:
-            UnitTest_SchemeSwitch_AltArgmin(test, test.buildTestName());
+            unit_test_scheme_switch_alt_argmin(test, test.build_test_name());
             break;
         case SCHEME_SWITCH_SERIALIZE:
-            UnitTest_SchemeSwitch_Serialize(test, test.buildTestName());
+            unit_test_scheme_switch_serialize(test, test.build_test_name());
             break;
         default:
             break;
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_SCHEMESWITCH, ::testing::ValuesIn(testCases), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_SCHEMESWITCH, ::testing::ValuesIn(test_cases), testName);

@@ -48,166 +48,166 @@ BFV implementation. See https://eprint.iacr.org/2021/204 for details.
 #include "cipher/fhe/key/public_key.h"
 #include "cipher/fhe/bfv/crypto_params.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-// makeSparse is not used by this scheme
-KeyPair<DCRTPoly> MultipartyBFVRNS::MultipartyKeyGen(CryptoContext<DCRTPoly> cc,
-                                                     const std::vector<PrivateKey<DCRTPoly>>& privateKeyVec,
-                                                     bool makeSparse) {
-    const auto cryptoParams = std::dynamic_pointer_cast<CryptoParametersRNS>(cc->GetCryptoParameters());
+// make_sparse_value is not used by this scheme
+KeyPair<RnsPoly> BfvRnsMultiparty::multiparty_key_gen(CryptoContext<RnsPoly> cc,
+                                                     const std::vector<PrivateKey<RnsPoly>>& private_key_vec,
+                                                     bool make_sparse_value) {
+    const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(cc->get_crypto_parameters());
 
-    KeyPair<DCRTPoly> keyPair(std::make_shared<PublicKeyImpl<DCRTPoly>>(cc),
-                              std::make_shared<PrivateKeyImpl<DCRTPoly>>(cc));
+    KeyPair<RnsPoly> key_pair(std::make_shared<PublicKeyImpl<RnsPoly>>(cc),
+                              std::make_shared<PrivateKeyImpl<RnsPoly>>(cc));
 
-    auto elementParams = cryptoParams->GetElementParams();
-    if (cryptoParams->GetEncryptionTechnique() == EXTENDED) {
-        elementParams = cryptoParams->GetParamsQr();
+    auto element_params = crypto_params->get_element_params();
+    if (crypto_params->get_encryption_technique() == EXTENDED) {
+        element_params = crypto_params->get_params_qr();
     }
-    const auto ns = cryptoParams->GetNoiseScale();
+    const auto ns = crypto_params->get_noise_scale();
 
-    const DggType& dgg = cryptoParams->GetDiscreteGaussianGenerator();
+    const DggType& dgg = crypto_params->get_discrete_gaussian_generator();
     DugType dug;
 
     // Private Key Generation
 
-    DCRTPoly s(elementParams, Format::EVALUATION, true);
+    RnsPoly s(element_params, Format::EVALUATION, true);
 
-    for (auto& pk : privateKeyVec) {
-        const DCRTPoly& si = pk->GetPrivateElement();
+    for (auto& pk : private_key_vec) {
+        const RnsPoly& si = pk->get_private_element();
         s += si;
     }
 
     // Public Key Generation
-    DCRTPoly a(dug, elementParams, Format::EVALUATION);
-    DCRTPoly e(dgg, elementParams, Format::EVALUATION);
-    DCRTPoly b(ns * e - a * s);
+    RnsPoly a(dug, element_params, Format::EVALUATION);
+    RnsPoly e(dgg, element_params, Format::EVALUATION);
+    RnsPoly b(ns * e - a * s);
 
-    keyPair.secretKey->SetPrivateElement(std::move(s));
-    std::vector<DCRTPoly> pkElems;
-    pkElems.reserve(2);
-    pkElems.push_back(std::move(b));
-    pkElems.push_back(std::move(a));
-    keyPair.publicKey->SetPublicElements(std::move(pkElems));
+    key_pair.secret_key->set_private_element(std::move(s));
+    std::vector<RnsPoly> pk_elems;
+    pk_elems.reserve(2);
+    pk_elems.push_back(std::move(b));
+    pk_elems.push_back(std::move(a));
+    key_pair.public_key->set_public_elements(std::move(pk_elems));
 
-    return keyPair;
+    return key_pair;
 }
 
-KeyPair<DCRTPoly> MultipartyBFVRNS::MultipartyKeyGen(CryptoContext<DCRTPoly> cc, const PublicKey<DCRTPoly> publicKey,
-                                                     bool makeSparse, bool fresh) {
-    const auto cryptoParams = std::dynamic_pointer_cast<CryptoParametersRNS>(cc->GetCryptoParameters());
+KeyPair<RnsPoly> BfvRnsMultiparty::multiparty_key_gen(CryptoContext<RnsPoly> cc, const PublicKey<RnsPoly> public_key,
+                                                     bool make_sparse_value, bool fresh) {
+    const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(cc->get_crypto_parameters());
 
-    KeyPair<DCRTPoly> keyPair(std::make_shared<PublicKeyImpl<DCRTPoly>>(cc),
-                              std::make_shared<PrivateKeyImpl<DCRTPoly>>(cc));
+    KeyPair<RnsPoly> key_pair(std::make_shared<PublicKeyImpl<RnsPoly>>(cc),
+                              std::make_shared<PrivateKeyImpl<RnsPoly>>(cc));
 
-    auto elementParams = cryptoParams->GetElementParams();
-    if (cryptoParams->GetEncryptionTechnique() == EXTENDED) {
-        elementParams = cryptoParams->GetParamsQr();
+    auto element_params = crypto_params->get_element_params();
+    if (crypto_params->get_encryption_technique() == EXTENDED) {
+        element_params = crypto_params->get_params_qr();
     }
-    const auto paramsPK = cryptoParams->GetParamsPK();
+    const auto params_pk = crypto_params->get_params_pk();
 
-    const auto ns = cryptoParams->GetNoiseScale();
+    const auto ns = crypto_params->get_noise_scale();
 
-    const DggType& dgg = cryptoParams->GetDiscreteGaussianGenerator();
+    const DggType& dgg = crypto_params->get_discrete_gaussian_generator();
     TugType tug;
 
-    DCRTPoly s;
-    switch (cryptoParams->GetSecretKeyDist()) {
+    RnsPoly s;
+    switch (crypto_params->get_secret_key_dist()) {
         case GAUSSIAN:
-            s = DCRTPoly(dgg, paramsPK, Format::EVALUATION);
+            s = RnsPoly(dgg, params_pk, Format::EVALUATION);
             break;
         case UNIFORM_TERNARY:
-            s = DCRTPoly(tug, paramsPK, Format::EVALUATION);
+            s = RnsPoly(tug, params_pk, Format::EVALUATION);
             break;
         case SPARSE_TERNARY:
-            s = DCRTPoly(tug, paramsPK, Format::EVALUATION, 192);
+            s = RnsPoly(tug, params_pk, Format::EVALUATION, 192);
             break;
         default:
             break;
     }
 
-    const std::vector<DCRTPoly>& pk = publicKey->GetPublicElements();
+    const std::vector<RnsPoly>& pk = public_key->get_public_elements();
 
-    DCRTPoly a = pk[1];
-    DCRTPoly e(dgg, paramsPK, Format::EVALUATION);
+    RnsPoly a = pk[1];
+    RnsPoly e(dgg, params_pk, Format::EVALUATION);
 
     // When PRE is not used, a joint key is computed
-    DCRTPoly b = fresh ? (ns * e - a * s) : (ns * e - a * s + pk[0]);
+    RnsPoly b = fresh ? (ns * e - a * s) : (ns * e - a * s + pk[0]);
 
-    uint32_t sizeQ = elementParams->GetParams().size();
-    uint32_t sizePK = paramsPK->GetParams().size();
-    if (sizePK > sizeQ) {
-        s.DropLastElements(sizePK - sizeQ);
+    uint32_t size_q = element_params->get_params().size();
+    uint32_t size_pk = params_pk->get_params().size();
+    if (size_pk > size_q) {
+        s.drop_last_elements(size_pk - size_q);
     }
 
-    keyPair.secretKey->SetPrivateElement(std::move(s));
-    std::vector<DCRTPoly> pkElems;
-    pkElems.reserve(2);
-    pkElems.push_back(std::move(b));
-    pkElems.push_back(std::move(a));
-    keyPair.publicKey->SetPublicElements(std::move(pkElems));
+    key_pair.secret_key->set_private_element(std::move(s));
+    std::vector<RnsPoly> pk_elems;
+    pk_elems.reserve(2);
+    pk_elems.push_back(std::move(b));
+    pk_elems.push_back(std::move(a));
+    key_pair.public_key->set_public_elements(std::move(pk_elems));
 
-    return keyPair;
+    return key_pair;
 }
 
-DecryptResult MultipartyBFVRNS::MultipartyDecryptFusion(const std::vector<Ciphertext<DCRTPoly>>& ciphertextVec,
+DecryptResult BfvRnsMultiparty::multiparty_decrypt_fusion(const std::vector<Ciphertext<RnsPoly>>& ciphertext_vec,
                                                         NativePoly* plaintext) const {
-    const auto cryptoParams =
-            std::dynamic_pointer_cast<CryptoParametersBFVRNS>(ciphertextVec[0]->GetCryptoParameters());
+    const auto crypto_params =
+            std::dynamic_pointer_cast<BfvRnsCryptoParams>(ciphertext_vec[0]->get_crypto_parameters());
 
-    const std::vector<DCRTPoly>& cv0 = ciphertextVec[0]->GetElements();
+    const std::vector<RnsPoly>& cv0 = ciphertext_vec[0]->get_elements();
 
-    DCRTPoly b = cv0[0];
-    for (size_t i = 1; i < ciphertextVec.size(); i++) {
-        const std::vector<DCRTPoly>& cvi = ciphertextVec[i]->GetElements();
+    RnsPoly b = cv0[0];
+    for (size_t i = 1; i < ciphertext_vec.size(); i++) {
+        const std::vector<RnsPoly>& cvi = ciphertext_vec[i]->get_elements();
         b += cvi[0];
     }
 
-    size_t sizeQl = b.GetNumOfElements();
+    size_t size_ql = b.get_num_of_elements();
 
-    const auto elementParams = cryptoParams->GetElementParams();
-    size_t sizeQ = elementParams->GetParams().size();
+    const auto element_params = crypto_params->get_element_params();
+    size_t size_q = element_params->get_params().size();
 
     // use RNS procedures only if the number of RNS limbs is the same as for fresh ciphertexts
-    if (sizeQl == sizeQ) {
-        b.SetFormat(Format::COEFFICIENT);
-        if (cryptoParams->GetMultiplicationTechnique() == HPS ||
-            cryptoParams->GetMultiplicationTechnique() == HPSPOVERQ ||
-            cryptoParams->GetMultiplicationTechnique() == HPSPOVERQLEVELED) {
-            *plaintext = b.ScaleAndRound(
-                    cryptoParams->GetPlaintextModulus(), cryptoParams->GettQHatInvModqDivqModt(),
-                    cryptoParams->GettQHatInvModqDivqModtPrecon(), cryptoParams->GettQHatInvModqBDivqModt(),
-                    cryptoParams->GettQHatInvModqBDivqModtPrecon(), cryptoParams->GettQHatInvModqDivqFrac(),
-                    cryptoParams->GettQHatInvModqBDivqFrac());
+    if (size_ql == size_q) {
+        b.set_format(Format::COEFFICIENT);
+        if (crypto_params->get_multiplication_technique() == HPS ||
+            crypto_params->get_multiplication_technique() == HPSPOVERQ ||
+            crypto_params->get_multiplication_technique() == HPSPOVERQLEVELED) {
+            *plaintext = b.scale_and_round(
+                    crypto_params->get_plaintext_modulus(), crypto_params->get_t_q_hat_inv_modq_divq_modt(),
+                    crypto_params->get_t_q_hat_inv_modq_divq_modt_precon(), crypto_params->get_t_q_hat_inv_modq_b_divq_modt(),
+                    crypto_params->get_t_q_hat_inv_modq_b_divq_modt_precon(), crypto_params->get_t_q_hat_inv_modq_divq_frac(),
+                    crypto_params->get_t_q_hat_inv_modq_b_divq_frac());
         } else {
-            *plaintext = b.ScaleAndRound(
-                    cryptoParams->GetModuliQ(), cryptoParams->GetPlaintextModulus(), cryptoParams->Gettgamma(),
-                    cryptoParams->GettgammaQHatInvModq(), cryptoParams->GettgammaQHatInvModqPrecon(),
-                    cryptoParams->GetNegInvqModtgamma(), cryptoParams->GetNegInvqModtgammaPrecon());
+            *plaintext = b.scale_and_round(
+                    crypto_params->get_moduli_q(), crypto_params->get_plaintext_modulus(), crypto_params->get_tgamma(),
+                    crypto_params->get_tgamma_q_hat_inv_modq(), crypto_params->get_tgamma_q_hat_inv_modq_precon(),
+                    crypto_params->get_neg_invq_modtgamma(), crypto_params->get_neg_invq_modtgamma_precon());
         }
     } else {
         // for the case when compress was called, we automatically reduce the polynomial to 1 RNS limb
-        size_t diffQl = sizeQ - sizeQl;
-        size_t levels = sizeQl - 1;
+        size_t diff_ql = size_q - size_ql;
+        size_t levels = size_ql - 1;
         for (size_t l = 0; l < levels; ++l) {
-            b.DropLastElementAndScale(cryptoParams->GetqlInvModq(diffQl + l));
+            b.drop_last_element_and_scale(crypto_params->get_ql_inv_modq(diff_ql + l));
         }
 
-        b.SetFormat(Format::COEFFICIENT);
+        b.set_format(Format::COEFFICIENT);
 
-        const NativeInteger t = cryptoParams->GetPlaintextModulus();
-        NativePoly element = b.GetElementAtIndex(0);
-        const NativeInteger q = element.GetModulus();
-        element = element.MultiplyAndRound(t, q);
+        const NativeInteger t = crypto_params->get_plaintext_modulus();
+        NativePoly element = b.get_element_at_index(0);
+        const NativeInteger q = element.get_modulus();
+        element = element.multiply_and_round(t, q);
 
         // Setting the root of unity to ONE as the calculation is expensive
         // It is assumed that no polynomial multiplications in evaluation
         // representation are performed after this
-        element.SwitchModulus(t, 1, 0, 0);
+        element.switch_modulus(t, 1, 0, 0);
 
         *plaintext = element;
     }
 
-    return DecryptResult(plaintext->GetLength());
+    return DecryptResult(plaintext->get_length());
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher

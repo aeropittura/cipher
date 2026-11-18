@@ -43,25 +43,25 @@
 #include "cipher/math/binary_uniform_gen.h"
 #include "cipher/util/inttypes.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 template <typename VecType>
-std::bernoulli_distribution BinaryUniformGeneratorImpl<VecType>::m_distribution = std::bernoulli_distribution(0.5);
+std::bernoulli_distribution BinaryUniformGeneratorImpl<VecType>::distribution_ = std::bernoulli_distribution(0.5);
 
 template <typename VecType>
-typename VecType::Integer BinaryUniformGeneratorImpl<VecType>::GenerateInteger() const {
-    return m_distribution(PseudoRandomNumberGenerator::GetPRNG()) ? 1 : 0;
+typename VecType::Integer BinaryUniformGeneratorImpl<VecType>::generate_integer() const {
+    return distribution_(PseudoRandomNumberGenerator::get_prng()) ? 1 : 0;
 }
 
 template <typename VecType>
-VecType BinaryUniformGeneratorImpl<VecType>::GenerateVector(const uint32_t size,
+VecType BinaryUniformGeneratorImpl<VecType>::generate_vector(const uint32_t size,
                                                             const typename VecType::Integer& modulus) const {
     VecType v(size, modulus);
     for (uint32_t i = 0; i < size; i++)
-        v[i] = GenerateInteger();
+        v[i] = generate_integer();
     return v;
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_MATH_BINARY_UNIFORM_GEN_IMPL_H_

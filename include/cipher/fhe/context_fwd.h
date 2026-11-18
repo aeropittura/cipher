@@ -38,7 +38,7 @@
 
 #include <memory>
 
-namespace lbcrypto {
+namespace cipher {
 
 template <typename Element>
 class CryptoContextImpl;
@@ -46,6 +46,6 @@ class CryptoContextImpl;
 template <typename Element>
 using CryptoContext = std::shared_ptr<CryptoContextImpl<Element>>;
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_CONTEXT_FWD_H_

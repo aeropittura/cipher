@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  Pluggable diagnostic output for OpenFHE. OPENFHE_DIAGNOSTIC_ERR / OPENFHE_DIAGNOSTIC_OUT
+  Pluggable diagnostic output for OpenFHE. CIPHER_DIAGNOSTIC_ERR / CIPHER_DIAGNOSTIC_OUT
   yield std::ostream& and support normal stream operators and manipulators.
   By default they write to std::cerr / std::cout; the setters below redirect
   them at runtime.
@@ -45,7 +45,7 @@
 
 #include <ostream>
 
-namespace lbcrypto {
+namespace cipher {
 
 // Redirect the channels at runtime and return the stream that was previously
 // installed, so a caller can restore it afterwards. The referenced stream must
@@ -53,39 +53,39 @@ namespace lbcrypto {
 // initialization; concurrent use with library diagnostics is the
 // caller's responsibility.
 /**
- * @brief Redirects the diagnostic error channel (OPENFHE_DIAGNOSTIC_ERR, std::cerr by default) to another
+ * @brief Redirects the diagnostic error channel (CIPHER_DIAGNOSTIC_ERR, std::cerr by default) to another
  * stream. The stream must outlive any later OpenFHE diagnostic; call once during initialization.
  * @param os stream to install
  * @return the stream that was previously installed, so the caller can restore it
  */
-std::ostream& SetOpenFHEErrStream(std::ostream& os);
+std::ostream& set_cipher_err_stream(std::ostream& os);
 /**
- * @brief Redirects the diagnostic output channel (OPENFHE_DIAGNOSTIC_OUT, std::cout by default) to another
+ * @brief Redirects the diagnostic output channel (CIPHER_DIAGNOSTIC_OUT, std::cout by default) to another
  * stream. The stream must outlive any later OpenFHE diagnostic; call once during initialization.
  * @param os stream to install
  * @return the stream that was previously installed, so the caller can restore it
  */
-std::ostream& SetOpenFHEOutStream(std::ostream& os);
+std::ostream& set_cipher_out_stream(std::ostream& os);
 
 namespace internal_diagnostics {
 
 // Implementation hooks; use the logging macros to emit diagnostics.
 /**
- * @brief Implementation hook behind OPENFHE_DIAGNOSTIC_ERR; use the macro rather than calling this directly.
+ * @brief Implementation hook behind CIPHER_DIAGNOSTIC_ERR; use the macro rather than calling this directly.
  * @return the currently installed diagnostic error stream
  */
-std::ostream& OpenFHEErrStream();
+std::ostream& cipher_err_stream();
 /**
- * @brief Implementation hook behind OPENFHE_DIAGNOSTIC_OUT; use the macro rather than calling this directly.
+ * @brief Implementation hook behind CIPHER_DIAGNOSTIC_OUT; use the macro rather than calling this directly.
  * @return the currently installed diagnostic output stream
  */
-std::ostream& OpenFHEOutStream();
+std::ostream& cipher_out_stream();
 
 }  // namespace internal_diagnostics
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
-#define OPENFHE_DIAGNOSTIC_ERR (::lbcrypto::internal_diagnostics::OpenFHEErrStream())
-#define OPENFHE_DIAGNOSTIC_OUT (::lbcrypto::internal_diagnostics::OpenFHEOutStream())
+#define CIPHER_DIAGNOSTIC_ERR (::cipher::internal_diagnostics::cipher_err_stream())
+#define CIPHER_DIAGNOSTIC_OUT (::cipher::internal_diagnostics::cipher_out_stream())
 
 #endif  // CIPHER_UTIL_DIAGNOSTIC_OUTPUT_H_

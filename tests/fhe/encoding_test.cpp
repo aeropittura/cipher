@@ -46,16 +46,16 @@
 #include "cipher/math/backend.h"
 #include "cipher/util/utilities.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 class UTGENERAL_ENCODING : public ::testing::Test {
   protected:
     virtual void SetUp() {
-        OpenFHEParallelControls.UnitTestStart();
+        cipher_parallel_controls.unit_test_start();
     }
 
     virtual void TearDown() {
-        OpenFHEParallelControls.UnitTestStop();
+        cipher_parallel_controls.unit_test_stop();
     }
 };
 
@@ -63,203 +63,203 @@ TEST_F(UTGENERAL_ENCODING, coef_packed_encoding) {
     std::vector<int64_t> value = {32, 17, 8, -12, -32, 22, -101, 6};
     uint32_t m = 16;
 
-    auto lp = std::make_shared<ILParamsImpl<BigInteger>>(m);
+    auto lp = std::make_shared<PolyParamsImpl<BigInteger>>(m);
     EncodingParams ep(std::make_shared<EncodingParamsImpl>(256));
 
     CoefPackedEncoding se(lp, ep, value);
-    se.Encode();
-    se.Decode();
-    se.SetLength(value.size());
-    EXPECT_EQ(se.GetCoefPackedValue(), value) << "COEF_PACKED_ENCODING";
+    se.encode();
+    se.decode();
+    se.set_length(value.size());
+    EXPECT_EQ(se.get_coef_packed_value(), value) << "COEF_PACKED_ENCODING";
 }
 
 TEST_F(UTGENERAL_ENCODING, packed_int_ptxt_encoding) {
     uint32_t m = 22;
     PlaintextModulus p = 89;
-    BigInteger modulusQ("955263939794561");
-    BigInteger squareRootOfRoot("941018665059848");
+    BigInteger modulus_q("955263939794561");
+    BigInteger square_root_of_root("941018665059848");
     BigInteger bigmodulus("80899135611688102162227204937217");
     BigInteger bigroot("77936753846653065954043047918387");
 
-    auto cycloPoly = GetCyclotomicPolynomial<BigVector>(m, modulusQ);
-    ChineseRemainderTransformArb<BigVector>().SetCylotomicPolynomial(cycloPoly, modulusQ);
+    auto cyclo_poly = get_cyclotomic_polynomial<BigVector>(m, modulus_q);
+    ChineseRemainderTransformArb<BigVector>().set_cylotomic_polynomial(cyclo_poly, modulus_q);
 
-    auto lp = std::make_shared<ILParams>(m, modulusQ, squareRootOfRoot, bigmodulus, bigroot);
+    auto lp = std::make_shared<PolyParams>(m, modulus_q, square_root_of_root, bigmodulus, bigroot);
     EncodingParams ep(std::make_shared<EncodingParamsImpl>(p, 8));
 
-    PackedEncoding::SetParams(m, ep);
+    PackedEncoding::set_params(m, ep);
 
-    std::vector<int64_t> vectorOfInts1 = {1, 2, 3, 4, 5, 6, 7, 8, 0, 0};
-    PackedEncoding se(lp, ep, vectorOfInts1);
-    se.Encode();
-    se.Decode();
-    EXPECT_EQ(se.GetPackedValue(), vectorOfInts1) << "packed int";
+    std::vector<int64_t> vector_of_ints1 = {1, 2, 3, 4, 5, 6, 7, 8, 0, 0};
+    PackedEncoding se(lp, ep, vector_of_ints1);
+    se.encode();
+    se.decode();
+    EXPECT_EQ(se.get_packed_value(), vector_of_ints1) << "packed int";
 }
 
 TEST_F(UTGENERAL_ENCODING, packed_int_ptxt_encoding_negative) {
     uint32_t m = 22;
     PlaintextModulus p = 89;
-    BigInteger modulusQ("955263939794561");
-    BigInteger squareRootOfRoot("941018665059848");
+    BigInteger modulus_q("955263939794561");
+    BigInteger square_root_of_root("941018665059848");
     BigInteger bigmodulus("80899135611688102162227204937217");
     BigInteger bigroot("77936753846653065954043047918387");
 
-    auto cycloPoly = GetCyclotomicPolynomial<BigVector>(m, modulusQ);
-    ChineseRemainderTransformArb<BigVector>().SetCylotomicPolynomial(cycloPoly, modulusQ);
+    auto cyclo_poly = get_cyclotomic_polynomial<BigVector>(m, modulus_q);
+    ChineseRemainderTransformArb<BigVector>().set_cylotomic_polynomial(cyclo_poly, modulus_q);
 
-    auto lp = std::make_shared<ILParams>(m, modulusQ, squareRootOfRoot, bigmodulus, bigroot);
+    auto lp = std::make_shared<PolyParams>(m, modulus_q, square_root_of_root, bigmodulus, bigroot);
     EncodingParams ep(std::make_shared<EncodingParamsImpl>(p, 8));
 
-    PackedEncoding::SetParams(m, ep);
+    PackedEncoding::set_params(m, ep);
 
-    std::vector<int64_t> vectorOfInts1 = {1, 2, -3, 4, 5, -6, 7, 8, 0, 0};
-    PackedEncoding se(lp, ep, vectorOfInts1);
-    se.Encode();
-    se.Decode();
-    EXPECT_EQ(se.GetPackedValue(), vectorOfInts1) << "packed int";
+    std::vector<int64_t> vector_of_ints1 = {1, 2, -3, 4, 5, -6, 7, 8, 0, 0};
+    PackedEncoding se(lp, ep, vector_of_ints1);
+    se.encode();
+    se.decode();
+    EXPECT_EQ(se.get_packed_value(), vector_of_ints1) << "packed int";
 }
 
 TEST_F(UTGENERAL_ENCODING, packed_int_ptxt_encoding_DCRTPoly_prime_cyclotomics) {
     uint32_t init_size = 3;
-    uint32_t dcrtBits = 24;
-    // Bluestein needs bigModulus > m * q^2 (about 2^58.8 for 24-bit towers at m = 1811)
-    uint32_t dcrtBitsBig = 60;
+    uint32_t dcrt_bits = 24;
+    // Bluestein needs big_modulus > m * q^2 (about 2^58.8 for 24-bit towers at m = 1811)
+    uint32_t dcrt_bits_big = 60;
 
     uint32_t m = 1811;
 
     PlaintextModulus p = 2 * m + 1;
-    BigInteger modulusP(p);
+    BigInteger modulus_p(p);
 
-    uint32_t mArb = 2 * m;
-    uint32_t mNTT = std::pow(2, std::ceil(std::log2(2 * m - 1)));
+    uint32_t m_arb = 2 * m;
+    uint32_t m_ntt = std::pow(2, std::ceil(std::log2(2 * m - 1)));
 
     // populate the towers for the small modulus
 
     std::vector<NativeInteger> init_moduli(init_size);
-    std::vector<NativeInteger> init_rootsOfUnity(init_size);
+    std::vector<NativeInteger> init_roots_of_unity(init_size);
 
-    init_moduli[0] = LastPrime<NativeInteger>(dcrtBits, mArb);
-    init_rootsOfUnity[0] = RootOfUnity(mArb, init_moduli[0]);
+    init_moduli[0] = last_prime<NativeInteger>(dcrt_bits, m_arb);
+    init_roots_of_unity[0] = root_of_unity(m_arb, init_moduli[0]);
 
     for (uint32_t i = 1; i < init_size; ++i) {
-        init_moduli[i] = PreviousPrime(init_moduli[i - 1], mArb);
-        init_rootsOfUnity[i] = RootOfUnity(mArb, init_moduli[i]);
+        init_moduli[i] = previous_prime(init_moduli[i - 1], m_arb);
+        init_roots_of_unity[i] = root_of_unity(m_arb, init_moduli[i]);
     }
 
     // populate the towers for the big modulus
 
-    std::vector<NativeInteger> init_moduli_NTT(init_size);
-    std::vector<NativeInteger> init_rootsOfUnity_NTT(init_size);
+    std::vector<NativeInteger> init_moduli_ntt(init_size);
+    std::vector<NativeInteger> init_roots_of_unity_ntt(init_size);
 
-    init_moduli_NTT[0] = LastPrime<NativeInteger>(dcrtBitsBig, mNTT);
-    init_rootsOfUnity_NTT[0] = RootOfUnity(mNTT, init_moduli_NTT[0]);
+    init_moduli_ntt[0] = last_prime<NativeInteger>(dcrt_bits_big, m_ntt);
+    init_roots_of_unity_ntt[0] = root_of_unity(m_ntt, init_moduli_ntt[0]);
 
     for (uint32_t i = 1; i < init_size; ++i) {
-        init_moduli_NTT[i] = PreviousPrime(init_moduli_NTT[i - 1], mNTT);
-        init_rootsOfUnity_NTT[i] = RootOfUnity(mNTT, init_moduli_NTT[i]);
+        init_moduli_ntt[i] = previous_prime(init_moduli_ntt[i - 1], m_ntt);
+        init_roots_of_unity_ntt[i] = root_of_unity(m_ntt, init_moduli_ntt[i]);
     }
 
-    auto paramsDCRT = std::make_shared<ILDCRTParams<BigInteger>>(m, init_moduli, init_rootsOfUnity, init_moduli_NTT,
-                                                                 init_rootsOfUnity_NTT);
+    auto params_dcrt = std::make_shared<RnsParams<BigInteger>>(m, init_moduli, init_roots_of_unity, init_moduli_ntt,
+                                                                 init_roots_of_unity_ntt);
 
     EncodingParams ep(std::make_shared<EncodingParamsImpl>(p));
 
-    PackedEncoding::SetParams(m, ep);
+    PackedEncoding::set_params(m, ep);
 
-    std::vector<int64_t> vectorOfInts1 = {1, 2, 3, 4, 5, 6, 7, 8, 0, 0};
-    PackedEncoding se(paramsDCRT, ep, vectorOfInts1);
+    std::vector<int64_t> vector_of_ints1 = {1, 2, 3, 4, 5, 6, 7, 8, 0, 0};
+    PackedEncoding se(params_dcrt, ep, vector_of_ints1);
 
-    se.Encode();
-    se.GetElement<DCRTPoly>().SetFormat(Format::COEFFICIENT);
+    se.encode();
+    se.get_element<RnsPoly>().set_format(Format::COEFFICIENT);
 
-    se.GetElement<DCRTPoly>().SwitchFormat();
-    se.GetElement<DCRTPoly>().SwitchFormat();
+    se.get_element<RnsPoly>().switch_format();
+    se.get_element<RnsPoly>().switch_format();
 
-    se.Decode();
+    se.decode();
 
-    se.SetLength(vectorOfInts1.size());
+    se.set_length(vector_of_ints1.size());
 
-    EXPECT_EQ(se.GetPackedValue(), vectorOfInts1) << "packed int - prime cyclotomics";
+    EXPECT_EQ(se.get_packed_value(), vector_of_ints1) << "packed int - prime cyclotomics";
 }
 
 TEST_F(UTGENERAL_ENCODING, packed_int_ptxt_encoding_DCRTPoly_prime_cyclotomics_negative) {
     uint32_t init_size = 3;
-    uint32_t dcrtBits = 24;
-    // Bluestein needs bigModulus > m * q^2 (about 2^58.8 for 24-bit towers at m = 1811)
-    uint32_t dcrtBitsBig = 60;
+    uint32_t dcrt_bits = 24;
+    // Bluestein needs big_modulus > m * q^2 (about 2^58.8 for 24-bit towers at m = 1811)
+    uint32_t dcrt_bits_big = 60;
 
     uint32_t m = 1811;
 
     PlaintextModulus p = 2 * m + 1;
-    BigInteger modulusP(p);
+    BigInteger modulus_p(p);
 
-    uint32_t mArb = 2 * m;
-    uint32_t mNTT = std::pow(2, std::ceil(std::log2(2 * m - 1)));
+    uint32_t m_arb = 2 * m;
+    uint32_t m_ntt = std::pow(2, std::ceil(std::log2(2 * m - 1)));
 
     // populate the towers for the small modulus
     std::vector<NativeInteger> init_moduli(init_size);
-    std::vector<NativeInteger> init_rootsOfUnity(init_size);
+    std::vector<NativeInteger> init_roots_of_unity(init_size);
 
-    init_moduli[0] = LastPrime<NativeInteger>(dcrtBits, mArb);
-    init_rootsOfUnity[0] = RootOfUnity(mArb, init_moduli[0]);
+    init_moduli[0] = last_prime<NativeInteger>(dcrt_bits, m_arb);
+    init_roots_of_unity[0] = root_of_unity(m_arb, init_moduli[0]);
 
     for (uint32_t i = 1; i < init_size; ++i) {
-        init_moduli[i] = PreviousPrime(init_moduli[i - 1], mArb);
-        init_rootsOfUnity[i] = RootOfUnity(mArb, init_moduli[i]);
+        init_moduli[i] = previous_prime(init_moduli[i - 1], m_arb);
+        init_roots_of_unity[i] = root_of_unity(m_arb, init_moduli[i]);
     }
 
     // populate the towers for the big modulus
 
-    std::vector<NativeInteger> init_moduli_NTT(init_size);
-    std::vector<NativeInteger> init_rootsOfUnity_NTT(init_size);
+    std::vector<NativeInteger> init_moduli_ntt(init_size);
+    std::vector<NativeInteger> init_roots_of_unity_ntt(init_size);
 
-    init_moduli_NTT[0] = LastPrime<NativeInteger>(dcrtBitsBig, mNTT);
-    init_rootsOfUnity_NTT[0] = RootOfUnity(mNTT, init_moduli_NTT[0]);
+    init_moduli_ntt[0] = last_prime<NativeInteger>(dcrt_bits_big, m_ntt);
+    init_roots_of_unity_ntt[0] = root_of_unity(m_ntt, init_moduli_ntt[0]);
 
     for (uint32_t i = 1; i < init_size; ++i) {
-        init_moduli_NTT[i] = PreviousPrime(init_moduli_NTT[i - 1], mNTT);
-        init_rootsOfUnity_NTT[i] = RootOfUnity(mNTT, init_moduli_NTT[i]);
+        init_moduli_ntt[i] = previous_prime(init_moduli_ntt[i - 1], m_ntt);
+        init_roots_of_unity_ntt[i] = root_of_unity(m_ntt, init_moduli_ntt[i]);
     }
 
-    auto paramsDCRT = std::make_shared<ILDCRTParams<BigInteger>>(m, init_moduli, init_rootsOfUnity, init_moduli_NTT,
-                                                                 init_rootsOfUnity_NTT);
+    auto params_dcrt = std::make_shared<RnsParams<BigInteger>>(m, init_moduli, init_roots_of_unity, init_moduli_ntt,
+                                                                 init_roots_of_unity_ntt);
 
     EncodingParams ep(std::make_shared<EncodingParamsImpl>(p));
 
-    PackedEncoding::SetParams(m, ep);
+    PackedEncoding::set_params(m, ep);
 
-    std::vector<int64_t> vectorOfInts1 = {1, 2, -3, 4, 5, 6, -7, 8, 0, 0};
-    PackedEncoding se(paramsDCRT, ep, vectorOfInts1);
+    std::vector<int64_t> vector_of_ints1 = {1, 2, -3, 4, 5, 6, -7, 8, 0, 0};
+    PackedEncoding se(params_dcrt, ep, vector_of_ints1);
 
-    se.Encode();
-    se.GetElement<DCRTPoly>().SetFormat(Format::COEFFICIENT);
+    se.encode();
+    se.get_element<RnsPoly>().set_format(Format::COEFFICIENT);
 
-    se.GetElement<DCRTPoly>().SwitchFormat();
-    se.GetElement<DCRTPoly>().SwitchFormat();
+    se.get_element<RnsPoly>().switch_format();
+    se.get_element<RnsPoly>().switch_format();
 
-    se.Decode();
+    se.decode();
 
-    se.SetLength(vectorOfInts1.size());
+    se.set_length(vector_of_ints1.size());
 
-    EXPECT_EQ(se.GetPackedValue(), vectorOfInts1) << "packed int - prime cyclotomics";
+    EXPECT_EQ(se.get_packed_value(), vector_of_ints1) << "packed int - prime cyclotomics";
 }
 
 TEST_F(UTGENERAL_ENCODING, string_encoding) {
     std::string value = "Hello, world!";
     uint32_t m = 64;
 
-    auto lp = std::make_shared<ILParamsImpl<BigInteger>>(m);
+    auto lp = std::make_shared<PolyParamsImpl<BigInteger>>(m);
     EncodingParams ep(std::make_shared<EncodingParamsImpl>(256));
 
     StringEncoding se(lp, ep, value);
-    se.Encode();
-    se.Decode();
-    EXPECT_EQ(se.GetStringValue(), value) << "string encode/decode";
+    se.encode();
+    se.decode();
+    EXPECT_EQ(se.get_string_value(), value) << "string encode/decode";
 
     // truncate!
-    auto lp2 = std::make_shared<ILParamsImpl<BigInteger>>(4);
+    auto lp2 = std::make_shared<PolyParamsImpl<BigInteger>>(4);
     StringEncoding se2(lp2, ep, value);
-    se2.Encode();
-    se2.Decode();
-    EXPECT_EQ(se2.GetStringValue(), value.substr(0, lp2->GetRingDimension())) << "string truncate encode/decode";
+    se2.encode();
+    se2.decode();
+    EXPECT_EQ(se2.get_string_value(), value.substr(0, lp2->get_ring_dimension())) << "string truncate encode/decode";
 }

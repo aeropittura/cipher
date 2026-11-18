@@ -31,10 +31,10 @@
 
 #include "cipher/fhe/base/rlwe_params.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-// template class CryptoParametersRLWE<Poly>;
-// template class CryptoParametersRLWE<NativePoly>;
-template class CryptoParametersRLWE<DCRTPoly>;
+// template class RlweCryptoParams<Poly>;
+// template class RlweCryptoParams<NativePoly>;
+template class RlweCryptoParams<RnsPoly>;
 
-}  // namespace lbcrypto
+}  // namespace cipher

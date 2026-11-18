@@ -32,33 +32,33 @@
 
 #include <iostream>
 
-namespace lbcrypto {
+namespace cipher {
 
 // clang-format off
 std::ostream& operator<<(std::ostream& os, const SchSwchParams& obj) {
-    os  << "securityLevelCKKS: " << obj.securityLevelCKKS
-        << "; securityLevelFHEW: " << obj.securityLevelFHEW
-        << "; numSlotsCKKS: " << obj.numSlotsCKKS
-        << "; numValues: " << obj.numValues
-        << "; ctxtModSizeFHEWLargePrec: " << obj.ctxtModSizeFHEWLargePrec
-        << "; ctxtModSizeFHEWIntermedSwch: " << obj.ctxtModSizeFHEWIntermedSwch
-        << "; bStepLTrCKKStoFHEW: " << obj.bStepLTrCKKStoFHEW
-        << "; bStepLTrFHEWtoCKKS: " << obj.bStepLTrFHEWtoCKKS
-        << "; levelLTrCKKStoFHEW: " << obj.levelLTrCKKStoFHEW
-        << "; levelLTrFHEWtoCKKS: " << obj.levelLTrFHEWtoCKKS
-        << "; arbitraryFunctionEvaluation: " << obj.arbitraryFunctionEvaluation
-        << "; useDynamicModeFHEW:" << obj.useDynamicModeFHEW
-        << "; computeArgmin: " << obj.computeArgmin
-        << "; oneHotEncoding: " << obj.oneHotEncoding
-        << "; useAltArgmin: " << obj.useAltArgmin
+    os  << "securityLevelCKKS: " << obj.security_level_ckks
+        << "; securityLevelFHEW: " << obj.security_level_fhew
+        << "; numSlotsCKKS: " << obj.num_slots_ckks
+        << "; numValues: " << obj.num_values
+        << "; ctxtModSizeFHEWLargePrec: " << obj.ctxt_mod_size_fhew_large_prec
+        << "; ctxtModSizeFHEWIntermedSwch: " << obj.ctxt_mod_size_fhew_intermed_swch
+        << "; bStepLTrCKKStoFHEW: " << obj.b_step_l_tr_ckks_to_fhew
+        << "; bStepLTrFHEWtoCKKS: " << obj.b_step_l_tr_fhew_to_ckks
+        << "; levelLTrCKKStoFHEW: " << obj.level_l_tr_ckks_to_fhew
+        << "; levelLTrFHEWtoCKKS: " << obj.level_l_tr_fhew_to_ckks
+        << "; arbitraryFunctionEvaluation: " << obj.arbitrary_function_evaluation
+        << "; useDynamicModeFHEW:" << obj.use_dynamic_mode_fhew
+        << "; computeArgmin: " << obj.compute_argmin
+        << "; oneHotEncoding: " << obj.one_hot_encoding
+        << "; useAltArgmin: " << obj.use_alt_argmin
         << "; PARAMS SET UP INTERNALLY FROM CRYPTOCONTEXT:"
-        << "  initialCKKSModulus: " << obj.initialCKKSModulus
-        << "; ringDimension: " << obj.ringDimension
-        << "; scalingModSize: " << obj.scalingModSize
-        << "; batchSize: " << obj.batchSize;
+        << "  initialCKKSModulus: " << obj.initial_ckks_modulus
+        << "; ringDimension: " << obj.ring_dimension_value
+        << "; scalingModSize: " << obj.scaling_mod_size
+        << "; batchSize: " << obj.batch_size;
 
     return os;
 }
 // clang-format on
 
-}  // namespace lbcrypto
+}  // namespace cipher

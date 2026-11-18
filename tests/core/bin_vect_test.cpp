@@ -40,26 +40,26 @@
 #include "cipher/util/inttypes.h"
 #include "cipher/util/utilities.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 // --------------- TESTING INTEGER OPERATIONS ON VECTOR  ---------------
 /*
    at() operates on Big Vector, retrieves the value at the given index of a
-   vector The functions returns BigInteger, which is passed to ConvertToInt() to
-   convert to integer One dimensional integer array expectedResult is created
+   vector The functions returns BigInteger, which is passed to convert_to_int() to
+   convert to integer One dimensional integer array expected_result is created
    Indivdual expected result for each index of the vector is store in array
    EXPECT_EQ is given the above integer from at, and the value of the
-   expectedResult at the corresponding index
+   expected_result at the corresponding index
 */
 
 // --------------- TESTING METHOD MODULUS FOR ALL CONDITIONS ---------------
 /*   The method "Mod" operates on Big Vector m, BigInteger q
      Returns:  m mod q, and the result is stored in Big Vector
-   calculatedResult.
+   calculated_result.
 */
 template <typename V>
-void AtAndSetModulusTest(const std::string& msg) {
-    OPENFHE_DEBUG_FLAG(false);
+void at_and_set_modulus_test(const std::string& msg) {
+    CIPHER_DEBUG_FLAG(false);
     uint32_t len = 10;
     V m(len);
 
@@ -77,14 +77,14 @@ void AtAndSetModulusTest(const std::string& msg) {
 
     typename V::Integer q("233");
 
-    m.SetModulus(q);
+    m.set_modulus(q);
 
-    OPENFHE_DEBUG("m" << m);
-    V calculatedResult = m.Mod(q);
-    OPENFHE_DEBUG("calculated result" << m);
-    uint64_t expectedResult[] = {48, 53, 7, 178, 190, 120, 79, 108, 60, 12};
+    CIPHER_DEBUG("m" << m);
+    V calculated_result = m.mod(q);
+    CIPHER_DEBUG("calculated result" << m);
+    uint64_t expected_result[] = {48, 53, 7, 178, 190, 120, 79, 108, 60, 12};
     for (uint32_t i = 0; i < len; i++) {
-        EXPECT_EQ(expectedResult[i], calculatedResult[i].ConvertToInt()) << msg << " Mod failed";
+        EXPECT_EQ(expected_result[i], calculated_result[i].convert_to_int()) << msg << " Mod failed";
     }
 
     V n(len, q);
@@ -100,41 +100,41 @@ void AtAndSetModulusTest(const std::string& msg) {
     n.at(8) = typename V::Integer("325328");
     n.at(9) = typename V::Integer("7698798");
 
-    OPENFHE_DEBUG("n" << n);
+    CIPHER_DEBUG("n" << n);
     for (uint32_t i = 0; i < len; i++) {
         if (i != 6) {  // value at 6 is < q
-            EXPECT_NE(expectedResult[i], n[i].ConvertToInt()) << msg << " at no mod failed";
+            EXPECT_NE(expected_result[i], n[i].convert_to_int()) << msg << " at no mod failed";
         } else {
-            EXPECT_EQ(expectedResult[i], n[i].ConvertToInt()) << msg << " at no mod failed";
+            EXPECT_EQ(expected_result[i], n[i].convert_to_int()) << msg << " at no mod failed";
         }
     }
 
     V l(len, q);
     // note list assignment does take modulus
     l = {"987968", "587679", "456454", "234343", "769789", "465654", "79", "346346", "325328", "7698798"};
-    OPENFHE_DEBUG("l" << l);
+    CIPHER_DEBUG("l" << l);
     for (uint32_t i = 0; i < len; i++) {
-        EXPECT_EQ(expectedResult[i], l[i].ConvertToInt()) << msg << " Mod on list assignment failed";
+        EXPECT_EQ(expected_result[i], l[i].convert_to_int()) << msg << " Mod on list assignment failed";
     }
 }
 
 TEST(UTBinVect, AtAndSetModulusTest) {
-    RUN_BIG_BACKENDS(AtAndSetModulusTest, "AtAndSetModulusTest")
+    RUN_BIG_BACKENDS(at_and_set_modulus_test, "AtAndSetModulusTest")
 }
 
 template <typename V>
-void CTOR_Test(const std::string& msg) {
+void ctor_test(const std::string& msg) {
     typename V::Integer q("233");
-    uint32_t expectedResult[10] = {48, 53, 7, 178, 190, 120, 79, 108, 60, 12};
-    const uint32_t len = sizeof(expectedResult) / sizeof(expectedResult[0]);
+    uint32_t expected_result[10] = {48, 53, 7, 178, 190, 120, 79, 108, 60, 12};
+    const uint32_t len = sizeof(expected_result) / sizeof(expected_result[0]);
 
     {
         V m(len, q, {"987968", "587679", "456454", "234343", "769789", "465654", "79", "346346", "325328", "7698798"});
 
-        V calculatedResult = m.Mod(q);
+        V calculated_result = m.mod(q);
 
         for (uint32_t i = 0; i < len; i++) {
-            EXPECT_EQ(expectedResult[i], (calculatedResult.at(i)).ConvertToInt()) << msg;
+            EXPECT_EQ(expected_result[i], (calculated_result.at(i)).convert_to_int()) << msg;
         }
     }
 
@@ -142,26 +142,26 @@ void CTOR_Test(const std::string& msg) {
         V m(len, q, {48, 53, 7, 178, 190, 120, 79, 108, 60, 12});
 
         for (uint32_t i = 0; i < len; i++) {
-            EXPECT_EQ(expectedResult[i], m.at(i).ConvertToInt()) << msg;
+            EXPECT_EQ(expected_result[i], m.at(i).convert_to_int()) << msg;
         }
     }
 }
 
 TEST(UTBinVect, CTOR_Test) {
-    RUN_BIG_BACKENDS(CTOR_Test, "CTOR_Test")
+    RUN_BIG_BACKENDS(ctor_test, "CTOR_Test")
 }
 
 // --------------- TESTING METHOD MODADD FOR ALLCONDITIONS ---------------
 
 /*   The method "Mod Add" operates on Big Vector m, BigIntegers n,q
         Returns:  (m+n)mod q, and the result is stored in Big Vector
-   calculatedResult.
+   calculated_result.
 */
 
 // TEST CASE WHEN NUMBERS AFTER ADDITION ARE SMALLER THAN MODULUS
 
 template <typename V>
-void ModAddBigModulus(const std::string& msg) {
+void mod_add_big_modulus(const std::string& msg) {
     typename V::Integer q("3435435");  // constructor calling to set mod value
     // calling constructor to create a vector of length 5 and passing value of q
     V m(5, q);
@@ -174,32 +174,32 @@ void ModAddBigModulus(const std::string& msg) {
     m.at(3) = typename V::Integer("2343");
     m.at(4) = typename V::Integer("9789");
 
-    V calculatedResult = m.ModAdd(n);
+    V calculated_result = m.mod_add(n);
 
-    uint64_t expectedResult[5] = {9871, 5882, 4557, 2346, 9792};
+    uint64_t expected_result[5] = {9871, 5882, 4557, 2346, 9792};
 
     for (uint32_t i = 0; i < 5; i++) {
-        EXPECT_EQ(expectedResult[i], (calculatedResult.at(i)).ConvertToInt()) << msg;
+        EXPECT_EQ(expected_result[i], (calculated_result.at(i)).convert_to_int()) << msg;
     }
 }
 
 TEST(UTBinVect, ModAddBigModulus) {
-    RUN_BIG_BACKENDS(ModAddBigModulus, "ModAddBigModulus")
+    RUN_BIG_BACKENDS(mod_add_big_modulus, "ModAddBigModulus")
 }
 
 // TEST CASE WHEN NUMBERS AFTER ADDITION ARE GREATER THAN MODULUS
 
 template <typename V>
-void ModAddSmallerModulus(const std::string& msg) {
-    OPENFHE_DEBUG_FLAG(false);
+void mod_add_smaller_modulus(const std::string& msg) {
+    CIPHER_DEBUG_FLAG(false);
 
     typename V::Integer q("3534");  // constructor calling to set mod value
     // calling constructor to create a vector of length 5 and passing value of q
     V m(5, q);
     typename V::Integer n("34365");
 
-    OPENFHE_DEBUG("m " << m);
-    OPENFHE_DEBUG("m's modulus " << m.GetModulus());
+    CIPHER_DEBUG("m " << m);
+    CIPHER_DEBUG("m's modulus " << m.get_modulus());
 
     m.at(0) = typename V::Integer("9868");
     m.at(1) = typename V::Integer("5879");
@@ -207,23 +207,23 @@ void ModAddSmallerModulus(const std::string& msg) {
     m.at(3) = typename V::Integer("2343");
     m.at(4) = typename V::Integer("9789");
 
-    // at() does not apply mod so m is currently ill-formed for input to ModAdd
+    // at() does not apply mod so m is currently ill-formed for input to mod_add
     // n is okay
-    m.ModEq(q);
+    m.mod_eq(q);
 
-    V calculatedResult = m.ModAdd(n);
+    V calculated_result = m.mod_add(n);
 
-    OPENFHE_DEBUG("m " << m);
-    OPENFHE_DEBUG("calculated result  " << calculatedResult);
-    uint64_t expectedResult[5] = {1825, 1370, 45, 1368, 1746};
+    CIPHER_DEBUG("m " << m);
+    CIPHER_DEBUG("calculated result  " << calculated_result);
+    uint64_t expected_result[5] = {1825, 1370, 45, 1368, 1746};
 
     for (uint32_t i = 0; i < 5; i++) {
-        EXPECT_EQ(expectedResult[i], (calculatedResult.at(i)).ConvertToInt()) << msg;
+        EXPECT_EQ(expected_result[i], (calculated_result.at(i)).convert_to_int()) << msg;
     }
 }
 
 TEST(UTBinVect, ModAddSmallerModulus) {
-    RUN_BIG_BACKENDS(ModAddSmallerModulus, "ModAddSmallerModulus")
+    RUN_BIG_BACKENDS(mod_add_smaller_modulus, "ModAddSmallerModulus")
 }
 
 // --------------- TESTING METHOD MODUSUB FOR ALL CONDITIONS ---------------
@@ -232,7 +232,7 @@ TEST(UTBinVect, ModAddSmallerModulus) {
                 when m>n, (m-n)mod q
                 when m=n, 0
                 when m<n, {(m mod q)+q-(n mod q)} mod q
-        and the result is stored in Big Vector calculatedResult.
+        and the result is stored in Big Vector calculated_result.
 */
 
 // TEST CASE WHEN FIRST NUMBER IS LESS THAN SECOND NUMBER
@@ -250,16 +250,16 @@ void modsub_first_less_than_second(const std::string& msg) {
     m.at(3) = typename V::Integer("2343");
     m.at(4) = typename V::Integer("9789");
 
-    // at() does not apply mod so m is currently ill-formed for input to ModSub
+    // at() does not apply mod so m is currently ill-formed for input to mod_sub
     // n is okay
-    m.ModEq(q);
+    m.mod_eq(q);
 
-    V calculatedResult = m.ModSub(n);
+    V calculated_result = m.mod_sub(n);
 
-    uint64_t expectedResult[5] = {241, 3320, 1995, 3318, 162};
+    uint64_t expected_result[5] = {241, 3320, 1995, 3318, 162};
 
     for (uint32_t i = 0; i < 5; i++) {
-        EXPECT_EQ(expectedResult[i], (calculatedResult.at(i)).ConvertToInt()) << msg;
+        EXPECT_EQ(expected_result[i], (calculated_result.at(i)).convert_to_int()) << msg;
     }
 }
 
@@ -282,16 +282,16 @@ void modsub_first_greater_than_second(const std::string& msg) {
     m.at(3) = typename V::Integer("2343");
     m.at(4) = typename V::Integer("9789");
 
-    // at() does not apply mod so m is currently ill-formed for input to ModSub
+    // at() does not apply mod so m is currently ill-formed for input to mod_sub
     // n is okay
-    m.ModEq(q);
+    m.mod_eq(q);
 
-    V calculatedResult = m.ModSub(n);
+    V calculated_result = m.mod_sub(n);
 
-    uint64_t expectedResult[5] = {3, 4, 9, 3, 29};
+    uint64_t expected_result[5] = {3, 4, 9, 3, 29};
 
     for (uint32_t i = 0; i < 5; i++) {
-        EXPECT_EQ(expectedResult[i], (calculatedResult.at(i)).ConvertToInt()) << msg;
+        EXPECT_EQ(expected_result[i], (calculated_result.at(i)).convert_to_int()) << msg;
     }
 }
 
@@ -303,10 +303,10 @@ TEST(UTBinVect, modsub_first_greater_than_second) {
 
 /*   The method "Mod Mul" operates on Big Vector m, BigIntegers n,q
         Returns:  (m*n)mod q
-        and the result is stored in Big Vector calculatedResult.
+        and the result is stored in Big Vector calculated_result.
 */
 template <typename V>
-void ModMulTest(const std::string& msg) {
+void mod_mul_test(const std::string& msg) {
     typename V::Integer q("3534");  // constructor calling to set mod value
     // calling constructor to create a vector of length 5 and passing value of q
     V m(5, q);
@@ -318,27 +318,27 @@ void ModMulTest(const std::string& msg) {
     m.at(3) = typename V::Integer("2343");
     m.at(4) = typename V::Integer("9789");
 
-    V calculatedResult = m.ModMul(n);
+    V calculated_result = m.mod_mul(n);
 
-    uint64_t expectedResult[5] = {1576, 1850, 978, 1758, 1476};
+    uint64_t expected_result[5] = {1576, 1850, 978, 1758, 1476};
 
     for (uint32_t i = 0; i < 5; i++) {
-        EXPECT_EQ(expectedResult[i], (calculatedResult.at(i)).ConvertToInt()) << msg;
+        EXPECT_EQ(expected_result[i], (calculated_result.at(i)).convert_to_int()) << msg;
     }
 }
 
 TEST(UTBinVect, ModMulTest) {
-    RUN_BIG_BACKENDS(ModMulTest, "ModMulTest")
+    RUN_BIG_BACKENDS(mod_mul_test, "ModMulTest")
 }
 
 // --------------- TESTING METHOD MODEXP FOR ALL CONDITIONS  ---------------
 /*   The method "Mod Exp" operates on Big Vector m, BigIntegers n,q
         Returns:  (m^n)mod q
-        and the result is stored in Big Vector calculatedResult.
+        and the result is stored in Big Vector calculated_result.
 */
 template <typename V>
-void ModExpTest(const std::string& msg) {
-    OPENFHE_DEBUG_FLAG(false);
+void mod_exp_test(const std::string& msg) {
+    CIPHER_DEBUG_FLAG(false);
     typename V::Integer q("3534");  // constructor calling to set mod value
 
     // calling constructor to create a vector of length 5 and passing value of q
@@ -350,23 +350,23 @@ void ModExpTest(const std::string& msg) {
     m[2] = typename V::Integer("4");
     m[3] = typename V::Integer("2343");
     m[4] = typename V::Integer("97");
-    OPENFHE_DEBUG("m's modulus " << m.GetModulus());
+    CIPHER_DEBUG("m's modulus " << m.get_modulus());
 
-    V calculatedResult = m.ModExp(n);
+    V calculated_result = m.mod_exp(n);
 
-    uint64_t expectedResult[5] = {2792, 3123, 64, 159, 901};
+    uint64_t expected_result[5] = {2792, 3123, 64, 159, 901};
 
     for (uint32_t i = 0; i < 5; i++) {
-        EXPECT_EQ(expectedResult[i], calculatedResult[i].ConvertToInt()) << msg;
+        EXPECT_EQ(expected_result[i], calculated_result[i].convert_to_int()) << msg;
     }
 }
 
 TEST(UTBinVect, ModExpTest) {
-    RUN_ALL_BACKENDS(ModExpTest, "ModExpTest")
+    RUN_ALL_BACKENDS(mod_exp_test, "ModExpTest")
 }
 
 template <typename V>
-void ModExpLargeExponentTest(const std::string& msg) {
+void mod_exp_large_exponent_test(const std::string& msg) {
     typename V::Integer q("7919");  // prime modulus
     typename V::Integer n = q + typename V::Integer(1);
 
@@ -377,42 +377,42 @@ void ModExpLargeExponentTest(const std::string& msg) {
     m[3] = typename V::Integer("0");
     m[4] = typename V::Integer("7918");
 
-    V calculatedResult = m.ModExp(n);
+    V calculated_result = m.mod_exp(n);
 
     for (uint32_t i = 0; i < 5; i++) {
-        EXPECT_EQ(m[i].ModExp(n, q), calculatedResult[i]) << msg << " vector ModExp disagrees with scalar ModExp";
+        EXPECT_EQ(m[i].mod_exp(n, q), calculated_result[i]) << msg << " vector ModExp disagrees with scalar ModExp";
     }
-    EXPECT_EQ(typename V::Integer(4), calculatedResult[0]) << msg << " 2^(q+1) mod q";
-    EXPECT_EQ(typename V::Integer(9), calculatedResult[1]) << msg << " 3^(q+1) mod q";
-    EXPECT_EQ(typename V::Integer(0), calculatedResult[3]) << msg << " 0^(q+1) mod q";
-    EXPECT_EQ(typename V::Integer(1), calculatedResult[4]) << msg << " (q-1)^(q+1) mod q";
+    EXPECT_EQ(typename V::Integer(4), calculated_result[0]) << msg << " 2^(q+1) mod q";
+    EXPECT_EQ(typename V::Integer(9), calculated_result[1]) << msg << " 3^(q+1) mod q";
+    EXPECT_EQ(typename V::Integer(0), calculated_result[3]) << msg << " 0^(q+1) mod q";
+    EXPECT_EQ(typename V::Integer(1), calculated_result[4]) << msg << " (q-1)^(q+1) mod q";
 
-    V inPlaceResult(m);
-    inPlaceResult.ModExpEq(n);
+    V in_place_result(m);
+    in_place_result.mod_exp_eq(n);
     for (uint32_t i = 0; i < 5; i++) {
-        EXPECT_EQ(calculatedResult[i], inPlaceResult[i]) << msg << " ModExpEq disagrees with ModExp";
+        EXPECT_EQ(calculated_result[i], in_place_result[i]) << msg << " ModExpEq disagrees with ModExp";
     }
 
     // an exponent aliasing a vector element must be read at its pre-call value
-    V aliasedResult(m);
-    V expectedAliased = m.ModExp(m[2]);
-    aliasedResult.ModExpEq(aliasedResult[2]);
+    V aliased_result(m);
+    V expected_aliased = m.mod_exp(m[2]);
+    aliased_result.mod_exp_eq(aliased_result[2]);
     for (uint32_t i = 0; i < 5; i++) {
-        EXPECT_EQ(expectedAliased[i], aliasedResult[i]) << msg << " ModExpEq with aliased exponent";
+        EXPECT_EQ(expected_aliased[i], aliased_result[i]) << msg << " ModExpEq with aliased exponent";
     }
 }
 
 TEST(UTBinVect, ModExpLargeExponentTest) {
-    RUN_ALL_BACKENDS(ModExpLargeExponentTest, "ModExpLargeExponentTest")
+    RUN_ALL_BACKENDS(mod_exp_large_exponent_test, "ModExpLargeExponentTest")
 }
 
 // --------------- TESTING METHOD MODINVERSE FOR ALL CONDITIONS ---------------
 
-/*   The method "Mod ModInverse" operates on Big Vector m, BigInteger q
+/*   The method "Mod mod_inverse" operates on Big Vector m, BigInteger q
         Returns:  (m^(-1))mod q
                 when m and q are co-prime (i,e GCD of m and q is 1)
                 and is calculated using extended Eucleadian Algorithm
-        and the result is stored in Big Vector calculatedResult.
+        and the result is stored in Big Vector calculated_result.
 */
 template <typename V>
 void test_modinv(const std::string& msg) {
@@ -426,12 +426,12 @@ void test_modinv(const std::string& msg) {
     m.at(3) = typename V::Integer("2343");
     m.at(4) = typename V::Integer("97");
 
-    V calculatedResult = m.ModInverse();
+    V calculated_result = m.mod_inverse();
 
-    uint64_t expectedResult[5] = {32, 24, 9, 17, 13};
+    uint64_t expected_result[5] = {32, 24, 9, 17, 13};
 
     for (uint32_t i = 0; i < 5; i++) {
-        EXPECT_EQ(expectedResult[i], (calculatedResult.at(i)).ConvertToInt()) << msg;
+        EXPECT_EQ(expected_result[i], (calculated_result.at(i)).convert_to_int()) << msg;
     }
 }
 
@@ -443,7 +443,7 @@ TEST(UTBinVect, test_modinv) {
 
 /*   The method "Mod Add" operates on Big Vectors m,n BigInteger q
         Returns:  (m+n)mod q, and the result is stored in Big Vector
-   calculatedResult.
+   calculated_result.
 */
 
 // TEST CASE WHEN NUMBERS AFTER ADDITION ARE SMALLER THAN MODULUS
@@ -467,12 +467,12 @@ void modadd_vector_result_smaller_modulus(const std::string& msg) {
     n.at(3) = typename V::Integer("1233");
     n.at(4) = typename V::Integer("7897");
 
-    V calculatedResult = m.ModAdd(n);
+    V calculated_result = m.mod_add(n);
 
-    uint64_t expectedResult[5] = {14401, 10428, 11310, 3576, 17686};
+    uint64_t expected_result[5] = {14401, 10428, 11310, 3576, 17686};
 
     for (uint32_t i = 0; i < 5; i++) {
-        EXPECT_EQ(expectedResult[i], (calculatedResult.at(i)).ConvertToInt()) << msg;
+        EXPECT_EQ(expected_result[i], (calculated_result.at(i)).convert_to_int()) << msg;
     }
 }
 
@@ -484,7 +484,7 @@ TEST(UTBinVect, modadd_vector_result_smaller_modulus) {
 
 template <typename V>
 void modadd_vector_result_greater_modulus(const std::string& msg) {
-    OPENFHE_DEBUG_FLAG(false);
+    CIPHER_DEBUG_FLAG(false);
     typename V::Integer q("657");  // constructor calling to set mod value
     // calling constructor to create a vector of length 5 and passing value of q
     V m(5, q);
@@ -494,18 +494,18 @@ void modadd_vector_result_greater_modulus(const std::string& msg) {
 
     n = {"4533", "4549", "6756", "1233", "7897"};
 
-    OPENFHE_DEBUG("m " << m);
-    OPENFHE_DEBUG("m mod" << m.GetModulus());
-    OPENFHE_DEBUG("n " << n);
-    OPENFHE_DEBUG("n mod " << n.GetModulus());
+    CIPHER_DEBUG("m " << m);
+    CIPHER_DEBUG("m mod" << m.get_modulus());
+    CIPHER_DEBUG("n " << n);
+    CIPHER_DEBUG("n mod " << n.get_modulus());
 
-    V calculatedResult = m.ModAdd(n);
+    V calculated_result = m.mod_add(n);
 
-    OPENFHE_DEBUG("result mod " << calculatedResult.GetModulus());
-    uint64_t expectedResult[5] = {604, 573, 141, 291, 604};
+    CIPHER_DEBUG("result mod " << calculated_result.get_modulus());
+    uint64_t expected_result[5] = {604, 573, 141, 291, 604};
 
     for (uint32_t i = 0; i < 5; i++) {
-        EXPECT_EQ(expectedResult[i], (calculatedResult.at(i)).ConvertToInt()) << msg;
+        EXPECT_EQ(expected_result[i], (calculated_result.at(i)).convert_to_int()) << msg;
     }
 }
 
@@ -519,7 +519,7 @@ TEST(UTBinVect, modadd_vector_result_greater_modulus) {
 */
 template <typename V>
 void method_add_equals_vector_operation(const std::string& msg) {
-    OPENFHE_DEBUG_FLAG(false);
+    CIPHER_DEBUG_FLAG(false);
     typename V::Integer q("657");
     // calling constructor to create a vector of length 5 and passing value of q
     V m(5, q);
@@ -534,15 +534,15 @@ void method_add_equals_vector_operation(const std::string& msg) {
     n.at(3) = typename V::Integer("33");
     n.at(4) = typename V::Integer("7");
 
-    OPENFHE_DEBUG("m " << m);
-    OPENFHE_DEBUG("n " << n);
+    CIPHER_DEBUG("m " << m);
+    CIPHER_DEBUG("n " << n);
 
     m += n;
-    OPENFHE_DEBUG("m" << m);
-    uint64_t expectedResult[5] = {17, 632, 21, 405, 598};
+    CIPHER_DEBUG("m" << m);
+    uint64_t expected_result[5] = {17, 632, 21, 405, 598};
 
     for (uint32_t i = 0; i < 5; i++) {
-        EXPECT_EQ(expectedResult[i], (m.at(i)).ConvertToInt()) << msg;
+        EXPECT_EQ(expected_result[i], (m.at(i)).convert_to_int()) << msg;
     }
 }
 
@@ -575,12 +575,12 @@ void modmul_vector(const std::string& msg) {
     n.at(3) = typename V::Integer("33");
     n.at(4) = typename V::Integer("7");
 
-    V calculatedResult = m.ModMul(n);
+    V calculated_result = m.mod_mul(n);
 
-    uint64_t expectedResult[5] = {52, 351, 315, 450, 195};
+    uint64_t expected_result[5] = {52, 351, 315, 450, 195};
 
     for (uint32_t i = 0; i < 5; i++) {
-        EXPECT_EQ(expectedResult[i], (calculatedResult.at(i)).ConvertToInt()) << msg;
+        EXPECT_EQ(expected_result[i], (calculated_result.at(i)).convert_to_int()) << msg;
     }
 }
 

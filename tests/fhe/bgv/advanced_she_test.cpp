@@ -42,7 +42,7 @@
     #include "fhe/support/test_utils.h"
     #include "gtest/gtest.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 //===========================================================================================================
 enum TEST_CASE_TYPE : int {
@@ -67,23 +67,23 @@ static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
 }
 //===========================================================================================================
 struct TEST_CASE_UTBGVRNS_SHEADVANCED {
-    TEST_CASE_TYPE testCaseType;
+    TEST_CASE_TYPE test_case_type;
     // test case description - MUST BE UNIQUE
     std::string description;
 
-    UnitTestCCParams params;
+    TestContextParams params;
 
     // additional test case data
     // ........
 
-    std::string buildTestName() const {
+    std::string build_test_name() const {
         std::stringstream ss;
-        ss << testCaseType << "_" << description;
+        ss << test_case_type << "_" << description;
         return ss.str();
     }
-    std::string toString() const {
+    std::string to_string_impl() const {
         std::stringstream ss;
-        ss << "testCaseType [" << testCaseType << "], " << params.toString();
+        ss << "testCaseType [" << test_case_type << "], " << params.to_string_impl();
         return ss.str();
     }
 };
@@ -91,11 +91,11 @@ struct TEST_CASE_UTBGVRNS_SHEADVANCED {
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
 static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTBGVRNS_SHEADVANCED>& test) {
-    return test.param.buildTestName();
+    return test.param.build_test_name();
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_UTBGVRNS_SHEADVANCED& test) {
-    return os << test.toString();
+    return os << test.to_string_impl();
 }
 //===========================================================================================================
 constexpr uint32_t RING_DIM = 8192;
@@ -104,14 +104,14 @@ constexpr uint32_t DSIZE = 4;
 constexpr double STD_DEV = 3.19;
 
 // clang-format off
-static std::vector<TEST_CASE_UTBGVRNS_SHEADVANCED> testCasesUTBGVRNS_SHEADVANCED = {
-    // TestType,       Descr,  Scheme,        RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl, KSTech, ScalTech,        LDigits, PtMod, StdDev,  EvalAddCt, KSCt, MultTech, EncTech, PREMode
+static std::vector<TEST_CASE_UTBGVRNS_SHEADVANCED> test_cases_utbgvrns_sheadvanced = {
+    // TestType,       Descr,  Scheme,        RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl, KSTech, ScalTech,        LDigits, PtMod, std_dev,  EvalAddCt, KSCt, MultTech, EncTech, pre_mode
     { EVAL_MULT_SINGLE, "01", {BGVRNS_SCHEME, RING_DIM, DFLT,      DFLT,     DSIZE, DFLT,    DFLT,       DFLT,          DFLT,     DFLT,   DFLT,   FLEXIBLEAUTO,    DFLT,    PTM,   STD_DEV, DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { EVAL_MULT_SINGLE, "02", {BGVRNS_SCHEME, RING_DIM, DFLT,      DFLT,     DSIZE, DFLT,    DFLT,       DFLT,          DFLT,     DFLT,   DFLT,   FIXEDMANUAL,     DFLT,    PTM,   STD_DEV, DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { EVAL_MULT_SINGLE, "03", {BGVRNS_SCHEME, RING_DIM, DFLT,      DFLT,     DSIZE, DFLT,    DFLT,       DFLT,          DFLT,     DFLT,   DFLT,   FIXEDAUTO,       DFLT,    PTM,   STD_DEV, DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { EVAL_MULT_SINGLE, "04", {BGVRNS_SCHEME, RING_DIM, DFLT,      DFLT,     DSIZE, DFLT,    DFLT,       DFLT,          DFLT,     DFLT,   DFLT,   FLEXIBLEAUTOEXT, DFLT,    PTM,   STD_DEV, DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     // ==========================================
-    // TestType,      Descr,  Scheme,        RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg,  FModSize, SecLvl, KSTech, ScalTech,        LDigits, PtMod, StdDev,  EvalAddCt, KSCt, MultTech, EncTech, PREMode
+    // TestType,      Descr,  Scheme,        RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg,  FModSize, SecLvl, KSTech, ScalTech,        LDigits, PtMod, std_dev,  EvalAddCt, KSCt, MultTech, EncTech, pre_mode
     { EVAL_ADD_SINGLE, "01", {BGVRNS_SCHEME, RING_DIM, DFLT,      DFLT,     DSIZE, DFLT,    DFLT,       DFLT,           DFLT,     DFLT,   DFLT,   FLEXIBLEAUTO,    DFLT,    PTM,   STD_DEV, DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { EVAL_ADD_SINGLE, "02", {BGVRNS_SCHEME, RING_DIM, DFLT,      DFLT,     DSIZE, DFLT,    DFLT,       DFLT,           DFLT,     DFLT,   DFLT,   FIXEDMANUAL,     DFLT,    PTM,   STD_DEV, DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { EVAL_ADD_SINGLE, "03", {BGVRNS_SCHEME, RING_DIM, DFLT,      DFLT,     DSIZE, DFLT,    DFLT,       DFLT,           DFLT,     DFLT,   DFLT,   FIXEDAUTO,       DFLT,    PTM,   STD_DEV, DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
@@ -120,47 +120,47 @@ static std::vector<TEST_CASE_UTBGVRNS_SHEADVANCED> testCasesUTBGVRNS_SHEADVANCED
 // clang-format on
 //===========================================================================================================
 class UTBGVRNS_SHEADVANCED : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS_SHEADVANCED> {
-    using Element = DCRTPoly;
+    using Element = RnsPoly;
 
   protected:
     void SetUp() {
-        OpenFHEParallelControls.UnitTestStart();
+        cipher_parallel_controls.unit_test_start();
     }
 
     void TearDown() {
-        CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
-        OpenFHEParallelControls.UnitTestStop();
+        ContextFactory<RnsPoly>::release_all_contexts();
+        cipher_parallel_controls.unit_test_stop();
     }
 
-    void UnitTest_EvalMultSingle(const TEST_CASE_UTBGVRNS_SHEADVANCED& testData,
+    void unit_test_eval_mult_single(const TEST_CASE_UTBGVRNS_SHEADVANCED& test_data,
                                  const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
             // Initialize the public key containers.
-            KeyPair<Element> kp = cc->KeyGen();
-            cc->EvalMultKeyGen(kp.secretKey);
+            KeyPair<Element> kp = cc->key_gen();
+            cc->eval_mult_key_gen(kp.secret_key);
 
-            std::vector<int64_t> vectorOfInts1 = {2};
-            Plaintext intArray1 = cc->MakeCoefPackedPlaintext(vectorOfInts1);
-            std::vector<int64_t> vectorOfInts2 = {3};
-            Plaintext intArray2 = cc->MakeCoefPackedPlaintext(vectorOfInts2);
-            std::vector<int64_t> vectorOfExpectedValues = {6};  // = vectorOfInts1 * vectorOfInts2
-            Plaintext expectedValues = cc->MakeCoefPackedPlaintext(vectorOfExpectedValues);
+            std::vector<int64_t> vector_of_ints1 = {2};
+            Plaintext int_array1 = cc->make_coef_packed_plaintext(vector_of_ints1);
+            std::vector<int64_t> vector_of_ints2 = {3};
+            Plaintext int_array2 = cc->make_coef_packed_plaintext(vector_of_ints2);
+            std::vector<int64_t> vector_of_expected_values = {6};  // = vector_of_ints1 * vector_of_ints2
+            Plaintext expected_values = cc->make_coef_packed_plaintext(vector_of_expected_values);
 
-            Ciphertext<Element> ciphertext1 = cc->Encrypt(kp.publicKey, intArray1);
-            Ciphertext<Element> ciphertext2 = cc->Encrypt(kp.publicKey, intArray2);
-            Ciphertext<Element> cResult = cc->EvalMult(ciphertext1, ciphertext2);
+            Ciphertext<Element> ciphertext1 = cc->encrypt(kp.public_key, int_array1);
+            Ciphertext<Element> ciphertext2 = cc->encrypt(kp.public_key, int_array2);
+            Ciphertext<Element> c_result = cc->eval_mult(ciphertext1, ciphertext2);
 
-            KeyPair<Element> newKp = cc->KeyGen();
-            EvalKey<Element> keySwitchHint2 = cc->KeySwitchGen(kp.secretKey, newKp.secretKey);
-            cc->KeySwitchInPlace(cResult, keySwitchHint2);
+            KeyPair<Element> new_kp = cc->key_gen();
+            EvalKey<Element> key_switch_hint2 = cc->key_switch_gen(kp.secret_key, new_kp.secret_key);
+            cc->key_switch_in_place(c_result, key_switch_hint2);
 
             Plaintext results;
-            cc->Decrypt(newKp.secretKey, cResult, &results);
-            results->SetLength(expectedValues->GetLength());
+            cc->decrypt(new_kp.secret_key, c_result, &results);
+            results->set_length(expected_values->get_length());
 
-            EXPECT_TRUE(checkEquality(results->GetCoefPackedValue(), expectedValues->GetCoefPackedValue()));
+            EXPECT_TRUE(check_equality(results->get_coef_packed_value(), expected_values->get_coef_packed_value()));
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -170,30 +170,30 @@ class UTBGVRNS_SHEADVANCED : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS_
         }
     }
 
-    void UnitTest_EvalAddSingle(const TEST_CASE_UTBGVRNS_SHEADVANCED& testData,
+    void unit_test_eval_add_single(const TEST_CASE_UTBGVRNS_SHEADVANCED& test_data,
                                 const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
             // Initialize the public key containers.
-            KeyPair<Element> kp = cc->KeyGen();
+            KeyPair<Element> kp = cc->key_gen();
 
-            std::vector<int64_t> vectorOfInts1 = {2, 3, 1, 4};
-            Plaintext intArray1 = cc->MakeCoefPackedPlaintext(vectorOfInts1);
-            std::vector<int64_t> vectorOfInts2 = {3, 6, 3, 1};
-            Plaintext intArray2 = cc->MakeCoefPackedPlaintext(vectorOfInts2);
-            std::vector<int64_t> vectorOfExpectedValues = {5, 9, 4, 5};  // = vectorOfInts1 + vectorOfInts2
-            Plaintext expectedValues = cc->MakeCoefPackedPlaintext(vectorOfExpectedValues);
+            std::vector<int64_t> vector_of_ints1 = {2, 3, 1, 4};
+            Plaintext int_array1 = cc->make_coef_packed_plaintext(vector_of_ints1);
+            std::vector<int64_t> vector_of_ints2 = {3, 6, 3, 1};
+            Plaintext int_array2 = cc->make_coef_packed_plaintext(vector_of_ints2);
+            std::vector<int64_t> vector_of_expected_values = {5, 9, 4, 5};  // = vector_of_ints1 + vector_of_ints2
+            Plaintext expected_values = cc->make_coef_packed_plaintext(vector_of_expected_values);
 
-            Ciphertext<Element> ciphertext1 = cc->Encrypt(kp.publicKey, intArray1);
-            Ciphertext<Element> ciphertext2 = cc->Encrypt(kp.publicKey, intArray2);
-            Ciphertext<Element> cResult = cc->EvalAdd(ciphertext1, ciphertext2);
+            Ciphertext<Element> ciphertext1 = cc->encrypt(kp.public_key, int_array1);
+            Ciphertext<Element> ciphertext2 = cc->encrypt(kp.public_key, int_array2);
+            Ciphertext<Element> c_result = cc->eval_add(ciphertext1, ciphertext2);
 
             Plaintext results;
-            cc->Decrypt(kp.secretKey, cResult, &results);
-            results->SetLength(expectedValues->GetLength());
+            cc->decrypt(kp.secret_key, c_result, &results);
+            results->set_length(expected_values->get_length());
 
-            EXPECT_TRUE(checkEquality(results->GetCoefPackedValue(), expectedValues->GetCoefPackedValue()));
+            EXPECT_TRUE(check_equality(results->get_coef_packed_value(), expected_values->get_coef_packed_value()));
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -205,21 +205,21 @@ class UTBGVRNS_SHEADVANCED : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS_
 };
 //===========================================================================================================
 TEST_P(UTBGVRNS_SHEADVANCED, SHEADVANCED) {
-    setupSignals();
+    setup_signals();
     auto test = GetParam();
 
-    switch (test.testCaseType) {
+    switch (test.test_case_type) {
         case EVAL_MULT_SINGLE:
-            UnitTest_EvalMultSingle(test, test.buildTestName());
+            unit_test_eval_mult_single(test, test.build_test_name());
             break;
         case EVAL_ADD_SINGLE:
-            UnitTest_EvalAddSingle(test, test.buildTestName());
+            unit_test_eval_add_single(test, test.build_test_name());
             break;
         default:
             break;
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTBGVRNS_SHEADVANCED, ::testing::ValuesIn(testCasesUTBGVRNS_SHEADVANCED), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTBGVRNS_SHEADVANCED, ::testing::ValuesIn(test_cases_utbgvrns_sheadvanced), testName);
 
 #endif

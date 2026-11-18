@@ -51,58 +51,58 @@
     #include TRANSFORM_IMPLEMENTATION
 #endif
 
-namespace lbcrypto {
+namespace cipher {
 
 template class DiscreteGaussianGeneratorImpl<NativeVector>;
 template class BinaryUniformGeneratorImpl<NativeVector>;
 template class TernaryUniformGeneratorImpl<NativeVector>;
 template class DiscreteUniformGeneratorImpl<NativeVector>;
 
-#if NATIVEINT != 32
+#if CIPHER_NATIVE_INT != 32
 // samplers at the 32-bit width, for the native 32-bit BinFHE key generation
 template class DiscreteGaussianGeneratorImpl<NativeVector32>;
 template class DiscreteUniformGeneratorImpl<NativeVector32>;
 #endif
 
-template NativeInteger RootOfUnity<NativeInteger>(uint32_t m, const NativeInteger& modulo);
-template std::vector<NativeInteger> RootsOfUnity(uint32_t m, const std::vector<NativeInteger>& moduli);
-template NativeInteger GreatestCommonDivisor(const NativeInteger& a, const NativeInteger& b);
-template bool MillerRabinPrimalityTest(const NativeInteger& p, const uint32_t niter);
-template const NativeInteger PollardRhoFactorization(const NativeInteger& n);
-template void PrimeFactorize(NativeInteger n, std::set<NativeInteger>& primeFactors);
-template NativeInteger FirstPrime(uint32_t nBits, uint64_t m);
-template NativeInteger LastPrime(uint32_t nBits, uint64_t m);
-template NativeInteger NextPrime(const NativeInteger& q, uint64_t m);
-template NativeInteger PreviousPrime(const NativeInteger& q, uint64_t m);
+template NativeInteger root_of_unity<NativeInteger>(uint32_t m, const NativeInteger& modulo);
+template std::vector<NativeInteger> roots_of_unity(uint32_t m, const std::vector<NativeInteger>& moduli);
+template NativeInteger greatest_common_divisor(const NativeInteger& a, const NativeInteger& b);
+template bool miller_rabin_primality_test(const NativeInteger& p, const uint32_t niter);
+template const NativeInteger pollard_rho_factorization(const NativeInteger& n);
+template void prime_factorize(NativeInteger n, std::set<NativeInteger>& prime_factors);
+template NativeInteger first_prime(uint32_t n_bits, uint64_t m);
+template NativeInteger last_prime(uint32_t n_bits, uint64_t m);
+template NativeInteger next_prime(const NativeInteger& q, uint64_t m);
+template NativeInteger previous_prime(const NativeInteger& q, uint64_t m);
 
-template std::vector<NativeInteger> GetTotientList(const NativeInteger& n);
-template std::vector<uint32_t> GetTotientList(const uint32_t& n);
+template std::vector<NativeInteger> get_totient_list(const NativeInteger& n);
+template std::vector<uint32_t> get_totient_list(const uint32_t& n);
 
-template NativeVector PolyMod(const NativeVector& dividend, const NativeVector& divisor, const NativeInteger& modulus);
-template NativeVector PolynomialMultiplication(const NativeVector& a, const NativeVector& b);
-template NativeVector GetCyclotomicPolynomial(uint32_t m, const NativeInteger& modulus);
-template NativeInteger SyntheticRemainder(const NativeVector& dividend, const NativeInteger& a,
+template NativeVector poly_mod(const NativeVector& dividend, const NativeVector& divisor, const NativeInteger& modulus);
+template NativeVector polynomial_multiplication(const NativeVector& a, const NativeVector& b);
+template NativeVector get_cyclotomic_polynomial(uint32_t m, const NativeInteger& modulus);
+template NativeInteger synthetic_remainder(const NativeVector& dividend, const NativeInteger& a,
                                           const NativeInteger& modulus);
-template NativeVector SyntheticPolyRemainder(const NativeVector& dividend, const NativeVector& aList,
+template NativeVector synthetic_poly_remainder(const NativeVector& dividend, const NativeVector& a_list,
                                              const NativeInteger& modulus);
-template NativeVector PolynomialPower<NativeVector>(const NativeVector& input, uint32_t power);
-template NativeVector SyntheticPolynomialDivision(const NativeVector& dividend, const NativeInteger& a,
+template NativeVector polynomial_power<NativeVector>(const NativeVector& input, uint32_t power);
+template NativeVector synthetic_polynomial_division(const NativeVector& dividend, const NativeInteger& a,
                                                   const NativeInteger& modulus);
-template NativeInteger FindGeneratorCyclic(const NativeInteger& modulo);
-template bool IsGenerator(const NativeInteger& g, const NativeInteger& modulo);
-template std::shared_ptr<std::vector<int64_t>> GetDigits(const NativeInteger& u, uint64_t base, uint32_t k);
+template NativeInteger find_generator_cyclic(const NativeInteger& modulo);
+template bool is_generator(const NativeInteger& g, const NativeInteger& modulo);
+template std::shared_ptr<std::vector<int64_t>> get_digits(const NativeInteger& u, uint64_t base, uint32_t k);
 
 template class Matrix<NativeInteger>;
 template class Matrix<NativeVector>;
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
-CEREAL_CLASS_VERSION(NativeInteger, NativeInteger::SerializedVersion());
-CEREAL_CLASS_VERSION(NativeVector, NativeVector::SerializedVersion());
+CEREAL_CLASS_VERSION(NativeInteger, NativeInteger::serialized_version());
+CEREAL_CLASS_VERSION(NativeVector, NativeVector::serialized_version());
 
 #ifdef TRANSFORM_IMPLEMENTATION
 MAKE_TRANSFORM_TYPES
-    #if NATIVEINT != 32
+    #if CIPHER_NATIVE_INT != 32
 MAKE_TRANSFORM_TYPES32
     #endif
 #endif

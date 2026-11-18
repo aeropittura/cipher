@@ -51,7 +51,7 @@
 //===========================================================================================================
 // simple macro for in cases with exceptions
 #define UT_EXPECT_THROW_SIMPLE(func)    \
-    PackedEncoding::Destroy();          \
+    PackedEncoding::destroy();          \
     try {                               \
         func;                           \
         EXPECT_EQ(0, 1);                \
@@ -71,7 +71,7 @@ constexpr double EPSILON_HIGH = 0.0001;
  * @param eps    minimum precision to consider a and b equal. Default is EPSILON
  */
 template <typename T>
-bool checkEquality(const T& a, const T& b, const double eps = EPSILON) {
+bool check_equality(const T& a, const T& b, const double eps = EPSILON) {
     return (std::abs(a - b) <= eps);
 }
 
@@ -80,12 +80,12 @@ bool checkEquality(const T& a, const T& b, const double eps = EPSILON) {
  *
  * @param a      first value to compare
  * @param b      second value to compare
- * @param errMsg Debug message to display upon failure
+ * @param err_msg Debug message to display upon failure
  * @param eps    minimum precision to consider a and b equal. Default is EPSILON
  */
 template <typename T>
-void checkEquality(const T& a, const T& b, const double eps, const std::string& errMsg) {
-    EXPECT_TRUE(checkEquality(a, b, eps)) << errMsg;
+void check_equality(const T& a, const T& b, const double eps, const std::string& err_msg) {
+    EXPECT_TRUE(check_equality(a, b, eps)) << err_msg;
 }
 
 /**
@@ -96,12 +96,12 @@ void checkEquality(const T& a, const T& b, const double eps, const std::string& 
  * @param eps    minimum precision to consider a and b equal. Default is EPSILON
  */
 template <typename V>
-bool checkEquality(const std::vector<V>& a, const std::vector<V>& b, const double eps = EPSILON) {
+bool check_equality(const std::vector<V>& a, const std::vector<V>& b, const double eps = EPSILON) {
     if (a.size() != b.size())
         return false;
 
     return std::equal(a.begin(), a.end(), b.begin(),
-                      [&eps](const V& a, const V& b) { return checkEquality(a, b, eps); });
+                      [&eps](const V& a, const V& b) { return check_equality(a, b, eps); });
 }
 
 /**
@@ -109,17 +109,17 @@ bool checkEquality(const std::vector<V>& a, const std::vector<V>& b, const doubl
  *
  * @param a      first vector to compare
  * @param b      second vector to compare
- * @param errMsg Debug message to display upon failure
+ * @param err_msg Debug message to display upon failure
  * @param eps    minimum precision to consider a and b equal. Default is EPSILON
  */
 template <typename V>
-void checkEquality(const std::vector<V>& a, const std::vector<V>& b, const double eps, const std::string& errMsg) {
-    EXPECT_TRUE(checkEquality(a, b, eps)) << errMsg;
+void check_equality(const std::vector<V>& a, const std::vector<V>& b, const double eps, const std::string& err_msg) {
+    EXPECT_TRUE(check_equality(a, b, eps)) << err_msg;
 }
 //===========================================================================================================
 // typename T can be any numeric type or float/double
 template <typename T>
-std::vector<std::complex<double>> toComplexDoubleVec(const std::vector<T>& v) {
+std::vector<std::complex<double>> to_complex_double_vec(const std::vector<T>& v) {
     std::vector<std::complex<double>> vec(v.size());
     std::transform(v.begin(), v.end(), vec.begin(), [](T elem) { return std::complex<double>(elem, 0); });
 
@@ -136,8 +136,8 @@ std::vector<std::complex<double>> toComplexDoubleVec(const std::vector<T>& v) {
 // }
 //===========================================================================================================
 // Helper function to check automorphism
-inline bool CheckAutomorphism(const std::vector<int64_t>& result, const std::vector<int64_t>& init) {
-    for (const auto& val : init) {
+inline bool check_automorphism(const std::vector<int64_t>& result, const std::vector<int64_t>& init_value) {
+    for (const auto& val : init_value) {
         if (!(std::find(result.begin(), result.end(), val) != result.end())) {
             return false;
         }
@@ -147,8 +147,8 @@ inline bool CheckAutomorphism(const std::vector<int64_t>& result, const std::vec
 }
 //===========================================================================================================
 // generate a random printable string of length outStrLength
-inline std::string RandomString(uint64_t outStringLength) {
-    auto getRandomChar = []() -> char {
+inline std::string random_string(uint64_t out_string_length) {
+    auto get_random_char = []() -> char {
         const char charset[] =
                 "0123456789"
                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -157,10 +157,10 @@ inline std::string RandomString(uint64_t outStringLength) {
         return charset[rand() % max_index];
     };
 
-    std::string retString(outStringLength, 0);
-    std::generate_n(retString.begin(), outStringLength, getRandomChar);
+    std::string ret_string(out_string_length, 0);
+    std::generate_n(ret_string.begin(), out_string_length, get_random_char);
 
-    return retString;
+    return ret_string;
 }
 //===========================================================================================================
 // check if a string is empty
@@ -200,8 +200,8 @@ inline void sighandler(int signum) {
     exit(1);
 }
 
-// setupSignals() should be included in to every unit test as it may help if a unit test crashes
-inline void setupSignals() {
+// setup_signals() should be included in to every unit test as it may help if a unit test crashes
+inline void setup_signals() {
     std::signal(SIGINT, sighandler);
     std::signal(SIGABRT, sighandler);
     std::signal(SIGFPE, sighandler);

@@ -38,7 +38,7 @@
 
 #include "cipher/boolean/context_ser.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 // path where files will be written to
 const std::string DATAFOLDER = "data";
@@ -46,28 +46,28 @@ const std::string DATAFOLDER = "data";
 int main() {
     // Generating the crypto context
 
-    auto cc1 = BinFHEContext();
+    auto cc1 = BooleanContext();
 
-    cc1.GenerateBinFHEContext(TOY);
+    cc1.generate_boolean_context(TOY);
 
     std::cout << "Generating keys." << std::endl;
 
     // Generating the secret key
-    auto sk1 = cc1.KeyGen();
+    auto sk1 = cc1.key_gen();
 
     // Generate the bootstrapping keys
-    cc1.BTKeyGen(sk1);
+    cc1.bt_key_gen(sk1);
 
     std::cout << "Done generating all keys." << std::endl;
 
     // Encryption for a ciphertext that will be serialized
-    auto ct1 = cc1.Encrypt(sk1, 1);
+    auto ct1 = cc1.encrypt(sk1, 1);
 
     // CODE FOR SERIALIZATION
 
     // Serializing key-independent crypto context
 
-    if (!Serial::SerializeToFile(DATAFOLDER + "/cryptoContext.txt", cc1, SerType::JSON)) {
+    if (!serialization::serialize_to_file(DATAFOLDER + "/cryptoContext.txt", cc1, SerType::JSON)) {
         std::cerr << "Error serializing the cryptocontext" << std::endl;
         return 1;
     }
@@ -75,7 +75,7 @@ int main() {
 
     // Serializing refreshing and key switching keys (needed for bootstrapping)
 
-    if (!Serial::SerializeToFile(DATAFOLDER + "/btKey.txt", cc1.GetBTKey(), SerType::JSON)) {
+    if (!serialization::serialize_to_file(DATAFOLDER + "/btKey.txt", cc1.get_bt_key(), SerType::JSON)) {
         std::cerr << "Error serializing the bootstrapping keys" << std::endl;
         return 1;
     }
@@ -83,7 +83,7 @@ int main() {
 
     // Serializing private keys
 
-    if (!Serial::SerializeToFile(DATAFOLDER + "/sk1.txt", sk1, SerType::JSON)) {
+    if (!serialization::serialize_to_file(DATAFOLDER + "/sk1.txt", sk1, SerType::JSON)) {
         std::cerr << "Error serializing sk1" << std::endl;
         return 1;
     }
@@ -91,7 +91,7 @@ int main() {
 
     // Serializing a ciphertext
 
-    if (!Serial::SerializeToFile(DATAFOLDER + "/ct1.txt", ct1, SerType::JSON)) {
+    if (!serialization::serialize_to_file(DATAFOLDER + "/ct1.txt", ct1, SerType::JSON)) {
         std::cerr << "Error serializing ct1" << std::endl;
         return 1;
     }
@@ -101,8 +101,8 @@ int main() {
 
     // Deserializing the cryptocontext
 
-    BinFHEContext cc;
-    if (Serial::DeserializeFromFile(DATAFOLDER + "/cryptoContext.txt", cc, SerType::JSON) == false) {
+    BooleanContext cc;
+    if (serialization::deserialize_from_file(DATAFOLDER + "/cryptoContext.txt", cc, SerType::JSON) == false) {
         std::cerr << "Could not deserialize the cryptocontext" << std::endl;
         return 1;
     }
@@ -110,20 +110,20 @@ int main() {
 
     // deserializing the refreshing and switching keys (for bootstrapping)
 
-    RingGSWBTKey btKey;
-    if (Serial::DeserializeFromFile(DATAFOLDER + "/btKey.txt", btKey, SerType::JSON) == false) {
+    RingGswBtKey bt_key;
+    if (serialization::deserialize_from_file(DATAFOLDER + "/btKey.txt", bt_key, SerType::JSON) == false) {
         std::cerr << "Could not deserialize the bootstrapping keys" << std::endl;
         return 1;
     }
     std::cout << "The bootstrapping keys have been deserialized." << std::endl;
 
     // Loading the keys in the cryptocontext
-    cc.BTKeyLoad(btKey);
+    cc.bt_key_load(bt_key);
 
     // Deserializing the secret key
 
-    LWEPrivateKey sk;
-    if (Serial::DeserializeFromFile(DATAFOLDER + "/sk1.txt", sk, SerType::JSON) == false) {
+    LwePrivateKey sk;
+    if (serialization::deserialize_from_file(DATAFOLDER + "/sk1.txt", sk, SerType::JSON) == false) {
         std::cerr << "Could not deserialize the secret key" << std::endl;
         return 1;
     }
@@ -131,8 +131,8 @@ int main() {
 
     // Deserializing a previously serialized ciphertext
 
-    LWECiphertext ct;
-    if (Serial::DeserializeFromFile(DATAFOLDER + "/ct1.txt", ct, SerType::JSON) == false) {
+    LweCiphertext ct;
+    if (serialization::deserialize_from_file(DATAFOLDER + "/ct1.txt", ct, SerType::JSON) == false) {
         std::cerr << "Could not deserialize the ciphertext" << std::endl;
         return 1;
     }
@@ -140,17 +140,17 @@ int main() {
 
     // OPERATIONS WITH DESERIALIZED KEYS AND CIPHERTEXTS
 
-    auto ct2 = cc.Encrypt(sk, 1);
+    auto ct2 = cc.encrypt(sk, 1);
 
     std::cout << "Running the computation" << std::endl;
 
-    auto ctResult = cc.EvalBinGate(AND, ct, ct2);
+    auto ct_result = cc.eval_bin_gate(AND, ct, ct2);
 
     std::cout << "The computation has completed" << std::endl;
 
-    LWEPlaintext result;
+    LwePlaintext result;
 
-    cc.Decrypt(sk, ctResult, &result);
+    cc.decrypt(sk, ct_result, &result);
 
     std::cout << "result of 1 AND 1 = " << result << std::endl;
 

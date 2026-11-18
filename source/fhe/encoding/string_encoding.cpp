@@ -38,74 +38,74 @@
 #include <cstdint>
 #include <string>
 
-namespace lbcrypto {
+namespace cipher {
 
-static const size_t charPtm = (1 << 8);
+static const size_t char_ptm = (1 << 8);
 static const uint32_t CHARMARKER = (1 << 7);
 
-bool StringEncoding::Encode() {
-    if (this->isEncoded)
+bool StringEncoding::encode() {
+    if (this->is_encoded_)
         return true;
-    auto mod = this->encodingParams->GetPlaintextModulus();
+    auto mod_value = this->encoding_params->get_plaintext_modulus();
 
-    if (mod != 256) {
-        OPENFHE_THROW("Plaintext modulus must be " + std::to_string(charPtm) + " for string encoding");
+    if (mod_value != 256) {
+        CIPHER_THROW("Plaintext modulus must be " + std::to_string(char_ptm) + " for string encoding");
     }
 
-    if (this->typeFlag == IsNativePoly) {
-        this->encodedNativeVector.SetValuesToZero();
+    if (this->type_flag == IsNativePoly) {
+        this->encoded_native_vector.set_values_to_zero();
         size_t i = 0;
-        for (; i < ptx.size() && i < this->encodedNativeVector.GetLength(); i++) {
-            this->encodedNativeVector[i] = static_cast<uint32_t>(ptx[i]);
+        for (; i < ptx.size() && i < this->encoded_native_vector.get_length(); i++) {
+            this->encoded_native_vector[i] = static_cast<uint32_t>(ptx[i]);
         }
-        for (; i < this->encodedNativeVector.GetLength(); i++) {
-            this->encodedNativeVector[i] = CHARMARKER;
+        for (; i < this->encoded_native_vector.get_length(); i++) {
+            this->encoded_native_vector[i] = CHARMARKER;
         }
     } else {
-        this->encodedVector.SetValuesToZero();
+        this->encoded_vector.set_values_to_zero();
         size_t i = 0;
-        for (; i < ptx.size() && i < this->encodedVector.GetLength(); i++) {
-            this->encodedVector[i] = static_cast<uint32_t>(ptx[i]);
+        for (; i < ptx.size() && i < this->encoded_vector.get_length(); i++) {
+            this->encoded_vector[i] = static_cast<uint32_t>(ptx[i]);
         }
-        for (; i < this->encodedVector.GetLength(); i++) {
-            this->encodedVector[i] = CHARMARKER;
+        for (; i < this->encoded_vector.get_length(); i++) {
+            this->encoded_vector[i] = CHARMARKER;
         }
     }
 
-    if (this->typeFlag == IsDCRTPoly) {
-        this->encodedVectorDCRT = this->encodedVector;
-        this->encodedVectorDCRT.SetFormat(Format::EVALUATION);
+    if (this->type_flag == IsDCRTPoly) {
+        this->encoded_vector_dcrt = this->encoded_vector;
+        this->encoded_vector_dcrt.set_format(Format::EVALUATION);
     }
 
-    this->isEncoded = true;
+    this->is_encoded_ = true;
     return true;
 }
 
 template <typename P>
-static void fillPlaintext(const P& poly, std::string& str, const PlaintextModulus& mod) {
+static void fill_plaintext(const P& poly, std::string& str, const PlaintextModulus& mod_value) {
     str.clear();
-    for (size_t i = 0; i < poly.GetLength(); i++) {
-        uint32_t ch = (poly[i].ConvertToInt() % mod) & 0xff;
+    for (size_t i = 0; i < poly.get_length(); i++) {
+        uint32_t ch = (poly[i].convert_to_int() % mod_value) & 0xff;
         if (ch == CHARMARKER)
             break;
         str += static_cast<char>(ch);
     }
 }
 
-bool StringEncoding::Decode() {
-    auto mod = this->encodingParams->GetPlaintextModulus();
+bool StringEncoding::decode() {
+    auto mod_value = this->encoding_params->get_plaintext_modulus();
 
-    if (this->typeFlag == IsNativePoly) {
-        fillPlaintext(this->encodedNativeVector, this->ptx, mod);
+    if (this->type_flag == IsNativePoly) {
+        fill_plaintext(this->encoded_native_vector, this->ptx, mod_value);
         // clears the values containing information about the noise
-        this->encodedNativeVector.SetValuesToZero();
+        this->encoded_native_vector.set_values_to_zero();
     } else {
-        fillPlaintext(this->encodedVector, this->ptx, mod);
+        fill_plaintext(this->encoded_vector, this->ptx, mod_value);
         // clears the values containing information about the noise
-        this->encodedVector.SetValuesToZero();
+        this->encoded_vector.set_values_to_zero();
     }
 
     return true;
 }
 
-} /* namespace lbcrypto */
+} /* namespace cipher */

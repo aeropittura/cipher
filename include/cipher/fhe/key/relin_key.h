@@ -42,10 +42,10 @@
 #include "cipher/fhe/key/relin_key_fwd.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Concrete class for Relinearization keys of RLWE scheme
@@ -54,8 +54,8 @@ namespace lbcrypto {
 template <class Element>
 class EvalKeyRelinImpl : public EvalKeyImpl<Element> {
   private:
-    std::vector<Element> m_AKey;
-    std::vector<Element> m_BKey;
+    std::vector<Element> a_key_;
+    std::vector<Element> b_key_;
 
   public:
     /**
@@ -75,7 +75,7 @@ class EvalKeyRelinImpl : public EvalKeyImpl<Element> {
      *@param rhs key to copy from
      */
     EvalKeyRelinImpl(const EvalKeyRelinImpl<Element>& rhs)
-        : EvalKeyImpl<Element>(rhs), m_AKey(rhs.m_AKey), m_BKey(rhs.m_BKey) {}
+        : EvalKeyImpl<Element>(rhs), a_key_(rhs.a_key_), b_key_(rhs.b_key_) {}
 
     /**
      * Move constructor
@@ -83,7 +83,7 @@ class EvalKeyRelinImpl : public EvalKeyImpl<Element> {
      *@param rhs key to move from
      */
     EvalKeyRelinImpl(EvalKeyRelinImpl<Element>&& rhs) noexcept
-        : EvalKeyImpl<Element>(std::move(rhs)), m_AKey(std::move(rhs.m_AKey)), m_BKey(std::move(rhs.m_BKey)) {}
+        : EvalKeyImpl<Element>(std::move(rhs)), a_key_(std::move(rhs.a_key_)), b_key_(std::move(rhs.b_key_)) {}
 
     /**
      * Checks whether the key is usable: it has a crypto context and both key vectors A and B are non-empty.
@@ -91,7 +91,7 @@ class EvalKeyRelinImpl : public EvalKeyImpl<Element> {
      * @return true if the key has a crypto context and non-empty A and B vectors
      */
     operator bool() const {
-        return (this->context != nullptr) && (m_AKey.size() != 0) && (m_BKey.size() != 0);
+        return (this->context != nullptr) && (a_key_.size() != 0) && (b_key_.size() != 0);
     }
 
     /**
@@ -102,8 +102,8 @@ class EvalKeyRelinImpl : public EvalKeyImpl<Element> {
      */
     EvalKeyRelinImpl<Element>& operator=(const EvalKeyRelinImpl<Element>& rhs) {
         EvalKeyImpl<Element>::operator=(rhs);
-        m_AKey = rhs.m_AKey;
-        m_BKey = rhs.m_BKey;
+        a_key_ = rhs.a_key_;
+        b_key_ = rhs.b_key_;
         return *this;
     }
 
@@ -115,8 +115,8 @@ class EvalKeyRelinImpl : public EvalKeyImpl<Element> {
      */
     EvalKeyRelinImpl<Element>& operator=(EvalKeyRelinImpl<Element>&& rhs) noexcept {
         EvalKeyImpl<Element>::operator=(std::move(rhs));
-        m_AKey = std::move(rhs.m_AKey);
-        m_BKey = std::move(rhs.m_BKey);
+        a_key_ = std::move(rhs.a_key_);
+        b_key_ = std::move(rhs.b_key_);
         return *this;
     }
 
@@ -126,8 +126,8 @@ class EvalKeyRelinImpl : public EvalKeyImpl<Element> {
      *
      * @param a is the Element vector to be copied.
      */
-    void SetAVector(const std::vector<Element>& a) override {
-        m_AKey = a;
+    void set_a_vector(const std::vector<Element>& a) override {
+        a_key_ = a;
     }
 
     /**
@@ -136,8 +136,8 @@ class EvalKeyRelinImpl : public EvalKeyImpl<Element> {
      *
      * @param a is the Element vector to be moved.
      */
-    void SetAVector(std::vector<Element>&& a) noexcept override {
-        m_AKey = std::move(a);
+    void set_a_vector(std::vector<Element>&& a) noexcept override {
+        a_key_ = std::move(a);
     }
 
     /**
@@ -146,8 +146,8 @@ class EvalKeyRelinImpl : public EvalKeyImpl<Element> {
      *
      * @return Element vector A.
      */
-    const std::vector<Element>& GetAVector() const override {
-        return m_AKey;
+    const std::vector<Element>& get_a_vector() const override {
+        return a_key_;
     }
 
     /**
@@ -156,8 +156,8 @@ class EvalKeyRelinImpl : public EvalKeyImpl<Element> {
      *
      * @param b is the Element vector to be copied.
      */
-    void SetBVector(const std::vector<Element>& b) override {
-        m_BKey = b;
+    void set_b_vector(const std::vector<Element>& b) override {
+        b_key_ = b;
     }
 
     /**
@@ -166,8 +166,8 @@ class EvalKeyRelinImpl : public EvalKeyImpl<Element> {
      *
      * @param b is the Element vector to be moved.
      */
-    void SetBVector(std::vector<Element>&& b) noexcept override {
-        m_BKey = std::move(b);
+    void set_b_vector(std::vector<Element>&& b) noexcept override {
+        b_key_ = std::move(b);
     }
 
     /**
@@ -176,16 +176,16 @@ class EvalKeyRelinImpl : public EvalKeyImpl<Element> {
      *
      * @return Element vector B.
      */
-    const std::vector<Element>& GetBVector() const override {
-        return m_BKey;
+    const std::vector<Element>& get_b_vector() const override {
+        return b_key_;
     }
 
     /**
      * Releases the key material: clears both key vectors A and B.
      */
-    void ClearKeys() override {
-        m_AKey.clear();
-        m_BKey.clear();
+    void clear_keys() override {
+        a_key_.clear();
+        b_key_.clear();
     }
 
     /**
@@ -197,36 +197,36 @@ class EvalKeyRelinImpl : public EvalKeyImpl<Element> {
      */
     bool key_compare(const EvalKeyImpl<Element>& rhs) const override {
         const auto& r = static_cast<const EvalKeyRelinImpl<Element>&>(rhs);
-        return CryptoObject<Element>::operator==(rhs) && m_AKey == r.m_AKey && m_BKey == r.m_BKey;
+        return CryptoObject<Element>::operator==(rhs) && a_key_ == r.a_key_ && b_key_ == r.b_key_;
     }
 
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
         ar(::cereal::base_class<EvalKeyImpl<Element>>(this));
-        ar(::cereal::make_nvp("ak", m_AKey));
-        ar(::cereal::make_nvp("bk", m_BKey));
+        ar(::cereal::make_nvp("ak", a_key_));
+        ar(::cereal::make_nvp("bk", b_key_));
     }
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
         ar(::cereal::base_class<EvalKeyImpl<Element>>(this));
-        ar(::cereal::make_nvp("ak", m_AKey));
-        ar(::cereal::make_nvp("bk", m_BKey));
+        ar(::cereal::make_nvp("ak", a_key_));
+        ar(::cereal::make_nvp("bk", b_key_));
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "EvalKeyRelin";
     }
 
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_KEY_RELIN_KEY_H_

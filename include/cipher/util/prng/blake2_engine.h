@@ -69,7 +69,7 @@ class Blake2Engine : public PRNG {
      * @param seed the 512-bit seed, used as the BLAKE2 key; wiped from the object by the destructor
      * @param counter initial value of the block counter hashed as the input message
      */
-    explicit Blake2Engine(const blake2_seed_array_t& seed, uint64_t counter) : m_seed{seed}, m_counter{counter} {}
+    explicit Blake2Engine(const blake2_seed_array_t& seed, uint64_t counter) : seed_{seed}, counter_{counter} {}
 
     ~Blake2Engine();
 
@@ -79,30 +79,30 @@ class Blake2Engine : public PRNG {
      * @return the next 32-bit pseudorandom sample
      */
     PRNG::result_type operator()() override {
-        if (m_bufferIndex == PRNG_BUFFER_SIZE) {
-            m_bufferIndex = 0;
-            Generate();
+        if (buffer_index_ == PRNG_BUFFER_SIZE) {
+            buffer_index_ = 0;
+            generate();
         }
-        return m_buffer[m_bufferIndex++];
+        return buffer_[buffer_index_++];
     }
 
  private:
     /**
      * @brief The main call to blake2xb function
      */
-    void Generate();
+    void generate();
 
     // The vector to store random samples generated using the hash function
-    blake2_buff_array_t m_buffer{};
+    blake2_buff_array_t buffer_{};
 
-    // Index in m_buffer corresponding to the current PRNG sample
-    size_t m_bufferIndex{PRNG_BUFFER_SIZE};
+    // Index in buffer_ corresponding to the current PRNG sample
+    size_t buffer_index_{PRNG_BUFFER_SIZE};
 
     // the seed for the hash function
-    blake2_seed_array_t m_seed{};
+    blake2_seed_array_t seed_{};
 
     // counter used as input to the hash function; gets incremented after each call
-    uint64_t m_counter{0};
+    uint64_t counter_{0};
 };
 
 /**

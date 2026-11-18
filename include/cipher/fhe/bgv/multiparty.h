@@ -39,38 +39,38 @@
 #include "cipher/fhe/rns/multiparty.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 /**
  * @brief BGV implementation of the threshold-FHE (multiparty) operations in the RNS representation.
  */
-class MultipartyBGVRNS : public MultipartyRNS {
+class BgvRnsMultiparty : public RnsMultiparty {
   public:
-    virtual ~MultipartyBGVRNS() {}
+    virtual ~BgvRnsMultiparty() {}
 
     /**
      * Threshold FHE: Combines the partial decryptions, modulus switches the sum down to a single tower and
      * reduces it modulo the plaintext modulus. For FLEXIBLEAUTO and FLEXIBLEAUTOEXT the scaling factor modulo
      * t is adjusted for the dropped towers and returned in the result.
      *
-     * @param ciphertextVec vector of "partial" decryptions.
+     * @param ciphertext_vec vector of "partial" decryptions.
      * @param plaintext the plaintext output as a NativePoly.
      * @return the decoding result (including the scaling factor modulo t).
      */
-    DecryptResult MultipartyDecryptFusion(const std::vector<Ciphertext<DCRTPoly>>& ciphertextVec,
+    DecryptResult multiparty_decrypt_fusion(const std::vector<Ciphertext<RnsPoly>>& ciphertext_vec,
                                           NativePoly* plaintext) const override;
 
     /**
      * Threshold FHE: Combines the partial decryptions, CRT-interpolates the sum to a large-integer polynomial
      * and reduces it modulo the plaintext modulus.
      *
-     * @param ciphertextVec vector of "partial" decryptions.
+     * @param ciphertext_vec vector of "partial" decryptions.
      * @param plaintext the plaintext output as a Poly.
      * @return the decoding result.
      */
-    DecryptResult MultipartyDecryptFusion(const std::vector<Ciphertext<DCRTPoly>>& ciphertextVec,
+    DecryptResult multiparty_decrypt_fusion(const std::vector<Ciphertext<RnsPoly>>& ciphertext_vec,
                                           Poly* plaintext) const override;
 
     /////////////////////////////////////
@@ -83,10 +83,10 @@ class MultipartyBGVRNS : public MultipartyRNS {
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {}
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "MultipartyBGVRNS";
     }
 };
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_BGV_MULTIPARTY_H_

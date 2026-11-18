@@ -38,7 +38,7 @@
 #include "cipher/boolean/context_ser.h"
 #include "gtest/gtest.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 // BinFHE at the build's true native word size.
 //
@@ -51,10 +51,10 @@ using namespace lbcrypto;
 // A NATIVE_SIZE=32 build has no narrowed form to select, so the native size is what the rest
 // of the suite already covers and this file is empty there.
 //
-// For anyone extending these: BTKeyGen defaults to internal32 = true, so a test that wants a
+// For anyone extending these: bt_key_gen defaults to internal32 = true, so a test that wants a
 // native-width key must say so.
 
-#if NATIVEINT != 32
+#if CIPHER_NATIVE_INT != 32
 
 namespace {
 
@@ -68,13 +68,13 @@ const std::vector<Gate> gates{{AND, "AND", {0, 0, 0, 1}}, {OR, "OR", {0, 1, 1, 1
                               {NOR, "NOR", {1, 0, 0, 0}}, {XOR, "XOR", {0, 1, 1, 0}}, {XNOR, "XNOR", {1, 0, 0, 1}}};
 
 // every gate against every input pair, decrypted and compared with its truth table
-void ExpectTruthTables(BinFHEContext& cc, ConstLWEPrivateKey& sk, const std::string& msg) {
+void expect_truth_tables(BooleanContext& cc, ConstLwePrivateKey& sk, const std::string& msg) {
     for (const auto& g : gates) {
         for (int a = 0; a < 2; ++a) {
             for (int b = 0; b < 2; ++b) {
-                auto ct = cc.EvalBinGate(g.gate, cc.Encrypt(sk, a), cc.Encrypt(sk, b));
-                LWEPlaintext result;
-                cc.Decrypt(sk, ct, &result);
+                auto ct = cc.eval_bin_gate(g.gate, cc.encrypt(sk, a), cc.encrypt(sk, b));
+                LwePlaintext result;
+                cc.decrypt(sk, ct, &result);
                 EXPECT_EQ(g.truth[2 * a + b], static_cast<int>(result))
                         << msg << " " << g.name << "(" << a << "," << b << ")";
             }
@@ -86,82 +86,82 @@ void ExpectTruthTables(BinFHEContext& cc, ConstLWEPrivateKey& sk, const std::str
 
 // Narrowing an existing key must not change a single ciphertext bit: same key, same inputs,
 // evaluated before and after the conversion.
-void UnitTestInternal32BitIdentical(BINFHE_PARAMSET set, BINFHE_METHOD method, const std::string& msg) {
-    BinFHEContext cc;
-    cc.GenerateBinFHEContext(set, method);
-    auto sk = cc.KeyGen();
-    cc.BTKeyGen(sk, SYM_ENCRYPT, /*internal32=*/false);
-    ASSERT_FALSE(cc.HasInternal32RefreshKey()) << msg << " expected a native-width refresh key to start from";
+void unit_test_internal32_bit_identical(BINFHE_PARAMSET set, BINFHE_METHOD method, const std::string& msg) {
+    BooleanContext cc;
+    cc.generate_boolean_context(set, method);
+    auto sk = cc.key_gen();
+    cc.bt_key_gen(sk, SYM_ENCRYPT, /*internal32=*/false);
+    ASSERT_FALSE(cc.has_internal32_refresh_key()) << msg << " expected a native-width refresh key to start from";
 
     // fixed inputs, so the two evaluations differ only in the key representation
-    std::vector<LWECiphertext> in0, in1, before;
+    std::vector<LweCiphertext> in0, in1, before;
     for (const auto& g : gates) {
-        in0.push_back(cc.Encrypt(sk, 1));
-        in1.push_back(cc.Encrypt(sk, 0));
-        before.push_back(cc.EvalBinGate(g.gate, in0.back(), in1.back()));
+        in0.push_back(cc.encrypt(sk, 1));
+        in1.push_back(cc.encrypt(sk, 0));
+        before.push_back(cc.eval_bin_gate(g.gate, in0.back(), in1.back()));
     }
 
     // narrow through the public route an application would use
-    cc.BTKeyLoad(cc.GetBTKey(), /*internal32=*/true);
-    ASSERT_TRUE(cc.HasInternal32RefreshKey()) << msg << " refresh key did not convert";
-    ASSERT_TRUE(cc.HasInternal32SwitchKey()) << msg << " switching key did not convert";
+    cc.bt_key_load(cc.get_bt_key(), /*internal32=*/true);
+    ASSERT_TRUE(cc.has_internal32_refresh_key()) << msg << " refresh key did not convert";
+    ASSERT_TRUE(cc.has_internal32_switch_key()) << msg << " switching key did not convert";
 
     for (size_t i = 0; i < gates.size(); ++i) {
-        auto after = cc.EvalBinGate(gates[i].gate, in0[i], in1[i]);
+        auto after = cc.eval_bin_gate(gates[i].gate, in0[i], in1[i]);
         EXPECT_EQ(*before[i], *after) << msg << " " << gates[i].name << " differs after narrowing";
     }
 }
 
 // Keys generated directly in the 32-bit form are not bit-comparable with narrowed ones, because
 // they are sampled natively, so the truth tables are the oracle.
-void UnitTestInternal32KeyGen(BINFHE_PARAMSET set, BINFHE_METHOD method, const std::string& msg) {
-    BinFHEContext cc;
-    cc.GenerateBinFHEContext(set, method);
-    auto sk = cc.KeyGen();
-    cc.BTKeyGen(sk, SYM_ENCRYPT, /*internal32=*/true);
-    EXPECT_TRUE(cc.HasInternal32RefreshKey()) << msg << " refresh key was not generated in 32-bit form";
-    EXPECT_TRUE(cc.HasInternal32SwitchKey()) << msg << " switching key was not generated in 32-bit form";
-    ExpectTruthTables(cc, sk, msg);
+void unit_test_internal32_key_gen(BINFHE_PARAMSET set, BINFHE_METHOD method, const std::string& msg) {
+    BooleanContext cc;
+    cc.generate_boolean_context(set, method);
+    auto sk = cc.key_gen();
+    cc.bt_key_gen(sk, SYM_ENCRYPT, /*internal32=*/true);
+    EXPECT_TRUE(cc.has_internal32_refresh_key()) << msg << " refresh key was not generated in 32-bit form";
+    EXPECT_TRUE(cc.has_internal32_switch_key()) << msg << " switching key was not generated in 32-bit form";
+    expect_truth_tables(cc, sk, msg);
 }
 
 // The native word size, whatever the build selected. Asking for it explicitly matters twice
 // over: no other test reaches it any more, and a parameter set that merely fails to qualify
 // would give a mixed context rather than a native one.
-void UnitTestNativeSizePath(BINFHE_PARAMSET set, BINFHE_METHOD method, const std::string& msg) {
-    BinFHEContext cc;
-    cc.GenerateBinFHEContext(set, method);
-    auto sk = cc.KeyGen();
-    cc.BTKeyGen(sk, SYM_ENCRYPT, /*internal32=*/false);
-    ASSERT_FALSE(cc.HasInternal32RefreshKey()) << msg << " refresh key should have stayed native width";
-    ASSERT_FALSE(cc.HasInternal32SwitchKey()) << msg << " switching key should have stayed native width";
-    ExpectTruthTables(cc, sk, msg);
+void unit_test_native_size_path(BINFHE_PARAMSET set, BINFHE_METHOD method, const std::string& msg) {
+    BooleanContext cc;
+    cc.generate_boolean_context(set, method);
+    auto sk = cc.key_gen();
+    cc.bt_key_gen(sk, SYM_ENCRYPT, /*internal32=*/false);
+    ASSERT_FALSE(cc.has_internal32_refresh_key()) << msg << " refresh key should have stayed native width";
+    ASSERT_FALSE(cc.has_internal32_switch_key()) << msg << " switching key should have stayed native width";
+    expect_truth_tables(cc, sk, msg);
 }
 
 TEST(UnitTestFHEWNativeSize, NativeSizePathGINX) {
-    UnitTestNativeSizePath(TOY, GINX, "UnitTestFHEWNativeSize.NativeSizePathGINX:");
+    unit_test_native_size_path(TOY, GINX, "UnitTestFHEWNativeSize.NativeSizePathGINX:");
 }
 TEST(UnitTestFHEWNativeSize, NativeSizePathAP) {
-    UnitTestNativeSizePath(TOY, AP, "UnitTestFHEWNativeSize.NativeSizePathAP:");
+    unit_test_native_size_path(TOY, AP, "UnitTestFHEWNativeSize.NativeSizePathAP:");
 }
 TEST(UnitTestFHEWNativeSize, NativeSizePathLMKCDEY) {
-    UnitTestNativeSizePath(TOY, LMKCDEY, "UnitTestFHEWNativeSize.NativeSizePathLMKCDEY:");
+    unit_test_native_size_path(TOY, LMKCDEY, "UnitTestFHEWNativeSize.NativeSizePathLMKCDEY:");
 }
 
 TEST(UnitTestFHEWNativeSize, BitIdenticalGINX) {
-    UnitTestInternal32BitIdentical(TOY, GINX, "UnitTestFHEWNativeSize.BitIdenticalGINX:");
+    unit_test_internal32_bit_identical(TOY, GINX, "UnitTestFHEWNativeSize.BitIdenticalGINX:");
 }
 TEST(UnitTestFHEWNativeSize, BitIdenticalAP) {
-    UnitTestInternal32BitIdentical(TOY, AP, "UnitTestFHEWNativeSize.BitIdenticalAP:");
+    unit_test_internal32_bit_identical(TOY, AP, "UnitTestFHEWNativeSize.BitIdenticalAP:");
 }
 TEST(UnitTestFHEWNativeSize, BitIdenticalLMKCDEY) {
-    UnitTestInternal32BitIdentical(TOY, LMKCDEY, "UnitTestFHEWNativeSize.BitIdenticalLMKCDEY:");
+    unit_test_internal32_bit_identical(TOY, LMKCDEY, "UnitTestFHEWNativeSize.BitIdenticalLMKCDEY:");
 }
 
 TEST(UnitTestFHEWNativeSize, Internal32KeyGenGINX) {
-    UnitTestInternal32KeyGen(TOY, GINX, "UnitTestFHEWNativeSize.Internal32KeyGenGINX:");
+    unit_test_internal32_key_gen(TOY, GINX, "UnitTestFHEWNativeSize.Internal32KeyGenGINX:");
 }
 TEST(UnitTestFHEWNativeSize, Internal32KeyGenLMKCDEY) {
-    UnitTestInternal32KeyGen(TOY, LMKCDEY, "UnitTestFHEWNativeSize.Internal32KeyGenLMKCDEY:");
+    unit_test_internal32_key_gen(TOY, LMKCDEY, "UnitTestFHEWNativeSize.Internal32KeyGenLMKCDEY:");
 }
 
 // Qualification is per key. Every predefined set now fits both keys, so the mixed case is
@@ -169,132 +169,132 @@ TEST(UnitTestFHEWNativeSize, Internal32KeyGenLMKCDEY) {
 // key-switching modulus still fits, so the context ends up mixed and must still evaluate.
 TEST(UnitTestFHEWNativeSize, PartialQualification) {
     const std::string msg("UnitTestFHEWNativeSize.PartialQualification:");
-    BinFHEContext cc;
-    cc.GenerateBinFHEContext(
-            BinFHEContextParams{37, 4096, 821, 2048, 32768, 32, 8192, 64, 10, UNIFORM_TERNARY, 3.19, {}}, GINX);
-    auto sk = cc.KeyGen();
-    cc.BTKeyGen(sk, SYM_ENCRYPT, /*internal32=*/true);
-    EXPECT_FALSE(cc.HasInternal32RefreshKey()) << msg << " a 37-bit modulus must not yield a 32-bit refresh key";
-    EXPECT_TRUE(cc.HasInternal32SwitchKey()) << msg << " the key-switching modulus fits and should convert";
+    BooleanContext cc;
+    cc.generate_boolean_context(
+            BooleanContextParams{37, 4096, 821, 2048, 32768, 32, 8192, 64, 10, UNIFORM_TERNARY, 3.19, {}}, GINX);
+    auto sk = cc.key_gen();
+    cc.bt_key_gen(sk, SYM_ENCRYPT, /*internal32=*/true);
+    EXPECT_FALSE(cc.has_internal32_refresh_key()) << msg << " a 37-bit modulus must not yield a 32-bit refresh key";
+    EXPECT_TRUE(cc.has_internal32_switch_key()) << msg << " the key-switching modulus fits and should convert";
 
-    LWEPlaintext result;
-    cc.Decrypt(sk, cc.EvalBinGate(AND, cc.Encrypt(sk, 1), cc.Encrypt(sk, 1)), &result);
+    LwePlaintext result;
+    cc.decrypt(sk, cc.eval_bin_gate(AND, cc.encrypt(sk, 1), cc.encrypt(sk, 1)), &result);
     EXPECT_EQ(1, static_cast<int>(result)) << msg << " AND(1,1) on the mixed path";
 }
 
 // Loading a 64-bit key with internal32 requested must narrow it and keep evaluating correctly.
 TEST(UnitTestFHEWNativeSize, KeyLoadNarrows) {
     const std::string msg("UnitTestFHEWNativeSize.KeyLoadNarrows:");
-    BinFHEContext src;
-    src.GenerateBinFHEContext(TOY, GINX);
-    auto sk = src.KeyGen();
-    src.BTKeyGen(sk, SYM_ENCRYPT, /*internal32=*/false);
+    BooleanContext src;
+    src.generate_boolean_context(TOY, GINX);
+    auto sk = src.key_gen();
+    src.bt_key_gen(sk, SYM_ENCRYPT, /*internal32=*/false);
 
-    BinFHEContext dst;
-    dst.GenerateBinFHEContext(TOY, GINX);
-    dst.BTKeyLoad(src.GetBTKey(), /*internal32=*/true);
-    EXPECT_TRUE(dst.HasInternal32RefreshKey()) << msg << " loaded refresh key did not narrow";
-    EXPECT_TRUE(dst.HasInternal32SwitchKey()) << msg << " loaded switching key did not narrow";
-    ExpectTruthTables(dst, sk, msg);
+    BooleanContext dst;
+    dst.generate_boolean_context(TOY, GINX);
+    dst.bt_key_load(src.get_bt_key(), /*internal32=*/true);
+    EXPECT_TRUE(dst.has_internal32_refresh_key()) << msg << " loaded refresh key did not narrow";
+    EXPECT_TRUE(dst.has_internal32_switch_key()) << msg << " loaded switching key did not narrow";
+    expect_truth_tables(dst, sk, msg);
 }
 
 // A 32-bit key serializes at its own width, and the archive records which width that was, so it
 // reloads narrow by default and widens only when the caller asks for the native form.
 TEST(UnitTestFHEWNativeSize, NarrowKeysSerializeNarrow) {
     const std::string msg("UnitTestFHEWNativeSize.NarrowKeysSerializeNarrow:");
-    BinFHEContext cc;
-    cc.GenerateBinFHEContext(TOY, GINX);
-    auto sk = cc.KeyGen();
-    cc.BTKeyGen(sk, SYM_ENCRYPT, /*internal32=*/true);
-    ASSERT_TRUE(cc.HasInternal32RefreshKey()) << msg << " expected a 32-bit refresh key to start from";
-    ASSERT_EQ(nullptr, cc.GetRefreshKey()) << msg << " the 64-bit handle must be empty while the 32-bit one is held";
+    BooleanContext cc;
+    cc.generate_boolean_context(TOY, GINX);
+    auto sk = cc.key_gen();
+    cc.bt_key_gen(sk, SYM_ENCRYPT, /*internal32=*/true);
+    ASSERT_TRUE(cc.has_internal32_refresh_key()) << msg << " expected a 32-bit refresh key to start from";
+    ASSERT_EQ(nullptr, cc.get_refresh_key()) << msg << " the 64-bit handle must be empty while the 32-bit one is held";
 
     std::stringstream s;
-    Serial::Serialize(cc.GetBTKey(), s, SerType::BINARY);
-    EXPECT_TRUE(cc.HasInternal32RefreshKey()) << msg << " the context lost its 32-bit refresh key";
-    EXPECT_TRUE(cc.HasInternal32SwitchKey()) << msg << " the context lost its 32-bit switching key";
+    serialization::to_stream(cc.get_bt_key(), s, SerType::BINARY);
+    EXPECT_TRUE(cc.has_internal32_refresh_key()) << msg << " the context lost its 32-bit refresh key";
+    EXPECT_TRUE(cc.has_internal32_switch_key()) << msg << " the context lost its 32-bit switching key";
 
-    RingGSWBTKey key;
-    Serial::Deserialize(key, s, SerType::BINARY);
-    ASSERT_NE(nullptr, key.BSkey32) << msg << " the archive should carry the 32-bit refresh key";
-    ASSERT_NE(nullptr, key.KSkey32) << msg << " the archive should carry the 32-bit switching key";
-    EXPECT_EQ(nullptr, key.BSkey) << msg << " no 64-bit refresh key should have been written";
-    EXPECT_EQ(*key.BSkey32, *cc.GetBTKey().BSkey32) << msg << " refresh key differs after the round trip";
-    EXPECT_EQ(*key.KSkey32, *cc.GetBTKey().KSkey32) << msg << " switching key differs after the round trip";
+    RingGswBtKey key;
+    serialization::from_stream(key, s, SerType::BINARY);
+    ASSERT_NE(nullptr, key.b_skey32) << msg << " the archive should carry the 32-bit refresh key";
+    ASSERT_NE(nullptr, key.ks_key32) << msg << " the archive should carry the 32-bit switching key";
+    EXPECT_EQ(nullptr, key.b_skey) << msg << " no 64-bit refresh key should have been written";
+    EXPECT_EQ(*key.b_skey32, *cc.get_bt_key().b_skey32) << msg << " refresh key differs after the round trip";
+    EXPECT_EQ(*key.ks_key32, *cc.get_bt_key().ks_key32) << msg << " switching key differs after the round trip";
 
-    BinFHEContext narrow;
-    narrow.GenerateBinFHEContext(TOY, GINX);
-    narrow.BTKeyLoad(key, /*internal32=*/true);
-    EXPECT_TRUE(narrow.HasInternal32RefreshKey()) << msg << " the narrow archive should load narrow";
-    ExpectTruthTables(narrow, sk, msg);
+    BooleanContext narrow;
+    narrow.generate_boolean_context(TOY, GINX);
+    narrow.bt_key_load(key, /*internal32=*/true);
+    EXPECT_TRUE(narrow.has_internal32_refresh_key()) << msg << " the narrow archive should load narrow";
+    expect_truth_tables(narrow, sk, msg);
 
-    BinFHEContext wide;
-    wide.GenerateBinFHEContext(TOY, GINX);
-    wide.BTKeyLoad(key, /*internal32=*/false);
-    EXPECT_FALSE(wide.HasInternal32RefreshKey()) << msg << " asking for the native width should widen";
-    ExpectTruthTables(wide, sk, msg);
+    BooleanContext wide;
+    wide.generate_boolean_context(TOY, GINX);
+    wide.bt_key_load(key, /*internal32=*/false);
+    EXPECT_FALSE(wide.has_internal32_refresh_key()) << msg << " asking for the native width should widen";
+    expect_truth_tables(wide, sk, msg);
 }
 
-// The switching key holds rows for digit values 1..baseKS-1 only, and its top digit position only
-// for the values a coefficient below qKS can reach, in both key widths; the key switch still decrypts.
+// The switching key holds rows for digit values 1..base_ks-1 only, and its top digit position only
+// for the values a coefficient below q_ks can reach, in both key widths; the key switch still decrypts.
 TEST(UnitTestFHEWNativeSize, SwitchingKeyTopPositionCompact) {
     const std::string msg("UnitTestFHEWNativeSize.SwitchingKeyTopPositionCompact:");
-    BinFHEContext cc;
-    cc.GenerateBinFHEContext(STD128, GINX);
-    auto&& lwe = cc.GetParams()->GetLWEParams();
-    const uint32_t d = lwe->GetDigitCountKS();
-    const uint32_t baseKS = lwe->GetBaseKS();
-    const uint32_t top = lwe->GetDigitExtentKS(d - 1);
+    BooleanContext cc;
+    cc.generate_boolean_context(STD128, GINX);
+    auto&& lwe = cc.get_params()->get_lwe_params();
+    const uint32_t d = lwe->get_digit_count_ks();
+    const uint32_t base_ks = lwe->get_base_ks();
+    const uint32_t top = lwe->get_digit_extent_ks(d - 1);
     ASSERT_EQ(2u, d) << msg;
-    EXPECT_EQ(baseKS, lwe->GetDigitExtentKS(0)) << msg;
+    EXPECT_EQ(base_ks, lwe->get_digit_extent_ks(0)) << msg;
     EXPECT_EQ(128u, top) << msg << " qKS = 2^15 in base 256 reaches 128 values at the top position";
 
-    auto sk = cc.KeyGen();
-    auto skN = cc.KeyGenN();
-    auto ksk = cc.KeySwitchGen(sk, skN);
-    const auto& A = ksk->GetElementsA();
-    ASSERT_EQ(lwe->GetN(), A.size()) << msg;
-    ASSERT_EQ(baseKS - 1, A[0].size()) << msg << " no row for digit value 0";
+    auto sk = cc.key_gen();
+    auto sk_n = cc.key_gen_n();
+    auto ksk = cc.key_switch_gen(sk, sk_n);
+    const auto& A = ksk->get_elements_a();
+    ASSERT_EQ(lwe->get_N(), A.size()) << msg;
+    ASSERT_EQ(base_ks - 1, A[0].size()) << msg << " no row for digit value 0";
     EXPECT_EQ(d, A[0][top - 2].size()) << msg;
     EXPECT_EQ(d - 1, A[0][top - 1].size()) << msg << " rows above the top extent must not be stored";
 
-    auto ct = cc.Encrypt(skN, 1, LARGE_DIM, 4, lwe->GetQ());
-    LWEPlaintext result;
-    cc.Decrypt(sk, cc.SwitchCTtoqn(ksk, ct), &result);
+    auto ct = cc.encrypt(sk_n, 1, LARGE_DIM, 4, lwe->get_Q());
+    LwePlaintext result;
+    cc.decrypt(sk, cc.switch_c_ttoqn(ksk, ct), &result);
     EXPECT_EQ(1, static_cast<int>(result)) << msg;
 
-    LWESwitchingKey32Impl narrow(*lwe, *ksk);
-    const uint64_t rows = static_cast<uint64_t>(lwe->GetN()) * ((d - 1) * (baseKS - 1) + (top - 1));
-    EXPECT_EQ(rows * (lwe->Getn() + 1) * sizeof(uint32_t), narrow.KeyBytes()) << msg;
-    EXPECT_EQ(*ksk, *narrow.Widen(*lwe)) << msg << " narrowing and widening must round-trip the compact key";
+    LweSwitchingKey32Impl narrow(*lwe, *ksk);
+    const uint64_t rows = static_cast<uint64_t>(lwe->get_N()) * ((d - 1) * (base_ks - 1) + (top - 1));
+    EXPECT_EQ(rows * (lwe->get_n() + 1) * sizeof(uint32_t), narrow.key_bytes()) << msg;
+    EXPECT_EQ(*ksk, *narrow.widen(*lwe)) << msg << " narrowing and widening must round-trip the compact key";
 }
 
 TEST(UnitTestFHEWNativeSize, SwitchingKey32FitsCapsModulus) {
-    auto Q = LastPrime<NativeInteger>(27, 1024);
-    auto fits = [&](uint64_t qKS) {
-        return LWESwitchingKey32Impl::Fits(LWECryptoParams(64, 512, 512, Q, qKS, 3.19, 32));
+    auto Q = last_prime<NativeInteger>(27, 1024);
+    auto fits_fn = [&](uint64_t q_ks) {
+        return LweSwitchingKey32Impl::fits(LweCryptoParams(64, 512, 512, Q, q_ks, 3.19, 32));
     };
-    EXPECT_TRUE(fits((1ull << 28) - 57));
-    EXPECT_FALSE(fits(1ull << 28));
-    EXPECT_FALSE(fits((1ull << 31) + 11));
-    EXPECT_FALSE(fits((1ull << 32) - 5));
+    EXPECT_TRUE(fits_fn((1ull << 28) - 57));
+    EXPECT_FALSE(fits_fn(1ull << 28));
+    EXPECT_FALSE(fits_fn((1ull << 31) + 11));
+    EXPECT_FALSE(fits_fn((1ull << 32) - 5));
 }
 
 TEST(UnitTestFHEWNativeSize, SwitchingKey32RejectsCiphertextAboveKeySwitchingModulus) {
     const std::string msg("UnitTestFHEWNativeSize.SwitchingKey32RejectsCiphertextAboveKeySwitchingModulus:");
-    BinFHEContext cc;
-    cc.GenerateBinFHEContext(BinFHEContextParams{27, 1024, 64, 512, 16384, 32, 512, 23, 9, UNIFORM_TERNARY, 3.19, {}},
+    BooleanContext cc;
+    cc.generate_boolean_context(BooleanContextParams{27, 1024, 64, 512, 16384, 32, 512, 23, 9, UNIFORM_TERNARY, 3.19, {}},
                              GINX);
-    auto&& lwe = cc.GetParams()->GetLWEParams();
-    auto sk = cc.KeyGen();
-    auto skN = cc.KeyGenN();
-    auto ksk = std::make_shared<LWESwitchingKey32Impl>(*lwe, *cc.KeySwitchGen(sk, skN));
-    auto ctQ = cc.Encrypt(skN, 1, LARGE_DIM, 4, lwe->GetQ());
-    EXPECT_THROW(cc.GetLWEScheme()->KeySwitch(lwe, ksk, ctQ), OpenFHEException) << msg;
+    auto&& lwe = cc.get_params()->get_lwe_params();
+    auto sk = cc.key_gen();
+    auto sk_n = cc.key_gen_n();
+    auto ksk = std::make_shared<LweSwitchingKey32Impl>(*lwe, *cc.key_switch_gen(sk, sk_n));
+    auto ct_q = cc.encrypt(sk_n, 1, LARGE_DIM, 4, lwe->get_Q());
+    EXPECT_THROW(cc.get_lwe_scheme()->key_switch(lwe, ksk, ct_q), CipherException) << msg;
 
-    LWEPlaintext result;
-    cc.Decrypt(sk, cc.GetLWEScheme()->SwitchCTtoqn(lwe, ksk, ctQ), &result);
+    LwePlaintext result;
+    cc.decrypt(sk, cc.get_lwe_scheme()->switch_c_ttoqn(lwe, ksk, ct_q), &result);
     EXPECT_EQ(1, static_cast<int>(result)) << msg;
 }
 
-#endif  // NATIVEINT != 32
+#endif  // CIPHER_NATIVE_INT != 32

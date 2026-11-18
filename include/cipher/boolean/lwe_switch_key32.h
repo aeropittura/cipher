@@ -42,79 +42,79 @@
 #include "cipher/boolean/lwe_switch_key_fwd.h"
 #include "cipher/util/serializable.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-#if NATIVEINT != 32
+#if CIPHER_NATIVE_INT != 32
 
-class LWESwitchingKey32Impl;
-using LWESwitchingKey32 = std::shared_ptr<LWESwitchingKey32Impl>;
-using ConstLWESwitchingKey32 = const std::shared_ptr<const LWESwitchingKey32Impl>;
+class LweSwitchingKey32Impl;
+using LweSwitchingKey32 = std::shared_ptr<LweSwitchingKey32Impl>;
+using ConstLweSwitchingKey32 = const std::shared_ptr<const LweSwitchingKey32Impl>;
 
 /**
  * @brief 32-bit internal form of the LWE key switching key.
  *
- * Every stored value is a residue mod qKS, so when qKS fits a 32-bit word the key stores in half
+ * Every stored value is a residue mod q_ks, so when q_ks fits a 32-bit word the key stores in half
  * the memory of the 64-bit form -- and it is by far the largest key object. Storage is two flat
- * arrays indexed by (LWE index i, digit position, digit value): rows of n words in m_keyA and one
- * word each in m_keyB, replacing the nested vector-of-vectors layout. Rows exist for digit values
- * 1..baseKS-1 only -- the value-0 row would encrypt zero and the key switch skips zero digits --
- * and the top digit position holds only the values a coefficient below qKS can reach. The key switch itself
+ * arrays indexed by (LWE index i, digit position, digit value): rows of n words in key_a_ and one
+ * word each in key_b_, replacing the nested vector-of-vectors layout. Rows exist for digit values
+ * 1..base_ks-1 only -- the value-0 row would encrypt zero and the key switch skips zero digits --
+ * and the top digit position holds only the values a coefficient below q_ks can reach. The key switch itself
  * accumulates rows in uint64 and reduces once per output coefficient, which yields the same
  * residues as the 64-bit path, so results are bit-identical.
  */
-class LWESwitchingKey32Impl : public Serializable {
+class LweSwitchingKey32Impl : public Serializable {
   public:
-    LWESwitchingKey32Impl() = default;
+    LweSwitchingKey32Impl() = default;
 
     /**
      * Checks whether the parameters qualify for the 32-bit switching key: generation runs on 32-bit kernels, exact up
-     * to MAX_MODULUS_SIZE32 bits of qKS, and the key switch accumulates N*digitCount unreduced rows below qKS in a
+     * to MAX_MODULUS_SIZE32 bits of q_ks, and the key switch accumulates N*digit_count unreduced rows below q_ks in a
      * 64-bit word
      *
      * @param params LWE scheme parameters
-     * @return true if qKS fits MAX_MODULUS_SIZE32 bits and N*digitCount*qKS does not overflow a uint64
+     * @return true if q_ks fits MAX_MODULUS_SIZE32 bits and N*digit_count*q_ks does not overflow a uint64
      */
-    static bool Fits(const LWECryptoParams& params) {
-        const auto& qKS = params.GetqKS();
-        if (qKS.GetMSB() > MAX_MODULUS_SIZE32)
+    static bool fits(const LweCryptoParams& params) {
+        const auto& q_ks = params.get_q_ks();
+        if (q_ks.get_msb() > MAX_MODULUS_SIZE32)
             return false;
-        uint64_t rows{static_cast<uint64_t>(params.GetN()) * params.GetDigitCountKS()};
-        return rows <= static_cast<uint64_t>(-1) / qKS.ConvertToInt<uint64_t>();
+        uint64_t rows{static_cast<uint64_t>(params.get_N()) * params.get_digit_count_ks()};
+        return rows <= static_cast<uint64_t>(-1) / q_ks.convert_to_int<uint64_t>();
     }
 
     /**
      * Allocates a key of the given shape with its storage deliberately left uninitialized: both generation paths write
      * every element, and value-initialization would fault and zero the whole key on the constructing thread before
-     * the parallel fill re-touches it. Each LWE index holds baseKS-1 rows (digit values 1..baseKS-1) per digit
-     * position except the top position, which holds topExtent-1: the values a coefficient below qKS can reach there
+     * the parallel fill re-touches it. Each LWE index holds base_ks-1 rows (digit values 1..base_ks-1) per digit
+     * position except the top position, which holds top_extent-1: the values a coefficient below q_ks can reach there
      *
      * @param N dimension of the source (old) secret key, the number of LWE indices
-     * @param baseKS key-switching base
-     * @param digitCount number of base-baseKS digits of a value below qKS
-     * @param topExtent number of values the top digit can take (LWECryptoParams::GetDigitExtentKS(digitCount - 1))
+     * @param base_ks key-switching base
+     * @param digit_count number of base-base_ks digits of a value below q_ks
+     * @param top_extent number of values the top digit can take (LweCryptoParams::get_digit_extent_ks(digit_count - 1))
      * @param n dimension of the target (new) secret key, the length of each row
      */
-    LWESwitchingKey32Impl(uint32_t N, uint32_t baseKS, uint32_t digitCount, uint32_t topExtent, uint32_t n)
-        : m_N(N),
-          m_m(baseKS),
-          m_d(digitCount),
-          m_top(topExtent),
-          m_n(n),
-          m_rows(static_cast<uint64_t>(digitCount - 1) * (baseKS - 1) + (topExtent - 1)),
-          m_sizeA(static_cast<uint64_t>(N) * m_rows * n),
-          m_sizeB(static_cast<uint64_t>(N) * m_rows),
-          m_keyA(new uint32_t[m_sizeA]),
-          m_keyB(new uint32_t[m_sizeB]) {}
+    LweSwitchingKey32Impl(uint32_t N, uint32_t base_ks, uint32_t digit_count, uint32_t top_extent, uint32_t n)
+        : N_(N),
+          m_(base_ks),
+          d_(digit_count),
+          top_(top_extent),
+          n_(n),
+          rows_(static_cast<uint64_t>(digit_count - 1) * (base_ks - 1) + (top_extent - 1)),
+          size_a_(static_cast<uint64_t>(N) * rows_ * n),
+          size_b_(static_cast<uint64_t>(N) * rows_),
+          key_a_(new uint32_t[size_a_]),
+          key_b_(new uint32_t[size_b_]) {}
 
     /**
      * Narrows an existing 64-bit key, taking the shape from the parameters and copying only the reachable digit rows.
-     * Peak memory holds both forms; the released pages come back only after AllocTrim(). Prefer
-     * LWEEncryptionScheme::KeySwitchGen32, which never materialises the 64-bit key
+     * Peak memory holds both forms; the released pages come back only after alloc_trim(). Prefer
+     * LweEncryptionScheme::key_switch_gen32, which never materialises the 64-bit key
      *
      * @param params LWE scheme parameters the key was generated with
-     * @param K the 64-bit switching key, which must have N entries with baseKS-1 digit-value rows each
+     * @param K the 64-bit switching key, which must have N entries with base_ks-1 digit-value rows each
      */
-    LWESwitchingKey32Impl(const LWECryptoParams& params, const LWESwitchingKeyImpl& K);
+    LweSwitchingKey32Impl(const LweCryptoParams& params, const LweSwitchingKeyImpl& K);
 
     /**
      * Produces an exact 64-bit copy of the key for serialization: every value fits, so 32 -> 64 -> 32 is the identity
@@ -122,81 +122,81 @@ class LWESwitchingKey32Impl : public Serializable {
      * @param params LWE scheme parameters, supplying the key-switching modulus of the 64-bit vectors
      * @return a shared pointer to the 64-bit switching key
      */
-    LWESwitchingKey Widen(const LWECryptoParams& params) const;
+    LweSwitchingKey widen(const LweCryptoParams& params) const;
 
     /**
-     * Accesses the A part of the encryption of val * baseKS^pos * skN[i]: a row of n residues mod qKS
+     * Accesses the A part of the encryption of val * base_ks^pos * sk_n[i]: a row of n residues mod q_ks
      *
      * @param i LWE index of the source secret-key coefficient, in [0, N)
-     * @param val digit value, in [1, GetDigitExtent(pos)); the value-0 row is not stored
-     * @param pos digit position, in [0, digitCount)
+     * @param val digit value, in [1, get_digit_extent(pos)); the value-0 row is not stored
+     * @param pos digit position, in [0, digit_count)
      * @return pointer to the n words of the row
      */
-    uint32_t* RowA(uint32_t i, uint32_t val, uint32_t pos) {
-        return m_keyA.get() + Slot(i, val, pos) * m_n;
+    uint32_t* row_a(uint32_t i, uint32_t val, uint32_t pos) {
+        return key_a_.get() + slot(i, val, pos) * n_;
     }
 
     /**
-     * Accesses the A part of the encryption of val * baseKS^pos * skN[i]: a row of n residues mod qKS
+     * Accesses the A part of the encryption of val * base_ks^pos * sk_n[i]: a row of n residues mod q_ks
      *
      * @param i LWE index of the source secret-key coefficient, in [0, N)
-     * @param val digit value, in [1, GetDigitExtent(pos)); the value-0 row is not stored
-     * @param pos digit position, in [0, digitCount)
+     * @param val digit value, in [1, get_digit_extent(pos)); the value-0 row is not stored
+     * @param pos digit position, in [0, digit_count)
      * @return pointer to the n words of the row
      */
-    const uint32_t* RowA(uint32_t i, uint32_t val, uint32_t pos) const {
-        return m_keyA.get() + Slot(i, val, pos) * m_n;
+    const uint32_t* row_a(uint32_t i, uint32_t val, uint32_t pos) const {
+        return key_a_.get() + slot(i, val, pos) * n_;
     }
 
     /**
-     * Accesses the B part of the encryption of val * baseKS^pos * skN[i]: one residue mod qKS
+     * Accesses the B part of the encryption of val * base_ks^pos * sk_n[i]: one residue mod q_ks
      *
      * @param i LWE index of the source secret-key coefficient, in [0, N)
-     * @param val digit value, in [1, GetDigitExtent(pos)); the value-0 row is not stored
-     * @param pos digit position, in [0, digitCount)
+     * @param val digit value, in [1, get_digit_extent(pos)); the value-0 row is not stored
+     * @param pos digit position, in [0, digit_count)
      * @return reference to the stored word
      */
     uint32_t& B(uint32_t i, uint32_t val, uint32_t pos) {
-        return m_keyB[Slot(i, val, pos)];
+        return key_b_[slot(i, val, pos)];
     }
 
     /**
-     * Reads the B part of the encryption of val * baseKS^pos * skN[i]: one residue mod qKS
+     * Reads the B part of the encryption of val * base_ks^pos * sk_n[i]: one residue mod q_ks
      *
      * @param i LWE index of the source secret-key coefficient, in [0, N)
-     * @param val digit value, in [1, GetDigitExtent(pos)); the value-0 row is not stored
-     * @param pos digit position, in [0, digitCount)
+     * @param val digit value, in [1, get_digit_extent(pos)); the value-0 row is not stored
+     * @param pos digit position, in [0, digit_count)
      * @return the stored word
      */
     uint32_t B(uint32_t i, uint32_t val, uint32_t pos) const {
-        return m_keyB[Slot(i, val, pos)];
+        return key_b_[slot(i, val, pos)];
     }
 
     /**
-     * Gets the number of digit values stored for a digit position: baseKS for every position except the top one,
-     * which holds topExtent
+     * Gets the number of digit values stored for a digit position: base_ks for every position except the top one,
+     * which holds top_extent
      *
-     * @param pos digit position, in [0, digitCount)
+     * @param pos digit position, in [0, digit_count)
      * @return the digit extent; rows exist for values 1..extent-1
      */
-    uint32_t GetDigitExtent(uint32_t pos) const {
-        return pos + 1 < m_d ? m_m : m_top;
+    uint32_t get_digit_extent(uint32_t pos) const {
+        return pos + 1 < d_ ? m_ : top_;
     }
 
-    uint32_t GetN() const {
-        return m_N;
+    uint32_t get_N() const {
+        return N_;
     }
 
-    uint32_t GetBaseKS() const {
-        return m_m;
+    uint32_t get_base_ks() const {
+        return m_;
     }
 
-    uint32_t GetDigitCount() const {
-        return m_d;
+    uint32_t get_digit_count() const {
+        return d_;
     }
 
-    uint32_t Getn() const {
-        return m_n;
+    uint32_t get_n() const {
+        return n_;
     }
 
     /**
@@ -204,55 +204,55 @@ class LWESwitchingKey32Impl : public Serializable {
      *
      * @return the size of the two flat arrays in bytes
      */
-    uint64_t KeyBytes() const {
-        return (m_sizeA + m_sizeB) * sizeof(uint32_t);
+    uint64_t key_bytes() const {
+        return (size_a_ + size_b_) * sizeof(uint32_t);
     }
 
-    bool operator==(const LWESwitchingKey32Impl& other) const {
-        if (m_N != other.m_N || m_m != other.m_m || m_d != other.m_d || m_top != other.m_top || m_n != other.m_n)
+    bool operator==(const LweSwitchingKey32Impl& other) const {
+        if (N_ != other.N_ || m_ != other.m_ || d_ != other.d_ || top_ != other.top_ || n_ != other.n_)
             return false;
-        return std::equal(m_keyA.get(), m_keyA.get() + m_sizeA, other.m_keyA.get()) &&
-               std::equal(m_keyB.get(), m_keyB.get() + m_sizeB, other.m_keyB.get());
+        return std::equal(key_a_.get(), key_a_.get() + size_a_, other.key_a_.get()) &&
+               std::equal(key_b_.get(), key_b_.get() + size_b_, other.key_b_.get());
     }
 
-    bool operator!=(const LWESwitchingKey32Impl& other) const {
+    bool operator!=(const LweSwitchingKey32Impl& other) const {
         return !(*this == other);
     }
 
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
-        ar(::cereal::make_nvp("N", m_N));
-        ar(::cereal::make_nvp("m", m_m));
-        ar(::cereal::make_nvp("d", m_d));
-        ar(::cereal::make_nvp("top", m_top));
-        ar(::cereal::make_nvp("n", m_n));
-        Bytes(ar, m_keyA.get(), m_sizeA);
-        Bytes(ar, m_keyB.get(), m_sizeB);
+        ar(::cereal::make_nvp("N", N_));
+        ar(::cereal::make_nvp("m", m_));
+        ar(::cereal::make_nvp("d", d_));
+        ar(::cereal::make_nvp("top", top_));
+        ar(::cereal::make_nvp("n", n_));
+        archive_bytes(ar, key_a_.get(), size_a_);
+        archive_bytes(ar, key_b_.get(), size_b_);
     }
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
-        ar(::cereal::make_nvp("N", m_N));
-        ar(::cereal::make_nvp("m", m_m));
-        ar(::cereal::make_nvp("d", m_d));
-        ar(::cereal::make_nvp("top", m_top));
-        ar(::cereal::make_nvp("n", m_n));
+        ar(::cereal::make_nvp("N", N_));
+        ar(::cereal::make_nvp("m", m_));
+        ar(::cereal::make_nvp("d", d_));
+        ar(::cereal::make_nvp("top", top_));
+        ar(::cereal::make_nvp("n", n_));
         Size();
-        m_keyA.reset(new uint32_t[m_sizeA]);
-        m_keyB.reset(new uint32_t[m_sizeB]);
-        Bytes(ar, m_keyA.get(), m_sizeA);
-        Bytes(ar, m_keyB.get(), m_sizeB);
+        key_a_.reset(new uint32_t[size_a_]);
+        key_b_.reset(new uint32_t[size_b_]);
+        archive_bytes(ar, key_a_.get(), size_a_);
+        archive_bytes(ar, key_b_.get(), size_b_);
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "LWESwitchingKey32";
     }
 
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 
@@ -261,7 +261,7 @@ class LWESwitchingKey32Impl : public Serializable {
     // and the JSON archive, which has no binary support, takes it one element at a time. Both sides
     // call this, so the two representations stay paired.
     template <class Archive, typename T>
-    static void Bytes(Archive& ar, T* p, uint64_t n) {
+    static void archive_bytes(Archive& ar, T* p, uint64_t n) {
         if constexpr (::cereal::traits::is_output_serializable<::cereal::BinaryData<T*>, Archive>::value ||
                       ::cereal::traits::is_input_serializable<::cereal::BinaryData<T*>, Archive>::value) {
             ar(::cereal::binary_data(p, n * sizeof(T)));
@@ -272,29 +272,29 @@ class LWESwitchingKey32Impl : public Serializable {
     }
 
     void Size() {
-        m_rows = static_cast<uint64_t>(m_d - 1) * (m_m - 1) + (m_top - 1);
-        m_sizeA = static_cast<uint64_t>(m_N) * m_rows * m_n;
-        m_sizeB = static_cast<uint64_t>(m_N) * m_rows;
+        rows_ = static_cast<uint64_t>(d_ - 1) * (m_ - 1) + (top_ - 1);
+        size_a_ = static_cast<uint64_t>(N_) * rows_ * n_;
+        size_b_ = static_cast<uint64_t>(N_) * rows_;
     }
 
-    uint64_t Slot(uint32_t i, uint32_t val, uint32_t pos) const {
-        return static_cast<uint64_t>(i) * m_rows + static_cast<uint64_t>(pos) * (m_m - 1) + (val - 1);
+    uint64_t slot(uint32_t i, uint32_t val, uint32_t pos) const {
+        return static_cast<uint64_t>(i) * rows_ + static_cast<uint64_t>(pos) * (m_ - 1) + (val - 1);
     }
 
-    uint32_t m_N{0};
-    uint32_t m_m{0};
-    uint32_t m_d{0};
-    uint32_t m_top{0};
-    uint32_t m_n{0};
-    uint64_t m_rows{0};
-    uint64_t m_sizeA{0};
-    uint64_t m_sizeB{0};
-    std::unique_ptr<uint32_t[]> m_keyA;
-    std::unique_ptr<uint32_t[]> m_keyB;
+    uint32_t N_{0};
+    uint32_t m_{0};
+    uint32_t d_{0};
+    uint32_t top_{0};
+    uint32_t n_{0};
+    uint64_t rows_{0};
+    uint64_t size_a_{0};
+    uint64_t size_b_{0};
+    std::unique_ptr<uint32_t[]> key_a_;
+    std::unique_ptr<uint32_t[]> key_b_;
 };
 
-#endif  // NATIVEINT != 32
+#endif  // CIPHER_NATIVE_INT != 32
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_BOOLEAN_LWE_SWITCH_KEY32_H_

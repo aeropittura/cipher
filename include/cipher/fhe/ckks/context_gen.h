@@ -44,19 +44,19 @@
 #include "cipher/fhe/ckks/context_params.h"
 #include "cipher/fhe/config/params_validation.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
- * @brief Generator of CKKS cryptocontexts; used as the template argument of CCParams and GenCryptoContext.
+ * @brief Generator of CKKS cryptocontexts; used as the template argument of ContextParams and make_crypto_context.
  */
-class CryptoContextCKKSRNS {
-    using Element = DCRTPoly;
+class CkksRnsContext {
+    using Element = RnsPoly;
 
   public:
-    using ContextType = CryptoContext<Element>;       ///< the generated context type; required by GenCryptoContext()
-    using Factory = CryptoContextFactory<Element>;    ///< the factory that creates and caches the contexts
-    using PublicKeyEncryptionScheme = SchemeCKKSRNS;  ///< the scheme instantiated in the context
-    using CryptoParams = CryptoParametersCKKSRNS;     ///< the crypto parameters instantiated in the context
+    using ContextType = CryptoContext<Element>;       ///< the generated context type; required by make_crypto_context()
+    using Factory = ContextFactory<Element>;    ///< the factory that creates and caches the contexts
+    using PublicKeyEncryptionScheme = CkksRnsScheme;  ///< the scheme instantiated in the context
+    using CryptoParams = CkksRnsCryptoParams;     ///< the crypto parameters instantiated in the context
 
     /**
      * Validates the parameters and generates a CKKS cryptocontext from them.
@@ -64,12 +64,12 @@ class CryptoContextCKKSRNS {
      * @param parameters the CKKS parameters
      * @return the cryptocontext
      */
-    static CryptoContext<Element> genCryptoContext(const CCParams<CryptoContextCKKSRNS>& parameters) {
-        validateParametersForCryptocontext(parameters);
-        return genCryptoContextCKKSRNSInternal<CryptoContextCKKSRNS, Element>(parameters);
+    static CryptoContext<Element> gen_crypto_context(const ContextParams<CkksRnsContext>& parameters) {
+        validate_parameters_for_cryptocontext(parameters);
+        return gen_crypto_context_ckksrns_internal<CkksRnsContext, Element>(parameters);
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_CKKS_CONTEXT_GEN_H_

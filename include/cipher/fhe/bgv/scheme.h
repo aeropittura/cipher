@@ -41,40 +41,40 @@
 #include "cipher/util/serializable.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief The BGV scheme in the RNS representation: instantiates the BGV parameter generation, PKE, PRE,
  * leveled SHE, advanced SHE, multiparty and FHE components.
  */
-class SchemeBGVRNS : public SchemeRNS {
+class BgvRnsScheme : public RnsScheme {
   public:
-    SchemeBGVRNS() {
-        this->m_ParamsGen = std::make_shared<ParameterGenerationBGVRNS>();
+    BgvRnsScheme() {
+        this->params_gen_ = std::make_shared<BgvRnsParamGen>();
     }
 
-    virtual ~SchemeBGVRNS() {}
+    virtual ~BgvRnsScheme() {}
 
     /**
      * Compares two schemes by type.
      *
      * @param sch the scheme to compare to.
-     * @return true if sch is also a SchemeBGVRNS.
+     * @return true if sch is also a BgvRnsScheme.
      */
-    bool operator==(const SchemeBase<DCRTPoly>& sch) const override {
-        return (typeid(sch) == typeid(SchemeBGVRNS));
+    bool operator==(const SchemeBase<RnsPoly>& sch) const override {
+        return (typeid(sch) == typeid(BgvRnsScheme));
     }
 
     /**
      * Instantiates the BGV implementation of the given feature (PKE, PRE, LEVELEDSHE, MULTIPARTY, ADVANCEDSHE
-     * or FHE) if it has not been instantiated yet. KEYSWITCH is set up separately by SetKeySwitchingTechnique().
+     * or FHE) if it has not been instantiated yet. KEYSWITCH is set up separately by set_key_switching_technique().
      *
      * @param feature the feature to enable; unsupported features throw.
      */
-    void Enable(PKESchemeFeature feature) override;
+    void enable(PkeSchemeFeature feature) override;
 
     /////////////////////////////////////
     // SERIALIZATION
@@ -82,18 +82,18 @@ class SchemeBGVRNS : public SchemeRNS {
 
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
-        ar(cereal::base_class<SchemeRNS>(this));
+        ar(cereal::base_class<RnsScheme>(this));
     }
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        ar(cereal::base_class<SchemeRNS>(this));
+        ar(cereal::base_class<RnsScheme>(this));
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "SchemeBGVRNS";
     }
 };
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_BGV_SCHEME_H_

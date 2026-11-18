@@ -41,10 +41,10 @@
 #include <vector>
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * Method for calculating Chebyshev coefficients for an input function
@@ -59,10 +59,10 @@ namespace lbcrypto {
  * @param d Desired degree of approximation
  * @return the coefficients of the Chebyshev approximation.
  */
-std::vector<double> EvalChebyshevCoefficients(std::function<double(double)> f, double a, double b, uint32_t d);
+std::vector<double> eval_chebyshev_coefficients(std::function<double(double)> f, double a, double b, uint32_t d);
 
 /**
- * A cleartext version of CryptoContext<...>::EvalChebyshevFunction(...).
+ * A cleartext version of CryptoContext<...>::eval_chebyshev_function(...).
  * It evaluates an approximation of f via Chebyshev polynomials of a
  * bounded degree, over a specified interval [a,b].
  *
@@ -73,9 +73,9 @@ std::vector<double> EvalChebyshevCoefficients(std::function<double(double)> f, d
  * @param d is the desired degree of approximation
  * @return Evaluation of the approximated function over the plaintexts.
  */
-std::vector<double> EvalChebyshevFunctionPtxt(std::function<double(double)> f, const std::vector<double>& ptxt,
+std::vector<double> eval_chebyshev_function_ptxt(std::function<double(double)> f, const std::vector<double>& ptxt,
                                               double a, double b, size_t d);
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_MATH_CHEBYSHEV_H_

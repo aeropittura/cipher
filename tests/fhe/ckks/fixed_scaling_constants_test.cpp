@@ -54,12 +54,12 @@
 #include "cipher/math/chebyshev.h"
 #include "cipher/fhe/ckks/context_gen.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
 namespace {
-// f(x) = c_0 / 2 + sum_{k >= 1} c_k T_k(x), the convention of EvalChebyshevCoefficients
-long double EvalChebyshevSeriesExact(const std::vector<double>& coefficients, long double x) {
+// f(x) = c_0 / 2 + sum_{k >= 1} c_k T_k(x), the convention of eval_chebyshev_coefficients
+long double eval_chebyshev_series_exact(const std::vector<double>& coefficients, long double x) {
     long double b1 = 0;
     long double b2 = 0;
     for (size_t k = coefficients.size() - 1; k >= 1; --k) {
@@ -73,16 +73,16 @@ long double EvalChebyshevSeriesExact(const std::vector<double>& coefficients, lo
 #endif
 
 TEST(UTCKKSRNS_FIXED_SCALING, DegreeTwoConstantsChebyshev119) {
-#if NATIVEINT == 128
+#if CIPHER_NATIVE_INT == 128
     GTEST_SKIP() << "precision thresholds are calibrated for the 64-bit build";
 #else
-    const uint32_t ringDim = 1 << 12;
-    const uint32_t slots = ringDim / 2;
+    const uint32_t ring_dim = 1 << 12;
+    const uint32_t slots = ring_dim / 2;
     const uint32_t degree = 119;
     const double K = 512;
 
     // the interpolant of the uniform-secret bootstrapping table before the double-angle iterations
-    std::vector<double> coefficients = EvalChebyshevCoefficients(
+    std::vector<double> coefficients = eval_chebyshev_coefficients(
             [K](double x) { return std::pow(2 * M_PI, -1.0 / 64) * std::cos(2 * M_PI * K * x / 64 - M_PI / 128); }, -1,
             1, degree);
 
@@ -92,42 +92,42 @@ TEST(UTCKKSRNS_FIXED_SCALING, DegreeTwoConstantsChebyshev119) {
     for (auto& x : input)
         x = uniform(gen);
 
-    for (auto scalTech : {FIXEDMANUAL, FIXEDAUTO}) {
-        CCParams<CryptoContextCKKSRNS> parameters;
-        parameters.SetSecurityLevel(HEStd_NotSet);
-        parameters.SetRingDim(ringDim);
-        parameters.SetScalingModSize(50);
-        parameters.SetFirstModSize(60);
-        parameters.SetScalingTechnique(scalTech);
-        parameters.SetMultiplicativeDepth(8);
-        parameters.SetSecretKeyDist(UNIFORM_TERNARY);
+    for (auto scal_tech : {FIXEDMANUAL, FIXEDAUTO}) {
+        ContextParams<CkksRnsContext> parameters;
+        parameters.set_security_level(HEStd_NotSet);
+        parameters.set_ring_dim(ring_dim);
+        parameters.set_scaling_mod_size(50);
+        parameters.set_first_mod_size(60);
+        parameters.set_scaling_technique(scal_tech);
+        parameters.set_multiplicative_depth(8);
+        parameters.set_secret_key_dist(UNIFORM_TERNARY);
 
-        auto cc = GenCryptoContext(parameters);
-        cc->Enable(PKE);
-        cc->Enable(KEYSWITCH);
-        cc->Enable(LEVELEDSHE);
-        cc->Enable(ADVANCEDSHE);
-        auto keyPair = cc->KeyGen();
-        cc->EvalMultKeyGen(keyPair.secretKey);
+        auto cc = make_crypto_context(parameters);
+        cc->enable(PKE);
+        cc->enable(KEYSWITCH);
+        cc->enable(LEVELEDSHE);
+        cc->enable(ADVANCEDSHE);
+        auto key_pair = cc->key_gen();
+        cc->eval_mult_key_gen(key_pair.secret_key);
 
-        auto ciphertext = cc->Encrypt(keyPair.publicKey, cc->MakeCKKSPackedPlaintext(input));
-        auto result = cc->EvalChebyshevSeries(ciphertext, coefficients, -1, 1);
+        auto ciphertext = cc->encrypt(key_pair.public_key, cc->make_ckks_packed_plaintext(input));
+        auto result = cc->eval_chebyshev_series(ciphertext, coefficients, -1, 1);
 
         Plaintext decrypted;
-        cc->Decrypt(keyPair.secretKey, result, &decrypted);
-        decrypted->SetLength(slots);
-        const auto& values = decrypted->GetRealPackedValue();
+        cc->decrypt(key_pair.secret_key, result, &decrypted);
+        decrypted->set_length(slots);
+        const auto& values = decrypted->get_real_packed_value();
 
-        double maxError = 0;
+        double max_error = 0;
         for (uint32_t i = 0; i < slots; ++i)
-            maxError = std::max(
-                    maxError,
-                    static_cast<double>(std::fabs(values[i] - EvalChebyshevSeriesExact(coefficients, input[i]))));
-        const double precisionBits = -std::log2(maxError);
+            max_error = std::max(
+                    max_error,
+                    static_cast<double>(std::fabs(values[i] - eval_chebyshev_series_exact(coefficients, input[i]))));
+        const double precision_bits_value = -std::log2(max_error);
 
         // both techniques reach about 28 bits; FIXEDAUTO gave about 24 bits before the constants were fixed
-        EXPECT_GE(precisionBits, 26.0) << "degree-" << degree << " Chebyshev series with scaling technique " << scalTech
-                                       << " lost precision: 2^-" << precisionBits;
+        EXPECT_GE(precision_bits_value, 26.0) << "degree-" << degree << " Chebyshev series with scaling technique " << scal_tech
+                                       << " lost precision: 2^-" << precision_bits_value;
     }
 #endif
 }

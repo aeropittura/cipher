@@ -35,8 +35,8 @@
 
 #include "cipher/util/base64.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 const char to_base64_char[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-} /* namespace lbcrypto */
+} /* namespace cipher */

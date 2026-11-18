@@ -31,8 +31,8 @@
 
 #include "cipher/fhe/base/fhe.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-template class FHEBase<DCRTPoly>;
+template class BaseFhe<RnsPoly>;
 
-}  // namespace lbcrypto
+}  // namespace cipher

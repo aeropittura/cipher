@@ -39,11 +39,11 @@
 #include "cipher/fhe/rns/scheme.h"
 #include "cipher/util/serial.h"
 
-CEREAL_REGISTER_TYPE(lbcrypto::CryptoParametersRNS);
-CEREAL_REGISTER_TYPE(lbcrypto::SchemeRNS);
-CEREAL_REGISTER_TYPE(lbcrypto::FHERNS);
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::RnsCryptoParams, "lbcrypto::CryptoParametersRNS");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::RnsScheme, "lbcrypto::SchemeRNS");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::RnsFhe, "lbcrypto::FHERNS");
 
-CEREAL_REGISTER_POLYMORPHIC_RELATION(lbcrypto::FHEBase<DCRTPoly>, lbcrypto::FHERNS);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(lbcrypto::CryptoParametersRLWE<DCRTPoly>, lbcrypto::CryptoParametersRNS);
+CEREAL_REGISTER_POLYMORPHIC_RELATION(cipher::BaseFhe<RnsPoly>, cipher::RnsFhe);
+CEREAL_REGISTER_POLYMORPHIC_RELATION(cipher::RlweCryptoParams<RnsPoly>, cipher::RnsCryptoParams);
 
 #endif  // CIPHER_FHE_RNS_SER_H_

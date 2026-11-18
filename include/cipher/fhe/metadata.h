@@ -40,7 +40,7 @@
 
 #include "cipher/util/exception.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 class Metadata;
 using MetadataMap = std::shared_ptr<std::map<std::string, std::shared_ptr<Metadata>>>;
@@ -73,7 +73,7 @@ class Metadata {
      *
      * @return the copy
      */
-    virtual std::shared_ptr<Metadata> Clone() const {
+    virtual std::shared_ptr<Metadata> clone() const {
         return std::make_shared<Metadata>();
     }
 
@@ -101,7 +101,7 @@ class Metadata {
     }
 
     /**
-     * << operator implements by calling member method PrintMetadata.
+     * << operator implements by calling member method print_metadata.
      * This is a friend method and cannot be overriden by subclasses.
      *
      * @param out output stream
@@ -109,7 +109,7 @@ class Metadata {
      * @return the output stream
      */
     friend std::ostream& operator<<(std::ostream& out, const Metadata& m) {
-        m.PrintMetadata(out);
+        m.print_metadata(out);
         return out;
     }
 
@@ -130,27 +130,27 @@ class Metadata {
      */
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
     }
 
     /**
-     * SerializedObjectName method for serialization
+     * serialized_object_name method for serialization
      *
      * @return the name of the class
      */
-    virtual std::string SerializedObjectName() const {
+    virtual std::string serialized_object_name() const {
         return "Metadata";
     }
 
     /**
-     * SerializedVersion method for serialization
+     * serialized_version method for serialization
      *
      * @return the current serialization version
      */
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 
@@ -162,11 +162,11 @@ class Metadata {
      * @param out output stream
      * @return the output stream
      */
-    virtual std::ostream& PrintMetadata(std::ostream& out) const {
-        OPENFHE_THROW("Not implemented");
+    virtual std::ostream& print_metadata(std::ostream& out) const {
+        CIPHER_THROW("Not implemented");
     }
 };
 
-}  // end namespace lbcrypto
+}  // end namespace cipher
 
 #endif  // CIPHER_FHE_METADATA_H_

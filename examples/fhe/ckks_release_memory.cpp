@@ -32,8 +32,8 @@
 /*
   Example for checking CKKS bootstrap memory cleanup.
 
-  EvalBootstrapSetup() caches precomputed data in the CKKS scheme. This example
-  compares ClearBootstrapPrecom() with ReleaseAllContexts() while keeping the
+  eval_bootstrap_setup() caches precomputed data in the CKKS scheme. This example
+  compares clear_bootstrap_precom() with release_all_contexts() while keeping the
   local CryptoContext handle alive.
 */
 
@@ -51,9 +51,9 @@
 #include "cipher/cipher.h"
 #include "cipher/util/memory.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
-std::size_t HeapInUseBytes() {
+std::size_t heap_in_use_bytes() {
 #if defined(__GLIBC__)
     auto info = mallinfo2();
     return info.uordblks;
@@ -62,59 +62,59 @@ std::size_t HeapInUseBytes() {
     malloc_zone_statistics(malloc_default_zone(), &s);
     return s.size_in_use;
 #else
-    OPENFHE_THROW("heap probe unavailable on this allocator");
+    CIPHER_THROW("heap probe unavailable on this allocator");
 #endif
 }
 
-static CryptoContext<DCRTPoly> BuildBootstrapContext() {
-    CCParams<CryptoContextCKKSRNS> parameters;
+static CryptoContext<RnsPoly> build_bootstrap_context() {
+    ContextParams<CkksRnsContext> parameters;
     // SPARSE_ENCAPSULATED is recommended for CKKS bootstrapping (probability of failure below 2^-128). UNIFORM_TERNARY,
     // used here, is the distribution of the homomorphic encryption security guidelines; its probability of failure is
     // 2^-67 for N = 2^16 and 2^-27 for N = 2^17 with full packing.
-    SecretKeyDist skDist = UNIFORM_TERNARY;
-    parameters.SetSecretKeyDist(skDist);
-    parameters.SetSecurityLevel(HEStd_NotSet);
-    parameters.SetRingDim(1 << 12);
+    SecretKeyDist sk_dist = UNIFORM_TERNARY;
+    parameters.set_secret_key_dist(sk_dist);
+    parameters.set_security_level(HEStd_NotSet);
+    parameters.set_ring_dim(1 << 12);
 
-    parameters.SetScalingModSize(59);
-    parameters.SetFirstModSize(60);
-    parameters.SetScalingTechnique(FLEXIBLEAUTO);
+    parameters.set_scaling_mod_size(59);
+    parameters.set_first_mod_size(60);
+    parameters.set_scaling_technique(FLEXIBLEAUTO);
 
-    std::vector<uint32_t> levelBudget = {4, 4};
-    uint32_t depth = 10 + FHECKKSRNS::GetBootstrapDepth(levelBudget, skDist);
-    parameters.SetMultiplicativeDepth(depth);
+    std::vector<uint32_t> level_budget = {4, 4};
+    uint32_t depth = 10 + CkksRnsFhe::get_bootstrap_depth(level_budget, sk_dist);
+    parameters.set_multiplicative_depth(depth);
 
-    auto cc = GenCryptoContext(parameters);
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
-    cc->Enable(FHE);
+    auto cc = make_crypto_context(parameters);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
+    cc->enable(FHE);
     return cc;
 }
 
 int main() {
-    auto cc = BuildBootstrapContext();
-    uint32_t ringDim = cc->GetRingDimension();
-    uint32_t numSlots = ringDim / 2;
+    auto cc = build_bootstrap_context();
+    uint32_t ring_dim = cc->get_ring_dimension();
+    uint32_t num_slots = ring_dim / 2;
 
-    std::cout << "ring dim = " << ringDim << "\n";
+    std::cout << "ring dim = " << ring_dim << "\n";
 
-    size_t before = HeapInUseBytes();
-    cc->EvalBootstrapSetup({4, 4}, {0, 0}, numSlots);
-    size_t after = HeapInUseBytes();
-    cc->ClearBootstrapPrecom();
-    size_t after_cleanup = HeapInUseBytes();
+    size_t before = heap_in_use_bytes();
+    cc->eval_bootstrap_setup({4, 4}, {0, 0}, num_slots);
+    size_t after = heap_in_use_bytes();
+    cc->clear_bootstrap_precom();
+    size_t after_cleanup = heap_in_use_bytes();
     std::cerr << "EvalBootstrapSetup(): before: " << before << "; after: " << after
               << "; after ClearBootstrapPrecom(): " << after_cleanup << std::endl;
 
-    before = HeapInUseBytes();
-    cc->EvalBootstrapSetup({4, 4}, {0, 0}, numSlots);
-    after = HeapInUseBytes();
-    cc->ClearBootstrapPrecom();
-    after_cleanup = HeapInUseBytes();
-    CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
-    size_t final = HeapInUseBytes();
+    before = heap_in_use_bytes();
+    cc->eval_bootstrap_setup({4, 4}, {0, 0}, num_slots);
+    after = heap_in_use_bytes();
+    cc->clear_bootstrap_precom();
+    after_cleanup = heap_in_use_bytes();
+    ContextFactory<RnsPoly>::release_all_contexts();
+    size_t final = heap_in_use_bytes();
     std::cerr << "EvalBootstrapSetup(): before: " << before << "; after: " << after
               << "; after ClearBootstrapPrecom(): " << after_cleanup << "; after ReleaseAllContexts(): " << final
               << std::endl;

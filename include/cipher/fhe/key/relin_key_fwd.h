@@ -37,7 +37,7 @@
 
 #include <memory>
 
-namespace lbcrypto {
+namespace cipher {
 
 template <typename Element>
 class EvalKeyRelinImpl;
@@ -50,6 +50,6 @@ class EvalKeyRelinImpl;
 template <typename Element>
 using EvalKeyRelin = std::shared_ptr<EvalKeyRelinImpl<Element>>;
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_KEY_RELIN_KEY_FWD_H_

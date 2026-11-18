@@ -31,6 +31,6 @@
 #include "cipher/fhe/key/eval_key.h"
 
 // the code below is from evalkey-impl.cpp
-namespace lbcrypto {
-template class EvalKeyImpl<DCRTPoly>;
-}  // namespace lbcrypto
+namespace cipher {
+template class EvalKeyImpl<RnsPoly>;
+}  // namespace cipher

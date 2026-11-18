@@ -39,48 +39,48 @@
 #include "cipher/fhe/base/pke.h"
 #include "cipher/fhe/base/scheme.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 template <class Element>
-EvalKey<Element> PREBase<Element>::ReKeyGen(const PrivateKey<Element> oldPrivateKey,
-                                            const PublicKey<Element> newPublicKey) const {
-    auto algo = oldPrivateKey->GetCryptoContext()->GetScheme();
-    return algo->KeySwitchGen(oldPrivateKey, newPublicKey);
+EvalKey<Element> BasePre<Element>::re_key_gen(const PrivateKey<Element> old_private_key,
+                                            const PublicKey<Element> new_public_key) const {
+    auto algo = old_private_key->get_crypto_context()->get_scheme();
+    return algo->key_switch_gen(old_private_key, new_public_key);
 }
 
 template <class Element>
-Ciphertext<Element> PREBase<Element>::ReEncrypt(ConstCiphertext<Element> ciphertext, const EvalKey<Element> evalKey,
-                                                const PublicKey<Element> publicKey) const {
-    auto algo = ciphertext->GetCryptoContext()->GetScheme();
-    const auto cryptoParams = std::dynamic_pointer_cast<CryptoParametersRNS>(ciphertext->GetCryptoParameters());
+Ciphertext<Element> BasePre<Element>::re_encrypt(ConstCiphertext<Element> ciphertext, const EvalKey<Element> eval_key,
+                                                const PublicKey<Element> public_key) const {
+    auto algo = ciphertext->get_crypto_context()->get_scheme();
+    const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(ciphertext->get_crypto_parameters());
 
-    Ciphertext<Element> result = ciphertext->Clone();
-    std::vector<Element>& cv = result->GetElements();
-    if (publicKey != nullptr) {
-        std::shared_ptr<std::vector<Element>> ba = algo->EncryptZeroCore(publicKey);
+    Ciphertext<Element> result = ciphertext->clone();
+    std::vector<Element>& cv = result->get_elements();
+    if (public_key != nullptr) {
+        std::shared_ptr<std::vector<Element>> ba = algo->encrypt_zero_core(public_key);
 
         cv[0] += (*ba)[0];
         cv[1] += (*ba)[1];
     }
 
-    if ((cryptoParams->GetPREMode() == FIXED_NOISE_HRA) || (cryptoParams->GetPREMode() == NOISE_FLOODING_HRA)) {
+    if ((crypto_params->get_pre_mode() == FIXED_NOISE_HRA) || (crypto_params->get_pre_mode() == NOISE_FLOODING_HRA)) {
         // noiseflooding
-        Element enf(cryptoParams->GetFloodingDiscreteGaussianGenerator(), cryptoParams->GetElementParams(),
+        Element enf(crypto_params->get_flooding_discrete_gaussian_generator(), crypto_params->get_element_params(),
                     Format::EVALUATION);
 
-        auto noise_scale = cryptoParams->GetNoiseScale();
+        auto noise_scale = crypto_params->get_noise_scale();
         cv[0] += noise_scale * enf;
     }
-    algo->KeySwitchInPlace(result, evalKey);
+    algo->key_switch_in_place(result, eval_key);
 
     return result;
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 // the code below is from base-pre-impl.cpp
-namespace lbcrypto {
+namespace cipher {
 
-template class PREBase<DCRTPoly>;
+template class BasePre<RnsPoly>;
 
-}  // namespace lbcrypto
+}  // namespace cipher

@@ -37,17 +37,17 @@
 #include "cipher/fhe/rns/pre.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief CKKS implementation of the proxy re-encryption capability; the RNS implementation is used unchanged.
  */
-class PRECKKSRNS : public PRERNS {
+class CkksRnsPre : public RnsPre {
   public:
-    virtual ~PRECKKSRNS() = default;
+    virtual ~CkksRnsPre() = default;
 
     /////////////////////////////////////
     // SERIALIZATION
@@ -55,19 +55,19 @@ class PRECKKSRNS : public PRERNS {
 
     template <class Archive>
     void save(Archive& ar) const {
-        ar(cereal::base_class<PRERNS>(this));
+        ar(cereal::base_class<RnsPre>(this));
     }
 
     template <class Archive>
     void load(Archive& ar) {
-        ar(cereal::base_class<PRERNS>(this));
+        ar(cereal::base_class<RnsPre>(this));
     }
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "PRECKKSRNS";
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_CKKS_PRE_H_

@@ -36,15 +36,15 @@
 #include "benchmark/benchmark.h"
 #include "cipher/boolean/context.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 /*
  * Context setup utility methods
  */
 
-BinFHEContext GenerateFHEWContext(BINFHE_PARAMSET set) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(set, AP);
+BooleanContext generate_fhew_context(BINFHE_PARAMSET set) {
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(set, AP);
     return cc;
 }
 
@@ -54,10 +54,10 @@ BinFHEContext GenerateFHEWContext(BINFHE_PARAMSET set) {
 template <class ParamSet>
 void FHEW_BTKEYGEN(benchmark::State& state, ParamSet param_set) {
     BINFHE_PARAMSET param(param_set);
-    BinFHEContext cc = GenerateFHEWContext(param);
+    BooleanContext cc = generate_fhew_context(param);
     for (auto _ : state) {
-        LWEPrivateKey sk = cc.KeyGen();
-        cc.BTKeyGen(sk);
+        LwePrivateKey sk = cc.key_gen();
+        cc.bt_key_gen(sk);
     }
 }
 
@@ -67,11 +67,11 @@ BENCHMARK_CAPTURE(FHEW_BTKEYGEN, STD128_AP, STD128_AP)->Unit(benchmark::kMicrose
 template <class ParamSet>
 void FHEW_ENCRYPT(benchmark::State& state, ParamSet param_set) {
     BINFHE_PARAMSET param(param_set);
-    BinFHEContext cc = GenerateFHEWContext(param);
+    BooleanContext cc = generate_fhew_context(param);
 
-    LWEPrivateKey sk = cc.KeyGen();
+    LwePrivateKey sk = cc.key_gen();
     for (auto _ : state) {
-        LWECiphertext ct1 = cc.Encrypt(sk, 1, SMALL_DIM);
+        LweCiphertext ct1 = cc.encrypt(sk, 1, SMALL_DIM);
     }
 }
 
@@ -81,14 +81,14 @@ BENCHMARK_CAPTURE(FHEW_ENCRYPT, STD128_AP, STD128_AP)->Unit(benchmark::kMicrosec
 template <class ParamSet>
 void FHEW_NOT(benchmark::State& state, ParamSet param_set) {
     BINFHE_PARAMSET param(param_set);
-    BinFHEContext cc = GenerateFHEWContext(param);
+    BooleanContext cc = generate_fhew_context(param);
 
-    LWEPrivateKey sk = cc.KeyGen();
+    LwePrivateKey sk = cc.key_gen();
 
-    LWECiphertext ct1 = cc.Encrypt(sk, 1, SMALL_DIM);
+    LweCiphertext ct1 = cc.encrypt(sk, 1, SMALL_DIM);
 
     for (auto _ : state) {
-        LWECiphertext ct11 = cc.EvalNOT(ct1);
+        LweCiphertext ct11 = cc.eval_not(ct1);
     }
 }
 
@@ -101,17 +101,17 @@ void FHEW_BINGATE(benchmark::State& state, ParamSet param_set, BinGate bin_gate)
     BINGATE gate(bin_gate);
     BINFHE_PARAMSET param(param_set);
 
-    BinFHEContext cc = GenerateFHEWContext(param);
+    BooleanContext cc = generate_fhew_context(param);
 
-    LWEPrivateKey sk = cc.KeyGen();
+    LwePrivateKey sk = cc.key_gen();
 
-    cc.BTKeyGen(sk);
+    cc.bt_key_gen(sk);
 
-    LWECiphertext ct1 = cc.Encrypt(sk, 1);
-    LWECiphertext ct2 = cc.Encrypt(sk, 1);
+    LweCiphertext ct1 = cc.encrypt(sk, 1);
+    LweCiphertext ct2 = cc.encrypt(sk, 1);
 
     for (auto _ : state) {
-        LWECiphertext ct11 = cc.EvalBinGate(gate, ct1, ct2);
+        LweCiphertext ct11 = cc.eval_bin_gate(gate, ct1, ct2);
     }
 }
 
@@ -143,16 +143,16 @@ BENCHMARK_CAPTURE(FHEW_BINGATE, STD128_AP_XNOR, STD128_AP, XNOR)->Unit(benchmark
 template <class ParamSet>
 void FHEW_KEYSWITCH(benchmark::State& state, ParamSet param_set) {
     BINFHE_PARAMSET param(param_set);
-    BinFHEContext cc = GenerateFHEWContext(param);
+    BooleanContext cc = generate_fhew_context(param);
 
-    LWEPrivateKey sk = cc.KeyGen();
-    LWEPrivateKey skN = cc.KeyGenN();
+    LwePrivateKey sk = cc.key_gen();
+    LwePrivateKey sk_n = cc.key_gen_n();
 
-    auto ctQN1 = cc.Encrypt(skN, 1, SMALL_DIM);
-    auto keySwitchHint = cc.KeySwitchGen(sk, skN);
+    auto ct_qn1 = cc.encrypt(sk_n, 1, SMALL_DIM);
+    auto key_switch_hint = cc.key_switch_gen(sk, sk_n);
 
     for (auto _ : state) {
-        LWECiphertext eQ1 = cc.GetLWEScheme()->KeySwitch(cc.GetParams()->GetLWEParams(), keySwitchHint, ctQN1);
+        LweCiphertext e_q1 = cc.get_lwe_scheme()->key_switch(cc.get_params()->get_lwe_params(), key_switch_hint, ct_qn1);
     }
 }
 

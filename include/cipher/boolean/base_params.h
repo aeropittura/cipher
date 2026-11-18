@@ -50,52 +50,52 @@
 #include "cipher/util/serializable.h"
 #include "cipher/util/utilities.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Class that stores all parameters for the RingGSW scheme used in
  * bootstrapping
  */
-class BinFHECryptoParams : public Serializable {
+class BooleanCryptoParams : public Serializable {
   public:
-    BinFHECryptoParams() = default;
+    BooleanCryptoParams() = default;
 
     /**
-     * Main constructor for BinFHECryptoParams
+     * Main constructor for BooleanCryptoParams
      *
-     * @param lweparams a shared poiter to an instance of LWECryptoParams
-     * @param rgswparams a shared poiter to an instance of RingGSWCryptoParams
+     * @param lweparams a shared poiter to an instance of LweCryptoParams
+     * @param rgswparams a shared poiter to an instance of RingGswCryptoParams
      */
-    BinFHECryptoParams(const std::shared_ptr<LWECryptoParams>& lweparams,
-                       const std::shared_ptr<RingGSWCryptoParams>& rgswparams)
-        : m_LWEParams(lweparams), m_RGSWParams(rgswparams) {
-        auto keyDist = m_LWEParams->GetKeyDist();
-        if (keyDist != m_RGSWParams->GetKeyDist())
-            OPENFHE_THROW("LWE and RingGSW parameters disagree on the secret key distribution");
-        if (keyDist != UNIFORM_TERNARY && keyDist != GAUSSIAN)
-            OPENFHE_THROW("BinFHE implements UNIFORM_TERNARY and GAUSSIAN secret key distributions only");
-        if (m_RGSWParams->GetMethod() == GINX && keyDist == GAUSSIAN)
-            OPENFHE_THROW("GINX/CGGI requires a ternary LWE secret key; use AP or LMKCDEY for GAUSSIAN");
-        if (m_RGSWParams->GetMethod() == LMKCDEY && m_RGSWParams->GetNumAutoKeys() >= m_LWEParams->Getn())
-            OPENFHE_THROW("numAutoKeys must be less than the LWE dimension n");
-        if ((2 * static_cast<uint64_t>(m_LWEParams->GetN())) % m_LWEParams->Getq().ConvertToInt<uint64_t>() != 0)
-            OPENFHE_THROW("the LWE modulus q must divide 2N");
+    BooleanCryptoParams(const std::shared_ptr<LweCryptoParams>& lweparams,
+                       const std::shared_ptr<RingGswCryptoParams>& rgswparams)
+        : lwe_params_(lweparams), rgsw_params_(rgswparams) {
+        auto key_dist = lwe_params_->get_key_dist();
+        if (key_dist != rgsw_params_->get_key_dist())
+            CIPHER_THROW("LWE and RingGSW parameters disagree on the secret key distribution");
+        if (key_dist != UNIFORM_TERNARY && key_dist != GAUSSIAN)
+            CIPHER_THROW("BinFHE implements UNIFORM_TERNARY and GAUSSIAN secret key distributions only");
+        if (rgsw_params_->get_method() == GINX && key_dist == GAUSSIAN)
+            CIPHER_THROW("GINX/CGGI requires a ternary LWE secret key; use AP or LMKCDEY for GAUSSIAN");
+        if (rgsw_params_->get_method() == LMKCDEY && rgsw_params_->get_num_auto_keys() >= lwe_params_->get_n())
+            CIPHER_THROW("numAutoKeys must be less than the LWE dimension n");
+        if ((2 * static_cast<uint64_t>(lwe_params_->get_N())) % lwe_params_->get_q().convert_to_int<uint64_t>() != 0)
+            CIPHER_THROW("the LWE modulus q must divide 2N");
     }
 
     /**
      * Getter for LWE params
      * @return a shared pointer to the LWE crypto parameters
      */
-    const std::shared_ptr<LWECryptoParams>& GetLWEParams() const {
-        return m_LWEParams;
+    const std::shared_ptr<LweCryptoParams>& get_lwe_params() const {
+        return lwe_params_;
     }
 
     /**
      * Getter for RingGSW params
      * @return a shared pointer to the RingGSW crypto parameters
      */
-    const std::shared_ptr<RingGSWCryptoParams>& GetRingGSWParams() const {
-        return m_RGSWParams;
+    const std::shared_ptr<RingGswCryptoParams>& get_ring_gsw_params() const {
+        return rgsw_params_;
     }
 
     /**
@@ -103,46 +103,46 @@ class BinFHECryptoParams : public Serializable {
      * @param other the parameters to compare with
      * @return true if the LWE and RingGSW parameters are both equal
      */
-    bool operator==(const BinFHECryptoParams& other) const {
-        return *m_LWEParams == *other.m_LWEParams && *m_RGSWParams == *other.m_RGSWParams;
+    bool operator==(const BooleanCryptoParams& other) const {
+        return *lwe_params_ == *other.lwe_params_ && *rgsw_params_ == *other.rgsw_params_;
     }
 
-    bool operator!=(const BinFHECryptoParams& other) const {
+    bool operator!=(const BooleanCryptoParams& other) const {
         return !(*this == other);
     }
 
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
-        ar(::cereal::make_nvp("lweparams", m_LWEParams));
-        ar(::cereal::make_nvp("rgswparams", m_RGSWParams));
+        ar(::cereal::make_nvp("lweparams", lwe_params_));
+        ar(::cereal::make_nvp("rgswparams", rgsw_params_));
     }
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
-        ar(::cereal::make_nvp("lweparams", m_LWEParams));
-        ar(::cereal::make_nvp("rgswparams", m_RGSWParams));
+        ar(::cereal::make_nvp("lweparams", lwe_params_));
+        ar(::cereal::make_nvp("rgswparams", rgsw_params_));
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "BinFHECryptoParams";
     }
 
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 
   private:
-    // shared pointer to an instance of LWECryptoParams
-    std::shared_ptr<LWECryptoParams> m_LWEParams{nullptr};
+    // shared pointer to an instance of LweCryptoParams
+    std::shared_ptr<LweCryptoParams> lwe_params_{nullptr};
 
     // shared pointer to an instance of RGSWCryptoParams
-    std::shared_ptr<RingGSWCryptoParams> m_RGSWParams{nullptr};
+    std::shared_ptr<RingGswCryptoParams> rgsw_params_{nullptr};
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_BOOLEAN_BASE_PARAMS_H_

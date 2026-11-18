@@ -41,15 +41,15 @@
 #include "cipher/fhe/ckks/utils.h"
 #include "cipher/fhe/ckks/context_gen.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 struct boot_config {
-    uint32_t ringDim;
+    uint32_t ring_dim;
     uint32_t slots;
-    uint32_t dcrtBits;
-    uint32_t firstMod;
-    uint32_t numDigits;
-    uint32_t lvlsAfter;
+    uint32_t dcrt_bits;
+    uint32_t first_mod;
+    uint32_t num_digits;
+    uint32_t lvls_after;
     uint32_t iters;
     std::vector<uint32_t> lvlb;
     SecretKeyDist skdst;
@@ -58,8 +58,8 @@ struct boot_config {
 };
 
 // clang-format off
-[[maybe_unused]] std::vector<boot_config> boot_configs = {
-    // ringDm,   slots, dcrtBits, firstMod, numDigits, lvlsAfter, iters,   lvlb,                skdst,                stech, precision
+[[maybe_unused]] std::vector<boot_config> boot_configs_value = {
+    // ringDm,   slots, dcrt_bits, first_mod, num_digits, lvls_after, iters,   lvlb,                skdst,                stech, precision
     // 2^16, full packing, sparse-encapsulated, one iteration: five levels after bootstrapping, then the most levels that fit the 128-bit bound
     { 1 << 16, 1 << 15,       56,       60,         5,         5,     1, {4, 3},  SPARSE_ENCAPSULATED,         FLEXIBLEAUTO,  0},
     { 1 << 16, 1 << 15,       54,       60,         7,        10,     1, {3, 3},  SPARSE_ENCAPSULATED,         FLEXIBLEAUTO,  0},
@@ -90,94 +90,94 @@ struct boot_config {
 };
 // clang-format on
 
-[[maybe_unused]] static void BootConfigs(benchmark::internal::Benchmark* b) {
-    for (uint32_t i = 0; i < boot_configs.size(); ++i)
+[[maybe_unused]] static void boot_configs(benchmark::internal::Benchmark* b) {
+    for (uint32_t i = 0; i < boot_configs_value.size(); ++i)
         b->ArgName("Config")->Arg(i);
 }
 
-[[maybe_unused]] static void CKKSBoot(benchmark::State& state) {
-    auto t = boot_configs[state.range(0)];
+[[maybe_unused]] static void ckks_boot(benchmark::State& state) {
+    auto t = boot_configs_value[state.range(0)];
 
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetSecurityLevel(HEStd_128_classic);
-    parameters.SetRingDim(t.ringDim);
-    parameters.SetScalingModSize(t.dcrtBits);
-    parameters.SetFirstModSize(t.firstMod);
-    parameters.SetNumLargeDigits(t.numDigits);
-    parameters.SetSecretKeyDist(t.skdst);
-    parameters.SetScalingTechnique(t.stech);
-    parameters.SetKeySwitchTechnique(HYBRID);
-    uint32_t depth = t.lvlsAfter + FHECKKSRNS::GetBootstrapDepth(t.lvlb, t.skdst) + (t.iters - 1);
-    parameters.SetMultiplicativeDepth(depth);
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_security_level(HEStd_128_classic);
+    parameters.set_ring_dim(t.ring_dim);
+    parameters.set_scaling_mod_size(t.dcrt_bits);
+    parameters.set_first_mod_size(t.first_mod);
+    parameters.set_num_large_digits(t.num_digits);
+    parameters.set_secret_key_dist(t.skdst);
+    parameters.set_scaling_technique(t.stech);
+    parameters.set_key_switch_technique(HYBRID);
+    uint32_t depth = t.lvls_after + CkksRnsFhe::get_bootstrap_depth(t.lvlb, t.skdst) + (t.iters - 1);
+    parameters.set_multiplicative_depth(depth);
 
-    auto cc = GenCryptoContext(parameters);
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
-    cc->Enable(FHE);
+    auto cc = make_crypto_context(parameters);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
+    cc->enable(FHE);
 
-    cc->EvalBootstrapSetup(t.lvlb, {0, 0}, t.slots);
+    cc->eval_bootstrap_setup(t.lvlb, {0, 0}, t.slots);
 
-    auto keyPair = cc->KeyGen();
-    cc->EvalMultKeyGen(keyPair.secretKey);
-    cc->EvalBootstrapKeyGen(keyPair.secretKey, t.slots);
-
-    std::vector<double> x = {0.25, 0.5, 0.75, 1.0, 2.0, 3.0, 4.0, 5.0};
-
-    auto ptxt = cc->MakeCKKSPackedPlaintext(x, 1, depth - 1, nullptr, t.slots);
-    ptxt->SetLength(t.slots);
-
-    auto ctxt = cc->Encrypt(keyPair.publicKey, ptxt);
-
-    while (state.KeepRunning())
-        auto ctxtAfter = cc->EvalBootstrap(ctxt, t.iters, t.precision);
-
-    cc->ClearStaticMapsAndVectors();
-}
-
-[[maybe_unused]] static void CKKSBootStC(benchmark::State& state) {
-    auto t = boot_configs[state.range(0)];
-
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetSecurityLevel(HEStd_128_classic);
-    parameters.SetRingDim(t.ringDim);
-    parameters.SetScalingModSize(t.dcrtBits);
-    parameters.SetFirstModSize(t.firstMod);
-    parameters.SetNumLargeDigits(t.numDigits);
-    parameters.SetSecretKeyDist(t.skdst);
-    parameters.SetScalingTechnique(t.stech);
-    parameters.SetKeySwitchTechnique(HYBRID);
-    uint32_t depth = t.lvlsAfter + FHECKKSRNS::GetBootstrapDepth(t.lvlb, t.skdst) + (t.iters - 1);
-    parameters.SetMultiplicativeDepth(depth);
-
-    auto cc = GenCryptoContext(parameters);
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
-    cc->Enable(FHE);
-
-    cc->EvalBootstrapSetup(t.lvlb, {0, 0}, t.slots, 0, true, true);
-
-    auto keyPair = cc->KeyGen();
-    cc->EvalMultKeyGen(keyPair.secretKey);
-    cc->EvalBootstrapKeyGen(keyPair.secretKey, t.slots);
+    auto key_pair = cc->key_gen();
+    cc->eval_mult_key_gen(key_pair.secret_key);
+    cc->eval_bootstrap_key_gen(key_pair.secret_key, t.slots);
 
     std::vector<double> x = {0.25, 0.5, 0.75, 1.0, 2.0, 3.0, 4.0, 5.0};
 
-    auto ptxt = cc->MakeCKKSPackedPlaintext(x, 1, depth - 1 - t.lvlb[1], nullptr, t.slots);
-    ptxt->SetLength(t.slots);
+    auto ptxt = cc->make_ckks_packed_plaintext(x, 1, depth - 1, nullptr, t.slots);
+    ptxt->set_length(t.slots);
 
-    auto ctxt = cc->Encrypt(keyPair.publicKey, ptxt);
+    auto ctxt = cc->encrypt(key_pair.public_key, ptxt);
 
     while (state.KeepRunning())
-        auto ctxtAfter = cc->EvalBootstrap(ctxt, t.iters, t.precision);
+        auto ctxt_after = cc->eval_bootstrap(ctxt, t.iters, t.precision);
 
-    cc->ClearStaticMapsAndVectors();
+    cc->clear_static_maps_and_vectors();
 }
 
-BENCHMARK(CKKSBoot)->Unit(benchmark::kSecond)->Iterations(4)->Apply(BootConfigs);
-BENCHMARK(CKKSBootStC)->Unit(benchmark::kSecond)->Iterations(4)->Apply(BootConfigs);
+[[maybe_unused]] static void ckks_boot_st_c(benchmark::State& state) {
+    auto t = boot_configs_value[state.range(0)];
+
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_security_level(HEStd_128_classic);
+    parameters.set_ring_dim(t.ring_dim);
+    parameters.set_scaling_mod_size(t.dcrt_bits);
+    parameters.set_first_mod_size(t.first_mod);
+    parameters.set_num_large_digits(t.num_digits);
+    parameters.set_secret_key_dist(t.skdst);
+    parameters.set_scaling_technique(t.stech);
+    parameters.set_key_switch_technique(HYBRID);
+    uint32_t depth = t.lvls_after + CkksRnsFhe::get_bootstrap_depth(t.lvlb, t.skdst) + (t.iters - 1);
+    parameters.set_multiplicative_depth(depth);
+
+    auto cc = make_crypto_context(parameters);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
+    cc->enable(FHE);
+
+    cc->eval_bootstrap_setup(t.lvlb, {0, 0}, t.slots, 0, true, true);
+
+    auto key_pair = cc->key_gen();
+    cc->eval_mult_key_gen(key_pair.secret_key);
+    cc->eval_bootstrap_key_gen(key_pair.secret_key, t.slots);
+
+    std::vector<double> x = {0.25, 0.5, 0.75, 1.0, 2.0, 3.0, 4.0, 5.0};
+
+    auto ptxt = cc->make_ckks_packed_plaintext(x, 1, depth - 1 - t.lvlb[1], nullptr, t.slots);
+    ptxt->set_length(t.slots);
+
+    auto ctxt = cc->encrypt(key_pair.public_key, ptxt);
+
+    while (state.KeepRunning())
+        auto ctxt_after = cc->eval_bootstrap(ctxt, t.iters, t.precision);
+
+    cc->clear_static_maps_and_vectors();
+}
+
+BENCHMARK(ckks_boot)->Unit(benchmark::kSecond)->Iterations(4)->Apply(boot_configs);
+BENCHMARK(ckks_boot_st_c)->Unit(benchmark::kSecond)->Iterations(4)->Apply(boot_configs);
 
 BENCHMARK_MAIN();

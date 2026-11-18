@@ -42,7 +42,7 @@
 #include "fhe/support/test_utils.h"
 #include "gtest/gtest.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 //===========================================================================================================
 enum TEST_CASE_TYPE : int {
@@ -103,23 +103,23 @@ static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
 }
 //===========================================================================================================
 struct TEST_CASE_UTCKKSRNS_EVAL_POLY {
-    TEST_CASE_TYPE testCaseType;
+    TEST_CASE_TYPE test_case_type;
     // test case description - MUST BE UNIQUE
     std::string description;
 
-    UnitTestCCParams params;
+    TestContextParams params;
 
     // additional test case data
     // ........
 
-    std::string buildTestName() const {
+    std::string build_test_name() const {
         std::stringstream ss;
-        ss << testCaseType << "_" << description;
+        ss << test_case_type << "_" << description;
         return ss.str();
     }
-    std::string toString() const {
+    std::string to_string_impl() const {
         std::stringstream ss;
-        ss << "testCaseType [" << testCaseType << "], " << params.toString();
+        ss << "testCaseType [" << test_case_type << "], " << params.to_string_impl();
         return ss.str();
     }
 };
@@ -127,11 +127,11 @@ struct TEST_CASE_UTCKKSRNS_EVAL_POLY {
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
 static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNS_EVAL_POLY>& test) {
-    return test.param.buildTestName();
+    return test.param.build_test_name();
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_UTCKKSRNS_EVAL_POLY& test) {
-    return os << test.toString();
+    return os << test.to_string_impl();
 }
 //===========================================================================================================
 constexpr uint32_t RDIM = 512;
@@ -139,7 +139,7 @@ constexpr uint32_t RDIM_LRG = 1024;
 constexpr uint32_t MULT_DEPTH = 10;
 constexpr uint32_t BATCH = 8;
 
-#if NATIVEINT == 128
+#if CIPHER_NATIVE_INT == 128
 constexpr uint32_t SMODSIZE = 78;
 constexpr uint32_t FMODSIZE = 89;
 #else
@@ -148,131 +148,131 @@ constexpr uint32_t FMODSIZE = 60;
 #endif
 
 // clang-format off
-static std::vector<TEST_CASE_UTCKKSRNS_EVAL_POLY> testCases = {
-    // TestType, Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, StdDev, EvalAddCt, KSCt, MultTech, EncTech, PREMode
+static std::vector<TEST_CASE_UTCKKSRNS_EVAL_POLY> test_cases = {
+    // TestType, Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
     { EVAL_POLY, "01", {CKKSRNS_SCHEME, RDIM, 5,          SMODSIZE,   20,    BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_POLY, "02", {CKKSRNS_SCHEME, RDIM, 5,          SMODSIZE,   20,    BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_POLY, "03", {CKKSRNS_SCHEME, RDIM, 5,          SMODSIZE,   20,    BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, BV,     FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_POLY, "04", {CKKSRNS_SCHEME, RDIM, 5,          SMODSIZE,   20,    BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, BV,     FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
     { EVAL_POLY, "05", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_POLY, "06", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_POLY, "07", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, BV,     FLEXIBLEAUTO,    DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_POLY, "08", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, BV,     FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
 #endif
     // ==========================================
-    // TestType,          Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, StdDev, EvalAddCt, KSCt, MultTech, EncTech, PREMode
+    // TestType,          Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
     { EVAL_CHEB_DIVISION, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_DIVISION, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_DIVISION, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_DIVISION, "04", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
     { EVAL_CHEB_DIVISION, "05", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_DIVISION, "06", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_DIVISION, "07", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_DIVISION, "08", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
 #endif
     // ==========================================
-    // TestType,       Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, StdDev, EvalAddCt, KSCt, MultTech, EncTech, PREMode
+    // TestType,       Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
     { EVAL_CHEB_LOGIT, "01", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_LOGIT, "02", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_LOGIT, "03", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_LOGIT, "04", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
     { EVAL_CHEB_LOGIT, "05", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_LOGIT, "06", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_LOGIT, "07", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_LOGIT, "08", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
 #endif
     // ==========================================
-    // TestType,             Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, StdDev, EvalAddCt, KSCt, MultTech, EncTech, PREMode
+    // TestType,             Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
     { EVAL_CHEB_LOGIT_NOLIN, "01", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_LOGIT_NOLIN, "02", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_LOGIT_NOLIN, "03", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_LOGIT_NOLIN, "04", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
     { EVAL_CHEB_LOGIT_NOLIN, "05", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_LOGIT_NOLIN, "06", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_LOGIT_NOLIN, "07", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_LOGIT_NOLIN, "08", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
 #endif
     // ==========================================
-    // TestType,      Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, StdDev, EvalAddCt, KSCt, MultTech, EncTech, PREMode
+    // TestType,      Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
     { EVAL_CHEB_SINE, "01", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_SINE, "02", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_SINE, "03", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_SINE, "04", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
     { EVAL_CHEB_SINE, "05", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_SINE, "06", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_SINE, "07", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_SINE, "08", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
 #endif
     // ==========================================
-    // TestType,      Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, StdDev, EvalAddCt, KSCt, MultTech, EncTech, PREMode
+    // TestType,      Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
     { EVAL_CHEB_POLY, "01", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_POLY, "02", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_POLY, "03", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_POLY, "04", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
     { EVAL_CHEB_POLY, "05", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_POLY, "06", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_POLY, "07", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_POLY, "08", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
 #endif
     // ==========================================
-    // TestType,   Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, StdDev, EvalAddCt, KSCt, MultTech, EncTech, PREMode
+    // TestType,   Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
     { EVAL_DIVIDE, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_DIVIDE, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_DIVIDE, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_DIVIDE, "04", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
     { EVAL_DIVIDE, "05", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_DIVIDE, "06", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_DIVIDE, "07", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_DIVIDE, "08", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
 #endif
     // ==========================================
-    // TestType,     Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, StdDev, EvalAddCt, KSCt, MultTech, EncTech, PREMode
+    // TestType,     Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
     { EVAL_LOGISTIC, "01", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_LOGISTIC, "02", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_LOGISTIC, "03", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_LOGISTIC, "04", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
     { EVAL_LOGISTIC, "05", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_LOGISTIC, "06", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_LOGISTIC, "07", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_LOGISTIC, "08", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
 #endif
     // ==========================================
-    // TestType Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, StdDev, EvalAddCt, KSCt, MultTech, EncTech, PREMode
+    // TestType Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
     { EVAL_SIN, "01", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_SIN, "02", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_SIN, "03", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_SIN, "04", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
     { EVAL_SIN, "05", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_SIN, "06", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_SIN, "07", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_SIN, "08", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
 #endif
     // ==========================================
-    // TestType Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, StdDev, EvalAddCt, KSCt, MultTech, EncTech, PREMode
+    // TestType Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
     { EVAL_COS, "01", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_COS, "02", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_COS, "03", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_COS, "04", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
     { EVAL_COS, "05", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_COS, "06", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_COS, "07", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_COS, "08", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
 #endif
     // ==========================================
-    // TestType,          Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, StdDev, EvalAddCt, KSCt, MultTech, EncTech, PREMode
+    // TestType,          Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
     { EVAL_PRECOMP_REUSE, "01", {CKKSRNS_SCHEME, RDIM, 5,          SMODSIZE,   20,    BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_PRECOMP_REUSE, "02", {CKKSRNS_SCHEME, RDIM, 5,          SMODSIZE,   20,    BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
     { EVAL_PRECOMP_REUSE, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_PRECOMP_REUSE, "04", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
 #endif
@@ -281,7 +281,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_EVAL_POLY> testCases = {
 // clang-format on
 //===========================================================================================================
 class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_EVAL_POLY> {
-    using Element = DCRTPoly;
+    using Element = RnsPoly;
 
     // The precision after which we consider two values equal.
     // This is necessary because CKKS works for approximate numbers.
@@ -289,20 +289,20 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
 
   protected:
     void SetUp() {
-        OpenFHEParallelControls.UnitTestStart();
+        cipher_parallel_controls.unit_test_start();
     }
 
     void TearDown() {
-        CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
-        OpenFHEParallelControls.UnitTestStop();
+        ContextFactory<RnsPoly>::release_all_contexts();
+        cipher_parallel_controls.unit_test_stop();
     }
 
-    void UnitTest_EvalPoly(const TEST_CASE_UTCKKSRNS_EVAL_POLY& testData, const std::string& failmsg = std::string()) {
+    void unit_test_eval_poly(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data, const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
             std::vector<std::complex<double>> input{0.5, 0.7, 0.9, 0.95, 0.93};
-            size_t encodedLength = input.size();
+            size_t encoded_length = input.size();
 
             // with only positive coefficients
             // x^16 + x^11 + 2 x^9 + x^8 + x^6 + 1.25 x^3 + 0.75*x + 0.15
@@ -320,62 +320,62 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
             // low-degree function to check linear implementation
             std::vector<double> coefficients5{0, 1, 1, -1};
 
-            Plaintext plaintext1 = cc->MakeCKKSPackedPlaintext(input);
+            Plaintext plaintext1 = cc->make_ckks_packed_plaintext(input);
 
             std::vector<std::complex<double>> output1{0.705191, 1.38285, 3.97211, 5.60216, 4.86358};
-            Plaintext plaintextResult1 = cc->MakeCKKSPackedPlaintext(output1);
+            Plaintext plaintext_result1 = cc->make_ckks_packed_plaintext(output1);
 
             std::vector<std::complex<double>> output2{-0.0526215, 0.217555, 1.76118, 2.85032, 2.34941};
-            Plaintext plaintextResult2 = cc->MakeCKKSPackedPlaintext(output2);
+            Plaintext plaintext_result2 = cc->make_ckks_packed_plaintext(output2);
 
             std::vector<std::complex<double>> output3{0.0000152588, 0.00332329, 0.185302, 0.440127, 0.313132};
-            Plaintext plaintextResult3 = cc->MakeCKKSPackedPlaintext(output3);
+            Plaintext plaintext_result3 = cc->make_ckks_packed_plaintext(output3);
 
             std::vector<std::complex<double>> output4{-0.59168396, -0.69253274, 0.12306489, 0.93308964, 0.54980166};
-            Plaintext plaintextResult4 = cc->MakeCKKSPackedPlaintext(output4);
+            Plaintext plaintext_result4 = cc->make_ckks_packed_plaintext(output4);
 
             std::vector<std::complex<double>> output5{0.625, 0.847, 0.9809999999, 0.995125, 0.990543};
-            Plaintext plaintextResult5 = cc->MakeCKKSPackedPlaintext(output5);
+            Plaintext plaintext_result5 = cc->make_ckks_packed_plaintext(output5);
 
-            auto keyPair = cc->KeyGen();
-            cc->EvalMultKeyGen(keyPair.secretKey);
+            auto key_pair = cc->key_gen();
+            cc->eval_mult_key_gen(key_pair.secret_key);
 
             // Encrypt plaintexts
-            Ciphertext<Element> ciphertext1 = cc->Encrypt(keyPair.publicKey, plaintext1);
+            Ciphertext<Element> ciphertext1 = cc->encrypt(key_pair.public_key, plaintext1);
 
             Plaintext results1;
-            auto cResult1 = cc->EvalPoly(ciphertext1, coefficients1);
-            cc->Decrypt(keyPair.secretKey, cResult1, &results1);
-            results1->SetLength(encodedLength);
-            checkEquality(plaintextResult1->GetCKKSPackedValue(), results1->GetCKKSPackedValue(), eps,
+            auto c_result1 = cc->eval_poly(ciphertext1, coefficients1);
+            cc->decrypt(key_pair.secret_key, c_result1, &results1);
+            results1->set_length(encoded_length);
+            check_equality(plaintext_result1->get_ckks_packed_value(), results1->get_ckks_packed_value(), eps,
                           failmsg + " EvalPoly with positive coefficients fails");
 
             Plaintext results2;
-            auto cResult2 = cc->EvalPoly(ciphertext1, coefficients2);
-            cc->Decrypt(keyPair.secretKey, cResult2, &results2);
-            results2->SetLength(encodedLength);
-            checkEquality(plaintextResult2->GetCKKSPackedValue(), results2->GetCKKSPackedValue(), eps,
+            auto c_result2 = cc->eval_poly(ciphertext1, coefficients2);
+            cc->decrypt(key_pair.secret_key, c_result2, &results2);
+            results2->set_length(encoded_length);
+            check_equality(plaintext_result2->get_ckks_packed_value(), results2->get_ckks_packed_value(), eps,
                           failmsg + " EvalPoly with negative coefficients fails");
 
             Plaintext results3;
-            auto cResult3 = cc->EvalPoly(ciphertext1, coefficients3);
-            cc->Decrypt(keyPair.secretKey, cResult3, &results3);
-            results3->SetLength(encodedLength);
-            checkEquality(plaintextResult3->GetCKKSPackedValue(), results3->GetCKKSPackedValue(), eps,
+            auto c_result3 = cc->eval_poly(ciphertext1, coefficients3);
+            cc->decrypt(key_pair.secret_key, c_result3, &results3);
+            results3->set_length(encoded_length);
+            check_equality(plaintext_result3->get_ckks_packed_value(), results3->get_ckks_packed_value(), eps,
                           failmsg + " EvalPoly for a power function fails");
 
             Plaintext results4;
-            auto cResult4 = cc->EvalPoly(ciphertext1, coefficients4);
-            cc->Decrypt(keyPair.secretKey, cResult4, &results4);
-            results4->SetLength(encodedLength);
-            checkEquality(plaintextResult4->GetCKKSPackedValue(), results4->GetCKKSPackedValue(), eps,
+            auto c_result4 = cc->eval_poly(ciphertext1, coefficients4);
+            cc->decrypt(key_pair.secret_key, c_result4, &results4);
+            results4->set_length(encoded_length);
+            check_equality(plaintext_result4->get_ckks_packed_value(), results4->get_ckks_packed_value(), eps,
                           failmsg + " EvalPoly for negative coefficients with magnitude > 1 fails");
 
             Plaintext results5;
-            auto cResult5 = cc->EvalPoly(ciphertext1, coefficients5);
-            cc->Decrypt(keyPair.secretKey, cResult5, &results5);
-            results5->SetLength(encodedLength);
-            checkEquality(plaintextResult5->GetCKKSPackedValue(), results5->GetCKKSPackedValue(), eps,
+            auto c_result5 = cc->eval_poly(ciphertext1, coefficients5);
+            cc->decrypt(key_pair.secret_key, c_result5, &results5);
+            results5->set_length(encoded_length);
+            check_equality(plaintext_result5->get_ckks_packed_value(), results5->get_ckks_packed_value(), eps,
                           failmsg + " EvalPoly for low-degree polynomial fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
@@ -386,13 +386,13 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
         }
     }
 
-    void UnitTest_EvalChebDivision(const TEST_CASE_UTCKKSRNS_EVAL_POLY& testData,
+    void unit_test_eval_cheb_division(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data,
                                    const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
             std::vector<std::complex<double>> input{2.0, 16.0, 64.0, 128.0, 512.0};
-            size_t encodedLength = input.size();
+            size_t encoded_length = input.size();
 
             std::vector<double> coefficients(
                     {0.0625,       -0.0587121,    0.0551538,    -0.0518111,    0.0486711,    -0.0457213,
@@ -419,25 +419,25 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
                      7.41236e-6,   -4.92553e-6,   2.45796e-6});
 
             std::vector<std::complex<double>> output1{0.500067, 0.0624609, 0.0156279, 0.00781142, 0.00195297};
-            Plaintext plaintextResult1 = cc->MakeCKKSPackedPlaintext(output1);
+            Plaintext plaintext_result1 = cc->make_ckks_packed_plaintext(output1);
 
-            auto keyPair = cc->KeyGen();
-            cc->EvalMultKeyGen(keyPair.secretKey);
+            auto key_pair = cc->key_gen();
+            cc->eval_mult_key_gen(key_pair.secret_key);
 
-            Plaintext plaintext1 = cc->MakeCKKSPackedPlaintext(input);
-            auto ciphertext1 = cc->Encrypt(keyPair.publicKey, plaintext1);
+            Plaintext plaintext1 = cc->make_ckks_packed_plaintext(input);
+            auto ciphertext1 = cc->encrypt(key_pair.public_key, plaintext1);
 
             double a = 1;
             double b = 1024;
-            auto result = cc->EvalChebyshevSeries(ciphertext1, coefficients, a, b);
+            auto result = cc->eval_chebyshev_series(ciphertext1, coefficients, a, b);
 
-            Plaintext plaintextDec;
-            cc->Decrypt(keyPair.secretKey, result, &plaintextDec);
-            plaintextDec->SetLength(encodedLength);
+            Plaintext plaintext_dec;
+            cc->decrypt(key_pair.secret_key, result, &plaintext_dec);
+            plaintext_dec->set_length(encoded_length);
 
-            std::vector<std::complex<double>> finalResult = plaintextDec->GetCKKSPackedValue();
-            finalResult.resize(encodedLength);
-            checkEquality(plaintextResult1->GetCKKSPackedValue(), finalResult, eps,
+            std::vector<std::complex<double>> final_result = plaintext_dec->get_ckks_packed_value();
+            final_result.resize(encoded_length);
+            check_equality(plaintext_result1->get_ckks_packed_value(), final_result, eps,
                           failmsg + " EvalChebyshevSeries approximation for division fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
@@ -448,38 +448,38 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
         }
     }
 
-    void UnitTest_EvalChebLogit(const TEST_CASE_UTCKKSRNS_EVAL_POLY& testData,
+    void unit_test_eval_cheb_logit(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data,
                                 const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
             std::vector<std::complex<double>> input{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0};
-            size_t encodedLength = input.size();
+            size_t encoded_length = input.size();
 
             std::vector<double> coefficients({1.0, 0.558971, 0.0, -0.0943712, 0.0, 0.0215023, 0.0, -0.00505348, 0.0,
                                               0.00119324, 0.0, -0.000281928, 0.0, 0.0000664347, 0.0, -0.0000148709});
             std::vector<std::complex<double>> output1(
                     {0.0179885, 0.0474289, 0.119205, 0.268936, 0.5, 0.731064, 0.880795, 0.952571, 0.982011});
 
-            Plaintext plaintext1 = cc->MakeCKKSPackedPlaintext(input);
-            Plaintext plaintextResult1 = cc->MakeCKKSPackedPlaintext(output1);
+            Plaintext plaintext1 = cc->make_ckks_packed_plaintext(input);
+            Plaintext plaintext_result1 = cc->make_ckks_packed_plaintext(output1);
 
-            auto keyPair = cc->KeyGen();
-            cc->EvalMultKeyGen(keyPair.secretKey);
-            auto ciphertext1 = cc->Encrypt(keyPair.publicKey, plaintext1);
+            auto key_pair = cc->key_gen();
+            cc->eval_mult_key_gen(key_pair.secret_key);
+            auto ciphertext1 = cc->encrypt(key_pair.public_key, plaintext1);
 
             double a = -4;
             double b = 4;
-            auto result = cc->EvalChebyshevSeries(ciphertext1, coefficients, a, b);
+            auto result = cc->eval_chebyshev_series(ciphertext1, coefficients, a, b);
 
-            Plaintext plaintextDec;
-            cc->Decrypt(keyPair.secretKey, result, &plaintextDec);
-            plaintextDec->SetLength(encodedLength);
+            Plaintext plaintext_dec;
+            cc->decrypt(key_pair.secret_key, result, &plaintext_dec);
+            plaintext_dec->set_length(encoded_length);
 
-            std::vector<std::complex<double>> finalResult = plaintextDec->GetCKKSPackedValue();
-            finalResult.resize(encodedLength);
+            std::vector<std::complex<double>> final_result = plaintext_dec->get_ckks_packed_value();
+            final_result.resize(encoded_length);
 
-            checkEquality(plaintextResult1->GetCKKSPackedValue(), finalResult, eps,
+            check_equality(plaintext_result1->get_ckks_packed_value(), final_result, eps,
                           failmsg + " EvalChebyshevSeries approximation for logistic function fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
@@ -490,14 +490,14 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
         }
     }
 
-    void UnitTest_EvalChebLogitNoLin(const TEST_CASE_UTCKKSRNS_EVAL_POLY& testData,
+    void unit_test_eval_cheb_logit_no_lin(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data,
                                      const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
             std::vector<std::complex<double>> input{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0};
-            size_t encodedLength = input.size();
-            for (size_t i = 0; i < encodedLength; ++i)
+            size_t encoded_length = input.size();
+            for (size_t i = 0; i < encoded_length; ++i)
                 input[i] *= 0.25;
 
             std::vector<double> coefficients({1.0, 0.558971, 0.0, -0.0943712, 0.0, 0.0215023, 0.0, -0.00505348, 0.0,
@@ -505,25 +505,25 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
             std::vector<std::complex<double>> output1(
                     {0.0179885, 0.0474289, 0.119205, 0.268936, 0.5, 0.731064, 0.880795, 0.952571, 0.982011});
 
-            Plaintext plaintext1 = cc->MakeCKKSPackedPlaintext(input);
-            Plaintext plaintextResult1 = cc->MakeCKKSPackedPlaintext(output1);
+            Plaintext plaintext1 = cc->make_ckks_packed_plaintext(input);
+            Plaintext plaintext_result1 = cc->make_ckks_packed_plaintext(output1);
 
-            auto keyPair = cc->KeyGen();
-            cc->EvalMultKeyGen(keyPair.secretKey);
-            auto ciphertext1 = cc->Encrypt(keyPair.publicKey, plaintext1);
+            auto key_pair = cc->key_gen();
+            cc->eval_mult_key_gen(key_pair.secret_key);
+            auto ciphertext1 = cc->encrypt(key_pair.public_key, plaintext1);
 
             double a = -1;
             double b = 1;
-            auto result = cc->EvalChebyshevSeries(ciphertext1, coefficients, a, b);
+            auto result = cc->eval_chebyshev_series(ciphertext1, coefficients, a, b);
 
-            Plaintext plaintextDec;
-            cc->Decrypt(keyPair.secretKey, result, &plaintextDec);
-            plaintextDec->SetLength(encodedLength);
+            Plaintext plaintext_dec;
+            cc->decrypt(key_pair.secret_key, result, &plaintext_dec);
+            plaintext_dec->set_length(encoded_length);
 
-            std::vector<std::complex<double>> finalResult = plaintextDec->GetCKKSPackedValue();
-            finalResult.resize(encodedLength);
+            std::vector<std::complex<double>> final_result = plaintext_dec->get_ckks_packed_value();
+            final_result.resize(encoded_length);
 
-            checkEquality(plaintextResult1->GetCKKSPackedValue(), finalResult, eps,
+            check_equality(plaintext_result1->get_ckks_packed_value(), final_result, eps,
                           failmsg + " EvalChebyshevSeries approximation for logistic function fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
@@ -534,13 +534,13 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
         }
     }
 
-    void UnitTest_EvalChebSine(const TEST_CASE_UTCKKSRNS_EVAL_POLY& testData,
+    void unit_test_eval_cheb_sine(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data,
                                const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
             std::vector<std::complex<double>> input{-1., -0.8, -0.6, -0.4, -0.2, 0., 0.2, 0.4, 0.6, 0.8, 1.};
-            size_t encodedLength = input.size();
+            size_t encoded_length = input.size();
 
             std::vector<double> coefficients{
                     0., -0.0178446,   0., -0.0171187,  0., -0.0155856,    0., -0.0131009,   0., -0.00949759,
@@ -559,25 +559,25 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
             std::vector<std::complex<double>> output1{6.80601e-09, 0.151365,  0.0935489,  -0.0935489, -0.151365,   0.,
                                                       0.151365,    0.0935489, -0.0935489, -0.151365,  -6.80601e-09};
 
-            Plaintext plaintext1 = cc->MakeCKKSPackedPlaintext(input);
-            Plaintext plaintextResult1 = cc->MakeCKKSPackedPlaintext(output1);
+            Plaintext plaintext1 = cc->make_ckks_packed_plaintext(input);
+            Plaintext plaintext_result1 = cc->make_ckks_packed_plaintext(output1);
 
-            auto keyPair = cc->KeyGen();
-            cc->EvalMultKeyGen(keyPair.secretKey);
-            auto ciphertext1 = cc->Encrypt(keyPair.publicKey, plaintext1);
+            auto key_pair = cc->key_gen();
+            cc->eval_mult_key_gen(key_pair.secret_key);
+            auto ciphertext1 = cc->encrypt(key_pair.public_key, plaintext1);
 
             double a = -1;
             double b = 1;
-            auto result = cc->EvalChebyshevSeries(ciphertext1, coefficients, a, b);
+            auto result = cc->eval_chebyshev_series(ciphertext1, coefficients, a, b);
 
-            Plaintext plaintextDec;
-            cc->Decrypt(keyPair.secretKey, result, &plaintextDec);
-            plaintextDec->SetLength(encodedLength);
+            Plaintext plaintext_dec;
+            cc->decrypt(key_pair.secret_key, result, &plaintext_dec);
+            plaintext_dec->set_length(encoded_length);
 
-            std::vector<std::complex<double>> finalResult = plaintextDec->GetCKKSPackedValue();
-            finalResult.resize(encodedLength);
+            std::vector<std::complex<double>> final_result = plaintext_dec->get_ckks_packed_value();
+            final_result.resize(encoded_length);
 
-            checkEquality(plaintextResult1->GetCKKSPackedValue(), finalResult, eps,
+            check_equality(plaintext_result1->get_ckks_packed_value(), final_result, eps,
                           failmsg + " EvalChebyshevSeries approximation for sine fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
@@ -588,36 +588,36 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
         }
     }
 
-    void UnitTest_EvalChebPoly(const TEST_CASE_UTCKKSRNS_EVAL_POLY& testData,
+    void unit_test_eval_cheb_poly(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data,
                                const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
             std::vector<std::complex<double>> input{-3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0};
-            size_t encodedLength = input.size();
+            size_t encoded_length = input.size();
 
             std::vector<double> coefficients{9, -17.25, 4.5, -6.75, -0};
             std::vector<std::complex<double>> output1{33, 10, 1, 0, 1, -2, -15};
 
-            Plaintext plaintext1 = cc->MakeCKKSPackedPlaintext(input);
-            Plaintext plaintextResult1 = cc->MakeCKKSPackedPlaintext(output1);
+            Plaintext plaintext1 = cc->make_ckks_packed_plaintext(input);
+            Plaintext plaintext_result1 = cc->make_ckks_packed_plaintext(output1);
 
-            auto keyPair = cc->KeyGen();
-            cc->EvalMultKeyGen(keyPair.secretKey);
-            auto ciphertext1 = cc->Encrypt(keyPair.publicKey, plaintext1);
+            auto key_pair = cc->key_gen();
+            cc->eval_mult_key_gen(key_pair.secret_key);
+            auto ciphertext1 = cc->encrypt(key_pair.public_key, plaintext1);
 
             double a = -3;
             double b = 3;
-            auto result = cc->EvalChebyshevSeries(ciphertext1, coefficients, a, b);
+            auto result = cc->eval_chebyshev_series(ciphertext1, coefficients, a, b);
 
-            Plaintext plaintextDec;
-            cc->Decrypt(keyPair.secretKey, result, &plaintextDec);
-            plaintextDec->SetLength(encodedLength);
+            Plaintext plaintext_dec;
+            cc->decrypt(key_pair.secret_key, result, &plaintext_dec);
+            plaintext_dec->set_length(encoded_length);
 
-            std::vector<std::complex<double>> finalResult = plaintextDec->GetCKKSPackedValue();
-            finalResult.resize(encodedLength);
+            std::vector<std::complex<double>> final_result = plaintext_dec->get_ckks_packed_value();
+            final_result.resize(encoded_length);
 
-            checkEquality(plaintextResult1->GetCKKSPackedValue(), finalResult, eps,
+            check_equality(plaintext_result1->get_ckks_packed_value(), final_result, eps,
                           failmsg + " EvalChebyshevSeries approximation for sine fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
@@ -628,33 +628,33 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
         }
     }
 
-    void UnitTest_EvalDivide(const TEST_CASE_UTCKKSRNS_EVAL_POLY& testData,
+    void unit_test_eval_divide(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data,
                              const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
             std::vector<std::complex<double>> input{2.0, 16.0, 64.0, 128.0, 512.0};
-            size_t encodedLength = input.size();
+            size_t encoded_length = input.size();
 
-            std::vector<std::complex<double>> expectedOutput{0.500067, 0.0624609, 0.0156279, 0.00781142, 0.00195297};
+            std::vector<std::complex<double>> expected_output{0.500067, 0.0624609, 0.0156279, 0.00781142, 0.00195297};
 
-            auto keyPair = cc->KeyGen();
-            cc->EvalMultKeyGen(keyPair.secretKey);
+            auto key_pair = cc->key_gen();
+            cc->eval_mult_key_gen(key_pair.secret_key);
 
-            Plaintext plaintext1 = cc->MakeCKKSPackedPlaintext(input);
-            auto ciphertext1 = cc->Encrypt(keyPair.publicKey, plaintext1);
+            Plaintext plaintext1 = cc->make_ckks_packed_plaintext(input);
+            auto ciphertext1 = cc->encrypt(key_pair.public_key, plaintext1);
 
             double a = 1;
             double b = 1024;
             uint32_t degree = 129;
-            auto result = cc->EvalDivide(ciphertext1, a, b, degree);
+            auto result = cc->eval_divide(ciphertext1, a, b, degree);
 
-            Plaintext plaintextDec;
-            cc->Decrypt(keyPair.secretKey, result, &plaintextDec);
-            plaintextDec->SetLength(encodedLength);
+            Plaintext plaintext_dec;
+            cc->decrypt(key_pair.secret_key, result, &plaintext_dec);
+            plaintext_dec->set_length(encoded_length);
 
-            std::vector<std::complex<double>> finalResult = plaintextDec->GetCKKSPackedValue();
-            checkEquality(expectedOutput, finalResult, eps, failmsg + " EvalDivide Chebyshev approximation fails");
+            std::vector<std::complex<double>> final_result = plaintext_dec->get_ckks_packed_value();
+            check_equality(expected_output, final_result, eps, failmsg + " EvalDivide Chebyshev approximation fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -663,118 +663,118 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
             UNIT_TEST_HANDLE_ALL_EXCEPTIONS;
         }
     }
-    void UnitTest_EvalLogistic(const TEST_CASE_UTCKKSRNS_EVAL_POLY& testData,
+    void unit_test_eval_logistic(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data,
                                const std::string& failmsg = std::string()) {
-        CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+        CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
         std::vector<std::complex<double>> input{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0};
-        size_t encodedLength = input.size();
+        size_t encoded_length = input.size();
 
-        std::vector<std::complex<double>> expectedOutput(
+        std::vector<std::complex<double>> expected_output(
                 {0.0179885, 0.0474289, 0.119205, 0.268936, 0.5, 0.731064, 0.880795, 0.952571, 0.982011});
 
-        Plaintext plaintext = cc->MakeCKKSPackedPlaintext(input);
+        Plaintext plaintext = cc->make_ckks_packed_plaintext(input);
 
-        auto keyPair = cc->KeyGen();
-        cc->EvalMultKeyGen(keyPair.secretKey);
-        auto ciphertext = cc->Encrypt(keyPair.publicKey, plaintext);
+        auto key_pair = cc->key_gen();
+        cc->eval_mult_key_gen(key_pair.secret_key);
+        auto ciphertext = cc->encrypt(key_pair.public_key, plaintext);
 
         double a = -4;
         double b = 4;
         uint32_t degree = 16;
-        auto result = cc->EvalLogistic(ciphertext, a, b, degree);
+        auto result = cc->eval_logistic(ciphertext, a, b, degree);
 
-        Plaintext plaintextDec;
-        cc->Decrypt(keyPair.secretKey, result, &plaintextDec);
-        plaintextDec->SetLength(encodedLength);
+        Plaintext plaintext_dec;
+        cc->decrypt(key_pair.secret_key, result, &plaintext_dec);
+        plaintext_dec->set_length(encoded_length);
 
-        std::vector<std::complex<double>> finalResult = plaintextDec->GetCKKSPackedValue();
+        std::vector<std::complex<double>> final_result = plaintext_dec->get_ckks_packed_value();
 
-        checkEquality(expectedOutput, finalResult, eps, failmsg + " EvalLogistic Chebyshev approximation fails");
+        check_equality(expected_output, final_result, eps, failmsg + " EvalLogistic Chebyshev approximation fails");
     }
-    void UnitTest_EvalSin(const TEST_CASE_UTCKKSRNS_EVAL_POLY& testData, const std::string& failmsg = std::string()) {
-        CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+    void unit_test_eval_sin(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data, const std::string& failmsg = std::string()) {
+        CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
         std::vector<std::complex<double>> input{-1., -0.8, -0.6, -0.4, -0.2, 0., 0.2, 0.4, 0.6, 0.8, 1.};
-        size_t encodedLength = input.size();
+        size_t encoded_length = input.size();
 
-        std::vector<std::complex<double>> expectedOutput{-0.841470, -0.717356, -0.564642, -0.389418, -0.198669, 0,
+        std::vector<std::complex<double>> expected_output{-0.841470, -0.717356, -0.564642, -0.389418, -0.198669, 0,
                                                          0.198669,  0.389418,  0.564642,  0.717356,  0.841470};
 
-        Plaintext plaintext = cc->MakeCKKSPackedPlaintext(input);
+        Plaintext plaintext = cc->make_ckks_packed_plaintext(input);
 
-        auto keyPair = cc->KeyGen();
-        cc->EvalMultKeyGen(keyPair.secretKey);
-        auto ciphertext = cc->Encrypt(keyPair.publicKey, plaintext);
+        auto key_pair = cc->key_gen();
+        cc->eval_mult_key_gen(key_pair.secret_key);
+        auto ciphertext = cc->encrypt(key_pair.public_key, plaintext);
 
         double a = -1;
         double b = 1;
         uint32_t degree = 129;
-        auto result = cc->EvalSin(ciphertext, a, b, degree);
+        auto result = cc->eval_sin(ciphertext, a, b, degree);
 
-        Plaintext plaintextDec;
-        cc->Decrypt(keyPair.secretKey, result, &plaintextDec);
-        plaintextDec->SetLength(encodedLength);
+        Plaintext plaintext_dec;
+        cc->decrypt(key_pair.secret_key, result, &plaintext_dec);
+        plaintext_dec->set_length(encoded_length);
 
-        std::vector<std::complex<double>> finalResult = plaintextDec->GetCKKSPackedValue();
+        std::vector<std::complex<double>> final_result = plaintext_dec->get_ckks_packed_value();
 
-        checkEquality(expectedOutput, finalResult, eps, failmsg + " EvalSin Chebyshev approximation fails");
+        check_equality(expected_output, final_result, eps, failmsg + " EvalSin Chebyshev approximation fails");
     }
-    void UnitTest_EvalCos(const TEST_CASE_UTCKKSRNS_EVAL_POLY& testData, const std::string& failmsg = std::string()) {
-        CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+    void unit_test_eval_cos(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data, const std::string& failmsg = std::string()) {
+        CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
         std::vector<std::complex<double>> input{-1., -0.8, -0.6, -0.4, -0.2, 0., 0.2, 0.4, 0.6, 0.8, 1.};
-        size_t encodedLength = input.size();
+        size_t encoded_length = input.size();
 
-        std::vector<std::complex<double>> expectedOutput{0.540302, 0.696706, 0.825335, 0.921060, 0.980066, 1.0,
+        std::vector<std::complex<double>> expected_output{0.540302, 0.696706, 0.825335, 0.921060, 0.980066, 1.0,
                                                          0.980066, 0.921060, 0.825335, 0.696706, 0.540302};
 
-        Plaintext plaintext = cc->MakeCKKSPackedPlaintext(input);
+        Plaintext plaintext = cc->make_ckks_packed_plaintext(input);
 
-        auto keyPair = cc->KeyGen();
-        cc->EvalMultKeyGen(keyPair.secretKey);
-        auto ciphertext = cc->Encrypt(keyPair.publicKey, plaintext);
+        auto key_pair = cc->key_gen();
+        cc->eval_mult_key_gen(key_pair.secret_key);
+        auto ciphertext = cc->encrypt(key_pair.public_key, plaintext);
 
         double a = -1;
         double b = 1;
         uint32_t degree = 129;
-        auto result = cc->EvalCos(ciphertext, a, b, degree);
+        auto result = cc->eval_cos(ciphertext, a, b, degree);
 
-        Plaintext plaintextDec;
-        cc->Decrypt(keyPair.secretKey, result, &plaintextDec);
-        plaintextDec->SetLength(encodedLength);
+        Plaintext plaintext_dec;
+        cc->decrypt(key_pair.secret_key, result, &plaintext_dec);
+        plaintext_dec->set_length(encoded_length);
 
-        std::vector<std::complex<double>> finalResult = plaintextDec->GetCKKSPackedValue();
+        std::vector<std::complex<double>> final_result = plaintext_dec->get_ckks_packed_value();
 
-        checkEquality(expectedOutput, finalResult, eps, failmsg + " EvalCos Chebyshev approximation fails");
+        check_equality(expected_output, final_result, eps, failmsg + " EvalCos Chebyshev approximation fails");
     }
 
     // Evaluates two series of degree 3 against one precomputation, in the order A, B, A, and checks every
     // result against a plaintext evaluation, so the later evaluations detect any in-place corruption of the
     // shared basis by the earlier ones. Degree 3 is evaluated term by term straight from the power or
     // Chebyshev basis rather than by Paterson-Stockmeyer, which is the path that touches the basis.
-    void UnitTest_EvalPrecompReuse(const TEST_CASE_UTCKKSRNS_EVAL_POLY& testData,
+    void unit_test_eval_precomp_reuse(const TEST_CASE_UTCKKSRNS_EVAL_POLY& test_data,
                                    const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
-            auto keyPair = cc->KeyGen();
-            cc->EvalMultKeyGen(keyPair.secretKey);
+            auto key_pair = cc->key_gen();
+            cc->eval_mult_key_gen(key_pair.secret_key);
 
-            auto decrypt = [&](ConstCiphertext<Element>& ciphertext, size_t length) {
+            auto decrypt_fn = [&](ConstCiphertext<Element>& ciphertext, size_t length) {
                 Plaintext plaintext;
-                cc->Decrypt(keyPair.secretKey, ciphertext, &plaintext);
-                plaintext->SetLength(length);
-                return plaintext->GetCKKSPackedValue();
+                cc->decrypt(key_pair.secret_key, ciphertext, &plaintext);
+                plaintext->set_length(length);
+                return plaintext->get_ckks_packed_value();
             };
 
             // power basis: 0.25 - 0.5 x + 2 x^2 + 1.5 x^3, then 0.15 + 0.75 x - 0.5 x^2 + 1.25 x^3
             {
                 std::vector<std::complex<double>> input{0.5, 0.7, 0.9, 0.95, 0.93};
-                std::vector<double> coefficientsA{0.25, -0.5, 2, 1.5};
-                std::vector<double> coefficientsB{0.15, 0.75, -0.5, 1.25};
+                std::vector<double> coefficients_a{0.25, -0.5, 2, 1.5};
+                std::vector<double> coefficients_b{0.15, 0.75, -0.5, 1.25};
 
-                auto evalPlain = [&](const std::vector<double>& coefficients) {
+                auto eval_plain = [&](const std::vector<double>& coefficients) {
                     std::vector<std::complex<double>> values(input.size());
                     for (size_t i = 0; i < input.size(); ++i) {
                         double y = 0;
@@ -785,17 +785,17 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
                     return values;
                 };
 
-                auto ciphertext = cc->Encrypt(keyPair.publicKey, cc->MakeCKKSPackedPlaintext(input));
-                auto powers = cc->EvalPowers(ciphertext, coefficientsA);
+                auto ciphertext = cc->encrypt(key_pair.public_key, cc->make_ckks_packed_plaintext(input));
+                auto powers = cc->eval_powers(ciphertext, coefficients_a);
 
                 auto check = [&](const std::vector<double>& coefficients, const std::string& label) {
-                    auto result = cc->EvalPolyWithPrecomp(powers, coefficients);
-                    checkEquality(evalPlain(coefficients), decrypt(result, input.size()), eps,
+                    auto result = cc->eval_poly_with_precomp(powers, coefficients);
+                    check_equality(eval_plain(coefficients), decrypt_fn(result, input.size()), eps,
                                   failmsg + " EvalPolyWithPrecomp on the reused powers fails for the " + label);
                 };
-                check(coefficientsA, "first polynomial");
-                check(coefficientsB, "second polynomial");
-                check(coefficientsA, "first polynomial evaluated again");
+                check(coefficients_a, "first polynomial");
+                check(coefficients_b, "second polynomial");
+                check(coefficients_a, "first polynomial evaluated again");
             }
 
             // Chebyshev basis on [-3, 3]
@@ -803,10 +803,10 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
                 std::vector<std::complex<double>> input{-3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0};
                 const double a = -3;
                 const double b = 3;
-                std::vector<double> coefficientsA{9, -17.25, 4.5, -6.75};
-                std::vector<double> coefficientsB{2, 1.5, -3, 0.25};
+                std::vector<double> coefficients_a{9, -17.25, 4.5, -6.75};
+                std::vector<double> coefficients_b{2, 1.5, -3, 0.25};
 
-                auto evalPlain = [&](const std::vector<double>& coefficients) {
+                auto eval_plain = [&](const std::vector<double>& coefficients) {
                     std::vector<std::complex<double>> values(input.size());
                     for (size_t i = 0; i < input.size(); ++i) {
                         double y = -1 + 2 * (input[i].real() - a) / (b - a);
@@ -824,18 +824,18 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
                     return values;
                 };
 
-                auto ciphertext = cc->Encrypt(keyPair.publicKey, cc->MakeCKKSPackedPlaintext(input));
-                auto polys = cc->EvalChebyPolys(ciphertext, coefficientsA, a, b);
+                auto ciphertext = cc->encrypt(key_pair.public_key, cc->make_ckks_packed_plaintext(input));
+                auto polys = cc->eval_cheby_polys(ciphertext, coefficients_a, a, b);
 
                 auto check = [&](const std::vector<double>& coefficients, const std::string& label) {
-                    auto result = cc->EvalChebyshevSeriesWithPrecomp(polys, coefficients);
-                    checkEquality(evalPlain(coefficients), decrypt(result, input.size()), eps,
+                    auto result = cc->eval_chebyshev_series_with_precomp(polys, coefficients);
+                    check_equality(eval_plain(coefficients), decrypt_fn(result, input.size()), eps,
                                   failmsg + " EvalChebyshevSeriesWithPrecomp on the reused polynomials fails for the " +
                                           label);
                 };
-                check(coefficientsA, "first series");
-                check(coefficientsB, "second series");
-                check(coefficientsA, "first series evaluated again");
+                check(coefficients_a, "first series");
+                check(coefficients_b, "second series");
+                check(coefficients_a, "first series evaluated again");
             }
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
@@ -849,46 +849,46 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
 
 //===========================================================================================================
 TEST_P(UTCKKSRNS_EVAL_POLY, CKKSRNS) {
-    setupSignals();
+    setup_signals();
     auto test = GetParam();
 
-    switch (test.testCaseType) {
+    switch (test.test_case_type) {
         case EVAL_POLY:
-            UnitTest_EvalPoly(test, test.buildTestName());
+            unit_test_eval_poly(test, test.build_test_name());
             break;
         case EVAL_CHEB_DIVISION:
-            UnitTest_EvalChebDivision(test, test.buildTestName());
+            unit_test_eval_cheb_division(test, test.build_test_name());
             break;
         case EVAL_CHEB_LOGIT:
-            UnitTest_EvalChebLogit(test, test.buildTestName());
+            unit_test_eval_cheb_logit(test, test.build_test_name());
             break;
         case EVAL_CHEB_LOGIT_NOLIN:
-            UnitTest_EvalChebLogitNoLin(test, test.buildTestName());
+            unit_test_eval_cheb_logit_no_lin(test, test.build_test_name());
             break;
         case EVAL_CHEB_SINE:
-            UnitTest_EvalChebSine(test, test.buildTestName());
+            unit_test_eval_cheb_sine(test, test.build_test_name());
             break;
         case EVAL_CHEB_POLY:
-            UnitTest_EvalChebPoly(test, test.buildTestName());
+            unit_test_eval_cheb_poly(test, test.build_test_name());
             break;
         case EVAL_DIVIDE:
-            UnitTest_EvalDivide(test, test.buildTestName());
+            unit_test_eval_divide(test, test.build_test_name());
             break;
         case EVAL_LOGISTIC:
-            UnitTest_EvalLogistic(test, test.buildTestName());
+            unit_test_eval_logistic(test, test.build_test_name());
             break;
         case EVAL_SIN:
-            UnitTest_EvalSin(test, test.buildTestName());
+            unit_test_eval_sin(test, test.build_test_name());
             break;
         case EVAL_COS:
-            UnitTest_EvalCos(test, test.buildTestName());
+            unit_test_eval_cos(test, test.build_test_name());
             break;
         case EVAL_PRECOMP_REUSE:
-            UnitTest_EvalPrecompReuse(test, test.buildTestName());
+            unit_test_eval_precomp_reuse(test, test.build_test_name());
             break;
         default:
             break;
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_EVAL_POLY, ::testing::ValuesIn(testCases), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_EVAL_POLY, ::testing::ValuesIn(test_cases), testName);

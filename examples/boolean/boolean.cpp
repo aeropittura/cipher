@@ -37,28 +37,28 @@
 
 #include "cipher/boolean/context.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 int main() {
     // Sample Program: Step 1: Set CryptoContext
 
-    auto cc = BinFHEContext();
+    auto cc = BooleanContext();
 
     // STD128 is the security level of 128 bits of security based on LWE Estimator
     // and HE standard. Other common options are TOY, MEDIUM, STD192, and STD256.
     // MEDIUM corresponds to the level of more than 100 bits for both quantum and
     // classical computer attacks.
-    cc.GenerateBinFHEContext(STD128);
+    cc.generate_boolean_context(STD128);
 
     // Sample Program: Step 2: Key Generation
 
     // Generate the secret key
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
     std::cout << "Generating the bootstrapping keys..." << std::endl;
 
     // Generate the bootstrapping keys (refresh and switching keys)
-    cc.BTKeyGen(sk);
+    cc.bt_key_gen(sk);
 
     std::cout << "Completed the key generation." << std::endl;
 
@@ -67,29 +67,29 @@ int main() {
     // Encrypt two ciphertexts representing Boolean True (1).
     // By default, freshly encrypted ciphertexts are bootstrapped.
     // If you wish to get a fresh encryption without bootstrapping, write
-    // auto   ct1 = cc.Encrypt(sk, 1, LARGE_DIM);
-    auto ct1 = cc.Encrypt(sk, 1);
-    auto ct2 = cc.Encrypt(sk, 1);
+    // auto   ct1 = cc.encrypt(sk, 1, LARGE_DIM);
+    auto ct1 = cc.encrypt(sk, 1);
+    auto ct2 = cc.encrypt(sk, 1);
 
     // Sample Program: Step 4: Evaluation
 
     // Compute (1 AND 1) = 1; Other binary gate options are OR, NAND, and NOR
-    auto ctAND1 = cc.EvalBinGate(AND, ct1, ct2);
+    auto ct_and1 = cc.eval_bin_gate(AND, ct1, ct2);
 
     // Compute (NOT 1) = 0
-    auto ct2Not = cc.EvalNOT(ct2);
+    auto ct2_not = cc.eval_not(ct2);
 
     // Compute (1 AND (NOT 1)) = 0
-    auto ctAND2 = cc.EvalBinGate(AND, ct2Not, ct1);
+    auto ct_and2 = cc.eval_bin_gate(AND, ct2_not, ct1);
 
-    // Computes OR of the results in ctAND1 and ctAND2 = 1
-    auto ctResult = cc.EvalBinGate(OR, ctAND1, ctAND2);
+    // Computes OR of the results in ct_and1 and ct_and2 = 1
+    auto ct_result = cc.eval_bin_gate(OR, ct_and1, ct_and2);
 
     // Sample Program: Step 5: Decryption
 
-    LWEPlaintext result;
+    LwePlaintext result;
 
-    cc.Decrypt(sk, ctResult, &result);
+    cc.decrypt(sk, ct_result, &result);
 
     std::cout << "Result of encrypted computation of (1 AND 1) OR (1 AND (NOT 1)) = " << result << std::endl;
 

@@ -36,7 +36,7 @@
 
 #include "cipher/math/backend/basic_int.h"
 
-namespace lbcrypto {
+namespace cipher {
 namespace DCRT_MODULUS {
 
 inline constexpr std::uint32_t DEFAULT_EXTRA_MOD_SIZE = 20;
@@ -44,6 +44,6 @@ inline constexpr std::uint32_t MIN_SIZE = 14;
 inline constexpr std::uint32_t MAX_SIZE = MAX_MODULUS_SIZE;
 
 }  // namespace DCRT_MODULUS
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_RNS_MODULUS_LIMITS_H_

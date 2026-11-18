@@ -39,7 +39,7 @@
 #include <string>
 
 /*
- *  ATTN: the caller information is accessible if BUILTIN_INFO_AVAILABLE is defined in CMakeLists.txt.
+ *  ATTN: the caller information is accessible if CIPHER_HAVE_BUILTIN_INFO is defined in CMakeLists.txt.
  *        Currently, USE_BUILTIN_INFO is defined for GCC only.
  *  Instructions how to use the macros defined below:
  *  if you want to access the caller information from within a function
@@ -68,23 +68,23 @@
  *      }
  */
 
-#ifdef BUILTIN_INFO_AVAILABLE
+#ifdef CIPHER_HAVE_BUILTIN_INFO
 
     #define CALLER_INFO_ARGS_HDR                                                                  \
-        const char *callerFile = __builtin_FILE(), const char *callerFunc = __builtin_FUNCTION(), \
-                   size_t callerLine = __builtin_LINE()
+        const char *caller_file = __builtin_FILE(), const char *caller_func = __builtin_FUNCTION(), \
+                   size_t caller_line = __builtin_LINE()
 
     #define CALLER_INFO \
-        std::string(" [called from: ") + callerFile + ":" + callerFunc + "():l." + std::to_string(callerLine) + "]"
+        std::string(" [called from: ") + caller_file + ":" + caller_func + "():l." + std::to_string(caller_line) + "]"
 
 #else
 
-    #define CALLER_INFO_ARGS_HDR const char *callerFile = "", const char *callerFunc = "", size_t callerLine = 0
+    #define CALLER_INFO_ARGS_HDR const char *caller_file = "", const char *caller_func = "", size_t caller_line = 0
 
     #define CALLER_INFO std::string("")
 
-#endif  // BUILTIN_INFO_AVAILABLE
+#endif  // CIPHER_HAVE_BUILTIN_INFO
 
-#define CALLER_INFO_ARGS_CPP const char *callerFile, const char *callerFunc, size_t callerLine
+#define CALLER_INFO_ARGS_CPP const char *caller_file, const char *caller_func, size_t caller_line
 
 #endif  // CIPHER_UTIL_CALLER_INFO_H_

@@ -34,31 +34,31 @@
 #include "cipher/boolean/context.h"
 #include "gtest/gtest.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 // test very deep FHE operations
 TEST(UnitTestFHEDeep, NOT_VERY_LONG) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(STD128);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(STD128);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
     // Generate the bootstrapping keys (refresh and switching keys)
-    cc.BTKeyGen(sk);
+    cc.bt_key_gen(sk);
 
     unsigned int input(1);
 
-    unsigned int nLoop(2000);
+    unsigned int n_loop(2000);
 
-    LWECiphertext stmp = cc.Encrypt(sk, input);
+    LweCiphertext stmp = cc.encrypt(sk, input);
     unsigned int tmp = input;
     // not loop
-    for (unsigned int ix = 0; ix < nLoop; ix++) {
+    for (unsigned int ix = 0; ix < n_loop; ix++) {
         // if (ix % 100 == 0) std::cout << ix << std::endl;
-        LWECiphertext a(stmp);
-        auto b = cc.EvalNOT(a);
+        LweCiphertext a(stmp);
+        auto b = cc.eval_not(a);
         unsigned int c = !tmp;
-        LWEPlaintext res;
-        cc.Decrypt(sk, b, &res);
+        LwePlaintext res;
+        cc.decrypt(sk, b, &res);
         std::string failed = "Failed in iteration " + std::to_string(ix);
         ASSERT_EQ(res, c) << failed;
         stmp = b;
@@ -68,35 +68,35 @@ TEST(UnitTestFHEDeep, NOT_VERY_LONG) {
 
 // test very deep FHE operations
 TEST(UnitTestFHEDeep, AND_GINX_VERY_LONG) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(STD128, GINX);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(STD128, GINX);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
     // Generate the bootstrapping keys (refresh and switching keys)
-    cc.BTKeyGen(sk);
+    cc.bt_key_gen(sk);
 
     unsigned int input1(1);
     unsigned int input2(1);
     // unsigned int one(1);
 
-    unsigned int nLoop(2000);
+    unsigned int n_loop(2000);
 
-    LWECiphertext stmp1 = cc.Encrypt(sk, input1);
-    LWECiphertext stmp2 = cc.Encrypt(sk, input2);
-    auto d = cc.EvalBinGate(AND, stmp1, stmp2);
-    stmp1 = cc.Encrypt(sk, input1);
-    stmp2 = cc.Encrypt(sk, input2);
+    LweCiphertext stmp1 = cc.encrypt(sk, input1);
+    LweCiphertext stmp2 = cc.encrypt(sk, input2);
+    auto d = cc.eval_bin_gate(AND, stmp1, stmp2);
+    stmp1 = cc.encrypt(sk, input1);
+    stmp2 = cc.encrypt(sk, input2);
     unsigned int tmp1 = input1;
     unsigned int tmp2 = input2;
 
     // and loop
-    for (unsigned int ix = 0; ix < nLoop; ix++) {
+    for (unsigned int ix = 0; ix < n_loop; ix++) {
         // if (ix % 100 == 0) std::cout << ix << std::endl;
-        auto b = cc.EvalBinGate(AND, stmp1, stmp2);
+        auto b = cc.eval_bin_gate(AND, stmp1, stmp2);
 
         unsigned int c = tmp1 && tmp2;
-        LWEPlaintext res;
-        cc.Decrypt(sk, b, &res);
+        LwePlaintext res;
+        cc.decrypt(sk, b, &res);
         std::string failed = "Failed in iteration " + std::to_string(ix);
         ASSERT_EQ(res, c) << failed;
 
@@ -105,7 +105,7 @@ TEST(UnitTestFHEDeep, AND_GINX_VERY_LONG) {
         // a constant one.
 
         stmp1 = b;
-        stmp2 = cc.EvalBinGate(AND, b, d);
+        stmp2 = cc.eval_bin_gate(AND, b, d);
         tmp1 = c;
         tmp2 = c;
     }
@@ -113,36 +113,36 @@ TEST(UnitTestFHEDeep, AND_GINX_VERY_LONG) {
 
 // test very deep FHE operations
 TEST(UnitTestFHEDeep, AND_AP_VERY_LONG) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(STD128_AP, AP);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(STD128_AP, AP);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
     // Generate the bootstrapping keys (refresh and switching keys)
-    cc.BTKeyGen(sk);
+    cc.bt_key_gen(sk);
 
     unsigned int input1(1);
     unsigned int input2(1);
     // unsigned int one(1);
 
-    unsigned int nLoop(2000);
+    unsigned int n_loop(2000);
 
-    LWECiphertext stmp1 = cc.Encrypt(sk, input1);
-    LWECiphertext stmp2 = cc.Encrypt(sk, input2);
-    auto d = cc.EvalBinGate(AND, stmp1, stmp2);
-    stmp1 = cc.Encrypt(sk, input1);
-    stmp2 = cc.Encrypt(sk, input2);
-    // LWECiphertext eone = cc.Encrypt(sk, one);
+    LweCiphertext stmp1 = cc.encrypt(sk, input1);
+    LweCiphertext stmp2 = cc.encrypt(sk, input2);
+    auto d = cc.eval_bin_gate(AND, stmp1, stmp2);
+    stmp1 = cc.encrypt(sk, input1);
+    stmp2 = cc.encrypt(sk, input2);
+    // LweCiphertext eone = cc.encrypt(sk, one);
     unsigned int tmp1 = input1;
     unsigned int tmp2 = input2;
 
     // not loop
-    for (unsigned int ix = 0; ix < nLoop; ix++) {
+    for (unsigned int ix = 0; ix < n_loop; ix++) {
         // if (ix % 100 == 0) std::cout << ix << std::endl;
-        auto b = cc.EvalBinGate(AND, stmp1, stmp2);
+        auto b = cc.eval_bin_gate(AND, stmp1, stmp2);
 
         unsigned int c = tmp1 && tmp2;
-        LWEPlaintext res;
-        cc.Decrypt(sk, b, &res);
+        LwePlaintext res;
+        cc.decrypt(sk, b, &res);
         std::string failed = "Failed in iteration " + std::to_string(ix);
         ASSERT_EQ(res, c) << failed;
 
@@ -151,7 +151,7 @@ TEST(UnitTestFHEDeep, AND_AP_VERY_LONG) {
         // a constant one.
 
         stmp1 = b;
-        stmp2 = cc.EvalBinGate(AND, b, d);
+        stmp2 = cc.eval_bin_gate(AND, b, d);
 
         tmp1 = c;
         tmp2 = c;
@@ -160,33 +160,33 @@ TEST(UnitTestFHEDeep, AND_AP_VERY_LONG) {
 
 // test very deep FHE operations
 TEST(UnitTestFHEDeep, XOR_AP_VERY_LONG) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(STD128_AP, AP);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(STD128_AP, AP);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
     // Generate the bootstrapping keys (refresh and switching keys)
-    cc.BTKeyGen(sk);
+    cc.bt_key_gen(sk);
 
     unsigned int input1(1);
     unsigned int input2(1);
     unsigned int one(1);
 
-    unsigned int nLoop(2000);
+    unsigned int n_loop(2000);
 
-    LWECiphertext stmp1 = cc.Encrypt(sk, input1);
-    LWECiphertext stmp2 = cc.Encrypt(sk, input2);
-    LWECiphertext eone = cc.Encrypt(sk, one);
+    LweCiphertext stmp1 = cc.encrypt(sk, input1);
+    LweCiphertext stmp2 = cc.encrypt(sk, input2);
+    LweCiphertext eone = cc.encrypt(sk, one);
     unsigned int tmp1 = input1;
     unsigned int tmp2 = input2;
 
     // xor loop
-    for (unsigned int ix = 0; ix < nLoop; ix++) {
+    for (unsigned int ix = 0; ix < n_loop; ix++) {
         // if (ix % 100 == 0) std::cout << ix << std::endl;
-        auto b = cc.EvalBinGate(XOR, stmp1, stmp2);
+        auto b = cc.eval_bin_gate(XOR, stmp1, stmp2);
 
         unsigned int c = tmp1 ^ tmp2;
-        LWEPlaintext res;
-        cc.Decrypt(sk, b, &res);
+        LwePlaintext res;
+        cc.decrypt(sk, b, &res);
         std::string failed = "Failed in iteration " + std::to_string(ix);
         ASSERT_EQ(res, c) << failed;
 
@@ -195,7 +195,7 @@ TEST(UnitTestFHEDeep, XOR_AP_VERY_LONG) {
         // a constant one.
 
         stmp1 = b;
-        stmp2 = cc.EvalBinGate(AND, b, eone);
+        stmp2 = cc.eval_bin_gate(AND, b, eone);
 
         tmp1 = c;
         tmp2 = c;
@@ -203,33 +203,33 @@ TEST(UnitTestFHEDeep, XOR_AP_VERY_LONG) {
 }
 // test very deep FHE operations
 TEST(UnitTestFHEDeep, XOR_GINX_VERY_LONG) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(STD128, GINX);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(STD128, GINX);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
     // Generate the bootstrapping keys (refresh and switching keys)
-    cc.BTKeyGen(sk);
+    cc.bt_key_gen(sk);
 
     unsigned int input1(1);
     unsigned int input2(1);
     unsigned int one(1);
 
-    unsigned int nLoop(2000);
+    unsigned int n_loop(2000);
 
-    LWECiphertext stmp1 = cc.Encrypt(sk, input1);
-    LWECiphertext stmp2 = cc.Encrypt(sk, input2);
-    LWECiphertext eone = cc.Encrypt(sk, one);
+    LweCiphertext stmp1 = cc.encrypt(sk, input1);
+    LweCiphertext stmp2 = cc.encrypt(sk, input2);
+    LweCiphertext eone = cc.encrypt(sk, one);
     unsigned int tmp1 = input1;
     unsigned int tmp2 = input2;
 
     // xor loop
-    for (unsigned int ix = 0; ix < nLoop; ix++) {
+    for (unsigned int ix = 0; ix < n_loop; ix++) {
         // if (ix % 100 == 0) std::cout << ix << std::endl;
-        auto b = cc.EvalBinGate(XOR, stmp1, stmp2);
+        auto b = cc.eval_bin_gate(XOR, stmp1, stmp2);
 
         unsigned int c = tmp1 ^ tmp2;
-        LWEPlaintext res;
-        cc.Decrypt(sk, b, &res);
+        LwePlaintext res;
+        cc.decrypt(sk, b, &res);
         std::string failed = "Failed in iteration " + std::to_string(ix);
         ASSERT_EQ(res, c) << failed;
 
@@ -238,7 +238,7 @@ TEST(UnitTestFHEDeep, XOR_GINX_VERY_LONG) {
         // a constant one.
 
         stmp1 = b;
-        stmp2 = cc.EvalBinGate(AND, b, eone);
+        stmp2 = cc.eval_bin_gate(AND, b, eone);
 
         tmp1 = c;
         tmp2 = c;
@@ -247,31 +247,31 @@ TEST(UnitTestFHEDeep, XOR_GINX_VERY_LONG) {
 
 // test very deep FHE operations
 TEST(UnitTestFHEDeep, OR_AP_VERY_LONG) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(STD128_AP, AP);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(STD128_AP, AP);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
     // Generate the bootstrapping keys (refresh and switching keys)
-    cc.BTKeyGen(sk);
+    cc.bt_key_gen(sk);
 
     unsigned int input1(1);
     unsigned int input2(1);
 
-    unsigned int nLoop(2000);
+    unsigned int n_loop(2000);
 
-    LWECiphertext stmp1 = cc.Encrypt(sk, input1);
-    LWECiphertext stmp2 = cc.Encrypt(sk, input2);
+    LweCiphertext stmp1 = cc.encrypt(sk, input1);
+    LweCiphertext stmp2 = cc.encrypt(sk, input2);
     unsigned int tmp1 = input1;
     unsigned int tmp2 = input2;
 
     // or loop
-    for (unsigned int ix = 0; ix < nLoop; ix++) {
+    for (unsigned int ix = 0; ix < n_loop; ix++) {
         // if (ix % 100 == 0) std::cout << ix << std::endl;
-        auto b = cc.EvalBinGate(OR, stmp1, stmp2);
+        auto b = cc.eval_bin_gate(OR, stmp1, stmp2);
 
         unsigned int c = tmp1 || tmp2;
-        LWEPlaintext res;
-        cc.Decrypt(sk, b, &res);
+        LwePlaintext res;
+        cc.decrypt(sk, b, &res);
         std::string failed = "Failed in iteration " + std::to_string(ix);
         ASSERT_EQ(res, c) << failed;
         stmp1 = b;
@@ -281,31 +281,31 @@ TEST(UnitTestFHEDeep, OR_AP_VERY_LONG) {
 
 // test very deep FHE operations
 TEST(UnitTestFHEDeep, OR_GINX_VERY_LONG) {
-    auto cc = BinFHEContext();
-    cc.GenerateBinFHEContext(STD128, GINX);
+    auto cc = BooleanContext();
+    cc.generate_boolean_context(STD128, GINX);
 
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
     // Generate the bootstrapping keys (refresh and switching keys)
-    cc.BTKeyGen(sk);
+    cc.bt_key_gen(sk);
 
     unsigned int input1(1);
     unsigned int input2(1);
 
-    unsigned int nLoop(2000);
+    unsigned int n_loop(2000);
 
-    LWECiphertext stmp1 = cc.Encrypt(sk, input1);
-    LWECiphertext stmp2 = cc.Encrypt(sk, input2);
+    LweCiphertext stmp1 = cc.encrypt(sk, input1);
+    LweCiphertext stmp2 = cc.encrypt(sk, input2);
     unsigned int tmp1 = input1;
     unsigned int tmp2 = input2;
 
     // or loop
-    for (unsigned int ix = 0; ix < nLoop; ix++) {
+    for (unsigned int ix = 0; ix < n_loop; ix++) {
         // if (ix % 100 == 0) std::cout << ix << std::endl;
-        auto b = cc.EvalBinGate(OR, stmp1, stmp2);
+        auto b = cc.eval_bin_gate(OR, stmp1, stmp2);
 
         unsigned int c = tmp1 || tmp2;
-        LWEPlaintext res;
-        cc.Decrypt(sk, b, &res);
+        LwePlaintext res;
+        cc.decrypt(sk, b, &res);
         std::string failed = "Failed in iteration " + std::to_string(ix);
         ASSERT_EQ(res, c) << failed;
         stmp1 = b;

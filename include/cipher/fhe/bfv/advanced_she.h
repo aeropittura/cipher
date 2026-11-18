@@ -37,17 +37,17 @@
 #include "cipher/fhe/rns/advanced_she.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief BFV instantiation of the advanced SHE component; it inherits the RNS implementation without changes.
  */
-class AdvancedSHEBFVRNS : public AdvancedSHERNS {
+class BfvRnsAdvancedShe : public RnsAdvancedShe {
   public:
-    virtual ~AdvancedSHEBFVRNS() {}
+    virtual ~BfvRnsAdvancedShe() {}
 
     /////////////////////////////////////
     // SERIALIZATION
@@ -55,18 +55,18 @@ class AdvancedSHEBFVRNS : public AdvancedSHERNS {
 
     template <class Archive>
     void save(Archive& ar) const {
-        ar(cereal::base_class<AdvancedSHERNS>(this));
+        ar(cereal::base_class<RnsAdvancedShe>(this));
     }
 
     template <class Archive>
     void load(Archive& ar) {
-        ar(cereal::base_class<AdvancedSHERNS>(this));
+        ar(cereal::base_class<RnsAdvancedShe>(this));
     }
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "AdvancedSHEBFVRNS";
     }
 };
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_BFV_ADVANCED_SHE_H_

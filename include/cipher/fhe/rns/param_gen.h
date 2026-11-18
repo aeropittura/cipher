@@ -41,17 +41,17 @@
 #include "cipher/fhe/rns/modulus_limits.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Abstract interface for parameter generation algorithm
  */
-class ParameterGenerationRNS : public ParameterGenerationBase<DCRTPoly> {
+class RnsParamGen : public BaseParamGen<RnsPoly> {
   public:
-    virtual ~ParameterGenerationRNS() = default;
+    virtual ~RnsParamGen() = default;
 
     /////////////////////////////////////
     // SERIALIZATION
@@ -63,11 +63,11 @@ class ParameterGenerationRNS : public ParameterGenerationBase<DCRTPoly> {
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {}
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "ParameterGenerationRNS";
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_RNS_PARAM_GEN_H_

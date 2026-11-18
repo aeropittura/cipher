@@ -38,19 +38,19 @@
 #include "cipher/fhe/rns/leveled_she.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief BGV implementation of the leveled SHE operations in the RNS representation: modulus switching
  * with the plaintext-modulus correction and the level/depth adjustments that track the scaling factor
  * modulo t for FLEXIBLEAUTO and FLEXIBLEAUTOEXT.
  */
-class LeveledSHEBGVRNS : public LeveledSHERNS {
+class BgvRnsLeveledShe : public RnsLeveledShe {
   public:
-    virtual ~LeveledSHEBGVRNS() = default;
+    virtual ~BgvRnsLeveledShe() = default;
 
     /////////////////////////////////////
     // AUTOMORPHISM
@@ -63,7 +63,7 @@ class LeveledSHEBGVRNS : public LeveledSHERNS {
      * @param m the cyclotomic order.
      * @return the automorphism index.
      */
-    uint32_t FindAutomorphismIndex(uint32_t index, uint32_t m) const override;
+    uint32_t find_automorphism_index(uint32_t index, uint32_t m) const override;
 
     /////////////////////////////////////
     // Mod Reduce
@@ -79,7 +79,7 @@ class LeveledSHEBGVRNS : public LeveledSHERNS {
      * @param levels the number of towers to drop (must be smaller than the number of towers).
      * @details \p ciphertext will have modulus reduction performed in-place.
      */
-    void ModReduceInternalInPlace(Ciphertext<DCRTPoly>& ciphertext, size_t levels) const override;
+    void mod_reduce_internal_in_place(Ciphertext<RnsPoly>& ciphertext, size_t levels) const override;
 
     /**
      * Drops the last levels towers of the ciphertext without changing the underlying plaintext and increases
@@ -88,7 +88,7 @@ class LeveledSHEBGVRNS : public LeveledSHERNS {
      * @param ciphertext is the ciphertext to be level reduced in-place.
      * @param levels the number of towers to drop.
      */
-    void LevelReduceInternalInPlace(Ciphertext<DCRTPoly>& ciphertext, size_t levels) const override;
+    void level_reduce_internal_in_place(Ciphertext<RnsPoly>& ciphertext, size_t levels) const override;
 
     /**
      * Multiplies all polynomials of the ciphertext by an integer constant and increases the noise scale degree
@@ -97,7 +97,7 @@ class LeveledSHEBGVRNS : public LeveledSHERNS {
      * @param ciphertext the input/output ciphertext.
      * @param constant the integer to multiply by.
      */
-    void EvalMultCoreInPlace(Ciphertext<DCRTPoly>& ciphertext, NativeInteger constant) const;
+    void eval_mult_core_in_place(Ciphertext<RnsPoly>& ciphertext, NativeInteger constant) const;
 
     /**
      * In-place homomorphic multiplication of a ciphertext by a plaintext; for FLEXIBLEAUTO and FLEXIBLEAUTOEXT
@@ -106,7 +106,7 @@ class LeveledSHEBGVRNS : public LeveledSHERNS {
      * @param ciphertext the input/output ciphertext.
      * @param plaintext the input plaintext.
      */
-    void EvalMultInPlace(Ciphertext<DCRTPoly>& ciphertext, ConstPlaintext& plaintext) const override;
+    void eval_mult_in_place(Ciphertext<RnsPoly>& ciphertext, ConstPlaintext& plaintext) const override;
 
     /**
      * Brings two ciphertexts to the same level and noise scale degree for addition or subtraction. The
@@ -117,18 +117,18 @@ class LeveledSHEBGVRNS : public LeveledSHERNS {
      * @param ciphertext1 first input/output ciphertext.
      * @param ciphertext2 second input/output ciphertext.
      */
-    void AdjustLevelsAndDepthInPlace(Ciphertext<DCRTPoly>& ciphertext1,
-                                     Ciphertext<DCRTPoly>& ciphertext2) const override;
+    void adjust_levels_and_depth_in_place(Ciphertext<RnsPoly>& ciphertext1,
+                                     Ciphertext<RnsPoly>& ciphertext2) const override;
 
     /**
      * Brings two ciphertexts to the same level and to noise scale degree 1 for multiplication: calls
-     * AdjustLevelsAndDepthInPlace() and then modulus switches both ciphertexts once if they are at degree 2.
+     * adjust_levels_and_depth_in_place() and then modulus switches both ciphertexts once if they are at degree 2.
      *
      * @param ciphertext1 first input/output ciphertext.
      * @param ciphertext2 second input/output ciphertext.
      */
-    void AdjustLevelsAndDepthToOneInPlace(Ciphertext<DCRTPoly>& ciphertext1,
-                                          Ciphertext<DCRTPoly>& ciphertext2) const override;
+    void adjust_levels_and_depth_to_one_in_place(Ciphertext<RnsPoly>& ciphertext1,
+                                          Ciphertext<RnsPoly>& ciphertext2) const override;
 
     /////////////////////////////////////
     // SERIALIZATION
@@ -136,19 +136,19 @@ class LeveledSHEBGVRNS : public LeveledSHERNS {
 
     template <class Archive>
     void save(Archive& ar) const {
-        ar(cereal::base_class<LeveledSHERNS>(this));
+        ar(cereal::base_class<RnsLeveledShe>(this));
     }
 
     template <class Archive>
     void load(Archive& ar) {
-        ar(cereal::base_class<LeveledSHERNS>(this));
+        ar(cereal::base_class<RnsLeveledShe>(this));
     }
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "LeveledSHEBGVRNS";
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_BGV_LEVELED_SHE_H_

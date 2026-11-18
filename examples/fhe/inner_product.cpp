@@ -39,10 +39,10 @@
 
 #include "cipher/cipher.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 template <class T>
-T plainInnerProduct(std::vector<T> vec) {
+T plain_inner_product(std::vector<T> vec) {
     T res = 0.0;
     for (auto& el : vec) {
         res += (el * el);
@@ -50,93 +50,93 @@ T plainInnerProduct(std::vector<T> vec) {
     return res;
 }
 
-bool innerProductBFV(std::vector<int64_t>& incomingVector) {
-    int64_t expectedResult = plainInnerProduct(incomingVector);
+bool inner_product_bfv(std::vector<int64_t>& incoming_vector) {
+    int64_t expected_result = plain_inner_product(incoming_vector);
     /////////////////////////////////////////////////////////
     // Crypto CryptoParams
     /////////////////////////////////////////////////////////
-    CCParams<CryptoContextBFVRNS> parameters;
-    parameters.SetPlaintextModulus(65537);
-    parameters.SetMultiplicativeDepth(20);
-    parameters.SetSecurityLevel(lbcrypto::HEStd_NotSet);
-    parameters.SetRingDim(1 << 7);
-    uint32_t batchSize = parameters.GetRingDim() / 2;
+    ContextParams<BfvRnsContext> parameters;
+    parameters.set_plaintext_modulus(65537);
+    parameters.set_multiplicative_depth(20);
+    parameters.set_security_level(cipher::HEStd_NotSet);
+    parameters.set_ring_dim(1 << 7);
+    uint32_t batch_size = parameters.get_ring_dim() / 2;
 
     /////////////////////////////////////////////////////////
     // Set crypto params and create context
     /////////////////////////////////////////////////////////
-    lbcrypto::CryptoContext<lbcrypto::DCRTPoly> cc;
-    cc = GenCryptoContext(parameters);
+    cipher::CryptoContext<cipher::RnsPoly> cc;
+    cc = make_crypto_context(parameters);
 
     // Enable the features that you wish to use.
-    cc->Enable(PKE);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
+    cc->enable(PKE);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
 
-    KeyPair keys = cc->KeyGen();
-    cc->EvalMultKeyGen(keys.secretKey);
-    cc->EvalSumKeyGen(keys.secretKey);
+    KeyPair keys = cc->key_gen();
+    cc->eval_mult_key_gen(keys.secret_key);
+    cc->eval_sum_key_gen(keys.secret_key);
 
-    Plaintext plaintext1 = cc->MakePackedPlaintext(incomingVector);
-    auto ct1 = cc->Encrypt(keys.publicKey, plaintext1);
-    auto finalResult = cc->EvalInnerProduct(ct1, ct1, batchSize);
-    lbcrypto::Plaintext res;
-    cc->Decrypt(keys.secretKey, finalResult, &res);
-    auto final = res->GetPackedValue()[0];
+    Plaintext plaintext1 = cc->make_packed_plaintext(incoming_vector);
+    auto ct1 = cc->encrypt(keys.public_key, plaintext1);
+    auto final_result = cc->eval_inner_product(ct1, ct1, batch_size);
+    cipher::Plaintext res;
+    cc->decrypt(keys.secret_key, final_result, &res);
+    auto final = res->get_packed_value()[0];
 
-    std::cout << "Expected Result: " << expectedResult << " Inner Product Result: " << final << std::endl;
-    return expectedResult == final;
+    std::cout << "Expected Result: " << expected_result << " Inner Product Result: " << final << std::endl;
+    return expected_result == final;
 }
 
-bool innerProductCKKS(const std::vector<double>& incomingVector) {
-    double expectedResult = plainInnerProduct(incomingVector);
-    lbcrypto::SecurityLevel securityLevel = lbcrypto::HEStd_NotSet;
-    uint32_t dcrtBits = 59;
-    uint32_t ringDim = 1 << 8;
-    uint32_t batchSize = ringDim / 2;
-    lbcrypto::CCParams<lbcrypto::CryptoContextCKKSRNS> parameters;
-    uint32_t multDepth = 10;
+bool inner_product_ckks(const std::vector<double>& incoming_vector) {
+    double expected_result = plain_inner_product(incoming_vector);
+    cipher::SecurityLevel security_level = cipher::HEStd_NotSet;
+    uint32_t dcrt_bits = 59;
+    uint32_t ring_dim = 1 << 8;
+    uint32_t batch_size = ring_dim / 2;
+    cipher::ContextParams<cipher::CkksRnsContext> parameters;
+    uint32_t mult_depth_value = 10;
 
-    parameters.SetMultiplicativeDepth(multDepth);
-    parameters.SetScalingModSize(dcrtBits);
-    parameters.SetBatchSize(batchSize);
-    parameters.SetSecurityLevel(securityLevel);
-    parameters.SetRingDim(ringDim);
+    parameters.set_multiplicative_depth(mult_depth_value);
+    parameters.set_scaling_mod_size(dcrt_bits);
+    parameters.set_batch_size(batch_size);
+    parameters.set_security_level(security_level);
+    parameters.set_ring_dim(ring_dim);
 
-    lbcrypto::CryptoContext<lbcrypto::DCRTPoly> cc;
-    cc = GenCryptoContext(parameters);
+    cipher::CryptoContext<cipher::RnsPoly> cc;
+    cc = make_crypto_context(parameters);
 
-    cc->Enable(PKE);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
+    cc->enable(PKE);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
 
-    KeyPair keys = cc->KeyGen();
-    cc->EvalMultKeyGen(keys.secretKey);
-    cc->EvalSumKeyGen(keys.secretKey);
+    KeyPair keys = cc->key_gen();
+    cc->eval_mult_key_gen(keys.secret_key);
+    cc->eval_sum_key_gen(keys.secret_key);
 
-    Plaintext plaintext1 = cc->MakeCKKSPackedPlaintext(incomingVector);
-    auto ct1 = cc->Encrypt(keys.publicKey, plaintext1);
-    auto finalResult = cc->EvalInnerProduct(ct1, ct1, batchSize);
-    lbcrypto::Plaintext res;
-    cc->Decrypt(keys.secretKey, finalResult, &res);
-    res->SetLength(incomingVector.size());
-    auto final = res->GetCKKSPackedValue()[0].real();
-    std::cout << "Expected Result: " << expectedResult << " Inner Product Result: " << final << std::endl;
-    return std::abs(expectedResult - final) <= 0.0001;
+    Plaintext plaintext1 = cc->make_ckks_packed_plaintext(incoming_vector);
+    auto ct1 = cc->encrypt(keys.public_key, plaintext1);
+    auto final_result = cc->eval_inner_product(ct1, ct1, batch_size);
+    cipher::Plaintext res;
+    cc->decrypt(keys.secret_key, final_result, &res);
+    res->set_length(incoming_vector.size());
+    auto final = res->get_ckks_packed_value()[0].real();
+    std::cout << "Expected Result: " << expected_result << " Inner Product Result: " << final << std::endl;
+    return std::abs(expected_result - final) <= 0.0001;
 }
 
 int main(int argc, char* argv[]) {
     std::vector<int64_t> vec = {1, 2, 3, 4, 5};
-    bool bfvRes = innerProductBFV(vec);
-    std::cout << "BFV Inner Product Correct? " << (bfvRes ? "True" : "False") << std::endl;
+    bool bfv_res = inner_product_bfv(vec);
+    std::cout << "BFV Inner Product Correct? " << (bfv_res ? "True" : "False") << std::endl;
 
     std::cout << "********************************************************************" << std::endl;
-    std::vector<double> asDouble(vec.begin(), vec.end());
-    for (size_t i = 0; i < asDouble.size(); i++) {
-        asDouble[i] += (asDouble[i] / 100.0);
+    std::vector<double> as_double(vec.begin(), vec.end());
+    for (size_t i = 0; i < as_double.size(); i++) {
+        as_double[i] += (as_double[i] / 100.0);
     }
-    bool ckksRes = innerProductCKKS(asDouble);
-    std::cout << "CKKS Inner Product Correct? " << (ckksRes ? "True" : "False") << std::endl;
+    bool ckks_res = inner_product_ckks(as_double);
+    std::cout << "CKKS Inner Product Correct? " << (ckks_res ? "True" : "False") << std::endl;
 
     return 0;
 }

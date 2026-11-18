@@ -41,10 +41,10 @@
 #include "cipher/fhe/rns/advanced_she.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief CKKS implementation of the advanced SHE capability: linear weighted sums and evaluation of polynomials
@@ -52,15 +52,15 @@ namespace lbcrypto {
  * use a binary tree of powers (or Chebyshev polynomials) below degree 5 and the Paterson-Stockmeyer algorithm
  * otherwise, and rescale automatically according to the scaling technique.
  */
-class AdvancedSHECKKSRNS : public AdvancedSHERNS {
+class CkksRnsAdvancedShe : public RnsAdvancedShe {
   public:
-    virtual ~AdvancedSHECKKSRNS() = default;
+    virtual ~CkksRnsAdvancedShe() = default;
 
     //------------------------------------------------------------------------------
     // LINEAR WEIGHTED SUM
     //------------------------------------------------------------------------------
 
-    Ciphertext<DCRTPoly> EvalLinearWSum(std::vector<ReadOnlyCiphertext<DCRTPoly>>& ciphertexts,
+    Ciphertext<RnsPoly> eval_linear_w_sum(std::vector<ReadOnlyCiphertext<RnsPoly>>& ciphertexts,
                                         const std::vector<int64_t>& constants) const override;
     /**
      * Computes the linear weighted sum of ciphertexts with real constants, leaving the inputs unchanged; the
@@ -70,7 +70,7 @@ class AdvancedSHECKKSRNS : public AdvancedSHERNS {
      * @param constants the real weights, one per ciphertext
      * @return the weighted sum
      */
-    Ciphertext<DCRTPoly> EvalLinearWSum(std::vector<ReadOnlyCiphertext<DCRTPoly>>& ciphertexts,
+    Ciphertext<RnsPoly> eval_linear_w_sum(std::vector<ReadOnlyCiphertext<RnsPoly>>& ciphertexts,
                                         const std::vector<double>& constants) const override;
     /**
      * Computes the linear weighted sum of ciphertexts with complex constants, leaving the inputs unchanged; the
@@ -80,10 +80,10 @@ class AdvancedSHECKKSRNS : public AdvancedSHERNS {
      * @param constants the complex weights, one per ciphertext
      * @return the weighted sum
      */
-    Ciphertext<DCRTPoly> EvalLinearWSum(std::vector<ReadOnlyCiphertext<DCRTPoly>>& ciphertexts,
+    Ciphertext<RnsPoly> eval_linear_w_sum(std::vector<ReadOnlyCiphertext<RnsPoly>>& ciphertexts,
                                         const std::vector<std::complex<double>>& constants) const override;
 
-    Ciphertext<DCRTPoly> EvalLinearWSumMutable(std::vector<Ciphertext<DCRTPoly>>& ciphertexts,
+    Ciphertext<RnsPoly> eval_linear_w_sum_mutable(std::vector<Ciphertext<RnsPoly>>& ciphertexts,
                                                const std::vector<int64_t>& constants) const override;
     /**
      * Computes the linear weighted sum of ciphertexts with real constants; the inputs are first brought to the
@@ -93,7 +93,7 @@ class AdvancedSHECKKSRNS : public AdvancedSHERNS {
      * @param constants the real weights, one per ciphertext
      * @return the weighted sum
      */
-    Ciphertext<DCRTPoly> EvalLinearWSumMutable(std::vector<Ciphertext<DCRTPoly>>& ciphertexts,
+    Ciphertext<RnsPoly> eval_linear_w_sum_mutable(std::vector<Ciphertext<RnsPoly>>& ciphertexts,
                                                const std::vector<double>& constants) const override;
     /**
      * Computes the linear weighted sum of ciphertexts with complex constants; the inputs are first brought to the
@@ -103,14 +103,14 @@ class AdvancedSHECKKSRNS : public AdvancedSHERNS {
      * @param constants the complex weights, one per ciphertext
      * @return the weighted sum
      */
-    Ciphertext<DCRTPoly> EvalLinearWSumMutable(std::vector<Ciphertext<DCRTPoly>>& ciphertexts,
+    Ciphertext<RnsPoly> eval_linear_w_sum_mutable(std::vector<Ciphertext<RnsPoly>>& ciphertexts,
                                                const std::vector<std::complex<double>>& constants) const override;
 
     //------------------------------------------------------------------------------
     // EVAL POLYNOMIAL
     //------------------------------------------------------------------------------
 
-    std::shared_ptr<seriesPowers<DCRTPoly>> EvalPowers(ConstCiphertext<DCRTPoly>& x,
+    std::shared_ptr<SeriesPowers<RnsPoly>> eval_powers(ConstCiphertext<RnsPoly>& x,
                                                        const std::vector<int64_t>& coefficients) const override;
     /**
      * Computes the powers of a ciphertext needed to evaluate a polynomial in the power basis with real
@@ -120,7 +120,7 @@ class AdvancedSHECKKSRNS : public AdvancedSHERNS {
      * @param coefficients coefficients of the polynomial; their number (degree + 1) determines the powers
      * @return the powers of x
      */
-    std::shared_ptr<seriesPowers<DCRTPoly>> EvalPowers(ConstCiphertext<DCRTPoly>& x,
+    std::shared_ptr<SeriesPowers<RnsPoly>> eval_powers(ConstCiphertext<RnsPoly>& x,
                                                        const std::vector<double>& coefficients) const override;
     /**
      * Computes the powers of a ciphertext needed to evaluate a polynomial in the power basis with complex
@@ -130,67 +130,67 @@ class AdvancedSHECKKSRNS : public AdvancedSHERNS {
      * @param coefficients coefficients of the polynomial; their number (degree + 1) determines the powers
      * @return the powers of x
      */
-    std::shared_ptr<seriesPowers<DCRTPoly>> EvalPowers(
-            ConstCiphertext<DCRTPoly>& x, const std::vector<std::complex<double>>& coefficients) const override;
+    std::shared_ptr<SeriesPowers<RnsPoly>> eval_powers(
+            ConstCiphertext<RnsPoly>& x, const std::vector<std::complex<double>>& coefficients) const override;
 
-    Ciphertext<DCRTPoly> EvalPoly(ConstCiphertext<DCRTPoly>& ciphertext,
+    Ciphertext<RnsPoly> eval_poly(ConstCiphertext<RnsPoly>& ciphertext,
                                   const std::vector<int64_t>& coefficients) const override;
     /**
-     * Evaluates a polynomial with real coefficients in the power basis: EvalPolyLinear below degree 5,
-     * EvalPolyPS otherwise.
+     * Evaluates a polynomial with real coefficients in the power basis: eval_poly_linear below degree 5,
+     * eval_poly_ps otherwise.
      *
      * @param ciphertext the input ciphertext
      * @param coefficients coefficients of the polynomial, constant term first (size = degree + 1)
      * @return the value of the polynomial
      */
-    Ciphertext<DCRTPoly> EvalPoly(ConstCiphertext<DCRTPoly>& ciphertext,
+    Ciphertext<RnsPoly> eval_poly(ConstCiphertext<RnsPoly>& ciphertext,
                                   const std::vector<double>& coefficients) const override;
     /**
-     * Evaluates a polynomial with complex coefficients in the power basis: EvalPolyLinear below degree 5,
-     * EvalPolyPS otherwise.
+     * Evaluates a polynomial with complex coefficients in the power basis: eval_poly_linear below degree 5,
+     * eval_poly_ps otherwise.
      *
      * @param ciphertext the input ciphertext
      * @param coefficients coefficients of the polynomial, constant term first (size = degree + 1)
      * @return the value of the polynomial
      */
-    Ciphertext<DCRTPoly> EvalPoly(ConstCiphertext<DCRTPoly>& ciphertext,
+    Ciphertext<RnsPoly> eval_poly(ConstCiphertext<RnsPoly>& ciphertext,
                                   const std::vector<std::complex<double>>& coefficients) const override;
 
     /**
-     * Evaluates a polynomial with integer coefficients in the power basis using powers precomputed by EvalPowers;
+     * Evaluates a polynomial with integer coefficients in the power basis using powers precomputed by eval_powers;
      * the powers are left unchanged so that several polynomials of the same shape can share them.
      *
-     * @param powers the powers of the input ciphertext returned by EvalPowers
+     * @param powers the powers of the input ciphertext returned by eval_powers
      * @param coefficients coefficients of the polynomial, constant term first; the degree may not exceed the one
      * the powers were computed for
      * @return the value of the polynomial
      */
-    Ciphertext<DCRTPoly> EvalPolyWithPrecomp(std::shared_ptr<seriesPowers<DCRTPoly>> powers,
+    Ciphertext<RnsPoly> eval_poly_with_precomp(std::shared_ptr<SeriesPowers<RnsPoly>> powers,
                                              const std::vector<int64_t>& coefficients) const override;
     /**
-     * Evaluates a polynomial with real coefficients in the power basis using powers precomputed by EvalPowers;
+     * Evaluates a polynomial with real coefficients in the power basis using powers precomputed by eval_powers;
      * the powers are left unchanged so that several polynomials of the same shape can share them.
      *
-     * @param powers the powers of the input ciphertext returned by EvalPowers
+     * @param powers the powers of the input ciphertext returned by eval_powers
      * @param coefficients coefficients of the polynomial, constant term first; the degree may not exceed the one
      * the powers were computed for
      * @return the value of the polynomial
      */
-    Ciphertext<DCRTPoly> EvalPolyWithPrecomp(std::shared_ptr<seriesPowers<DCRTPoly>> powers,
+    Ciphertext<RnsPoly> eval_poly_with_precomp(std::shared_ptr<SeriesPowers<RnsPoly>> powers,
                                              const std::vector<double>& coefficients) const override;
     /**
-     * Evaluates a polynomial with complex coefficients in the power basis using powers precomputed by EvalPowers;
+     * Evaluates a polynomial with complex coefficients in the power basis using powers precomputed by eval_powers;
      * the powers are left unchanged so that several polynomials of the same shape can share them.
      *
-     * @param powers the powers of the input ciphertext returned by EvalPowers
+     * @param powers the powers of the input ciphertext returned by eval_powers
      * @param coefficients coefficients of the polynomial, constant term first; the degree may not exceed the one
      * the powers were computed for
      * @return the value of the polynomial
      */
-    Ciphertext<DCRTPoly> EvalPolyWithPrecomp(std::shared_ptr<seriesPowers<DCRTPoly>> powers,
+    Ciphertext<RnsPoly> eval_poly_with_precomp(std::shared_ptr<SeriesPowers<RnsPoly>> powers,
                                              const std::vector<std::complex<double>>& coefficients) const override;
 
-    Ciphertext<DCRTPoly> EvalPolyLinear(ConstCiphertext<DCRTPoly>& x,
+    Ciphertext<RnsPoly> eval_poly_linear(ConstCiphertext<RnsPoly>& x,
                                         const std::vector<int64_t>& coefficients) const override;
     /**
      * Evaluates a polynomial with real coefficients in the power basis using a binary tree of powers (intended
@@ -200,7 +200,7 @@ class AdvancedSHECKKSRNS : public AdvancedSHERNS {
      * @param coefficients coefficients of the polynomial, constant term first (size = degree + 1)
      * @return the value of the polynomial
      */
-    Ciphertext<DCRTPoly> EvalPolyLinear(ConstCiphertext<DCRTPoly>& x,
+    Ciphertext<RnsPoly> eval_poly_linear(ConstCiphertext<RnsPoly>& x,
                                         const std::vector<double>& coefficients) const override;
     /**
      * Evaluates a polynomial with complex coefficients in the power basis using a binary tree of powers (intended
@@ -210,10 +210,10 @@ class AdvancedSHECKKSRNS : public AdvancedSHERNS {
      * @param coefficients coefficients of the polynomial, constant term first (size = degree + 1)
      * @return the value of the polynomial
      */
-    Ciphertext<DCRTPoly> EvalPolyLinear(ConstCiphertext<DCRTPoly>& x,
+    Ciphertext<RnsPoly> eval_poly_linear(ConstCiphertext<RnsPoly>& x,
                                         const std::vector<std::complex<double>>& coefficients) const override;
 
-    Ciphertext<DCRTPoly> EvalPolyPS(ConstCiphertext<DCRTPoly>& x,
+    Ciphertext<RnsPoly> eval_poly_ps(ConstCiphertext<RnsPoly>& x,
                                     const std::vector<int64_t>& coefficients) const override;
     /**
      * Evaluates a polynomial with real coefficients in the power basis using the Paterson-Stockmeyer algorithm.
@@ -222,7 +222,7 @@ class AdvancedSHECKKSRNS : public AdvancedSHERNS {
      * @param coefficients coefficients of the polynomial, constant term first (size = degree + 1)
      * @return the value of the polynomial
      */
-    Ciphertext<DCRTPoly> EvalPolyPS(ConstCiphertext<DCRTPoly>& x,
+    Ciphertext<RnsPoly> eval_poly_ps(ConstCiphertext<RnsPoly>& x,
                                     const std::vector<double>& coefficients) const override;
     /**
      * Evaluates a polynomial with complex coefficients in the power basis using the Paterson-Stockmeyer algorithm.
@@ -231,14 +231,14 @@ class AdvancedSHECKKSRNS : public AdvancedSHERNS {
      * @param coefficients coefficients of the polynomial, constant term first (size = degree + 1)
      * @return the value of the polynomial
      */
-    Ciphertext<DCRTPoly> EvalPolyPS(ConstCiphertext<DCRTPoly>& x,
+    Ciphertext<RnsPoly> eval_poly_ps(ConstCiphertext<RnsPoly>& x,
                                     const std::vector<std::complex<double>>& coefficients) const override;
 
     //------------------------------------------------------------------------------
     // EVAL CHEBYSHEV SERIES
     //------------------------------------------------------------------------------
 
-    std::shared_ptr<seriesPowers<DCRTPoly>> EvalChebyPolys(ConstCiphertext<DCRTPoly>& x,
+    std::shared_ptr<SeriesPowers<RnsPoly>> eval_cheby_polys(ConstCiphertext<RnsPoly>& x,
                                                            const std::vector<int64_t>& coefficients, double a,
                                                            double b) const override;
     /**
@@ -252,7 +252,7 @@ class AdvancedSHECKKSRNS : public AdvancedSHERNS {
      * @param b upper bound of the interpolation interval
      * @return the Chebyshev polynomials of the mapped input
      */
-    std::shared_ptr<seriesPowers<DCRTPoly>> EvalChebyPolys(ConstCiphertext<DCRTPoly>& x,
+    std::shared_ptr<SeriesPowers<RnsPoly>> eval_cheby_polys(ConstCiphertext<RnsPoly>& x,
                                                            const std::vector<double>& coefficients, double a,
                                                            double b) const override;
     /**
@@ -266,16 +266,16 @@ class AdvancedSHECKKSRNS : public AdvancedSHERNS {
      * @param b upper bound of the interpolation interval
      * @return the Chebyshev polynomials of the mapped input
      */
-    std::shared_ptr<seriesPowers<DCRTPoly>> EvalChebyPolys(ConstCiphertext<DCRTPoly>& x,
+    std::shared_ptr<SeriesPowers<RnsPoly>> eval_cheby_polys(ConstCiphertext<RnsPoly>& x,
                                                            const std::vector<std::complex<double>>& coefficients,
                                                            double a, double b) const override;
 
-    Ciphertext<DCRTPoly> EvalChebyshevSeries(ConstCiphertext<DCRTPoly>& ciphertext,
+    Ciphertext<RnsPoly> eval_chebyshev_series(ConstCiphertext<RnsPoly>& ciphertext,
                                              const std::vector<int64_t>& coefficients, double a,
                                              double b) const override;
     /**
      * Evaluates a Chebyshev series with real coefficients over [a, b]: the input is mapped to [-1, 1] and the
-     * series is evaluated with EvalChebyshevSeriesLinear below degree 5, EvalChebyshevSeriesPS otherwise.
+     * series is evaluated with eval_chebyshev_series_linear below degree 5, eval_chebyshev_series_ps otherwise.
      *
      * @param ciphertext the input ciphertext, with values in [a, b]
      * @param coefficients coefficients of the Chebyshev series (size = degree + 1)
@@ -283,12 +283,12 @@ class AdvancedSHECKKSRNS : public AdvancedSHERNS {
      * @param b upper bound of the interpolation interval
      * @return the value of the series
      */
-    Ciphertext<DCRTPoly> EvalChebyshevSeries(ConstCiphertext<DCRTPoly>& ciphertext,
+    Ciphertext<RnsPoly> eval_chebyshev_series(ConstCiphertext<RnsPoly>& ciphertext,
                                              const std::vector<double>& coefficients, double a,
                                              double b) const override;
     /**
      * Evaluates a Chebyshev series with complex coefficients over [a, b]: the input is mapped to [-1, 1] and the
-     * series is evaluated with EvalChebyshevSeriesLinear below degree 5, EvalChebyshevSeriesPS otherwise.
+     * series is evaluated with eval_chebyshev_series_linear below degree 5, eval_chebyshev_series_ps otherwise.
      *
      * @param ciphertext the input ciphertext, with values in [a, b]
      * @param coefficients coefficients of the Chebyshev series (size = degree + 1)
@@ -296,43 +296,43 @@ class AdvancedSHECKKSRNS : public AdvancedSHERNS {
      * @param b upper bound of the interpolation interval
      * @return the value of the series
      */
-    Ciphertext<DCRTPoly> EvalChebyshevSeries(ConstCiphertext<DCRTPoly>& ciphertext,
+    Ciphertext<RnsPoly> eval_chebyshev_series(ConstCiphertext<RnsPoly>& ciphertext,
                                              const std::vector<std::complex<double>>& coefficients, double a,
                                              double b) const override;
 
     /**
      * Evaluates a Chebyshev series with integer coefficients using the Chebyshev polynomials precomputed by
-     * EvalChebyPolys; the polynomials are left unchanged so that several series of the same shape can share them.
+     * eval_cheby_polys; the polynomials are left unchanged so that several series of the same shape can share them.
      *
-     * @param polys the Chebyshev polynomials returned by EvalChebyPolys
+     * @param polys the Chebyshev polynomials returned by eval_cheby_polys
      * @param coefficients coefficients of the Chebyshev series; the degree may not exceed the one the polynomials
      * were computed for
      * @return the value of the series
      */
-    Ciphertext<DCRTPoly> EvalChebyshevSeriesWithPrecomp(std::shared_ptr<seriesPowers<DCRTPoly>> polys,
+    Ciphertext<RnsPoly> eval_chebyshev_series_with_precomp(std::shared_ptr<SeriesPowers<RnsPoly>> polys,
                                                         const std::vector<int64_t>& coefficients) const override;
     /**
      * Evaluates a Chebyshev series with real coefficients using the Chebyshev polynomials precomputed by
-     * EvalChebyPolys; the polynomials are left unchanged so that several series of the same shape can share them.
+     * eval_cheby_polys; the polynomials are left unchanged so that several series of the same shape can share them.
      *
-     * @param polys the Chebyshev polynomials returned by EvalChebyPolys
+     * @param polys the Chebyshev polynomials returned by eval_cheby_polys
      * @param coefficients coefficients of the Chebyshev series; the degree may not exceed the one the polynomials
      * were computed for
      * @return the value of the series
      */
-    Ciphertext<DCRTPoly> EvalChebyshevSeriesWithPrecomp(std::shared_ptr<seriesPowers<DCRTPoly>> polys,
+    Ciphertext<RnsPoly> eval_chebyshev_series_with_precomp(std::shared_ptr<SeriesPowers<RnsPoly>> polys,
                                                         const std::vector<double>& coefficients) const override;
     /**
      * Evaluates a Chebyshev series with complex coefficients using the Chebyshev polynomials precomputed by
-     * EvalChebyPolys; the polynomials are left unchanged so that several series of the same shape can share them.
+     * eval_cheby_polys; the polynomials are left unchanged so that several series of the same shape can share them.
      *
-     * @param polys the Chebyshev polynomials returned by EvalChebyPolys
+     * @param polys the Chebyshev polynomials returned by eval_cheby_polys
      * @param coefficients coefficients of the Chebyshev series; the degree may not exceed the one the polynomials
      * were computed for
      * @return the value of the series
      */
-    Ciphertext<DCRTPoly> EvalChebyshevSeriesWithPrecomp(
-            std::shared_ptr<seriesPowers<DCRTPoly>> polys,
+    Ciphertext<RnsPoly> eval_chebyshev_series_with_precomp(
+            std::shared_ptr<SeriesPowers<RnsPoly>> polys,
             const std::vector<std::complex<double>>& coefficients) const override;
 
     /**
@@ -345,7 +345,7 @@ class AdvancedSHECKKSRNS : public AdvancedSHERNS {
      * @param b upper bound of the interpolation interval
      * @return the value of the series
      */
-    Ciphertext<DCRTPoly> EvalChebyshevSeriesLinear(ConstCiphertext<DCRTPoly>& ciphertext,
+    Ciphertext<RnsPoly> eval_chebyshev_series_linear(ConstCiphertext<RnsPoly>& ciphertext,
                                                    const std::vector<int64_t>& coefficients, double a,
                                                    double b) const override;
     /**
@@ -358,7 +358,7 @@ class AdvancedSHECKKSRNS : public AdvancedSHERNS {
      * @param b upper bound of the interpolation interval
      * @return the value of the series
      */
-    Ciphertext<DCRTPoly> EvalChebyshevSeriesLinear(ConstCiphertext<DCRTPoly>& ciphertext,
+    Ciphertext<RnsPoly> eval_chebyshev_series_linear(ConstCiphertext<RnsPoly>& ciphertext,
                                                    const std::vector<double>& coefficients, double a,
                                                    double b) const override;
     /**
@@ -371,7 +371,7 @@ class AdvancedSHECKKSRNS : public AdvancedSHERNS {
      * @param b upper bound of the interpolation interval
      * @return the value of the series
      */
-    Ciphertext<DCRTPoly> EvalChebyshevSeriesLinear(ConstCiphertext<DCRTPoly>& ciphertext,
+    Ciphertext<RnsPoly> eval_chebyshev_series_linear(ConstCiphertext<RnsPoly>& ciphertext,
                                                    const std::vector<std::complex<double>>& coefficients, double a,
                                                    double b) const override;
 
@@ -385,7 +385,7 @@ class AdvancedSHECKKSRNS : public AdvancedSHERNS {
      * @param b upper bound of the interpolation interval
      * @return the value of the series
      */
-    Ciphertext<DCRTPoly> EvalChebyshevSeriesPS(ConstCiphertext<DCRTPoly>& ciphertext,
+    Ciphertext<RnsPoly> eval_chebyshev_series_ps(ConstCiphertext<RnsPoly>& ciphertext,
                                                const std::vector<int64_t>& coefficients, double a,
                                                double b) const override;
     /**
@@ -398,7 +398,7 @@ class AdvancedSHECKKSRNS : public AdvancedSHERNS {
      * @param b upper bound of the interpolation interval
      * @return the value of the series
      */
-    Ciphertext<DCRTPoly> EvalChebyshevSeriesPS(ConstCiphertext<DCRTPoly>& ciphertext,
+    Ciphertext<RnsPoly> eval_chebyshev_series_ps(ConstCiphertext<RnsPoly>& ciphertext,
                                                const std::vector<double>& coefficients, double a,
                                                double b) const override;
     /**
@@ -411,7 +411,7 @@ class AdvancedSHECKKSRNS : public AdvancedSHERNS {
      * @param b upper bound of the interpolation interval
      * @return the value of the series
      */
-    Ciphertext<DCRTPoly> EvalChebyshevSeriesPS(ConstCiphertext<DCRTPoly>& ciphertext,
+    Ciphertext<RnsPoly> eval_chebyshev_series_ps(ConstCiphertext<RnsPoly>& ciphertext,
                                                const std::vector<std::complex<double>>& coefficients, double a,
                                                double b) const override;
 
@@ -425,19 +425,19 @@ class AdvancedSHECKKSRNS : public AdvancedSHERNS {
 
     template <class Archive>
     void save(Archive& ar) const {
-        ar(cereal::base_class<AdvancedSHERNS>(this));
+        ar(cereal::base_class<RnsAdvancedShe>(this));
     }
 
     template <class Archive>
     void load(Archive& ar) {
-        ar(cereal::base_class<AdvancedSHERNS>(this));
+        ar(cereal::base_class<RnsAdvancedShe>(this));
     }
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "AdvancedSHECKKSRNS";
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_CKKS_ADVANCED_SHE_H_

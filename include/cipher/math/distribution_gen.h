@@ -43,7 +43,7 @@
 #include "cipher/config.h"
 #include "cipher/util/prng/prng.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief PseudoRandomNumberGenerator provides the PRNG capability to all random distribution generators in OpenFHE.
@@ -54,36 +54,36 @@ namespace lbcrypto {
 class PseudoRandomNumberGenerator {
   public:
     /**
-     * @brief InitPRNGEngine() initializes the PRNG generator
-     * @param libPath a string with the absolute path to an external PRNG library ("/path/to/libprng.so").
+     * @brief init_prng_engine() initializes the PRNG generator
+     * @param lib_path a string with the absolute path to an external PRNG library ("/path/to/libprng.so").
      *        If the string is empty, then the default (OpenFHE's built-in PRNG) library will be used.
      * @note this function should be called at the beginning of main() if an external library to be used and
      *       prints a trace in this case. There is no trace for the built-in PRNG
      */
-    static void InitPRNGEngine(const std::string& libPath = std::string());
+    static void init_prng_engine(const std::string& lib_path = std::string());
 
     /**
      * @brief Returns a reference to the PRNG engine
      *
      * @return the PRNG engine used by the distribution generators (created on first use)
      */
-    static PRNG& GetPRNG();
+    static PRNG& get_prng();
 
   private:
-    using GenPRNGEngineFuncPtr = PRNG* (*)();
+    using GenPrngEngineFuncPtr = PRNG* (*)();
 
-#if defined(WITH_OPENMP)
+#if defined(CIPHER_WITH_OPENMP)
     // shared pointer to a thread-specific PRNG engine
-    static std::shared_ptr<PRNG> m_prng;
+    static std::shared_ptr<PRNG> prng_;
     #if !defined(FIXED_SEED)
-        // avoid contention on m_prng: local copies of m_prng are created for each thread
-        #pragma omp threadprivate(m_prng)
+        // avoid contention on prng_: local copies of prng_ are created for each thread
+        #pragma omp threadprivate(prng_)
     #endif
 #endif
     // pointer to the function generating PRNG
-    static GenPRNGEngineFuncPtr genPRNGEngine;
+    static GenPrngEngineFuncPtr gen_prng_engine;
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_MATH_DISTRIBUTION_GEN_H_

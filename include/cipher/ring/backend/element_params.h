@@ -47,74 +47,74 @@
 #include "cipher/util/inttypes.h"
 #include "cipher/util/serializable.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
- * @class ElemParams
+ * @class ElementParams
  * @brief Wrapper class to hold the parameters for Element types and their
  * inheritors.
  */
 template <typename IntegerType>
-class ElemParams : public Serializable {
+class ElementParams : public Serializable {
   public:
-    constexpr ElemParams() = default;
-    virtual ~ElemParams() = default;
+    constexpr ElementParams() = default;
+    virtual ~ElementParams() = default;
 
     /**
      * @brief Constructor taking the cyclotomic order and the ciphertext modulus; the ring dimension is set to the
      * totient of the order and the roots of unity and big modulus are left at zero.
      * @param order the cyclotomic order wrapped by the parameter set.
-     * @param ctModulus the ciphertext modulus wrapped by the parameter set.
+     * @param ct_modulus the ciphertext modulus wrapped by the parameter set.
      */
-    ElemParams(uint32_t order, const IntegerType& ctModulus)
-        : m_ringDimension(static_cast<uint32_t>(GetTotient(order))),
-          m_cyclotomicOrder(order),
-          m_ciphertextModulus(ctModulus) {}
+    ElementParams(uint32_t order, const IntegerType& ct_modulus)
+        : ring_dimension_(static_cast<uint32_t>(get_totient(order))),
+          cyclotomic_order_(order),
+          ciphertext_modulus_(ct_modulus) {}
 
     /**
      * @brief Constructor taking the cyclotomic order, the ciphertext modulus and its root of unity; the ring
      * dimension is set to the totient of the order and the big modulus and big root of unity are left at zero.
      * @param order the cyclotomic order wrapped by the parameter set.
-     * @param ctModulus the ciphertext modulus wrapped by the parameter set.
-     * @param rUnity the root of unity.
+     * @param ct_modulus the ciphertext modulus wrapped by the parameter set.
+     * @param r_unity the root of unity.
      */
-    ElemParams(uint32_t order, const IntegerType& ctModulus, const IntegerType& rUnity)
-        : m_ringDimension(static_cast<uint32_t>(GetTotient(order))),
-          m_cyclotomicOrder(order),
-          m_ciphertextModulus(ctModulus),
-          m_rootOfUnity(rUnity) {}
+    ElementParams(uint32_t order, const IntegerType& ct_modulus, const IntegerType& r_unity)
+        : ring_dimension_(static_cast<uint32_t>(get_totient(order))),
+          cyclotomic_order_(order),
+          ciphertext_modulus_(ct_modulus),
+          root_of_unity_(r_unity) {}
 
     /**
      * @brief Constructor taking the cyclotomic order, the ciphertext modulus and
      * root of unity, and the big ciphertext modulus and big root of unity used
      * for bit-packing operations.
      * @param order the cyclotomic order wrapped by the parameter set.
-     * @param ctModulus the ciphertext modulus wrapped by the parameter set.
-     * @param rUnity the root of unity.
-     * @param bigCtModulus the big ciphertext modulus used for bit packing
+     * @param ct_modulus the ciphertext modulus wrapped by the parameter set.
+     * @param r_unity the root of unity.
+     * @param big_ct_modulus the big ciphertext modulus used for bit packing
      * operations.
-     * @param bigRUnity the big root of unity used for bit packing operations.
+     * @param big_r_unity the big root of unity used for bit packing operations.
      */
-    ElemParams(uint32_t order, const IntegerType& ctModulus, const IntegerType& rUnity, const IntegerType& bigCtModulus,
-               const IntegerType& bigRUnity)
-        : m_ringDimension(static_cast<uint32_t>(GetTotient(order))),
-          m_cyclotomicOrder(order),
-          m_ciphertextModulus(ctModulus),
-          m_rootOfUnity(rUnity),
-          m_bigCiphertextModulus(bigCtModulus),
-          m_bigRootOfUnity(bigRUnity) {}
+    ElementParams(uint32_t order, const IntegerType& ct_modulus, const IntegerType& r_unity, const IntegerType& big_ct_modulus,
+               const IntegerType& big_r_unity)
+        : ring_dimension_(static_cast<uint32_t>(get_totient(order))),
+          cyclotomic_order_(order),
+          ciphertext_modulus_(ct_modulus),
+          root_of_unity_(r_unity),
+          big_ciphertext_modulus_(big_ct_modulus),
+          big_root_of_unity_(big_r_unity) {}
 
-    ElemParams(const ElemParams& rhs) = default;
-    ElemParams(ElemParams&& rhs) noexcept = default;
-    ElemParams& operator=(const ElemParams& rhs) = default;
-    ElemParams& operator=(ElemParams&& rhs) noexcept = default;
+    ElementParams(const ElementParams& rhs) = default;
+    ElementParams(ElementParams&& rhs) noexcept = default;
+    ElementParams& operator=(const ElementParams& rhs) = default;
+    ElementParams& operator=(ElementParams&& rhs) noexcept = default;
 
     /**
      * @brief Simple getter method for cyclotomic order.
      * @return The cyclotomic order.
      */
-    uint32_t GetCyclotomicOrder() const {
-        return m_cyclotomicOrder;
+    uint32_t get_cyclotomic_order() const {
+        return cyclotomic_order_;
     }
 
     /**
@@ -122,8 +122,8 @@ class ElemParams : public Serializable {
      * evaluation of the totient function of the cyclotomic order.
      * @return the ring dimension.
      */
-    uint32_t GetRingDimension() const {
-        return m_ringDimension;
+    uint32_t get_ring_dimension() const {
+        return ring_dimension_;
     }
 
     /**
@@ -131,8 +131,8 @@ class ElemParams : public Serializable {
      * ciphertext modulus.
      * @return The ciphertext modulus, not the big ciphertext modulus.
      */
-    const IntegerType& GetModulus() const {
-        return m_ciphertextModulus;
+    const IntegerType& get_modulus() const {
+        return ciphertext_modulus_;
     }
 
     /**
@@ -140,8 +140,8 @@ class ElemParams : public Serializable {
      * This is not relevant for all applications.
      * @return The big ciphertext modulus.
      */
-    const IntegerType& GetBigModulus() const {
-        return m_bigCiphertextModulus;
+    const IntegerType& get_big_modulus() const {
+        return big_ciphertext_modulus_;
     }
 
     /**
@@ -149,16 +149,16 @@ class ElemParams : public Serializable {
      * unity.
      * @return The root of unity, not the big root of unity.
      */
-    const IntegerType& GetRootOfUnity() const {
-        return m_rootOfUnity;
+    const IntegerType& get_root_of_unity() const {
+        return root_of_unity_;
     }
 
     /**
      * @brief Simple getter method for the big root of unity.
      * @return The the big root of unity.
      */
-    const IntegerType& GetBigRootOfUnity() const {
-        return m_bigRootOfUnity;
+    const IntegerType& get_big_root_of_unity() const {
+        return big_root_of_unity_;
     }
 
     /**
@@ -167,7 +167,7 @@ class ElemParams : public Serializable {
      * @param item what to add to the output stream.
      * @return the appended output stream.
      */
-    friend std::ostream& operator<<(std::ostream& out, const ElemParams& item) {
+    friend std::ostream& operator<<(std::ostream& out, const ElementParams& item) {
         return item.doprint(out);
     }
 
@@ -176,10 +176,10 @@ class ElemParams : public Serializable {
      * @param other the other ElemenParams to compare to.
      * @return True if all elements are equal, and False otherwise.
      */
-    virtual bool operator==(const ElemParams<IntegerType>& other) const {
-        return m_ringDimension == other.m_ringDimension && m_cyclotomicOrder == other.m_cyclotomicOrder &&
-               m_ciphertextModulus == other.m_ciphertextModulus && m_rootOfUnity == other.m_rootOfUnity &&
-               m_bigCiphertextModulus == other.m_bigCiphertextModulus && m_bigRootOfUnity == other.m_bigRootOfUnity;
+    virtual bool operator==(const ElementParams<IntegerType>& other) const {
+        return ring_dimension_ == other.ring_dimension_ && cyclotomic_order_ == other.cyclotomic_order_ &&
+               ciphertext_modulus_ == other.ciphertext_modulus_ && root_of_unity_ == other.root_of_unity_ &&
+               big_ciphertext_modulus_ == other.big_ciphertext_modulus_ && big_root_of_unity_ == other.big_root_of_unity_;
     }
 
     /**
@@ -187,60 +187,60 @@ class ElemParams : public Serializable {
      * @param other the other ElemenParams to compare to.
      * @return False if all elements are equal, and True otherwise.
      */
-    bool operator!=(const ElemParams<IntegerType>& other) const {
+    bool operator!=(const ElementParams<IntegerType>& other) const {
         return !(*this == other);
     }
 
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
-        ar(::cereal::make_nvp("co", m_cyclotomicOrder));
-        ar(::cereal::make_nvp("rd", m_ringDimension));
-        ar(::cereal::make_nvp("cm", m_ciphertextModulus));
-        ar(::cereal::make_nvp("ru", m_rootOfUnity));
-        ar(::cereal::make_nvp("bm", m_bigCiphertextModulus));
-        ar(::cereal::make_nvp("br", m_bigRootOfUnity));
+        ar(::cereal::make_nvp("co", cyclotomic_order_));
+        ar(::cereal::make_nvp("rd", ring_dimension_));
+        ar(::cereal::make_nvp("cm", ciphertext_modulus_));
+        ar(::cereal::make_nvp("ru", root_of_unity_));
+        ar(::cereal::make_nvp("bm", big_ciphertext_modulus_));
+        ar(::cereal::make_nvp("br", big_root_of_unity_));
     }
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion())
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version())
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
-        ar(::cereal::make_nvp("co", m_cyclotomicOrder));
-        ar(::cereal::make_nvp("rd", m_ringDimension));
-        ar(::cereal::make_nvp("cm", m_ciphertextModulus));
-        ar(::cereal::make_nvp("ru", m_rootOfUnity));
-        ar(::cereal::make_nvp("bm", m_bigCiphertextModulus));
-        ar(::cereal::make_nvp("br", m_bigRootOfUnity));
+        ar(::cereal::make_nvp("co", cyclotomic_order_));
+        ar(::cereal::make_nvp("rd", ring_dimension_));
+        ar(::cereal::make_nvp("cm", ciphertext_modulus_));
+        ar(::cereal::make_nvp("ru", root_of_unity_));
+        ar(::cereal::make_nvp("bm", big_ciphertext_modulus_));
+        ar(::cereal::make_nvp("br", big_root_of_unity_));
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "ElemParams";
     }
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 
   protected:
-    uint32_t m_ringDimension{0};
-    uint32_t m_cyclotomicOrder{0};
-    IntegerType m_ciphertextModulus{0};
-    IntegerType m_rootOfUnity{0};
-    IntegerType m_bigCiphertextModulus{0};  // Used for only some applications.
-    IntegerType m_bigRootOfUnity{0};        // Used for only some applications.
+    uint32_t ring_dimension_{0};
+    uint32_t cyclotomic_order_{0};
+    IntegerType ciphertext_modulus_{0};
+    IntegerType root_of_unity_{0};
+    IntegerType big_ciphertext_modulus_{0};  // Used for only some applications.
+    IntegerType big_root_of_unity_{0};        // Used for only some applications.
 
     /**
-     * @brief Pretty print operator for the ElemParams type.
+     * @brief Pretty print operator for the ElementParams type.
      * @param out the output stream to print to
      * @return the resulting output stream.
      */
     virtual std::ostream& doprint(std::ostream& out) const {
-        out << "[m=" << m_cyclotomicOrder << " n=" << m_ringDimension << " q=" << m_ciphertextModulus
-            << " ru=" << m_rootOfUnity << " bigq=" << m_bigCiphertextModulus << " bigru=" << m_bigRootOfUnity << "]";
+        out << "[m=" << cyclotomic_order_ << " n=" << ring_dimension_ << " q=" << ciphertext_modulus_
+            << " ru=" << root_of_unity_ << " bigq=" << big_ciphertext_modulus_ << " bigru=" << big_root_of_unity_ << "]";
         return out;
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_RING_BACKEND_ELEMENT_PARAMS_H_

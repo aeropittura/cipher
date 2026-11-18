@@ -57,15 +57,15 @@
 #include "cipher/util/exception.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 template <typename Element>
 class KeyPair;
 
-// TODO: fix DCRTPoly passed by value
+// TODO: fix RnsPoly passed by value
 
 /**
  * @brief Abstract interface for public key encryption schemes
@@ -73,28 +73,28 @@ class KeyPair;
  * SchemeBase is a dispatcher rather than an implementation: it owns one object per family of operations, and
  * every public operation forwards to the same-named method of the object implementing that family after checking
  * that the family has been enabled. The families and the members holding them are
- *  - m_ParamsGen (ParameterGenerationBase): parameter generation (ParamsGenBFVRNS, ParamsGenCKKSRNS,
- *    ParamsGenBGVRNS);
- *  - m_PKE (PKEBase): key generation, encryption and decryption, including the EncryptZeroCore and DecryptCore
+ *  - params_gen_ (BaseParamGen): parameter generation (params_gen_bfvrns, params_gen_ckksrns,
+ *    params_gen_bgvrns);
+ *  - pke_ (BasePke): key generation, encryption and decryption, including the encrypt_zero_core and decrypt_core
  *    building blocks;
- *  - m_KeySwitch (KeySwitchBase): key-switching key generation and key switching, including the core operations
+ *  - key_switch_ (KeySwitchBase): key-switching key generation and key switching, including the core operations
  *    and the extended-basis (Ext) variants described below;
- *  - m_PRE (PREBase): proxy re-encryption (ReKeyGen, ReEncrypt);
- *  - m_LeveledSHE (LeveledSHEBase): leveled homomorphic arithmetic: negation, addition, subtraction,
+ *  - pre_ (BasePre): proxy re-encryption (re_key_gen, re_encrypt);
+ *  - leveled_she_ (BaseLeveledShe): leveled homomorphic arithmetic: negation, addition, subtraction,
  *    multiplication and relinearization, automorphisms and rotations, modulus/level reduction and the level and
  *    scaling adjustment helpers;
- *  - m_AdvancedSHE (AdvancedSHEBase): operations built on the leveled ones: linear weighted sums, polynomial and
- *    Chebyshev series evaluation, EvalSum/EvalSumRows/EvalSumCols and inner products;
- *  - m_Multiparty (MultipartyBase): threshold key generation, distributed decryption and the interactive
+ *  - advanced_she_ (BaseAdvancedShe): operations built on the leveled ones: linear weighted sums, polynomial and
+ *    Chebyshev series evaluation, eval_sum/eval_sum_rows/eval_sum_cols and inner products;
+ *  - multiparty_ (BaseMultiparty): threshold key generation, distributed decryption and the interactive
  *    multiparty bootstrapping protocol (IntMPBoot*);
- *  - m_FHE (FHEBase): CKKS bootstrapping and functional bootstrapping (EvalBootstrap*, EvalFBT*, EvalMVB*,
- *    EvalFEFuncBootstrap*) together with their precomputation caches;
- *  - m_SchemeSwitch (FHEBase): CKKS <-> FHEW scheme switching (EvalCKKStoFHEW*, EvalFHEWtoCKKS*,
- *    EvalCompareSchemeSwitching, EvalMinSchemeSwitching, EvalMaxSchemeSwitching and related calls).
+ *  - fhe_ (BaseFhe): CKKS bootstrapping and functional bootstrapping (eval_bootstrap*, eval_fbt*, eval_mvb*,
+ *    eval_fe_func_bootstrap*) together with their precomputation caches;
+ *  - scheme_switch_ (BaseFhe): CKKS <-> FHEW scheme switching (eval_ckks_to_fhew*, eval_fhew_to_ckks*,
+ *    eval_compare_scheme_switching, eval_min_scheme_switching, eval_max_scheme_switching and related calls).
  *
- * A family is enabled with Enable(PKESchemeFeature), which the concrete schemes (SchemeCKKSRNS, SchemeBFVRNS,
- * SchemeBGVRNS) override to instantiate the corresponding member; Enable(uint32_t) accepts a bit mask of
- * features, and GetEnabled()/IsFeatureEnabled() report the current state. Calling an operation of a family that
+ * A family is enabled with enable(PkeSchemeFeature), which the concrete schemes (CkksRnsScheme, BfvRnsScheme,
+ * BgvRnsScheme) override to instantiate the corresponding member; enable(uint32_t) accepts a bit mask of
+ * features, and get_enabled()/is_feature_enabled() report the current state. Calling an operation of a family that
  * is not enabled throws an exception from the corresponding Verify*Enabled() helper naming the operation and the
  * feature that must be enabled.
  *
@@ -104,16 +104,16 @@ class KeyPair;
  * base-leveledshe.h, base-advancedshe.h, base-multiparty.h, base-fhe.h) and on the user-facing wrappers in
  * cryptocontext.h. The methods that do more than forward are documented below: the key-generation wrappers
  * implemented in base-scheme.cpp stamp the returned keys with the key tag of the secret key they belong to (or
- * with the caller-supplied keyId in the multiparty variants), a few wrappers validate their arguments or return
+ * with the caller-supplied key_id in the multiparty variants), a few wrappers validate their arguments or return
  * early, and the serialization methods keep backward compatibility with older serialized contexts.
  *
- * Key switching is exposed at three granularities. KeySwitch and KeySwitchInPlace switch a whole ciphertext.
+ * Key switching is exposed at three granularities. key_switch and key_switch_in_place switch a whole ciphertext.
  * The core operations split the work so that the expensive, key-independent digit decomposition can be reused:
- * EvalKeySwitchPrecomputeCore decomposes a ring element into digits, EvalFastKeySwitchCore multiplies precomputed
- * digits by an evaluation key and returns the result in the basis Q, and KeySwitchCore performs both steps.
- * EvalFastRotationPrecompute and EvalFastRotation build hoisted rotations on the same digits, so several
- * rotations of one ciphertext share a single decomposition. The Ext variants (EvalFastKeySwitchCoreExt,
- * EvalFastRotationExt, KeySwitchExt, KeySwitchDown, KeySwitchDownFirstElement), supported by hybrid key switching
+ * eval_key_switch_precompute_core decomposes a ring element into digits, eval_fast_key_switch_core multiplies precomputed
+ * digits by an evaluation key and returns the result in the basis Q, and key_switch_core performs both steps.
+ * eval_fast_rotation_precompute and eval_fast_rotation build hoisted rotations on the same digits, so several
+ * rotations of one ciphertext share a single decomposition. The Ext variants (eval_fast_key_switch_core_ext,
+ * eval_fast_rotation_ext, key_switch_ext, key_switch_down, key_switch_down_first_element), supported by hybrid key switching
  * only, keep intermediate results in the extended basis P*Q, so that many key-switched or rotated terms can be
  * accumulated before a single scale-down from P*Q to Q.
  *
@@ -134,13 +134,13 @@ class SchemeBase {
 
     /**
      * Compares two scheme objects. The base implementation throws an exception; every concrete scheme overrides
-     * it (CryptoContextFactory relies on it to deduplicate crypto contexts).
+     * it (ContextFactory relies on it to deduplicate crypto contexts).
      *
      * @param sch the scheme to compare with
      * @return true if the schemes are equal
      */
     virtual bool operator==(const SchemeBase& sch) const {
-        OPENFHE_THROW("operator== is not supported");
+        CIPHER_THROW("operator== is not supported");
     }
 
     /**
@@ -154,50 +154,50 @@ class SchemeBase {
     }
 
     /**
-     * Enable features with a bit mask of PKESchemeFeature codes
-     * @param mask bitwise OR of PKESchemeFeature codes to enable
+     * Enable features with a bit mask of PkeSchemeFeature codes
+     * @param mask bitwise OR of PkeSchemeFeature codes to enable
      */
-    void Enable(uint32_t mask) {
+    void enable(uint32_t mask) {
         if (mask & PKE)
-            Enable(PKE);
+            enable(PKE);
         if (mask & KEYSWITCH)
-            Enable(KEYSWITCH);
+            enable(KEYSWITCH);
         if (mask & LEVELEDSHE)
-            Enable(LEVELEDSHE);
+            enable(LEVELEDSHE);
         if (mask & ADVANCEDSHE)
-            Enable(ADVANCEDSHE);
+            enable(ADVANCEDSHE);
         if (mask & PRE)
-            Enable(PRE);
+            enable(PRE);
         if (mask & MULTIPARTY)
-            Enable(MULTIPARTY);
+            enable(MULTIPARTY);
         if (mask & FHE)
-            Enable(FHE);
+            enable(FHE);
         if (mask & SCHEMESWITCH)
-            Enable(SCHEMESWITCH);
+            enable(SCHEMESWITCH);
     }
 
     /**
      * Returns the enabled features, i.e., the families whose implementing object has been instantiated.
      *
-     * @return bitwise OR of the PKESchemeFeature codes of the enabled features
+     * @return bitwise OR of the PkeSchemeFeature codes of the enabled features
      */
-    uint32_t GetEnabled() const {
+    uint32_t get_enabled() const {
         uint32_t flag = 0;
-        if (m_PKE != nullptr)
+        if (pke_ != nullptr)
             flag |= PKE;
-        if (m_KeySwitch != nullptr)
+        if (key_switch_ != nullptr)
             flag |= KEYSWITCH;
-        if (m_LeveledSHE != nullptr)
+        if (leveled_she_ != nullptr)
             flag |= LEVELEDSHE;
-        if (m_AdvancedSHE != nullptr)
+        if (advanced_she_ != nullptr)
             flag |= ADVANCEDSHE;
-        if (m_PRE != nullptr)
+        if (pre_ != nullptr)
             flag |= PRE;
-        if (m_Multiparty != nullptr)
+        if (multiparty_ != nullptr)
             flag |= MULTIPARTY;
-        if (m_FHE != nullptr)
+        if (fhe_ != nullptr)
             flag |= FHE;
-        if (m_SchemeSwitch != nullptr)
+        if (scheme_switch_ != nullptr)
             flag |= SCHEMESWITCH;
         return flag;
     }
@@ -208,26 +208,26 @@ class SchemeBase {
      * @param feature the feature to check; an unknown value causes an exception
      * @return true if the object implementing the feature has been instantiated
      */
-    bool IsFeatureEnabled(PKESchemeFeature feature) {
+    bool is_feature_enabled(PkeSchemeFeature feature) {
         switch (feature) {
             case PKE:
-                return (m_PKE != nullptr);
+                return (pke_ != nullptr);
             case KEYSWITCH:
-                return (m_KeySwitch != nullptr);
+                return (key_switch_ != nullptr);
             case LEVELEDSHE:
-                return (m_LeveledSHE != nullptr);
+                return (leveled_she_ != nullptr);
             case ADVANCEDSHE:
-                return (m_AdvancedSHE != nullptr);
+                return (advanced_she_ != nullptr);
             case PRE:
-                return (m_PRE != nullptr);
+                return (pre_ != nullptr);
             case MULTIPARTY:
-                return (m_Multiparty != nullptr);
+                return (multiparty_ != nullptr);
             case FHE:
-                return (m_FHE != nullptr);
+                return (fhe_ != nullptr);
             case SCHEMESWITCH:
-                return (m_SchemeSwitch != nullptr);
+                return (scheme_switch_ != nullptr);
             default:
-                OPENFHE_THROW("Unknown PKESchemeFeature " + std::to_string(feature));
+                CIPHER_THROW("Unknown PKESchemeFeature " + std::to_string(feature));
         }
     }
 
@@ -238,178 +238,178 @@ class SchemeBase {
      * @param feature the feature to enable
      */
     // instantiated in the scheme implementation class
-    virtual void Enable(PKESchemeFeature feature) {
-        OPENFHE_THROW("Enable is not implemented");
+    virtual void enable(PkeSchemeFeature feature) {
+        CIPHER_THROW("Enable is not implemented");
     }
 
     //------------------------------------------------------------------------------
     // PARAMETER GENERATION WRAPPER
-    // The three methods below forward to m_ParamsGen, which the concrete scheme sets in its constructor,
+    // The three methods below forward to params_gen_, which the concrete scheme sets in its constructor,
     // and throw if it has not been set. Their parameters are documented in base-parametergeneration.h.
     //------------------------------------------------------------------------------
 
-    bool ParamsGenBFVRNS(std::shared_ptr<CryptoParametersBase<Element>> cryptoParams, uint32_t evalAddCount,
-                         uint32_t multiplicativeDepth, uint32_t keySwitchCount, size_t dcrtBits, uint32_t n,
-                         uint32_t numPartQ) const {
-        if (!m_ParamsGen)
-            OPENFHE_THROW("m_ParamsGen is nullptr");
-        return m_ParamsGen->ParamsGenBFVRNSInternal(cryptoParams, evalAddCount, multiplicativeDepth, keySwitchCount,
-                                                    dcrtBits, n, numPartQ);
+    bool params_gen_bfvrns(std::shared_ptr<BaseCryptoParams<Element>> crypto_params, uint32_t eval_add_count,
+                         uint32_t multiplicative_depth, uint32_t key_switch_count, size_t dcrt_bits, uint32_t n,
+                         uint32_t num_part_q) const {
+        if (!params_gen_)
+            CIPHER_THROW("m_ParamsGen is nullptr");
+        return params_gen_->params_gen_bfvrns_internal(crypto_params, eval_add_count, multiplicative_depth, key_switch_count,
+                                                    dcrt_bits, n, num_part_q);
     }
 
-    bool ParamsGenCKKSRNS(std::shared_ptr<CryptoParametersBase<Element>> cryptoParams, uint32_t cyclOrder,
-                          uint32_t numPrimes, uint32_t scalingModSize, uint32_t firstModSize, uint32_t numPartQ,
-                          CompressionLevel mPIntBootCiphertextCompressionLevel) const {
-        if (!m_ParamsGen)
-            OPENFHE_THROW("m_ParamsGen is nullptr");
-        return m_ParamsGen->ParamsGenCKKSRNSInternal(cryptoParams, cyclOrder, numPrimes, scalingModSize, firstModSize,
-                                                     numPartQ, mPIntBootCiphertextCompressionLevel);
+    bool params_gen_ckksrns(std::shared_ptr<BaseCryptoParams<Element>> crypto_params, uint32_t cycl_order,
+                          uint32_t num_primes_value, uint32_t scaling_mod_size, uint32_t first_mod_size_value, uint32_t num_part_q,
+                          CompressionLevel m_p_int_boot_ciphertext_compression_level) const {
+        if (!params_gen_)
+            CIPHER_THROW("m_ParamsGen is nullptr");
+        return params_gen_->params_gen_ckksrns_internal(crypto_params, cycl_order, num_primes_value, scaling_mod_size, first_mod_size_value,
+                                                     num_part_q, m_p_int_boot_ciphertext_compression_level);
     }
 
-    bool ParamsGenBGVRNS(std::shared_ptr<CryptoParametersBase<Element>> cryptoParams, uint32_t evalAddCount,
-                         uint32_t keySwitchCount, uint32_t cyclOrder, uint32_t numPrimes, uint32_t firstModSize,
-                         uint32_t dcrtBits, uint32_t numPartQ, uint32_t PRENumHops) const {
-        if (!m_ParamsGen)
-            OPENFHE_THROW("m_ParamsGen is nullptr");
-        return m_ParamsGen->ParamsGenBGVRNSInternal(cryptoParams, evalAddCount, keySwitchCount, cyclOrder, numPrimes,
-                                                    firstModSize, dcrtBits, numPartQ, PRENumHops);
+    bool params_gen_bgvrns(std::shared_ptr<BaseCryptoParams<Element>> crypto_params, uint32_t eval_add_count,
+                         uint32_t key_switch_count, uint32_t cycl_order, uint32_t num_primes_value, uint32_t first_mod_size_value,
+                         uint32_t dcrt_bits, uint32_t num_part_q, uint32_t pre_num_hops) const {
+        if (!params_gen_)
+            CIPHER_THROW("m_ParamsGen is nullptr");
+        return params_gen_->params_gen_bgvrns_internal(crypto_params, eval_add_count, key_switch_count, cycl_order, num_primes_value,
+                                                    first_mod_size_value, dcrt_bits, num_part_q, pre_num_hops);
     }
 
     /////////////////////////////////////////
     // PKE WRAPPER
     /////////////////////////////////////////
 
-    virtual KeyPair<Element> KeyGen(CryptoContext<Element> cc, bool makeSparse) const {
-        VerifyPKEEnabled(__func__);
-        return m_PKE->KeyGenInternal(cc, makeSparse);
+    virtual KeyPair<Element> key_gen(CryptoContext<Element> cc, bool make_sparse_value) const {
+        verify_pke_enabled(__func__);
+        return pke_->key_gen_internal(cc, make_sparse_value);
     }
 
-    virtual Ciphertext<Element> Encrypt(const Element& plaintext, const PrivateKey<Element> privateKey) const {
-        VerifyPKEEnabled(__func__);
-        return m_PKE->Encrypt(plaintext, privateKey);
+    virtual Ciphertext<Element> encrypt(const Element& plaintext, const PrivateKey<Element> private_key) const {
+        verify_pke_enabled(__func__);
+        return pke_->encrypt(plaintext, private_key);
     }
 
-    virtual Ciphertext<Element> Encrypt(const Element& plaintext, const PublicKey<Element> publicKey) const {
-        VerifyPKEEnabled(__func__);
-        return m_PKE->Encrypt(plaintext, publicKey);
+    virtual Ciphertext<Element> encrypt(const Element& plaintext, const PublicKey<Element> public_key) const {
+        verify_pke_enabled(__func__);
+        return pke_->encrypt(plaintext, public_key);
     }
 
-    virtual DecryptResult Decrypt(ConstCiphertext<Element>& ciphertext, const PrivateKey<Element> privateKey,
+    virtual DecryptResult decrypt(ConstCiphertext<Element>& ciphertext, const PrivateKey<Element> private_key,
                                   NativePoly* plaintext) const {
-        VerifyPKEEnabled(__func__);
-        return m_PKE->Decrypt(ciphertext, privateKey, plaintext);
+        verify_pke_enabled(__func__);
+        return pke_->decrypt(ciphertext, private_key, plaintext);
     }
 
-    virtual DecryptResult Decrypt(ConstCiphertext<Element>& ciphertext, const PrivateKey<Element> privateKey,
+    virtual DecryptResult decrypt(ConstCiphertext<Element>& ciphertext, const PrivateKey<Element> private_key,
                                   Poly* plaintext) const {
-        VerifyPKEEnabled(__func__);
-        return m_PKE->Decrypt(ciphertext, privateKey, plaintext);
+        verify_pke_enabled(__func__);
+        return pke_->decrypt(ciphertext, private_key, plaintext);
     }
 
-    std::shared_ptr<std::vector<Element>> EncryptZeroCore(const PrivateKey<Element> privateKey) const {
-        VerifyPKEEnabled(__func__);
-        if (!privateKey)
-            OPENFHE_THROW("Input private key is nullptr");
-        return m_PKE->EncryptZeroCore(privateKey, nullptr);
+    std::shared_ptr<std::vector<Element>> encrypt_zero_core(const PrivateKey<Element> private_key) const {
+        verify_pke_enabled(__func__);
+        if (!private_key)
+            CIPHER_THROW("Input private key is nullptr");
+        return pke_->encrypt_zero_core(private_key, nullptr);
     }
 
-    std::shared_ptr<std::vector<Element>> EncryptZeroCore(const PublicKey<Element> publicKey) const {
-        VerifyPKEEnabled(__func__);
-        if (!publicKey)
-            OPENFHE_THROW("Input public key is nullptr");
-        return m_PKE->EncryptZeroCore(publicKey, nullptr);
+    std::shared_ptr<std::vector<Element>> encrypt_zero_core(const PublicKey<Element> public_key) const {
+        verify_pke_enabled(__func__);
+        if (!public_key)
+            CIPHER_THROW("Input public key is nullptr");
+        return pke_->encrypt_zero_core(public_key, nullptr);
     }
 
-    Element DecryptCore(ConstCiphertext<Element>& ciphertext, const PrivateKey<Element> privateKey) const {
-        VerifyPKEEnabled(__func__);
+    Element decrypt_core(ConstCiphertext<Element>& ciphertext, const PrivateKey<Element> private_key) const {
+        verify_pke_enabled(__func__);
         if (!ciphertext)
-            OPENFHE_THROW("Input ciphertext is nullptr");
-        if (!privateKey)
-            OPENFHE_THROW("Input private key is nullptr");
-        return m_PKE->DecryptCore(ciphertext->GetElements(), privateKey);
+            CIPHER_THROW("Input ciphertext is nullptr");
+        if (!private_key)
+            CIPHER_THROW("Input private key is nullptr");
+        return pke_->decrypt_core(ciphertext->get_elements(), private_key);
     }
 
     /////////////////////////////////////////
     // KEY SWITCH WRAPPER
-    // Forwarders to m_KeySwitch; the core and Ext methods additionally reject null or empty arguments.
+    // Forwarders to key_switch_; the core and Ext methods additionally reject null or empty arguments.
     // See the class description for how the core, fast-rotation and Ext operations relate.
     /////////////////////////////////////////
 
-    virtual EvalKey<Element> KeySwitchGen(const PrivateKey<Element> oldPrivateKey,
-                                          const PrivateKey<Element> newPrivateKey) const {
-        VerifyKeySwitchEnabled(__func__);
-        return m_KeySwitch->KeySwitchGenInternal(oldPrivateKey, newPrivateKey);
+    virtual EvalKey<Element> key_switch_gen(const PrivateKey<Element> old_private_key,
+                                          const PrivateKey<Element> new_private_key) const {
+        verify_key_switch_enabled(__func__);
+        return key_switch_->key_switch_gen_internal(old_private_key, new_private_key);
     }
 
-    virtual EvalKey<Element> KeySwitchGen(const PrivateKey<Element> oldPrivateKey,
-                                          const PrivateKey<Element> newPrivateKey,
-                                          const EvalKey<Element> evalKey) const {
-        VerifyKeySwitchEnabled(__func__);
-        return m_KeySwitch->KeySwitchGenInternal(oldPrivateKey, newPrivateKey, evalKey);
+    virtual EvalKey<Element> key_switch_gen(const PrivateKey<Element> old_private_key,
+                                          const PrivateKey<Element> new_private_key,
+                                          const EvalKey<Element> eval_key) const {
+        verify_key_switch_enabled(__func__);
+        return key_switch_->key_switch_gen_internal(old_private_key, new_private_key, eval_key);
     }
 
-    virtual EvalKey<Element> KeySwitchGen(const PrivateKey<Element> oldPrivateKey,
-                                          const PublicKey<Element> newPublicKey) const {
-        VerifyKeySwitchEnabled(__func__);
-        return m_KeySwitch->KeySwitchGenInternal(oldPrivateKey, newPublicKey);
+    virtual EvalKey<Element> key_switch_gen(const PrivateKey<Element> old_private_key,
+                                          const PublicKey<Element> new_public_key) const {
+        verify_key_switch_enabled(__func__);
+        return key_switch_->key_switch_gen_internal(old_private_key, new_public_key);
     }
 
-    virtual Ciphertext<Element> KeySwitch(ConstCiphertext<Element>& ciphertext, const EvalKey<Element> evalKey) const {
-        VerifyKeySwitchEnabled(__func__);
-        return m_KeySwitch->KeySwitch(ciphertext, evalKey);
+    virtual Ciphertext<Element> key_switch(ConstCiphertext<Element>& ciphertext, const EvalKey<Element> eval_key) const {
+        verify_key_switch_enabled(__func__);
+        return key_switch_->key_switch(ciphertext, eval_key);
     }
 
-    virtual void KeySwitchInPlace(Ciphertext<Element>& ciphertext, const EvalKey<Element> evalKey) const {
-        VerifyKeySwitchEnabled(__func__);
-        m_KeySwitch->KeySwitchInPlace(ciphertext, evalKey);
+    virtual void key_switch_in_place(Ciphertext<Element>& ciphertext, const EvalKey<Element> eval_key) const {
+        verify_key_switch_enabled(__func__);
+        key_switch_->key_switch_in_place(ciphertext, eval_key);
     }
 
-    virtual Ciphertext<Element> KeySwitchDown(ConstCiphertext<Element>& ciphertext) const {
-        VerifyKeySwitchEnabled(__func__);
-        return m_KeySwitch->KeySwitchDown(ciphertext);
+    virtual Ciphertext<Element> key_switch_down(ConstCiphertext<Element>& ciphertext) const {
+        verify_key_switch_enabled(__func__);
+        return key_switch_->key_switch_down(ciphertext);
     }
 
-    virtual std::shared_ptr<std::vector<Element>> EvalKeySwitchPrecomputeCore(
-            const Element& c, std::shared_ptr<CryptoParametersBase<Element>> cryptoParamsBase) const {
-        VerifyKeySwitchEnabled(__func__);
-        return m_KeySwitch->EvalKeySwitchPrecomputeCore(c, cryptoParamsBase);
+    virtual std::shared_ptr<std::vector<Element>> eval_key_switch_precompute_core(
+            const Element& c, std::shared_ptr<BaseCryptoParams<Element>> crypto_params_base) const {
+        verify_key_switch_enabled(__func__);
+        return key_switch_->eval_key_switch_precompute_core(c, crypto_params_base);
     }
 
-    virtual std::vector<Element> EvalFastKeySwitchCoreExt(const std::shared_ptr<std::vector<Element>> digits,
-                                                          const EvalKey<Element> evalKey,
+    virtual std::vector<Element> eval_fast_key_switch_core_ext(const std::shared_ptr<std::vector<Element>> digits,
+                                                          const EvalKey<Element> eval_key,
                                                           const std::shared_ptr<ParmType> params) const {
-        VerifyKeySwitchEnabled(__func__);
+        verify_key_switch_enabled(__func__);
         if (nullptr == digits)
-            OPENFHE_THROW("Input digits is nullptr");
+            CIPHER_THROW("Input digits is nullptr");
         if (digits->size() == 0)
-            OPENFHE_THROW("Input digits size is 0");
-        if (!evalKey)
-            OPENFHE_THROW("Input evaluation key is nullptr");
+            CIPHER_THROW("Input digits size is 0");
+        if (!eval_key)
+            CIPHER_THROW("Input evaluation key is nullptr");
         if (!params)
-            OPENFHE_THROW("Input params is nullptr");
-        return m_KeySwitch->EvalFastKeySwitchCoreExt(digits, evalKey, params);
+            CIPHER_THROW("Input params is nullptr");
+        return key_switch_->eval_fast_key_switch_core_ext(digits, eval_key, params);
     }
 
-    virtual std::vector<Element> EvalFastKeySwitchCore(const std::shared_ptr<std::vector<Element>> digits,
-                                                       const EvalKey<Element> evalKey,
+    virtual std::vector<Element> eval_fast_key_switch_core(const std::shared_ptr<std::vector<Element>> digits,
+                                                       const EvalKey<Element> eval_key,
                                                        const std::shared_ptr<ParmType> params) const {
-        VerifyKeySwitchEnabled(__func__);
+        verify_key_switch_enabled(__func__);
         if (nullptr == digits)
-            OPENFHE_THROW("Input digits is nullptr");
+            CIPHER_THROW("Input digits is nullptr");
         if (digits->size() == 0)
-            OPENFHE_THROW("Input digits size is 0");
-        if (!evalKey)
-            OPENFHE_THROW("Input evaluation key is nullptr");
+            CIPHER_THROW("Input digits size is 0");
+        if (!eval_key)
+            CIPHER_THROW("Input evaluation key is nullptr");
         if (!params)
-            OPENFHE_THROW("Input params is nullptr");
-        return m_KeySwitch->EvalFastKeySwitchCore(digits, evalKey, params);
+            CIPHER_THROW("Input params is nullptr");
+        return key_switch_->eval_fast_key_switch_core(digits, eval_key, params);
     }
 
-    virtual std::vector<Element> KeySwitchCore(const Element& a, const EvalKey<Element> evalKey) const {
-        VerifyKeySwitchEnabled(__func__);
-        if (!evalKey)
-            OPENFHE_THROW("Input evaluation key is nullptr");
-        return m_KeySwitch->KeySwitchCore(a, evalKey);
+    virtual std::vector<Element> key_switch_core(const Element& a, const EvalKey<Element> eval_key) const {
+        verify_key_switch_enabled(__func__);
+        if (!eval_key)
+            CIPHER_THROW("Input evaluation key is nullptr");
+        return key_switch_->key_switch_core(a, eval_key);
     }
 
     /////////////////////////////////////////
@@ -417,168 +417,168 @@ class SchemeBase {
     /////////////////////////////////////////
 
     /**
-     * Generates a proxy re-encryption key from oldPrivateKey to newPublicKey via m_PRE and tags it with the key tag
-     * of newPublicKey, so that re-encrypted ciphertexts are associated with the new key.
+     * Generates a proxy re-encryption key from old_private_key to new_public_key via pre_ and tags it with the key tag
+     * of new_public_key, so that re-encrypted ciphertexts are associated with the new key.
      *
-     * @param oldPrivateKey secret key the ciphertexts are currently encrypted under
-     * @param newPublicKey public key of the new recipient
+     * @param old_private_key secret key the ciphertexts are currently encrypted under
+     * @param new_public_key public key of the new recipient
      * @return the re-encryption key
      */
-    virtual EvalKey<Element> ReKeyGen(const PrivateKey<Element> oldPrivateKey,
-                                      const PublicKey<Element> newPublicKey) const;
+    virtual EvalKey<Element> re_key_gen(const PrivateKey<Element> old_private_key,
+                                      const PublicKey<Element> new_public_key) const;
 
     /**
-     * Re-encrypts a ciphertext to the recipient of the re-encryption key via m_PRE and sets the key tag of the
-     * result to the tag of evalKey (that of the new public key).
+     * Re-encrypts a ciphertext to the recipient of the re-encryption key via pre_ and sets the key tag of the
+     * result to the tag of eval_key (that of the new public key).
      *
      * @param ciphertext the ciphertext to re-encrypt
-     * @param evalKey the re-encryption key
-     * @param publicKey public key of the recipient, used by the PRE modes that re-randomize the result with a fresh
+     * @param eval_key the re-encryption key
+     * @param public_key public key of the recipient, used by the PRE modes that re-randomize the result with a fresh
      *        encryption of zero (may be null in the other modes)
      * @return the re-encrypted ciphertext
      */
-    virtual Ciphertext<Element> ReEncrypt(ConstCiphertext<Element>& ciphertext, const EvalKey<Element> evalKey,
-                                          const PublicKey<Element> publicKey) const;
+    virtual Ciphertext<Element> re_encrypt(ConstCiphertext<Element>& ciphertext, const EvalKey<Element> eval_key,
+                                          const PublicKey<Element> public_key) const;
 
     /////////////////////////////////////////
     // SHE NEGATION WRAPPER
     /////////////////////////////////////////
 
-    virtual Ciphertext<Element> EvalNegate(ConstCiphertext<Element>& ciphertext) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalNegate(ciphertext);
+    virtual Ciphertext<Element> eval_negate(ConstCiphertext<Element>& ciphertext) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_negate(ciphertext);
     }
 
-    virtual void EvalNegateInPlace(Ciphertext<Element>& ciphertext) const {
-        VerifyLeveledSHEEnabled(__func__);
-        m_LeveledSHE->EvalNegateInPlace(ciphertext);
+    virtual void eval_negate_in_place(Ciphertext<Element>& ciphertext) const {
+        verify_leveled_she_enabled(__func__);
+        leveled_she_->eval_negate_in_place(ciphertext);
     }
 
     /////////////////////////////////////////
     // SHE ADDITION Wrapper
     /////////////////////////////////////////
 
-    virtual Ciphertext<Element> EvalAdd(ConstCiphertext<Element>& ciphertext1,
+    virtual Ciphertext<Element> eval_add(ConstCiphertext<Element>& ciphertext1,
                                         ConstCiphertext<Element>& ciphertext2) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalAdd(ciphertext1, ciphertext2);
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_add(ciphertext1, ciphertext2);
     }
 
-    virtual void EvalAddInPlace(Ciphertext<Element>& ciphertext1, ConstCiphertext<Element>& ciphertext2) const {
-        VerifyLeveledSHEEnabled(__func__);
-        m_LeveledSHE->EvalAddInPlace(ciphertext1, ciphertext2);
+    virtual void eval_add_in_place(Ciphertext<Element>& ciphertext1, ConstCiphertext<Element>& ciphertext2) const {
+        verify_leveled_she_enabled(__func__);
+        leveled_she_->eval_add_in_place(ciphertext1, ciphertext2);
     }
 
-    virtual Ciphertext<Element> EvalAddMutable(Ciphertext<Element>& ciphertext1,
+    virtual Ciphertext<Element> eval_add_mutable(Ciphertext<Element>& ciphertext1,
                                                Ciphertext<Element>& ciphertext2) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalAddMutable(ciphertext1, ciphertext2);
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_add_mutable(ciphertext1, ciphertext2);
     }
 
-    virtual void EvalAddMutableInPlace(Ciphertext<Element>& ciphertext1, Ciphertext<Element>& ciphertext2) const {
-        VerifyLeveledSHEEnabled(__func__);
-        m_LeveledSHE->EvalAddMutableInPlace(ciphertext1, ciphertext2);
+    virtual void eval_add_mutable_in_place(Ciphertext<Element>& ciphertext1, Ciphertext<Element>& ciphertext2) const {
+        verify_leveled_she_enabled(__func__);
+        leveled_she_->eval_add_mutable_in_place(ciphertext1, ciphertext2);
     }
 
-    virtual Ciphertext<Element> EvalAdd(ConstCiphertext<Element>& ciphertext, ConstPlaintext& plaintext) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalAdd(ciphertext, plaintext);
+    virtual Ciphertext<Element> eval_add(ConstCiphertext<Element>& ciphertext, ConstPlaintext& plaintext) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_add(ciphertext, plaintext);
     }
 
-    virtual void EvalAddInPlace(Ciphertext<Element>& ciphertext, ConstPlaintext& plaintext) const {
-        VerifyLeveledSHEEnabled(__func__);
-        m_LeveledSHE->EvalAddInPlace(ciphertext, plaintext);
+    virtual void eval_add_in_place(Ciphertext<Element>& ciphertext, ConstPlaintext& plaintext) const {
+        verify_leveled_she_enabled(__func__);
+        leveled_she_->eval_add_in_place(ciphertext, plaintext);
     }
 
-    virtual Ciphertext<Element> EvalAddMutable(Ciphertext<Element>& ciphertext, Plaintext& plaintext) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalAddMutable(ciphertext, plaintext);
+    virtual Ciphertext<Element> eval_add_mutable(Ciphertext<Element>& ciphertext, Plaintext& plaintext) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_add_mutable(ciphertext, plaintext);
     }
 
-    virtual void EvalAddInPlace(Ciphertext<Element>& ciphertext, NativeInteger constant) const {
-        VerifyLeveledSHEEnabled(__func__);
-        m_LeveledSHE->EvalAddInPlace(ciphertext, constant);
+    virtual void eval_add_in_place(Ciphertext<Element>& ciphertext, NativeInteger constant) const {
+        verify_leveled_she_enabled(__func__);
+        leveled_she_->eval_add_in_place(ciphertext, constant);
     }
 
-    virtual Ciphertext<Element> EvalAdd(ConstCiphertext<Element>& ciphertext, double constant) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalAdd(ciphertext, constant);
+    virtual Ciphertext<Element> eval_add(ConstCiphertext<Element>& ciphertext, double constant) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_add(ciphertext, constant);
     }
 
-    virtual void EvalAddInPlace(Ciphertext<Element>& ciphertext, double constant) const {
-        VerifyLeveledSHEEnabled(__func__);
-        m_LeveledSHE->EvalAddInPlace(ciphertext, constant);
+    virtual void eval_add_in_place(Ciphertext<Element>& ciphertext, double constant) const {
+        verify_leveled_she_enabled(__func__);
+        leveled_she_->eval_add_in_place(ciphertext, constant);
     }
 
-    virtual Ciphertext<Element> EvalAdd(ConstCiphertext<Element>& ciphertext, std::complex<double> constant) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalAdd(ciphertext, constant);
+    virtual Ciphertext<Element> eval_add(ConstCiphertext<Element>& ciphertext, std::complex<double> constant) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_add(ciphertext, constant);
     }
 
-    virtual void EvalAddInPlace(Ciphertext<Element>& ciphertext, std::complex<double> constant) const {
-        VerifyLeveledSHEEnabled(__func__);
-        m_LeveledSHE->EvalAddInPlace(ciphertext, constant);
+    virtual void eval_add_in_place(Ciphertext<Element>& ciphertext, std::complex<double> constant) const {
+        verify_leveled_she_enabled(__func__);
+        leveled_she_->eval_add_in_place(ciphertext, constant);
     }
 
     /////////////////////////////////////////
     // SHE SUBTRACTION Wrapper
     /////////////////////////////////////////
 
-    virtual Ciphertext<Element> EvalSub(ConstCiphertext<Element>& ciphertext1,
+    virtual Ciphertext<Element> eval_sub(ConstCiphertext<Element>& ciphertext1,
                                         ConstCiphertext<Element>& ciphertext2) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalSub(ciphertext1, ciphertext2);
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_sub(ciphertext1, ciphertext2);
     }
 
-    virtual void EvalSubInPlace(Ciphertext<Element>& ciphertext1, ConstCiphertext<Element>& ciphertext2) const {
-        VerifyLeveledSHEEnabled(__func__);
-        m_LeveledSHE->EvalSubInPlace(ciphertext1, ciphertext2);
+    virtual void eval_sub_in_place(Ciphertext<Element>& ciphertext1, ConstCiphertext<Element>& ciphertext2) const {
+        verify_leveled_she_enabled(__func__);
+        leveled_she_->eval_sub_in_place(ciphertext1, ciphertext2);
     }
 
-    virtual Ciphertext<Element> EvalSubMutable(Ciphertext<Element>& ciphertext1,
+    virtual Ciphertext<Element> eval_sub_mutable(Ciphertext<Element>& ciphertext1,
                                                Ciphertext<Element>& ciphertext2) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalSubMutable(ciphertext1, ciphertext2);
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_sub_mutable(ciphertext1, ciphertext2);
     }
 
-    virtual void EvalSubMutableInPlace(Ciphertext<Element>& ciphertext1, Ciphertext<Element>& ciphertext2) const {
-        VerifyLeveledSHEEnabled(__func__);
-        m_LeveledSHE->EvalSubMutableInPlace(ciphertext1, ciphertext2);
+    virtual void eval_sub_mutable_in_place(Ciphertext<Element>& ciphertext1, Ciphertext<Element>& ciphertext2) const {
+        verify_leveled_she_enabled(__func__);
+        leveled_she_->eval_sub_mutable_in_place(ciphertext1, ciphertext2);
     }
 
-    virtual Ciphertext<Element> EvalSub(ConstCiphertext<Element>& ciphertext, ConstPlaintext& plaintext) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalSub(ciphertext, plaintext);
+    virtual Ciphertext<Element> eval_sub(ConstCiphertext<Element>& ciphertext, ConstPlaintext& plaintext) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_sub(ciphertext, plaintext);
     }
 
-    virtual void EvalSubInPlace(Ciphertext<Element>& ciphertext, ConstPlaintext& plaintext) const {
-        VerifyLeveledSHEEnabled(__func__);
-        m_LeveledSHE->EvalSubInPlace(ciphertext, plaintext);
+    virtual void eval_sub_in_place(Ciphertext<Element>& ciphertext, ConstPlaintext& plaintext) const {
+        verify_leveled_she_enabled(__func__);
+        leveled_she_->eval_sub_in_place(ciphertext, plaintext);
     }
 
-    virtual Ciphertext<Element> EvalSubMutable(Ciphertext<Element>& ciphertext, Plaintext& plaintext) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalSubMutable(ciphertext, plaintext);
+    virtual Ciphertext<Element> eval_sub_mutable(Ciphertext<Element>& ciphertext, Plaintext& plaintext) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_sub_mutable(ciphertext, plaintext);
     }
 
-    virtual Ciphertext<Element> EvalSub(ConstCiphertext<Element>& ciphertext, NativeInteger constant) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalSub(ciphertext, constant);
+    virtual Ciphertext<Element> eval_sub(ConstCiphertext<Element>& ciphertext, NativeInteger constant) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_sub(ciphertext, constant);
     }
 
-    virtual void EvalSubInPlace(Ciphertext<Element>& ciphertext, NativeInteger constant) const {
-        VerifyLeveledSHEEnabled(__func__);
-        m_LeveledSHE->EvalSubInPlace(ciphertext, constant);
+    virtual void eval_sub_in_place(Ciphertext<Element>& ciphertext, NativeInteger constant) const {
+        verify_leveled_she_enabled(__func__);
+        leveled_she_->eval_sub_in_place(ciphertext, constant);
     }
 
-    virtual Ciphertext<Element> EvalSub(ConstCiphertext<Element>& ciphertext, double constant) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalSub(ciphertext, constant);
+    virtual Ciphertext<Element> eval_sub(ConstCiphertext<Element>& ciphertext, double constant) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_sub(ciphertext, constant);
     }
 
-    virtual void EvalSubInPlace(Ciphertext<Element>& ciphertext, double constant) const {
-        VerifyLeveledSHEEnabled(__func__);
-        m_LeveledSHE->EvalSubInPlace(ciphertext, constant);
+    virtual void eval_sub_in_place(Ciphertext<Element>& ciphertext, double constant) const {
+        verify_leveled_she_enabled(__func__);
+        leveled_she_->eval_sub_in_place(ciphertext, constant);
     }
 
     /////////////////////////////////////////
@@ -586,168 +586,168 @@ class SchemeBase {
     /////////////////////////////////////////
 
     /**
-     * Generates the relinearization key (from s^2 to s) via m_LeveledSHE and tags it with the key tag of privateKey.
+     * Generates the relinearization key (from s^2 to s) via leveled_she_ and tags it with the key tag of private_key.
      *
-     * @param privateKey the secret key
+     * @param private_key the secret key
      * @return the relinearization key
      */
-    virtual EvalKey<Element> EvalMultKeyGen(const PrivateKey<Element> privateKey) const;
+    virtual EvalKey<Element> eval_mult_key_gen(const PrivateKey<Element> private_key) const;
 
     /**
      * Generates the relinearization keys for s^2, s^3, ... (used for ciphertexts of more than two elements) via
-     * m_LeveledSHE and tags each of them with the key tag of privateKey.
+     * leveled_she_ and tags each of them with the key tag of private_key.
      *
-     * @param privateKey the secret key
+     * @param private_key the secret key
      * @return the vector of relinearization keys
      */
-    virtual std::vector<EvalKey<Element>> EvalMultKeysGen(const PrivateKey<Element> privateKey) const;
+    virtual std::vector<EvalKey<Element>> eval_mult_keys_gen(const PrivateKey<Element> private_key) const;
 
-    virtual Ciphertext<Element> EvalMult(ConstCiphertext<Element>& ciphertext1,
+    virtual Ciphertext<Element> eval_mult(ConstCiphertext<Element>& ciphertext1,
                                          ConstCiphertext<Element>& ciphertext2) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalMult(ciphertext1, ciphertext2);
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_mult(ciphertext1, ciphertext2);
     }
 
-    virtual Ciphertext<Element> EvalMultMutable(Ciphertext<Element>& ciphertext1,
+    virtual Ciphertext<Element> eval_mult_mutable(Ciphertext<Element>& ciphertext1,
                                                 Ciphertext<Element>& ciphertext2) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalMultMutable(ciphertext1, ciphertext2);
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_mult_mutable(ciphertext1, ciphertext2);
     }
 
-    virtual Ciphertext<Element> EvalSquare(ConstCiphertext<Element>& ciphertext) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalSquare(ciphertext);
+    virtual Ciphertext<Element> eval_square(ConstCiphertext<Element>& ciphertext) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_square(ciphertext);
     }
 
-    virtual Ciphertext<Element> EvalSquareMutable(Ciphertext<Element>& ciphertext) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalSquareMutable(ciphertext);
+    virtual Ciphertext<Element> eval_square_mutable(Ciphertext<Element>& ciphertext) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_square_mutable(ciphertext);
     }
 
     /////////////////////////////////////////
     // MULTIPLICATION With Eval Key
     /////////////////////////////////////////
 
-    virtual Ciphertext<Element> EvalMult(ConstCiphertext<Element>& ciphertext1, ConstCiphertext<Element>& ciphertext2,
-                                         const EvalKey<Element> evalKey) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalMult(ciphertext1, ciphertext2, evalKey);
+    virtual Ciphertext<Element> eval_mult(ConstCiphertext<Element>& ciphertext1, ConstCiphertext<Element>& ciphertext2,
+                                         const EvalKey<Element> eval_key) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_mult(ciphertext1, ciphertext2, eval_key);
     }
 
-    virtual void EvalMultInPlace(Ciphertext<Element>& ciphertext1, ConstCiphertext<Element>& ciphertext2,
-                                 const EvalKey<Element> evalKey) const {
-        VerifyLeveledSHEEnabled(__func__);
-        m_LeveledSHE->EvalMultInPlace(ciphertext1, ciphertext2, evalKey);
+    virtual void eval_mult_in_place(Ciphertext<Element>& ciphertext1, ConstCiphertext<Element>& ciphertext2,
+                                 const EvalKey<Element> eval_key) const {
+        verify_leveled_she_enabled(__func__);
+        leveled_she_->eval_mult_in_place(ciphertext1, ciphertext2, eval_key);
     }
 
-    virtual Ciphertext<Element> EvalMultMutable(Ciphertext<Element>& ciphertext1, Ciphertext<Element>& ciphertext2,
-                                                const EvalKey<Element> evalKey) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalMultMutable(ciphertext1, ciphertext2, evalKey);
+    virtual Ciphertext<Element> eval_mult_mutable(Ciphertext<Element>& ciphertext1, Ciphertext<Element>& ciphertext2,
+                                                const EvalKey<Element> eval_key) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_mult_mutable(ciphertext1, ciphertext2, eval_key);
     }
 
-    virtual void EvalMultMutableInPlace(Ciphertext<Element>& ciphertext1, Ciphertext<Element>& ciphertext2,
-                                        const EvalKey<Element> evalKey) const {
-        VerifyLeveledSHEEnabled(__func__);
-        m_LeveledSHE->EvalMultMutableInPlace(ciphertext1, ciphertext2, evalKey);
+    virtual void eval_mult_mutable_in_place(Ciphertext<Element>& ciphertext1, Ciphertext<Element>& ciphertext2,
+                                        const EvalKey<Element> eval_key) const {
+        verify_leveled_she_enabled(__func__);
+        leveled_she_->eval_mult_mutable_in_place(ciphertext1, ciphertext2, eval_key);
     }
 
-    virtual Ciphertext<Element> EvalSquare(ConstCiphertext<Element>& ciphertext, const EvalKey<Element> evalKey) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalSquare(ciphertext, evalKey);
+    virtual Ciphertext<Element> eval_square(ConstCiphertext<Element>& ciphertext, const EvalKey<Element> eval_key) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_square(ciphertext, eval_key);
     }
 
-    virtual void EvalSquareInPlace(Ciphertext<Element>& ciphertext, const EvalKey<Element> evalKey) const {
-        VerifyLeveledSHEEnabled(__func__);
-        m_LeveledSHE->EvalSquareInPlace(ciphertext, evalKey);
+    virtual void eval_square_in_place(Ciphertext<Element>& ciphertext, const EvalKey<Element> eval_key) const {
+        verify_leveled_she_enabled(__func__);
+        leveled_she_->eval_square_in_place(ciphertext, eval_key);
     }
 
-    virtual Ciphertext<Element> EvalSquareMutable(Ciphertext<Element>& ciphertext,
-                                                  const EvalKey<Element> evalKey) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalSquareMutable(ciphertext, evalKey);
+    virtual Ciphertext<Element> eval_square_mutable(Ciphertext<Element>& ciphertext,
+                                                  const EvalKey<Element> eval_key) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_square_mutable(ciphertext, eval_key);
     }
 
-    virtual Ciphertext<Element> EvalMultAndRelinearize(ConstCiphertext<Element>& ciphertext1,
+    virtual Ciphertext<Element> eval_mult_and_relinearize(ConstCiphertext<Element>& ciphertext1,
                                                        ConstCiphertext<Element>& ciphertext2,
-                                                       const std::vector<EvalKey<Element>>& evalKeyVec) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalMultAndRelinearize(ciphertext1, ciphertext2, evalKeyVec);
+                                                       const std::vector<EvalKey<Element>>& eval_key_vec) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_mult_and_relinearize(ciphertext1, ciphertext2, eval_key_vec);
     }
 
-    virtual Ciphertext<Element> Relinearize(ConstCiphertext<Element>& ciphertext,
-                                            const std::vector<EvalKey<Element>>& evalKeyVec) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->Relinearize(ciphertext, evalKeyVec);
+    virtual Ciphertext<Element> relinearize(ConstCiphertext<Element>& ciphertext,
+                                            const std::vector<EvalKey<Element>>& eval_key_vec) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->relinearize(ciphertext, eval_key_vec);
     }
 
-    virtual void RelinearizeInPlace(Ciphertext<Element>& ciphertext,
-                                    const std::vector<EvalKey<Element>>& evalKeyVec) const {
-        VerifyLeveledSHEEnabled(__func__);
-        m_LeveledSHE->RelinearizeInPlace(ciphertext, evalKeyVec);
+    virtual void relinearize_in_place(Ciphertext<Element>& ciphertext,
+                                    const std::vector<EvalKey<Element>>& eval_key_vec) const {
+        verify_leveled_she_enabled(__func__);
+        leveled_she_->relinearize_in_place(ciphertext, eval_key_vec);
     }
 
-    virtual Ciphertext<Element> EvalMult(ConstCiphertext<Element>& ciphertext, ConstPlaintext& plaintext) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalMult(ciphertext, plaintext);
+    virtual Ciphertext<Element> eval_mult(ConstCiphertext<Element>& ciphertext, ConstPlaintext& plaintext) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_mult(ciphertext, plaintext);
     }
 
-    virtual void EvalMultInPlace(Ciphertext<Element>& ciphertext, ConstPlaintext& plaintext) const {
-        VerifyLeveledSHEEnabled(__func__);
-        m_LeveledSHE->EvalMultInPlace(ciphertext, plaintext);
+    virtual void eval_mult_in_place(Ciphertext<Element>& ciphertext, ConstPlaintext& plaintext) const {
+        verify_leveled_she_enabled(__func__);
+        leveled_she_->eval_mult_in_place(ciphertext, plaintext);
     }
 
-    virtual Ciphertext<Element> EvalMultMutable(Ciphertext<Element>& ciphertext, Plaintext& plaintext) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalMultMutable(ciphertext, plaintext);
+    virtual Ciphertext<Element> eval_mult_mutable(Ciphertext<Element>& ciphertext, Plaintext& plaintext) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_mult_mutable(ciphertext, plaintext);
     }
 
-    virtual Ciphertext<Element> MultByMonomial(ConstCiphertext<Element>& ciphertext, uint32_t power) const {
-        VerifyLeveledSHEEnabled(__func__);
+    virtual Ciphertext<Element> mult_by_monomial(ConstCiphertext<Element>& ciphertext, uint32_t power) const {
+        verify_leveled_she_enabled(__func__);
         if (!ciphertext)
-            OPENFHE_THROW("Input ciphertext is nullptr");
-        return m_LeveledSHE->MultByMonomial(ciphertext, power);
+            CIPHER_THROW("Input ciphertext is nullptr");
+        return leveled_she_->mult_by_monomial(ciphertext, power);
     }
 
-    virtual void MultByMonomialInPlace(Ciphertext<Element>& ciphertext, uint32_t power) const {
-        VerifyLeveledSHEEnabled(__func__);
+    virtual void mult_by_monomial_in_place(Ciphertext<Element>& ciphertext, uint32_t power) const {
+        verify_leveled_she_enabled(__func__);
         if (!ciphertext)
-            OPENFHE_THROW("Input ciphertext is nullptr");
-        m_LeveledSHE->MultByMonomialInPlace(ciphertext, power);
+            CIPHER_THROW("Input ciphertext is nullptr");
+        leveled_she_->mult_by_monomial_in_place(ciphertext, power);
     }
 
-    virtual Ciphertext<Element> EvalMult(ConstCiphertext<Element>& ciphertext, double constant) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalMult(ciphertext, constant);
+    virtual Ciphertext<Element> eval_mult(ConstCiphertext<Element>& ciphertext, double constant) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_mult(ciphertext, constant);
     }
 
-    virtual void EvalMultInPlace(Ciphertext<Element>& ciphertext, double constant) const {
-        VerifyLeveledSHEEnabled(__func__);
-        m_LeveledSHE->EvalMultInPlace(ciphertext, constant);
+    virtual void eval_mult_in_place(Ciphertext<Element>& ciphertext, double constant) const {
+        verify_leveled_she_enabled(__func__);
+        leveled_she_->eval_mult_in_place(ciphertext, constant);
     }
 
-    virtual Ciphertext<Element> EvalMult(ConstCiphertext<Element>& ciphertext, std::complex<double> constant) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->EvalMult(ciphertext, constant);
+    virtual Ciphertext<Element> eval_mult(ConstCiphertext<Element>& ciphertext, std::complex<double> constant) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->eval_mult(ciphertext, constant);
     }
 
-    virtual void EvalMultInPlace(Ciphertext<Element>& ciphertext, std::complex<double> constant) const {
-        VerifyLeveledSHEEnabled(__func__);
-        m_LeveledSHE->EvalMultInPlace(ciphertext, constant);
+    virtual void eval_mult_in_place(Ciphertext<Element>& ciphertext, std::complex<double> constant) const {
+        verify_leveled_she_enabled(__func__);
+        leveled_she_->eval_mult_in_place(ciphertext, constant);
     }
 
-    virtual Ciphertext<Element> MultByInteger(ConstCiphertext<Element>& ciphertext, uint64_t integer) const {
-        VerifyLeveledSHEEnabled(__func__);
+    virtual Ciphertext<Element> mult_by_integer(ConstCiphertext<Element>& ciphertext, uint64_t integer) const {
+        verify_leveled_she_enabled(__func__);
         if (!ciphertext)
-            OPENFHE_THROW("Input ciphertext is nullptr");
-        return m_LeveledSHE->MultByInteger(ciphertext, integer);
+            CIPHER_THROW("Input ciphertext is nullptr");
+        return leveled_she_->mult_by_integer(ciphertext, integer);
     }
 
-    virtual void MultByIntegerInPlace(Ciphertext<Element>& ciphertext, uint64_t integer) const {
-        VerifyLeveledSHEEnabled(__func__);
+    virtual void mult_by_integer_in_place(Ciphertext<Element>& ciphertext, uint64_t integer) const {
+        verify_leveled_she_enabled(__func__);
         if (!ciphertext)
-            OPENFHE_THROW("Input ciphertext is nullptr");
-        m_LeveledSHE->MultByIntegerInPlace(ciphertext, integer);
+            CIPHER_THROW("Input ciphertext is nullptr");
+        leveled_she_->mult_by_integer_in_place(ciphertext, integer);
     }
 
     /////////////////////////////////////////
@@ -755,55 +755,55 @@ class SchemeBase {
     /////////////////////////////////////////
 
     /**
-     * Generates the automorphism (key-switching) keys for the given automorphism indices via m_LeveledSHE and tags
-     * each of them with the key tag of privateKey.
+     * Generates the automorphism (key-switching) keys for the given automorphism indices via leveled_she_ and tags
+     * each of them with the key tag of private_key.
      *
-     * @param privateKey the secret key
-     * @param indexList automorphism indices (elements of the Galois group) to generate keys for
+     * @param private_key the secret key
+     * @param index_list automorphism indices (elements of the Galois group) to generate keys for
      * @return map from automorphism index to key
      */
-    virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> EvalAutomorphismKeyGen(
-            const PrivateKey<Element> privateKey, const std::vector<uint32_t>& indexList) const;
+    virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_automorphism_key_gen(
+            const PrivateKey<Element> private_key, const std::vector<uint32_t>& index_list) const;
 
-    virtual Ciphertext<Element> EvalAutomorphism(ConstCiphertext<Element>& ciphertext, uint32_t i,
-                                                 const std::map<uint32_t, EvalKey<Element>>& evalKeyMap,
+    virtual Ciphertext<Element> eval_automorphism(ConstCiphertext<Element>& ciphertext, uint32_t i,
+                                                 const std::map<uint32_t, EvalKey<Element>>& eval_key_map,
                                                  CALLER_INFO_ARGS_HDR) const {
-        if (m_LeveledSHE) {
+        if (leveled_she_) {
             if (!ciphertext)
-                OPENFHE_THROW("Input ciphertext is nullptr");
-            if (!evalKeyMap.size())
-                OPENFHE_THROW("Input evaluation key map is empty");
+                CIPHER_THROW("Input ciphertext is nullptr");
+            if (!eval_key_map.size())
+                CIPHER_THROW("Input evaluation key map is empty");
 
-            return m_LeveledSHE->EvalAutomorphism(ciphertext, i, evalKeyMap);
+            return leveled_she_->eval_automorphism(ciphertext, i, eval_key_map);
         }
-        std::string errorMsg(std::string("EvalAutomorphism operation has not been enabled") + CALLER_INFO);
-        OPENFHE_THROW(errorMsg);
+        std::string error_msg(std::string("EvalAutomorphism operation has not been enabled") + CALLER_INFO);
+        CIPHER_THROW(error_msg);
     }
 
-    virtual Ciphertext<Element> EvalFastRotation(ConstCiphertext<Element>& ciphertext, const uint32_t index,
+    virtual Ciphertext<Element> eval_fast_rotation(ConstCiphertext<Element>& ciphertext, const uint32_t index,
                                                  const uint32_t m,
                                                  const std::shared_ptr<std::vector<Element>> digits) const {
-        VerifyLeveledSHEEnabled(__func__);
+        verify_leveled_she_enabled(__func__);
         if (!ciphertext)
-            OPENFHE_THROW("Input ciphertext is nullptr");
-        return m_LeveledSHE->EvalFastRotation(ciphertext, index, m, digits);
+            CIPHER_THROW("Input ciphertext is nullptr");
+        return leveled_she_->eval_fast_rotation(ciphertext, index, m, digits);
     }
 
-    virtual std::shared_ptr<std::vector<Element>> EvalFastRotationPrecompute(
+    virtual std::shared_ptr<std::vector<Element>> eval_fast_rotation_precompute(
             ConstCiphertext<Element> ciphertext) const {
-        VerifyLeveledSHEEnabled(__func__);
+        verify_leveled_she_enabled(__func__);
         if (!ciphertext)
-            OPENFHE_THROW("Input ciphertext is nullptr");
-        return m_LeveledSHE->EvalFastRotationPrecompute(ciphertext);
+            CIPHER_THROW("Input ciphertext is nullptr");
+        return leveled_she_->eval_fast_rotation_precompute(ciphertext);
     }
 
-    virtual Ciphertext<Element> EvalAutomorphismCore(ConstCiphertext<Element>& ciphertext, uint32_t autoIndex,
+    virtual Ciphertext<Element> eval_automorphism_core(ConstCiphertext<Element>& ciphertext, uint32_t auto_index,
                                                      const std::shared_ptr<std::vector<Element>>& digits,
-                                                     const EvalKey<Element>& evalKey) const {
-        VerifyLeveledSHEEnabled(__func__);
+                                                     const EvalKey<Element>& eval_key) const {
+        verify_leveled_she_enabled(__func__);
         if (!ciphertext)
-            OPENFHE_THROW("Input ciphertext is nullptr");
-        return m_LeveledSHE->EvalAutomorphismCore(ciphertext, autoIndex, digits, evalKey);
+            CIPHER_THROW("Input ciphertext is nullptr");
+        return leveled_she_->eval_automorphism_core(ciphertext, auto_index, digits, eval_key);
     }
 
     /**
@@ -814,17 +814,17 @@ class SchemeBase {
      * @param ciphertext input ciphertext
      * @param index the rotation index.
      * @param digits the precomputed digits for the ciphertext
-     * @param addFirst if true, the first element c0 is also computed (otherwise ignored)
-     * @param evalKeys the map of automorphism keys
+     * @param add_first if true, the first element c0 is also computed (otherwise ignored)
+     * @param eval_keys the map of automorphism keys
      * @return resulting ciphertext
      */
-    virtual Ciphertext<Element> EvalFastRotationExt(ConstCiphertext<Element>& ciphertext, uint32_t index,
-                                                    const std::shared_ptr<std::vector<Element>> digits, bool addFirst,
-                                                    const std::map<uint32_t, EvalKey<Element>>& evalKeys) const {
-        VerifyLeveledSHEEnabled(__func__);
+    virtual Ciphertext<Element> eval_fast_rotation_ext(ConstCiphertext<Element>& ciphertext, uint32_t index,
+                                                    const std::shared_ptr<std::vector<Element>> digits, bool add_first,
+                                                    const std::map<uint32_t, EvalKey<Element>>& eval_keys) const {
+        verify_leveled_she_enabled(__func__);
         if (!ciphertext)
-            OPENFHE_THROW("Input ciphertext is nullptr");
-        return m_LeveledSHE->EvalFastRotationExt(ciphertext, index, digits, addFirst, evalKeys);
+            CIPHER_THROW("Input ciphertext is nullptr");
+        return leveled_she_->eval_fast_rotation_ext(ciphertext, index, digits, add_first, eval_keys);
     }
 
     /**
@@ -834,38 +834,38 @@ class SchemeBase {
      * @param ciphertext input ciphertext in the extended basis
      * @return resulting polynomial
      */
-    Element KeySwitchDownFirstElement(ConstCiphertext<Element>& ciphertext) const {
-        VerifyKeySwitchEnabled(__func__);
-        return m_KeySwitch->KeySwitchDownFirstElement(ciphertext);
+    Element key_switch_down_first_element(ConstCiphertext<Element>& ciphertext) const {
+        verify_key_switch_enabled(__func__);
+        return key_switch_->key_switch_down_first_element(ciphertext);
     }
 
-    virtual Ciphertext<Element> KeySwitchExt(ConstCiphertext<Element>& ciphertext, bool addFirst) const {
-        VerifyKeySwitchEnabled(__func__);
-        return m_KeySwitch->KeySwitchExt(ciphertext, addFirst);
+    virtual Ciphertext<Element> key_switch_ext(ConstCiphertext<Element>& ciphertext, bool add_first) const {
+        verify_key_switch_enabled(__func__);
+        return key_switch_->key_switch_ext(ciphertext, add_first);
     }
 
     /**
-     * Generates the rotation keys for the given rotation indices via m_LeveledSHE and tags each of them with the
-     * key tag of privateKey.
+     * Generates the rotation keys for the given rotation indices via leveled_she_ and tags each of them with the
+     * key tag of private_key.
      *
-     * @param privateKey the secret key
-     * @param indexList rotation indices (positive for left, negative for right rotations)
+     * @param private_key the secret key
+     * @param index_list rotation indices (positive for left, negative for right rotations)
      * @return map from automorphism index to key
      */
-    virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> EvalAtIndexKeyGen(
-            const PrivateKey<Element> privateKey, const std::vector<int32_t>& indexList) const;
+    virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_at_index_key_gen(
+            const PrivateKey<Element> private_key, const std::vector<int32_t>& index_list) const;
 
-    virtual Ciphertext<Element> EvalAtIndex(ConstCiphertext<Element>& ciphertext, uint32_t i,
-                                            const std::map<uint32_t, EvalKey<Element>>& evalKeyMap) const {
-        VerifyLeveledSHEEnabled(__func__);
-        if (!evalKeyMap.size())
-            OPENFHE_THROW("Input evaluation key map is empty");
-        return m_LeveledSHE->EvalAtIndex(ciphertext, i, evalKeyMap);
+    virtual Ciphertext<Element> eval_at_index(ConstCiphertext<Element>& ciphertext, uint32_t i,
+                                            const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const {
+        verify_leveled_she_enabled(__func__);
+        if (!eval_key_map.size())
+            CIPHER_THROW("Input evaluation key map is empty");
+        return leveled_she_->eval_at_index(ciphertext, i, eval_key_map);
     }
 
-    virtual uint32_t FindAutomorphismIndex(uint32_t index, uint32_t m) {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->FindAutomorphismIndex(index, m);
+    virtual uint32_t find_automorphism_index(uint32_t index, uint32_t m) {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->find_automorphism_index(index, m);
     }
 
     /////////////////////////////////////////
@@ -873,128 +873,128 @@ class SchemeBase {
     /////////////////////////////////////////
 
     /**
-     * Multiplies two ciphertexts, relinearizes and rescales the product via m_LeveledSHE, and sets the key tag of
-     * the result to the tag of evalKey.
+     * Multiplies two ciphertexts, relinearizes and rescales the product via leveled_she_, and sets the key tag of
+     * the result to the tag of eval_key.
      *
      * @param ciphertext1 first operand
      * @param ciphertext2 second operand
-     * @param evalKey the relinearization key
+     * @param eval_key the relinearization key
      * @return the relinearized and rescaled product
      */
-    virtual Ciphertext<Element> ComposedEvalMult(ConstCiphertext<Element>& ciphertext1,
+    virtual Ciphertext<Element> composed_eval_mult(ConstCiphertext<Element>& ciphertext1,
                                                  ConstCiphertext<Element>& ciphertext2,
-                                                 const EvalKey<Element> evalKey) const;
+                                                 const EvalKey<Element> eval_key) const;
 
     /**
-     * Rescales a ciphertext by the given number of levels via m_LeveledSHE; the result keeps the key tag of the
+     * Rescales a ciphertext by the given number of levels via leveled_she_; the result keeps the key tag of the
      * input.
      *
      * @param ciphertext the ciphertext to rescale
      * @param levels number of levels (RNS limbs) to drop
      * @return the rescaled ciphertext
      */
-    virtual Ciphertext<Element> ModReduce(ConstCiphertext<Element>& ciphertext, size_t levels) const;
+    virtual Ciphertext<Element> mod_reduce(ConstCiphertext<Element>& ciphertext, size_t levels) const;
 
-    virtual void ModReduceInPlace(Ciphertext<Element>& ciphertext, size_t levels) const {
-        VerifyLeveledSHEEnabled(__func__);
-        m_LeveledSHE->ModReduceInPlace(ciphertext, levels);
+    virtual void mod_reduce_in_place(Ciphertext<Element>& ciphertext, size_t levels) const {
+        verify_leveled_she_enabled(__func__);
+        leveled_she_->mod_reduce_in_place(ciphertext, levels);
     }
 
-    virtual Ciphertext<Element> ModReduceInternal(ConstCiphertext<Element>& ciphertext, size_t levels) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->ModReduceInternal(ciphertext, levels);
+    virtual Ciphertext<Element> mod_reduce_internal(ConstCiphertext<Element>& ciphertext, size_t levels) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->mod_reduce_internal(ciphertext, levels);
     }
 
     /**
-     * Rescales a ciphertext in place by the given number of levels via m_LeveledSHE; does nothing for levels == 0.
+     * Rescales a ciphertext in place by the given number of levels via leveled_she_; does nothing for levels == 0.
      *
      * @param ciphertext the ciphertext to rescale
      * @param levels number of levels (RNS limbs) to drop
      */
-    virtual void ModReduceInternalInPlace(Ciphertext<Element>& ciphertext, size_t levels) const {
-        VerifyLeveledSHEEnabled(__func__);
+    virtual void mod_reduce_internal_in_place(Ciphertext<Element>& ciphertext, size_t levels) const {
+        verify_leveled_she_enabled(__func__);
         if (levels > 0)
-            m_LeveledSHE->ModReduceInternalInPlace(ciphertext, levels);
+            leveled_she_->mod_reduce_internal_in_place(ciphertext, levels);
     }
 
-    virtual Ciphertext<Element> LevelReduce(ConstCiphertext<Element>& ciphertext, const EvalKey<Element> evalKey,
+    virtual Ciphertext<Element> level_reduce(ConstCiphertext<Element>& ciphertext, const EvalKey<Element> eval_key,
                                             size_t levels) const {
-        VerifyLeveledSHEEnabled(__func__);
-        auto result = m_LeveledSHE->LevelReduce(ciphertext, evalKey, levels);
-        result->SetKeyTag(ciphertext->GetKeyTag());
+        verify_leveled_she_enabled(__func__);
+        auto result = leveled_she_->level_reduce(ciphertext, eval_key, levels);
+        result->set_key_tag(ciphertext->get_key_tag());
         return result;
     }
 
-    virtual void LevelReduceInPlace(Ciphertext<Element>& ciphertext, const EvalKey<Element> evalKey,
+    virtual void level_reduce_in_place(Ciphertext<Element>& ciphertext, const EvalKey<Element> eval_key,
                                     size_t levels) const {
-        VerifyLeveledSHEEnabled(__func__);
-        m_LeveledSHE->LevelReduceInPlace(ciphertext, evalKey, levels);
+        verify_leveled_she_enabled(__func__);
+        leveled_she_->level_reduce_in_place(ciphertext, eval_key, levels);
     }
 
-    virtual Ciphertext<Element> LevelReduceInternal(ConstCiphertext<Element>& ciphertext, size_t levels) const {
-        VerifyLeveledSHEEnabled(__func__);
+    virtual Ciphertext<Element> level_reduce_internal(ConstCiphertext<Element>& ciphertext, size_t levels) const {
+        verify_leveled_she_enabled(__func__);
         if (!ciphertext)
-            OPENFHE_THROW("Input ciphertext is nullptr");
-        return m_LeveledSHE->LevelReduceInternal(ciphertext, levels);
+            CIPHER_THROW("Input ciphertext is nullptr");
+        return leveled_she_->level_reduce_internal(ciphertext, levels);
     }
 
-    virtual void LevelReduceInternalInPlace(Ciphertext<Element>& ciphertext, size_t levels) const {
-        VerifyLeveledSHEEnabled(__func__);
-        m_LeveledSHE->LevelReduceInternalInPlace(ciphertext, levels);
+    virtual void level_reduce_internal_in_place(Ciphertext<Element>& ciphertext, size_t levels) const {
+        verify_leveled_she_enabled(__func__);
+        leveled_she_->level_reduce_internal_in_place(ciphertext, levels);
     }
 
-    virtual Ciphertext<Element> Compress(ConstCiphertext<Element>& ciphertext, size_t towersLeft,
-                                         size_t noiseScaleDeg) const {
-        VerifyLeveledSHEEnabled(__func__);
-        return m_LeveledSHE->Compress(ciphertext, towersLeft, noiseScaleDeg);
+    virtual Ciphertext<Element> compress(ConstCiphertext<Element>& ciphertext, size_t towers_left,
+                                         size_t noise_scale_deg) const {
+        verify_leveled_she_enabled(__func__);
+        return leveled_she_->compress(ciphertext, towers_left, noise_scale_deg);
     }
 
-    virtual void AdjustLevelsInPlace(Ciphertext<Element>& ciphertext1, Ciphertext<Element>& ciphertext2) const {
-        VerifyLeveledSHEEnabled(__func__);
+    virtual void adjust_levels_in_place(Ciphertext<Element>& ciphertext1, Ciphertext<Element>& ciphertext2) const {
+        verify_leveled_she_enabled(__func__);
         if (!ciphertext1)
-            OPENFHE_THROW("Input ciphertext1 is nullptr");
+            CIPHER_THROW("Input ciphertext1 is nullptr");
         if (!ciphertext2)
-            OPENFHE_THROW("Input ciphertext2 is nullptr");
-        m_LeveledSHE->AdjustLevelsInPlace(ciphertext1, ciphertext2);
+            CIPHER_THROW("Input ciphertext2 is nullptr");
+        leveled_she_->adjust_levels_in_place(ciphertext1, ciphertext2);
     }
 
-    virtual void AdjustLevelsAndDepthInPlace(Ciphertext<Element>& ciphertext1, Ciphertext<Element>& ciphertext2) const {
-        VerifyLeveledSHEEnabled(__func__);
+    virtual void adjust_levels_and_depth_in_place(Ciphertext<Element>& ciphertext1, Ciphertext<Element>& ciphertext2) const {
+        verify_leveled_she_enabled(__func__);
         if (!ciphertext1)
-            OPENFHE_THROW("Input ciphertext1 is nullptr");
+            CIPHER_THROW("Input ciphertext1 is nullptr");
         if (!ciphertext2)
-            OPENFHE_THROW("Input ciphertext2 is nullptr");
-        m_LeveledSHE->AdjustLevelsAndDepthInPlace(ciphertext1, ciphertext2);
+            CIPHER_THROW("Input ciphertext2 is nullptr");
+        leveled_she_->adjust_levels_and_depth_in_place(ciphertext1, ciphertext2);
     }
 
-    virtual void AdjustLevelsAndDepthToOneInPlace(Ciphertext<Element>& ciphertext1,
+    virtual void adjust_levels_and_depth_to_one_in_place(Ciphertext<Element>& ciphertext1,
                                                   Ciphertext<Element>& ciphertext2) const {
-        VerifyLeveledSHEEnabled(__func__);
+        verify_leveled_she_enabled(__func__);
         if (!ciphertext1)
-            OPENFHE_THROW("Input ciphertext1 is nullptr");
+            CIPHER_THROW("Input ciphertext1 is nullptr");
         if (!ciphertext2)
-            OPENFHE_THROW("Input ciphertext2 is nullptr");
-        m_LeveledSHE->AdjustLevelsAndDepthToOneInPlace(ciphertext1, ciphertext2);
+            CIPHER_THROW("Input ciphertext2 is nullptr");
+        leveled_she_->adjust_levels_and_depth_to_one_in_place(ciphertext1, ciphertext2);
     }
 
     /////////////////////////////////////////
     // Advanced SHE Wrapper
     /////////////////////////////////////////
 
-    virtual Ciphertext<Element> EvalAddMany(const std::vector<Ciphertext<Element>>& ciphertextVec) const {
-        VerifyAdvancedSHEEnabled(__func__);
-        return m_AdvancedSHE->EvalAddMany(ciphertextVec);
+    virtual Ciphertext<Element> eval_add_many(const std::vector<Ciphertext<Element>>& ciphertext_vec) const {
+        verify_advanced_she_enabled(__func__);
+        return advanced_she_->eval_add_many(ciphertext_vec);
     }
 
-    virtual Ciphertext<Element> EvalAddManyInPlace(std::vector<Ciphertext<Element>>& ciphertextVec) const {
-        VerifyAdvancedSHEEnabled(__func__);
-        return m_AdvancedSHE->EvalAddManyInPlace(ciphertextVec);
+    virtual Ciphertext<Element> eval_add_many_in_place(std::vector<Ciphertext<Element>>& ciphertext_vec) const {
+        verify_advanced_she_enabled(__func__);
+        return advanced_she_->eval_add_many_in_place(ciphertext_vec);
     }
 
-    virtual Ciphertext<Element> EvalMultMany(const std::vector<Ciphertext<Element>>& ciphertextVec,
-                                             const std::vector<EvalKey<Element>>& evalKeyVec) const {
-        VerifyAdvancedSHEEnabled(__func__);
-        return m_AdvancedSHE->EvalMultMany(ciphertextVec, evalKeyVec);
+    virtual Ciphertext<Element> eval_mult_many(const std::vector<Ciphertext<Element>>& ciphertext_vec,
+                                             const std::vector<EvalKey<Element>>& eval_key_vec) const {
+        verify_advanced_she_enabled(__func__);
+        return advanced_she_->eval_mult_many(ciphertext_vec, eval_key_vec);
     }
 
     /////////////////////////////////////
@@ -1002,21 +1002,21 @@ class SchemeBase {
     /////////////////////////////////////
 
     template <typename VectorDataType = double>
-    Ciphertext<Element> EvalLinearWSum(std::vector<ReadOnlyCiphertext<Element>>& ciphertextVec,
-                                       const std::vector<VectorDataType>& constantVec) const {
-        VerifyAdvancedSHEEnabled(__func__);
-        if (!ciphertextVec.size())
-            OPENFHE_THROW("Input ciphertext vector is empty");
-        return m_AdvancedSHE->EvalLinearWSum(ciphertextVec, constantVec);
+    Ciphertext<Element> eval_linear_w_sum(std::vector<ReadOnlyCiphertext<Element>>& ciphertext_vec,
+                                       const std::vector<VectorDataType>& constant_vec) const {
+        verify_advanced_she_enabled(__func__);
+        if (!ciphertext_vec.size())
+            CIPHER_THROW("Input ciphertext vector is empty");
+        return advanced_she_->eval_linear_w_sum(ciphertext_vec, constant_vec);
     }
 
     template <typename VectorDataType = double>
-    Ciphertext<Element> EvalLinearWSumMutable(std::vector<Ciphertext<Element>>& ciphertextVec,
-                                              const std::vector<VectorDataType>& constantVec) const {
-        VerifyAdvancedSHEEnabled(__func__);
-        if (!ciphertextVec.size())
-            OPENFHE_THROW("Input ciphertext vector is empty");
-        return m_AdvancedSHE->EvalLinearWSumMutable(ciphertextVec, constantVec);
+    Ciphertext<Element> eval_linear_w_sum_mutable(std::vector<Ciphertext<Element>>& ciphertext_vec,
+                                              const std::vector<VectorDataType>& constant_vec) const {
+        verify_advanced_she_enabled(__func__);
+        if (!ciphertext_vec.size())
+            CIPHER_THROW("Input ciphertext vector is empty");
+        return advanced_she_->eval_linear_w_sum_mutable(ciphertext_vec, constant_vec);
     }
 
     /////////////////////////////////////
@@ -1024,38 +1024,38 @@ class SchemeBase {
     /////////////////////////////////////
 
     template <typename VectorDataType = double>
-    std::shared_ptr<seriesPowers<Element>> EvalPowers(ConstCiphertext<Element>& ciphertext,
+    std::shared_ptr<SeriesPowers<Element>> eval_powers(ConstCiphertext<Element>& ciphertext,
                                                       const std::vector<VectorDataType>& coefficients) const {
-        VerifyAdvancedSHEEnabled(__func__);
-        return m_AdvancedSHE->EvalPowers(ciphertext, coefficients);
+        verify_advanced_she_enabled(__func__);
+        return advanced_she_->eval_powers(ciphertext, coefficients);
     }
 
     template <typename VectorDataType = double>
-    Ciphertext<Element> EvalPoly(ConstCiphertext<Element>& ciphertext,
+    Ciphertext<Element> eval_poly(ConstCiphertext<Element>& ciphertext,
                                  const std::vector<VectorDataType>& coefficients) const {
-        VerifyAdvancedSHEEnabled(__func__);
-        return m_AdvancedSHE->EvalPoly(ciphertext, coefficients);
+        verify_advanced_she_enabled(__func__);
+        return advanced_she_->eval_poly(ciphertext, coefficients);
     }
 
     template <typename VectorDataType = double>
-    Ciphertext<Element> EvalPolyWithPrecomp(std::shared_ptr<seriesPowers<Element>> powers,
+    Ciphertext<Element> eval_poly_with_precomp(std::shared_ptr<SeriesPowers<Element>> powers,
                                             const std::vector<VectorDataType>& coefficients) const {
-        VerifyAdvancedSHEEnabled(__func__);
-        return m_AdvancedSHE->EvalPolyWithPrecomp(powers, coefficients);
+        verify_advanced_she_enabled(__func__);
+        return advanced_she_->eval_poly_with_precomp(powers, coefficients);
     }
 
     template <typename VectorDataType = double>
-    Ciphertext<Element> EvalPolyLinear(ConstCiphertext<Element>& ciphertext,
+    Ciphertext<Element> eval_poly_linear(ConstCiphertext<Element>& ciphertext,
                                        const std::vector<VectorDataType>& coefficients) const {
-        VerifyAdvancedSHEEnabled(__func__);
-        return m_AdvancedSHE->EvalPolyLinear(ciphertext, coefficients);
+        verify_advanced_she_enabled(__func__);
+        return advanced_she_->eval_poly_linear(ciphertext, coefficients);
     }
 
     template <typename VectorDataType = double>
-    Ciphertext<Element> EvalPolyPS(ConstCiphertext<Element>& ciphertext,
+    Ciphertext<Element> eval_poly_ps(ConstCiphertext<Element>& ciphertext,
                                    const std::vector<VectorDataType>& coefficients) const {
-        VerifyAdvancedSHEEnabled(__func__);
-        return m_AdvancedSHE->EvalPolyPS(ciphertext, coefficients);
+        verify_advanced_she_enabled(__func__);
+        return advanced_she_->eval_poly_ps(ciphertext, coefficients);
     }
 
     /////////////////////////////////////
@@ -1063,41 +1063,41 @@ class SchemeBase {
     /////////////////////////////////////
 
     template <typename VectorDataType = double>
-    std::shared_ptr<seriesPowers<Element>> EvalChebyPolys(ConstCiphertext<Element>& ciphertext,
+    std::shared_ptr<SeriesPowers<Element>> eval_cheby_polys(ConstCiphertext<Element>& ciphertext,
                                                           const std::vector<VectorDataType>& coefficients, double a,
                                                           double b) const {
-        VerifyAdvancedSHEEnabled(__func__);
-        return m_AdvancedSHE->EvalChebyPolys(ciphertext, coefficients, a, b);
+        verify_advanced_she_enabled(__func__);
+        return advanced_she_->eval_cheby_polys(ciphertext, coefficients, a, b);
     }
 
     template <typename VectorDataType = double>
-    Ciphertext<Element> EvalChebyshevSeries(ConstCiphertext<Element>& ciphertext,
+    Ciphertext<Element> eval_chebyshev_series(ConstCiphertext<Element>& ciphertext,
                                             const std::vector<VectorDataType>& coefficients, double a, double b) const {
-        VerifyAdvancedSHEEnabled(__func__);
-        return m_AdvancedSHE->EvalChebyshevSeries(ciphertext, coefficients, a, b);
+        verify_advanced_she_enabled(__func__);
+        return advanced_she_->eval_chebyshev_series(ciphertext, coefficients, a, b);
     }
 
     template <typename VectorDataType = double>
-    Ciphertext<Element> EvalChebyshevSeriesWithPrecomp(std::shared_ptr<seriesPowers<Element>> polys,
+    Ciphertext<Element> eval_chebyshev_series_with_precomp(std::shared_ptr<SeriesPowers<Element>> polys,
                                                        const std::vector<VectorDataType>& coefficients) const {
-        VerifyAdvancedSHEEnabled(__func__);
-        return m_AdvancedSHE->EvalChebyshevSeriesWithPrecomp(polys, coefficients);
+        verify_advanced_she_enabled(__func__);
+        return advanced_she_->eval_chebyshev_series_with_precomp(polys, coefficients);
     }
 
     template <typename VectorDataType = double>
-    Ciphertext<Element> EvalChebyshevSeriesLinear(ConstCiphertext<Element>& ciphertext,
+    Ciphertext<Element> eval_chebyshev_series_linear(ConstCiphertext<Element>& ciphertext,
                                                   const std::vector<VectorDataType>& coefficients, double a,
                                                   double b) const {
-        VerifyAdvancedSHEEnabled(__func__);
-        return m_AdvancedSHE->EvalChebyshevSeriesLinear(ciphertext, coefficients, a, b);
+        verify_advanced_she_enabled(__func__);
+        return advanced_she_->eval_chebyshev_series_linear(ciphertext, coefficients, a, b);
     }
 
     template <typename VectorDataType = double>
-    Ciphertext<Element> EvalChebyshevSeriesPS(ConstCiphertext<Element>& ciphertext,
+    Ciphertext<Element> eval_chebyshev_series_ps(ConstCiphertext<Element>& ciphertext,
                                               const std::vector<VectorDataType>& coefficients, double a,
                                               double b) const {
-        VerifyAdvancedSHEEnabled(__func__);
-        return m_AdvancedSHE->EvalChebyshevSeriesPS(ciphertext, coefficients, a, b);
+        verify_advanced_she_enabled(__func__);
+        return advanced_she_->eval_chebyshev_series_ps(ciphertext, coefficients, a, b);
     }
 
     /////////////////////////////////////
@@ -1105,66 +1105,66 @@ class SchemeBase {
     /////////////////////////////////////
 
     /**
-     * Generates the rotation keys needed by EvalSum via m_AdvancedSHE and tags each of them with the key tag of
-     * privateKey.
+     * Generates the rotation keys needed by eval_sum via advanced_she_ and tags each of them with the key tag of
+     * private_key.
      *
-     * @param privateKey the secret key
+     * @param private_key the secret key
      * @return map from automorphism index to key
      */
-    virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> EvalSumKeyGen(
-            const PrivateKey<Element> privateKey) const;
+    virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_sum_key_gen(
+            const PrivateKey<Element> private_key) const;
 
     /**
-     * Generates the rotation keys needed by EvalSumRows via m_AdvancedSHE and tags each of them with the key tag
-     * of privateKey.
+     * Generates the rotation keys needed by eval_sum_rows via advanced_she_ and tags each of them with the key tag
+     * of private_key.
      *
-     * @param privateKey the secret key
-     * @param rowSize number of slots per row of the packed matrix
-     * @param subringDim subring dimension (0 selects the cyclotomic order)
+     * @param private_key the secret key
+     * @param row_size number of slots per row of the packed matrix
+     * @param subring_dim subring dimension (0 selects the cyclotomic order)
      * @param indices receives the automorphism indices the keys were generated for
      * @return map from automorphism index to key
      */
-    virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> EvalSumRowsKeyGen(
-            const PrivateKey<Element> privateKey, uint32_t rowSize, uint32_t subringDim,
+    virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_sum_rows_key_gen(
+            const PrivateKey<Element> private_key, uint32_t row_size, uint32_t subring_dim,
             std::vector<uint32_t>& indices) const;
 
     /**
-     * Generates the rotation keys needed by EvalSumCols via m_AdvancedSHE and tags each of them with the key tag
-     * of privateKey.
+     * Generates the rotation keys needed by eval_sum_cols via advanced_she_ and tags each of them with the key tag
+     * of private_key.
      *
-     * @param privateKey the secret key
+     * @param private_key the secret key
      * @param indices receives the automorphism indices the keys were generated for
      * @return map from automorphism index to key
      */
-    virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> EvalSumColsKeyGen(
-            const PrivateKey<Element> privateKey, std::vector<uint32_t>& indices) const;
+    virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_sum_cols_key_gen(
+            const PrivateKey<Element> private_key, std::vector<uint32_t>& indices) const;
 
-    virtual Ciphertext<Element> EvalSum(ConstCiphertext<Element> ciphertext, uint32_t batchSize,
-                                        const std::map<uint32_t, EvalKey<Element>>& evalKeyMap) const {
-        VerifyAdvancedSHEEnabled(__func__);
-        if (!evalKeyMap.size())
-            OPENFHE_THROW("Input evaluation key map is empty");
-        return m_AdvancedSHE->EvalSum(ciphertext, batchSize, evalKeyMap);
+    virtual Ciphertext<Element> eval_sum(ConstCiphertext<Element> ciphertext, uint32_t batch_size,
+                                        const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const {
+        verify_advanced_she_enabled(__func__);
+        if (!eval_key_map.size())
+            CIPHER_THROW("Input evaluation key map is empty");
+        return advanced_she_->eval_sum(ciphertext, batch_size, eval_key_map);
     }
 
-    virtual Ciphertext<Element> EvalSumRows(ConstCiphertext<Element>& ciphertext, uint32_t rowSize,
-                                            const std::map<uint32_t, EvalKey<Element>>& evalKeyMap,
-                                            uint32_t subringDim) const {
-        VerifyAdvancedSHEEnabled(__func__);
-        if (!evalKeyMap.size())
-            OPENFHE_THROW("Input evaluation key map is empty");
-        return m_AdvancedSHE->EvalSumRows(ciphertext, rowSize, evalKeyMap, subringDim);
+    virtual Ciphertext<Element> eval_sum_rows(ConstCiphertext<Element>& ciphertext, uint32_t row_size,
+                                            const std::map<uint32_t, EvalKey<Element>>& eval_key_map,
+                                            uint32_t subring_dim) const {
+        verify_advanced_she_enabled(__func__);
+        if (!eval_key_map.size())
+            CIPHER_THROW("Input evaluation key map is empty");
+        return advanced_she_->eval_sum_rows(ciphertext, row_size, eval_key_map, subring_dim);
     }
 
-    virtual Ciphertext<Element> EvalSumCols(ConstCiphertext<Element>& ciphertext, uint32_t batchSize,
-                                            const std::map<uint32_t, EvalKey<Element>>& evalKeyMap,
-                                            const std::map<uint32_t, EvalKey<Element>>& rightEvalKeyMap) const {
-        VerifyAdvancedSHEEnabled(__func__);
-        if (!evalKeyMap.size())
-            OPENFHE_THROW("Input first evaluation key map is empty");
-        if (!rightEvalKeyMap.size())
-            OPENFHE_THROW("Input second evaluation key map is empty");
-        return m_AdvancedSHE->EvalSumCols(ciphertext, batchSize, evalKeyMap, rightEvalKeyMap);
+    virtual Ciphertext<Element> eval_sum_cols(ConstCiphertext<Element>& ciphertext, uint32_t batch_size,
+                                            const std::map<uint32_t, EvalKey<Element>>& eval_key_map,
+                                            const std::map<uint32_t, EvalKey<Element>>& right_eval_key_map) const {
+        verify_advanced_she_enabled(__func__);
+        if (!eval_key_map.size())
+            CIPHER_THROW("Input first evaluation key map is empty");
+        if (!right_eval_key_map.size())
+            CIPHER_THROW("Input second evaluation key map is empty");
+        return advanced_she_->eval_sum_cols(ciphertext, batch_size, eval_key_map, right_eval_key_map);
     }
 
     /////////////////////////////////////
@@ -1172,44 +1172,44 @@ class SchemeBase {
     /////////////////////////////////////
 
     /**
-     * Computes the inner product of two packed ciphertexts via m_AdvancedSHE after checking that the summation key
+     * Computes the inner product of two packed ciphertexts via advanced_she_ after checking that the summation key
      * map is not empty and the relinearization key is not null; the result is tagged with the key tag of the
      * summation keys.
      *
      * @param ciphertext1 first operand
      * @param ciphertext2 second operand
-     * @param batchSize number of slots to sum over
-     * @param evalSumKeyMap rotation keys generated by EvalSumKeyGen
-     * @param evalMultKey the relinearization key
+     * @param batch_size number of slots to sum over
+     * @param eval_sum_key_map rotation keys generated by eval_sum_key_gen
+     * @param eval_mult_key the relinearization key
      * @return ciphertext with the inner product in every slot
      */
-    virtual Ciphertext<Element> EvalInnerProduct(ConstCiphertext<Element>& ciphertext1,
-                                                 ConstCiphertext<Element>& ciphertext2, uint32_t batchSize,
-                                                 const std::map<uint32_t, EvalKey<Element>>& evalSumKeyMap,
-                                                 const EvalKey<Element> evalMultKey) const;
+    virtual Ciphertext<Element> eval_inner_product(ConstCiphertext<Element>& ciphertext1,
+                                                 ConstCiphertext<Element>& ciphertext2, uint32_t batch_size,
+                                                 const std::map<uint32_t, EvalKey<Element>>& eval_sum_key_map,
+                                                 const EvalKey<Element> eval_mult_key) const;
 
-    virtual Ciphertext<Element> EvalInnerProduct(ConstCiphertext<Element>& ciphertext, ConstPlaintext& plaintext,
-                                                 uint32_t batchSize,
-                                                 const std::map<uint32_t, EvalKey<Element>>& evalSumKeyMap) const {
-        VerifyAdvancedSHEEnabled(__func__);
-        if (!evalSumKeyMap.size())
-            OPENFHE_THROW("Input evaluation key map is empty");
-        return m_AdvancedSHE->EvalInnerProduct(ciphertext, plaintext, batchSize, evalSumKeyMap);
+    virtual Ciphertext<Element> eval_inner_product(ConstCiphertext<Element>& ciphertext, ConstPlaintext& plaintext,
+                                                 uint32_t batch_size,
+                                                 const std::map<uint32_t, EvalKey<Element>>& eval_sum_key_map) const {
+        verify_advanced_she_enabled(__func__);
+        if (!eval_sum_key_map.size())
+            CIPHER_THROW("Input evaluation key map is empty");
+        return advanced_she_->eval_inner_product(ciphertext, plaintext, batch_size, eval_sum_key_map);
     }
 
-    virtual Ciphertext<Element> AddRandomNoise(ConstCiphertext<Element> ciphertext) const {
-        VerifyAdvancedSHEEnabled(__func__);
+    virtual Ciphertext<Element> add_random_noise(ConstCiphertext<Element> ciphertext) const {
+        verify_advanced_she_enabled(__func__);
         if (!ciphertext)
-            OPENFHE_THROW("Input ciphertext is nullptr");
-        return m_AdvancedSHE->AddRandomNoise(ciphertext);
+            CIPHER_THROW("Input ciphertext is nullptr");
+        return advanced_she_->add_random_noise(ciphertext);
     }
 
-    virtual Ciphertext<Element> EvalMerge(const std::vector<Ciphertext<Element>>& ciphertextVec,
-                                          const std::map<uint32_t, EvalKey<Element>>& evalKeyMap) const {
-        VerifyAdvancedSHEEnabled(__func__);
-        if (!evalKeyMap.size())
-            OPENFHE_THROW("Input evaluation key map is empty");
-        return m_AdvancedSHE->EvalMerge(ciphertextVec, evalKeyMap);
+    virtual Ciphertext<Element> eval_merge(const std::vector<Ciphertext<Element>>& ciphertext_vec,
+                                          const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const {
+        verify_advanced_she_enabled(__func__);
+        if (!eval_key_map.size())
+            CIPHER_THROW("Input evaluation key map is empty");
+        return advanced_she_->eval_merge(ciphertext_vec, eval_key_map);
     }
 
     /////////////////////////////////////////
@@ -1217,257 +1217,257 @@ class SchemeBase {
     /////////////////////////////////////////
 
     /**
-     * Threshold key generation from the secret keys of several parties via m_Multiparty. Checks that the context
+     * Threshold key generation from the secret keys of several parties via multiparty_. Checks that the context
      * and the key vector are not empty and sets the key tag of the joint public key to that of the joint secret key.
      *
      * @param cc the crypto context
-     * @param privateKeyVec secret keys of the participating parties
-     * @param makeSparse use ring reduction (no longer supported)
+     * @param private_key_vec secret keys of the participating parties
+     * @param make_sparse_value use ring reduction (no longer supported)
      * @return the joint key pair
      */
-    virtual KeyPair<Element> MultipartyKeyGen(CryptoContext<Element> cc,
-                                              const std::vector<PrivateKey<Element>>& privateKeyVec, bool makeSparse);
+    virtual KeyPair<Element> multiparty_key_gen(CryptoContext<Element> cc,
+                                              const std::vector<PrivateKey<Element>>& private_key_vec, bool make_sparse_value);
 
     /**
-     * Threshold key generation for one party given the joint public key of the previous parties, via m_Multiparty.
+     * Threshold key generation for one party given the joint public key of the previous parties, via multiparty_.
      * Checks that the context and the public key are not null and sets the key tag of the returned public key to
      * that of the returned secret key.
      *
      * @param cc the crypto context
-     * @param publicKey joint public key of the prior parties
-     * @param makeSparse use ring reduction (no longer supported)
+     * @param public_key joint public key of the prior parties
+     * @param make_sparse_value use ring reduction (no longer supported)
      * @param PRE true if proxy re-encryption or the star topology is used in the multiparty protocol, in which case
      *        a fresh public key is generated instead of a joint one
      * @return this party's key pair
      */
-    virtual KeyPair<Element> MultipartyKeyGen(CryptoContext<Element> cc, const PublicKey<Element> publicKey,
-                                              bool makeSparse, bool PRE);
+    virtual KeyPair<Element> multiparty_key_gen(CryptoContext<Element> cc, const PublicKey<Element> public_key,
+                                              bool make_sparse_value, bool PRE);
 
     /**
-     * Computes a non-lead party's partial decryption via m_Multiparty after checking that the ciphertext has at
+     * Computes a non-lead party's partial decryption via multiparty_ after checking that the ciphertext has at
      * most two elements.
      *
      * @param ciphertext the ciphertext to partially decrypt
-     * @param privateKey this party's secret key share
+     * @param private_key this party's secret key share
      * @return the partial decryption
      */
-    virtual Ciphertext<Element> MultipartyDecryptMain(ConstCiphertext<Element>& ciphertext,
-                                                      const PrivateKey<Element> privateKey) const;
+    virtual Ciphertext<Element> multiparty_decrypt_main(ConstCiphertext<Element>& ciphertext,
+                                                      const PrivateKey<Element> private_key) const;
 
     /**
-     * Computes the lead party's partial decryption via m_Multiparty after checking that the ciphertext has at most
+     * Computes the lead party's partial decryption via multiparty_ after checking that the ciphertext has at most
      * two elements.
      *
      * @param ciphertext the ciphertext to partially decrypt
-     * @param privateKey the lead party's secret key share
+     * @param private_key the lead party's secret key share
      * @return the partial decryption
      */
-    virtual Ciphertext<Element> MultipartyDecryptLead(ConstCiphertext<Element>& ciphertext,
-                                                      const PrivateKey<Element> privateKey) const;
+    virtual Ciphertext<Element> multiparty_decrypt_lead(ConstCiphertext<Element>& ciphertext,
+                                                      const PrivateKey<Element> private_key) const;
 
-    virtual DecryptResult MultipartyDecryptFusion(const std::vector<Ciphertext<Element>>& ciphertextVec,
+    virtual DecryptResult multiparty_decrypt_fusion(const std::vector<Ciphertext<Element>>& ciphertext_vec,
                                                   NativePoly* plaintext) const {
-        VerifyMultipartyEnabled(__func__);
-        return m_Multiparty->MultipartyDecryptFusion(ciphertextVec, plaintext);
+        verify_multiparty_enabled(__func__);
+        return multiparty_->multiparty_decrypt_fusion(ciphertext_vec, plaintext);
     }
 
-    virtual DecryptResult MultipartyDecryptFusion(const std::vector<Ciphertext<Element>>& ciphertextVec,
+    virtual DecryptResult multiparty_decrypt_fusion(const std::vector<Ciphertext<Element>>& ciphertext_vec,
                                                   Poly* plaintext) const {
-        VerifyMultipartyEnabled(__func__);
-        return m_Multiparty->MultipartyDecryptFusion(ciphertextVec, plaintext);
+        verify_multiparty_enabled(__func__);
+        return multiparty_->multiparty_decrypt_fusion(ciphertext_vec, plaintext);
     }
 
     /**
-     * Generates this party's share of a key-switching key (used for joint relinearization keys) via m_Multiparty
-     * and tags it with the key tag of newPrivateKey.
+     * Generates this party's share of a key-switching key (used for joint relinearization keys) via multiparty_
+     * and tags it with the key tag of new_private_key.
      *
-     * @param oldPrivateKey this party's share of the original secret key
-     * @param newPrivateKey this party's share of the new secret key
-     * @param evalKey the key-switching key accumulated so far by the previous parties
+     * @param old_private_key this party's share of the original secret key
+     * @param new_private_key this party's share of the new secret key
+     * @param eval_key the key-switching key accumulated so far by the previous parties
      * @return the updated key-switching key
      */
-    virtual EvalKey<Element> MultiKeySwitchGen(const PrivateKey<Element> oldPrivateKey,
-                                               const PrivateKey<Element> newPrivateKey,
-                                               const EvalKey<Element> evalKey) const;
+    virtual EvalKey<Element> multi_key_switch_gen(const PrivateKey<Element> old_private_key,
+                                               const PrivateKey<Element> new_private_key,
+                                               const EvalKey<Element> eval_key) const;
 
     /**
-     * Adds this party's share to the joint automorphism keys via m_Multiparty and tags every returned key with
-     * keyId.
+     * Adds this party's share to the joint automorphism keys via multiparty_ and tags every returned key with
+     * key_id.
      *
-     * @param privateKey this party's secret key share
-     * @param evalAutoKeyMap automorphism keys accumulated so far by the previous parties
-     * @param indexList automorphism indices to generate keys for
-     * @param keyId key tag assigned to the returned keys
+     * @param private_key this party's secret key share
+     * @param eval_auto_key_map automorphism keys accumulated so far by the previous parties
+     * @param index_list automorphism indices to generate keys for
+     * @param key_id key tag assigned to the returned keys
      * @return map from automorphism index to the updated key
      */
-    virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> MultiEvalAutomorphismKeyGen(
-            const PrivateKey<Element> privateKey,
-            const std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> evalAutoKeyMap,
-            const std::vector<uint32_t>& indexList, const std::string& keyId);
+    virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> multi_eval_automorphism_key_gen(
+            const PrivateKey<Element> private_key,
+            const std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_auto_key_map,
+            const std::vector<uint32_t>& index_list, const std::string& key_id);
 
     /**
-     * Adds this party's share to the joint rotation keys via m_Multiparty and tags every returned key with keyId.
+     * Adds this party's share to the joint rotation keys via multiparty_ and tags every returned key with key_id.
      *
-     * @param privateKey this party's secret key share
-     * @param evalAutoKeyMap rotation keys accumulated so far by the previous parties
-     * @param indexList rotation indices to generate keys for
-     * @param keyId key tag assigned to the returned keys
+     * @param private_key this party's secret key share
+     * @param eval_auto_key_map rotation keys accumulated so far by the previous parties
+     * @param index_list rotation indices to generate keys for
+     * @param key_id key tag assigned to the returned keys
      * @return map from automorphism index to the updated key
      */
-    virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> MultiEvalAtIndexKeyGen(
-            const PrivateKey<Element> privateKey,
-            const std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> evalAutoKeyMap,
-            const std::vector<int32_t>& indexList, const std::string& keyId);
+    virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> multi_eval_at_index_key_gen(
+            const PrivateKey<Element> private_key,
+            const std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_auto_key_map,
+            const std::vector<int32_t>& index_list, const std::string& key_id);
 
     /**
-     * Adds this party's share to the joint EvalSum keys via m_Multiparty and tags every returned key with keyId.
+     * Adds this party's share to the joint eval_sum keys via multiparty_ and tags every returned key with key_id.
      *
-     * @param privateKey this party's secret key share
-     * @param evalSumKeyMap summation keys accumulated so far by the previous parties
-     * @param keyId key tag assigned to the returned keys
+     * @param private_key this party's secret key share
+     * @param eval_sum_key_map summation keys accumulated so far by the previous parties
+     * @param key_id key tag assigned to the returned keys
      * @return map from automorphism index to the updated key
      */
-    virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> MultiEvalSumKeyGen(
-            const PrivateKey<Element> privateKey,
-            const std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> evalSumKeyMap, const std::string& keyId = "");
+    virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> multi_eval_sum_key_gen(
+            const PrivateKey<Element> private_key,
+            const std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_sum_key_map, const std::string& key_id = "");
 
     /**
-     * Adds two evaluation (key-switching) key shares via m_Multiparty and tags the sum with keyId.
+     * Adds two evaluation (key-switching) key shares via multiparty_ and tags the sum with key_id.
      *
-     * @param evalKey1 first key share
-     * @param evalKey2 second key share
-     * @param keyId key tag assigned to the result
+     * @param eval_key1 first key share
+     * @param eval_key2 second key share
+     * @param key_id key tag assigned to the result
      * @return the summed key
      */
-    virtual EvalKey<Element> MultiAddEvalKeys(EvalKey<Element> evalKey1, EvalKey<Element> evalKey2,
-                                              const std::string& keyId);
+    virtual EvalKey<Element> multi_add_eval_keys(EvalKey<Element> eval_key1, EvalKey<Element> eval_key2,
+                                              const std::string& key_id);
 
     /**
      * Multiplies an evaluation key by this party's secret key share (a step of the joint relinearization key
-     * generation) via m_Multiparty and tags the result with keyId.
+     * generation) via multiparty_ and tags the result with key_id.
      *
-     * @param privateKey this party's secret key share
-     * @param evalKey the evaluation key to multiply
-     * @param keyId key tag assigned to the result
+     * @param private_key this party's secret key share
+     * @param eval_key the evaluation key to multiply
+     * @param key_id key tag assigned to the result
      * @return the resulting key
      */
-    virtual EvalKey<Element> MultiMultEvalKey(PrivateKey<Element> privateKey, EvalKey<Element> evalKey,
-                                              const std::string& keyId);
+    virtual EvalKey<Element> multi_mult_eval_key(PrivateKey<Element> private_key, EvalKey<Element> eval_key,
+                                              const std::string& key_id);
 
     /**
-     * Adds two maps of EvalSum key shares index by index via m_Multiparty and tags every resulting key with keyId.
+     * Adds two maps of eval_sum key shares index by index via multiparty_ and tags every resulting key with key_id.
      *
-     * @param evalSumKeyMap1 first map of key shares
-     * @param evalSumKeyMap2 second map of key shares
-     * @param keyId key tag assigned to the resulting keys
+     * @param eval_sum_key_map1 first map of key shares
+     * @param eval_sum_key_map2 second map of key shares
+     * @param key_id key tag assigned to the resulting keys
      * @return map from automorphism index to the summed key
      */
-    virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> MultiAddEvalSumKeys(
-            const std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> evalSumKeyMap1,
-            const std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> evalSumKeyMap2, const std::string& keyId);
+    virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> multi_add_eval_sum_keys(
+            const std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_sum_key_map1,
+            const std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_sum_key_map2, const std::string& key_id);
 
     /**
-     * Adds two maps of automorphism key shares index by index via m_Multiparty and tags every resulting key with
-     * keyId.
+     * Adds two maps of automorphism key shares index by index via multiparty_ and tags every resulting key with
+     * key_id.
      *
-     * @param evalSumKeyMap1 first map of key shares
-     * @param evalSumKeyMap2 second map of key shares
-     * @param keyId key tag assigned to the resulting keys
+     * @param eval_sum_key_map1 first map of key shares
+     * @param eval_sum_key_map2 second map of key shares
+     * @param key_id key tag assigned to the resulting keys
      * @return map from automorphism index to the summed key
      */
-    virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> MultiAddEvalAutomorphismKeys(
-            const std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> evalSumKeyMap1,
-            const std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> evalSumKeyMap2, const std::string& keyId);
+    virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> multi_add_eval_automorphism_keys(
+            const std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_sum_key_map1,
+            const std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_sum_key_map2, const std::string& key_id);
 
     /**
-     * Adds two public key shares via m_Multiparty and tags the joint public key with keyId.
+     * Adds two public key shares via multiparty_ and tags the joint public key with key_id.
      *
-     * @param publicKey1 first public key share
-     * @param publicKey2 second public key share
-     * @param keyId key tag assigned to the result
+     * @param public_key1 first public key share
+     * @param public_key2 second public key share
+     * @param key_id key tag assigned to the result
      * @return the joint public key
      */
-    virtual PublicKey<Element> MultiAddPubKeys(PublicKey<Element> publicKey1, PublicKey<Element> publicKey2,
-                                               const std::string& keyId);
+    virtual PublicKey<Element> multi_add_pub_keys(PublicKey<Element> public_key1, PublicKey<Element> public_key2,
+                                               const std::string& key_id);
 
     /**
-     * Adds two relinearization key shares via m_Multiparty and tags the sum with keyId.
+     * Adds two relinearization key shares via multiparty_ and tags the sum with key_id.
      *
-     * @param evalKey1 first relinearization key share
-     * @param evalKey2 second relinearization key share
-     * @param keyId key tag assigned to the result
+     * @param eval_key1 first relinearization key share
+     * @param eval_key2 second relinearization key share
+     * @param key_id key tag assigned to the result
      * @return the joint relinearization key
      */
-    virtual EvalKey<Element> MultiAddEvalMultKeys(EvalKey<Element> evalKey1, EvalKey<Element> evalKey2,
-                                                  const std::string& keyId);
+    virtual EvalKey<Element> multi_add_eval_mult_keys(EvalKey<Element> eval_key1, EvalKey<Element> eval_key2,
+                                                  const std::string& key_id);
 
-    Ciphertext<Element> IntBootAdjustScale(ConstCiphertext<Element>& ciphertext) const {
-        VerifyMultipartyEnabled(__func__);
-        return m_Multiparty->IntBootAdjustScale(ciphertext);
+    Ciphertext<Element> int_boot_adjust_scale(ConstCiphertext<Element>& ciphertext) const {
+        verify_multiparty_enabled(__func__);
+        return multiparty_->int_boot_adjust_scale(ciphertext);
     }
 
-    Ciphertext<Element> IntBootDecrypt(const PrivateKey<Element> privateKey,
+    Ciphertext<Element> int_boot_decrypt(const PrivateKey<Element> private_key,
                                        ConstCiphertext<Element>& ciphertext) const {
-        VerifyMultipartyEnabled(__func__);
-        return m_Multiparty->IntBootDecrypt(privateKey, ciphertext);
+        verify_multiparty_enabled(__func__);
+        return multiparty_->int_boot_decrypt(private_key, ciphertext);
     }
 
-    Ciphertext<Element> IntBootEncrypt(const PublicKey<Element> publicKey, ConstCiphertext<Element>& ciphertext) const {
-        VerifyMultipartyEnabled(__func__);
-        return m_Multiparty->IntBootEncrypt(publicKey, ciphertext);
+    Ciphertext<Element> int_boot_encrypt(const PublicKey<Element> public_key, ConstCiphertext<Element>& ciphertext) const {
+        verify_multiparty_enabled(__func__);
+        return multiparty_->int_boot_encrypt(public_key, ciphertext);
     }
 
-    Ciphertext<Element> IntBootAdd(ConstCiphertext<Element> ciphertext1, ConstCiphertext<Element>& ciphertext2) const {
-        VerifyMultipartyEnabled(__func__);
-        return m_Multiparty->IntBootAdd(ciphertext1, ciphertext2);
+    Ciphertext<Element> int_boot_add(ConstCiphertext<Element> ciphertext1, ConstCiphertext<Element>& ciphertext2) const {
+        verify_multiparty_enabled(__func__);
+        return multiparty_->int_boot_add(ciphertext1, ciphertext2);
     }
 
-    Ciphertext<Element> IntMPBootAdjustScale(ConstCiphertext<Element>& ciphertext) const {
-        VerifyMultipartyEnabled(__func__);
-        return m_Multiparty->IntMPBootAdjustScale(ciphertext);
+    Ciphertext<Element> int_mp_boot_adjust_scale(ConstCiphertext<Element>& ciphertext) const {
+        verify_multiparty_enabled(__func__);
+        return multiparty_->int_mp_boot_adjust_scale(ciphertext);
     }
 
-    Ciphertext<Element> IntMPBootRandomElementGen(std::shared_ptr<CryptoParametersCKKSRNS> cryptoParameters,
-                                                  const PublicKey<Element> publicKey) const {
-        VerifyMultipartyEnabled(__func__);
-        return m_Multiparty->IntMPBootRandomElementGen(cryptoParameters, publicKey);
+    Ciphertext<Element> int_mp_boot_random_element_gen(std::shared_ptr<CkksRnsCryptoParams> crypto_parameters,
+                                                  const PublicKey<Element> public_key) const {
+        verify_multiparty_enabled(__func__);
+        return multiparty_->int_mp_boot_random_element_gen(crypto_parameters, public_key);
     }
 
-    Ciphertext<Element> IntMPBootRandomElementGen(std::shared_ptr<CryptoParametersCKKSRNS> cryptoParameters,
+    Ciphertext<Element> int_mp_boot_random_element_gen(std::shared_ptr<CkksRnsCryptoParams> crypto_parameters,
                                                   ConstCiphertext<Element>& ciphertext) const {
-        VerifyMultipartyEnabled(__func__);
-        return m_Multiparty->IntMPBootRandomElementGen(cryptoParameters, ciphertext);
+        verify_multiparty_enabled(__func__);
+        return multiparty_->int_mp_boot_random_element_gen(crypto_parameters, ciphertext);
     }
 
-    std::vector<Ciphertext<Element>> IntMPBootDecrypt(const PrivateKey<Element> privateKey,
+    std::vector<Ciphertext<Element>> int_mp_boot_decrypt(const PrivateKey<Element> private_key,
                                                       ConstCiphertext<Element> ciphertext,
                                                       ConstCiphertext<Element> a) const {
-        VerifyMultipartyEnabled(__func__);
-        return m_Multiparty->IntMPBootDecrypt(privateKey, ciphertext, a);
+        verify_multiparty_enabled(__func__);
+        return multiparty_->int_mp_boot_decrypt(private_key, ciphertext, a);
     }
 
-    std::vector<Ciphertext<Element>> IntMPBootAdd(std::vector<std::vector<Ciphertext<Element>>>& sharesPairVec) const {
-        VerifyMultipartyEnabled(__func__);
-        return m_Multiparty->IntMPBootAdd(sharesPairVec);
+    std::vector<Ciphertext<Element>> int_mp_boot_add(std::vector<std::vector<Ciphertext<Element>>>& shares_pair_vec) const {
+        verify_multiparty_enabled(__func__);
+        return multiparty_->int_mp_boot_add(shares_pair_vec);
     }
 
-    Ciphertext<Element> IntMPBootEncrypt(const PublicKey<Element> publicKey,
-                                         const std::vector<Ciphertext<Element>>& sharesPair,
+    Ciphertext<Element> int_mp_boot_encrypt(const PublicKey<Element> public_key,
+                                         const std::vector<Ciphertext<Element>>& shares_pair,
                                          ConstCiphertext<Element>& a, ConstCiphertext<Element>& ciphertext) const {
-        VerifyMultipartyEnabled(__func__);
-        return m_Multiparty->IntMPBootEncrypt(publicKey, sharesPair, a, ciphertext);
+        verify_multiparty_enabled(__func__);
+        return multiparty_->int_mp_boot_encrypt(public_key, shares_pair, a, ciphertext);
     }
 
     // FHE METHODS
 
     // TODO Andrey: do we need this method?
-    //  const std::shared_ptr<PKEBase<Element>> getAlgorithm() const { return m_PKE; }
+    //  const std::shared_ptr<BasePke<Element>> getAlgorithm() const { return pke_; }
 
-    void EvalBootstrapSetup(const CryptoContextImpl<Element>& cc, const std::vector<uint32_t>& levelBudget = {5, 4},
+    void eval_bootstrap_setup(const CryptoContextImpl<Element>& cc, const std::vector<uint32_t>& level_budget = {5, 4},
                             const std::vector<uint32_t>& dim1 = {0, 0}, uint32_t slots = 0,
-                            uint32_t correctionFactor = 0, bool precompute = true, bool BTSlotsEncoding = false) {
-        VerifyFHEEnabled(__func__);
-        m_FHE->EvalBootstrapSetup(cc, levelBudget, dim1, slots, correctionFactor, precompute, BTSlotsEncoding);
+                            uint32_t correction_factor = 0, bool precompute = true, bool bt_slots_encoding = false) {
+        verify_fhe_enabled(__func__);
+        fhe_->eval_bootstrap_setup(cc, level_budget, dim1, slots, correction_factor, precompute, bt_slots_encoding);
     }
 
     // Cache teardown is best-effort and must stay noexcept: a scheme that never enabled the
@@ -1475,277 +1475,277 @@ class SchemeBase {
     /**
      * Drops the bootstrapping precomputations cached by the FHE object; a no-op if FHE has not been enabled.
      */
-    void ClearBootstrapPrecom() noexcept {
-        if (m_FHE)
-            m_FHE->ClearBootstrapPrecom();
+    void clear_bootstrap_precom() noexcept {
+        if (fhe_)
+            fhe_->clear_bootstrap_precom();
     }
 
     /**
      * Drops the scheme-switching precomputations cached by the scheme-switching object; a no-op if SCHEMESWITCH has
      * not been enabled.
      */
-    void ClearSchemeSwitchPrecom() noexcept {
-        if (m_SchemeSwitch)
-            m_SchemeSwitch->ClearSchemeSwitchPrecom();
+    void clear_scheme_switch_precom() noexcept {
+        if (scheme_switch_)
+            scheme_switch_->clear_scheme_switch_precom();
     }
 
-    std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> EvalBootstrapKeyGen(const PrivateKey<Element> privateKey,
+    std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_bootstrap_key_gen(const PrivateKey<Element> private_key,
                                                                               uint32_t slots) {
-        VerifyFHEEnabled(__func__);
-        return m_FHE->EvalBootstrapKeyGen(privateKey, slots);
+        verify_fhe_enabled(__func__);
+        return fhe_->eval_bootstrap_key_gen(private_key, slots);
     }
 
-    std::vector<uint32_t> EvalBootstrapKeyMapIndices(const CryptoContext<Element>& cc, uint32_t slots) {
-        VerifyFHEEnabled(__func__);
-        return m_FHE->EvalBootstrapKeyMapIndices(cc, slots);
+    std::vector<uint32_t> eval_bootstrap_key_map_indices(const CryptoContext<Element>& cc, uint32_t slots) {
+        verify_fhe_enabled(__func__);
+        return fhe_->eval_bootstrap_key_map_indices(cc, slots);
     }
 
-    void EvalBootstrapPrecompute(const CryptoContextImpl<Element>& cc, uint32_t slots = 0) {
-        VerifyFHEEnabled(__func__);
-        m_FHE->EvalBootstrapPrecompute(cc, slots);
+    void eval_bootstrap_precompute(const CryptoContextImpl<Element>& cc, uint32_t slots = 0) {
+        verify_fhe_enabled(__func__);
+        fhe_->eval_bootstrap_precompute(cc, slots);
     }
 
-    Ciphertext<Element> EvalBootstrap(ConstCiphertext<Element>& ciphertext, uint32_t numIterations = 1,
+    Ciphertext<Element> eval_bootstrap(ConstCiphertext<Element>& ciphertext, uint32_t num_iterations = 1,
                                       uint32_t precision = 0) const {
-        VerifyFHEEnabled(__func__);
-        return m_FHE->EvalBootstrap(ciphertext, numIterations, precision);
+        verify_fhe_enabled(__func__);
+        return fhe_->eval_bootstrap(ciphertext, num_iterations, precision);
     }
 
-    Ciphertext<Element> EvalBootstrapStCFirst(ConstCiphertext<Element>& ciphertext, uint32_t numIterations = 1,
+    Ciphertext<Element> eval_bootstrap_st_c_first(ConstCiphertext<Element>& ciphertext, uint32_t num_iterations = 1,
                                               uint32_t precision = 0) const {
-        VerifyFHEEnabled(__func__);
-        return m_FHE->EvalBootstrapStCFirst(ciphertext, numIterations, precision);
+        verify_fhe_enabled(__func__);
+        return fhe_->eval_bootstrap_st_c_first(ciphertext, num_iterations, precision);
     }
 
-    void EvalFEFuncBootstrapSetup(const CryptoContextImpl<Element>& cc,
-                                  const std::vector<uint32_t>& levelBudget = {5, 4},
+    void eval_fe_func_bootstrap_setup(const CryptoContextImpl<Element>& cc,
+                                  const std::vector<uint32_t>& level_budget = {5, 4},
                                   const std::vector<uint32_t>& dim1 = {0, 0}, uint32_t slots = 0) {
-        VerifyFHEEnabled(__func__);
-        m_FHE->EvalFEFuncBootstrapSetup(cc, levelBudget, dim1, slots);
+        verify_fhe_enabled(__func__);
+        fhe_->eval_fe_func_bootstrap_setup(cc, level_budget, dim1, slots);
     }
 
-    Ciphertext<Element> EvalFEFuncBootstrap(ConstCiphertext<Element>& ciphertext,
+    Ciphertext<Element> eval_fe_func_bootstrap(ConstCiphertext<Element>& ciphertext,
                                             const std::vector<std::complex<double>>& coefficients) const {
-        VerifyFHEEnabled(__func__);
-        return m_FHE->EvalFEFuncBootstrap(ciphertext, coefficients);
+        verify_fhe_enabled(__func__);
+        return fhe_->eval_fe_func_bootstrap(ciphertext, coefficients);
     }
 
-    std::shared_ptr<seriesPowers<Element>> EvalFEFuncBootstrapPrecompute(
+    std::shared_ptr<SeriesPowers<Element>> eval_fe_func_bootstrap_precompute(
             ConstCiphertext<Element>& ciphertext, const std::vector<std::complex<double>>& coefficients) const {
-        VerifyFHEEnabled(__func__);
-        return m_FHE->EvalFEFuncBootstrapPrecompute(ciphertext, coefficients);
+        verify_fhe_enabled(__func__);
+        return fhe_->eval_fe_func_bootstrap_precompute(ciphertext, coefficients);
     }
 
-    Ciphertext<Element> EvalFEFuncBootstrapWithPrecomp(const std::shared_ptr<seriesPowers<Element>>& powers,
+    Ciphertext<Element> eval_fe_func_bootstrap_with_precomp(const std::shared_ptr<SeriesPowers<Element>>& powers,
                                                        const std::vector<std::complex<double>>& coefficients) const {
-        VerifyFHEEnabled(__func__);
-        return m_FHE->EvalFEFuncBootstrapWithPrecomp(powers, coefficients);
+        verify_fhe_enabled(__func__);
+        return fhe_->eval_fe_func_bootstrap_with_precomp(powers, coefficients);
     }
 
     template <typename VectorDataType>
-    void EvalFBTSetup(const CryptoContextImpl<Element>& cc, const std::vector<VectorDataType>& coeffs,
-                      uint32_t numSlots, const BigInteger& PIn, const BigInteger& POut, const BigInteger& Bigq,
-                      const PublicKey<DCRTPoly>& pubKey, const std::vector<uint32_t>& dim1,
-                      const std::vector<uint32_t>& levelBudget, uint32_t lvlsAfterBoot = 0,
-                      uint32_t depthLeveledComputation = 0, size_t order = 1) {
-        VerifyFHEEnabled(__func__);
-        m_FHE->EvalFBTSetup(cc, coeffs, numSlots, PIn, POut, Bigq, pubKey, dim1, levelBudget, lvlsAfterBoot,
-                            depthLeveledComputation, order);
+    void eval_fbt_setup(const CryptoContextImpl<Element>& cc, const std::vector<VectorDataType>& coeffs,
+                      uint32_t num_slots, const BigInteger& p_in, const BigInteger& P_out, const BigInteger& bigq,
+                      const PublicKey<RnsPoly>& pub_key, const std::vector<uint32_t>& dim1,
+                      const std::vector<uint32_t>& level_budget, uint32_t lvls_after_boot = 0,
+                      uint32_t depth_leveled_computation = 0, size_t order = 1) {
+        verify_fhe_enabled(__func__);
+        fhe_->eval_fbt_setup(cc, coeffs, num_slots, p_in, P_out, bigq, pub_key, dim1, level_budget, lvls_after_boot,
+                            depth_leveled_computation, order);
     }
 
     template <typename VectorDataType>
-    Ciphertext<Element> EvalFBT(ConstCiphertext<Element>& ciphertext, const std::vector<VectorDataType>& coeffs,
-                                uint32_t digitBitSize, const BigInteger& initialScaling, uint64_t postScaling,
-                                uint32_t levelToReduce = 0, size_t order = 1) {
-        VerifyFHEEnabled(__func__);
-        return m_FHE->EvalFBT(ciphertext, coeffs, digitBitSize, initialScaling, postScaling, levelToReduce, order);
+    Ciphertext<Element> eval_fbt(ConstCiphertext<Element>& ciphertext, const std::vector<VectorDataType>& coeffs,
+                                uint32_t digit_bit_size, const BigInteger& initial_scaling, uint64_t post_scaling,
+                                uint32_t level_to_reduce = 0, size_t order = 1) {
+        verify_fhe_enabled(__func__);
+        return fhe_->eval_fbt(ciphertext, coeffs, digit_bit_size, initial_scaling, post_scaling, level_to_reduce, order);
     }
 
     template <typename VectorDataType>
-    Ciphertext<Element> EvalFBTNoDecoding(ConstCiphertext<Element>& ciphertext,
-                                          const std::vector<VectorDataType>& coeffs, uint32_t digitBitSize,
-                                          const BigInteger& initialScaling, size_t order = 1) {
-        VerifyFHEEnabled(__func__);
-        return m_FHE->EvalFBTNoDecoding(ciphertext, coeffs, digitBitSize, initialScaling, order);
+    Ciphertext<Element> eval_fbt_no_decoding(ConstCiphertext<Element>& ciphertext,
+                                          const std::vector<VectorDataType>& coeffs, uint32_t digit_bit_size,
+                                          const BigInteger& initial_scaling, size_t order = 1) {
+        verify_fhe_enabled(__func__);
+        return fhe_->eval_fbt_no_decoding(ciphertext, coeffs, digit_bit_size, initial_scaling, order);
     }
 
-    Ciphertext<Element> EvalHomDecoding(ConstCiphertext<Element>& ciphertext, uint64_t postScaling,
-                                        uint32_t levelToReduce = 0) {
-        VerifyFHEEnabled(__func__);
-        return m_FHE->EvalHomDecoding(ciphertext, postScaling, levelToReduce);
+    Ciphertext<Element> eval_hom_decoding(ConstCiphertext<Element>& ciphertext, uint64_t post_scaling,
+                                        uint32_t level_to_reduce = 0) {
+        verify_fhe_enabled(__func__);
+        return fhe_->eval_hom_decoding(ciphertext, post_scaling, level_to_reduce);
     }
 
     template <typename VectorDataType>
-    std::shared_ptr<seriesPowers<Element>> EvalMVBPrecompute(ConstCiphertext<Element>& ciphertext,
+    std::shared_ptr<SeriesPowers<Element>> eval_mvb_precompute(ConstCiphertext<Element>& ciphertext,
                                                              const std::vector<VectorDataType>& coeffs,
-                                                             uint32_t digitBitSize, const BigInteger& initialScaling,
+                                                             uint32_t digit_bit_size, const BigInteger& initial_scaling,
                                                              size_t order = 1) {
-        VerifyFHEEnabled(__func__);
-        return m_FHE->EvalMVBPrecompute(ciphertext, coeffs, digitBitSize, initialScaling, order);
+        verify_fhe_enabled(__func__);
+        return fhe_->eval_mvb_precompute(ciphertext, coeffs, digit_bit_size, initial_scaling, order);
     }
 
     template <typename VectorDataType>
-    Ciphertext<Element> EvalMVB(const std::shared_ptr<seriesPowers<Element>> ciphertexts,
-                                const std::vector<VectorDataType>& coeffs, uint32_t digitBitSize, uint64_t postScaling,
-                                uint32_t levelToReduce = 0, size_t order = 1) {
-        VerifyFHEEnabled(__func__);
-        return m_FHE->EvalMVB(ciphertexts, coeffs, digitBitSize, postScaling, levelToReduce, order);
+    Ciphertext<Element> eval_mvb(const std::shared_ptr<SeriesPowers<Element>> ciphertexts,
+                                const std::vector<VectorDataType>& coeffs, uint32_t digit_bit_size, uint64_t post_scaling,
+                                uint32_t level_to_reduce = 0, size_t order = 1) {
+        verify_fhe_enabled(__func__);
+        return fhe_->eval_mvb(ciphertexts, coeffs, digit_bit_size, post_scaling, level_to_reduce, order);
     }
 
     template <typename VectorDataType>
-    Ciphertext<Element> EvalMVBNoDecoding(const std::shared_ptr<seriesPowers<Element>> ciphertexts,
-                                          const std::vector<VectorDataType>& coeffs, uint32_t digitBitSize,
+    Ciphertext<Element> eval_mvb_no_decoding(const std::shared_ptr<SeriesPowers<Element>> ciphertexts,
+                                          const std::vector<VectorDataType>& coeffs, uint32_t digit_bit_size,
                                           size_t order = 1) {
-        VerifyFHEEnabled(__func__);
-        return m_FHE->EvalMVBNoDecoding(ciphertexts, coeffs, digitBitSize, order);
+        verify_fhe_enabled(__func__);
+        return fhe_->eval_mvb_no_decoding(ciphertexts, coeffs, digit_bit_size, order);
     }
 
     template <typename VectorDataType>
-    Ciphertext<Element> EvalHermiteTrigSeries(ConstCiphertext<Element>& ciphertext,
-                                              const std::vector<std::complex<double>>& coefficientsCheb, double a,
-                                              double b, const std::vector<VectorDataType>& coefficientsHerm,
+    Ciphertext<Element> eval_hermite_trig_series(ConstCiphertext<Element>& ciphertext,
+                                              const std::vector<std::complex<double>>& coefficients_cheb, double a,
+                                              double b, const std::vector<VectorDataType>& coefficients_herm,
                                               size_t precomp = 0) {
-        VerifyFHEEnabled(__func__);
-        return m_FHE->EvalHermiteTrigSeries(ciphertext, coefficientsCheb, a, b, coefficientsHerm, precomp);
+        verify_fhe_enabled(__func__);
+        return fhe_->eval_hermite_trig_series(ciphertext, coefficients_cheb, a, b, coefficients_herm, precomp);
     }
 
-    uint32_t GetCKKSBootCorrectionFactor() {
-        VerifyFHEEnabled(__func__);
-        return m_FHE->GetCKKSBootCorrectionFactor();
+    uint32_t get_ckks_boot_correction_factor() {
+        verify_fhe_enabled(__func__);
+        return fhe_->get_ckks_boot_correction_factor();
     }
 
-    void SetCKKSBootCorrectionFactor(uint32_t cf) {
-        VerifyFHEEnabled(__func__);
-        return m_FHE->SetCKKSBootCorrectionFactor(cf);
+    void set_ckks_boot_correction_factor(uint32_t cf) {
+        verify_fhe_enabled(__func__);
+        return fhe_->set_ckks_boot_correction_factor(cf);
     }
 
     // SCHEMESWITCHING methods
 
-    LWEPrivateKey EvalCKKStoFHEWSetup(const SchSwchParams& params) {
-        VerifySchemeSwitchEnabled(__func__);
-        return m_SchemeSwitch->EvalCKKStoFHEWSetup(params);
+    LwePrivateKey eval_ckks_to_fhew_setup(const SchSwchParams& params) {
+        verify_scheme_switch_enabled(__func__);
+        return scheme_switch_->eval_ckks_to_fhew_setup(params);
     }
 
-    std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> EvalCKKStoFHEWKeyGen(const KeyPair<Element>& keyPair,
-                                                                               ConstLWEPrivateKey& lwesk) {
-        VerifySchemeSwitchEnabled(__func__);
-        return m_SchemeSwitch->EvalCKKStoFHEWKeyGen(keyPair, lwesk);
+    std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_ckks_to_fhew_key_gen(const KeyPair<Element>& key_pair,
+                                                                               ConstLwePrivateKey& lwesk) {
+        verify_scheme_switch_enabled(__func__);
+        return scheme_switch_->eval_ckks_to_fhew_key_gen(key_pair, lwesk);
     }
 
-    void EvalCKKStoFHEWPrecompute(const CryptoContextImpl<Element>& cc, double scale = 1.0) {
-        VerifySchemeSwitchEnabled(__func__);
-        return m_SchemeSwitch->EvalCKKStoFHEWPrecompute(cc, scale);
+    void eval_ckks_to_fhew_precompute(const CryptoContextImpl<Element>& cc, double scale = 1.0) {
+        verify_scheme_switch_enabled(__func__);
+        return scheme_switch_->eval_ckks_to_fhew_precompute(cc, scale);
     }
 
-    std::vector<std::shared_ptr<LWECiphertextImpl>> EvalCKKStoFHEW(ConstCiphertext<Element>& ciphertext,
-                                                                   uint32_t numCtxts = 0) {
-        VerifySchemeSwitchEnabled(__func__);
-        return m_SchemeSwitch->EvalCKKStoFHEW(ciphertext, numCtxts);
+    std::vector<std::shared_ptr<LweCiphertextImpl>> eval_ckks_to_fhew(ConstCiphertext<Element>& ciphertext,
+                                                                   uint32_t num_ctxts = 0) {
+        verify_scheme_switch_enabled(__func__);
+        return scheme_switch_->eval_ckks_to_fhew(ciphertext, num_ctxts);
     }
 
-    void EvalFHEWtoCKKSSetup(const CryptoContextImpl<Element>& ccCKKS, const std::shared_ptr<BinFHEContext>& ccLWE,
-                             uint32_t numSlotsCKKS = 0, uint32_t logQ = 25) {
-        VerifySchemeSwitchEnabled(__func__);
-        m_SchemeSwitch->EvalFHEWtoCKKSSetup(ccCKKS, ccLWE, numSlotsCKKS, logQ);
+    void eval_fhew_to_ckks_setup(const CryptoContextImpl<Element>& cc_ckks, const std::shared_ptr<BooleanContext>& cc_lwe,
+                             uint32_t num_slots_ckks = 0, uint32_t log_q = 25) {
+        verify_scheme_switch_enabled(__func__);
+        scheme_switch_->eval_fhew_to_ckks_setup(cc_ckks, cc_lwe, num_slots_ckks, log_q);
     }
 
-    std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> EvalFHEWtoCKKSKeyGen(const KeyPair<Element>& keyPair,
-                                                                               ConstLWEPrivateKey& lwesk,
-                                                                               uint32_t numSlots = 0,
-                                                                               uint32_t numCtxts = 0, uint32_t dim1 = 0,
+    std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_fhew_to_ckks_key_gen(const KeyPair<Element>& key_pair,
+                                                                               ConstLwePrivateKey& lwesk,
+                                                                               uint32_t num_slots = 0,
+                                                                               uint32_t num_ctxts = 0, uint32_t dim1 = 0,
                                                                                uint32_t L = 0) {
-        VerifySchemeSwitchEnabled(__func__);
-        return m_SchemeSwitch->EvalFHEWtoCKKSKeyGen(keyPair, lwesk, numSlots, numCtxts, dim1, L);
+        verify_scheme_switch_enabled(__func__);
+        return scheme_switch_->eval_fhew_to_ckks_key_gen(key_pair, lwesk, num_slots, num_ctxts, dim1, L);
     }
 
-    void EvalCompareSwitchPrecompute(const CryptoContextImpl<Element>& ccCKKS, uint32_t pLWE = 0,
-                                     double scaleSign = 1.0, bool unit = false) {
-        VerifySchemeSwitchEnabled(__func__);
-        m_SchemeSwitch->EvalCompareSwitchPrecompute(ccCKKS, pLWE, scaleSign, unit);
+    void eval_compare_switch_precompute(const CryptoContextImpl<Element>& cc_ckks, uint32_t p_lwe = 0,
+                                     double scale_sign = 1.0, bool unit = false) {
+        verify_scheme_switch_enabled(__func__);
+        scheme_switch_->eval_compare_switch_precompute(cc_ckks, p_lwe, scale_sign, unit);
     }
 
-    Ciphertext<Element> EvalFHEWtoCKKS(std::vector<std::shared_ptr<LWECiphertextImpl>>& LWECiphertexts,
-                                       uint32_t numCtxts = 0, uint32_t numSlots = 0, uint32_t p = 4, double pmin = 0.0,
+    Ciphertext<Element> eval_fhew_to_ckks(std::vector<std::shared_ptr<LweCiphertextImpl>>& lwe_ciphertexts,
+                                       uint32_t num_ctxts = 0, uint32_t num_slots = 0, uint32_t p = 4, double pmin = 0.0,
                                        double pmax = 2.0, uint32_t dim1 = 0) const {
-        VerifySchemeSwitchEnabled(__func__);
-        return m_SchemeSwitch->EvalFHEWtoCKKS(LWECiphertexts, numCtxts, numSlots, p, pmin, pmax, dim1);
+        verify_scheme_switch_enabled(__func__);
+        return scheme_switch_->eval_fhew_to_ckks(lwe_ciphertexts, num_ctxts, num_slots, p, pmin, pmax, dim1);
     }
 
-    LWEPrivateKey EvalSchemeSwitchingSetup(const SchSwchParams& params) {
-        VerifySchemeSwitchEnabled(__func__);
-        return m_SchemeSwitch->EvalSchemeSwitchingSetup(params);
+    LwePrivateKey eval_scheme_switching_setup(const SchSwchParams& params) {
+        verify_scheme_switch_enabled(__func__);
+        return scheme_switch_->eval_scheme_switching_setup(params);
     }
 
-    std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> EvalSchemeSwitchingKeyGen(const KeyPair<Element>& keyPair,
-                                                                                    ConstLWEPrivateKey& lwesk) {
-        VerifySchemeSwitchEnabled(__func__);
-        return m_SchemeSwitch->EvalSchemeSwitchingKeyGen(keyPair, lwesk);
+    std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> eval_scheme_switching_key_gen(const KeyPair<Element>& key_pair,
+                                                                                    ConstLwePrivateKey& lwesk) {
+        verify_scheme_switch_enabled(__func__);
+        return scheme_switch_->eval_scheme_switching_key_gen(key_pair, lwesk);
     }
 
-    Ciphertext<Element> EvalCompareSchemeSwitching(ConstCiphertext<Element>& ciphertext1,
-                                                   ConstCiphertext<Element>& ciphertext2, uint32_t numCtxts = 0,
-                                                   uint32_t numSlots = 0, uint32_t pLWE = 0, double scaleSign = 1.0,
+    Ciphertext<Element> eval_compare_scheme_switching(ConstCiphertext<Element>& ciphertext1,
+                                                   ConstCiphertext<Element>& ciphertext2, uint32_t num_ctxts = 0,
+                                                   uint32_t num_slots = 0, uint32_t p_lwe = 0, double scale_sign = 1.0,
                                                    bool unit = false) {
-        VerifySchemeSwitchEnabled(__func__);
-        return m_SchemeSwitch->EvalCompareSchemeSwitching(ciphertext1, ciphertext2, numCtxts, numSlots, pLWE, scaleSign,
+        verify_scheme_switch_enabled(__func__);
+        return scheme_switch_->eval_compare_scheme_switching(ciphertext1, ciphertext2, num_ctxts, num_slots, p_lwe, scale_sign,
                                                           unit);
     }
 
-    std::vector<Ciphertext<Element>> EvalMinSchemeSwitching(ConstCiphertext<Element>& ciphertext,
-                                                            PublicKey<Element> publicKey, uint32_t numValues = 0,
-                                                            uint32_t numSlots = 0, uint32_t pLWE = 0,
-                                                            double scaleSign = 1.0) {
-        VerifySchemeSwitchEnabled(__func__);
-        return m_SchemeSwitch->EvalMinSchemeSwitching(ciphertext, publicKey, numValues, numSlots, pLWE, scaleSign);
+    std::vector<Ciphertext<Element>> eval_min_scheme_switching(ConstCiphertext<Element>& ciphertext,
+                                                            PublicKey<Element> public_key, uint32_t num_values = 0,
+                                                            uint32_t num_slots = 0, uint32_t p_lwe = 0,
+                                                            double scale_sign = 1.0) {
+        verify_scheme_switch_enabled(__func__);
+        return scheme_switch_->eval_min_scheme_switching(ciphertext, public_key, num_values, num_slots, p_lwe, scale_sign);
     }
 
-    std::vector<Ciphertext<Element>> EvalMinSchemeSwitchingAlt(ConstCiphertext<Element>& ciphertext,
-                                                               PublicKey<Element> publicKey, uint32_t numValues = 0,
-                                                               uint32_t numSlots = 0, uint32_t pLWE = 0,
-                                                               double scaleSign = 1.0) {
-        VerifySchemeSwitchEnabled(__func__);
-        return m_SchemeSwitch->EvalMinSchemeSwitchingAlt(ciphertext, publicKey, numValues, numSlots, pLWE, scaleSign);
+    std::vector<Ciphertext<Element>> eval_min_scheme_switching_alt(ConstCiphertext<Element>& ciphertext,
+                                                               PublicKey<Element> public_key, uint32_t num_values = 0,
+                                                               uint32_t num_slots = 0, uint32_t p_lwe = 0,
+                                                               double scale_sign = 1.0) {
+        verify_scheme_switch_enabled(__func__);
+        return scheme_switch_->eval_min_scheme_switching_alt(ciphertext, public_key, num_values, num_slots, p_lwe, scale_sign);
     }
 
-    std::vector<Ciphertext<Element>> EvalMaxSchemeSwitching(ConstCiphertext<Element>& ciphertext,
-                                                            PublicKey<Element> publicKey, uint32_t numValues = 0,
-                                                            uint32_t numSlots = 0, uint32_t pLWE = 0,
-                                                            double scaleSign = 1.0) {
-        VerifySchemeSwitchEnabled(__func__);
-        return m_SchemeSwitch->EvalMaxSchemeSwitching(ciphertext, publicKey, numValues, numSlots, pLWE, scaleSign);
+    std::vector<Ciphertext<Element>> eval_max_scheme_switching(ConstCiphertext<Element>& ciphertext,
+                                                            PublicKey<Element> public_key, uint32_t num_values = 0,
+                                                            uint32_t num_slots = 0, uint32_t p_lwe = 0,
+                                                            double scale_sign = 1.0) {
+        verify_scheme_switch_enabled(__func__);
+        return scheme_switch_->eval_max_scheme_switching(ciphertext, public_key, num_values, num_slots, p_lwe, scale_sign);
     }
 
-    std::vector<Ciphertext<Element>> EvalMaxSchemeSwitchingAlt(ConstCiphertext<Element>& ciphertext,
-                                                               PublicKey<Element> publicKey, uint32_t numValues = 0,
-                                                               uint32_t numSlots = 0, uint32_t pLWE = 0,
-                                                               double scaleSign = 1.0) {
-        VerifySchemeSwitchEnabled(__func__);
-        return m_SchemeSwitch->EvalMaxSchemeSwitchingAlt(ciphertext, publicKey, numValues, numSlots, pLWE, scaleSign);
+    std::vector<Ciphertext<Element>> eval_max_scheme_switching_alt(ConstCiphertext<Element>& ciphertext,
+                                                               PublicKey<Element> public_key, uint32_t num_values = 0,
+                                                               uint32_t num_slots = 0, uint32_t p_lwe = 0,
+                                                               double scale_sign = 1.0) {
+        verify_scheme_switch_enabled(__func__);
+        return scheme_switch_->eval_max_scheme_switching_alt(ciphertext, public_key, num_values, num_slots, p_lwe, scale_sign);
     }
 
-    std::shared_ptr<lbcrypto::BinFHEContext> GetBinCCForSchemeSwitch() {
-        VerifySchemeSwitchEnabled(__func__);
-        return m_SchemeSwitch->GetBinCCForSchemeSwitch();
+    std::shared_ptr<cipher::BooleanContext> get_bin_cc_for_scheme_switch() {
+        verify_scheme_switch_enabled(__func__);
+        return scheme_switch_->get_bin_cc_for_scheme_switch();
     }
 
-    void SetBinCCForSchemeSwitch(std::shared_ptr<lbcrypto::BinFHEContext> ccLWE) {
-        VerifySchemeSwitchEnabled(__func__);
-        m_SchemeSwitch->SetBinCCForSchemeSwitch(ccLWE);
+    void set_bin_cc_for_scheme_switch(std::shared_ptr<cipher::BooleanContext> cc_lwe) {
+        verify_scheme_switch_enabled(__func__);
+        scheme_switch_->set_bin_cc_for_scheme_switch(cc_lwe);
     }
 
-    Ciphertext<Element> GetSwkFC() {
-        VerifySchemeSwitchEnabled(__func__);
-        return m_SchemeSwitch->GetSwkFC();
+    Ciphertext<Element> get_swk_fc() {
+        verify_scheme_switch_enabled(__func__);
+        return scheme_switch_->get_swk_fc();
     }
 
-    void SetSwkFC(Ciphertext<Element> FHEWtoCKKSswk) {
-        VerifySchemeSwitchEnabled(__func__);
-        m_SchemeSwitch->SetSwkFC(FHEWtoCKKSswk);
+    void set_swk_fc(Ciphertext<Element> fhew_to_ckks_swk) {
+        verify_scheme_switch_enabled(__func__);
+        scheme_switch_->set_swk_fc(fhew_to_ckks_swk);
     }
 
     /**
      * Serializes the scheme: only the FHE and scheme-switching objects (which carry precomputed data) and the mask
-     * of enabled features are written; the other family objects are stateless and are recreated by Enable() on
+     * of enabled features are written; the other family objects are stateless and are recreated by enable() on
      * load.
      *
      * @param ar the archive to write to
@@ -1754,69 +1754,69 @@ class SchemeBase {
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
         // TODO (dsuponit): should we serialize all feature pointers???
-        // if (IsFeatureEnabled()) {
+        // if (is_feature_enabled()) {
         // }
-        // ar(::cereal::make_nvp("params", m_ParamsGen));
-        // ar(::cereal::make_nvp("pke", m_PKE));
-        // ar(::cereal::make_nvp("keyswitch", m_KeySwitch));
-        // ar(::cereal::make_nvp("pre", m_PRE));
-        // ar(::cereal::make_nvp("lvldshe", m_LeveledSHE));
-        // ar(::cereal::make_nvp("advshe", m_AdvancedSHE));
-        ar(::cereal::make_nvp("fhe", m_FHE));
-        ar(::cereal::make_nvp("schswitch", m_SchemeSwitch));
-        ar(::cereal::make_nvp("enabled", GetEnabled()));
+        // ar(::cereal::make_nvp("params", params_gen_));
+        // ar(::cereal::make_nvp("pke", pke_));
+        // ar(::cereal::make_nvp("keyswitch", key_switch_));
+        // ar(::cereal::make_nvp("pre", pre_));
+        // ar(::cereal::make_nvp("lvldshe", leveled_she_));
+        // ar(::cereal::make_nvp("advshe", advanced_she_));
+        ar(::cereal::make_nvp("fhe", fhe_));
+        ar(::cereal::make_nvp("schswitch", scheme_switch_));
+        ar(::cereal::make_nvp("enabled", get_enabled()));
     }
 
     /**
      * Deserializes the scheme: reads the FHE and scheme-switching objects, tolerating archives written before
      * these fields existed (JSON encoding only; the fields are then left null), then re-enables every feature in
-     * the serialized mask through Enable().
+     * the serialized mask through enable().
      *
      * @param ar the archive to read from
-     * @param version serialized version of the object; must not exceed SerializedVersion()
+     * @param version serialized version of the object; must not exceed serialized_version()
      */
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
 
-        // ar(::cereal::make_nvp("params", m_ParamsGen));
-        // ar(::cereal::make_nvp("pke", m_PKE));
-        // ar(::cereal::make_nvp("keyswitch", m_KeySwitch));
-        // ar(::cereal::make_nvp("pre", m_PRE));
-        // ar(::cereal::make_nvp("lvldshe", m_LeveledSHE));
-        // ar(::cereal::make_nvp("advshe", m_AdvancedSHE));
+        // ar(::cereal::make_nvp("params", params_gen_));
+        // ar(::cereal::make_nvp("pke", pke_));
+        // ar(::cereal::make_nvp("keyswitch", key_switch_));
+        // ar(::cereal::make_nvp("pre", pre_));
+        // ar(::cereal::make_nvp("lvldshe", leveled_she_));
+        // ar(::cereal::make_nvp("advshe", advanced_she_));
 
         // try-catch is used for backwards compatibility down to 1.0.x
         // only works for JSON encoding
-        // m_FHE was added in v1.1.2
+        // fhe_ was added in v1.1.2
         try {
-            ar(::cereal::make_nvp("fhe", m_FHE));
+            ar(::cereal::make_nvp("fhe", fhe_));
         } catch (cereal::Exception&) {
-            m_FHE = nullptr;
+            fhe_ = nullptr;
         }
 
         // try-catch is used for backwards compatibility down to 1.0.x
         // only works for JSON encoding
-        // m_SchemeSwitch was added in v1.1.3
+        // scheme_switch_ was added in v1.1.3
         try {
-            ar(::cereal::make_nvp("schswitch", m_SchemeSwitch));
+            ar(::cereal::make_nvp("schswitch", scheme_switch_));
         } catch (cereal::Exception&) {
-            m_SchemeSwitch = nullptr;
+            scheme_switch_ = nullptr;
         }
 
         uint32_t enabled = 0;
         ar(::cereal::make_nvp("enabled", enabled));
-        Enable(enabled);
+        enable(enabled);
     }
 
-    virtual std::string SerializedObjectName() const {
+    virtual std::string serialized_object_name() const {
         return "SchemeBase";
     }
 
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 
@@ -1824,100 +1824,100 @@ class SchemeBase {
     // Functions to check enabled features in the cryptocontext
     //=================================================================================================================
     /**
-     * @brief VerifyAdvancedSHEEnabled is to check if Enable(ADVANCEDSHE) has been called and if it has not
+     * @brief verify_advanced_she_enabled is to check if enable(ADVANCEDSHE) has been called and if it has not
      *        it will throw an exception
-     * @param functionName is the calling function name. __func__ can be used instead
+     * @param function_name is the calling function name. __func__ can be used instead
      */
-    inline void VerifyAdvancedSHEEnabled(const std::string& functionName) const {
-        if (m_AdvancedSHE == nullptr) {
-            std::string errMsg = std::string(functionName) +
+    inline void verify_advanced_she_enabled(const std::string& function_name) const {
+        if (advanced_she_ == nullptr) {
+            std::string err_msg = std::string(function_name) +
                                  " operation has not been enabled. Enable(ADVANCEDSHE) must be called to enable it.";
-            OPENFHE_THROW(errMsg);
+            CIPHER_THROW(err_msg);
         }
     }
     /**
-     * @brief VerifyMultipartyEnabled is to check if Enable(MULTIPARTY) has been called and if it has not
+     * @brief verify_multiparty_enabled is to check if enable(MULTIPARTY) has been called and if it has not
      *        it will throw an exception
-     * @param functionName is the calling function name. __func__ can be used instead
+     * @param function_name is the calling function name. __func__ can be used instead
      */
-    inline void VerifyMultipartyEnabled(const std::string& functionName) const {
-        if (m_Multiparty == nullptr) {
-            std::string errMsg = std::string(functionName) +
+    inline void verify_multiparty_enabled(const std::string& function_name) const {
+        if (multiparty_ == nullptr) {
+            std::string err_msg = std::string(function_name) +
                                  " operation has not been enabled. Enable(MULTIPARTY) must be called to enable it.";
-            OPENFHE_THROW(errMsg);
+            CIPHER_THROW(err_msg);
         }
     }
     /**
-     * @brief VerifyLeveledSHEEnabled is to check if Enable(LEVELEDSHE) has been called and if it has not
+     * @brief verify_leveled_she_enabled is to check if enable(LEVELEDSHE) has been called and if it has not
      *        it will throw an exception
-     * @param functionName is the calling function name. __func__ can be used instead
+     * @param function_name is the calling function name. __func__ can be used instead
      */
-    inline void VerifyLeveledSHEEnabled(const std::string& functionName) const {
-        if (m_LeveledSHE == nullptr) {
-            std::string errMsg = std::string(functionName) +
+    inline void verify_leveled_she_enabled(const std::string& function_name) const {
+        if (leveled_she_ == nullptr) {
+            std::string err_msg = std::string(function_name) +
                                  " operation has not been enabled. Enable(LEVELEDSHE) must be called to enable it.";
-            OPENFHE_THROW(errMsg);
+            CIPHER_THROW(err_msg);
         }
     }
     /**
-     * @brief VerifyPKEEnabled is to check if Enable(PKE) has been called and if it has not
+     * @brief verify_pke_enabled is to check if enable(PKE) has been called and if it has not
      *        it will throw an exception
-     * @param functionName is the calling function name. __func__ can be used instead
+     * @param function_name is the calling function name. __func__ can be used instead
      */
-    inline void VerifyPKEEnabled(const std::string& functionName) const {
-        if (m_PKE == nullptr) {
-            std::string errMsg = std::string(functionName) +
+    inline void verify_pke_enabled(const std::string& function_name) const {
+        if (pke_ == nullptr) {
+            std::string err_msg = std::string(function_name) +
                                  " operation has not been enabled. Enable(PKE) must be called to enable it.";
-            OPENFHE_THROW(errMsg);
+            CIPHER_THROW(err_msg);
         }
     }
     /**
-     * @brief VerifyPREEnabled is to check if Enable(PRE) has been called and if it has not
+     * @brief verify_pre_enabled is to check if enable(PRE) has been called and if it has not
      *        it will throw an exception
-     * @param functionName is the calling function name. __func__ can be used instead
+     * @param function_name is the calling function name. __func__ can be used instead
      */
-    inline void VerifyPREEnabled(const std::string& functionName) const {
-        if (m_PRE == nullptr) {
-            std::string errMsg = std::string(functionName) +
+    inline void verify_pre_enabled(const std::string& function_name) const {
+        if (pre_ == nullptr) {
+            std::string err_msg = std::string(function_name) +
                                  " operation has not been enabled. Enable(PRE) must be called to enable it.";
-            OPENFHE_THROW(errMsg);
+            CIPHER_THROW(err_msg);
         }
     }
     /**
-     * @brief VerifyKeySwitchEnabled is to check if Enable(KEYSWITCH) has been called and if it has not
+     * @brief verify_key_switch_enabled is to check if enable(KEYSWITCH) has been called and if it has not
      *        it will throw an exception
-     * @param functionName is the calling function name. __func__ can be used instead
+     * @param function_name is the calling function name. __func__ can be used instead
      */
-    inline void VerifyKeySwitchEnabled(const std::string& functionName) const {
-        if (m_KeySwitch == nullptr) {
-            std::string errMsg = std::string(functionName) +
+    inline void verify_key_switch_enabled(const std::string& function_name) const {
+        if (key_switch_ == nullptr) {
+            std::string err_msg = std::string(function_name) +
                                  " operation has not been enabled. Enable(KEYSWITCH) must be called to enable it.";
-            OPENFHE_THROW(errMsg);
+            CIPHER_THROW(err_msg);
         }
     }
     /**
-     * @brief VerifyFHEEnabled is to check if Enable(FHE) has been called and if it has not
+     * @brief verify_fhe_enabled is to check if enable(FHE) has been called and if it has not
      *        it will throw an exception
-     * @param functionName is the calling function name. __func__ can be used instead
+     * @param function_name is the calling function name. __func__ can be used instead
      */
-    inline void VerifyFHEEnabled(const std::string& functionName) const {
-        if (m_FHE == nullptr) {
-            std::string errMsg = std::string(functionName) +
+    inline void verify_fhe_enabled(const std::string& function_name) const {
+        if (fhe_ == nullptr) {
+            std::string err_msg = std::string(function_name) +
                                  " operation has not been enabled. Enable(FHE) must be called to enable it.";
-            OPENFHE_THROW(errMsg);
+            CIPHER_THROW(err_msg);
         }
     }
 
     /**
-     * @brief VerifySchemeSwitchEnabled is to check if Enable(SCHEMESWITCH) has been called and if it has not
+     * @brief verify_scheme_switch_enabled is to check if enable(SCHEMESWITCH) has been called and if it has not
      *        it will throw an exception
-     * @param functionName is the calling function name. __func__ can be used instead
+     * @param function_name is the calling function name. __func__ can be used instead
      */
-    inline void VerifySchemeSwitchEnabled(const std::string& functionName) const {
-        if (m_SchemeSwitch == nullptr) {
-            std::string errMsg = std::string(functionName) +
+    inline void verify_scheme_switch_enabled(const std::string& function_name) const {
+        if (scheme_switch_ == nullptr) {
+            std::string err_msg = std::string(function_name) +
                                  " operation has not been enabled. Enable(SCHEMESWITCH) must be called to enable it.";
-            OPENFHE_THROW(errMsg);
+            CIPHER_THROW(err_msg);
         }
     }
 
@@ -1931,37 +1931,37 @@ class SchemeBase {
      */
     friend std::ostream& operator<<(std::ostream& out, const SchemeBase<Element>& s) {
         out << typeid(s).name() << ":";
-        out << " ParamsGen " << (s.m_ParamsGen == 0 ? "none" : typeid(*s.m_ParamsGen).name());
-        out << ", PKE " << (s.m_PKE == 0 ? "none" : typeid(*s.m_PKE).name());
-        out << ", KeySwitch " << (s.m_KeySwitch == 0 ? "none" : typeid(*s.m_KeySwitch).name());
-        out << ", PRE " << (s.m_PRE == 0 ? "none" : typeid(*s.m_PRE).name());
-        out << ", LeveledSHE " << (s.m_LeveledSHE == 0 ? "none" : typeid(*s.m_LeveledSHE).name());
-        out << ", AdvancedSHE " << (s.m_AdvancedSHE == 0 ? "none" : typeid(*s.m_AdvancedSHE).name());
-        out << ", Multiparty " << (s.m_Multiparty == 0 ? "none" : typeid(*s.m_Multiparty).name());
-        out << ", FHE " << (s.m_FHE == 0 ? "none" : typeid(*s.m_FHE).name());
-        out << ", SchemeSwitch " << (s.m_SchemeSwitch == 0 ? "none" : typeid(*s.m_SchemeSwitch).name());
+        out << " ParamsGen " << (s.params_gen_ == 0 ? "none" : typeid(*s.params_gen_).name());
+        out << ", PKE " << (s.pke_ == 0 ? "none" : typeid(*s.pke_).name());
+        out << ", KeySwitch " << (s.key_switch_ == 0 ? "none" : typeid(*s.key_switch_).name());
+        out << ", PRE " << (s.pre_ == 0 ? "none" : typeid(*s.pre_).name());
+        out << ", LeveledSHE " << (s.leveled_she_ == 0 ? "none" : typeid(*s.leveled_she_).name());
+        out << ", AdvancedSHE " << (s.advanced_she_ == 0 ? "none" : typeid(*s.advanced_she_).name());
+        out << ", Multiparty " << (s.multiparty_ == 0 ? "none" : typeid(*s.multiparty_).name());
+        out << ", FHE " << (s.fhe_ == 0 ? "none" : typeid(*s.fhe_).name());
+        out << ", SchemeSwitch " << (s.scheme_switch_ == 0 ? "none" : typeid(*s.scheme_switch_).name());
         return out;
     }
 
   protected:
     /** parameter generation; set by the concrete scheme's constructor */
-    std::shared_ptr<ParameterGenerationBase<Element>> m_ParamsGen;
-    /** key generation, encryption and decryption; set by Enable(PKE) */
-    std::shared_ptr<PKEBase<Element>> m_PKE;
-    /** key switching; set by Enable(KEYSWITCH) */
-    std::shared_ptr<KeySwitchBase<Element>> m_KeySwitch;
-    /** proxy re-encryption; set by Enable(PRE) */
-    std::shared_ptr<PREBase<Element>> m_PRE;
-    /** leveled homomorphic arithmetic; set by Enable(LEVELEDSHE) */
-    std::shared_ptr<LeveledSHEBase<Element>> m_LeveledSHE;
-    /** polynomial evaluation, summation and inner products; set by Enable(ADVANCEDSHE) */
-    std::shared_ptr<AdvancedSHEBase<Element>> m_AdvancedSHE;
-    /** threshold key generation and decryption; set by Enable(MULTIPARTY) */
-    std::shared_ptr<MultipartyBase<Element>> m_Multiparty;
-    /** CKKS bootstrapping and functional bootstrapping; set by Enable(FHE) */
-    std::shared_ptr<FHEBase<Element>> m_FHE;
-    /** CKKS <-> FHEW scheme switching; set by Enable(SCHEMESWITCH) */
-    std::shared_ptr<FHEBase<Element>> m_SchemeSwitch;
+    std::shared_ptr<BaseParamGen<Element>> params_gen_;
+    /** key generation, encryption and decryption; set by enable(PKE) */
+    std::shared_ptr<BasePke<Element>> pke_;
+    /** key switching; set by enable(KEYSWITCH) */
+    std::shared_ptr<KeySwitchBase<Element>> key_switch_;
+    /** proxy re-encryption; set by enable(PRE) */
+    std::shared_ptr<BasePre<Element>> pre_;
+    /** leveled homomorphic arithmetic; set by enable(LEVELEDSHE) */
+    std::shared_ptr<BaseLeveledShe<Element>> leveled_she_;
+    /** polynomial evaluation, summation and inner products; set by enable(ADVANCEDSHE) */
+    std::shared_ptr<BaseAdvancedShe<Element>> advanced_she_;
+    /** threshold key generation and decryption; set by enable(MULTIPARTY) */
+    std::shared_ptr<BaseMultiparty<Element>> multiparty_;
+    /** CKKS bootstrapping and functional bootstrapping; set by enable(FHE) */
+    std::shared_ptr<BaseFhe<Element>> fhe_;
+    /** CKKS <-> FHEW scheme switching; set by enable(SCHEMESWITCH) */
+    std::shared_ptr<BaseFhe<Element>> scheme_switch_;
 
     /**
      * Throws an exception if the ciphertext has more than two elements, since multiparty decryption requires a
@@ -1969,16 +1969,16 @@ class SchemeBase {
      *
      * @param ciphertext the ciphertext to check
      */
-    inline void CheckMultipartyDecryptCompatibility(ConstCiphertext<Element>& ciphertext, CALLER_INFO_ARGS_HDR) const {
-        if (ciphertext->NumberCiphertextElements() > 2) {
-            std::string errorMsg(std::string("ciphertext's number of elements is [") +
-                                 std::to_string(ciphertext->NumberCiphertextElements()) +
+    inline void check_multiparty_decrypt_compatibility(ConstCiphertext<Element>& ciphertext, CALLER_INFO_ARGS_HDR) const {
+        if (ciphertext->number_ciphertext_elements() > 2) {
+            std::string error_msg(std::string("ciphertext's number of elements is [") +
+                                 std::to_string(ciphertext->number_ciphertext_elements()) +
                                  "]. Must be 2 or less for Multiparty Decryption." + CALLER_INFO);
-            OPENFHE_THROW(errorMsg);
+            CIPHER_THROW(error_msg);
         }
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_BASE_SCHEME_H_

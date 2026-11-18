@@ -44,35 +44,35 @@
 #include "cipher/fhe/bgv/context_params.h"
 #include "cipher/fhe/config/params_validation.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 template <typename Element>
-class CryptoContextFactory;
+class ContextFactory;
 
 /**
  * @brief Context generator for the BGV scheme: binds the BGV scheme, crypto parameters and factory types
- * used by GenCryptoContext() and builds a CryptoContext from CCParams<CryptoContextBGVRNS>.
+ * used by make_crypto_context() and builds a CryptoContext from ContextParams<BgvRnsContext>.
  */
-class CryptoContextBGVRNS {
-    using Element = DCRTPoly;
+class BgvRnsContext {
+    using Element = RnsPoly;
 
   public:
     /**
-     * The crypto context type produced by this generator (required by GenCryptoContext()).
+     * The crypto context type produced by this generator (required by make_crypto_context()).
      */
-    using ContextType = CryptoContext<Element>;  // required by GenCryptoContext() in gen-cryptocontext.h
+    using ContextType = CryptoContext<Element>;  // required by make_crypto_context() in gen-cryptocontext.h
     /**
      * The factory that registers and returns the generated contexts.
      */
-    using Factory = CryptoContextFactory<Element>;
+    using Factory = ContextFactory<Element>;
     /**
      * The scheme implementation class instantiated for the context.
      */
-    using PublicKeyEncryptionScheme = SchemeBGVRNS;
+    using PublicKeyEncryptionScheme = BgvRnsScheme;
     /**
      * The crypto parameters class instantiated for the context.
      */
-    using CryptoParams = CryptoParametersBGVRNS;
+    using CryptoParams = BgvRnsCryptoParams;
 
     /**
      * Validates the parameters and generates a BGV crypto context from them.
@@ -80,12 +80,12 @@ class CryptoContextBGVRNS {
      * @param parameters the BGV parameters.
      * @return the generated crypto context.
      */
-    static CryptoContext<Element> genCryptoContext(const CCParams<CryptoContextBGVRNS>& parameters) {
-        validateParametersForCryptocontext(parameters);
-        return genCryptoContextBGVRNSInternal<CryptoContextBGVRNS, Element>(parameters);
+    static CryptoContext<Element> gen_crypto_context(const ContextParams<BgvRnsContext>& parameters) {
+        validate_parameters_for_cryptocontext(parameters);
+        return gen_crypto_context_bgvrns_internal<BgvRnsContext, Element>(parameters);
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_BGV_CONTEXT_GEN_H_

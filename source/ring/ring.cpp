@@ -50,15 +50,15 @@
 #include DCRTPOLY_IMPLEMENTATION
 
 //---------------------------------------------------------------------------------------------
-namespace lbcrypto {
+namespace cipher {
 
-template class ElemParams<NativeInteger>;
+template class ElementParams<NativeInteger>;
 
 MAKE_ILPARAMS_TYPE(NativeInteger)
 MAKE_POLY_TYPE(NativeVector)
 
-#if NATIVEINT != 32
-template class ElemParams<NativeInteger32>;
+#if CIPHER_NATIVE_INT != 32
+template class ElementParams<NativeInteger32>;
 MAKE_ILPARAMS_TYPE(NativeInteger32)
 MAKE_POLY_TYPE(NativeVector32)
 #endif
@@ -67,23 +67,23 @@ template class Matrix<NativePoly>;
 SPLIT64_FOR_TYPE(NativePoly)
 SPLIT64ALT_FOR_TYPE(NativePoly)
 SPLIT32ALT_FOR_TYPE(NativePoly)
-template Matrix<NativeVector> RotateVecResult(Matrix<NativePoly> const& inMat);
-template Matrix<NativeInteger> Rotate(Matrix<NativePoly> const& inMat);
+template Matrix<NativeVector> rotate_vec_result(Matrix<NativePoly> const& in_mat);
+template Matrix<NativeInteger> Rotate(Matrix<NativePoly> const& in_mat);
 
 template class Matrix<Field2n>;
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
-CEREAL_CLASS_VERSION(lbcrypto::ElemParams<NativeInteger>, lbcrypto::ElemParams<NativeInteger>::SerializedVersion());
-CEREAL_CLASS_VERSION(lbcrypto::ILNativeParams, lbcrypto::ILNativeParams::SerializedVersion());
-CEREAL_CLASS_VERSION(lbcrypto::NativePoly, lbcrypto::NativePoly::SerializedVersion());
-CEREAL_CLASS_VERSION(lbcrypto::Field2n, lbcrypto::Field2n::SerializedVersion());
+CEREAL_CLASS_VERSION(cipher::ElementParams<NativeInteger>, cipher::ElementParams<NativeInteger>::serialized_version());
+CEREAL_CLASS_VERSION(cipher::NativePolyParams, cipher::NativePolyParams::serialized_version());
+CEREAL_CLASS_VERSION(cipher::NativePoly, cipher::NativePoly::serialized_version());
+CEREAL_CLASS_VERSION(cipher::Field2n, cipher::Field2n::serialized_version());
 
 //---------------------------------------------------------------------------------------------
-#ifdef WITH_BE2
-namespace lbcrypto {
+#ifdef CIPHER_WITH_BE2
+namespace cipher {
 
-template class ElemParams<M2Integer>;
+template class ElementParams<M2Integer>;
 
 MAKE_ILPARAMS_TYPE(M2Integer)
 MAKE_ILDCRTPARAMS_TYPE(M2Integer)
@@ -94,30 +94,30 @@ template class Matrix<M2Poly>;
 SPLIT64_FOR_TYPE(M2Poly)
 SPLIT64ALT_FOR_TYPE(M2Poly)
 SPLIT32ALT_FOR_TYPE(M2Poly)
-template Matrix<M2Vector> RotateVecResult(Matrix<M2Poly> const& inMat);
-template Matrix<M2Integer> Rotate(Matrix<M2Poly> const& inMat);
+template Matrix<M2Vector> rotate_vec_result(Matrix<M2Poly> const& in_mat);
+template Matrix<M2Integer> Rotate(Matrix<M2Poly> const& in_mat);
 
-template class Matrix<M2DCRTPoly>;
-SPLIT64_FOR_TYPE(M2DCRTPoly)
-SPLIT64ALT_FOR_TYPE(M2DCRTPoly)
-SPLIT32ALT_FOR_TYPE(M2DCRTPoly)
-template Matrix<M2Vector> RotateVecResult(Matrix<M2DCRTPoly> const& inMat);
-template Matrix<M2Integer> Rotate(Matrix<M2DCRTPoly> const& inMat);
+template class Matrix<M2RnsPoly>;
+SPLIT64_FOR_TYPE(M2RnsPoly)
+SPLIT64ALT_FOR_TYPE(M2RnsPoly)
+SPLIT32ALT_FOR_TYPE(M2RnsPoly)
+template Matrix<M2Vector> rotate_vec_result(Matrix<M2RnsPoly> const& in_mat);
+template Matrix<M2Integer> Rotate(Matrix<M2RnsPoly> const& in_mat);
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
-CEREAL_CLASS_VERSION(lbcrypto::ElemParams<M2Integer>, lbcrypto::ElemParams<M2Integer>::SerializedVersion());
-CEREAL_CLASS_VERSION(lbcrypto::M2Params, lbcrypto::M2Params::SerializedVersion());
-CEREAL_CLASS_VERSION(lbcrypto::M2DCRTParams, lbcrypto::M2DCRTParams::SerializedVersion());
-CEREAL_CLASS_VERSION(lbcrypto::M2Poly, lbcrypto::M2Poly::SerializedVersion());
-CEREAL_CLASS_VERSION(lbcrypto::M2DCRTPoly, lbcrypto::M2DCRTPoly::SerializedVersion());
+CEREAL_CLASS_VERSION(cipher::ElementParams<M2Integer>, cipher::ElementParams<M2Integer>::serialized_version());
+CEREAL_CLASS_VERSION(cipher::M2Params, cipher::M2Params::serialized_version());
+CEREAL_CLASS_VERSION(cipher::M2RnsParams, cipher::M2RnsParams::serialized_version());
+CEREAL_CLASS_VERSION(cipher::M2Poly, cipher::M2Poly::serialized_version());
+CEREAL_CLASS_VERSION(cipher::M2RnsPoly, cipher::M2RnsPoly::serialized_version());
 #endif
 
 //---------------------------------------------------------------------------------------------
-#ifdef WITH_BE4
-namespace lbcrypto {
+#ifdef CIPHER_WITH_BE4
+namespace cipher {
 
-template class ElemParams<M4Integer>;
+template class ElementParams<M4Integer>;
 
 MAKE_ILPARAMS_TYPE(M4Integer)
 MAKE_ILDCRTPARAMS_TYPE(M4Integer)
@@ -128,30 +128,30 @@ template class Matrix<M4Poly>;
 SPLIT64_FOR_TYPE(M4Poly)
 SPLIT64ALT_FOR_TYPE(M4Poly)
 SPLIT32ALT_FOR_TYPE(M4Poly)
-template Matrix<M4Vector> RotateVecResult(Matrix<M4Poly> const& inMat);
-template Matrix<M4Integer> Rotate(Matrix<M4Poly> const& inMat);
+template Matrix<M4Vector> rotate_vec_result(Matrix<M4Poly> const& in_mat);
+template Matrix<M4Integer> Rotate(Matrix<M4Poly> const& in_mat);
 
-template class Matrix<M4DCRTPoly>;
-SPLIT64_FOR_TYPE(M4DCRTPoly)
-SPLIT64ALT_FOR_TYPE(M4DCRTPoly)
-SPLIT32ALT_FOR_TYPE(M4DCRTPoly)
-template Matrix<M4Vector> RotateVecResult(Matrix<M4DCRTPoly> const& inMat);
-template Matrix<M4Integer> Rotate(Matrix<M4DCRTPoly> const& inMat);
+template class Matrix<M4RnsPoly>;
+SPLIT64_FOR_TYPE(M4RnsPoly)
+SPLIT64ALT_FOR_TYPE(M4RnsPoly)
+SPLIT32ALT_FOR_TYPE(M4RnsPoly)
+template Matrix<M4Vector> rotate_vec_result(Matrix<M4RnsPoly> const& in_mat);
+template Matrix<M4Integer> Rotate(Matrix<M4RnsPoly> const& in_mat);
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
-CEREAL_CLASS_VERSION(lbcrypto::ElemParams<M4Integer>, lbcrypto::ElemParams<M4Integer>::SerializedVersion());
-CEREAL_CLASS_VERSION(lbcrypto::M4Params, lbcrypto::M4Params::SerializedVersion());
-CEREAL_CLASS_VERSION(lbcrypto::M4DCRTParams, lbcrypto::M4DCRTParams::SerializedVersion());
-CEREAL_CLASS_VERSION(lbcrypto::M4Poly, lbcrypto::M4Poly::SerializedVersion());
-CEREAL_CLASS_VERSION(lbcrypto::M4DCRTPoly, lbcrypto::M4DCRTPoly::SerializedVersion());
+CEREAL_CLASS_VERSION(cipher::ElementParams<M4Integer>, cipher::ElementParams<M4Integer>::serialized_version());
+CEREAL_CLASS_VERSION(cipher::M4Params, cipher::M4Params::serialized_version());
+CEREAL_CLASS_VERSION(cipher::M4RnsParams, cipher::M4RnsParams::serialized_version());
+CEREAL_CLASS_VERSION(cipher::M4Poly, cipher::M4Poly::serialized_version());
+CEREAL_CLASS_VERSION(cipher::M4RnsPoly, cipher::M4RnsPoly::serialized_version());
 #endif
 
 //---------------------------------------------------------------------------------------------
-#ifdef WITH_NTL
-namespace lbcrypto {
+#ifdef CIPHER_WITH_NTL
+namespace cipher {
 
-template class ElemParams<M6Integer>;
+template class ElementParams<M6Integer>;
 
 MAKE_ILPARAMS_TYPE(M6Integer)
 MAKE_ILDCRTPARAMS_TYPE(M6Integer)
@@ -162,21 +162,21 @@ template class Matrix<M6Poly>;
 SPLIT64_FOR_TYPE(M6Poly)
 SPLIT64ALT_FOR_TYPE(M6Poly)
 SPLIT32ALT_FOR_TYPE(M6Poly)
-template Matrix<M6Vector> RotateVecResult(Matrix<M6Poly> const& inMat);
-template Matrix<M6Integer> Rotate(Matrix<M6Poly> const& inMat);
+template Matrix<M6Vector> rotate_vec_result(Matrix<M6Poly> const& in_mat);
+template Matrix<M6Integer> Rotate(Matrix<M6Poly> const& in_mat);
 
-template class Matrix<M6DCRTPoly>;
-SPLIT64_FOR_TYPE(M6DCRTPoly)
-SPLIT64ALT_FOR_TYPE(M6DCRTPoly)
-SPLIT32ALT_FOR_TYPE(M6DCRTPoly)
-template Matrix<M6Vector> RotateVecResult(Matrix<M6DCRTPoly> const& inMat);
-template Matrix<M6Integer> Rotate(Matrix<M6DCRTPoly> const& inMat);
+template class Matrix<M6RnsPoly>;
+SPLIT64_FOR_TYPE(M6RnsPoly)
+SPLIT64ALT_FOR_TYPE(M6RnsPoly)
+SPLIT32ALT_FOR_TYPE(M6RnsPoly)
+template Matrix<M6Vector> rotate_vec_result(Matrix<M6RnsPoly> const& in_mat);
+template Matrix<M6Integer> Rotate(Matrix<M6RnsPoly> const& in_mat);
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
-CEREAL_CLASS_VERSION(lbcrypto::ElemParams<M6Integer>, lbcrypto::ElemParams<M6Integer>::SerializedVersion());
-CEREAL_CLASS_VERSION(lbcrypto::M6Params, lbcrypto::M6Params::SerializedVersion());
-CEREAL_CLASS_VERSION(lbcrypto::M6DCRTParams, lbcrypto::M6DCRTParams::SerializedVersion());
-CEREAL_CLASS_VERSION(lbcrypto::M6Poly, lbcrypto::M6Poly::SerializedVersion());
-CEREAL_CLASS_VERSION(lbcrypto::M6DCRTPoly, lbcrypto::M6DCRTPoly::SerializedVersion());
+CEREAL_CLASS_VERSION(cipher::ElementParams<M6Integer>, cipher::ElementParams<M6Integer>::serialized_version());
+CEREAL_CLASS_VERSION(cipher::M6Params, cipher::M6Params::serialized_version());
+CEREAL_CLASS_VERSION(cipher::M6RnsParams, cipher::M6RnsParams::serialized_version());
+CEREAL_CLASS_VERSION(cipher::M6Poly, cipher::M6Poly::serialized_version());
+CEREAL_CLASS_VERSION(cipher::M6RnsPoly, cipher::M6RnsPoly::serialized_version());
 #endif

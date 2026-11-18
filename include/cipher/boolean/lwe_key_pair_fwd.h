@@ -33,13 +33,13 @@
 
 #include <memory>
 
-namespace lbcrypto {
+namespace cipher {
 
-class LWEKeyPairImpl;
+class LweKeyPairImpl;
 
-using LWEKeyPair = std::shared_ptr<LWEKeyPairImpl>;
-using ConstLWEKeyPair = const std::shared_ptr<const LWEKeyPairImpl>;
+using LweKeyPair = std::shared_ptr<LweKeyPairImpl>;
+using ConstLweKeyPair = const std::shared_ptr<const LweKeyPairImpl>;
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_BOOLEAN_LWE_KEY_PAIR_FWD_H_

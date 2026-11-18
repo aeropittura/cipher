@@ -43,79 +43,79 @@
 #include "cipher/fhe/config/scheme_id.h"
 #include "cipher/fhe/config/scheme_utils.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 // forward declarations (don't include headers as compilation fails when you do)
 template <typename T>
-class CCParams;
+class ContextParams;
 
 template <typename ContextGeneratorType, typename Element>
 /**
  * Builds a BFV crypto context from the parameters: creates the crypto parameters object (with the noise
  * scale fixed to 1), the scheme object with the requested key switching technique, runs the BFV parameter
  * generation and registers the context with the factory. MUST NOT be used without the wrapper
- * CryptoContextBFVRNS::genCryptoContext(), which validates the parameters first.
+ * BfvRnsContext::gen_crypto_context(), which validates the parameters first.
  *
- * @tparam ContextGeneratorType the context generator class (CryptoContextBFVRNS).
- * @tparam Element the ring element type (DCRTPoly).
+ * @tparam ContextGeneratorType the context generator class (BfvRnsContext).
+ * @tparam Element the ring element type (RnsPoly).
  * @param parameters the BFV parameters.
  * @return the generated crypto context.
  */
-typename ContextGeneratorType::ContextType genCryptoContextBFVRNSInternal(
-        const CCParams<ContextGeneratorType>& parameters) {
+typename ContextGeneratorType::ContextType gen_crypto_context_bfvrns_internal(
+        const ContextParams<ContextGeneratorType>& parameters) {
     using ParmType = typename Element::Params;
-    constexpr float assuranceMeasure = 36.0f;
+    constexpr float assurance_measure = 36.0f;
 
     auto ep = std::make_shared<ParmType>();
-    EncodingParams encodingParams(
-            std::make_shared<EncodingParamsImpl>(parameters.GetPlaintextModulus(), parameters.GetBatchSize()));
+    EncodingParams encoding_params(
+            std::make_shared<EncodingParamsImpl>(parameters.get_plaintext_modulus(), parameters.get_batch_size()));
 
     // clang-format off
     auto params = std::make_shared<typename ContextGeneratorType::CryptoParams>(
         ep,
-        encodingParams,
-        parameters.GetStandardDeviation(),
-        assuranceMeasure,
-        parameters.GetSecurityLevel(),
-        parameters.GetDigitSize(),
-        parameters.GetSecretKeyDist(),
-        parameters.GetMaxRelinSkDeg(),
-        parameters.GetKeySwitchTechnique(),
-        parameters.GetScalingTechnique(),
-        parameters.GetEncryptionTechnique(),
-        parameters.GetMultiplicationTechnique(),
-        parameters.GetPREMode(),
-        parameters.GetMultipartyMode(),
-        parameters.GetExecutionMode(),
-        parameters.GetDecryptionNoiseMode(),
-        parameters.GetPlaintextModulus(),
-        parameters.GetStatisticalSecurity(),
-        parameters.GetNumAdversarialQueries(),
-        parameters.GetThresholdNumOfParties());
+        encoding_params,
+        parameters.get_standard_deviation(),
+        assurance_measure,
+        parameters.get_security_level(),
+        parameters.get_digit_size(),
+        parameters.get_secret_key_dist(),
+        parameters.get_max_relin_sk_deg(),
+        parameters.get_key_switch_technique(),
+        parameters.get_scaling_technique(),
+        parameters.get_encryption_technique(),
+        parameters.get_multiplication_technique(),
+        parameters.get_pre_mode(),
+        parameters.get_multiparty_mode(),
+        parameters.get_execution_mode(),
+        parameters.get_decryption_noise_mode(),
+        parameters.get_plaintext_modulus(),
+        parameters.get_statistical_security(),
+        parameters.get_num_adversarial_queries(),
+        parameters.get_threshold_num_of_parties());
 
     // for BFV scheme noise scale is always set to 1
-    params->SetNoiseScale(1);
-    params->SetMultiplicativeDepth(parameters.GetMultiplicativeDepth());
-    params->SetEvalAddCount(parameters.GetEvalAddCount());
-    params->SetKeySwitchCount(parameters.GetKeySwitchCount());
+    params->set_noise_scale(1);
+    params->set_multiplicative_depth(parameters.get_multiplicative_depth());
+    params->set_eval_add_count(parameters.get_eval_add_count());
+    params->set_key_switch_count(parameters.get_key_switch_count());
 
     auto scheme = std::make_shared<typename ContextGeneratorType::PublicKeyEncryptionScheme>();
-    scheme->SetKeySwitchingTechnique(parameters.GetKeySwitchTechnique());
-    scheme->ParamsGenBFVRNS(
+    scheme->set_key_switching_technique(parameters.get_key_switch_technique());
+    scheme->params_gen_bfvrns(
         params,
-        parameters.GetEvalAddCount(),
-        parameters.GetMultiplicativeDepth(),
-        parameters.GetKeySwitchCount(),
-        parameters.GetScalingModSize(),
-        parameters.GetRingDim(),
-        parameters.GetNumLargeDigits());
+        parameters.get_eval_add_count(),
+        parameters.get_multiplicative_depth(),
+        parameters.get_key_switch_count(),
+        parameters.get_scaling_mod_size(),
+        parameters.get_ring_dim(),
+        parameters.get_num_large_digits());
     // clang-format on
 
-    auto cc = ContextGeneratorType::Factory::GetContext(params, scheme);
-    cc->setSchemeId(SCHEME::BFVRNS_SCHEME);
+    auto cc = ContextGeneratorType::Factory::get_context(params, scheme);
+    cc->set_scheme_id(SCHEME::BFVRNS_SCHEME);
     return cc;
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_BFV_CONTEXT_GEN_INTERNAL_H_

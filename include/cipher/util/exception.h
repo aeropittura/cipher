@@ -46,37 +46,37 @@
 
 #include "cipher/util/call_stack.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Captures an exception thrown inside an OpenMP parallel region or thread so it can be rethrown in the
  * calling thread after the region ends.
  *
  * Exceptions thrown inside a critical region or an OpenMP thread must be caught in the thread where they were
- * thrown. Declare an instance before the region, call CaptureException() from a catch(...) block inside it (or
- * wrap the body in Run()), and call Rethrow() after the region; see the usage example below the class.
+ * thrown. Declare an instance before the region, call capture_exception() from a catch(...) block inside it (or
+ * wrap the body in run()), and call rethrow() after the region; see the usage example below the class.
  */
 class ThreadException {
-    std::exception_ptr Ptr;
-    std::mutex Lock;
+    std::exception_ptr ptr_;
+    std::mutex lock_;
 
   public:
-    ThreadException() : Ptr(nullptr) {}
+    ThreadException() : ptr_(nullptr) {}
     ~ThreadException() {}
     /**
      * @brief Rethrows the captured exception, if any, in the calling thread; does nothing when none was captured.
      */
-    void Rethrow() {
-        if (this->Ptr)
-            std::rethrow_exception(this->Ptr);
+    void rethrow() {
+        if (this->ptr_)
+            std::rethrow_exception(this->ptr_);
     }
     /**
      * @brief Stores the exception currently being handled (call from inside a catch block); thread-safe, the last
      * captured exception wins.
      */
-    void CaptureException() {
-        std::unique_lock<std::mutex> guard(this->Lock);
-        this->Ptr = std::current_exception();
+    void capture_exception() {
+        std::unique_lock<std::mutex> guard(this->lock_);
+        this->ptr_ = std::current_exception();
     }
 
     /**
@@ -85,54 +85,54 @@ class ThreadException {
      * @param params arguments forwarded to f
      */
     template <typename Function, typename... Parameters>
-    void Run(Function f, Parameters... params) {
+    void run(Function f, Parameters... params) {
         try {
             f(params...);
         } catch (...) {
-            CaptureException();
+            capture_exception();
         }
     }
 };
 
 // how  to use ThreadException
 // To use this, declare an instance of the object before the critical
-// region/thread, catch exceptions in thread with CaptureException, then after
-// the region call object.Rethrow()
+// region/thread, catch exceptions in thread with capture_exception, then after
+// the region call object.rethrow()
 // #pragma omp parallel for
 // for (unsigned i = 0; i < rv.size(); i++) try {
 //     rv.polys[i] = (polys[i].*f)();
 //   } catch (...) {
-//     e.CaptureException();
+//     e.capture_exception();
 //   }
-// e.Rethrow();
+// e.rethrow();
 //
 // // use of Run looks like:
 // ThreadException e;
 // #pragma omp parallel for
 // for (int i = 0; i < n; i++) {
-//   e.Run([=] {
+//   e.run([=] {
 //     // code that might throw
 //     // ...
 //   });
 // }
-// e.Rethrow();
+// e.rethrow();
 
 /**
- * @brief Exception type thrown by OpenFHE, normally through the OPENFHE_THROW macro. Records the error
+ * @brief Exception type thrown by OpenFHE, normally through the CIPHER_THROW macro. Records the error
  * description together with the throw site (file, function, line) and the call stack at construction; what()
  * returns "file:l.line:function(): description".
  */
-class OpenFHEException : public std::exception {
+class CipherException : public std::exception {
     // clang-format off
-    std::string m_errorDescription;
-    std::string m_fileName;
-    std::string m_funcName;
-    size_t m_lineNumber{0};
+    std::string error_description_;
+    std::string file_name_;
+    std::string func_name_;
+    size_t line_number_{0};
 
-    std::string m_errorMessage;
-    std::vector<std::string> m_callStack;
+    std::string error_message_;
+    std::vector<std::string> call_stack_;
 
-    static std::string buildErrorMessage(const std::string& file,
+    static std::string build_error_message(const std::string& file,
                                          const std::string& func,
                                          std::size_t line,
                                          const std::string& desc) {
@@ -142,33 +142,33 @@ class OpenFHEException : public std::exception {
 public:
     /**
      * @brief Constructs the exception and captures the call stack.
-     * @param errorDescription description of the error
-     * @param fileName source file of the throw site (__FILE__)
-     * @param funcName function of the throw site (__func__)
-     * @param lineNumber line of the throw site (__LINE__)
+     * @param error_description description of the error
+     * @param file_name source file of the throw site (__FILE__)
+     * @param func_name function of the throw site (__func__)
+     * @param line_number line of the throw site (__LINE__)
      */
-    explicit OpenFHEException(const std::string_view errorDescription,
-                              const std::string fileName,
-                              const std::string funcName,
-                              size_t lineNumber)
-        : m_errorDescription(errorDescription),
-          m_fileName(fileName),
-          m_funcName(funcName),
-          m_lineNumber(lineNumber),
-          m_errorMessage(buildErrorMessage(m_fileName, m_funcName, m_lineNumber, m_errorDescription)),
-          m_callStack(get_call_stack()) {}
+    explicit CipherException(const std::string_view error_description,
+                              const std::string file_name,
+                              const std::string func_name,
+                              size_t line_number)
+        : error_description_(error_description),
+          file_name_(file_name),
+          func_name_(func_name),
+          line_number_(line_number),
+          error_message_(build_error_message(file_name_, func_name_, line_number_, error_description_)),
+          call_stack_(get_call_stack()) {}
     // clang-format on
 
-    ~OpenFHEException() override = default;
-    OpenFHEException(const OpenFHEException&) = default;
-    OpenFHEException& operator=(const OpenFHEException&) = default;
+    ~CipherException() override = default;
+    CipherException(const CipherException&) = default;
+    CipherException& operator=(const CipherException&) = default;
 
     /**
      * @brief Returns the formatted error message "file:l.line:function(): description".
      * @return the error message
      */
     const char* what() const noexcept override {
-        return m_errorMessage.c_str();
+        return error_message_.c_str();
     }
 
     /**
@@ -176,36 +176,36 @@ public:
      * call-stack capture is not available in this build).
      * @return the call stack frames
      */
-    std::vector<std::string> getCallStackAsVector() const {
-        return m_callStack;
+    std::vector<std::string> get_call_stack_as_vector() const {
+        return call_stack_;
     }
 
-    // getCallStackAsString() was added to be used by JSON logger. the implementtion will follow
+    // get_call_stack_as_string() was added to be used by JSON logger. the implementtion will follow
     /**
      * @brief Placeholder for a single-string rendering of the call stack intended for a JSON logger.
      * @return an empty string; the implementation is not yet provided
      */
-    std::string getCallStackAsString() const {
+    std::string get_call_stack_as_string() const {
         return std::string();
 
-        // if (m_callStack.empty())
+        // if (call_stack_.empty())
         //     return {};
 
-        // std::string ret = m_callStack.front();
-        // for (std::size_t i = 1; i < m_callStack.size(); ++i) {
+        // std::string ret = call_stack_.front();
+        // for (std::size_t i = 1; i < call_stack_.size(); ++i) {
         //     ret += '\n';
-        //     ret += m_callStack[i];
+        //     ret += call_stack_[i];
         // }
         // return ret;
     }
 };
 
 /**
- * @brief Throws an OpenFHEException with the given description, tagged with the current file, function, and line.
+ * @brief Throws an CipherException with the given description, tagged with the current file, function, and line.
  * @param desc error description (anything convertible to std::string_view)
  */
-#define OPENFHE_THROW(desc) throw lbcrypto::OpenFHEException((desc), __FILE__, __func__, __LINE__)
+#define CIPHER_THROW(desc) throw cipher::CipherException((desc), __FILE__, __func__, __LINE__)
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_UTIL_EXCEPTION_H_

@@ -42,7 +42,7 @@
 #include <string>
 #include <vector>
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Hash algorithm selector for HashUtil::Hash. SHA_512 is currently not implemented, and requesting it
@@ -68,10 +68,10 @@ class HashUtil {
                 return;
 
             case SHA_512:
-                OPENFHE_THROW("SHA_512 is not implemented");
+                CIPHER_THROW("SHA_512 is not implemented");
 
             default:
-                OPENFHE_THROW("ERROR: Unknown Hash Algorithm");
+                CIPHER_THROW("ERROR: Unknown Hash Algorithm");
         }
     }
 
@@ -80,7 +80,7 @@ class HashUtil {
      * @param message input bytes to hash
      * @return the 64-character lowercase hexadecimal SHA-256 digest
      */
-    static std::string HashString(std::string message);
+    static std::string hash_string(std::string message);
 
   private:
     static void SHA256(std::string message, std::vector<int64_t>& digest);
@@ -89,6 +89,6 @@ class HashUtil {
     static const uint64_t k_512[80];
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_UTIL_HASH_H_

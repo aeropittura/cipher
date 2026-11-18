@@ -42,7 +42,7 @@
 
 #include "cipher/fhe/encoding/plaintext.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @class StringEncoding
@@ -57,24 +57,24 @@ class StringEncoding : public PlaintextImpl {
     // these three constructors are used inside of Decrypt
     /**
      * @brief Constructs an empty string plaintext over the given element parameters.
-     * @param vp element parameters of the polynomial (Poly, NativePoly or DCRTPoly parameters)
+     * @param vp element parameters of the polynomial (Poly, NativePoly or RnsPoly parameters)
      * @param ep encoding parameters
      */
     template <typename T, typename std::enable_if<std::is_same<T, Poly::Params>::value ||
                                                           std::is_same<T, NativePoly::Params>::value ||
-                                                          std::is_same<T, DCRTPoly::Params>::value,
+                                                          std::is_same<T, RnsPoly::Params>::value,
                                                   bool>::type = true>
     StringEncoding(std::shared_ptr<T> vp, EncodingParams ep) : PlaintextImpl(vp, ep, STRING_ENCODING) {}
 
     /**
      * @brief Constructs a string plaintext holding the given string (not encoded yet; call Encode).
-     * @param vp element parameters of the polynomial (Poly, NativePoly or DCRTPoly parameters)
+     * @param vp element parameters of the polynomial (Poly, NativePoly or RnsPoly parameters)
      * @param ep encoding parameters
      * @param str the string to encode
      */
     template <typename T, typename std::enable_if<std::is_same<T, Poly::Params>::value ||
                                                           std::is_same<T, NativePoly::Params>::value ||
-                                                          std::is_same<T, DCRTPoly::Params>::value,
+                                                          std::is_same<T, RnsPoly::Params>::value,
                                                   bool>::type = true>
     StringEncoding(std::shared_ptr<T> vp, EncodingParams ep, const std::string& str)
         : PlaintextImpl(vp, ep, STRING_ENCODING), ptx(str) {}
@@ -85,18 +85,18 @@ class StringEncoding : public PlaintextImpl {
     ~StringEncoding() override = default;
 
     /**
-     * GetStringValue
+     * get_string_value
      * @return the un-encoded string
      */
-    const std::string& GetStringValue() const override {
+    const std::string& get_string_value() const override {
         return ptx;
     }
 
     /**
-     * SetStringValue
+     * set_string_value
      * @param value string to initialize the Plaintext with
      */
-    void SetStringValue(const std::string& value) override {
+    void set_string_value(const std::string& value) override {
         ptx = value;
     }
 
@@ -104,20 +104,20 @@ class StringEncoding : public PlaintextImpl {
      * Encode the plaintext into the Poly
      * @return true on success
      */
-    bool Encode() override;
+    bool encode() override;
 
     /**
      * Decode the Poly into the string
      * @return true on success
      */
-    bool Decode() override;
+    bool decode() override;
 
     /**
      * Get length of the plaintext
      *
      * @return number of elements in this plaintext
      */
-    size_t GetLength() const override {
+    size_t get_length() const override {
         return ptx.size();
     }
 
@@ -129,7 +129,7 @@ class StringEncoding : public PlaintextImpl {
      * @param rhs - the other plaintext to compare to.
      * @return whether the two plaintext are equivalent.
      */
-    bool CompareTo(const PlaintextImpl& rhs) const override {
+    bool compare_to(const PlaintextImpl& rhs) const override {
         if (typeid(rhs) != typeid(StringEncoding))
             return false;
 
@@ -138,14 +138,14 @@ class StringEncoding : public PlaintextImpl {
     }
 
     /**
-     * PrintValue - used by operator<< for this object
+     * print_value - used by operator<< for this object
      * @param out stream to print to
      */
-    void PrintValue(std::ostream& out) const override {
+    void print_value(std::ostream& out) const override {
         out << ptx;
     }
 };
 
-} /* namespace lbcrypto */
+} /* namespace cipher */
 
 #endif  // CIPHER_FHE_ENCODING_STRING_ENCODING_H_

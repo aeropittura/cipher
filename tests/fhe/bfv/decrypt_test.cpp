@@ -41,17 +41,17 @@
 #include "cipher/fhe/bfv/context_gen.h"
 #include "cipher/util/debug.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 class UTBFVRNS_DECRYPT : public ::testing::TestWithParam<std::tuple<uint32_t, uint32_t>> {
   protected:
     void SetUp() {
-        OpenFHEParallelControls.UnitTestStart();
+        cipher_parallel_controls.unit_test_start();
     }
 
     void TearDown() {
-        CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
-        OpenFHEParallelControls.UnitTestStop();
+        ContextFactory<RnsPoly>::release_all_contexts();
+        cipher_parallel_controls.unit_test_stop();
     }
 
   public:
@@ -60,18 +60,18 @@ class UTBFVRNS_DECRYPT : public ::testing::TestWithParam<std::tuple<uint32_t, ui
 /**
  * This function checks whether vectors of numbers a and b are equal.
  *
- * @param vectorSize The length of the two vectors.
+ * @param vector_size The length of the two vectors.
  * @param failmsg Debug message to display upon failure.
  */
-static void checkEquality(const std::vector<int64_t>& a, const std::vector<int64_t>& b, int vectorSize,
+static void check_equality(const std::vector<int64_t>& a, const std::vector<int64_t>& b, int vector_size,
                           const std::string& failmsg) {
-    std::vector<uint32_t> allTrue(vectorSize);
-    std::vector<uint32_t> tmp(vectorSize);
-    for (int i = 0; i < vectorSize; i++) {
-        allTrue[i] = 1;
+    std::vector<uint32_t> all_true(vector_size);
+    std::vector<uint32_t> tmp(vector_size);
+    for (int i = 0; i < vector_size; i++) {
+        all_true[i] = 1;
         tmp[i] = (a[i] == b[i]);
     }
-    EXPECT_TRUE(tmp == allTrue) << failmsg;
+    EXPECT_TRUE(tmp == all_true) << failmsg;
 }
 
 // static std::vector<uint32_t> ptm_args{2, 65537, 5308417};
@@ -79,67 +79,67 @@ static void checkEquality(const std::vector<int64_t>& a, const std::vector<int64
 
 TEST_P(UTBFVRNS_DECRYPT, BFVrns_Decrypt) {
     uint32_t ptm = std::get<0>(GetParam());
-    uint32_t dcrtBits = std::get<1>(GetParam());
+    uint32_t dcrt_bits = std::get<1>(GetParam());
 
-    CCParams<CryptoContextBFVRNS> parameters;
-    parameters.SetPlaintextModulus(ptm);
-    parameters.SetScalingModSize(dcrtBits);
+    ContextParams<BfvRnsContext> parameters;
+    parameters.set_plaintext_modulus(ptm);
+    parameters.set_scaling_mod_size(dcrt_bits);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
 
-    KeyPair<DCRTPoly> kp = cc->KeyGen();
+    KeyPair<RnsPoly> kp = cc->key_gen();
 
     uint32_t vecsize = 8;
-    std::vector<int64_t> vectorOfInts(8);
+    std::vector<int64_t> vector_of_ints(8);
     for (uint32_t i = 0; i < vecsize; ++i) {
         if (ptm == 2) {
-            vectorOfInts[i] = rand() % ptm;  // NOLINT
+            vector_of_ints[i] = rand() % ptm;  // NOLINT
         } else {
-            vectorOfInts[i] = (rand() % ptm) / 2;  // NOLINT
+            vector_of_ints[i] = (rand() % ptm) / 2;  // NOLINT
         }
     }
 
     Plaintext plaintext;
     if (!(ptm & (ptm - 1)))
-        plaintext = cc->MakeCoefPackedPlaintext(vectorOfInts);
+        plaintext = cc->make_coef_packed_plaintext(vector_of_ints);
     else
-        plaintext = cc->MakePackedPlaintext(vectorOfInts);
+        plaintext = cc->make_packed_plaintext(vector_of_ints);
     Plaintext result;
-    Ciphertext<DCRTPoly> ciphertext = cc->Encrypt(kp.publicKey, plaintext);
-    cc->Decrypt(kp.secretKey, ciphertext, &result);
+    Ciphertext<RnsPoly> ciphertext = cc->encrypt(kp.public_key, plaintext);
+    cc->decrypt(kp.secret_key, ciphertext, &result);
 
     if (!(ptm & (ptm - 1))) {
-        auto tmp_a = plaintext->GetCoefPackedValue();
-        auto tmp_b = result->GetCoefPackedValue();
-        checkEquality(tmp_a, tmp_b, vecsize, "BFVrns Decrypt fails");
+        auto tmp_a = plaintext->get_coef_packed_value();
+        auto tmp_b = result->get_coef_packed_value();
+        check_equality(tmp_a, tmp_b, vecsize, "BFVrns Decrypt fails");
     } else {
-        auto tmp_a = plaintext->GetPackedValue();
-        auto tmp_b = result->GetPackedValue();
-        checkEquality(tmp_a, tmp_b, vecsize, "BFVrns Decrypt fails");
+        auto tmp_a = plaintext->get_packed_value();
+        auto tmp_b = result->get_packed_value();
+        check_equality(tmp_a, tmp_b, vecsize, "BFVrns Decrypt fails");
     }
 }
 
 /*
- * Our tuples are (t, qMSB)
- * sizeQMSB is small (1-2 bits)
+ * Our tuples are (t, q_msb)
+ * size_qmsb is small (1-2 bits)
  * We test several instanses:
  * - t is a power of two
- *   - (qMSB + sizeQMSB) <  52
- *     - (qMSB + tMSB + sizeQMSB) <  63   (A)
- *     - (qMSB + tMSB + sizeQMSB) >= 63   (B)
- *   - (qMSB + sizeQMSB) >= 52
- *     - (qMSBHf + tMSB + sizeQMSB) <  62 (C)
- *     - (qMSBHf + tMSB + sizeQMSB) >= 62 (D)
+ *   - (q_msb + size_qmsb) <  52
+ *     - (q_msb + t_msb + size_qmsb) <  63   (A)
+ *     - (q_msb + t_msb + size_qmsb) >= 63   (B)
+ *   - (q_msb + size_qmsb) >= 52
+ *     - (q_msb_hf + t_msb + size_qmsb) <  62 (C)
+ *     - (q_msb_hf + t_msb + size_qmsb) >= 62 (D)
  * - t it not a power of two
- *   - (qMSB + sizeQMSB) <  52
- *     - (qMSB + tMSB + sizeQMSB) <  52   (E)
- *     - (qMSB + tMSB + sizeQMSB) >= 52   (F)
- *   - (qMSB + sizeQMSB) >= 52
- *     - (qMSBHf + tMSB + sizeQMSB) <  52 (G)
- *     - (qMSBHf + tMSB + sizeQMSB) >= 52 (H)
+ *   - (q_msb + size_qmsb) <  52
+ *     - (q_msb + t_msb + size_qmsb) <  52   (E)
+ *     - (q_msb + t_msb + size_qmsb) >= 52   (F)
+ *   - (q_msb + size_qmsb) >= 52
+ *     - (q_msb_hf + t_msb + size_qmsb) <  52 (G)
+ *     - (q_msb_hf + t_msb + size_qmsb) >= 52 (H)
  *
  * log2(65537) = 16.00002
  * log2(5308417) = 22.34

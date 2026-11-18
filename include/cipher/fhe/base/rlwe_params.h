@@ -48,48 +48,48 @@
 // TODO - temp include for the SecurityLevel
 #include "cipher/ring/standard_params.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Template for crypto parameters.
  * @tparam Element a ring element.
  */
 template <class Element>
-class CryptoParametersRLWE : public CryptoParametersBase<Element> {
+class RlweCryptoParams : public BaseCryptoParams<Element> {
   public:
     /**
      * Default Constructor
      */
-    CryptoParametersRLWE() = default;
+    RlweCryptoParams() = default;
 
     /**
      * Copy constructor.
      * @param rhs the parameters to copy from
      */
-    CryptoParametersRLWE(const CryptoParametersRLWE& rhs)
-        : CryptoParametersBase<Element>(rhs.GetElementParams(), rhs.GetPlaintextModulus()) {
-        m_distributionParameter = rhs.m_distributionParameter;
-        m_assuranceMeasure = rhs.m_assuranceMeasure;
-        m_noiseScale = rhs.m_noiseScale;
-        m_digitSize = rhs.m_digitSize;
-        m_noiseEstimate = rhs.m_noiseEstimate;
-        m_multiplicativeDepth = rhs.m_multiplicativeDepth;
-        m_evalAddCount = rhs.m_evalAddCount;
-        m_keySwitchCount = rhs.m_keySwitchCount;
-        m_PRENumHops = rhs.m_PRENumHops;
-        m_maxRelinSkDeg = rhs.m_maxRelinSkDeg;
-        m_secretKeyDist = rhs.m_secretKeyDist;
-        m_stdLevel = rhs.m_stdLevel;
-        m_floodingDistributionParameter = rhs.m_floodingDistributionParameter;
-        m_dgg.SetStd(m_distributionParameter);
-        m_dggFlooding.SetStd(m_floodingDistributionParameter);
-        m_PREMode = rhs.m_PREMode;
-        m_multipartyMode = rhs.m_multipartyMode;
-        m_executionMode = rhs.m_executionMode;
-        m_decryptionNoiseMode = rhs.m_decryptionNoiseMode;
-        m_statisticalSecurity = rhs.m_statisticalSecurity;
-        m_numAdversarialQueries = rhs.m_numAdversarialQueries;
-        m_thresholdNumOfParties = rhs.m_thresholdNumOfParties;
+    RlweCryptoParams(const RlweCryptoParams& rhs)
+        : BaseCryptoParams<Element>(rhs.get_element_params(), rhs.get_plaintext_modulus()) {
+        distribution_parameter_ = rhs.distribution_parameter_;
+        assurance_measure_ = rhs.assurance_measure_;
+        noise_scale_ = rhs.noise_scale_;
+        digit_size_ = rhs.digit_size_;
+        noise_estimate_ = rhs.noise_estimate_;
+        multiplicative_depth_ = rhs.multiplicative_depth_;
+        eval_add_count_ = rhs.eval_add_count_;
+        key_switch_count_ = rhs.key_switch_count_;
+        pre_num_hops_ = rhs.pre_num_hops_;
+        max_relin_sk_deg_ = rhs.max_relin_sk_deg_;
+        secret_key_dist_ = rhs.secret_key_dist_;
+        std_level_ = rhs.std_level_;
+        flooding_distribution_parameter_ = rhs.flooding_distribution_parameter_;
+        dgg_.set_std(distribution_parameter_);
+        dgg_flooding_.set_std(flooding_distribution_parameter_);
+        pre_mode_ = rhs.pre_mode_;
+        multiparty_mode_ = rhs.multiparty_mode_;
+        execution_mode_ = rhs.execution_mode_;
+        decryption_noise_mode_ = rhs.decryption_noise_mode_;
+        statistical_security_ = rhs.statistical_security_;
+        num_adversarial_queries_ = rhs.num_adversarial_queries_;
+        threshold_num_of_parties_ = rhs.threshold_num_of_parties_;
     }
 
     /**
@@ -97,53 +97,53 @@ class CryptoParametersRLWE : public CryptoParametersBase<Element> {
      * standard security levels
      *
      * @param params element parameters.
-     * @param encodingParams encoding-specific parameters
-     * @param distributionParameter noise distribution parameter.
-     * @param assuranceMeasure assurance level.
-     * @param stdLevel security level.
-     * @param digitSize the size of the digit size.
-     * @param maxRelinSkDeg the maximum power of secret key for which the
+     * @param encoding_params encoding-specific parameters
+     * @param distribution_parameter noise distribution parameter.
+     * @param assurance_measure assurance level.
+     * @param std_level security level.
+     * @param digit_size the size of the digit size.
+     * @param max_relin_sk_deg the maximum power of secret key for which the
      * relinearization key is generated
-     * @param secretKeyDist mode for secret polynomial, defaults to GAUSSIAN.
-     * @param PREMode security mode for proxy re-encryption
-     * @param multipartyMode security mode for multiparty decryption
-     * @param executionMode execution mode for CKKS noise flooding
-     * @param decryptionNoiseMode decryption noise mode for CKKS noise flooding
-     * @param noiseScale used in HRA-secure PRE
-     * @param statisticalSecurity statistical security parameter for CKKS noise flooding and PRE
-     * @param numAdversarialQueries number of adversarial queries for CKKS noise flooding and PRE
-     * @param thresholdNumOfParties number of parties in threshold FHE
+     * @param secret_key_dist mode for secret polynomial, defaults to GAUSSIAN.
+     * @param pre_mode security mode for proxy re-encryption
+     * @param multiparty_mode security mode for multiparty decryption
+     * @param execution_mode execution mode for CKKS noise flooding
+     * @param decryption_noise_mode decryption noise mode for CKKS noise flooding
+     * @param noise_scale_value used in HRA-secure PRE
+     * @param statistical_security statistical security parameter for CKKS noise flooding and PRE
+     * @param num_adversarial_queries number of adversarial queries for CKKS noise flooding and PRE
+     * @param threshold_num_of_parties number of parties in threshold FHE
      */
-    CryptoParametersRLWE(std::shared_ptr<typename Element::Params> params, EncodingParams encodingParams,
-                         float distributionParameter, float assuranceMeasure, SecurityLevel stdLevel,
-                         uint32_t digitSize, int maxRelinSkDeg = 2, SecretKeyDist secretKeyDist = GAUSSIAN,
-                         ProxyReEncryptionMode PREMode = INDCPA, MultipartyMode multipartyMode = FIXED_NOISE_MULTIPARTY,
-                         ExecutionMode executionMode = EXEC_EVALUATION,
-                         DecryptionNoiseMode decryptionNoiseMode = FIXED_NOISE_DECRYPT, PlaintextModulus noiseScale = 1,
-                         uint32_t statisticalSecurity = 30, uint32_t numAdversarialQueries = 1,
-                         uint32_t thresholdNumOfParties = 1)
-        : CryptoParametersBase<Element>(params, encodingParams) {
-        m_distributionParameter = distributionParameter;
-        m_assuranceMeasure = assuranceMeasure;
-        m_noiseScale = noiseScale;
-        m_digitSize = digitSize;
-        m_dgg.SetStd(m_distributionParameter);
-        m_maxRelinSkDeg = maxRelinSkDeg;
-        m_secretKeyDist = secretKeyDist;
-        m_stdLevel = stdLevel;
-        m_PREMode = PREMode;
-        m_multipartyMode = multipartyMode;
-        m_executionMode = executionMode;
-        m_decryptionNoiseMode = decryptionNoiseMode;
-        m_statisticalSecurity = statisticalSecurity;
-        m_numAdversarialQueries = numAdversarialQueries;
-        m_thresholdNumOfParties = thresholdNumOfParties;
+    RlweCryptoParams(std::shared_ptr<typename Element::Params> params, EncodingParams encoding_params,
+                         float distribution_parameter, float assurance_measure, SecurityLevel std_level,
+                         uint32_t digit_size, int max_relin_sk_deg = 2, SecretKeyDist secret_key_dist = GAUSSIAN,
+                         ProxyReEncryptionMode pre_mode = INDCPA, MultipartyMode multiparty_mode = FIXED_NOISE_MULTIPARTY,
+                         ExecutionMode execution_mode = EXEC_EVALUATION,
+                         DecryptionNoiseMode decryption_noise_mode = FIXED_NOISE_DECRYPT, PlaintextModulus noise_scale_value = 1,
+                         uint32_t statistical_security = 30, uint32_t num_adversarial_queries = 1,
+                         uint32_t threshold_num_of_parties = 1)
+        : BaseCryptoParams<Element>(params, encoding_params) {
+        distribution_parameter_ = distribution_parameter;
+        assurance_measure_ = assurance_measure;
+        noise_scale_ = noise_scale_value;
+        digit_size_ = digit_size;
+        dgg_.set_std(distribution_parameter_);
+        max_relin_sk_deg_ = max_relin_sk_deg;
+        secret_key_dist_ = secret_key_dist;
+        std_level_ = std_level;
+        pre_mode_ = pre_mode;
+        multiparty_mode_ = multiparty_mode;
+        execution_mode_ = execution_mode;
+        decryption_noise_mode_ = decryption_noise_mode;
+        statistical_security_ = statistical_security;
+        num_adversarial_queries_ = num_adversarial_queries;
+        threshold_num_of_parties_ = threshold_num_of_parties;
     }
 
     /**
      * Virtual Destructor
      */
-    ~CryptoParametersRLWE() override = default;
+    ~RlweCryptoParams() override = default;
 
     /**
      * Returns the value of standard deviation r for discrete Gaussian
@@ -151,8 +151,8 @@ class CryptoParametersRLWE : public CryptoParametersBase<Element> {
      *
      * @return the standard deviation r.
      */
-    float GetDistributionParameter() const {
-        return m_distributionParameter;
+    float get_distribution_parameter() const {
+        return distribution_parameter_;
     }
 
     /**
@@ -161,8 +161,8 @@ class CryptoParametersRLWE : public CryptoParametersBase<Element> {
      *
      * @return the flooding standard deviation r.
      */
-    double GetFloodingDistributionParameter() const {
-        return m_floodingDistributionParameter;
+    double get_flooding_distribution_parameter() const {
+        return flooding_distribution_parameter_;
     }
 
     /**
@@ -170,8 +170,8 @@ class CryptoParametersRLWE : public CryptoParametersBase<Element> {
      *
      * @return the assurance measure.
      */
-    float GetAssuranceMeasure() const {
-        return m_assuranceMeasure;
+    float get_assurance_measure() const {
+        return assurance_measure_;
     }
 
     /**
@@ -179,8 +179,8 @@ class CryptoParametersRLWE : public CryptoParametersBase<Element> {
      *
      * @return the noise scale.
      */
-    PlaintextModulus GetNoiseScale() const {
-        return m_noiseScale;
+    PlaintextModulus get_noise_scale() const {
+        return noise_scale_;
     }
 
     /**
@@ -188,24 +188,24 @@ class CryptoParametersRLWE : public CryptoParametersBase<Element> {
      *
      * @return the digit size.
      */
-    uint32_t GetDigitSize() const override {
-        return m_digitSize;
+    uint32_t get_digit_size() const override {
+        return digit_size_;
     }
 
-    virtual double GetNoiseEstimate() const {
-        return m_noiseEstimate;
+    virtual double get_noise_estimate() const {
+        return noise_estimate_;
     }
-    virtual uint32_t GetMultiplicativeDepth() const {
-        return m_multiplicativeDepth;
+    virtual uint32_t get_multiplicative_depth() const {
+        return multiplicative_depth_;
     }
-    virtual uint32_t GetEvalAddCount() const {
-        return m_evalAddCount;
+    virtual uint32_t get_eval_add_count() const {
+        return eval_add_count_;
     }
-    virtual uint32_t GetKeySwitchCount() const {
-        return m_keySwitchCount;
+    virtual uint32_t get_key_switch_count() const {
+        return key_switch_count_;
     }
-    virtual uint32_t GetPRENumHops() const {
-        return m_PRENumHops;
+    virtual uint32_t get_pre_num_hops() const {
+        return pre_num_hops_;
     }
 
     /**
@@ -214,17 +214,17 @@ class CryptoParametersRLWE : public CryptoParametersBase<Element> {
      *
      * @return maximum power of secret key
      */
-    uint32_t GetMaxRelinSkDeg() const override {
-        return m_maxRelinSkDeg;
+    uint32_t get_max_relin_sk_deg() const override {
+        return max_relin_sk_deg_;
     }
 
     /**
-     * Gets the secretKeyDist setting: GAUSSIAN or UNIFORM_TERNARY
+     * Gets the secret_key_dist setting: GAUSSIAN or UNIFORM_TERNARY
      *
-     * @return the secretKeyDist setting.
+     * @return the secret_key_dist setting.
      */
-    SecretKeyDist GetSecretKeyDist() const {
-        return m_secretKeyDist;
+    SecretKeyDist get_secret_key_dist() const {
+        return secret_key_dist_;
     }
 
     /**
@@ -233,8 +233,8 @@ class CryptoParametersRLWE : public CryptoParametersBase<Element> {
      *
      * @return the pre security mode setting.
      */
-    ProxyReEncryptionMode GetPREMode() const {
-        return m_PREMode;
+    ProxyReEncryptionMode get_pre_mode() const {
+        return pre_mode_;
     }
 
     /**
@@ -242,8 +242,8 @@ class CryptoParametersRLWE : public CryptoParametersBase<Element> {
      *
      * @return the multiparty security mode setting.
      */
-    MultipartyMode GetMultipartyMode() const {
-        return m_multipartyMode;
+    MultipartyMode get_multiparty_mode() const {
+        return multiparty_mode_;
     }
 
     /**
@@ -251,8 +251,8 @@ class CryptoParametersRLWE : public CryptoParametersBase<Element> {
      *
      * @return the execution mode setting.
      */
-    ExecutionMode GetExecutionMode() const {
-        return m_executionMode;
+    ExecutionMode get_execution_mode() const {
+        return execution_mode_;
     }
 
     /**
@@ -260,8 +260,8 @@ class CryptoParametersRLWE : public CryptoParametersBase<Element> {
      *
      * @return the decryption noise mode setting.
      */
-    DecryptionNoiseMode GetDecryptionNoiseMode() {
-        return m_decryptionNoiseMode;
+    DecryptionNoiseMode get_decryption_noise_mode() {
+        return decryption_noise_mode_;
     }
 
     /**
@@ -269,8 +269,8 @@ class CryptoParametersRLWE : public CryptoParametersBase<Element> {
      *
      * @return the security level.
      */
-    SecurityLevel GetStdLevel() const {
-        return m_stdLevel;
+    SecurityLevel get_std_level() const {
+        return std_level_;
     }
 
     /**
@@ -278,8 +278,8 @@ class CryptoParametersRLWE : public CryptoParametersBase<Element> {
      *
      * @return reference to Discrete Gaussian Generator.
      */
-    const typename Element::DggType& GetDiscreteGaussianGenerator() const {
-        return m_dgg;
+    const typename Element::DggType& get_discrete_gaussian_generator() const {
+        return dgg_;
     }
 
     /**
@@ -288,8 +288,8 @@ class CryptoParametersRLWE : public CryptoParametersBase<Element> {
      * @return reference to Discrete Gaussian Generator with flooding for PRE.
      * The Std dev for this generator changes based on the PRE mode, so it is not const
      */
-    typename Element::DggType& GetFloodingDiscreteGaussianGenerator() {
-        return m_dggFlooding;
+    typename Element::DggType& get_flooding_discrete_gaussian_generator() {
+        return dgg_flooding_;
     }
 
     /**
@@ -297,8 +297,8 @@ class CryptoParametersRLWE : public CryptoParametersBase<Element> {
      *
      * @return the statistical security level.
      */
-    double GetStatisticalSecurity() const {
-        return m_statisticalSecurity;
+    double get_statistical_security() const {
+        return statistical_security_;
     }
 
     /**
@@ -306,8 +306,8 @@ class CryptoParametersRLWE : public CryptoParametersBase<Element> {
      *
      * @return the number of adversarial queries.
      */
-    double GetNumAdversarialQueries() const {
-        return m_numAdversarialQueries;
+    double get_num_adversarial_queries() const {
+        return num_adversarial_queries_;
     }
 
     /**
@@ -315,290 +315,290 @@ class CryptoParametersRLWE : public CryptoParametersBase<Element> {
      *
      * @return the threshold number of parties.
      */
-    uint32_t GetThresholdNumOfParties() const {
-        return m_thresholdNumOfParties;
+    uint32_t get_threshold_num_of_parties() const {
+        return threshold_num_of_parties_;
     }
 
     // @Set Properties
 
     /**
      * Sets the value of standard deviation r for discrete Gaussian distribution
-     * @param distributionParameter the standard deviation r
+     * @param distribution_parameter the standard deviation r
      */
-    void SetDistributionParameter(float distributionParameter) {
-        m_distributionParameter = distributionParameter;
-        m_dgg.SetStd(m_distributionParameter);
+    void set_distribution_parameter(float distribution_parameter) {
+        distribution_parameter_ = distribution_parameter;
+        dgg_.set_std(distribution_parameter_);
     }
 
     /**
      * Sets the value of flooding standard deviation r for discrete Gaussian distribution with flooding
-     * @param distributionParameter the flooding standard deviation r
+     * @param distribution_parameter the flooding standard deviation r
      */
-    void SetFloodingDistributionParameter(double distributionParameter) {
-        m_floodingDistributionParameter = distributionParameter;
-        m_dggFlooding.SetStd(m_floodingDistributionParameter);
+    void set_flooding_distribution_parameter(double distribution_parameter) {
+        flooding_distribution_parameter_ = distribution_parameter;
+        dgg_flooding_.set_std(flooding_distribution_parameter_);
     }
 
     /**
      * Sets the values of assurance measure alpha
-     * @param assuranceMeasure the assurance measure
+     * @param assurance_measure the assurance measure
      */
-    void SetAssuranceMeasure(float assuranceMeasure) {
-        m_assuranceMeasure = assuranceMeasure;
+    void set_assurance_measure(float assurance_measure) {
+        assurance_measure_ = assurance_measure;
     }
 
     /**
      * Sets the standard security level
-     * @param securityLevel the standard security level
+     * @param security_level the standard security level
      */
-    void SetStdLevel(SecurityLevel securityLevel) {
-        m_stdLevel = securityLevel;
+    void set_std_level(SecurityLevel security_level) {
+        std_level_ = security_level;
     }
 
     /**
      * Sets the value of noise scale
-     * @param noiseScale the noise scale used in HRA-secure PRE
+     * @param noise_scale_value the noise scale used in HRA-secure PRE
      */
-    void SetNoiseScale(PlaintextModulus noiseScale) {
-        m_noiseScale = noiseScale;
+    void set_noise_scale(PlaintextModulus noise_scale_value) {
+        noise_scale_ = noise_scale_value;
     }
 
     /**
      * Sets the value of digit size
-     * @param digitSize the digit size
+     * @param digit_size the digit size
      */
-    void SetDigitSize(uint32_t digitSize) {
-        m_digitSize = digitSize;
+    void set_digit_size(uint32_t digit_size) {
+        digit_size_ = digit_size;
     }
 
-    void SetNoiseEstimate(double noiseEstimate) {
-        m_noiseEstimate = noiseEstimate;
+    void set_noise_estimate(double noise_estimate) {
+        noise_estimate_ = noise_estimate;
     }
-    void SetMultiplicativeDepth(uint32_t multiplicativeDepth) {
-        m_multiplicativeDepth = multiplicativeDepth;
+    void set_multiplicative_depth(uint32_t multiplicative_depth) {
+        multiplicative_depth_ = multiplicative_depth;
     }
-    void SetEvalAddCount(uint32_t evalAddCount) {
-        m_evalAddCount = evalAddCount;
+    void set_eval_add_count(uint32_t eval_add_count) {
+        eval_add_count_ = eval_add_count;
     }
-    void SetKeySwitchCount(uint32_t keySwitchCount) {
-        m_keySwitchCount = keySwitchCount;
+    void set_key_switch_count(uint32_t key_switch_count) {
+        key_switch_count_ = key_switch_count;
     }
-    void SetPRENumHops(uint32_t PRENumHops) {
-        m_PRENumHops = PRENumHops;
+    void set_pre_num_hops(uint32_t pre_num_hops) {
+        pre_num_hops_ = pre_num_hops;
     }
 
     /**
      * Sets the value of the maximum power of secret key for which the
      * relinearization key is generated
-     * @param maxRelinSkDeg the maximum power of secret key
+     * @param max_relin_sk_deg the maximum power of secret key
      */
-    void SetMaxRelinSkDeg(uint32_t maxRelinSkDeg) {
-        m_maxRelinSkDeg = maxRelinSkDeg;
+    void set_max_relin_sk_deg(uint32_t max_relin_sk_deg) {
+        max_relin_sk_deg_ = max_relin_sk_deg;
     }
 
     /**
-     * Configures the secretKeyDist for generating the secret key polynomial
-     * @param secretKeyDist is GAUSSIAN or UNIFORM_TERNARY
+     * Configures the secret_key_dist for generating the secret key polynomial
+     * @param secret_key_dist is GAUSSIAN or UNIFORM_TERNARY
      */
-    void SetSecretKeyDist(SecretKeyDist secretKeyDist) {
-        m_secretKeyDist = secretKeyDist;
+    void set_secret_key_dist(SecretKeyDist secret_key_dist) {
+        secret_key_dist_ = secret_key_dist;
     }
 
     /**
      * Configures the security mode for pre
-     * @param PREMode is INDCPA, FIXED_NOISE_HRA, NOISE_FLOODING_HRA or MODULUS_SWITCHING_HRA.
+     * @param pre_mode is INDCPA, FIXED_NOISE_HRA, NOISE_FLOODING_HRA or MODULUS_SWITCHING_HRA.
      */
-    void SetPREMode(ProxyReEncryptionMode PREMode) {
-        m_PREMode = PREMode;
+    void set_pre_mode(ProxyReEncryptionMode pre_mode) {
+        pre_mode_ = pre_mode;
     }
 
     /**
      * Configures the security mode for multiparty
-     * @param multipartyMode Security mode for multiparty decryption.
+     * @param multiparty_mode Security mode for multiparty decryption.
      */
-    void SetMultipartyMode(MultipartyMode multipartyMode) {
-        m_multipartyMode = multipartyMode;
+    void set_multiparty_mode(MultipartyMode multiparty_mode) {
+        multiparty_mode_ = multiparty_mode;
     }
 
     /**
      * Configures the execution for CKKS noise flooding
-     * @param executionMode Execution mode.
+     * @param execution_mode Execution mode.
      */
-    void SetExecutionMode(ExecutionMode executionMode) {
-        m_executionMode = executionMode;
+    void set_execution_mode(ExecutionMode execution_mode) {
+        execution_mode_ = execution_mode;
     }
 
     /**
      * Configures the decryption noise mode for CKKS noise flooding
-     * @param decryptionNoiseMode Decryption noise mode.
+     * @param decryption_noise_mode Decryption noise mode.
      */
-    void SetDecryptionNoiseMode(DecryptionNoiseMode decryptionNoiseMode) {
-        m_decryptionNoiseMode = decryptionNoiseMode;
+    void set_decryption_noise_mode(DecryptionNoiseMode decryption_noise_mode) {
+        decryption_noise_mode_ = decryption_noise_mode;
     }
 
     /**
      * Configures the statistical security parameter for CKKS noise flooding and PRE
-     * @param statisticalSecurity the statistical security parameter
+     * @param statistical_security the statistical security parameter
      */
-    void SetStatisticalSecurity(uint32_t statisticalSecurity) {
-        m_statisticalSecurity = statisticalSecurity;
+    void set_statistical_security(uint32_t statistical_security) {
+        statistical_security_ = statistical_security;
     }
 
     /**
      * Configures the number of adversarial queries for CKKS noise flooding and PRE
-     * @param numAdversarialQueries the number of adversarial queries
+     * @param num_adversarial_queries the number of adversarial queries
      */
-    void SetNumAdversarialQueries(uint32_t numAdversarialQueries) {
-        m_numAdversarialQueries = numAdversarialQueries;
+    void set_num_adversarial_queries(uint32_t num_adversarial_queries) {
+        num_adversarial_queries_ = num_adversarial_queries;
     }
 
     /**
      * Configures the number of parties in threshold FHE
-     * @param thresholdNumOfParties the number of parties
+     * @param threshold_num_of_parties the number of parties
      */
-    void SetThresholdNumOfParties(uint32_t thresholdNumOfParties) {
-        m_thresholdNumOfParties = thresholdNumOfParties;
+    void set_threshold_num_of_parties(uint32_t threshold_num_of_parties) {
+        threshold_num_of_parties_ = threshold_num_of_parties;
     }
 
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
-        ar(::cereal::base_class<CryptoParametersBase<Element>>(this));
-        ar(::cereal::make_nvp("dp", m_distributionParameter));
-        ar(::cereal::make_nvp("am", m_assuranceMeasure));
-        ar(::cereal::make_nvp("ns", m_noiseScale));
-        ar(::cereal::make_nvp("rw", m_digitSize));
-        ar(::cereal::make_nvp("nest", m_noiseEstimate));
-        ar(::cereal::make_nvp("muld", m_multiplicativeDepth));
-        ar(::cereal::make_nvp("addc", m_evalAddCount));
-        ar(::cereal::make_nvp("kswc", m_keySwitchCount));
-        ar(::cereal::make_nvp("phops", m_PRENumHops));
-        ar(::cereal::make_nvp("md", m_maxRelinSkDeg));
-        ar(::cereal::make_nvp("mo", m_secretKeyDist));
-        ar(::cereal::make_nvp("pmo", m_PREMode));
-        ar(::cereal::make_nvp("mmo", m_multipartyMode));
-        ar(::cereal::make_nvp("exm", m_executionMode));
-        ar(::cereal::make_nvp("dnm", m_decryptionNoiseMode));
-        ar(::cereal::make_nvp("slv", m_stdLevel));
-        ar(::cereal::make_nvp("fdp", m_floodingDistributionParameter));
-        ar(::cereal::make_nvp("ss", m_statisticalSecurity));
-        ar(::cereal::make_nvp("aq", m_numAdversarialQueries));
-        ar(::cereal::make_nvp("tp", m_thresholdNumOfParties));
+        ar(::cereal::base_class<BaseCryptoParams<Element>>(this));
+        ar(::cereal::make_nvp("dp", distribution_parameter_));
+        ar(::cereal::make_nvp("am", assurance_measure_));
+        ar(::cereal::make_nvp("ns", noise_scale_));
+        ar(::cereal::make_nvp("rw", digit_size_));
+        ar(::cereal::make_nvp("nest", noise_estimate_));
+        ar(::cereal::make_nvp("muld", multiplicative_depth_));
+        ar(::cereal::make_nvp("addc", eval_add_count_));
+        ar(::cereal::make_nvp("kswc", key_switch_count_));
+        ar(::cereal::make_nvp("phops", pre_num_hops_));
+        ar(::cereal::make_nvp("md", max_relin_sk_deg_));
+        ar(::cereal::make_nvp("mo", secret_key_dist_));
+        ar(::cereal::make_nvp("pmo", pre_mode_));
+        ar(::cereal::make_nvp("mmo", multiparty_mode_));
+        ar(::cereal::make_nvp("exm", execution_mode_));
+        ar(::cereal::make_nvp("dnm", decryption_noise_mode_));
+        ar(::cereal::make_nvp("slv", std_level_));
+        ar(::cereal::make_nvp("fdp", flooding_distribution_parameter_));
+        ar(::cereal::make_nvp("ss", statistical_security_));
+        ar(::cereal::make_nvp("aq", num_adversarial_queries_));
+        ar(::cereal::make_nvp("tp", threshold_num_of_parties_));
     }
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        ar(::cereal::base_class<CryptoParametersBase<Element>>(this));
-        ar(::cereal::make_nvp("dp", m_distributionParameter));
-        ar(::cereal::make_nvp("am", m_assuranceMeasure));
-        ar(::cereal::make_nvp("ns", m_noiseScale));
-        ar(::cereal::make_nvp("rw", m_digitSize));
-        ar(::cereal::make_nvp("nest", m_noiseEstimate));
-        ar(::cereal::make_nvp("muld", m_multiplicativeDepth));
-        ar(::cereal::make_nvp("addc", m_evalAddCount));
-        ar(::cereal::make_nvp("kswc", m_keySwitchCount));
-        ar(::cereal::make_nvp("phops", m_PRENumHops));
-        ar(::cereal::make_nvp("md", m_maxRelinSkDeg));
-        ar(::cereal::make_nvp("mo", m_secretKeyDist));
-        ar(::cereal::make_nvp("pmo", m_PREMode));
-        ar(::cereal::make_nvp("mmo", m_multipartyMode));
-        ar(::cereal::make_nvp("exm", m_executionMode));
-        ar(::cereal::make_nvp("dnm", m_decryptionNoiseMode));
-        ar(::cereal::make_nvp("slv", m_stdLevel));
-        ar(::cereal::make_nvp("fdp", m_floodingDistributionParameter));
-        ar(::cereal::make_nvp("ss", m_statisticalSecurity));
-        ar(::cereal::make_nvp("aq", m_numAdversarialQueries));
-        ar(::cereal::make_nvp("tp", m_thresholdNumOfParties));
+        ar(::cereal::base_class<BaseCryptoParams<Element>>(this));
+        ar(::cereal::make_nvp("dp", distribution_parameter_));
+        ar(::cereal::make_nvp("am", assurance_measure_));
+        ar(::cereal::make_nvp("ns", noise_scale_));
+        ar(::cereal::make_nvp("rw", digit_size_));
+        ar(::cereal::make_nvp("nest", noise_estimate_));
+        ar(::cereal::make_nvp("muld", multiplicative_depth_));
+        ar(::cereal::make_nvp("addc", eval_add_count_));
+        ar(::cereal::make_nvp("kswc", key_switch_count_));
+        ar(::cereal::make_nvp("phops", pre_num_hops_));
+        ar(::cereal::make_nvp("md", max_relin_sk_deg_));
+        ar(::cereal::make_nvp("mo", secret_key_dist_));
+        ar(::cereal::make_nvp("pmo", pre_mode_));
+        ar(::cereal::make_nvp("mmo", multiparty_mode_));
+        ar(::cereal::make_nvp("exm", execution_mode_));
+        ar(::cereal::make_nvp("dnm", decryption_noise_mode_));
+        ar(::cereal::make_nvp("slv", std_level_));
+        ar(::cereal::make_nvp("fdp", flooding_distribution_parameter_));
+        ar(::cereal::make_nvp("ss", statistical_security_));
+        ar(::cereal::make_nvp("aq", num_adversarial_queries_));
+        ar(::cereal::make_nvp("tp", threshold_num_of_parties_));
 
-        m_dgg.SetStd(m_distributionParameter);
-        m_dggFlooding.SetStd(m_floodingDistributionParameter);
+        dgg_.set_std(distribution_parameter_);
+        dgg_flooding_.set_std(flooding_distribution_parameter_);
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "CryptoParametersRLWE";
     }
 
   protected:
     /// standard deviation in Discrete Gaussian Distribution
-    float m_distributionParameter = 0;
+    float distribution_parameter_ = 0;
     /// standard deviation in Discrete Gaussian Distribution with Flooding
-    double m_floodingDistributionParameter = 0;
+    double flooding_distribution_parameter_ = 0;
     /// assurance measure alpha
-    float m_assuranceMeasure = 0;
+    float assurance_measure_ = 0;
     /// noise scale
-    PlaintextModulus m_noiseScale = 1;
+    PlaintextModulus noise_scale_ = 1;
     /// digit size
-    uint32_t m_digitSize = 1;
+    uint32_t digit_size_ = 1;
 
     /// log2 of the noise estimate used to set the flooding noise in the NOISE_FLOODING_DECRYPT mode of CKKS
-    double m_noiseEstimate{0};
+    double noise_estimate_{0};
     /// multiplicative depth the parameters were generated for
-    uint32_t m_multiplicativeDepth{1};
+    uint32_t multiplicative_depth_{1};
     /// number of additions assumed in parameter generation
-    uint32_t m_evalAddCount{0};
+    uint32_t eval_add_count_{0};
     /// number of key switching operations assumed in parameter generation
-    uint32_t m_keySwitchCount{0};
+    uint32_t key_switch_count_{0};
     /// number of re-encryption hops supported in the HRA-secure mode of PRE
-    uint32_t m_PRENumHops{0};
+    uint32_t pre_num_hops_{0};
 
     /// the highest power of secret key for which relinearization key is generated
-    uint32_t m_maxRelinSkDeg = 2;
+    uint32_t max_relin_sk_deg_ = 2;
     /// specifies whether the secret polynomials are generated from discrete
     /// Gaussian distribution or ternary distribution with the norm of unity
-    SecretKeyDist m_secretKeyDist = GAUSSIAN;
+    SecretKeyDist secret_key_dist_ = GAUSSIAN;
     /// Security level according in the HomomorphicEncryption.org standard
-    SecurityLevel m_stdLevel = HEStd_NotSet;
+    SecurityLevel std_level_ = HEStd_NotSet;
 
-    /// m_dgg gets the same default value as m_distributionParameter does
-    typename Element::DggType m_dgg = typename Element::DggType(0);
-    /// m_dggFlooding gets the same default value as m_floodingDistributionParameter does
-    typename Element::DggType m_dggFlooding = typename Element::DggType(0);
+    /// dgg_ gets the same default value as distribution_parameter_ does
+    typename Element::DggType dgg_ = typename Element::DggType(0);
+    /// dgg_flooding_ gets the same default value as flooding_distribution_parameter_ does
+    typename Element::DggType dgg_flooding_ = typename Element::DggType(0);
 
     /// specifies the security mode used for PRE
-    ProxyReEncryptionMode m_PREMode = NOT_SET;
+    ProxyReEncryptionMode pre_mode_ = NOT_SET;
 
     /// specifies the security mode used for multiparty decryption
-    MultipartyMode m_multipartyMode = FIXED_NOISE_MULTIPARTY;
+    MultipartyMode multiparty_mode_ = FIXED_NOISE_MULTIPARTY;
 
     /// specifies the execution mode used for NOISE_FLOODING_DECRYPT mode in CKKS
-    ExecutionMode m_executionMode = EXEC_EVALUATION;
+    ExecutionMode execution_mode_ = EXEC_EVALUATION;
 
     /// specifies the noise mode used for decryption in CKKS
-    DecryptionNoiseMode m_decryptionNoiseMode = FIXED_NOISE_DECRYPT;
+    DecryptionNoiseMode decryption_noise_mode_ = FIXED_NOISE_DECRYPT;
 
     /// Statistical security of CKKS in NOISE_FLOODING_DECRYPT mode. This is the bound on the probability of success
-    /// that any adversary can have. Specifically, they a probability of success of at most 2^(-statisticalSecurity).
-    double m_statisticalSecurity = 30;
+    /// that any adversary can have. Specifically, they a probability of success of at most 2^(-statistical_security).
+    double statistical_security_ = 30;
 
     /// This is the number of adversarial queries a user is expecting for their application, which we use to ensure
     /// security of CKKS in NOISE_FLOODING_DECRYPT mode.
-    double m_numAdversarialQueries = 1;
+    double num_adversarial_queries_ = 1;
 
     /// number of parties in threshold FHE
-    uint32_t m_thresholdNumOfParties = 1;
+    uint32_t threshold_num_of_parties_ = 1;
 
     /**
-     * @brief CompareTo() is a method to compare two CryptoParametersRLWE objects.
-     *        It is called by CryptoParametersBase::operator==()
-     * @param rhs - the other CryptoParametersRLWE object to compare to.
-     * @return whether the two CryptoParametersRLWE objects are equivalent.
+     * @brief compare_to() is a method to compare two RlweCryptoParams objects.
+     *        It is called by BaseCryptoParams::operator==()
+     * @param rhs - the other RlweCryptoParams object to compare to.
+     * @return whether the two RlweCryptoParams objects are equivalent.
      */
-    bool CompareTo(const CryptoParametersBase<Element>& rhs) const override {
-        auto el = dynamic_cast<const CryptoParametersRLWE*>(&rhs);
+    bool compare_to(const BaseCryptoParams<Element>& rhs) const override {
+        auto el = dynamic_cast<const RlweCryptoParams*>(&rhs);
         if (!el)
             return false;
 
-        return CryptoParametersBase<Element>::CompareTo(rhs) &&
-               m_distributionParameter == el->m_distributionParameter && m_assuranceMeasure == el->m_assuranceMeasure &&
-               m_noiseScale == el->m_noiseScale && m_digitSize == el->m_digitSize &&
-               m_noiseEstimate == el->m_noiseEstimate && m_multiplicativeDepth == el->m_multiplicativeDepth &&
-               m_evalAddCount == el->m_evalAddCount && m_keySwitchCount == el->m_keySwitchCount &&
-               m_PRENumHops == el->m_PRENumHops && m_secretKeyDist == el->m_secretKeyDist &&
-               m_stdLevel == el->m_stdLevel && m_maxRelinSkDeg == el->m_maxRelinSkDeg && m_PREMode == el->m_PREMode &&
-               m_multipartyMode == el->m_multipartyMode && m_executionMode == el->m_executionMode &&
-               m_floodingDistributionParameter == el->m_floodingDistributionParameter &&
-               m_statisticalSecurity == el->m_statisticalSecurity &&
-               m_numAdversarialQueries == el->m_numAdversarialQueries &&
-               m_thresholdNumOfParties == el->m_thresholdNumOfParties;
+        return BaseCryptoParams<Element>::compare_to(rhs) &&
+               distribution_parameter_ == el->distribution_parameter_ && assurance_measure_ == el->assurance_measure_ &&
+               noise_scale_ == el->noise_scale_ && digit_size_ == el->digit_size_ &&
+               noise_estimate_ == el->noise_estimate_ && multiplicative_depth_ == el->multiplicative_depth_ &&
+               eval_add_count_ == el->eval_add_count_ && key_switch_count_ == el->key_switch_count_ &&
+               pre_num_hops_ == el->pre_num_hops_ && secret_key_dist_ == el->secret_key_dist_ &&
+               std_level_ == el->std_level_ && max_relin_sk_deg_ == el->max_relin_sk_deg_ && pre_mode_ == el->pre_mode_ &&
+               multiparty_mode_ == el->multiparty_mode_ && execution_mode_ == el->execution_mode_ &&
+               flooding_distribution_parameter_ == el->flooding_distribution_parameter_ &&
+               statistical_security_ == el->statistical_security_ &&
+               num_adversarial_queries_ == el->num_adversarial_queries_ &&
+               threshold_num_of_parties_ == el->threshold_num_of_parties_;
     }
 
     /**
@@ -607,15 +607,15 @@ class CryptoParametersRLWE : public CryptoParametersBase<Element> {
      *
      * @param os the stream to print to.
      */
-    void PrintParameters(std::ostream& os) const override {
-        CryptoParametersBase<Element>::PrintParameters(os);
+    void print_parameters(std::ostream& os) const override {
+        BaseCryptoParams<Element>::print_parameters(os);
 
-        os << "Distrib parm " << m_distributionParameter << ", Assurance measure " << m_assuranceMeasure
-           << ", Noise scale " << m_noiseScale << ", Digit Size " << m_digitSize << ", SecretKeyDist "
-           << m_secretKeyDist << ", Standard security level " << m_stdLevel << std::endl;
+        os << "Distrib parm " << distribution_parameter_ << ", Assurance measure " << assurance_measure_
+           << ", Noise scale " << noise_scale_ << ", Digit Size " << digit_size_ << ", SecretKeyDist "
+           << secret_key_dist_ << ", Standard security level " << std_level_ << std::endl;
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_BASE_RLWE_PARAMS_H_

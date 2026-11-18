@@ -51,33 +51,33 @@
 #include "cipher/util/exception.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
- * @brief RNS implementation of the scheme interface (all crypto components for DCRTPoly)
+ * @brief RNS implementation of the scheme interface (all crypto components for RnsPoly)
  */
-class SchemeRNS : public SchemeBase<DCRTPoly> {
+class RnsScheme : public SchemeBase<RnsPoly> {
   public:
-    SchemeRNS() = default;
+    RnsScheme() = default;
 
-    virtual ~SchemeRNS() = default;
+    virtual ~RnsScheme() = default;
 
     /**
-     * Instantiates the key switching component for the given technique (KeySwitchBV or KeySwitchHYBRID).
+     * Instantiates the key switching component for the given technique (KeySwitchBv or KeySwitchHybrid).
      * Must be called with the key switching technique from the crypto parameters before any key switching.
      *
-     * @param ksTech the key switching technique (BV or HYBRID); any other value throws.
+     * @param ks_tech the key switching technique (BV or HYBRID); any other value throws.
      */
-    void SetKeySwitchingTechnique(KeySwitchTechnique ksTech) {
-        if (ksTech == BV) {
-            m_KeySwitch = std::make_shared<KeySwitchBV>();
-        } else if (ksTech == HYBRID) {
-            m_KeySwitch = std::make_shared<KeySwitchHYBRID>();
+    void set_key_switching_technique(KeySwitchTechnique ks_tech) {
+        if (ks_tech == BV) {
+            key_switch_ = std::make_shared<KeySwitchBv>();
+        } else if (ks_tech == HYBRID) {
+            key_switch_ = std::make_shared<KeySwitchHybrid>();
         } else
-            OPENFHE_THROW("ksTech is invalid");
+            CIPHER_THROW("ksTech is invalid");
     }
 
     /////////////////////////////////////
@@ -86,19 +86,19 @@ class SchemeRNS : public SchemeBase<DCRTPoly> {
 
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
-        ar(cereal::base_class<SchemeBase<DCRTPoly>>(this));
+        ar(cereal::base_class<SchemeBase<RnsPoly>>(this));
     }
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        ar(cereal::base_class<SchemeBase<DCRTPoly>>(this));
+        ar(cereal::base_class<SchemeBase<RnsPoly>>(this));
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "SchemeRNS";
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_RNS_SCHEME_H_

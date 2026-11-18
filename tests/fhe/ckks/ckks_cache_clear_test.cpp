@@ -50,16 +50,16 @@
 #endif
 
 #if defined(__GLIBC__) || defined(__APPLE__)
-    #define OPENFHE_HAS_HEAP_PROBE 1
+    #define CIPHER_HAS_HEAP_PROBE 1
 #else
-    #define OPENFHE_HAS_HEAP_PROBE 0
+    #define CIPHER_HAS_HEAP_PROBE 0
 #endif
 
-using namespace lbcrypto;
+using namespace cipher;
 
 namespace {
-std::size_t HeapInUseBytes() {
-#if OPENFHE_HAS_HEAP_PROBE
+std::size_t heap_in_use_bytes() {
+#if CIPHER_HAS_HEAP_PROBE
     #if defined(__GLIBC__)
     auto info = mallinfo2();
     return info.uordblks;
@@ -69,67 +69,67 @@ std::size_t HeapInUseBytes() {
     return s.size_in_use;
     #endif
 #else
-    OPENFHE_THROW("heap probe unavailable on this allocator");
+    CIPHER_THROW("heap probe unavailable on this allocator");
 #endif
 }
 
-CryptoContext<DCRTPoly> MakeBootstrapCC(uint32_t ringDim = 1 << 8) {
-    CCParams<CryptoContextCKKSRNS> params;
-    SecretKeyDist skDist = UNIFORM_TERNARY;
-    params.SetSecretKeyDist(skDist);
-    params.SetSecurityLevel(HEStd_NotSet);
-    params.SetRingDim(ringDim);
-#if NATIVEINT == 128
-    params.SetScalingModSize(78);
-    params.SetFirstModSize(89);
-    params.SetScalingTechnique(FIXEDAUTO);
+CryptoContext<RnsPoly> make_bootstrap_cc(uint32_t ring_dim = 1 << 8) {
+    ContextParams<CkksRnsContext> params;
+    SecretKeyDist sk_dist = UNIFORM_TERNARY;
+    params.set_secret_key_dist(sk_dist);
+    params.set_security_level(HEStd_NotSet);
+    params.set_ring_dim(ring_dim);
+#if CIPHER_NATIVE_INT == 128
+    params.set_scaling_mod_size(78);
+    params.set_first_mod_size(89);
+    params.set_scaling_technique(FIXEDAUTO);
 #else
-    params.SetScalingModSize(59);
-    params.SetFirstModSize(60);
-    params.SetScalingTechnique(FLEXIBLEAUTO);
+    params.set_scaling_mod_size(59);
+    params.set_first_mod_size(60);
+    params.set_scaling_technique(FLEXIBLEAUTO);
 #endif
-    std::vector<uint32_t> levelBudget = {1, 1};
-    uint32_t depth = 2 + FHECKKSRNS::GetBootstrapDepth(levelBudget, skDist);
-    params.SetMultiplicativeDepth(depth);
+    std::vector<uint32_t> level_budget = {1, 1};
+    uint32_t depth = 2 + CkksRnsFhe::get_bootstrap_depth(level_budget, sk_dist);
+    params.set_multiplicative_depth(depth);
 
-    auto cc = GenCryptoContext(params);
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
-    cc->Enable(FHE);
+    auto cc = make_crypto_context(params);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
+    cc->enable(FHE);
     return cc;
 }
-CryptoContext<DCRTPoly> MakeSchemeSwitchCC() {
-    CCParams<CryptoContextCKKSRNS> params;
-    params.SetMultiplicativeDepth(3);
-#if NATIVEINT == 128
-    params.SetFirstModSize(89);
-    params.SetScalingModSize(78);
-    params.SetScalingTechnique(FIXEDAUTO);
+CryptoContext<RnsPoly> make_scheme_switch_cc() {
+    ContextParams<CkksRnsContext> params;
+    params.set_multiplicative_depth(3);
+#if CIPHER_NATIVE_INT == 128
+    params.set_first_mod_size(89);
+    params.set_scaling_mod_size(78);
+    params.set_scaling_technique(FIXEDAUTO);
 #else
-    params.SetFirstModSize(60);
-    params.SetScalingModSize(50);
-    params.SetScalingTechnique(FLEXIBLEAUTOEXT);
+    params.set_first_mod_size(60);
+    params.set_scaling_mod_size(50);
+    params.set_scaling_technique(FLEXIBLEAUTOEXT);
 #endif
-    params.SetSecurityLevel(HEStd_NotSet);
-    params.SetRingDim(1 << 12);
-    params.SetBatchSize(16);
-    auto cc = GenCryptoContext(params);
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(SCHEMESWITCH);
+    params.set_security_level(HEStd_NotSet);
+    params.set_ring_dim(1 << 12);
+    params.set_batch_size(16);
+    auto cc = make_crypto_context(params);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(SCHEMESWITCH);
     return cc;
 }
 
 }  // namespace
 
-class UTCKKSCacheClear : public ::testing::Test {
+class CkksCacheClearTest : public ::testing::Test {
   protected:
-#if defined(WITH_TCM) || !OPENFHE_HAS_HEAP_PROBE
+#if defined(CIPHER_WITH_TCM) || !CIPHER_HAS_HEAP_PROBE
     void SetUp() override {
-    #if defined(WITH_TCM)
+    #if defined(CIPHER_WITH_TCM)
         GTEST_SKIP() << "Heap usage checks are not stable with tcmalloc enabled";
     #elif defined(__EMSCRIPTEN__)
         GTEST_SKIP() << "Heap probe unavailable under Emscripten";
@@ -142,108 +142,108 @@ class UTCKKSCacheClear : public ::testing::Test {
 #endif
 
     void TearDown() override {
-        CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+        ContextFactory<RnsPoly>::release_all_contexts();
     }
 };
 
 // These checks do not depend on allocator statistics and also run with tcmalloc and on platforms
 // without a supported heap probe.
-class UTCKKSReleaseAllContexts : public ::testing::Test {
+class CkksReleaseAllContextsTest : public ::testing::Test {
   protected:
     void TearDown() override {
-        CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+        ContextFactory<RnsPoly>::release_all_contexts();
     }
 };
 
-TEST_F(UTCKKSReleaseAllContexts, ClearsBootstrapPrecomWithLiveContext) {
-    auto cc = MakeBootstrapCC();
-    const std::vector<uint32_t> slotCounts{cc->GetRingDimension() / 4, cc->GetRingDimension() / 2};
-    for (auto slots : slotCounts) {
-        cc->EvalBootstrapSetup({1, 1}, {0, 0}, slots);
-        ASSERT_FALSE(cc->GetScheme()->EvalBootstrapKeyMapIndices(cc, slots).empty());
+TEST_F(CkksReleaseAllContextsTest, ClearsBootstrapPrecomWithLiveContext) {
+    auto cc = make_bootstrap_cc();
+    const std::vector<uint32_t> slot_counts{cc->get_ring_dimension() / 4, cc->get_ring_dimension() / 2};
+    for (auto slots : slot_counts) {
+        cc->eval_bootstrap_setup({1, 1}, {0, 0}, slots);
+        ASSERT_FALSE(cc->get_scheme()->eval_bootstrap_key_map_indices(cc, slots).empty());
     }
 
     // Keep cc alive: dropping the factory's references alone must not make this test pass.
-    CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+    ContextFactory<RnsPoly>::release_all_contexts();
 
-    EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 0);
-    for (auto slots : slotCounts) {
-        EXPECT_THROW(cc->GetScheme()->EvalBootstrapKeyMapIndices(cc, slots), OpenFHEException);
+    EXPECT_EQ(ContextFactory<RnsPoly>::get_context_count(), 0);
+    for (auto slots : slot_counts) {
+        EXPECT_THROW(cc->get_scheme()->eval_bootstrap_key_map_indices(cc, slots), CipherException);
     }
 }
 
-TEST_F(UTCKKSReleaseAllContexts, ClearsSchemeSwitchPrecomWithLiveContext) {
-    auto cc = MakeSchemeSwitchCC();
-    auto kp = cc->KeyGen();
+TEST_F(CkksReleaseAllContextsTest, ClearsSchemeSwitchPrecomWithLiveContext) {
+    auto cc = make_scheme_switch_cc();
+    auto kp = cc->key_gen();
 
     SchSwchParams p;
-    p.SetSecurityLevelCKKS(HEStd_NotSet);
-    p.SetSecurityLevelFHEW(TOY);
-    p.SetCtxtModSizeFHEWLargePrec(25);
-    p.SetNumSlotsCKKS(16);
-    auto lweSk = cc->EvalCKKStoFHEWSetup(p);
-    cc->EvalCKKStoFHEWKeyGen(kp, lweSk);
-    std::weak_ptr<BinFHEContext> binCC = cc->GetBinCCForSchemeSwitch();
-    ASSERT_FALSE(binCC.expired());
+    p.set_security_level_ckks(HEStd_NotSet);
+    p.set_security_level_fhew(TOY);
+    p.set_ctxt_mod_size_fhew_large_prec(25);
+    p.set_num_slots_ckks(16);
+    auto lwe_sk = cc->eval_ckks_to_fhew_setup(p);
+    cc->eval_ckks_to_fhew_key_gen(kp, lwe_sk);
+    std::weak_ptr<BooleanContext> bin_cc = cc->get_bin_cc_for_scheme_switch();
+    ASSERT_FALSE(bin_cc.expired());
 
     // Neither cc nor its keys go out of scope before the cache lifetime is checked.
-    CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+    ContextFactory<RnsPoly>::release_all_contexts();
 
-    EXPECT_EQ(CryptoContextFactory<DCRTPoly>::GetContextCount(), 0);
-    EXPECT_EQ(cc->GetBinCCForSchemeSwitch(), nullptr);
-    EXPECT_TRUE(binCC.expired());
+    EXPECT_EQ(ContextFactory<RnsPoly>::get_context_count(), 0);
+    EXPECT_EQ(cc->get_bin_cc_for_scheme_switch(), nullptr);
+    EXPECT_TRUE(bin_cc.expired());
 }
 
-// Full clear drops every slot-keyed entry in FHECKKSRNS::m_bootPrecomMap.
-TEST_F(UTCKKSCacheClear, FullBootstrapClear) {
-    auto cc = MakeBootstrapCC();
-    uint32_t numSlots = cc->GetRingDimension() / 2;
+// Full clear drops every slot-keyed entry in CkksRnsFhe::boot_precom_map_.
+TEST_F(CkksCacheClearTest, FullBootstrapClear) {
+    auto cc = make_bootstrap_cc();
+    uint32_t num_slots = cc->get_ring_dimension() / 2;
 
-    // The first EvalBootstrapSetup() grows per-thread allocator structures in
+    // The first eval_bootstrap_setup() grows per-thread allocator structures in
     // proportion to the OpenMP thread count, and those are not returned to the
     // heap. Running one setup and clear before the baseline is taken keeps that
     // growth out of the comparison, so what is measured is the bootstrap
     // precomputation alone rather than the thread count of the host.
-    cc->EvalBootstrapSetup({1, 1}, {0, 0}, numSlots);
-    cc->ClearBootstrapPrecom();
+    cc->eval_bootstrap_setup({1, 1}, {0, 0}, num_slots);
+    cc->clear_bootstrap_precom();
 
-    size_t before = HeapInUseBytes();
-    cc->EvalBootstrapSetup({1, 1}, {0, 0}, numSlots);
-    // size_t after = HeapInUseBytes();
-    cc->ClearBootstrapPrecom();
-    // size_t after_cleanup = HeapInUseBytes();
-    CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
-    size_t final = HeapInUseBytes();
+    size_t before = heap_in_use_bytes();
+    cc->eval_bootstrap_setup({1, 1}, {0, 0}, num_slots);
+    // size_t after = heap_in_use_bytes();
+    cc->clear_bootstrap_precom();
+    // size_t after_cleanup = heap_in_use_bytes();
+    ContextFactory<RnsPoly>::release_all_contexts();
+    size_t final = heap_in_use_bytes();
 
     std::string failmsg{"ClearBootstrapPrecom() may not clean all allocated memory"};
     EXPECT_TRUE(final <= before) << failmsg;
 
     // std::cerr << "FullBootstrapClear(): before: " << before << "; after: " << after
-    //           << "; after cleanup: " << after_cleanup << "; after ReleaseAllContexts(): " << final << std::endl;
+    //           << "; after cleanup: " << after_cleanup << "; after release_all_contexts(): " << final << std::endl;
 }
 
-TEST_F(UTCKKSCacheClear, SchemeSwitchPrecomClear) {
-    auto cc = MakeSchemeSwitchCC();
-    auto kp = cc->KeyGen();
+TEST_F(CkksCacheClearTest, SchemeSwitchPrecomClear) {
+    auto cc = make_scheme_switch_cc();
+    auto kp = cc->key_gen();
 
     SchSwchParams p;
-    p.SetSecurityLevelCKKS(HEStd_NotSet);
-    p.SetSecurityLevelFHEW(TOY);
-    p.SetCtxtModSizeFHEWLargePrec(25);
-    p.SetNumSlotsCKKS(16);
-    size_t before = HeapInUseBytes();
-    auto lweSk = cc->EvalCKKStoFHEWSetup(p);
-    cc->EvalCKKStoFHEWKeyGen(kp, lweSk);
-    // size_t after = HeapInUseBytes();
-    cc->ClearSchemeSwitchPrecom();
-    cc->ClearStaticMapsAndVectors();
-    // size_t after_cleanup = HeapInUseBytes();
-    CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
-    size_t final = HeapInUseBytes();
+    p.set_security_level_ckks(HEStd_NotSet);
+    p.set_security_level_fhew(TOY);
+    p.set_ctxt_mod_size_fhew_large_prec(25);
+    p.set_num_slots_ckks(16);
+    size_t before = heap_in_use_bytes();
+    auto lwe_sk = cc->eval_ckks_to_fhew_setup(p);
+    cc->eval_ckks_to_fhew_key_gen(kp, lwe_sk);
+    // size_t after = heap_in_use_bytes();
+    cc->clear_scheme_switch_precom();
+    cc->clear_static_maps_and_vectors();
+    // size_t after_cleanup = heap_in_use_bytes();
+    ContextFactory<RnsPoly>::release_all_contexts();
+    size_t final = heap_in_use_bytes();
 
     std::string failmsg{"ClearSchemeSwitchPrecom() may not clean all allocated memory"};
     EXPECT_TRUE(final <= before) << failmsg;
 
     // std::cerr << "SchemeSwitchPrecomClear(): before: " << before << "; after: " << after
-    //           << "; after cleanup: " << after_cleanup << "; after ReleaseAllContexts(): " << final << std::endl;
+    //           << "; after cleanup: " << after_cleanup << "; after release_all_contexts(): " << final << std::endl;
 }

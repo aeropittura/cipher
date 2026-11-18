@@ -42,6 +42,6 @@
 constexpr uint32_t RING_DIM_LOG = 16;
 constexpr uint32_t DCRTBITS = MAX_MODULUS_SIZE;
 
-static PolyBenchParams TestParameters((1 << (RING_DIM_LOG + 1)), DCRTBITS);
+static PolyBenchParams test_parameters((1 << (RING_DIM_LOG + 1)), DCRTBITS);
 
 BENCHMARK_MAIN();

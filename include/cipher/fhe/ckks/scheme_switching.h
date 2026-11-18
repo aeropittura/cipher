@@ -48,10 +48,10 @@
 #include "cipher/fhe/rns/fhe.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief CKKS implementation of scheme switching between CKKS and FHEW (Boolean) ciphertexts.
@@ -62,100 +62,100 @@ namespace lbcrypto {
  * operations that combine both directions. The precomputations and the FHEW cryptocontext are stored in this
  * object, one instance per CKKS cryptocontext.
  */
-class SWITCHCKKSRNS : public FHERNS {
-    using ParmType = typename DCRTPoly::Params;
+class CkksRnsSchemeSwitching : public RnsFhe {
+    using ParmType = typename RnsPoly::Params;
 
   public:
-    virtual ~SWITCHCKKSRNS() = default;
+    virtual ~CkksRnsSchemeSwitching() = default;
 
     /**
      * Clear cached CKKS/FHEW scheme-switch data held by this object.
      * Any shared object already returned to the caller stays alive until released.
      */
-    void ClearSchemeSwitchPrecom() noexcept override {
-        std::vector<ReadOnlyPlaintext>().swap(m_U0Pre);
-        m_ccLWE.reset();
-        m_ccKS.reset();
-        m_CKKStoFHEWswk.reset();
-        m_FHEWtoCKKSswk.reset();
-        m_ctxtKS.reset();
+    void clear_scheme_switch_precom() noexcept override {
+        std::vector<ReadOnlyPlaintext>().swap(u0_pre_);
+        cc_lwe_.reset();
+        cc_ks_.reset();
+        ckks_to_fhew_swk_.reset();
+        fhew_to_ckks_swk_.reset();
+        ctxt_ks_.reset();
     }
 
     //------------------------------------------------------------------------------
     // Scheme Switching Wrappers
     //------------------------------------------------------------------------------
 
-    LWEPrivateKey EvalCKKStoFHEWSetup(const SchSwchParams& params) override;
+    LwePrivateKey eval_ckks_to_fhew_setup(const SchSwchParams& params) override;
 
-    std::shared_ptr<std::map<uint32_t, EvalKey<DCRTPoly>>> EvalCKKStoFHEWKeyGen(const KeyPair<DCRTPoly>& keyPair,
-                                                                                ConstLWEPrivateKey& lwesk) override;
+    std::shared_ptr<std::map<uint32_t, EvalKey<RnsPoly>>> eval_ckks_to_fhew_key_gen(const KeyPair<RnsPoly>& key_pair,
+                                                                                ConstLwePrivateKey& lwesk) override;
 
-    void EvalCKKStoFHEWPrecompute(const CryptoContextImpl<DCRTPoly>& cc, double scale) override;
+    void eval_ckks_to_fhew_precompute(const CryptoContextImpl<RnsPoly>& cc, double scale) override;
 
-    std::vector<std::shared_ptr<LWECiphertextImpl>> EvalCKKStoFHEW(ConstCiphertext<DCRTPoly> ciphertext,
-                                                                   uint32_t numCtxts) override;
+    std::vector<std::shared_ptr<LweCiphertextImpl>> eval_ckks_to_fhew(ConstCiphertext<RnsPoly> ciphertext,
+                                                                   uint32_t num_ctxts) override;
 
-    void EvalFHEWtoCKKSSetup(const CryptoContextImpl<DCRTPoly>& ccCKKS, const std::shared_ptr<BinFHEContext>& ccLWE,
-                             uint32_t numSlotsCKKS, uint32_t logQ) override;
+    void eval_fhew_to_ckks_setup(const CryptoContextImpl<RnsPoly>& cc_ckks, const std::shared_ptr<BooleanContext>& cc_lwe,
+                             uint32_t num_slots_ckks, uint32_t log_q) override;
 
-    std::shared_ptr<std::map<uint32_t, EvalKey<DCRTPoly>>> EvalFHEWtoCKKSKeyGen(const KeyPair<DCRTPoly>& keyPair,
-                                                                                ConstLWEPrivateKey& lwesk,
-                                                                                uint32_t numSlots, uint32_t numCtxts,
+    std::shared_ptr<std::map<uint32_t, EvalKey<RnsPoly>>> eval_fhew_to_ckks_key_gen(const KeyPair<RnsPoly>& key_pair,
+                                                                                ConstLwePrivateKey& lwesk,
+                                                                                uint32_t num_slots, uint32_t num_ctxts,
                                                                                 uint32_t dim1, uint32_t L) override;
 
-    Ciphertext<DCRTPoly> EvalFHEWtoCKKS(std::vector<std::shared_ptr<LWECiphertextImpl>>& LWECiphertexts,
-                                        uint32_t numCtxts, uint32_t numSlots, uint32_t p, double pmin, double pmax,
+    Ciphertext<RnsPoly> eval_fhew_to_ckks(std::vector<std::shared_ptr<LweCiphertextImpl>>& lwe_ciphertexts,
+                                        uint32_t num_ctxts, uint32_t num_slots, uint32_t p, double pmin, double pmax,
                                         uint32_t dim1) const override;
 
-    LWEPrivateKey EvalSchemeSwitchingSetup(const SchSwchParams& params) override;
+    LwePrivateKey eval_scheme_switching_setup(const SchSwchParams& params) override;
 
-    std::shared_ptr<std::map<uint32_t, EvalKey<DCRTPoly>>> EvalSchemeSwitchingKeyGen(
-            const KeyPair<DCRTPoly>& keyPair, ConstLWEPrivateKey& lwesk) override;
+    std::shared_ptr<std::map<uint32_t, EvalKey<RnsPoly>>> eval_scheme_switching_key_gen(
+            const KeyPair<RnsPoly>& key_pair, ConstLwePrivateKey& lwesk) override;
 
-    void EvalCompareSwitchPrecompute(const CryptoContextImpl<DCRTPoly>& ccCKKS, uint32_t pLWE, double scaleSign,
+    void eval_compare_switch_precompute(const CryptoContextImpl<RnsPoly>& cc_ckks, uint32_t p_lwe, double scale_sign,
                                      bool unit) override;
 
-    Ciphertext<DCRTPoly> EvalCompareSchemeSwitching(ConstCiphertext<DCRTPoly> ciphertext1,
-                                                    ConstCiphertext<DCRTPoly> ciphertext2, uint32_t numCtxts,
-                                                    uint32_t numSlots, uint32_t pLWE, double scaleSign,
+    Ciphertext<RnsPoly> eval_compare_scheme_switching(ConstCiphertext<RnsPoly> ciphertext1,
+                                                    ConstCiphertext<RnsPoly> ciphertext2, uint32_t num_ctxts,
+                                                    uint32_t num_slots, uint32_t p_lwe, double scale_sign,
                                                     bool unit) override;
 
-    std::vector<Ciphertext<DCRTPoly>> EvalMinSchemeSwitching(ConstCiphertext<DCRTPoly> ciphertext,
-                                                             PublicKey<DCRTPoly> publicKey, uint32_t numValues,
-                                                             uint32_t numSlots, uint32_t pLWE,
-                                                             double scaleSign) override;
+    std::vector<Ciphertext<RnsPoly>> eval_min_scheme_switching(ConstCiphertext<RnsPoly> ciphertext,
+                                                             PublicKey<RnsPoly> public_key, uint32_t num_values,
+                                                             uint32_t num_slots, uint32_t p_lwe,
+                                                             double scale_sign) override;
 
-    std::vector<Ciphertext<DCRTPoly>> EvalMinSchemeSwitchingAlt(ConstCiphertext<DCRTPoly> ciphertext,
-                                                                PublicKey<DCRTPoly> publicKey, uint32_t numValues,
-                                                                uint32_t numSlots, uint32_t pLWE,
-                                                                double scaleSign) override;
+    std::vector<Ciphertext<RnsPoly>> eval_min_scheme_switching_alt(ConstCiphertext<RnsPoly> ciphertext,
+                                                                PublicKey<RnsPoly> public_key, uint32_t num_values,
+                                                                uint32_t num_slots, uint32_t p_lwe,
+                                                                double scale_sign) override;
 
-    std::vector<Ciphertext<DCRTPoly>> EvalMaxSchemeSwitching(ConstCiphertext<DCRTPoly> ciphertext,
-                                                             PublicKey<DCRTPoly> publicKey, uint32_t numValues,
-                                                             uint32_t numSlots, uint32_t pLWE,
-                                                             double scaleSign) override;
+    std::vector<Ciphertext<RnsPoly>> eval_max_scheme_switching(ConstCiphertext<RnsPoly> ciphertext,
+                                                             PublicKey<RnsPoly> public_key, uint32_t num_values,
+                                                             uint32_t num_slots, uint32_t p_lwe,
+                                                             double scale_sign) override;
 
-    std::vector<Ciphertext<DCRTPoly>> EvalMaxSchemeSwitchingAlt(ConstCiphertext<DCRTPoly> ciphertext,
-                                                                PublicKey<DCRTPoly> publicKey, uint32_t numValues,
-                                                                uint32_t numSlots, uint32_t pLWE,
-                                                                double scaleSign) override;
+    std::vector<Ciphertext<RnsPoly>> eval_max_scheme_switching_alt(ConstCiphertext<RnsPoly> ciphertext,
+                                                                PublicKey<RnsPoly> public_key, uint32_t num_values,
+                                                                uint32_t num_slots, uint32_t p_lwe,
+                                                                double scale_sign) override;
 
     /**
      * Gets the FHEW (binary FHE) cryptocontext used for scheme switching.
      *
      * @return the FHEW cryptocontext
      */
-    std::shared_ptr<lbcrypto::BinFHEContext> GetBinCCForSchemeSwitch() override {
-        return m_ccLWE;
+    std::shared_ptr<cipher::BooleanContext> get_bin_cc_for_scheme_switch() override {
+        return cc_lwe_;
     }
 
     /**
      * Sets the FHEW (binary FHE) cryptocontext used for scheme switching (e.g., after deserialization).
      *
-     * @param ccLWE the FHEW cryptocontext
+     * @param cc_lwe the FHEW cryptocontext
      */
-    void SetBinCCForSchemeSwitch(std::shared_ptr<lbcrypto::BinFHEContext> ccLWE) override {
-        m_ccLWE = ccLWE;
+    void set_bin_cc_for_scheme_switch(std::shared_ptr<cipher::BooleanContext> cc_lwe) override {
+        cc_lwe_ = cc_lwe;
     }
 
     /**
@@ -163,18 +163,18 @@ class SWITCHCKKSRNS : public FHERNS {
      *
      * @return the switching key
      */
-    Ciphertext<DCRTPoly> GetSwkFC() override {
-        return m_FHEWtoCKKSswk;
+    Ciphertext<RnsPoly> get_swk_fc() override {
+        return fhew_to_ckks_swk_;
     }
 
     /**
      * Sets the FHEW to CKKS switching key, i.e., the CKKS encryption of the FHEW secret key (it is not serialized
      * with this object, so it has to be restored after deserialization).
      *
-     * @param FHEWtoCKKSswk the switching key
+     * @param fhew_to_ckks_swk the switching key
      */
-    void SetSwkFC(Ciphertext<DCRTPoly> FHEWtoCKKSswk) override {
-        m_FHEWtoCKKSswk = FHEWtoCKKSswk;
+    void set_swk_fc(Ciphertext<RnsPoly> fhew_to_ckks_swk) override {
+        fhew_to_ckks_swk_ = fhew_to_ckks_swk;
     }
 
     /**
@@ -182,8 +182,8 @@ class SWITCHCKKSRNS : public FHERNS {
      *
      * @return the number of ciphertexts to switch
      */
-    uint32_t GetNumCtxtsToSwitch() {
-        return m_numCtxts;
+    uint32_t get_num_ctxts_to_switch() {
+        return num_ctxts_;
     }
 
     /**
@@ -191,8 +191,8 @@ class SWITCHCKKSRNS : public FHERNS {
      *
      * @return the LWE modulus
      */
-    NativeInteger GetModulusLWEToSwitch() {
-        return m_modulus_LWE;
+    NativeInteger get_modulus_lwe_to_switch() {
+        return modulus_lwe_;
     }
 
     //------------------------------------------------------------------------------
@@ -201,118 +201,118 @@ class SWITCHCKKSRNS : public FHERNS {
 
     template <class Archive>
     void save(Archive& ar) const {
-        ar(cereal::base_class<FHERNS>(this));
-        ar(cereal::make_nvp("QLWE", m_modulus_LWE));
-        ar(cereal::make_nvp("QCKKS1", m_modulus_CKKS_initial));
-        ar(cereal::make_nvp("QCKKS2", m_modulus_CKKS_from));
-        ar(cereal::make_nvp("slots", m_numSlotsCKKS));
-        ar(cereal::make_nvp("ctxts", m_numCtxts));
-        ar(cereal::make_nvp("bCF", m_dim1CF));
-        ar(cereal::make_nvp("bFC", m_dim1FC));
-        ar(cereal::make_nvp("lCF", m_LCF));
-        ar(cereal::make_nvp("lFC", m_LFC));
-        ar(cereal::make_nvp("argmin", m_argmin));
-        ar(cereal::make_nvp("oneHot", m_oneHot));
-        ar(cereal::make_nvp("alt", m_alt));
-        ar(cereal::make_nvp("swkCF", m_CKKStoFHEWswk));
-        // ar(cereal::make_nvp("swkFC", m_FHEWtoCKKSswk)); // Avoid a circular issue when deserializing
-        ar(cereal::make_nvp("ctKS", m_ctxtKS));
+        ar(cereal::base_class<RnsFhe>(this));
+        ar(cereal::make_nvp("QLWE", modulus_lwe_));
+        ar(cereal::make_nvp("QCKKS1", modulus_ckks_initial_));
+        ar(cereal::make_nvp("QCKKS2", modulus_ckks_from_));
+        ar(cereal::make_nvp("slots", num_slots_ckks_));
+        ar(cereal::make_nvp("ctxts", num_ctxts_));
+        ar(cereal::make_nvp("bCF", dim1_cf_));
+        ar(cereal::make_nvp("bFC", dim1_fc_));
+        ar(cereal::make_nvp("lCF", lcf_));
+        ar(cereal::make_nvp("lFC", lfc_));
+        ar(cereal::make_nvp("argmin", argmin_));
+        ar(cereal::make_nvp("oneHot", one_hot_));
+        ar(cereal::make_nvp("alt", alt_));
+        ar(cereal::make_nvp("swkCF", ckks_to_fhew_swk_));
+        // ar(cereal::make_nvp("swkFC", fhew_to_ckks_swk_)); // Avoid a circular issue when deserializing
+        ar(cereal::make_nvp("ctKS", ctxt_ks_));
     }
 
     template <class Archive>
     void load(Archive& ar) {
-        ar(cereal::base_class<FHERNS>(this));
-        ar(cereal::make_nvp("QLWE", m_modulus_LWE));
-        ar(cereal::make_nvp("QCKKS1", m_modulus_CKKS_initial));
-        ar(cereal::make_nvp("QCKKS2", m_modulus_CKKS_from));
-        ar(cereal::make_nvp("slots", m_numSlotsCKKS));
-        ar(cereal::make_nvp("ctxts", m_numCtxts));
-        ar(cereal::make_nvp("bCF", m_dim1CF));
-        ar(cereal::make_nvp("bFC", m_dim1FC));
-        ar(cereal::make_nvp("lCF", m_LCF));
-        ar(cereal::make_nvp("lFC", m_LFC));
-        ar(cereal::make_nvp("argmin", m_argmin));
-        ar(cereal::make_nvp("oneHot", m_oneHot));
-        ar(cereal::make_nvp("alt", m_alt));
-        ar(cereal::make_nvp("swkCF", m_CKKStoFHEWswk));
-        // ar(cereal::make_nvp("swkFC", m_FHEWtoCKKSswk)); // Avoid a circular issue when deserializing
-        ar(cereal::make_nvp("ctKS", m_ctxtKS));
+        ar(cereal::base_class<RnsFhe>(this));
+        ar(cereal::make_nvp("QLWE", modulus_lwe_));
+        ar(cereal::make_nvp("QCKKS1", modulus_ckks_initial_));
+        ar(cereal::make_nvp("QCKKS2", modulus_ckks_from_));
+        ar(cereal::make_nvp("slots", num_slots_ckks_));
+        ar(cereal::make_nvp("ctxts", num_ctxts_));
+        ar(cereal::make_nvp("bCF", dim1_cf_));
+        ar(cereal::make_nvp("bFC", dim1_fc_));
+        ar(cereal::make_nvp("lCF", lcf_));
+        ar(cereal::make_nvp("lFC", lfc_));
+        ar(cereal::make_nvp("argmin", argmin_));
+        ar(cereal::make_nvp("oneHot", one_hot_));
+        ar(cereal::make_nvp("alt", alt_));
+        ar(cereal::make_nvp("swkCF", ckks_to_fhew_swk_));
+        // ar(cereal::make_nvp("swkFC", fhew_to_ckks_swk_)); // Avoid a circular issue when deserializing
+        ar(cereal::make_nvp("ctKS", ctxt_ks_));
     }
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "SWITCHCKKSRNS";
     }
 
   private:
-    std::vector<ReadOnlyPlaintext> EvalLTPrecomputeSwitch(const CryptoContextImpl<DCRTPoly>& cc,
+    std::vector<ReadOnlyPlaintext> eval_lt_precompute_switch(const CryptoContextImpl<RnsPoly>& cc,
                                                           const std::vector<std::vector<std::complex<double>>>& A,
                                                           uint32_t dim1, uint32_t L, double scale) const;
 
-    std::vector<ReadOnlyPlaintext> EvalLTPrecomputeSwitch(const CryptoContextImpl<DCRTPoly>& cc,
+    std::vector<ReadOnlyPlaintext> eval_lt_precompute_switch(const CryptoContextImpl<RnsPoly>& cc,
                                                           const std::vector<std::vector<std::complex<double>>>& A,
                                                           const std::vector<std::vector<std::complex<double>>>& B,
                                                           uint32_t dim1, uint32_t L, double scale) const;
 
-    Ciphertext<DCRTPoly> EvalLTWithPrecomputeSwitch(const CryptoContextImpl<DCRTPoly>& cc,
-                                                    ConstCiphertext<DCRTPoly> ctxt,
+    Ciphertext<RnsPoly> eval_lt_with_precompute_switch(const CryptoContextImpl<RnsPoly>& cc,
+                                                    ConstCiphertext<RnsPoly> ctxt,
                                                     const std::vector<ReadOnlyPlaintext>& A, uint32_t dim1,
                                                     bool ext = false) const;
 
-    Ciphertext<DCRTPoly> EvalLTRectWithPrecomputeSwitch(const CryptoContextImpl<DCRTPoly>& cc,
+    Ciphertext<RnsPoly> eval_lt_rect_with_precompute_switch(const CryptoContextImpl<RnsPoly>& cc,
                                                         const std::vector<std::vector<std::complex<double>>>& A,
-                                                        ConstCiphertext<DCRTPoly> ct, bool wide, uint32_t dim1,
+                                                        ConstCiphertext<RnsPoly> ct, bool wide, uint32_t dim1,
                                                         uint32_t L) const;
 
-    Ciphertext<DCRTPoly> EvalSlotsToCoeffsSwitch(const CryptoContextImpl<DCRTPoly>& cc,
-                                                 ConstCiphertext<DCRTPoly> ciphertext) const;
+    Ciphertext<RnsPoly> eval_slots_to_coeffs_switch(const CryptoContextImpl<RnsPoly>& cc,
+                                                 ConstCiphertext<RnsPoly> ciphertext) const;
 
-    Ciphertext<DCRTPoly> EvalPartialHomDecryption(const CryptoContextImpl<DCRTPoly>& cc,
+    Ciphertext<RnsPoly> eval_partial_hom_decryption(const CryptoContextImpl<RnsPoly>& cc,
                                                   const std::vector<std::vector<std::complex<double>>>& A,
-                                                  ConstCiphertext<DCRTPoly> ct, uint32_t dim1, double scale,
+                                                  ConstCiphertext<RnsPoly> ct, uint32_t dim1, double scale,
                                                   uint32_t L) const;
 
     //------------------------------------------------------------------------------
     // Complex Plaintext Functions, copied from ckksrns-fhe. TODO: fix this
     //------------------------------------------------------------------------------
 
-    Plaintext MakeAuxPlaintext(const CryptoContextImpl<DCRTPoly>& cc, const std::shared_ptr<ParmType> params,
-                               const std::vector<std::complex<double>>& value, size_t noiseScaleDeg, uint32_t level,
+    Plaintext make_aux_plaintext(const CryptoContextImpl<RnsPoly>& cc, const std::shared_ptr<ParmType> params,
+                               const std::vector<std::complex<double>>& value, size_t noise_scale_deg, uint32_t level,
                                uint32_t slots) const;
 
-    Ciphertext<DCRTPoly> EvalMultExt(ConstCiphertext<DCRTPoly> ciphertext, ConstPlaintext plaintext) const;
+    Ciphertext<RnsPoly> eval_mult_ext(ConstCiphertext<RnsPoly> ciphertext, ConstPlaintext plaintext) const;
 
-    void EvalAddExtInPlace(Ciphertext<DCRTPoly>& ciphertext1, ConstCiphertext<DCRTPoly> ciphertext2) const;
+    void eval_add_ext_in_place(Ciphertext<RnsPoly>& ciphertext1, ConstCiphertext<RnsPoly> ciphertext2) const;
 
-    Ciphertext<DCRTPoly> EvalAddExt(ConstCiphertext<DCRTPoly> ciphertext1, ConstCiphertext<DCRTPoly> ciphertext2) const;
+    Ciphertext<RnsPoly> eval_add_ext(ConstCiphertext<RnsPoly> ciphertext1, ConstCiphertext<RnsPoly> ciphertext2) const;
 
-    EvalKey<DCRTPoly> ConjugateKeyGen(const PrivateKey<DCRTPoly> privateKey) const;
+    EvalKey<RnsPoly> conjugate_key_gen(const PrivateKey<RnsPoly> private_key) const;
 
-    Ciphertext<DCRTPoly> Conjugate(ConstCiphertext<DCRTPoly> ciphertext,
-                                   const std::map<uint32_t, EvalKey<DCRTPoly>>& evalKeys) const;
+    Ciphertext<RnsPoly> Conjugate(ConstCiphertext<RnsPoly> ciphertext,
+                                   const std::map<uint32_t, EvalKey<RnsPoly>>& eval_keys) const;
 
-#if NATIVEINT == 128
+#if CIPHER_NATIVE_INT == 128
     /**
      * Set modulus and recalculates the vector values to fit the modulus
      *
-     * @param ringDim ring dimension (number of coefficients to fit).
+     * @param ring_dim ring dimension (number of coefficients to fit).
      * @param vec input vector
-     * @param bigBound big bound of the vector values.
-     * @param nativeVec output native vector (its modulus is used to fit the values).
+     * @param big_bound big bound of the vector values.
+     * @param native_vec output native vector (its modulus is used to fit the values).
      */
-    void FitToNativeVector(uint32_t ringDim, const std::vector<__int128>& vec, __int128 bigBound,
-                           NativeVector* nativeVec) const;
+    void fit_to_native_vector(uint32_t ring_dim, const std::vector<__int128>& vec, __int128 big_bound,
+                           NativeVector* native_vec) const;
 
-#else  // NATIVEINT == 64
+#else  // CIPHER_NATIVE_INT == 64
     /**
      * Set modulus and recalculates the vector values to fit the modulus
      *
-     * @param ringDim ring dimension (number of coefficients to fit).
+     * @param ring_dim ring dimension (number of coefficients to fit).
      * @param vec input vector
-     * @param bigBound big bound of the vector values.
-     * @param nativeVec output native vector (its modulus is used to fit the values).
+     * @param big_bound big bound of the vector values.
+     * @param native_vec output native vector (its modulus is used to fit the values).
      */
-    void FitToNativeVector(uint32_t ringDim, const std::vector<int64_t>& vec, int64_t bigBound,
-                           NativeVector* nativeVec) const;
+    void fit_to_native_vector(uint32_t ring_dim, const std::vector<int64_t>& vec, int64_t big_bound,
+                           NativeVector* native_vec) const;
 #endif
 
     //------------------------------------------------------------------------------
@@ -320,39 +320,39 @@ class SWITCHCKKSRNS : public FHERNS {
     //------------------------------------------------------------------------------
 
     // the associated ciphertext modulus Q for the LWE cryptocontext
-    NativeInteger m_modulus_LWE;
+    NativeInteger modulus_lwe_;
     // the target ciphertext modulus Q for the CKKS cryptocontext. We assume the switching goes to the same initial cryptocontext
-    NativeInteger m_modulus_CKKS_initial;
+    NativeInteger modulus_ckks_initial_;
     // the ciphertext modulus Q' for the CKKS cryptocontext that is secure for the LWE ring dimension
-    NativeInteger m_modulus_CKKS_from;
+    NativeInteger modulus_ckks_from_;
     // number of slots encoded in the CKKS ciphertext
-    uint32_t m_numSlotsCKKS;
+    uint32_t num_slots_ckks_;
     // number of ciphertexts to switch, different logic for argmin (i.e., it starts from number of ciphertexts / 2)
-    uint32_t m_numCtxts;
+    uint32_t num_ctxts_;
     // baby-step dimensions for linear transform for CKKS->FHEW, FHEW->CKKS
-    uint32_t m_dim1CF;
-    uint32_t m_dim1FC;
+    uint32_t dim1_cf_;
+    uint32_t dim1_fc_;
     // starting levels for linear transforms
-    uint32_t m_LCF;
-    uint32_t m_LFC;
+    uint32_t lcf_;
+    uint32_t lfc_;
     // flags indicating type of argmin computation
-    bool m_argmin;
-    bool m_oneHot;
-    bool m_alt;
+    bool argmin_;
+    bool one_hot_;
+    bool alt_;
     // the LWE cryptocontext to generate when scheme switching from CKKS
-    std::shared_ptr<BinFHEContext> m_ccLWE;
+    std::shared_ptr<BooleanContext> cc_lwe_;
     // the CKKS cryptocontext for the intermediate modulus switching in CKKS to FHEW
-    CryptoContext<DCRTPoly> m_ccKS;
+    CryptoContext<RnsPoly> cc_ks_;
     // switching key from CKKS to FHEW
-    EvalKey<DCRTPoly> m_CKKStoFHEWswk;
+    EvalKey<RnsPoly> ckks_to_fhew_swk_;
     // switching key from FHEW to CKKS
-    Ciphertext<DCRTPoly> m_FHEWtoCKKSswk;
+    Ciphertext<RnsPoly> fhew_to_ckks_swk_;
     // a ciphertext under the intermediate cryptocontext
-    Ciphertext<DCRTPoly> m_ctxtKS;
+    Ciphertext<RnsPoly> ctxt_ks_;
     // Precomputed matrix for CKKS to FHEW switching
-    std::vector<ReadOnlyPlaintext> m_U0Pre;
+    std::vector<ReadOnlyPlaintext> u0_pre_;
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_CKKS_SCHEME_SWITCHING_H_

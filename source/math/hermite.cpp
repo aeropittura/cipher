@@ -43,19 +43,19 @@
 
 #include "cipher/util/exception.h"
 
-static bool IsNotEqualZero(std::complex<double> v) {
+static bool is_not_equal_zero(std::complex<double> v) {
     // TODO: tune this delta value during the fbt refactor
     constexpr double delta = 0x1p-32;  // 2**-32
     return (std::fabs(v.real()) >= delta) || (std::fabs(v.imag()) >= delta);
 }
 
-namespace lbcrypto {
+namespace cipher {
 
-std::vector<std::complex<double>> GetHermiteTrigCoefficients(std::function<int64_t(int64_t)> func, uint32_t p,
+std::vector<std::complex<double>> get_hermite_trig_coefficients(std::function<int64_t(int64_t)> func, uint32_t p,
                                                              size_t order, double scale) {
     using namespace std::complex_literals;
     if (p == 0)
-        OPENFHE_THROW("The degree of approximation can not be zero");
+        CIPHER_THROW("The degree of approximation can not be zero");
 
     switch (order) {
         case 1: {
@@ -67,7 +67,7 @@ std::vector<std::complex<double>> GetHermiteTrigCoefficients(std::function<int64
                     coeffs[i] += static_cast<double>(func(j)) * std::exp((-2. * M_PI * i * j / p) * 1i);
                 // No multiplication by 2 is to account for taking the real part
                 coeffs[i] *= static_cast<double>(p - i) / static_cast<double>(p * p) / scale;
-                if (IsNotEqualZero(coeffs[i]))
+                if (is_not_equal_zero(coeffs[i]))
                     degree = i;
             }
             coeffs[0] /= 2.0;
@@ -76,8 +76,8 @@ std::vector<std::complex<double>> GetHermiteTrigCoefficients(std::function<int64
         } break;
         case 2: {
             uint32_t pby2{p >> 1};
-            uint32_t coeffTotal{p + pby2 + 1};
-            std::vector<std::complex<double>> coeffs(coeffTotal);
+            uint32_t coeff_total{p + pby2 + 1};
+            std::vector<std::complex<double>> coeffs(coeff_total);
             std::vector<std::complex<double>> alpha(p);
             std::vector<std::complex<double>> beta(pby2);
             std::vector<double> gamma(pby2);
@@ -115,7 +115,7 @@ std::vector<std::complex<double>> GetHermiteTrigCoefficients(std::function<int64
 
             uint32_t degree = 0;
             coeffs[0] = alpha[0];
-            for (uint32_t i = 1; i < coeffTotal; ++i) {
+            for (uint32_t i = 1; i < coeff_total; ++i) {
                 if (i < p)
                     coeffs[i] = alpha[i];
                 if (i <= pby2)
@@ -124,15 +124,15 @@ std::vector<std::complex<double>> GetHermiteTrigCoefficients(std::function<int64
                     coeffs[i] -= omega[p - i - 1];
                 if (i > p)
                     coeffs[i] -= delta[i - p - 1];
-                if (IsNotEqualZero(coeffs[i]))
+                if (is_not_equal_zero(coeffs[i]))
                     degree = i;
             }
             coeffs.resize(degree + 1);
             return coeffs;
         } break;
         case 3: {
-            uint32_t coeffTotal{p + p};
-            std::vector<std::complex<double>> coeffs(coeffTotal);
+            uint32_t coeff_total{p + p};
+            std::vector<std::complex<double>> coeffs(coeff_total);
             std::vector<std::complex<double>> alpha(p);
             std::vector<std::complex<double>> beta(p - 1);
             std::vector<std::complex<double>> delta(p - 1);
@@ -165,7 +165,7 @@ std::vector<std::complex<double>> GetHermiteTrigCoefficients(std::function<int64
 
             uint32_t degree = 0;
             coeffs[0] = alpha[0];
-            for (uint32_t i = 1; i < coeffTotal; ++i) {
+            for (uint32_t i = 1; i < coeff_total; ++i) {
                 if (i < p)
                     coeffs[i] = alpha[i];
                 if (i <= p - 1)
@@ -174,15 +174,15 @@ std::vector<std::complex<double>> GetHermiteTrigCoefficients(std::function<int64
                     coeffs[i] -= omega[p - i - 1];
                 if (i > p)
                     coeffs[i] -= delta[i - p - 1];
-                if (IsNotEqualZero(coeffs[i]))
+                if (is_not_equal_zero(coeffs[i]))
                     degree = i;
             }
             coeffs.resize(degree + 1);
             return coeffs;
         } break;
         default:
-            OPENFHE_THROW("Order must be 1, 2, or 3");
+            CIPHER_THROW("Order must be 1, 2, or 3");
     }
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher

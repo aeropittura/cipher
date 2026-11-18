@@ -49,391 +49,391 @@
 #include "cipher/fhe/rns/crypto_params.h"
 #include "cipher/util/parallel.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 template <class Element>
-Ciphertext<Element> AdvancedSHEBase<Element>::EvalAddMany(const std::vector<Ciphertext<Element>>& ciphertextVec) const {
-    const uint32_t size = ciphertextVec.size();
+Ciphertext<Element> BaseAdvancedShe<Element>::eval_add_many(const std::vector<Ciphertext<Element>>& ciphertext_vec) const {
+    const uint32_t size = ciphertext_vec.size();
     if (size == 0)
-        OPENFHE_THROW("Input ciphertext vector is empty.");
+        CIPHER_THROW("Input ciphertext vector is empty.");
 
     uint32_t first = 0;
-    while (first < size && ciphertextVec[first] == nullptr)
+    while (first < size && ciphertext_vec[first] == nullptr)
         ++first;
     if (first == size)
-        OPENFHE_THROW("Input ciphertext vector has no non-null entries.");
+        CIPHER_THROW("Input ciphertext vector has no non-null entries.");
 
-    auto result = ciphertextVec[first]->Clone();
-    auto algo = result->GetCryptoContext()->GetScheme();
+    auto result = ciphertext_vec[first]->clone();
+    auto algo = result->get_crypto_context()->get_scheme();
     for (uint32_t i = first + 1; i < size; ++i) {
-        if (ciphertextVec[i] != nullptr)
-            algo->EvalAddInPlace(result, ciphertextVec[i]);
+        if (ciphertext_vec[i] != nullptr)
+            algo->eval_add_in_place(result, ciphertext_vec[i]);
     }
 
     return result;
 }
 
 template <class Element>
-Ciphertext<Element> AdvancedSHEBase<Element>::EvalAddManyInPlace(
-        std::vector<Ciphertext<Element>>& ciphertextVec) const {
-    const uint32_t size = ciphertextVec.size();
+Ciphertext<Element> BaseAdvancedShe<Element>::eval_add_many_in_place(
+        std::vector<Ciphertext<Element>>& ciphertext_vec) const {
+    const uint32_t size = ciphertext_vec.size();
     if (size == 0)
-        OPENFHE_THROW("Input ciphertext vector is empty.");
+        CIPHER_THROW("Input ciphertext vector is empty.");
 
     uint32_t first = 0;
-    while (first < size && ciphertextVec[first] == nullptr)
+    while (first < size && ciphertext_vec[first] == nullptr)
         ++first;
     if (first == size)
-        OPENFHE_THROW("Input ciphertext vector has no non-null entries.");
+        CIPHER_THROW("Input ciphertext vector has no non-null entries.");
 
-    auto algo = ciphertextVec[first]->GetCryptoContext()->GetScheme();
+    auto algo = ciphertext_vec[first]->get_crypto_context()->get_scheme();
     for (uint32_t i = first + 1; i < size; ++i) {
-        if (ciphertextVec[i] != nullptr)
-            algo->EvalAddInPlace(ciphertextVec[first], ciphertextVec[i]);
+        if (ciphertext_vec[i] != nullptr)
+            algo->eval_add_in_place(ciphertext_vec[first], ciphertext_vec[i]);
     }
 
     if (first != 0)
-        ciphertextVec[0] = ciphertextVec[first];
+        ciphertext_vec[0] = ciphertext_vec[first];
 
-    return ciphertextVec[0];
+    return ciphertext_vec[0];
 }
 
 template <class Element>
-Ciphertext<Element> AdvancedSHEBase<Element>::EvalMultMany(const std::vector<Ciphertext<Element>>& ciphertextVec,
-                                                           const std::vector<EvalKey<Element>>& evalKeys) const {
-    const uint32_t size = ciphertextVec.size();
+Ciphertext<Element> BaseAdvancedShe<Element>::eval_mult_many(const std::vector<Ciphertext<Element>>& ciphertext_vec,
+                                                           const std::vector<EvalKey<Element>>& eval_keys) const {
+    const uint32_t size = ciphertext_vec.size();
     if (size == 0)
-        OPENFHE_THROW("Input ciphertext vector is empty.");
+        CIPHER_THROW("Input ciphertext vector is empty.");
 
     if (size == 1)
-        return ciphertextVec[0]->Clone();
+        return ciphertext_vec[0]->clone();
 
     const uint32_t lim = size * 2 - 2;
-    std::vector<Ciphertext<Element>> ciphertextMultVec(size - 1);
+    std::vector<Ciphertext<Element>> ciphertext_mult_vec(size - 1);
 
     // BASE_NUM_LEVELS_TO_DROP everywhere except composite-scaling CKKS.
-    const auto cryptoParams = std::dynamic_pointer_cast<CryptoParametersRNS>(ciphertextVec[0]->GetCryptoParameters());
-    const uint32_t levelsToDrop = cryptoParams ? cryptoParams->GetCompositeDegree() : BASE_NUM_LEVELS_TO_DROP;
+    const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(ciphertext_vec[0]->get_crypto_parameters());
+    const uint32_t levels_to_drop = crypto_params ? crypto_params->get_composite_degree() : BASE_NUM_LEVELS_TO_DROP;
 
-    auto algo = ciphertextVec[0]->GetCryptoContext()->GetScheme();
+    auto algo = ciphertext_vec[0]->get_crypto_context()->get_scheme();
 
     uint32_t i = 0, j = 0;
     // input x input
     for (; i < (size - 1); i += 2) {
-        ciphertextMultVec[j] = algo->EvalMultAndRelinearize(ciphertextVec[i], ciphertextVec[i + 1], evalKeys);
-        algo->ModReduceInPlace(ciphertextMultVec[j++], levelsToDrop);
+        ciphertext_mult_vec[j] = algo->eval_mult_and_relinearize(ciphertext_vec[i], ciphertext_vec[i + 1], eval_keys);
+        algo->mod_reduce_in_place(ciphertext_mult_vec[j++], levels_to_drop);
     }
     // odd size: the last input pairs with the first partial
     if (i < size) {
-        ciphertextMultVec[j] =
-                algo->EvalMultAndRelinearize(ciphertextVec[i], ciphertextMultVec[i + 1 - size], evalKeys);
-        algo->ModReduceInPlace(ciphertextMultVec[j++], levelsToDrop);
-        ciphertextMultVec[i + 1 - size].reset();
+        ciphertext_mult_vec[j] =
+                algo->eval_mult_and_relinearize(ciphertext_vec[i], ciphertext_mult_vec[i + 1 - size], eval_keys);
+        algo->mod_reduce_in_place(ciphertext_mult_vec[j++], levels_to_drop);
+        ciphertext_mult_vec[i + 1 - size].reset();
         i += 2;
     }
     // partial x partial
     for (; i < lim; i += 2) {
-        ciphertextMultVec[j] =
-                algo->EvalMultAndRelinearize(ciphertextMultVec[i - size], ciphertextMultVec[i + 1 - size], evalKeys);
-        algo->ModReduceInPlace(ciphertextMultVec[j++], levelsToDrop);
-        ciphertextMultVec[i - size].reset();
-        ciphertextMultVec[i + 1 - size].reset();
+        ciphertext_mult_vec[j] =
+                algo->eval_mult_and_relinearize(ciphertext_mult_vec[i - size], ciphertext_mult_vec[i + 1 - size], eval_keys);
+        algo->mod_reduce_in_place(ciphertext_mult_vec[j++], levels_to_drop);
+        ciphertext_mult_vec[i - size].reset();
+        ciphertext_mult_vec[i + 1 - size].reset();
     }
 
-    return ciphertextMultVec.back();
+    return ciphertext_mult_vec.back();
 }
 
 template <class Element>
-Ciphertext<Element> AdvancedSHEBase<Element>::AddRandomNoise(ConstCiphertext<Element> ciphertext) const {
+Ciphertext<Element> BaseAdvancedShe<Element>::add_random_noise(ConstCiphertext<Element> ciphertext) const {
     if (!ciphertext)
-        OPENFHE_THROW("Input ciphertext is nullptr");
+        CIPHER_THROW("Input ciphertext is nullptr");
 
     std::uniform_real_distribution<double> distribution(0.0, 1.0);
 
-    std::string kID = ciphertext->GetKeyTag();
-    const auto cryptoParams = ciphertext->GetCryptoParameters();
-    const auto encodingParams = cryptoParams->GetEncodingParams();
-    const auto elementParams = cryptoParams->GetElementParams();
+    std::string k_id = ciphertext->get_key_tag();
+    const auto crypto_params = ciphertext->get_crypto_parameters();
+    const auto encoding_params = crypto_params->get_encoding_params();
+    const auto element_params = crypto_params->get_element_params();
 
-    uint32_t n = elementParams->GetRingDimension();
+    uint32_t n = element_params->get_ring_dimension();
 
-    auto cc = ciphertext->GetCryptoContext();
+    auto cc = ciphertext->get_crypto_context();
 
     Plaintext plaintext;
 
-    if (ciphertext->GetEncodingType() == CKKS_PACKED_ENCODING) {
-        std::vector<std::complex<double>> randomIntVector(n);
+    if (ciphertext->get_encoding_type() == CKKS_PACKED_ENCODING) {
+        std::vector<std::complex<double>> random_int_vector(n);
 
         // first plaintext slot does not need to change
-        randomIntVector[0].real(0);
+        random_int_vector[0].real(0);
 
         for (uint32_t i = 0; i < n - 1; i++) {
-            randomIntVector[i + 1].real(distribution(PseudoRandomNumberGenerator::GetPRNG()));
+            random_int_vector[i + 1].real(distribution(PseudoRandomNumberGenerator::get_prng()));
         }
 
-        plaintext = cc->MakeCKKSPackedPlaintext(randomIntVector, ciphertext->GetNoiseScaleDeg(), 0, nullptr,
-                                                ciphertext->GetSlots());
+        plaintext = cc->make_ckks_packed_plaintext(random_int_vector, ciphertext->get_noise_scale_deg(), 0, nullptr,
+                                                ciphertext->get_slots());
     } else {
         DiscreteUniformGeneratorImpl<typename Element::Vector> dug;
-        auto randomVector{dug.GenerateVector(n - 1, encodingParams->GetPlaintextModulus())};
+        auto random_vector{dug.generate_vector(n - 1, encoding_params->get_plaintext_modulus())};
 
-        std::vector<int64_t> randomIntVector(n);
+        std::vector<int64_t> random_int_vector(n);
 
         // first plaintext slot does not need to change
-        randomIntVector[0] = 0;
+        random_int_vector[0] = 0;
 
         for (uint32_t i = 0; i < n - 1; i++) {
-            randomIntVector[i + 1] = randomVector[i].ConvertToInt();
+            random_int_vector[i + 1] = random_vector[i].convert_to_int();
         }
 
-        plaintext = cc->MakePackedPlaintext(randomIntVector);
+        plaintext = cc->make_packed_plaintext(random_int_vector);
     }
 
-    plaintext->Encode();
-    plaintext->GetElement<Element>().SetFormat(EVALUATION);
-    auto algo = cc->GetScheme();
-    return algo->EvalAdd(ciphertext, plaintext);
+    plaintext->encode();
+    plaintext->get_element<Element>().set_format(EVALUATION);
+    auto algo = cc->get_scheme();
+    return algo->eval_add(ciphertext, plaintext);
 }
 
 template <class Element>
-std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> AdvancedSHEBase<Element>::EvalSumKeyGen(
-        const PrivateKey<Element> privateKey) const {
-    if (!privateKey)
-        OPENFHE_THROW("Input private key is nullptr");
+std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> BaseAdvancedShe<Element>::eval_sum_key_gen(
+        const PrivateKey<Element> private_key) const {
+    if (!private_key)
+        CIPHER_THROW("Input private key is nullptr");
 
     // get automorphism indices and convert them to a vector
-    std::set<uint32_t> indx_set{GenerateIndexListForEvalSum(privateKey)};
+    std::set<uint32_t> indx_set{generate_index_list_for_eval_sum(private_key)};
     std::vector<uint32_t> indices(indx_set.begin(), indx_set.end());
 
-    auto algo = privateKey->GetCryptoContext()->GetScheme();
-    return algo->EvalAutomorphismKeyGen(privateKey, indices);
+    auto algo = private_key->get_crypto_context()->get_scheme();
+    return algo->eval_automorphism_key_gen(private_key, indices);
 }
 
 template <class Element>
-std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> AdvancedSHEBase<Element>::EvalSumRowsKeyGen(
-        const PrivateKey<Element> privateKey, uint32_t rowSize, uint32_t subringDim,
+std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> BaseAdvancedShe<Element>::eval_sum_rows_key_gen(
+        const PrivateKey<Element> private_key, uint32_t row_size, uint32_t subring_dim,
         std::vector<uint32_t>& indices) const {
-    auto cc = privateKey->GetCryptoContext();
+    auto cc = private_key->get_crypto_context();
 
-    if (!isCKKS(cc->getSchemeId()))
-        OPENFHE_THROW("Matrix summation of row-vectors is only supported for CKKSPackedEncoding.");
+    if (!is_ckks(cc->get_scheme_id_impl()))
+        CIPHER_THROW("Matrix summation of row-vectors is only supported for CKKSPackedEncoding.");
 
-    uint32_t m = (subringDim == 0) ? privateKey->GetCryptoParameters()->GetElementParams()->GetCyclotomicOrder() :
-                                     subringDim;
+    uint32_t m = (subring_dim == 0) ? private_key->get_crypto_parameters()->get_element_params()->get_cyclotomic_order() :
+                                     subring_dim;
 
-    if (!IsPowerOfTwo(m))
-        OPENFHE_THROW("Matrix summation of row-vectors is not supported for arbitrary cyclotomics.");
+    if (!is_power_of_two(m))
+        CIPHER_THROW("Matrix summation of row-vectors is not supported for arbitrary cyclotomics.");
 
-    std::set<uint32_t> rowsIndices{GenerateIndices2nComplexRows(rowSize, m)};
-    indices.reserve(indices.size() + rowsIndices.size());
-    indices.insert(indices.end(), rowsIndices.begin(), rowsIndices.end());
+    std::set<uint32_t> rows_indices{generate_indices2n_complex_rows(row_size, m)};
+    indices.reserve(indices.size() + rows_indices.size());
+    indices.insert(indices.end(), rows_indices.begin(), rows_indices.end());
 
-    auto algo = cc->GetScheme();
-    return algo->EvalAutomorphismKeyGen(privateKey, indices);
+    auto algo = cc->get_scheme();
+    return algo->eval_automorphism_key_gen(private_key, indices);
 }
 
 template <class Element>
-std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> AdvancedSHEBase<Element>::EvalSumColsKeyGen(
-        const PrivateKey<Element> privateKey, std::vector<uint32_t>& indices) const {
-    auto cc = privateKey->GetCryptoContext();
+std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> BaseAdvancedShe<Element>::eval_sum_cols_key_gen(
+        const PrivateKey<Element> private_key, std::vector<uint32_t>& indices) const {
+    auto cc = private_key->get_crypto_context();
 
-    if (!isCKKS(cc->getSchemeId()))
-        OPENFHE_THROW("Matrix summation of column-vectors is only supported for CKKSPackedEncoding.");
+    if (!is_ckks(cc->get_scheme_id_impl()))
+        CIPHER_THROW("Matrix summation of column-vectors is only supported for CKKSPackedEncoding.");
 
-    const auto cryptoParams = privateKey->GetCryptoParameters();
-    uint32_t M = cryptoParams->GetElementParams()->GetCyclotomicOrder();
-    if (!IsPowerOfTwo(M))
-        OPENFHE_THROW("Matrix summation of column-vectors is not supported for arbitrary cyclotomics.");
+    const auto crypto_params = private_key->get_crypto_parameters();
+    uint32_t M = crypto_params->get_element_params()->get_cyclotomic_order();
+    if (!is_power_of_two(M))
+        CIPHER_THROW("Matrix summation of column-vectors is not supported for arbitrary cyclotomics.");
 
-    uint32_t batchSize = cryptoParams->GetEncodingParams()->GetBatchSize();
+    uint32_t batch_size = crypto_params->get_encoding_params()->get_batch_size();
 
-    // get indices for EvalSumCols() and merge them with the indices for EvalSum()
-    std::set<uint32_t> evalSumColsIndices = GenerateIndices2nComplexCols(batchSize, M);
-    std::set<uint32_t> evalSumIndices = GenerateIndexListForEvalSum(privateKey);
-    evalSumColsIndices.merge(evalSumIndices);
-    indices.reserve(indices.size() + evalSumColsIndices.size());
-    indices.insert(indices.end(), evalSumColsIndices.begin(), evalSumColsIndices.end());
+    // get indices for eval_sum_cols() and merge them with the indices for eval_sum()
+    std::set<uint32_t> eval_sum_cols_indices = generate_indices2n_complex_cols(batch_size, M);
+    std::set<uint32_t> eval_sum_indices = generate_index_list_for_eval_sum(private_key);
+    eval_sum_cols_indices.merge(eval_sum_indices);
+    indices.reserve(indices.size() + eval_sum_cols_indices.size());
+    indices.insert(indices.end(), eval_sum_cols_indices.begin(), eval_sum_cols_indices.end());
 
-    auto algo = cc->GetScheme();
-    return algo->EvalAutomorphismKeyGen(privateKey, indices);
+    auto algo = cc->get_scheme();
+    return algo->eval_automorphism_key_gen(private_key, indices);
 }
 
 template <class Element>
-Ciphertext<Element> AdvancedSHEBase<Element>::EvalSum(ConstCiphertext<Element> ciphertext, uint32_t batchSize,
-                                                      const std::map<uint32_t, EvalKey<Element>>& evalKeyMap) const {
-    const auto cryptoParams = ciphertext->GetCryptoParameters();
-    const auto encodingParams = cryptoParams->GetEncodingParams();
+Ciphertext<Element> BaseAdvancedShe<Element>::eval_sum(ConstCiphertext<Element> ciphertext, uint32_t batch_size,
+                                                      const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const {
+    const auto crypto_params = ciphertext->get_crypto_parameters();
+    const auto encoding_params = crypto_params->get_encoding_params();
 
-    if ((encodingParams->GetBatchSize() == 0))
-        OPENFHE_THROW(
+    if ((encoding_params->get_batch_size() == 0))
+        CIPHER_THROW(
                 "Packed encoding parameters 'batch size' is not set; "
                 "Please check the EncodingParams passed to the crypto context.");
 
-    uint32_t m = cryptoParams->GetElementParams()->GetCyclotomicOrder();
+    uint32_t m = crypto_params->get_element_params()->get_cyclotomic_order();
 
-    Ciphertext<Element> newCiphertext = ciphertext->Clone();
+    Ciphertext<Element> new_ciphertext = ciphertext->clone();
 
-    if (IsPowerOfTwo(m)) {
-        if (ciphertext->GetEncodingType() == CKKS_PACKED_ENCODING)
-            newCiphertext = EvalSum2nComplex(newCiphertext, batchSize, m, evalKeyMap);
+    if (is_power_of_two(m)) {
+        if (ciphertext->get_encoding_type() == CKKS_PACKED_ENCODING)
+            new_ciphertext = eval_sum2n_complex(new_ciphertext, batch_size, m, eval_key_map);
         else
-            newCiphertext = EvalSum_2n(newCiphertext, batchSize, m, evalKeyMap);
+            new_ciphertext = eval_sum_2n(new_ciphertext, batch_size, m, eval_key_map);
     } else {  // Arbitrary cyclotomics
-        if (encodingParams->GetPlaintextGenerator() == 0) {
-            OPENFHE_THROW(
+        if (encoding_params->get_plaintext_generator() == 0) {
+            CIPHER_THROW(
                     "Packed encoding parameters 'plaintext "
                     "generator' is not set; Please check the "
                     "EncodingParams passed to the crypto context.");
         } else {
-            auto algo = ciphertext->GetCryptoContext()->GetScheme();
+            auto algo = ciphertext->get_crypto_context()->get_scheme();
 
-            uint32_t g = encodingParams->GetPlaintextGenerator();
-            for (int i = 0; i < std::floor(std::log2(batchSize)); i++) {
-                newCiphertext = algo->EvalAdd(newCiphertext, algo->EvalAutomorphism(newCiphertext, g, evalKeyMap));
+            uint32_t g = encoding_params->get_plaintext_generator();
+            for (int i = 0; i < std::floor(std::log2(batch_size)); i++) {
+                new_ciphertext = algo->eval_add(new_ciphertext, algo->eval_automorphism(new_ciphertext, g, eval_key_map));
                 g = (g * g) % m;
             }
         }
     }
 
-    return newCiphertext;
+    return new_ciphertext;
 }
 
 template <class Element>
-Ciphertext<Element> AdvancedSHEBase<Element>::EvalSumRows(ConstCiphertext<Element> ciphertext, uint32_t numRows,
-                                                          const std::map<uint32_t, EvalKey<Element>>& evalSumKeys,
-                                                          uint32_t subringDim) const {
-    if (ciphertext->GetEncodingType() != CKKS_PACKED_ENCODING)
-        OPENFHE_THROW("Matrix summation of row-vectors is only supported for CKKS packed encoding.");
+Ciphertext<Element> BaseAdvancedShe<Element>::eval_sum_rows(ConstCiphertext<Element> ciphertext, uint32_t num_rows,
+                                                          const std::map<uint32_t, EvalKey<Element>>& eval_sum_keys,
+                                                          uint32_t subring_dim) const {
+    if (ciphertext->get_encoding_type() != CKKS_PACKED_ENCODING)
+        CIPHER_THROW("Matrix summation of row-vectors is only supported for CKKS packed encoding.");
 
-    const auto cryptoParams = ciphertext->GetCryptoParameters();
-    const auto encodingParams = cryptoParams->GetEncodingParams();
-    if ((encodingParams->GetBatchSize() == 0))
-        OPENFHE_THROW(
+    const auto crypto_params = ciphertext->get_crypto_parameters();
+    const auto encoding_params = crypto_params->get_encoding_params();
+    if ((encoding_params->get_batch_size() == 0))
+        CIPHER_THROW(
                 "Packed encoding parameters 'batch size' is not set. Please check the EncodingParams passed to the crypto context.");
 
-    uint32_t m = (subringDim == 0) ? cryptoParams->GetElementParams()->GetCyclotomicOrder() : subringDim;
-    if (!IsPowerOfTwo(m))
-        OPENFHE_THROW("Matrix summation of row-vectors is not supported for arbitrary cyclotomics.");
+    uint32_t m = (subring_dim == 0) ? crypto_params->get_element_params()->get_cyclotomic_order() : subring_dim;
+    if (!is_power_of_two(m))
+        CIPHER_THROW("Matrix summation of row-vectors is not supported for arbitrary cyclotomics.");
 
-    return EvalSum2nComplexRows(ciphertext->Clone(), numRows, m, evalSumKeys);
+    return eval_sum2n_complex_rows(ciphertext->clone(), num_rows, m, eval_sum_keys);
 }
 
 template <class Element>
-Ciphertext<Element> AdvancedSHEBase<Element>::EvalSumCols(
-        ConstCiphertext<Element> ciphertext, uint32_t numCols,
-        const std::map<uint32_t, EvalKey<Element>>& evalSumKeyMap,
-        const std::map<uint32_t, EvalKey<Element>>& evalSumColsKeyMap) const {
+Ciphertext<Element> BaseAdvancedShe<Element>::eval_sum_cols(
+        ConstCiphertext<Element> ciphertext, uint32_t num_cols,
+        const std::map<uint32_t, EvalKey<Element>>& eval_sum_key_map,
+        const std::map<uint32_t, EvalKey<Element>>& eval_sum_cols_key_map) const {
     if (!ciphertext)
-        OPENFHE_THROW("Input ciphertext is nullptr");
-    if (!evalSumKeyMap.size())
-        OPENFHE_THROW("Input evalKeys map is empty");
-    if (!evalSumColsKeyMap.size())
-        OPENFHE_THROW("Input rightEvalKeys map is empty");
-    if (ciphertext->GetEncodingType() != CKKS_PACKED_ENCODING)
-        OPENFHE_THROW("Matrix summation of column-vectors is only supported for CKKS packed encoding.");
+        CIPHER_THROW("Input ciphertext is nullptr");
+    if (!eval_sum_key_map.size())
+        CIPHER_THROW("Input evalKeys map is empty");
+    if (!eval_sum_cols_key_map.size())
+        CIPHER_THROW("Input rightEvalKeys map is empty");
+    if (ciphertext->get_encoding_type() != CKKS_PACKED_ENCODING)
+        CIPHER_THROW("Matrix summation of column-vectors is only supported for CKKS packed encoding.");
 
-    const uint32_t slots = ciphertext->GetSlots();
-    if (slots < numCols)
-        OPENFHE_THROW("The number of columns ca not be greater than the number of slots.");
+    const uint32_t slots = ciphertext->get_slots();
+    if (slots < num_cols)
+        CIPHER_THROW("The number of columns ca not be greater than the number of slots.");
 
-    const auto cryptoParams = ciphertext->GetCryptoParameters();
-    const auto encodingParams = cryptoParams->GetEncodingParams();
-    if ((encodingParams->GetBatchSize() == 0))
-        OPENFHE_THROW(
+    const auto crypto_params = ciphertext->get_crypto_parameters();
+    const auto encoding_params = crypto_params->get_encoding_params();
+    if ((encoding_params->get_batch_size() == 0))
+        CIPHER_THROW(
                 "Packed encoding parameters 'batch size' is not set. Please check the EncodingParams passed to the crypto context.");
 
-    const auto elementParams = cryptoParams->GetElementParams();
-    uint32_t m = elementParams->GetCyclotomicOrder();
-    if (!IsPowerOfTwo(m))
-        OPENFHE_THROW("Matrix summation of column-vectors is not supported for arbitrary cyclotomics.");
+    const auto element_params = crypto_params->get_element_params();
+    uint32_t m = element_params->get_cyclotomic_order();
+    if (!is_power_of_two(m))
+        CIPHER_THROW("Matrix summation of column-vectors is not supported for arbitrary cyclotomics.");
 
     std::vector<std::complex<double>> mask(slots, 0);  // create a mask vector and set all its elements to zero
     for (size_t i = 0; i < mask.size(); i++) {
-        if (i % numCols == 0)
+        if (i % num_cols == 0)
             mask[i] = 1;
     }
 
-    Ciphertext<Element> newCiphertext = EvalSum2nComplex(ciphertext->Clone(), numCols, m, evalSumKeyMap);
-    auto cc = ciphertext->GetCryptoContext();
-    auto algo = cc->GetScheme();
-    Plaintext plaintext = cc->MakeCKKSPackedPlaintext(mask, 1, 0, nullptr, slots);
-    algo->EvalMultInPlace(newCiphertext, plaintext);
+    Ciphertext<Element> new_ciphertext = eval_sum2n_complex(ciphertext->clone(), num_cols, m, eval_sum_key_map);
+    auto cc = ciphertext->get_crypto_context();
+    auto algo = cc->get_scheme();
+    Plaintext plaintext = cc->make_ckks_packed_plaintext(mask, 1, 0, nullptr, slots);
+    algo->eval_mult_in_place(new_ciphertext, plaintext);
 
-    return EvalSum2nComplexCols(newCiphertext, numCols, m, evalSumColsKeyMap);
+    return eval_sum2n_complex_cols(new_ciphertext, num_cols, m, eval_sum_cols_key_map);
 }
 
 template <class Element>
-Ciphertext<Element> AdvancedSHEBase<Element>::EvalInnerProduct(
-        ConstCiphertext<Element> ciphertext1, ConstCiphertext<Element> ciphertext2, uint32_t batchSize,
-        const std::map<uint32_t, EvalKey<Element>>& evalSumKeyMap, const EvalKey<Element> evalMultKey) const {
-    auto algo = ciphertext1->GetCryptoContext()->GetScheme();
+Ciphertext<Element> BaseAdvancedShe<Element>::eval_inner_product(
+        ConstCiphertext<Element> ciphertext1, ConstCiphertext<Element> ciphertext2, uint32_t batch_size,
+        const std::map<uint32_t, EvalKey<Element>>& eval_sum_key_map, const EvalKey<Element> eval_mult_key) const {
+    auto algo = ciphertext1->get_crypto_context()->get_scheme();
 
-    Ciphertext<Element> result = algo->EvalMult(ciphertext1, ciphertext2, evalMultKey);
+    Ciphertext<Element> result = algo->eval_mult(ciphertext1, ciphertext2, eval_mult_key);
 
-    result = EvalSum(result, batchSize, evalSumKeyMap);
+    result = eval_sum(result, batch_size, eval_sum_key_map);
 
     // add a random number to all slots except for the first one so that no
     // information is leaked
-    // if (ciphertext1->GetEncodingType() != CKKS_PACKED_ENCODING)
-    //   result = AddRandomNoise(result);
+    // if (ciphertext1->get_encoding_type() != CKKS_PACKED_ENCODING)
+    //   result = add_random_noise(result);
     return result;
 }
 
 template <class Element>
-Ciphertext<Element> AdvancedSHEBase<Element>::EvalInnerProduct(
-        ConstCiphertext<Element> ciphertext, ConstPlaintext plaintext, uint32_t batchSize,
-        const std::map<uint32_t, EvalKey<Element>>& evalSumKeyMap) const {
-    auto algo = ciphertext->GetCryptoContext()->GetScheme();
+Ciphertext<Element> BaseAdvancedShe<Element>::eval_inner_product(
+        ConstCiphertext<Element> ciphertext, ConstPlaintext plaintext, uint32_t batch_size,
+        const std::map<uint32_t, EvalKey<Element>>& eval_sum_key_map) const {
+    auto algo = ciphertext->get_crypto_context()->get_scheme();
 
-    Ciphertext<Element> result = algo->EvalMult(ciphertext, plaintext);
+    Ciphertext<Element> result = algo->eval_mult(ciphertext, plaintext);
 
-    result = EvalSum(result, batchSize, evalSumKeyMap);
+    result = eval_sum(result, batch_size, eval_sum_key_map);
 
     // add a random number to all slots except for the first one so that no
     // information is leaked
-    // if (ciphertext1->GetEncodingType() != CKKS_PACKED_ENCODING)
-    //   result = AddRandomNoise(result);
+    // if (ciphertext1->get_encoding_type() != CKKS_PACKED_ENCODING)
+    //   result = add_random_noise(result);
     return result;
 }
 
 template <class Element>
-Ciphertext<Element> AdvancedSHEBase<Element>::EvalMerge(const std::vector<Ciphertext<Element>>& ciphertextVec,
-                                                        const std::map<uint32_t, EvalKey<Element>>& evalKeyMap) const {
-    if (ciphertextVec.size() == 0)
-        OPENFHE_THROW("the vector of ciphertexts to be merged cannot be empty");
+Ciphertext<Element> BaseAdvancedShe<Element>::eval_merge(const std::vector<Ciphertext<Element>>& ciphertext_vec,
+                                                        const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const {
+    if (ciphertext_vec.size() == 0)
+        CIPHER_THROW("the vector of ciphertexts to be merged cannot be empty");
 
-    const std::shared_ptr<CryptoParametersBase<Element>> cryptoParams = ciphertextVec[0]->GetCryptoParameters();
-    Ciphertext<Element> ciphertextMerged(std::make_shared<CiphertextImpl<Element>>(*(ciphertextVec[0])));
+    const std::shared_ptr<BaseCryptoParams<Element>> crypto_params = ciphertext_vec[0]->get_crypto_parameters();
+    Ciphertext<Element> ciphertext_merged(std::make_shared<CiphertextImpl<Element>>(*(ciphertext_vec[0])));
 
-    auto cc = ciphertextVec[0]->GetCryptoContext();
+    auto cc = ciphertext_vec[0]->get_crypto_context();
 
     Plaintext plaintext;
-    if (ciphertextVec[0]->GetEncodingType() == CKKS_PACKED_ENCODING) {
+    if (ciphertext_vec[0]->get_encoding_type() == CKKS_PACKED_ENCODING) {
         std::vector<std::complex<double>> mask({{1, 0}, {0, 0}});
-        plaintext = cc->MakeCKKSPackedPlaintext(mask, 1, 0, nullptr, ciphertextVec[0]->GetSlots());
+        plaintext = cc->make_ckks_packed_plaintext(mask, 1, 0, nullptr, ciphertext_vec[0]->get_slots());
     } else {
         std::vector<int64_t> mask = {1, 0};
-        plaintext = cc->MakePackedPlaintext(mask);
+        plaintext = cc->make_packed_plaintext(mask);
     }
-    auto algo = ciphertextVec[0]->GetCryptoContext()->GetScheme();
+    auto algo = ciphertext_vec[0]->get_crypto_context()->get_scheme();
 
-    ciphertextMerged = algo->EvalMult(ciphertextMerged, plaintext);
+    ciphertext_merged = algo->eval_mult(ciphertext_merged, plaintext);
 
-    for (size_t i = 1; i < ciphertextVec.size(); i++) {
-        ciphertextMerged = algo->EvalAdd(
-                ciphertextMerged,
-                algo->EvalAtIndex(algo->EvalMult(ciphertextVec[i], plaintext), -static_cast<int32_t>(i), evalKeyMap));
+    for (size_t i = 1; i < ciphertext_vec.size(); i++) {
+        ciphertext_merged = algo->eval_add(
+                ciphertext_merged,
+                algo->eval_at_index(algo->eval_mult(ciphertext_vec[i], plaintext), -static_cast<int32_t>(i), eval_key_map));
     }
 
-    return ciphertextMerged;
+    return ciphertext_merged;
 }
 
-static_assert(PARTIAL_SUM_RADIX >= 2 && (PARTIAL_SUM_RADIX & (PARTIAL_SUM_RADIX - 1)) == 0,
+static_assert(CIPHER_PARTIAL_SUM_RADIX >= 2 && (CIPHER_PARTIAL_SUM_RADIX & (CIPHER_PARTIAL_SUM_RADIX - 1)) == 0,
               "PARTIAL_SUM_RADIX must be a power of two >= 2");
 
 template <class Element>
-std::set<uint32_t> AdvancedSHEBase<Element>::GenerateEvalSumIndices(uint32_t g0, uint32_t size, uint32_t m) {
-    constexpr uint32_t radix = PARTIAL_SUM_RADIX;
+std::set<uint32_t> BaseAdvancedShe<Element>::generate_eval_sum_indices(uint32_t g0, uint32_t size, uint32_t m) {
+    constexpr uint32_t radix = CIPHER_PARTIAL_SUM_RADIX;
     std::set<uint32_t> indices;
     uint64_t g = g0;
     for (uint32_t s = 1; s < size; s *= radix) {
@@ -451,13 +451,13 @@ std::set<uint32_t> AdvancedSHEBase<Element>::GenerateEvalSumIndices(uint32_t g0,
 }
 
 template <class Element>
-std::set<uint32_t> AdvancedSHEBase<Element>::GenerateIndices_2n(uint32_t batchSize, uint32_t m) {
+std::set<uint32_t> BaseAdvancedShe<Element>::generate_indices_2n(uint32_t batch_size, uint32_t m) {
     std::set<uint32_t> indices;
-    if (batchSize > 1) {
-        if (2 * batchSize < m)
-            return GenerateEvalSumIndices(5, batchSize, m);
+    if (batch_size > 1) {
+        if (2 * batch_size < m)
+            return generate_eval_sum_indices(5, batch_size, m);
 
-        indices = GenerateEvalSumIndices(5, batchSize / 2, m);
+        indices = generate_eval_sum_indices(5, batch_size / 2, m);
         indices.insert(m - 1);
     }
 
@@ -465,42 +465,42 @@ std::set<uint32_t> AdvancedSHEBase<Element>::GenerateIndices_2n(uint32_t batchSi
 }
 
 template <class Element>
-std::set<uint32_t> AdvancedSHEBase<Element>::GenerateIndices2nComplex(uint32_t batchSize, uint32_t m) {
-    return GenerateEvalSumIndices(5, batchSize, m);
+std::set<uint32_t> BaseAdvancedShe<Element>::generate_indices2n_complex(uint32_t batch_size, uint32_t m) {
+    return generate_eval_sum_indices(5, batch_size, m);
 }
 
 template <class Element>
-std::set<uint32_t> AdvancedSHEBase<Element>::GenerateIndices2nComplexRows(uint32_t rowSize, uint32_t m) {
-    const uint32_t colSize = m / (4 * rowSize);
-    const uint32_t g0 = (NativeInteger(5).ModExp(rowSize, m)).ConvertToInt<uint32_t>();
-    return GenerateEvalSumIndices(g0, colSize, m);
+std::set<uint32_t> BaseAdvancedShe<Element>::generate_indices2n_complex_rows(uint32_t row_size, uint32_t m) {
+    const uint32_t col_size = m / (4 * row_size);
+    const uint32_t g0 = (NativeInteger(5).mod_exp(row_size, m)).convert_to_int<uint32_t>();
+    return generate_eval_sum_indices(g0, col_size, m);
 }
 
 template <class Element>
-std::set<uint32_t> AdvancedSHEBase<Element>::GenerateIndices2nComplexCols(uint32_t batchSize, uint32_t m) {
-    const uint32_t g0 = NativeInteger(5).ModInverse(m).ConvertToInt<uint32_t>();
-    return GenerateEvalSumIndices(g0, batchSize, m);
+std::set<uint32_t> BaseAdvancedShe<Element>::generate_indices2n_complex_cols(uint32_t batch_size, uint32_t m) {
+    const uint32_t g0 = NativeInteger(5).mod_inverse(m).convert_to_int<uint32_t>();
+    return generate_eval_sum_indices(g0, batch_size, m);
 }
 
 template <class Element>
-std::set<uint32_t> AdvancedSHEBase<Element>::GenerateIndexListForEvalSum(const PrivateKey<Element>& privateKey) {
-    const auto cryptoParams = privateKey->GetCryptoParameters();
-    const auto encodingParams = cryptoParams->GetEncodingParams();
-    const auto elementParams = cryptoParams->GetElementParams();
+std::set<uint32_t> BaseAdvancedShe<Element>::generate_index_list_for_eval_sum(const PrivateKey<Element>& private_key) {
+    const auto crypto_params = private_key->get_crypto_parameters();
+    const auto encoding_params = crypto_params->get_encoding_params();
+    const auto element_params = crypto_params->get_element_params();
 
-    uint32_t batchSize = encodingParams->GetBatchSize();
-    uint32_t m = elementParams->GetCyclotomicOrder();
+    uint32_t batch_size = encoding_params->get_batch_size();
+    uint32_t m = element_params->get_cyclotomic_order();
 
     std::set<uint32_t> indices;
-    if (IsPowerOfTwo(m)) {
-        auto ccInst = privateKey->GetCryptoContext();
+    if (is_power_of_two(m)) {
+        auto cc_inst = private_key->get_crypto_context();
         // CKKS Packing
-        indices = isCKKS(ccInst->getSchemeId()) ? GenerateIndices2nComplex(batchSize, m) :
-                                                  GenerateIndices_2n(batchSize, m);
+        indices = is_ckks(cc_inst->get_scheme_id_impl()) ? generate_indices2n_complex(batch_size, m) :
+                                                  generate_indices_2n(batch_size, m);
     } else {
         // Arbitrary cyclotomics
-        auto isize = static_cast<size_t>(std::floor(std::log2(batchSize)));
-        uint32_t g = encodingParams->GetPlaintextGenerator();
+        auto isize = static_cast<size_t>(std::floor(std::log2(batch_size)));
+        uint32_t g = encoding_params->get_plaintext_generator();
         for (size_t i = 0; i < isize; i++) {
             indices.insert(g);
             g = (g * g) % m;
@@ -511,30 +511,30 @@ std::set<uint32_t> AdvancedSHEBase<Element>::GenerateIndexListForEvalSum(const P
 }
 
 template <class Element>
-Ciphertext<Element> AdvancedSHEBase<Element>::EvalSumRadixFold(
+Ciphertext<Element> BaseAdvancedShe<Element>::eval_sum_radix_fold(
         ConstCiphertext<Element>& ciphertext, uint32_t g0, uint32_t size, uint32_t m,
-        const std::map<uint32_t, EvalKey<Element>>& evalKeyMap) const {
-    Ciphertext<Element> result = ciphertext->Clone();
+        const std::map<uint32_t, EvalKey<Element>>& eval_key_map) const {
+    Ciphertext<Element> result = ciphertext->clone();
     if (size <= 1)
         return result;
 
-    constexpr uint32_t radix = PARTIAL_SUM_RADIX;
-    auto algo = ciphertext->GetCryptoContext()->GetScheme();
-    const auto cryptoParams = std::dynamic_pointer_cast<CryptoParametersRNS>(ciphertext->GetCryptoParameters());
+    constexpr uint32_t radix = CIPHER_PARTIAL_SUM_RADIX;
+    auto algo = ciphertext->get_crypto_context()->get_scheme();
+    const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(ciphertext->get_crypto_parameters());
 
-    if (!cryptoParams || cryptoParams->GetKeySwitchTechnique() != HYBRID) {
+    if (!crypto_params || crypto_params->get_key_switch_technique() != HYBRID) {
         uint64_t g = g0;
         for (uint32_t s = 1; s < size; s *= radix) {
-            Ciphertext<Element> base = result->Clone();
-            auto digits = algo->EvalFastRotationPrecompute(base);
+            Ciphertext<Element> base = result->clone();
+            auto digits = algo->eval_fast_rotation_precompute(base);
             uint64_t gi = g;
             for (uint32_t i = 1; i < radix && i * s < size; ++i) {
-                const auto autoIndex = static_cast<uint32_t>(gi);
-                auto evalKeyIterator = evalKeyMap.find(autoIndex);
-                if (evalKeyIterator == evalKeyMap.end())
-                    OPENFHE_THROW("EvalKey for index [" + std::to_string(autoIndex) + "] is not found.");
-                result = algo->EvalAdd(result,
-                                       algo->EvalAutomorphismCore(base, autoIndex, digits, evalKeyIterator->second));
+                const auto auto_index = static_cast<uint32_t>(gi);
+                auto eval_key_iterator = eval_key_map.find(auto_index);
+                if (eval_key_iterator == eval_key_map.end())
+                    CIPHER_THROW("EvalKey for index [" + std::to_string(auto_index) + "] is not found.");
+                result = algo->eval_add(result,
+                                       algo->eval_automorphism_core(base, auto_index, digits, eval_key_iterator->second));
                 gi = gi * g % m;
             }
             for (uint32_t r = radix; r > 1; r >>= 1)
@@ -543,128 +543,128 @@ Ciphertext<Element> AdvancedSHEBase<Element>::EvalSumRadixFold(
         return result;
     }
 
-    const uint32_t N = ciphertext->GetCryptoContext()->GetRingDimension();
-    std::vector<Element>& cv = result->GetElements();
-    const auto paramsQl = cv[0].GetParams();
-    const auto paramsP = cryptoParams->GetParamsP();
-    const auto paramsQlP = cv[0].GetExtendedCRTBasis(paramsP);
-    const uint32_t sizeQl = paramsQl->GetParams().size();
-    const uint32_t sizeQlP = paramsQlP->GetParams().size();
+    const uint32_t N = ciphertext->get_crypto_context()->get_ring_dimension();
+    std::vector<Element>& cv = result->get_elements();
+    const auto params_ql = cv[0].get_params();
+    const auto params_p = crypto_params->get_params_p();
+    const auto params_ql_p = cv[0].get_extended_crt_basis(params_p);
+    const uint32_t size_ql = params_ql->get_params().size();
+    const uint32_t size_ql_p = params_ql_p->get_params().size();
 
-    const PlaintextModulus t = (cryptoParams->GetNoiseScale() == 1) ? 0 : cryptoParams->GetPlaintextModulus();
+    const PlaintextModulus t = (crypto_params->get_noise_scale() == 1) ? 0 : crypto_params->get_plaintext_modulus();
 
-    Element acc(paramsQlP, Format::EVALUATION, true);
-    auto cMult = cv[0].TimesNoCheck(cryptoParams->GetPModq());
-    for (uint32_t i = 0; i < sizeQl; ++i)
-        acc.SetElementAtIndex(i, std::move(cMult.GetElementAtIndex(i)));
+    Element acc(params_ql_p, Format::EVALUATION, true);
+    auto c_mult = cv[0].times_no_check(crypto_params->get_p_modq());
+    for (uint32_t i = 0; i < size_ql; ++i)
+        acc.set_element_at_index(i, std::move(c_mult.get_element_at_index(i)));
 
     std::vector<uint32_t> vec(N);
     uint64_t g = g0;
     for (uint32_t s = 1; s < size; s *= radix) {
-        auto digits = algo->EvalKeySwitchPrecomputeCore(cv[1], cryptoParams);
+        auto digits = algo->eval_key_switch_precompute_core(cv[1], crypto_params);
 
-        Element lvl0(paramsQlP, Format::EVALUATION, true);
-        Element lvl1(paramsQlP, Format::EVALUATION, true);
+        Element lvl0(params_ql_p, Format::EVALUATION, true);
+        Element lvl1(params_ql_p, Format::EVALUATION, true);
 
         uint64_t gi = g;
         for (uint32_t i = 1; i < radix && i * s < size; ++i) {
-            const auto autoIndex = static_cast<uint32_t>(gi);
-            auto evalKeyIterator = evalKeyMap.find(autoIndex);
-            if (evalKeyIterator == evalKeyMap.end())
-                OPENFHE_THROW("EvalKey for index [" + std::to_string(autoIndex) + "] is not found.");
+            const auto auto_index = static_cast<uint32_t>(gi);
+            auto eval_key_iterator = eval_key_map.find(auto_index);
+            if (eval_key_iterator == eval_key_map.end())
+                CIPHER_THROW("EvalKey for index [" + std::to_string(auto_index) + "] is not found.");
 
-            PrecomputeAutoMap(N, autoIndex, &vec);
+            precompute_auto_map(N, auto_index, &vec);
 
-            auto ba = algo->EvalFastKeySwitchCoreExt(digits, evalKeyIterator->second, paramsQl);
+            auto ba = algo->eval_fast_key_switch_core_ext(digits, eval_key_iterator->second, params_ql);
 
             // ba[0] += acc;
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(sizeQlP))
-            for (uint32_t j = 0; j < sizeQlP; ++j)
-                ba[0].GetAllElements()[j] += acc.GetAllElements()[j];
+#pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(size_ql_p))
+            for (uint32_t j = 0; j < size_ql_p; ++j)
+                ba[0].get_all_elements()[j] += acc.get_all_elements()[j];
 
-            ba[0] = ba[0].AutomorphismTransform(autoIndex, vec);
-            ba[1] = ba[1].AutomorphismTransform(autoIndex, vec);
+            ba[0] = ba[0].automorphism_transform(auto_index, vec);
+            ba[1] = ba[1].automorphism_transform(auto_index, vec);
 
             // lvl0 += ba[0]; lvl1 += ba[1];
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(sizeQlP))
-            for (uint32_t j = 0; j < sizeQlP; ++j) {
-                lvl0.GetAllElements()[j] += ba[0].GetAllElements()[j];
-                lvl1.GetAllElements()[j] += ba[1].GetAllElements()[j];
+#pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(size_ql_p))
+            for (uint32_t j = 0; j < size_ql_p; ++j) {
+                lvl0.get_all_elements()[j] += ba[0].get_all_elements()[j];
+                lvl1.get_all_elements()[j] += ba[1].get_all_elements()[j];
             }
 
             gi = gi * g % m;
         }
 
         // acc += lvl0;
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(sizeQlP))
-        for (uint32_t j = 0; j < sizeQlP; ++j)
-            acc.GetAllElements()[j] += lvl0.GetAllElements()[j];
+#pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(size_ql_p))
+        for (uint32_t j = 0; j < size_ql_p; ++j)
+            acc.get_all_elements()[j] += lvl0.get_all_elements()[j];
 
         // Element 1 settles once per level from the level's extended sum: the next level's
         // rotations need its digit decomposition.
-        cv[1] += lvl1.ApproxModDown(paramsQl, paramsP, cryptoParams->GetPInvModq(), cryptoParams->GetPInvModqPrecon(),
-                                    cryptoParams->GetPHatInvModp(), cryptoParams->GetPHatInvModpPrecon(),
-                                    cryptoParams->GetPHatModq(), cryptoParams->GetModqBarrettMu(),
-                                    cryptoParams->GettInvModp(), cryptoParams->GettInvModpPrecon(), t,
-                                    cryptoParams->GettModqPrecon());
+        cv[1] += lvl1.approx_mod_down(params_ql, params_p, crypto_params->get_p_inv_modq(), crypto_params->get_p_inv_modq_precon(),
+                                    crypto_params->get_p_hat_inv_modp(), crypto_params->get_p_hat_inv_modp_precon(),
+                                    crypto_params->get_p_hat_modq(), crypto_params->get_modq_barrett_mu(),
+                                    crypto_params->get_t_inv_modp(), crypto_params->get_t_inv_modp_precon(), t,
+                                    crypto_params->get_t_modq_precon());
 
         for (uint32_t r = radix; r > 1; r >>= 1)
             g = g * g % m;
     }
 
-    cv[0] = acc.ApproxModDown(paramsQl, paramsP, cryptoParams->GetPInvModq(), cryptoParams->GetPInvModqPrecon(),
-                              cryptoParams->GetPHatInvModp(), cryptoParams->GetPHatInvModpPrecon(),
-                              cryptoParams->GetPHatModq(), cryptoParams->GetModqBarrettMu(),
-                              cryptoParams->GettInvModp(), cryptoParams->GettInvModpPrecon(), t,
-                              cryptoParams->GettModqPrecon());
+    cv[0] = acc.approx_mod_down(params_ql, params_p, crypto_params->get_p_inv_modq(), crypto_params->get_p_inv_modq_precon(),
+                              crypto_params->get_p_hat_inv_modp(), crypto_params->get_p_hat_inv_modp_precon(),
+                              crypto_params->get_p_hat_modq(), crypto_params->get_modq_barrett_mu(),
+                              crypto_params->get_t_inv_modp(), crypto_params->get_t_inv_modp_precon(), t,
+                              crypto_params->get_t_modq_precon());
 
     return result;
 }
 
 template <class Element>
-Ciphertext<Element> AdvancedSHEBase<Element>::EvalSum_2n(ConstCiphertext<Element> ciphertext, uint32_t batchSize,
+Ciphertext<Element> BaseAdvancedShe<Element>::eval_sum_2n(ConstCiphertext<Element> ciphertext, uint32_t batch_size,
                                                          uint32_t m,
-                                                         const std::map<uint32_t, EvalKey<Element>>& evalKeys) const {
-    if (batchSize <= 1)
-        return ciphertext->Clone();
+                                                         const std::map<uint32_t, EvalKey<Element>>& eval_keys) const {
+    if (batch_size <= 1)
+        return ciphertext->clone();
 
-    if (2 * batchSize < m)
-        return EvalSumRadixFold(ciphertext, 5, batchSize, m, evalKeys);
+    if (2 * batch_size < m)
+        return eval_sum_radix_fold(ciphertext, 5, batch_size, m, eval_keys);
 
-    auto result = EvalSumRadixFold(ciphertext, 5, batchSize / 2, m, evalKeys);
-    auto algo = ciphertext->GetCryptoContext()->GetScheme();
-    return algo->EvalAdd(result, algo->EvalAutomorphism(result, m - 1, evalKeys));
+    auto result = eval_sum_radix_fold(ciphertext, 5, batch_size / 2, m, eval_keys);
+    auto algo = ciphertext->get_crypto_context()->get_scheme();
+    return algo->eval_add(result, algo->eval_automorphism(result, m - 1, eval_keys));
 }
 
 template <class Element>
-Ciphertext<Element> AdvancedSHEBase<Element>::EvalSum2nComplex(
-        ConstCiphertext<Element> ciphertext, uint32_t batchSize, uint32_t m,
-        const std::map<uint32_t, EvalKey<Element>>& evalKeys) const {
-    return EvalSumRadixFold(ciphertext, 5, batchSize, m, evalKeys);
+Ciphertext<Element> BaseAdvancedShe<Element>::eval_sum2n_complex(
+        ConstCiphertext<Element> ciphertext, uint32_t batch_size, uint32_t m,
+        const std::map<uint32_t, EvalKey<Element>>& eval_keys) const {
+    return eval_sum_radix_fold(ciphertext, 5, batch_size, m, eval_keys);
 }
 
 template <class Element>
-Ciphertext<Element> AdvancedSHEBase<Element>::EvalSum2nComplexRows(
-        ConstCiphertext<Element> ciphertext, uint32_t rowSize, uint32_t m,
-        const std::map<uint32_t, EvalKey<Element>>& evalKeys) const {
-    const uint32_t colSize = m / (4 * rowSize);
-    const uint32_t g0 = (NativeInteger(5).ModExp(rowSize, m)).ConvertToInt<uint32_t>();
-    return EvalSumRadixFold(ciphertext, g0, colSize, m, evalKeys);
+Ciphertext<Element> BaseAdvancedShe<Element>::eval_sum2n_complex_rows(
+        ConstCiphertext<Element> ciphertext, uint32_t row_size, uint32_t m,
+        const std::map<uint32_t, EvalKey<Element>>& eval_keys) const {
+    const uint32_t col_size = m / (4 * row_size);
+    const uint32_t g0 = (NativeInteger(5).mod_exp(row_size, m)).convert_to_int<uint32_t>();
+    return eval_sum_radix_fold(ciphertext, g0, col_size, m, eval_keys);
 }
 
 template <class Element>
-Ciphertext<Element> AdvancedSHEBase<Element>::EvalSum2nComplexCols(
-        ConstCiphertext<Element> ciphertext, uint32_t batchSize, uint32_t m,
-        const std::map<uint32_t, EvalKey<Element>>& evalKeys) const {
-    const uint32_t g0 = NativeInteger(5).ModInverse(m).ConvertToInt<uint32_t>();
-    return EvalSumRadixFold(ciphertext, g0, batchSize, m, evalKeys);
+Ciphertext<Element> BaseAdvancedShe<Element>::eval_sum2n_complex_cols(
+        ConstCiphertext<Element> ciphertext, uint32_t batch_size, uint32_t m,
+        const std::map<uint32_t, EvalKey<Element>>& eval_keys) const {
+    const uint32_t g0 = NativeInteger(5).mod_inverse(m).convert_to_int<uint32_t>();
+    return eval_sum_radix_fold(ciphertext, g0, batch_size, m, eval_keys);
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 // the code below is from base-advancedshe-impl.cpp
-namespace lbcrypto {
+namespace cipher {
 
-template class AdvancedSHEBase<DCRTPoly>;
+template class BaseAdvancedShe<RnsPoly>;
 
-}  // namespace lbcrypto
+}  // namespace cipher

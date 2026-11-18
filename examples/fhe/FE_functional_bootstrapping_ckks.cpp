@@ -43,7 +43,7 @@
 #include "cipher/cipher.h"
 #include "cipher/fhe/ckks/fhe.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 namespace {
 
@@ -166,7 +166,7 @@ static const std::vector<std::complex<double>> coeff_gelu_8_double_44{
         std::complex<double>(1.478126284614e-10, -1.420742295235e-12),
         std::complex<double>(1.014093012815e-10, 4.286355138519e-13)};
 
-std::vector<double> BuildNormalizedInput(size_t slots) {
+std::vector<double> build_normalized_input(size_t slots) {
     std::vector<double> input(slots);
     constexpr double left = -0.5;
     constexpr double right = 0.5;
@@ -176,31 +176,31 @@ std::vector<double> BuildNormalizedInput(size_t slots) {
     return input;
 }
 
-double ComputeMeanPrecisionBits(const std::vector<double>& expected, const std::vector<double>& actual) {
+double compute_mean_precision_bits(const std::vector<double>& expected, const std::vector<double>& actual) {
     const size_t count = std::min(expected.size(), actual.size());
     if (count == 0) {
         return std::numeric_limits<double>::quiet_NaN();
     }
 
-    double minExpected = expected[0];
-    double maxExpected = expected[0];
-    double sumError = 0.0;
+    double min_expected = expected[0];
+    double max_expected = expected[0];
+    double sum_error = 0.0;
     for (size_t i = 0; i < count; ++i) {
-        minExpected = std::min(minExpected, expected[i]);
-        maxExpected = std::max(maxExpected, expected[i]);
-        sumError += std::abs(expected[i] - actual[i]);
+        min_expected = std::min(min_expected, expected[i]);
+        max_expected = std::max(max_expected, expected[i]);
+        sum_error += std::abs(expected[i] - actual[i]);
     }
 
-    double range = maxExpected - minExpected;
+    double range = max_expected - min_expected;
     if (range < 1e-15) {
         range = 1.0;
     }
 
-    const double meanError = sumError / static_cast<double>(count);
-    return (meanError == 0.0) ? std::numeric_limits<double>::infinity() : -std::log2(meanError / range);
+    const double mean_error = sum_error / static_cast<double>(count);
+    return (mean_error == 0.0) ? std::numeric_limits<double>::infinity() : -std::log2(mean_error / range);
 }
 
-void PrintValues(const std::vector<double>& values, size_t count) {
+void print_values(const std::vector<double>& values, size_t count) {
     for (size_t i = 0; i < count; ++i) {
         std::cout << std::fixed << std::setprecision(10) << values[i] << " ";
     }
@@ -210,112 +210,112 @@ void PrintValues(const std::vector<double>& values, size_t count) {
 }  // namespace
 
 int main() {
-    const uint32_t ringDim = 1 << 16;
-    const uint32_t numSlots = 1 << 15;
-    const ScalingTechnique scalingTechnique = FLEXIBLEAUTO;
-    const std::vector<uint32_t> levelBudget = {3, 2};
-    const std::vector<uint32_t> bsgsDim = {0, 0};
-    const usint dcrtBits = 59;
-    const usint firstMod = 60;
+    const uint32_t ring_dim = 1 << 16;
+    const uint32_t num_slots = 1 << 15;
+    const ScalingTechnique scaling_technique = FLEXIBLEAUTO;
+    const std::vector<uint32_t> level_budget = {3, 2};
+    const std::vector<uint32_t> bsgs_dim = {0, 0};
+    const usint dcrt_bits = 59;
+    const usint first_mod = 60;
     // SPARSE_ENCAPSULATED is recommended (probability of failure below 2^-128). UNIFORM_TERNARY (2^-79 for
     // N = 2^16, 2^-33 for N = 2^17) needs a larger depth; SPARSE_TERNARY (about 2^-23 for N = 2^16) is discouraged.
     const SecretKeyDist skd = SPARSE_ENCAPSULATED;
 
-    // GetFEFBTDepth covers the functional bootstrapping itself, for the longest of the three series; the
+    // get_fefbt_depth covers the functional bootstrapping itself, for the longest of the three series; the
     // levels added on top of it are what is left to compute with on the refreshed ciphertext.
-    constexpr uint32_t levelsAfterBootstrapping = 6;
+    constexpr uint32_t levels_after_bootstrapping = 6;
 
     const uint32_t depth = std::max({
-                                   FHECKKSRNS::GetFEFBTDepth(levelBudget, coeff_exp_2_double_29, skd),
-                                   FHECKKSRNS::GetFEFBTDepth(levelBudget, coeff_sigmoid_8_double_34, skd),
-                                   FHECKKSRNS::GetFEFBTDepth(levelBudget, coeff_gelu_8_double_44, skd),
+                                   CkksRnsFhe::get_fefbt_depth(level_budget, coeff_exp_2_double_29, skd),
+                                   CkksRnsFhe::get_fefbt_depth(level_budget, coeff_sigmoid_8_double_34, skd),
+                                   CkksRnsFhe::get_fefbt_depth(level_budget, coeff_gelu_8_double_44, skd),
                            }) +
-                           levelsAfterBootstrapping;
+                           levels_after_bootstrapping;
 
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetCKKSDataType(COMPLEX);
-    parameters.SetSecretKeyDist(skd);
-    parameters.SetSecurityLevel(HEStd_NotSet);
-    parameters.SetRingDim(ringDim);
-    parameters.SetNumLargeDigits(3);
-    parameters.SetKeySwitchTechnique(HYBRID);
-    parameters.SetScalingModSize(dcrtBits);
-    parameters.SetScalingTechnique(scalingTechnique);
-    parameters.SetFirstModSize(firstMod);
-    parameters.SetBatchSize(numSlots);
-    parameters.SetMultiplicativeDepth(depth);
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_ckks_data_type(COMPLEX);
+    parameters.set_secret_key_dist(skd);
+    parameters.set_security_level(HEStd_NotSet);
+    parameters.set_ring_dim(ring_dim);
+    parameters.set_num_large_digits(3);
+    parameters.set_key_switch_technique(HYBRID);
+    parameters.set_scaling_mod_size(dcrt_bits);
+    parameters.set_scaling_technique(scaling_technique);
+    parameters.set_first_mod_size(first_mod);
+    parameters.set_batch_size(num_slots);
+    parameters.set_multiplicative_depth(depth);
 
-    auto cc = GenCryptoContext(parameters);
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
-    cc->Enable(FHE);
-    cc->EvalFEFuncBootstrapSetup(levelBudget, bsgsDim, numSlots);
+    auto cc = make_crypto_context(parameters);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
+    cc->enable(FHE);
+    cc->eval_fe_func_bootstrap_setup(level_budget, bsgs_dim, num_slots);
 
-    auto keyPair = cc->KeyGen();
-    cc->EvalMultKeyGen(keyPair.secretKey);
-    cc->EvalBootstrapKeyGen(keyPair.secretKey, numSlots);
+    auto key_pair = cc->key_gen();
+    cc->eval_mult_key_gen(key_pair.secret_key);
+    cc->eval_bootstrap_key_gen(key_pair.secret_key, num_slots);
 
-    const auto normalizedInput = BuildNormalizedInput(numSlots);
+    const auto normalized_input = build_normalized_input(num_slots);
     Plaintext plaintext =
-            cc->MakeCKKSPackedPlaintext(normalizedInput, 1, depth - (levelBudget[1] + 1), nullptr, numSlots);
-    auto input = cc->Encrypt(keyPair.publicKey, plaintext);
-    uint32_t totalModulusBits = 0;
-    for (const auto& modParams : cc->GetCryptoParameters()->GetElementParams()->GetParams()) {
-        totalModulusBits += modParams->GetModulus().GetMSB();
+            cc->make_ckks_packed_plaintext(normalized_input, 1, depth - (level_budget[1] + 1), nullptr, num_slots);
+    auto input = cc->encrypt(key_pair.public_key, plaintext);
+    uint32_t total_modulus_bits = 0;
+    for (const auto& mod_params : cc->get_crypto_parameters()->get_element_params()->get_params()) {
+        total_modulus_bits += mod_params->get_modulus().get_msb();
     }
-    const uint32_t levelBeforeBoot = plaintext->GetLevel();
+    const uint32_t level_before_boot = plaintext->get_level();
 
     // The refresh itself - SlotsToCoeffs, modulus raise, CoeffsToSlots and the complex exponential - does not
     // depend on the target function, so it is run once here and shared by every function below. The powers
     // are precomputed for the longest series of the family (gelu, degree 44); the shorter ones are evaluated
     // against those same powers.
-    auto precomputeStart = std::chrono::high_resolution_clock::now();
-    auto sharedPowers = cc->EvalFEFuncBootstrapPrecompute(input, coeff_gelu_8_double_44);
-    auto precomputeStop = std::chrono::high_resolution_clock::now();
-    const double precomputeMs = std::chrono::duration<double, std::milli>(precomputeStop - precomputeStart).count();
+    auto precompute_start = std::chrono::high_resolution_clock::now();
+    auto shared_powers = cc->eval_fe_func_bootstrap_precompute(input, coeff_gelu_8_double_44);
+    auto precompute_stop = std::chrono::high_resolution_clock::now();
+    const double precompute_ms = std::chrono::duration<double, std::milli>(precompute_stop - precompute_start).count();
 
-    std::cout << "Shared bootstrapping and complex exponential: " << static_cast<int64_t>(std::llround(precomputeMs))
+    std::cout << "Shared bootstrapping and complex exponential: " << static_cast<int64_t>(std::llround(precompute_ms))
               << " ms (paid once for all functions below)\n";
 
-    auto runOne = [&](const std::string& title, double radius, const std::vector<std::complex<double>>& coeffs,
+    auto run_one = [&](const std::string& title, double radius, const std::vector<std::complex<double>>& coeffs,
                       const auto& target) {
-        auto expected = normalizedInput;
+        auto expected = normalized_input;
         for (double& value : expected) {
             value = target(2.0 * radius * value);
         }
 
         auto start = std::chrono::high_resolution_clock::now();
-        auto output = cc->EvalFEFuncBootstrapWithPrecomp(sharedPowers, coeffs);
+        auto output = cc->eval_fe_func_bootstrap_with_precomp(shared_powers, coeffs);
         auto stop = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration<double, std::milli>(stop - start).count();
 
         Plaintext decrypted;
-        cc->Decrypt(keyPair.secretKey, output, &decrypted);
-        decrypted->SetLength(expected.size());
-        const auto actual = decrypted->GetRealPackedValue();
+        cc->decrypt(key_pair.secret_key, output, &decrypted);
+        decrypted->set_length(expected.size());
+        const auto actual = decrypted->get_real_packed_value();
 
         std::cout << "\n===== " << title << " =====\n";
-        std::cout << "CKKS total modulus: " << totalModulusBits << " bits\n";
-        std::cout << "Level before bootstrapping: " << levelBeforeBoot << "\n\n";
-        std::cout << "Level after bootstrapping: " << output->GetLevel() << "\n";
+        std::cout << "CKKS total modulus: " << total_modulus_bits << " bits\n";
+        std::cout << "Level before bootstrapping: " << level_before_boot << "\n\n";
+        std::cout << "Level after bootstrapping: " << output->get_level() << "\n";
         std::cout << "Series evaluation time: " << static_cast<int64_t>(std::llround(elapsed)) << " ms\n";
-        std::cout << "Slots amortize time: " << std::fixed << std::setprecision(6) << elapsed / numSlots << " ms\n\n";
+        std::cout << "Slots amortize time: " << std::fixed << std::setprecision(6) << elapsed / num_slots << " ms\n\n";
         std::cout << "--- Sample Points Inspection (Total 10 points) ---\n";
-        PrintValues(normalizedInput, 10);
+        print_values(normalized_input, 10);
         std::cout << "----------- Expected Function Values: -----------\n";
-        PrintValues(expected, 10);
+        print_values(expected, 10);
         std::cout << "------- Functional Bootstrapping Results: -------\n";
-        PrintValues(actual, 10);
+        print_values(actual, 10);
         std::cout << "-------------------------------------------------\n";
-        std::cout << "Precision: " << std::fixed << std::setprecision(4) << ComputeMeanPrecisionBits(expected, actual)
+        std::cout << "Precision: " << std::fixed << std::setprecision(4) << compute_mean_precision_bits(expected, actual)
                   << " bits\n";
     };
 
-    runOne("exp[-2,2]", 2.0, coeff_exp_2_double_29, [](double x) { return std::exp(x); });
-    runOne("sigmoid[-8,8]", 8.0, coeff_sigmoid_8_double_34, [](double x) { return 1.0 / (1.0 + std::exp(-x)); });
-    runOne("gelu_tanh[-8,8]", 8.0, coeff_gelu_8_double_44, [](double x) {
+    run_one("exp[-2,2]", 2.0, coeff_exp_2_double_29, [](double x) { return std::exp(x); });
+    run_one("sigmoid[-8,8]", 8.0, coeff_sigmoid_8_double_34, [](double x) { return 1.0 / (1.0 + std::exp(-x)); });
+    run_one("gelu_tanh[-8,8]", 8.0, coeff_gelu_8_double_44, [](double x) {
         return 0.5 * x * (1.0 + std::tanh(std::sqrt(2.0 / M_PI) * (x + 0.044715 * std::pow(x, 3))));
     });
 

@@ -47,101 +47,101 @@
 #include "cipher/util/exception.h"
 #include "cipher/util/inttypes.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 // Constructor from ring element
 Field2n::Field2n(const Poly& element) : format(Format::COEFFICIENT) {
-    if (element.GetFormat() != Format::COEFFICIENT)
-        OPENFHE_THROW("Poly not in Format::COEFFICIENT representation");
-    size_t size = element.GetLength();
+    if (element.get_format() != Format::COEFFICIENT)
+        CIPHER_THROW("Poly not in Format::COEFFICIENT representation");
+    size_t size = element.get_length();
     this->std::vector<std::complex<double>>::reserve(size);
-    BigInteger negativeThreshold(element.GetModulus() / Poly::Integer(2));
+    BigInteger negative_threshold(element.get_modulus() / Poly::Integer(2));
     for (size_t i = 0; i < size; ++i) {
-        if (element[i] > negativeThreshold)
-            this->std::vector<std::complex<double>>::push_back(-(element.GetModulus() - element[i]).ConvertToDouble());
+        if (element[i] > negative_threshold)
+            this->std::vector<std::complex<double>>::push_back(-(element.get_modulus() - element[i]).convert_to_double());
         else
-            this->std::vector<std::complex<double>>::push_back(element[i].ConvertToDouble());
+            this->std::vector<std::complex<double>>::push_back(element[i].convert_to_double());
     }
 }
 
 // Constructor from ring element
 Field2n::Field2n(const NativePoly& element) : format(Format::COEFFICIENT) {
-    if (element.GetFormat() != Format::COEFFICIENT)
-        OPENFHE_THROW("Poly not in Format::COEFFICIENT representation");
-    size_t size = element.GetLength();
+    if (element.get_format() != Format::COEFFICIENT)
+        CIPHER_THROW("Poly not in Format::COEFFICIENT representation");
+    size_t size = element.get_length();
     this->std::vector<std::complex<double>>::reserve(size);
-    NativeInteger negativeThreshold(element.GetModulus() / 2);
+    NativeInteger negative_threshold(element.get_modulus() / 2);
     for (size_t i = 0; i < size; ++i) {
-        if (element[i] > negativeThreshold)
-            this->std::vector<std::complex<double>>::push_back(-(element.GetModulus() - element[i]).ConvertToDouble());
+        if (element[i] > negative_threshold)
+            this->std::vector<std::complex<double>>::push_back(-(element.get_modulus() - element[i]).convert_to_double());
         else
-            this->std::vector<std::complex<double>>::push_back(element[i].ConvertToDouble());
+            this->std::vector<std::complex<double>>::push_back(element[i].convert_to_double());
     }
 }
 
-// Constructor from DCRTPoly ring element
-Field2n::Field2n(const DCRTPoly& DCRTelement) : format(Format::COEFFICIENT) {
-    if (DCRTelement.GetFormat() != Format::COEFFICIENT)
-        OPENFHE_THROW("DCRTPoly not in Format::COEFFICIENT representation");
-    // GetElementAtIndex() is unchecked, so reject an empty DCRTPoly before indexing into it.
-    if (DCRTelement.GetNumOfElements() == 0)
-        OPENFHE_THROW("DCRTPoly has no towers to convert");
+// Constructor from RnsPoly ring element
+Field2n::Field2n(const RnsPoly& dcrt_element) : format(Format::COEFFICIENT) {
+    if (dcrt_element.get_format() != Format::COEFFICIENT)
+        CIPHER_THROW("DCRTPoly not in Format::COEFFICIENT representation");
+    // get_element_at_index() is unchecked, so reject an empty RnsPoly before indexing into it.
+    if (dcrt_element.get_num_of_elements() == 0)
+        CIPHER_THROW("DCRTPoly has no towers to convert");
     // Reading only the first tower is exact while every centered coefficient fits inside it, which
     // is what this constructor's callers produce (products of small trapdoor samples). Check that
     // against the remaining towers rather than assuming it, and interpolate when it does not hold.
-    const typename DCRTPoly::PolyType& element = DCRTelement.GetElementAtIndex(0);
-    const NativeInteger& q0 = element.GetModulus();
-    const NativeInteger negativeThreshold(q0 / 2);
-    size_t size = element.GetLength();
-    for (uint32_t t = 1; t < DCRTelement.GetNumOfElements(); ++t) {
-        const typename DCRTPoly::PolyType& tower = DCRTelement.GetElementAtIndex(t);
-        const NativeInteger& qt = tower.GetModulus();
+    const typename RnsPoly::PolyType& element = dcrt_element.get_element_at_index(0);
+    const NativeInteger& q0 = element.get_modulus();
+    const NativeInteger negative_threshold(q0 / 2);
+    size_t size = element.get_length();
+    for (uint32_t t = 1; t < dcrt_element.get_num_of_elements(); ++t) {
+        const typename RnsPoly::PolyType& tower = dcrt_element.get_element_at_index(t);
+        const NativeInteger& qt = tower.get_modulus();
         for (size_t i = 0; i < size; ++i) {
-            bool negative = element[i] > negativeThreshold;
-            NativeInteger residue((negative ? q0 - element[i] : element[i]).Mod(qt));
+            bool negative = element[i] > negative_threshold;
+            NativeInteger residue((negative ? q0 - element[i] : element[i]).mod(qt));
             if (negative && residue > NativeInteger(0))
                 residue = qt - residue;
             if (tower[i] != residue) {
-                *this = Field2n(DCRTelement.CRTInterpolate());
+                *this = Field2n(dcrt_element.crt_interpolate());
                 return;
             }
         }
     }
     this->std::vector<std::complex<double>>::reserve(size);
     for (size_t i = 0; i < size; ++i) {
-        if (element[i] > negativeThreshold)
-            this->std::vector<std::complex<double>>::push_back(-(q0 - element[i]).ConvertToDouble());
+        if (element[i] > negative_threshold)
+            this->std::vector<std::complex<double>>::push_back(-(q0 - element[i]).convert_to_double());
         else
-            this->std::vector<std::complex<double>>::push_back(element[i].ConvertToDouble());
+            this->std::vector<std::complex<double>>::push_back(element[i].convert_to_double());
     }
 }
 
 // Constructor from a ring element matrix
 Field2n::Field2n(const Matrix<int64_t>& element) : format(Format::COEFFICIENT) {
-    size_t size = element.GetRows();
+    size_t size = element.get_rows();
     this->std::vector<std::complex<double>>::reserve(size);
     for (size_t i = 0; i < size; ++i)
         this->std::vector<std::complex<double>>::push_back(element(i, 0));
 }
 
 // Inverse operation for the field elements
-Field2n Field2n::Inverse() const {
+Field2n Field2n::inverse() const {
     if (format == Format::COEFFICIENT)
-        OPENFHE_THROW("Polynomial not in Format::EVALUATION representation");
-    Field2n inverse(*this);
-    for (size_t i = 0; i < inverse.size(); ++i) {
-        auto real{inverse[i].real()};
-        auto imag{inverse[i].imag()};
+        CIPHER_THROW("Polynomial not in Format::EVALUATION representation");
+    Field2n inverse_value(*this);
+    for (size_t i = 0; i < inverse_value.size(); ++i) {
+        auto real{inverse_value[i].real()};
+        auto imag{inverse_value[i].imag()};
         auto quotient{real * real + imag * imag};
-        inverse[i] = std::complex<double>(real / quotient, -imag / quotient);
+        inverse_value[i] = std::complex<double>(real / quotient, -imag / quotient);
     }
-    return inverse;
+    return inverse_value;
 }
 
 // Addition operation for field elements
-Field2n Field2n::Plus(const Field2n& rhs) const {
-    if (format != rhs.GetFormat())
-        OPENFHE_THROW("Operands are not in the same format");
+Field2n Field2n::plus_impl(const Field2n& rhs) const {
+    if (format != rhs.get_format())
+        CIPHER_THROW("Operands are not in the same format");
     Field2n sum(*this);
     for (size_t i = 0; i < rhs.size(); ++i)
         sum[i] += rhs[i];
@@ -149,18 +149,18 @@ Field2n Field2n::Plus(const Field2n& rhs) const {
 }
 
 // Scalar addition operation for field elements
-Field2n Field2n::Plus(double scalar) const {
+Field2n Field2n::plus_impl(double scalar) const {
     if (format != Format::COEFFICIENT)
-        OPENFHE_THROW("Field2n scalar addition is currently supported only for Format::COEFFICIENT representation");
+        CIPHER_THROW("Field2n scalar addition is currently supported only for Format::COEFFICIENT representation");
     Field2n sum(*this);
     sum.at(0) += scalar;
     return sum;
 }
 
 // Substraction operation for field elements
-Field2n Field2n::Minus(const Field2n& rhs) const {
-    if (format != rhs.GetFormat())
-        OPENFHE_THROW("Operands are not in the same format");
+Field2n Field2n::minus_impl(const Field2n& rhs) const {
+    if (format != rhs.get_format())
+        CIPHER_THROW("Operands are not in the same format");
     Field2n difference(*this);
     for (size_t i = 0; i < rhs.size(); ++i)
         difference[i] -= rhs[i];
@@ -169,8 +169,8 @@ Field2n Field2n::Minus(const Field2n& rhs) const {
 
 // Multiplication operation for field elements
 Field2n Field2n::Times(const Field2n& rhs) const {
-    if (format != Format::EVALUATION && rhs.GetFormat() != Format::EVALUATION)
-        OPENFHE_THROW("At least one of the polynomials is not in Format::EVALUATION representation");
+    if (format != Format::EVALUATION && rhs.get_format() != Format::EVALUATION)
+        CIPHER_THROW("At least one of the polynomials is not in Format::EVALUATION representation");
     Field2n result(*this);
     for (size_t i = 0; i < rhs.size(); ++i)
         result[i] *= rhs[i];
@@ -178,9 +178,9 @@ Field2n Field2n::Times(const Field2n& rhs) const {
 }
 
 // Right shift operation for the field element
-Field2n Field2n::ShiftRight() {
+Field2n Field2n::shift_right() {
     if (format != Format::COEFFICIENT)
-        OPENFHE_THROW("Polynomial not in Format::COEFFICIENT representation");
+        CIPHER_THROW("Polynomial not in Format::COEFFICIENT representation");
     Field2n result(*this);
     size_t i = this->std::vector<std::complex<double>>::size() - 1;
     auto tmp = std::complex<double>(-1., 0.) * result[i];
@@ -191,11 +191,11 @@ Field2n Field2n::ShiftRight() {
 }
 
 // Performs an automorphism transform operation and returns the result.
-Field2n Field2n::AutomorphismTransform(size_t i) const {
+Field2n Field2n::automorphism_transform(size_t i) const {
     if (format != Format::EVALUATION)
-        OPENFHE_THROW("Field2n Automorphism is only implemented for Format::EVALUATION format");
+        CIPHER_THROW("Field2n Automorphism is only implemented for Format::EVALUATION format");
     if (i % 2 == 0)
-        OPENFHE_THROW("automorphism index should be odd\n");
+        CIPHER_THROW("automorphism index should be odd\n");
     Field2n result(*this);
     size_t m = this->std::vector<std::complex<double>>::size() * 2;
     for (size_t j = 1; j < m; j += 2) {
@@ -207,10 +207,10 @@ Field2n Field2n::AutomorphismTransform(size_t i) const {
 
 // Transpose operation defined in section VI.B4 of
 // https://eprint.iacr.org/2017/844.pdf
-Field2n Field2n::Transpose() const {
+Field2n Field2n::transposed() const {
     size_t size = this->std::vector<std::complex<double>>::size();
     if (format != Format::COEFFICIENT)
-        return AutomorphismTransform(size * 2 - 1);
+        return automorphism_transform(size * 2 - 1);
     constexpr auto negone = std::complex<double>(-1., 0.);
     Field2n transpose(size, Format::COEFFICIENT, true);
     transpose[0] = this->std::vector<std::complex<double>>::operator[](0);
@@ -220,9 +220,9 @@ Field2n Field2n::Transpose() const {
 }
 
 // Function for extracting odd factors of the field element
-Field2n Field2n::ExtractOdd() const {
+Field2n Field2n::extract_odd() const {
     if (format != Format::COEFFICIENT)
-        OPENFHE_THROW("Polynomial not in Format::COEFFICIENT representation");
+        CIPHER_THROW("Polynomial not in Format::COEFFICIENT representation");
     size_t size = this->std::vector<std::complex<double>>::size();
     Field2n odds(size / 2, Format::COEFFICIENT, true);
     for (size_t i = 0; i < odds.size(); ++i)
@@ -231,9 +231,9 @@ Field2n Field2n::ExtractOdd() const {
 }
 
 // Function for extracting even factors of the field element
-Field2n Field2n::ExtractEven() const {
+Field2n Field2n::extract_even() const {
     if (format != Format::COEFFICIENT)
-        OPENFHE_THROW("Polynomial not in Format::COEFFICIENT representation");
+        CIPHER_THROW("Polynomial not in Format::COEFFICIENT representation");
     size_t size = this->std::vector<std::complex<double>>::size();
     Field2n evens(size / 2, Format::COEFFICIENT, true);
     for (size_t i = 0; i < evens.size(); ++i)
@@ -243,36 +243,36 @@ Field2n Field2n::ExtractEven() const {
 
 // Permutation operation defined in Algorithm 4 of
 // https://eprint.iacr.org/2017/844.pdf
-Field2n Field2n::Permute() const {
+Field2n Field2n::permute() const {
     if (format != Format::COEFFICIENT)
-        OPENFHE_THROW("Polynomial not in Format::COEFFICIENT representation");
+        CIPHER_THROW("Polynomial not in Format::COEFFICIENT representation");
     size_t size{this->std::vector<std::complex<double>>::size()};
     Field2n permuted(size, Format::COEFFICIENT, true);
-    size_t evenPtr{0}, oddPtr{size / 2};
+    size_t even_ptr{0}, odd_ptr{size / 2};
     for (size_t i = 0; i < size;) {
-        permuted[evenPtr++] = this->std::vector<std::complex<double>>::operator[](i++);
-        permuted[oddPtr++] = this->std::vector<std::complex<double>>::operator[](i++);
+        permuted[even_ptr++] = this->std::vector<std::complex<double>>::operator[](i++);
+        permuted[odd_ptr++] = this->std::vector<std::complex<double>>::operator[](i++);
     }
     return permuted;
 }
 
 // Inverse operation for permutation operation defined in
 // Algorithm 4 of https://eprint.iacr.org/2017/844.pdf
-Field2n Field2n::InversePermute() const {
+Field2n Field2n::inverse_permute() const {
     if (format != Format::COEFFICIENT)
-        OPENFHE_THROW("Polynomial not in Format::COEFFICIENT representation");
+        CIPHER_THROW("Polynomial not in Format::COEFFICIENT representation");
     size_t size{this->std::vector<std::complex<double>>::size()};
     Field2n invpermuted(size, Format::COEFFICIENT, true);
-    size_t evenPtr{0}, oddPtr{size / 2};
+    size_t even_ptr{0}, odd_ptr{size / 2};
     for (size_t i = 0; i < size;) {
-        invpermuted[i++] = this->std::vector<std::complex<double>>::operator[](evenPtr++);
-        invpermuted[i++] = this->std::vector<std::complex<double>>::operator[](oddPtr++);
+        invpermuted[i++] = this->std::vector<std::complex<double>>::operator[](even_ptr++);
+        invpermuted[i++] = this->std::vector<std::complex<double>>::operator[](odd_ptr++);
     }
     return invpermuted;
 }
 
 // Operation for scalar multiplication
-Field2n Field2n::ScalarMult(double d) {
+Field2n Field2n::scalar_mult(double d) {
     size_t size{this->std::vector<std::complex<double>>::size()};
     Field2n scaled(size, format, true);
     for (size_t i = 0; i < size; ++i)
@@ -281,14 +281,14 @@ Field2n Field2n::ScalarMult(double d) {
 }
 
 // Method for switching format of the field elements
-void Field2n::SwitchFormat() {
-    auto r = (format == Format::COEFFICIENT) ? DiscreteFourierTransform::ForwardTransform(*this) :
-                                               DiscreteFourierTransform::InverseTransform(*this);
+void Field2n::switch_format() {
+    auto r = (format == Format::COEFFICIENT) ? DiscreteFourierTransform::forward_transform(*this) :
+                                               DiscreteFourierTransform::inverse_transform(*this);
     format = (format == Format::COEFFICIENT) ? Format::EVALUATION : Format::COEFFICIENT;
     for (size_t i = 0; i < r.size(); ++i)
         this->std::vector<std::complex<double>>::operator[](i) = r[i];
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_RING_FIELD2N_IMPL_H_

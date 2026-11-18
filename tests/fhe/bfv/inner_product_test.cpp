@@ -38,18 +38,18 @@
 #include "cipher/fhe/bfv/context_gen.h"
 #include "cipher/util/debug.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 namespace {
 class UTBFVRNS_INNERPRODUCT : public ::testing::Test {
   protected:
     void SetUp() {
-        OpenFHEParallelControls.UnitTestStart();
+        cipher_parallel_controls.unit_test_start();
     }
 
     void TearDown() {
-        CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
-        OpenFHEParallelControls.UnitTestStop();
+        ContextFactory<RnsPoly>::release_all_contexts();
+        cipher_parallel_controls.unit_test_stop();
     }
 
   public:
@@ -60,7 +60,7 @@ enum TEST_ESTIMATED_RESULT { SUCCESS, FAILURE };
 }  // anonymous namespace
 
 template <class T>
-T plainInnerProduct(std::vector<T> vec) {
+T plain_inner_product(std::vector<T> vec) {
     T res = 0.0;
     for (auto& el : vec) {
         res += (el * el);
@@ -72,41 +72,41 @@ T plainInnerProduct(std::vector<T> vec) {
 
 // declaration for Automorphism Test on BFVrns scheme with polynomial operation
 // in power of 2 cyclotomics.
-int64_t BFVrnsInnerProduct(const std::vector<int64_t> testVec) {
-    CCParams<CryptoContextBFVRNS> parameters;
-    parameters.SetPlaintextModulus(65537);
-    parameters.SetMultiplicativeDepth(20);
-    parameters.SetSecurityLevel(lbcrypto::HEStd_NotSet);
-    parameters.SetRingDim(1 << 7);
-    uint32_t batchSize = parameters.GetRingDim() / 2;
+int64_t bfv_rns_inner_product(const std::vector<int64_t> test_vec) {
+    ContextParams<BfvRnsContext> parameters;
+    parameters.set_plaintext_modulus(65537);
+    parameters.set_multiplicative_depth(20);
+    parameters.set_security_level(cipher::HEStd_NotSet);
+    parameters.set_ring_dim(1 << 7);
+    uint32_t batch_size = parameters.get_ring_dim() / 2;
 
     /////////////////////////////////////////////////////////
     // Set crypto params and create context
     /////////////////////////////////////////////////////////
-    lbcrypto::CryptoContext<lbcrypto::DCRTPoly> cc;
-    cc = GenCryptoContext(parameters);
+    cipher::CryptoContext<cipher::RnsPoly> cc;
+    cc = make_crypto_context(parameters);
 
     // Enable the features that you wish to use.
-    cc->Enable(PKE);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
+    cc->enable(PKE);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
 
-    KeyPair<DCRTPoly> keys = cc->KeyGen();
-    cc->EvalMultKeyGen(keys.secretKey);
-    cc->EvalSumKeyGen(keys.secretKey);
+    KeyPair<RnsPoly> keys = cc->key_gen();
+    cc->eval_mult_key_gen(keys.secret_key);
+    cc->eval_sum_key_gen(keys.secret_key);
 
-    Plaintext plaintext1 = cc->MakePackedPlaintext(testVec);
-    auto ct1 = cc->Encrypt(keys.publicKey, plaintext1);
-    auto finalResult = cc->EvalInnerProduct(ct1, ct1, batchSize);
-    lbcrypto::Plaintext res;
-    cc->Decrypt(keys.secretKey, finalResult, &res);
-    return res->GetPackedValue()[0];
+    Plaintext plaintext1 = cc->make_packed_plaintext(test_vec);
+    auto ct1 = cc->encrypt(keys.public_key, plaintext1);
+    auto final_result = cc->eval_inner_product(ct1, ct1, batch_size);
+    cipher::Plaintext res;
+    cc->decrypt(keys.secret_key, final_result, &res);
+    return res->get_packed_value()[0];
 }
 
 TEST_F(UTBFVRNS_INNERPRODUCT, Test_BFVrns_INNERPRODUCT) {
-    const std::vector<int64_t> testVec{1, 2, 3, 4, 5};
-    auto innerProductHE = BFVrnsInnerProduct(testVec);
+    const std::vector<int64_t> test_vec{1, 2, 3, 4, 5};
+    auto inner_product_he = bfv_rns_inner_product(test_vec);
 
-    int64_t expectedResult = plainInnerProduct(testVec);
-    EXPECT_EQ(innerProductHE, expectedResult);
+    int64_t expected_result = plain_inner_product(test_vec);
+    EXPECT_EQ(inner_product_he, expected_result);
 }

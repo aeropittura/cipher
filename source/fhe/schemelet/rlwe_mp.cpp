@@ -43,8 +43,8 @@
 #include "cipher/fhe/rns/crypto_params.h"
 #include "cipher/util/utilities.h"
 
-template <typename typeT>
-static void BitReverse(typeT& vals) {
+template <typename TypeT>
+static void BitReverse(TypeT& vals) {
     uint32_t size = vals.size();
     for (uint32_t i = 1, j = 0; i < size; ++i) {
         uint32_t bit = size >> 1;
@@ -59,8 +59,8 @@ static void BitReverse(typeT& vals) {
     }
 }
 
-template <typename typeT>
-static void BitReverseTwoHalves(typeT& vals) {
+template <typename TypeT>
+static void bit_reverse_two_halves(TypeT& vals) {
     uint32_t size = vals.size() / 2;
     for (uint32_t i = 1, j = 0; i < size; ++i) {
         uint32_t bit = size >> 1;
@@ -87,171 +87,171 @@ static void BitReverseTwoHalves(typeT& vals) {
     }
 }
 
-namespace lbcrypto {
+namespace cipher {
 
 namespace {
 
-static std::vector<DCRTPoly> ModSwitchUp(const std::vector<Poly>& input, const BigInteger& Qfrom, const BigInteger& Qto,
-                                         const std::shared_ptr<ILDCRTParams<DCRTPoly::Integer>>& ep) {
-    Poly bPoly = input[0];
-    bPoly.SwitchModulus(Qto, 1, 0, 0);
+static std::vector<RnsPoly> mod_switch_up(const std::vector<Poly>& input, const BigInteger& qfrom, const BigInteger& qto,
+                                         const std::shared_ptr<RnsParams<RnsPoly::Integer>>& ep) {
+    Poly b_poly = input[0];
+    b_poly.switch_modulus(qto, 1, 0, 0);
 
-    Poly aPoly = input[1];
-    aPoly.SwitchModulus(Qto, 1, 0, 0);
+    Poly a_poly = input[1];
+    a_poly.switch_modulus(qto, 1, 0, 0);
 
-    std::vector<DCRTPoly> output{DCRTPoly(bPoly.MultiplyAndRound(Qto, Qfrom), ep),
-                                 DCRTPoly(aPoly.MultiplyAndRound(Qto, Qfrom), ep)};
-    output[0].SetFormat(Format::EVALUATION);
-    output[1].SetFormat(Format::EVALUATION);
+    std::vector<RnsPoly> output{RnsPoly(b_poly.multiply_and_round(qto, qfrom), ep),
+                                 RnsPoly(a_poly.multiply_and_round(qto, qfrom), ep)};
+    output[0].set_format(Format::EVALUATION);
+    output[1].set_format(Format::EVALUATION);
 
     return output;
 }
 
-static std::vector<DCRTPoly> ModSwitchDown(const std::vector<Poly>& input, const BigInteger& Qfrom,
-                                           const BigInteger& Qto,
-                                           const std::shared_ptr<ILDCRTParams<DCRTPoly::Integer>>& ep) {
-    Poly bPoly = input[0].MultiplyAndRound(Qto, Qfrom);
-    bPoly.SwitchModulus(Qto, 1, 0, 0);
+static std::vector<RnsPoly> mod_switch_down(const std::vector<Poly>& input, const BigInteger& qfrom,
+                                           const BigInteger& qto,
+                                           const std::shared_ptr<RnsParams<RnsPoly::Integer>>& ep) {
+    Poly b_poly = input[0].multiply_and_round(qto, qfrom);
+    b_poly.switch_modulus(qto, 1, 0, 0);
 
-    Poly aPoly = input[1].MultiplyAndRound(Qto, Qfrom);
-    aPoly.SwitchModulus(Qto, 1, 0, 0);
+    Poly a_poly = input[1].multiply_and_round(qto, qfrom);
+    a_poly.switch_modulus(qto, 1, 0, 0);
 
-    std::vector<DCRTPoly> output{DCRTPoly(bPoly, ep), DCRTPoly(aPoly, ep)};
-    output[0].SetFormat(Format::EVALUATION);
-    output[1].SetFormat(Format::EVALUATION);
+    std::vector<RnsPoly> output{RnsPoly(b_poly, ep), RnsPoly(a_poly, ep)};
+    output[0].set_format(Format::EVALUATION);
+    output[1].set_format(Format::EVALUATION);
 
     return output;
 }
 
 }  // namespace
 
-std::shared_ptr<ILDCRTParams<DCRTPoly::Integer>> SchemeletRLWEMP::GetElementParams(
-        const PrivateKey<DCRTPoly>& privateKey, uint32_t level) {
-    const auto cryptoParams =
-            std::dynamic_pointer_cast<CryptoParametersRLWE<DCRTPoly>>(privateKey->GetCryptoParameters());
+std::shared_ptr<RnsParams<RnsPoly::Integer>> SchemeletRlweMp::get_element_params(
+        const PrivateKey<RnsPoly>& private_key, uint32_t level) {
+    const auto crypto_params =
+            std::dynamic_pointer_cast<RlweCryptoParams<RnsPoly>>(private_key->get_crypto_parameters());
 
-    const auto cryptoParamsRNS = std::dynamic_pointer_cast<CryptoParametersRNS>(privateKey->GetCryptoParameters());
-    if (cryptoParamsRNS != nullptr) {
-        auto st = cryptoParamsRNS->GetScalingTechnique();
-        // in the COMPOSITESCALING* modes, every level consists of compositeDegree towers
+    const auto crypto_params_rns = std::dynamic_pointer_cast<RnsCryptoParams>(private_key->get_crypto_parameters());
+    if (crypto_params_rns != nullptr) {
+        auto st = crypto_params_rns->get_scaling_technique();
+        // in the COMPOSITESCALING* modes, every level consists of composite_degree towers
         if (st == COMPOSITESCALINGAUTO || st == COMPOSITESCALINGMANUAL)
-            level *= cryptoParamsRNS->GetCompositeDegree();
+            level *= crypto_params_rns->get_composite_degree();
         else if (st == FLEXIBLEAUTOEXT)
             ++level;
     }
 
-    auto ep = std::make_shared<ILDCRTParams<DCRTPoly::Integer>>(*(cryptoParams->GetElementParams()));
+    auto ep = std::make_shared<RnsParams<RnsPoly::Integer>>(*(crypto_params->get_element_params()));
     for (uint32_t i = 0; i < level; ++i)
-        ep->PopLastParam();
+        ep->pop_last_param();
 
     return ep;
 }
 
-std::vector<Poly> SchemeletRLWEMP::EncryptCoeff(std::vector<int64_t> input, const BigInteger& Q, const BigInteger& p,
-                                                const PrivateKey<DCRTPoly>& privateKey,
-                                                const std::shared_ptr<ILDCRTParams<DCRTPoly::Integer>>& ep,
-                                                bool bitReverse) {
-    const auto cryptoParams =
-            std::dynamic_pointer_cast<CryptoParametersRLWE<DCRTPoly>>(privateKey->GetCryptoParameters());
+std::vector<Poly> SchemeletRlweMp::encrypt_coeff(std::vector<int64_t> input, const BigInteger& Q, const BigInteger& p,
+                                                const PrivateKey<RnsPoly>& private_key,
+                                                const std::shared_ptr<RnsParams<RnsPoly::Integer>>& ep,
+                                                bool bit_reverse) {
+    const auto crypto_params =
+            std::dynamic_pointer_cast<RlweCryptoParams<RnsPoly>>(private_key->get_crypto_parameters());
 
     DugType dug;
-    DCRTPoly a(dug, ep, Format::EVALUATION);
-    DCRTPoly e(cryptoParams->GetDiscreteGaussianGenerator(), ep, Format::EVALUATION);
+    RnsPoly a(dug, ep, Format::EVALUATION);
+    RnsPoly e(crypto_params->get_discrete_gaussian_generator(), ep, Format::EVALUATION);
 
-    auto scopy = privateKey->GetPrivateElement().CloneTowers(0, ep->GetParams().size() - 1);
+    auto scopy = private_key->get_private_element().clone_towers(0, ep->get_params().size() - 1);
 
-    DCRTPoly b = e - a * scopy;  // encryption of 0 using Q'
+    RnsPoly b = e - a * scopy;  // encryption of 0 using Q'
 
-    a.SetFormat(Format::COEFFICIENT);
-    auto aPoly = a.CRTInterpolate();
-    b.SetFormat(Format::COEFFICIENT);
-    auto bPoly = b.CRTInterpolate();
+    a.set_format(Format::COEFFICIENT);
+    auto a_poly = a.crt_interpolate();
+    b.set_format(Format::COEFFICIENT);
+    auto b_poly = b.crt_interpolate();
 
-    BigInteger bigQPrime = b.GetModulus();
+    BigInteger big_q_prime = b.get_modulus();
 
     // Do modulus switching from Q' to Q
-    if (Q < bigQPrime) {
-        bPoly = bPoly.MultiplyAndRound(Q, bigQPrime);
-        bPoly.SwitchModulus(Q, 1, 0, 0);
+    if (Q < big_q_prime) {
+        b_poly = b_poly.multiply_and_round(Q, big_q_prime);
+        b_poly.switch_modulus(Q, 1, 0, 0);
 
-        aPoly = aPoly.MultiplyAndRound(Q, bigQPrime);
-        aPoly.SwitchModulus(Q, 1, 0, 0);
+        a_poly = a_poly.multiply_and_round(Q, big_q_prime);
+        a_poly.switch_modulus(Q, 1, 0, 0);
     } else {
-        bPoly.SwitchModulus(Q, 1, 0, 0);
-        bPoly = bPoly.MultiplyAndRound(Q, bigQPrime);
+        b_poly.switch_modulus(Q, 1, 0, 0);
+        b_poly = b_poly.multiply_and_round(Q, big_q_prime);
 
-        aPoly.SwitchModulus(Q, 1, 0, 0);
-        aPoly = aPoly.MultiplyAndRound(Q, bigQPrime);
+        a_poly.switch_modulus(Q, 1, 0, 0);
+        a_poly = a_poly.multiply_and_round(Q, big_q_prime);
     }
 
-    auto mPoly = bPoly;
-    mPoly.SetValuesToZero();
+    auto m_poly = b_poly;
+    m_poly.set_values_to_zero();
 
     auto delta = Q / p;
-    uint32_t gap = mPoly.GetLength() / (2.0 * input.size());
+    uint32_t gap = m_poly.get_length() / (2.0 * input.size());
 
     // Input here is not yet padded up to the ring dimension
-    if (bitReverse) {
+    if (bit_reverse) {
         if (gap == 0) {
-            BitReverseTwoHalves(input);
+            bit_reverse_two_halves(input);
         } else {
             BitReverse(input);
         }
     }
 
     gap = (gap == 0) ? 1 : gap;
-    const uint32_t limit = input.size() < mPoly.GetLength() ? input.size() : mPoly.GetLength();
+    const uint32_t limit = input.size() < m_poly.get_length() ? input.size() : m_poly.get_length();
     for (uint32_t i = 0; i < limit; ++i) {
-        auto entry = SignedToResidue(input[i], mPoly.GetModulus());
-        mPoly[i * gap] = delta * entry;
+        auto entry = signed_to_residue(input[i], m_poly.get_modulus());
+        m_poly[i * gap] = delta * entry;
         if (gap > 1) {
-            mPoly[(i + limit) * gap] = delta * entry;
+            m_poly[(i + limit) * gap] = delta * entry;
         }
     }
 
-    return {bPoly += mPoly, aPoly};
+    return {b_poly += m_poly, a_poly};
 }
 
-std::vector<int64_t> SchemeletRLWEMP::DecryptCoeff(const std::vector<Poly>& input, const BigInteger& Q,
-                                                   const BigInteger& p, const PrivateKey<DCRTPoly>& privateKey,
-                                                   const std::shared_ptr<ILDCRTParams<DCRTPoly::Integer>>& ep,
-                                                   uint32_t numSlots, uint32_t length, bool bitReverse) {
-    const auto& bigQPrime = ep->GetModulus();
+std::vector<int64_t> SchemeletRlweMp::decrypt_coeff(const std::vector<Poly>& input, const BigInteger& Q,
+                                                   const BigInteger& p, const PrivateKey<RnsPoly>& private_key,
+                                                   const std::shared_ptr<RnsParams<RnsPoly::Integer>>& ep,
+                                                   uint32_t num_slots, uint32_t length, bool bit_reverse) {
+    const auto& big_q_prime = ep->get_modulus();
 
-    auto ba = (Q < bigQPrime) ? ModSwitchUp(input, Q, bigQPrime, ep) : ModSwitchDown(input, Q, bigQPrime, ep);
+    auto ba = (Q < big_q_prime) ? mod_switch_up(input, Q, big_q_prime, ep) : mod_switch_down(input, Q, big_q_prime, ep);
 
-    auto scopy = privateKey->GetPrivateElement().CloneTowers(0, ep->GetParams().size() - 1);
+    auto scopy = private_key->get_private_element().clone_towers(0, ep->get_params().size() - 1);
 
     auto m = ba[0] + ba[1] * scopy;
 
-    m.SetFormat(Format::COEFFICIENT);
+    m.set_format(Format::COEFFICIENT);
 
-    auto mPoly = m.CRTInterpolate();
-    uint32_t gap = mPoly.GetLength() / (2 * numSlots);
+    auto m_poly = m.crt_interpolate();
+    uint32_t gap = m_poly.get_length() / (2 * num_slots);
 
-    if (Q < bigQPrime) {
-        mPoly = mPoly.MultiplyAndRound(Q, bigQPrime);
-        mPoly.SwitchModulus(Q, 1, 0, 0);
+    if (Q < big_q_prime) {
+        m_poly = m_poly.multiply_and_round(Q, big_q_prime);
+        m_poly.switch_modulus(Q, 1, 0, 0);
     } else {
-        mPoly.SwitchModulus(Q, 1, 0, 0);
-        mPoly = mPoly.MultiplyAndRound(Q, bigQPrime);
+        m_poly.switch_modulus(Q, 1, 0, 0);
+        m_poly = m_poly.multiply_and_round(Q, big_q_prime);
     }
 
-    mPoly = mPoly.MultiplyAndRound(p, Q);
-    mPoly.SwitchModulus(p, 1, 0, 0);
+    m_poly = m_poly.multiply_and_round(p, Q);
+    m_poly.switch_modulus(p, 1, 0, 0);
 
     BigInteger half = p >> 1;
 
-    length = (length == 0) ? numSlots : length;
+    length = (length == 0) ? num_slots : length;
 
     std::vector<int64_t> output(length);
     for (uint32_t i = 0, idx = 0; i < length; ++i, idx += gap)
         output[i] =
-                (mPoly[idx] > half) ? -(p - mPoly[idx]).ConvertToInt<int64_t>() : mPoly[idx].ConvertToInt<int64_t>();
+                (m_poly[idx] > half) ? -(p - m_poly[idx]).convert_to_int<int64_t>() : m_poly[idx].convert_to_int<int64_t>();
 
-    if (bitReverse) {
-        if (numSlots < length) {
-            BitReverseTwoHalves(output);
+    if (bit_reverse) {
+        if (num_slots < length) {
+            bit_reverse_two_halves(output);
         } else {
             BitReverse(output);
         }
@@ -260,78 +260,78 @@ std::vector<int64_t> SchemeletRLWEMP::DecryptCoeff(const std::vector<Poly>& inpu
     return output;
 }
 
-void SchemeletRLWEMP::ModSwitch(std::vector<Poly>& input, const BigInteger& Q1, const BigInteger& Q2) {
-    input[0] = input[0].MultiplyAndRound(Q1, Q2);
-    input[0].SwitchModulus(Q1, 1, 0, 0);
-    input[1] = input[1].MultiplyAndRound(Q1, Q2);
-    input[1].SwitchModulus(Q1, 1, 0, 0);
+void SchemeletRlweMp::mod_switch(std::vector<Poly>& input, const BigInteger& Q1, const BigInteger& Q2) {
+    input[0] = input[0].multiply_and_round(Q1, Q2);
+    input[0].switch_modulus(Q1, 1, 0, 0);
+    input[1] = input[1].multiply_and_round(Q1, Q2);
+    input[1].switch_modulus(Q1, 1, 0, 0);
 }
 
-Ciphertext<DCRTPoly> SchemeletRLWEMP::ConvertRLWEToCKKS(const CryptoContextImpl<DCRTPoly>& cc,
+Ciphertext<RnsPoly> SchemeletRlweMp::convert_rlwe_to_ckks(const CryptoContextImpl<RnsPoly>& cc,
                                                         const std::vector<Poly>& coeffs,
-                                                        const PublicKey<DCRTPoly>& pubKey, const BigInteger& Bigq,
+                                                        const PublicKey<RnsPoly>& pub_key, const BigInteger& bigq,
                                                         uint32_t slots, uint32_t level) {
-    const auto cryptoParamsRNS = std::dynamic_pointer_cast<CryptoParametersRNS>(cc.GetCryptoParameters());
-    if (cryptoParamsRNS != nullptr) {
-        auto st = cryptoParamsRNS->GetScalingTechnique();
-        // in the COMPOSITESCALING* modes, every level consists of compositeDegree towers
+    const auto crypto_params_rns = std::dynamic_pointer_cast<RnsCryptoParams>(cc.get_crypto_parameters());
+    if (crypto_params_rns != nullptr) {
+        auto st = crypto_params_rns->get_scaling_technique();
+        // in the COMPOSITESCALING* modes, every level consists of composite_degree towers
         if (st == COMPOSITESCALINGAUTO || st == COMPOSITESCALINGMANUAL)
-            level *= cryptoParamsRNS->GetCompositeDegree();
+            level *= crypto_params_rns->get_composite_degree();
         else if (st == FLEXIBLEAUTOEXT)
             ++level;
     }
 
     std::vector<std::complex<double>> y(1);
-    auto ptxt = cc.MakeCKKSPackedPlaintext(y, 1, level);
-    ptxt->SetLength(slots);
+    auto ptxt = cc.make_ckks_packed_plaintext(y, 1, level);
+    ptxt->set_length(slots);
 
-    auto ctxt = cc.Encrypt(pubKey, ptxt);
+    auto ctxt = cc.encrypt(pub_key, ptxt);
 
-    auto ep = ptxt->GetElement<DCRTPoly>().GetParams();
+    auto ep = ptxt->get_element<RnsPoly>().get_params();
 
-    auto& qPrimeCKKS = ep->GetModulus();
+    auto& q_prime_ckks = ep->get_modulus();
 
-    auto elementsCKKS = (qPrimeCKKS > Bigq) ? ModSwitchUp(coeffs, Bigq, qPrimeCKKS, ep) :
-                                              ModSwitchDown(coeffs, Bigq, qPrimeCKKS, ep);
-    ctxt->SetElements(elementsCKKS);
+    auto elements_ckks = (q_prime_ckks > bigq) ? mod_switch_up(coeffs, bigq, q_prime_ckks, ep) :
+                                              mod_switch_down(coeffs, bigq, q_prime_ckks, ep);
+    ctxt->set_elements(elements_ckks);
     return ctxt;
 }
 
-std::vector<Poly> SchemeletRLWEMP::ConvertCKKSToRLWE(ConstCiphertext<DCRTPoly>& ctxt, const BigInteger& Q) {
-    auto b = ctxt->GetElements()[0];
-    b.SetFormat(Format::COEFFICIENT);
-    auto bPoly = b.CRTInterpolate();
+std::vector<Poly> SchemeletRlweMp::convert_ckks_to_rlwe(ConstCiphertext<RnsPoly>& ctxt, const BigInteger& Q) {
+    auto b = ctxt->get_elements()[0];
+    b.set_format(Format::COEFFICIENT);
+    auto b_poly = b.crt_interpolate();
 
-    auto a = ctxt->GetElements()[1];
-    a.SetFormat(Format::COEFFICIENT);
-    auto aPoly = a.CRTInterpolate();
+    auto a = ctxt->get_elements()[1];
+    a.set_format(Format::COEFFICIENT);
+    auto a_poly = a.crt_interpolate();
 
-    BigInteger QPrime = ctxt->GetElements()[0].GetModulus();
-    if (Q < QPrime) {
-        bPoly = bPoly.MultiplyAndRound(Q, QPrime);
-        bPoly.SwitchModulus(Q, 1, 0, 0);
+    BigInteger q_prime = ctxt->get_elements()[0].get_modulus();
+    if (Q < q_prime) {
+        b_poly = b_poly.multiply_and_round(Q, q_prime);
+        b_poly.switch_modulus(Q, 1, 0, 0);
 
-        aPoly = aPoly.MultiplyAndRound(Q, QPrime);
-        aPoly.SwitchModulus(Q, 1, 0, 0);
+        a_poly = a_poly.multiply_and_round(Q, q_prime);
+        a_poly.switch_modulus(Q, 1, 0, 0);
     } else {
-        bPoly.SwitchModulus(Q, 1, 0, 0);
-        bPoly = bPoly.MultiplyAndRound(Q, QPrime);
+        b_poly.switch_modulus(Q, 1, 0, 0);
+        b_poly = b_poly.multiply_and_round(Q, q_prime);
 
-        aPoly.SwitchModulus(Q, 1, 0, 0);
-        aPoly = aPoly.MultiplyAndRound(Q, QPrime);
+        a_poly.switch_modulus(Q, 1, 0, 0);
+        a_poly = a_poly.multiply_and_round(Q, q_prime);
     }
-    return {bPoly, aPoly};
+    return {b_poly, a_poly};
 }
 
-BigInteger SchemeletRLWEMP::GetQPrime(const PublicKey<DCRTPoly>& pubKey, uint32_t lvls) {
-    auto& params = pubKey->GetPublicElements()[0].GetParams()->GetParams();
+BigInteger SchemeletRlweMp::get_q_prime(const PublicKey<RnsPoly>& pub_key, uint32_t lvls) {
+    auto& params = pub_key->get_public_elements()[0].get_params()->get_params();
     uint32_t cnt = 0;
 
-    BigInteger QPrime = params[0]->GetModulus();
+    BigInteger q_prime = params[0]->get_modulus();
     while (lvls-- > 0)
-        QPrime *= params[++cnt]->GetModulus();
+        q_prime *= params[++cnt]->get_modulus();
 
-    return QPrime;
+    return q_prime;
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher

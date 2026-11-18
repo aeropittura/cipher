@@ -40,12 +40,12 @@
 
 #include "cipher/boolean/context.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 int main() {
     // Sample Program: Step 1: Set CryptoContext
 
-    auto cc = BinFHEContext();
+    auto cc = BooleanContext();
 
     // Set the ciphertext modulus to be 1 << 17
     // Note that normally we do not use this way to obtain the input ciphertext.
@@ -53,23 +53,23 @@ int main() {
     // modulus is already provided (e.g., by extracting from a CKKS ciphertext).
     // However, we do not provide such a step in this example.
     // Therefore, we use a brute force way to create a large LWE ciphertext.
-    uint32_t logQ = 17;
-    cc.GenerateBinFHEContext(STD128, false, logQ, 0, GINX, false);
+    uint32_t log_q = 17;
+    cc.generate_boolean_context(STD128, false, log_q, 0, GINX, false);
 
-    uint32_t Q = 1 << logQ;
+    uint32_t Q = 1 << log_q;
 
     int q = 4096;                                               // q
-    int factor = 1 << int(logQ - std::log2(q));                 // Q/q
-    int p = cc.GetMaxPlaintextSpace().ConvertToInt() * factor;  // Obtain the maximum plaintext space
+    int factor = 1 << int(log_q - std::log2(q));                 // Q/q
+    int p = cc.get_max_plaintext_space().convert_to_int() * factor;  // Obtain the maximum plaintext space
 
     // Sample Program: Step 2: Key Generation
     // Generate the secret key
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
     std::cout << "Generating the bootstrapping keys..." << std::endl;
 
     // Generate the bootstrapping keys (refresh and switching keys)
-    cc.BTKeyGen(sk);
+    cc.bt_key_gen(sk);
 
     std::cout << "Completed the key generation." << std::endl;
 
@@ -77,13 +77,13 @@ int main() {
     // Note that we check for 8 different numbers
     for (int i = 0; i < 8; i++) {
         // We first encrypt with large Q
-        auto ct1 = cc.Encrypt(sk, p / 2 + i - 3, LARGE_DIM, p, Q);
+        auto ct1 = cc.encrypt(sk, p / 2 + i - 3, LARGE_DIM, p, Q);
 
         // Get the MSB
-        ct1 = cc.EvalSign(ct1);
+        ct1 = cc.eval_sign(ct1);
 
-        LWEPlaintext result;
-        cc.Decrypt(sk, ct1, &result, 2);
+        LwePlaintext result;
+        cc.decrypt(sk, ct1, &result, 2);
         std::cout << "Input: " << i << ". Expected sign: " << (i >= 3)
                   << ". "
                      "Evaluated Sign: "

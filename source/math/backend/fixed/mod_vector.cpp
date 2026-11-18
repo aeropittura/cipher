@@ -38,7 +38,7 @@
 #include <string>
 
 #include "cipher/config.h"
-#ifdef WITH_BE2
+#ifdef CIPHER_WITH_BE2
 
     #include "cipher/math/backend/fixed/mod_vector.h"
     #include "cipher/math/backend.h"
@@ -46,56 +46,56 @@
     #include "cipher/util/debug.h"
     #include "cipher/util/serializable.h"
 
-namespace bigintfxd {
+namespace fixed_int {
 
 template <class IntegerType>
 BigVectorFixedT<IntegerType>::BigVectorFixedT() {
-    this->m_length = 0;
-    this->m_modulus = 0;
-    m_data = nullptr;
+    this->length_ = 0;
+    this->modulus_ = 0;
+    data_ = nullptr;
 }
 
 template <class IntegerType>
 BigVectorFixedT<IntegerType>::BigVectorFixedT(uint32_t length, const IntegerType& modulus) {
-    this->m_length = length;
-    this->m_modulus = modulus;
-    this->m_data = new IntegerType[m_length]();
+    this->length_ = length;
+    this->modulus_ = modulus;
+    this->data_ = new IntegerType[length_]();
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType>::BigVectorFixedT(const BigVectorFixedT& bigVector) {
-    m_length = bigVector.m_length;
-    m_modulus = bigVector.m_modulus;
-    m_data = new IntegerType[m_length];
-    for (uint32_t i = 0; i < m_length; i++) {
-        m_data[i] = bigVector.m_data[i];
+BigVectorFixedT<IntegerType>::BigVectorFixedT(const BigVectorFixedT& big_vector) {
+    length_ = big_vector.length_;
+    modulus_ = big_vector.modulus_;
+    data_ = new IntegerType[length_];
+    for (uint32_t i = 0; i < length_; i++) {
+        data_[i] = big_vector.data_[i];
     }
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType>::BigVectorFixedT(BigVectorFixedT&& bigVector) {
-    if (this != &bigVector) {
-        m_data = bigVector.m_data;
-        m_length = bigVector.m_length;
-        m_modulus = bigVector.m_modulus;
-        bigVector.m_data = nullptr;
-        bigVector.m_length = 0;
-        bigVector.m_modulus = 0;
+BigVectorFixedT<IntegerType>::BigVectorFixedT(BigVectorFixedT&& big_vector) {
+    if (this != &big_vector) {
+        data_ = big_vector.data_;
+        length_ = big_vector.length_;
+        modulus_ = big_vector.modulus_;
+        big_vector.data_ = nullptr;
+        big_vector.length_ = 0;
+        big_vector.modulus_ = 0;
     }
 }
 
 template <class IntegerType>
 BigVectorFixedT<IntegerType>::BigVectorFixedT(uint32_t length, const IntegerType& modulus,
                                               std::initializer_list<std::string> rhs) {
-    this->m_length = length;
-    this->m_modulus = modulus;
-    this->m_data = new IntegerType[m_length]();
+    this->length_ = length;
+    this->modulus_ = modulus;
+    this->data_ = new IntegerType[length_]();
     uint32_t len = rhs.size();
-    for (uint32_t i = 0; i < m_length; i++) {  // this loops over each entry
+    for (uint32_t i = 0; i < length_; i++) {  // this loops over each entry
         if (i < len) {
-            m_data[i] = IntegerType(*(rhs.begin() + i)) % m_modulus;
+            data_[i] = IntegerType(*(rhs.begin() + i)) % modulus_;
         } else {
-            m_data[i] = 0;
+            data_[i] = 0;
         }
     }
 }
@@ -103,15 +103,15 @@ BigVectorFixedT<IntegerType>::BigVectorFixedT(uint32_t length, const IntegerType
 template <class IntegerType>
 BigVectorFixedT<IntegerType>::BigVectorFixedT(uint32_t length, const IntegerType& modulus,
                                               std::initializer_list<uint64_t> rhs) {
-    this->m_length = length;
-    this->m_modulus = modulus;
-    this->m_data = new IntegerType[m_length]();
+    this->length_ = length;
+    this->modulus_ = modulus;
+    this->data_ = new IntegerType[length_]();
     uint32_t len = rhs.size();
-    for (uint32_t i = 0; i < m_length; i++) {  // this loops over each entry
+    for (uint32_t i = 0; i < length_; i++) {  // this loops over each entry
         if (i < len) {
-            m_data[i] = IntegerType(*(rhs.begin() + i)) % m_modulus;
+            data_[i] = IntegerType(*(rhs.begin() + i)) % modulus_;
         } else {
-            m_data[i] = 0;
+            data_[i] = 0;
         }
     }
 }
@@ -119,20 +119,20 @@ BigVectorFixedT<IntegerType>::BigVectorFixedT(uint32_t length, const IntegerType
 template <class IntegerType>
 BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::operator=(const BigVectorFixedT& rhs) {
     if (this != &rhs) {
-        if (this->m_length == rhs.m_length) {
-            for (size_t i = 0; i < m_length; i++) {
-                this->m_data[i] = rhs.m_data[i];
+        if (this->length_ == rhs.length_) {
+            for (size_t i = 0; i < length_; i++) {
+                this->data_[i] = rhs.data_[i];
             }
         } else {
-            delete[] m_data;
-            m_length = rhs.m_length;
-            m_modulus = rhs.m_modulus;
-            m_data = new IntegerType[m_length];
-            for (size_t i = 0; i < m_length; i++) {
-                m_data[i] = rhs.m_data[i];
+            delete[] data_;
+            length_ = rhs.length_;
+            modulus_ = rhs.modulus_;
+            data_ = new IntegerType[length_];
+            for (size_t i = 0; i < length_; i++) {
+                data_[i] = rhs.data_[i];
             }
         }
-        this->m_modulus = rhs.m_modulus;
+        this->modulus_ = rhs.modulus_;
     }
     return *this;
 }
@@ -140,11 +140,11 @@ BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::operator=(const BigV
 template <class IntegerType>
 BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::operator=(BigVectorFixedT&& rhs) {
     if (this != &rhs) {
-        delete[] m_data;
-        m_data = rhs.m_data;
-        m_length = rhs.m_length;
-        m_modulus = rhs.m_modulus;
-        rhs.m_data = nullptr;
+        delete[] data_;
+        data_ = rhs.data_;
+        length_ = rhs.length_;
+        modulus_ = rhs.modulus_;
+        rhs.data_ = nullptr;
     }
     return *this;
 }
@@ -152,15 +152,15 @@ BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::operator=(BigVectorF
 template <class IntegerType>
 BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::operator=(std::initializer_list<std::string> rhs) {
     size_t len = rhs.size();
-    for (size_t i = 0; i < m_length; i++) {
+    for (size_t i = 0; i < length_; i++) {
         if (i < len) {
-            if (m_modulus != 0) {
-                m_data[i] = IntegerType(*(rhs.begin() + i)) % m_modulus;
+            if (modulus_ != 0) {
+                data_[i] = IntegerType(*(rhs.begin() + i)) % modulus_;
             } else {
-                m_data[i] = IntegerType(*(rhs.begin() + i));
+                data_[i] = IntegerType(*(rhs.begin() + i));
             }
         } else {
-            m_data[i] = 0;
+            data_[i] = 0;
         }
     }
     return *this;
@@ -169,15 +169,15 @@ BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::operator=(std::initi
 template <class IntegerType>
 BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::operator=(std::initializer_list<uint64_t> rhs) {
     size_t len = rhs.size();
-    for (size_t i = 0; i < m_length; i++) {
+    for (size_t i = 0; i < length_; i++) {
         if (i < len) {
-            if (m_modulus != 0) {
-                m_data[i] = IntegerType(*(rhs.begin() + i)) % m_modulus;
+            if (modulus_ != 0) {
+                data_[i] = IntegerType(*(rhs.begin() + i)) % modulus_;
             } else {
-                m_data[i] = IntegerType(*(rhs.begin() + i));
+                data_[i] = IntegerType(*(rhs.begin() + i));
             }
         } else {
-            m_data[i] = 0;
+            data_[i] = 0;
         }
     }
     return *this;
@@ -191,57 +191,57 @@ BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::operator=(std::initi
  * > om/2 i' = i-delta
  */
 template <class IntegerType>
-void BigVectorFixedT<IntegerType>::SwitchModulus(const IntegerType& newModulus) {
-    IntegerType oldModulus(this->m_modulus);
+void BigVectorFixedT<IntegerType>::switch_modulus(const IntegerType& new_modulus) {
+    IntegerType old_modulus(this->modulus_);
     IntegerType n;
-    IntegerType oldModulusByTwo(oldModulus >> 1);
-    IntegerType diff((oldModulus > newModulus) ? (oldModulus - newModulus) : (newModulus - oldModulus));
-    for (uint32_t i = 0; i < this->m_length; i++) {
+    IntegerType old_modulus_by_two(old_modulus >> 1);
+    IntegerType diff((old_modulus > new_modulus) ? (old_modulus - new_modulus) : (new_modulus - old_modulus));
+    for (uint32_t i = 0; i < this->length_; i++) {
         n = this->at(i);
-        if (oldModulus < newModulus) {
-            if (n > oldModulusByTwo) {
-                this->at(i) = n.ModAdd(diff, newModulus);
+        if (old_modulus < new_modulus) {
+            if (n > old_modulus_by_two) {
+                this->at(i) = n.mod_add(diff, new_modulus);
             } else {
-                this->at(i) = n.Mod(newModulus);
+                this->at(i) = n.mod(new_modulus);
             }
         } else {
-            if (n > oldModulusByTwo) {
-                this->at(i) = n.ModSub(diff, newModulus);
+            if (n > old_modulus_by_two) {
+                this->at(i) = n.mod_sub(diff, new_modulus);
             } else {
-                this->at(i) = n.Mod(newModulus);
+                this->at(i) = n.mod(new_modulus);
             }
         }
     }
-    m_modulus = newModulus;
+    modulus_ = new_modulus;
 }
 
 template <class IntegerType>
-void BigVectorFixedT<IntegerType>::LazySwitchModulus(const IntegerType& modulus) {
-    for (uint32_t i = 0; i < m_length; ++i)
-        this->m_data[i].ModEq(modulus);
-    m_modulus = modulus;
+void BigVectorFixedT<IntegerType>::lazy_switch_modulus(const IntegerType& modulus) {
+    for (uint32_t i = 0; i < length_; ++i)
+        this->data_[i].mod_eq(modulus);
+    modulus_ = modulus;
 }
 
 // MODULAR ARITHMETIC OPERATIONS
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::Mod(const IntegerType& modulus) const {
+BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::mod(const IntegerType& modulus) const {
     BigVectorFixedT ans(*this);
-    ans.ModEq(modulus);
+    ans.mod_eq(modulus);
     return ans;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::ModEq(const IntegerType& modulus) {
+BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::mod_eq(const IntegerType& modulus) {
     if (modulus == 2) {
-        return this->ModByTwoEq();
+        return this->mod_by_two_eq();
     } else {
-        IntegerType halfQ(m_modulus >> 1);
-        for (uint32_t i = 0; i < m_length; i++) {
-            if (this->m_data[i] > halfQ) {
-                this->m_data[i].ModSubEq(m_modulus, modulus);
+        IntegerType half_q(modulus_ >> 1);
+        for (uint32_t i = 0; i < length_; i++) {
+            if (this->data_[i] > half_q) {
+                this->data_[i].mod_sub_eq(modulus_, modulus);
             } else {
-                this->m_data[i].ModEq(modulus);
+                this->data_[i].mod_eq(modulus);
             }
         }
         return *this;
@@ -249,140 +249,100 @@ BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::ModEq(const IntegerT
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::ModAdd(const IntegerType& b) const {
+BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::mod_add(const IntegerType& b) const {
     BigVectorFixedT ans(*this);
-    ans.ModAddEq(b);
+    ans.mod_add_eq(b);
     return ans;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::ModAddEq(const IntegerType& b) {
-    IntegerType bb = b.Mod(this->m_modulus);
-    for (uint32_t i = 0; i < this->m_length; i++) {
-        this->m_data[i].ModAddFastEq(bb, this->m_modulus);
+BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::mod_add_eq(const IntegerType& b) {
+    IntegerType bb = b.mod(this->modulus_);
+    for (uint32_t i = 0; i < this->length_; i++) {
+        this->data_[i].mod_add_fast_eq(bb, this->modulus_);
     }
     return *this;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::ModAddAtIndex(uint32_t i, const IntegerType& b) const {
+BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::mod_add_at_index(uint32_t i, const IntegerType& b) const {
     BigVectorFixedT ans(*this);
-    ans.ModAddAtIndexEq(i, b);
+    ans.mod_add_at_index_eq(i, b);
     return ans;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::ModAddAtIndexEq(uint32_t i, const IntegerType& b) {
-    if (i > m_length - 1) {
-        OPENFHE_THROW("mubintvecfxd::ModAddAtIndex. Index is out of range. i = " + std::to_string(i));
+BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::mod_add_at_index_eq(uint32_t i, const IntegerType& b) {
+    if (i > length_ - 1) {
+        CIPHER_THROW("mubintvecfxd::ModAddAtIndex. Index is out of range. i = " + std::to_string(i));
     }
-    this->m_data[i].ModAddEq(b, this->m_modulus);
+    this->data_[i].mod_add_eq(b, this->modulus_);
     return *this;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::ModAdd(const BigVectorFixedT& b) const {
+BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::mod_add(const BigVectorFixedT& b) const {
     BigVectorFixedT ans(*this);
-    ans.ModAddEq(b);
+    ans.mod_add_eq(b);
     return ans;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::ModAddEq(const BigVectorFixedT& b) {
-    if ((this->m_length != b.m_length) || this->m_modulus != b.m_modulus) {
-        OPENFHE_THROW("ModAddEq called on BigVectorFixedT's with different parameters.");
+BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::mod_add_eq(const BigVectorFixedT& b) {
+    if ((this->length_ != b.length_) || this->modulus_ != b.modulus_) {
+        CIPHER_THROW("ModAddEq called on BigVectorFixedT's with different parameters.");
     }
-    for (uint32_t i = 0; i < this->m_length; i++) {
-        this->m_data[i].ModAddFastEq(b.m_data[i], this->m_modulus);
+    for (uint32_t i = 0; i < this->length_; i++) {
+        this->data_[i].mod_add_fast_eq(b.data_[i], this->modulus_);
     }
     return *this;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::ModAddNoCheckEq(const BigVectorFixedT& b) {
-    for (uint32_t i = 0; i < m_length; ++i)
-        m_data[i].ModAddFastEq(b.m_data[i], m_modulus);
+BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::mod_add_no_check_eq(const BigVectorFixedT& b) {
+    for (uint32_t i = 0; i < length_; ++i)
+        data_[i].mod_add_fast_eq(b.data_[i], modulus_);
     return *this;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::ModSub(const IntegerType& b) const {
+BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::mod_sub(const IntegerType& b) const {
     BigVectorFixedT ans(*this);
-    ans.ModSubEq(b);
+    ans.mod_sub_eq(b);
     return ans;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::ModSubEq(const IntegerType& b) {
-    IntegerType bb = b.Mod(this->m_modulus);
-    for (uint32_t i = 0; i < this->m_length; i++) {
-        this->m_data[i].ModSubFastEq(bb, this->m_modulus);
+BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::mod_sub_eq(const IntegerType& b) {
+    IntegerType bb = b.mod(this->modulus_);
+    for (uint32_t i = 0; i < this->length_; i++) {
+        this->data_[i].mod_sub_fast_eq(bb, this->modulus_);
     }
     return *this;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::ModSub(const BigVectorFixedT& b) const {
+BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::mod_sub(const BigVectorFixedT& b) const {
     BigVectorFixedT ans(*this);
-    ans.ModSubEq(b);
+    ans.mod_sub_eq(b);
     return ans;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::ModSubEq(const BigVectorFixedT& b) {
-    if ((this->m_length != b.m_length) || this->m_modulus != b.m_modulus) {
-        OPENFHE_THROW("ModSubEq called on BigVectorFixedT's with different parameters.");
+BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::mod_sub_eq(const BigVectorFixedT& b) {
+    if ((this->length_ != b.length_) || this->modulus_ != b.modulus_) {
+        CIPHER_THROW("ModSubEq called on BigVectorFixedT's with different parameters.");
     }
-    for (uint32_t i = 0; i < this->m_length; i++) {
-        this->m_data[i].ModSubFastEq(b.m_data[i], this->m_modulus);
-    }
-    return *this;
-}
-
-template <class IntegerType>
-BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::ModMul(const IntegerType& b) const {
-    BigVectorFixedT ans(*this);
-    ans.ModMulEq(b);
-    return ans;
-}
-
-/*
- Source: http://homes.esat.kuleuven.be/~fvercaut/papers/bar_mont.pdf
- @article{knezevicspeeding,
- title={Speeding Up Barrett and Montgomery Modular Multiplications},
- author={Knezevic, Miroslav and Vercauteren, Frederik and Verbauwhede, Ingrid}
- }
- We use the Generalized Barrett modular reduction algorithm described in
- Algorithm 2 of the Source. The algorithm was originally proposed in J.-F. Dhem.
- Modified version of the Barrett algorithm. Technical report, 1994 and described
- in more detail in the PhD thesis of the author published at
- http://users.belgacom.net/dhem/these/these_public.pdf (Section 2.2.4).
- We take \alpha equal to n + 3. So in our case, \mu = 2^(n + \alpha) = 2^(2*n +
- 3). Generally speaking, the value of \alpha should be \ge \gamma + 1, where
- \gamma + n is the number of digits in the dividend. We use the upper bound of
- dividend assuming that none of the dividends will be larger than 2^(2*n + 3).
-
- Potential improvements:
- Our implementation makes the modulo operation essentially equivalent to two
- multiplications. If sparse moduli are selected, it can be replaced with a
- single multiplication. The interleaved version of modular multiplication for
- this case is listed in Algorithm 6 of the source. This algorithm would most
- like give the biggest improvement but it sets constraints on moduli.
- */
-template <class IntegerType>
-BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::ModMulEq(const IntegerType& b) {
-    IntegerType bb = b.Mod(this->m_modulus);
-    IntegerType mu = this->m_modulus.ComputeMu();  // Precompute the Barrett mu parameter
-    for (uint32_t i = 0; i < this->m_length; i++) {
-        this->m_data[i].ModMulEq(bb, this->m_modulus, mu);
+    for (uint32_t i = 0; i < this->length_; i++) {
+        this->data_[i].mod_sub_fast_eq(b.data_[i], this->modulus_);
     }
     return *this;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::ModMul(const BigVectorFixedT& b) const {
+BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::mod_mul(const IntegerType& b) const {
     BigVectorFixedT ans(*this);
-    ans.ModMulEq(b);
+    ans.mod_mul_eq(b);
     return ans;
 }
 
@@ -410,79 +370,119 @@ BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::ModMul(const BigVecto
  like give the biggest improvement but it sets constraints on moduli.
  */
 template <class IntegerType>
-BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::ModMulEq(const BigVectorFixedT& b) {
-    if ((this->m_length != b.m_length) || this->m_modulus != b.m_modulus) {
-        OPENFHE_THROW("ModMulEq called on BigVectorFixedT's with different parameters.");
+BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::mod_mul_eq(const IntegerType& b) {
+    IntegerType bb = b.mod(this->modulus_);
+    IntegerType mu = this->modulus_.compute_mu();  // Precompute the Barrett mu parameter
+    for (uint32_t i = 0; i < this->length_; i++) {
+        this->data_[i].mod_mul_eq(bb, this->modulus_, mu);
     }
-    IntegerType mu = this->m_modulus.ComputeMu();
+    return *this;
+}
+
+template <class IntegerType>
+BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::mod_mul(const BigVectorFixedT& b) const {
+    BigVectorFixedT ans(*this);
+    ans.mod_mul_eq(b);
+    return ans;
+}
+
+/*
+ Source: http://homes.esat.kuleuven.be/~fvercaut/papers/bar_mont.pdf
+ @article{knezevicspeeding,
+ title={Speeding Up Barrett and Montgomery Modular Multiplications},
+ author={Knezevic, Miroslav and Vercauteren, Frederik and Verbauwhede, Ingrid}
+ }
+ We use the Generalized Barrett modular reduction algorithm described in
+ Algorithm 2 of the Source. The algorithm was originally proposed in J.-F. Dhem.
+ Modified version of the Barrett algorithm. Technical report, 1994 and described
+ in more detail in the PhD thesis of the author published at
+ http://users.belgacom.net/dhem/these/these_public.pdf (Section 2.2.4).
+ We take \alpha equal to n + 3. So in our case, \mu = 2^(n + \alpha) = 2^(2*n +
+ 3). Generally speaking, the value of \alpha should be \ge \gamma + 1, where
+ \gamma + n is the number of digits in the dividend. We use the upper bound of
+ dividend assuming that none of the dividends will be larger than 2^(2*n + 3).
+
+ Potential improvements:
+ Our implementation makes the modulo operation essentially equivalent to two
+ multiplications. If sparse moduli are selected, it can be replaced with a
+ single multiplication. The interleaved version of modular multiplication for
+ this case is listed in Algorithm 6 of the source. This algorithm would most
+ like give the biggest improvement but it sets constraints on moduli.
+ */
+template <class IntegerType>
+BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::mod_mul_eq(const BigVectorFixedT& b) {
+    if ((this->length_ != b.length_) || this->modulus_ != b.modulus_) {
+        CIPHER_THROW("ModMulEq called on BigVectorFixedT's with different parameters.");
+    }
+    IntegerType mu = this->modulus_.compute_mu();
     // Precompute the Barrett mu parameter
-    for (uint32_t i = 0; i < this->m_length; i++) {
-        this->m_data[i].ModMulEq(b.m_data[i], this->m_modulus, mu);
+    for (uint32_t i = 0; i < this->length_; i++) {
+        this->data_[i].mod_mul_eq(b.data_[i], this->modulus_, mu);
     }
     return *this;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::ModMulNoCheckEq(const BigVectorFixedT& b) {
-    auto mu{m_modulus.ComputeMu()};
-    for (uint32_t i = 0; i < m_length; ++i)
-        m_data[i].ModMulEq(b[i], m_modulus, mu);
+BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::mod_mul_no_check_eq(const BigVectorFixedT& b) {
+    auto mu{modulus_.compute_mu()};
+    for (uint32_t i = 0; i < length_; ++i)
+        data_[i].mod_mul_eq(b[i], modulus_, mu);
     return *this;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::ModExp(const IntegerType& b) const {
+BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::mod_exp(const IntegerType& b) const {
     BigVectorFixedT ans(*this);
-    ans.ModExpEq(b);
+    ans.mod_exp_eq(b);
     return ans;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::ModExpEq(const IntegerType& b) {
-    IntegerType bLocal(b);
-    for (uint32_t i = 0; i < this->m_length; i++) {
-        this->m_data[i].ModExpEq(bLocal, this->m_modulus);
+BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::mod_exp_eq(const IntegerType& b) {
+    IntegerType b_local(b);
+    for (uint32_t i = 0; i < this->length_; i++) {
+        this->data_[i].mod_exp_eq(b_local, this->modulus_);
     }
     return *this;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::ModInverse() const {
+BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::mod_inverse() const {
     BigVectorFixedT ans(*this);
-    ans.ModInverseEq();
+    ans.mod_inverse_eq();
     return ans;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::ModInverseEq() {
-    for (uint32_t i = 0; i < this->m_length; i++) {
-        this->m_data[i].ModInverseEq(this->m_modulus);
+BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::mod_inverse_eq() {
+    for (uint32_t i = 0; i < this->length_; i++) {
+        this->data_[i].mod_inverse_eq(this->modulus_);
     }
     return *this;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::ModByTwo() const {
+BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::mod_by_two() const {
     BigVectorFixedT ans(*this);
-    ans.ModByTwoEq();
+    ans.mod_by_two_eq();
     return ans;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::ModByTwoEq() {
-    IntegerType halfQ(m_modulus >> 1);
-    for (uint32_t i = 0; i < m_length; i++) {
-        if (this->m_data[i] > halfQ) {
-            if (this->m_data[i].Mod(2) == 1) {
-                this->m_data[i] = IntegerType(0);
+BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::mod_by_two_eq() {
+    IntegerType half_q(modulus_ >> 1);
+    for (uint32_t i = 0; i < length_; i++) {
+        if (this->data_[i] > half_q) {
+            if (this->data_[i].mod(2) == 1) {
+                this->data_[i] = IntegerType(0);
             } else {
-                this->m_data[i] = 1;
+                this->data_[i] = 1;
             }
         } else {
-            if (this->m_data[i].Mod(2) == 1) {
-                this->m_data[i] = 1;
+            if (this->data_[i].mod(2) == 1) {
+                this->data_[i] = 1;
             } else {
-                this->m_data[i] = IntegerType(0);
+                this->data_[i] = IntegerType(0);
             }
         }
     }
@@ -490,65 +490,65 @@ BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::ModByTwoEq() {
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::MultWithOutMod(const BigVectorFixedT& b) const {
+BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::mult_with_out_mod(const BigVectorFixedT& b) const {
     BigVectorFixedT ans(*this);
-    ans.MultWithOutModEq(b);
+    ans.mult_with_out_mod_eq(b);
     return ans;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::MultWithOutModEq(const BigVectorFixedT& b) {
-    if ((this->m_length != b.m_length) || this->m_modulus != b.m_modulus) {
-        OPENFHE_THROW("MultWithOutMod called on BigVectorFixedT's with different parameters.");
+BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::mult_with_out_mod_eq(const BigVectorFixedT& b) {
+    if ((this->length_ != b.length_) || this->modulus_ != b.modulus_) {
+        CIPHER_THROW("MultWithOutMod called on BigVectorFixedT's with different parameters.");
     }
-    for (uint32_t i = 0; i < this->m_length; i++) {
-        this->m_data[i].MulEq(b.m_data[i]);
+    for (uint32_t i = 0; i < this->length_; i++) {
+        this->data_[i].mul_eq(b.data_[i]);
     }
     return *this;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::MultiplyAndRound(const IntegerType& p,
+BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::multiply_and_round(const IntegerType& p,
                                                                             const IntegerType& q) const {
     BigVectorFixedT ans(*this);
-    ans.MultiplyAndRoundEq(p, q);
+    ans.multiply_and_round_eq(p, q);
     return ans;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::MultiplyAndRoundEq(const IntegerType& p,
+BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::multiply_and_round_eq(const IntegerType& p,
                                                                                const IntegerType& q) {
-    IntegerType halfQ(this->m_modulus >> 1);
+    IntegerType half_q(this->modulus_ >> 1);
     IntegerType temp;
-    for (uint32_t i = 0; i < this->m_length; i++) {
-        if (this->m_data[i] > halfQ) {
-            temp = this->m_modulus - this->m_data[i];
-            this->m_data[i] = this->m_modulus - temp.MultiplyAndRound(p, q);
+    for (uint32_t i = 0; i < this->length_; i++) {
+        if (this->data_[i] > half_q) {
+            temp = this->modulus_ - this->data_[i];
+            this->data_[i] = this->modulus_ - temp.multiply_and_round(p, q);
         } else {
-            this->m_data[i].MultiplyAndRoundEq(p, q);
-            this->m_data[i].ModEq(this->m_modulus);
+            this->data_[i].multiply_and_round_eq(p, q);
+            this->data_[i].mod_eq(this->modulus_);
         }
     }
     return *this;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::DivideAndRound(const IntegerType& q) const {
+BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::divide_and_round(const IntegerType& q) const {
     BigVectorFixedT ans(*this);
-    ans.DivideAndRoundEq(q);
+    ans.divide_and_round_eq(q);
     return ans;
 }
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::DivideAndRoundEq(const IntegerType& q) {
-    IntegerType halfQ(this->m_modulus >> 1);
+BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::divide_and_round_eq(const IntegerType& q) {
+    IntegerType half_q(this->modulus_ >> 1);
     IntegerType temp;
-    for (uint32_t i = 0; i < this->m_length; i++) {
-        if (this->m_data[i] > halfQ) {
-            temp = this->m_modulus - this->m_data[i];
-            this->m_data[i] = this->m_modulus - temp.DivideAndRound(q);
+    for (uint32_t i = 0; i < this->length_; i++) {
+        if (this->data_[i] > half_q) {
+            temp = this->modulus_ - this->data_[i];
+            this->data_[i] = this->modulus_ - temp.divide_and_round(q);
         } else {
-            this->m_data[i].DivideAndRoundEq(q);
+            this->data_[i].divide_and_round_eq(q);
         }
     }
     return *this;
@@ -557,10 +557,10 @@ BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::DivideAndRoundEq(con
 // OTHER OPERATIONS
 
 template <class IntegerType>
-BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::GetDigitAtIndexForBase(uint32_t index, uint32_t base) const {
+BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::get_digit_at_index_for_base(uint32_t index, uint32_t base) const {
     BigVectorFixedT ans(*this);
-    for (uint32_t i = 0; i < this->m_length; i++) {
-        ans.m_data[i] = IntegerType(ans.m_data[i].GetDigitAtIndexForBase(index, base));
+    for (uint32_t i = 0; i < this->length_; i++) {
+        ans.data_[i] = IntegerType(ans.data_[i].get_digit_at_index_for_base(index, base));
     }
     return ans;
 }

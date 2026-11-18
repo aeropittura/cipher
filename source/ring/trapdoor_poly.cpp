@@ -46,19 +46,19 @@
 #include "cipher/math/matrix_impl.h"
 #include "cipher/util/debug.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 template <>
-std::pair<Matrix<Poly>, RLWETrapdoorPair<Poly>> RLWETrapdoorUtility<Poly>::TrapdoorGen(
+std::pair<Matrix<Poly>, RlweTrapdoorPair<Poly>> RlweTrapdoorUtility<Poly>::trapdoor_gen(
         std::shared_ptr<typename Poly::Params> params, double stddev, int64_t base, bool bal) {
-    auto zero_alloc = Poly::Allocator(params, EVALUATION);
-    auto gaussian_alloc = Poly::MakeDiscreteGaussianCoefficientAllocator(params, COEFFICIENT, stddev);
-    auto uniform_alloc = Poly::MakeDiscreteUniformAllocator(params, EVALUATION);
+    auto zero_alloc = Poly::allocator(params, EVALUATION);
+    auto gaussian_alloc = Poly::make_discrete_gaussian_coefficient_allocator(params, COEFFICIENT, stddev);
+    auto uniform_alloc = Poly::make_discrete_uniform_allocator(params, EVALUATION);
 
-    double val = params->GetModulus().ConvertToDouble();
-    double nBits = std::floor(std::log2(val - 1.0) + 1.0);
+    double val = params->get_modulus().convert_to_double();
+    double n_bits = std::floor(std::log2(val - 1.0) + 1.0);
 
-    size_t k = std::ceil(nBits / std::log2(base)); /* (+1) is for balanced representation */
+    size_t k = std::ceil(n_bits / std::log2(base)); /* (+1) is for balanced representation */
 
     if (bal == true) {
         k++;  // for a balanced digit representation, there is an extra digit
@@ -71,10 +71,10 @@ std::pair<Matrix<Poly>, RLWETrapdoorPair<Poly>> RLWETrapdoorUtility<Poly>::Trapd
     Matrix<Poly> e(zero_alloc, 1, k, gaussian_alloc);
 
     // Converts discrete gaussians to Evaluation representation
-    r.SetFormat(Format::EVALUATION);
-    e.SetFormat(Format::EVALUATION);
+    r.set_format(Format::EVALUATION);
+    e.set_format(Format::EVALUATION);
 
-    Matrix<Poly> g = Matrix<Poly>(zero_alloc, 1, k).GadgetVector(base);
+    Matrix<Poly> g = Matrix<Poly>(zero_alloc, 1, k).gadget_vector(base);
 
     Matrix<Poly> A(zero_alloc, 1, k + 2);
     A(0, 0) = 1;
@@ -84,20 +84,20 @@ std::pair<Matrix<Poly>, RLWETrapdoorPair<Poly>> RLWETrapdoorUtility<Poly>::Trapd
         A(0, i + 2) = g(0, i) - (a * r(0, i) + e(0, i));
     }
 
-    return std::pair<Matrix<Poly>, RLWETrapdoorPair<Poly>>(A, RLWETrapdoorPair<Poly>(r, e));
+    return std::pair<Matrix<Poly>, RlweTrapdoorPair<Poly>>(A, RlweTrapdoorPair<Poly>(r, e));
 }
 
 template <>
-std::pair<Matrix<NativePoly>, RLWETrapdoorPair<NativePoly>> RLWETrapdoorUtility<NativePoly>::TrapdoorGen(
+std::pair<Matrix<NativePoly>, RlweTrapdoorPair<NativePoly>> RlweTrapdoorUtility<NativePoly>::trapdoor_gen(
         std::shared_ptr<typename NativePoly::Params> params, double stddev, int64_t base, bool bal) {
-    auto zero_alloc = NativePoly::Allocator(params, EVALUATION);
-    auto gaussian_alloc = NativePoly::MakeDiscreteGaussianCoefficientAllocator(params, COEFFICIENT, stddev);
-    auto uniform_alloc = NativePoly::MakeDiscreteUniformAllocator(params, EVALUATION);
+    auto zero_alloc = NativePoly::allocator(params, EVALUATION);
+    auto gaussian_alloc = NativePoly::make_discrete_gaussian_coefficient_allocator(params, COEFFICIENT, stddev);
+    auto uniform_alloc = NativePoly::make_discrete_uniform_allocator(params, EVALUATION);
 
-    double val = params->GetModulus().ConvertToDouble();
-    double nBits = std::floor(std::log2(val - 1.0) + 1.0);
+    double val = params->get_modulus().convert_to_double();
+    double n_bits = std::floor(std::log2(val - 1.0) + 1.0);
 
-    size_t k = std::ceil(nBits / std::log2(base)); /* (+1) is for balanced representation */
+    size_t k = std::ceil(n_bits / std::log2(base)); /* (+1) is for balanced representation */
 
     if (bal == true) {
         k++;  // for a balanced digit representation, there is an extra digit
@@ -110,10 +110,10 @@ std::pair<Matrix<NativePoly>, RLWETrapdoorPair<NativePoly>> RLWETrapdoorUtility<
     Matrix<NativePoly> e(zero_alloc, 1, k, gaussian_alloc);
 
     // Converts discrete gaussians to Evaluation representation
-    r.SetFormat(Format::EVALUATION);
-    e.SetFormat(Format::EVALUATION);
+    r.set_format(Format::EVALUATION);
+    e.set_format(Format::EVALUATION);
 
-    Matrix<NativePoly> g = Matrix<NativePoly>(zero_alloc, 1, k).GadgetVector(base);
+    Matrix<NativePoly> g = Matrix<NativePoly>(zero_alloc, 1, k).gadget_vector(base);
 
     Matrix<NativePoly> A(zero_alloc, 1, k + 2);
     A(0, 0) = 1;
@@ -123,20 +123,20 @@ std::pair<Matrix<NativePoly>, RLWETrapdoorPair<NativePoly>> RLWETrapdoorUtility<
         A(0, i + 2) = g(0, i) - (a * r(0, i) + e(0, i));
     }
 
-    return std::pair<Matrix<NativePoly>, RLWETrapdoorPair<NativePoly>>(A, RLWETrapdoorPair<NativePoly>(r, e));
+    return std::pair<Matrix<NativePoly>, RlweTrapdoorPair<NativePoly>>(A, RlweTrapdoorPair<NativePoly>(r, e));
 }
 
 template <>
-std::pair<Matrix<Poly>, RLWETrapdoorPair<Poly>> RLWETrapdoorUtility<Poly>::TrapdoorGenSquareMat(
+std::pair<Matrix<Poly>, RlweTrapdoorPair<Poly>> RlweTrapdoorUtility<Poly>::trapdoor_gen_square_mat(
         std::shared_ptr<typename Poly::Params> params, double stddev, size_t d, int64_t base, bool bal) {
-    auto zero_alloc = Poly::Allocator(params, EVALUATION);
-    auto gaussian_alloc = Poly::MakeDiscreteGaussianCoefficientAllocator(params, COEFFICIENT, stddev);
-    auto uniform_alloc = Poly::MakeDiscreteUniformAllocator(params, EVALUATION);
+    auto zero_alloc = Poly::allocator(params, EVALUATION);
+    auto gaussian_alloc = Poly::make_discrete_gaussian_coefficient_allocator(params, COEFFICIENT, stddev);
+    auto uniform_alloc = Poly::make_discrete_uniform_allocator(params, EVALUATION);
 
-    double val = params->GetModulus().ConvertToDouble();
-    double nBits = std::ceil(std::log2(val));
+    double val = params->get_modulus().convert_to_double();
+    double n_bits = std::ceil(std::log2(val));
 
-    size_t k = std::ceil(nBits / std::log2(base)); /* (+1) is for balanced representation */
+    size_t k = std::ceil(n_bits / std::log2(base)); /* (+1) is for balanced representation */
 
     if (bal == true) {
         k++;  // for a balanced digit representation, there is an extra digit
@@ -146,19 +146,19 @@ std::pair<Matrix<Poly>, RLWETrapdoorPair<Poly>> RLWETrapdoorUtility<Poly>::Trapd
     Matrix<Poly> R(zero_alloc, d, d * k, gaussian_alloc);
     Matrix<Poly> E(zero_alloc, d, d * k, gaussian_alloc);
 
-    Matrix<Poly> Abar(zero_alloc, d, d, uniform_alloc);
+    Matrix<Poly> abar(zero_alloc, d, d, uniform_alloc);
 
     // Converts discrete gaussians to Evaluation representation
-    R.SetFormat(Format::EVALUATION);
-    E.SetFormat(Format::EVALUATION);
+    R.set_format(Format::EVALUATION);
+    E.set_format(Format::EVALUATION);
 
-    Matrix<Poly> G = Matrix<Poly>(zero_alloc, d, d * k).GadgetVector(base);
+    Matrix<Poly> G = Matrix<Poly>(zero_alloc, d, d * k).gadget_vector(base);
 
     Matrix<Poly> A(zero_alloc, d, d * 2);
 
     for (size_t i = 0; i < d; i++) {
         for (size_t j = 0; j < d; j++) {
-            A(i, j) = Abar(i, j);
+            A(i, j) = abar(i, j);
             if (i == j)
                 A(i, j + d) = 1;
             else
@@ -166,24 +166,24 @@ std::pair<Matrix<Poly>, RLWETrapdoorPair<Poly>> RLWETrapdoorUtility<Poly>::Trapd
         }
     }
 
-    Matrix<Poly> A1 = G - (Abar * R + E);
+    Matrix<Poly> A1 = G - (abar * R + E);
 
-    A.HStack(A1);
+    A.h_stack(A1);
 
-    return std::pair<Matrix<Poly>, RLWETrapdoorPair<Poly>>(A, RLWETrapdoorPair<Poly>(R, E));
+    return std::pair<Matrix<Poly>, RlweTrapdoorPair<Poly>>(A, RlweTrapdoorPair<Poly>(R, E));
 }
 
 template <>
-std::pair<Matrix<NativePoly>, RLWETrapdoorPair<NativePoly>> RLWETrapdoorUtility<NativePoly>::TrapdoorGenSquareMat(
+std::pair<Matrix<NativePoly>, RlweTrapdoorPair<NativePoly>> RlweTrapdoorUtility<NativePoly>::trapdoor_gen_square_mat(
         std::shared_ptr<typename NativePoly::Params> params, double stddev, size_t d, int64_t base, bool bal) {
-    auto zero_alloc = NativePoly::Allocator(params, EVALUATION);
-    auto gaussian_alloc = NativePoly::MakeDiscreteGaussianCoefficientAllocator(params, COEFFICIENT, stddev);
-    auto uniform_alloc = NativePoly::MakeDiscreteUniformAllocator(params, EVALUATION);
+    auto zero_alloc = NativePoly::allocator(params, EVALUATION);
+    auto gaussian_alloc = NativePoly::make_discrete_gaussian_coefficient_allocator(params, COEFFICIENT, stddev);
+    auto uniform_alloc = NativePoly::make_discrete_uniform_allocator(params, EVALUATION);
 
-    double val = params->GetModulus().ConvertToDouble();
-    double nBits = std::ceil(std::log2(val));
+    double val = params->get_modulus().convert_to_double();
+    double n_bits = std::ceil(std::log2(val));
 
-    size_t k = std::ceil(nBits / std::log2(base)); /* (+1) is for balanced representation */
+    size_t k = std::ceil(n_bits / std::log2(base)); /* (+1) is for balanced representation */
 
     if (bal == true) {
         k++;  // for a balanced digit representation, there is an extra digit
@@ -193,19 +193,19 @@ std::pair<Matrix<NativePoly>, RLWETrapdoorPair<NativePoly>> RLWETrapdoorUtility<
     Matrix<NativePoly> R(zero_alloc, d, d * k, gaussian_alloc);
     Matrix<NativePoly> E(zero_alloc, d, d * k, gaussian_alloc);
 
-    Matrix<NativePoly> Abar(zero_alloc, d, d, uniform_alloc);
+    Matrix<NativePoly> abar(zero_alloc, d, d, uniform_alloc);
 
     // Converts discrete gaussians to Evaluation representation
-    R.SetFormat(Format::EVALUATION);
-    E.SetFormat(Format::EVALUATION);
+    R.set_format(Format::EVALUATION);
+    E.set_format(Format::EVALUATION);
 
-    Matrix<NativePoly> G = Matrix<NativePoly>(zero_alloc, d, d * k).GadgetVector(base);
+    Matrix<NativePoly> G = Matrix<NativePoly>(zero_alloc, d, d * k).gadget_vector(base);
 
     Matrix<NativePoly> A(zero_alloc, d, d * 2);
 
     for (size_t i = 0; i < d; i++) {
         for (size_t j = 0; j < d; j++) {
-            A(i, j) = Abar(i, j);
+            A(i, j) = abar(i, j);
             if (i == j)
                 A(i, j + d) = 1;
             else
@@ -213,301 +213,301 @@ std::pair<Matrix<NativePoly>, RLWETrapdoorPair<NativePoly>> RLWETrapdoorUtility<
         }
     }
 
-    Matrix<NativePoly> A1 = G - (Abar * R + E);
+    Matrix<NativePoly> A1 = G - (abar * R + E);
 
-    A.HStack(A1);
+    A.h_stack(A1);
 
-    return std::pair<Matrix<NativePoly>, RLWETrapdoorPair<NativePoly>>(A, RLWETrapdoorPair<NativePoly>(R, E));
+    return std::pair<Matrix<NativePoly>, RlweTrapdoorPair<NativePoly>>(A, RlweTrapdoorPair<NativePoly>(R, E));
 }
 
 // Gaussian sampling as described in Alogorithm 2 of
 // https://eprint.iacr.org/2017/844.pdf
 
 template <>
-Matrix<Poly> RLWETrapdoorUtility<Poly>::GaussSamp(size_t n, size_t k, const Matrix<Poly>& A,
-                                                  const RLWETrapdoorPair<Poly>& T, const Poly& u,
-                                                  typename Poly::DggType& dgg, typename Poly::DggType& dggLargeSigma,
+Matrix<Poly> RlweTrapdoorUtility<Poly>::gauss_samp(size_t n, size_t k, const Matrix<Poly>& A,
+                                                  const RlweTrapdoorPair<Poly>& T, const Poly& u,
+                                                  typename Poly::DggType& dgg, typename Poly::DggType& dgg_large_sigma,
                                                   int64_t base) {
-    OPENFHE_DEBUG_FLAG(false);
+    CIPHER_DEBUG_FLAG(false);
     TimeVar t1, t1_tot, t2, t2_tot;
     TIC(t1);
     TIC(t1_tot);
-    const std::shared_ptr<typename Poly::Params> params = u.GetParams();
-    auto zero_alloc = Poly::Allocator(params, EVALUATION);
+    const std::shared_ptr<typename Poly::Params> params = u.get_params();
+    auto zero_alloc = Poly::allocator(params, EVALUATION);
 
     double c = (base + 1) * SIGMA;
 
-    const typename Poly::Integer& modulus = A(0, 0).GetModulus();
+    const typename Poly::Integer& modulus = A(0, 0).get_modulus();
 
     // spectral bound s
     double s = SPECTRAL_BOUND(n, k, base);
 
-    OPENFHE_DEBUG("c " << c << " s " << s);
+    CIPHER_DEBUG("c " << c << " s " << s);
 
     // perturbation vector in evaluation representation
-    auto pHat = std::make_shared<Matrix<Poly>>(zero_alloc, k + 2, 1);
-    OPENFHE_DEBUG("t1a: " << TOC(t1));
+    auto p_hat = std::make_shared<Matrix<Poly>>(zero_alloc, k + 2, 1);
+    CIPHER_DEBUG("t1a: " << TOC(t1));
     TIC(t1);
-    ZSampleSigmaP(n, s, c, T, dgg, dggLargeSigma, pHat);
-    OPENFHE_DEBUG("t1b: " << TOC(t1));  // this takes the most time 61
+    z_sample_sigma_p(n, s, c, T, dgg, dgg_large_sigma, p_hat);
+    CIPHER_DEBUG("t1b: " << TOC(t1));  // this takes the most time 61
     TIC(t1);
-    // It is assumed that A has dimension 1 x (k + 2) and pHat has the dimension
-    // of (k + 2) x 1 perturbedSyndrome is in the evaluation representation
-    Poly perturbedSyndrome = u - (A.Mult(*pHat))(0, 0);
+    // It is assumed that A has dimension 1 x (k + 2) and p_hat has the dimension
+    // of (k + 2) x 1 perturbed_syndrome is in the evaluation representation
+    Poly perturbed_syndrome = u - (A.mult(*p_hat))(0, 0);
 
-    OPENFHE_DEBUG("t1c: " << TOC(t1));  // takes 2
+    CIPHER_DEBUG("t1c: " << TOC(t1));  // takes 2
     TIC(t1);
-    Matrix<int64_t> zHatBBI([]() { return 0; }, k, n);
-    OPENFHE_DEBUG("t1d: " << TOC(t1));     // takes 0
-    OPENFHE_DEBUG("t1: " << TOC(t1_tot));  // takes 64
+    Matrix<int64_t> z_hat_bbi([]() { return 0; }, k, n);
+    CIPHER_DEBUG("t1d: " << TOC(t1));     // takes 0
+    CIPHER_DEBUG("t1: " << TOC(t1_tot));  // takes 64
     TIC(t2);
     TIC(t2_tot);
-    perturbedSyndrome.SetFormat(Format::COEFFICIENT);
-    OPENFHE_DEBUG("t2a: " << TOC(t2));  // takes 1
+    perturbed_syndrome.set_format(Format::COEFFICIENT);
+    CIPHER_DEBUG("t2a: " << TOC(t2));  // takes 1
     TIC(t2);
-    LatticeGaussSampUtility<Poly>::GaussSampGqArbBase(perturbedSyndrome, c, k, modulus, base, dgg, &zHatBBI);
-    OPENFHE_DEBUG("t2b: " << TOC(t2));  // takes 36
+    LatticeGaussSampUtility<Poly>::gauss_samp_gq_arb_base(perturbed_syndrome, c, k, modulus, base, dgg, &z_hat_bbi);
+    CIPHER_DEBUG("t2b: " << TOC(t2));  // takes 36
     TIC(t2);
-    // Convert zHat from a matrix of BBI to a vector of Element ring elements
-    // zHat is in the coefficient representation
-    Matrix<Poly> zHat = SplitInt64AltIntoElements<Poly>(zHatBBI, n, params);
+    // Convert z_hat from a matrix of BBI to a vector of Element ring elements
+    // z_hat is in the coefficient representation
+    Matrix<Poly> z_hat = split_int64_alt_into_elements<Poly>(z_hat_bbi, n, params);
 
-    OPENFHE_DEBUG("t2c: " << TOC(t2));  // takes 0
+    CIPHER_DEBUG("t2c: " << TOC(t2));  // takes 0
     // Now converting it to the evaluation representation before multiplication
-    zHat.SetFormat(Format::EVALUATION);
-    OPENFHE_DEBUG("t2d: " << TOC(t2));  // takes 17
-    OPENFHE_DEBUG("t2: " << TOC(t2_tot));
+    z_hat.set_format(Format::EVALUATION);
+    CIPHER_DEBUG("t2d: " << TOC(t2));  // takes 17
+    CIPHER_DEBUG("t2: " << TOC(t2_tot));
     // TIC(t3); seems trivial
-    Matrix<Poly> zHatPrime(zero_alloc, k + 2, 1);
+    Matrix<Poly> z_hat_prime(zero_alloc, k + 2, 1);
 
-    zHatPrime(0, 0) = (*pHat)(0, 0) + T.m_e.Mult(zHat)(0, 0);
-    zHatPrime(1, 0) = (*pHat)(1, 0) + T.m_r.Mult(zHat)(0, 0);
+    z_hat_prime(0, 0) = (*p_hat)(0, 0) + T.e_.mult(z_hat)(0, 0);
+    z_hat_prime(1, 0) = (*p_hat)(1, 0) + T.r_.mult(z_hat)(0, 0);
 
     for (size_t row = 2; row < k + 2; ++row)
-        zHatPrime(row, 0) = (*pHat)(row, 0) + zHat(row - 2, 0);
+        z_hat_prime(row, 0) = (*p_hat)(row, 0) + z_hat(row - 2, 0);
 
-    return zHatPrime;
+    return z_hat_prime;
 }
 
 // Gaussian sampling as described in Alogorithm 2 of
 // https://eprint.iacr.org/2017/844.pdf
 
 template <>
-Matrix<NativePoly> RLWETrapdoorUtility<NativePoly>::GaussSamp(size_t n, size_t k, const Matrix<NativePoly>& A,
-                                                              const RLWETrapdoorPair<NativePoly>& T,
+Matrix<NativePoly> RlweTrapdoorUtility<NativePoly>::gauss_samp(size_t n, size_t k, const Matrix<NativePoly>& A,
+                                                              const RlweTrapdoorPair<NativePoly>& T,
                                                               const NativePoly& u, typename NativePoly::DggType& dgg,
-                                                              typename NativePoly::DggType& dggLargeSigma,
+                                                              typename NativePoly::DggType& dgg_large_sigma,
                                                               int64_t base) {
-    OPENFHE_DEBUG_FLAG(false);
+    CIPHER_DEBUG_FLAG(false);
     TimeVar t1, t1_tot, t2, t2_tot;
     TIC(t1);
     TIC(t1_tot);
-    const std::shared_ptr<typename NativePoly::Params> params = u.GetParams();
-    auto zero_alloc = NativePoly::Allocator(params, EVALUATION);
+    const std::shared_ptr<typename NativePoly::Params> params = u.get_params();
+    auto zero_alloc = NativePoly::allocator(params, EVALUATION);
 
     double c = (base + 1) * SIGMA;
 
-    const typename NativePoly::Integer& modulus = A(0, 0).GetModulus();
+    const typename NativePoly::Integer& modulus = A(0, 0).get_modulus();
 
     // spectral bound s
     double s = SPECTRAL_BOUND(n, k, base);
 
-    OPENFHE_DEBUG("c " << c << " s " << s);
+    CIPHER_DEBUG("c " << c << " s " << s);
 
     // perturbation vector in evaluation representation
-    auto pHat = std::make_shared<Matrix<NativePoly>>(zero_alloc, k + 2, 1);
-    OPENFHE_DEBUG("t1a: " << TOC(t1));
+    auto p_hat = std::make_shared<Matrix<NativePoly>>(zero_alloc, k + 2, 1);
+    CIPHER_DEBUG("t1a: " << TOC(t1));
     TIC(t1);
-    ZSampleSigmaP(n, s, c, T, dgg, dggLargeSigma, pHat);
-    OPENFHE_DEBUG("t1b: " << TOC(t1));  // this takes the most time 61
+    z_sample_sigma_p(n, s, c, T, dgg, dgg_large_sigma, p_hat);
+    CIPHER_DEBUG("t1b: " << TOC(t1));  // this takes the most time 61
     TIC(t1);
-    // It is assumed that A has dimension 1 x (k + 2) and pHat has the dimension
-    // of (k + 2) x 1 perturbedSyndrome is in the evaluation representation
-    NativePoly perturbedSyndrome = u - (A.Mult(*pHat))(0, 0);
+    // It is assumed that A has dimension 1 x (k + 2) and p_hat has the dimension
+    // of (k + 2) x 1 perturbed_syndrome is in the evaluation representation
+    NativePoly perturbed_syndrome = u - (A.mult(*p_hat))(0, 0);
 
-    OPENFHE_DEBUG("t1c: " << TOC(t1));  // takes 2
+    CIPHER_DEBUG("t1c: " << TOC(t1));  // takes 2
     TIC(t1);
-    Matrix<int64_t> zHatBBI([]() { return 0; }, k, n);
-    OPENFHE_DEBUG("t1d: " << TOC(t1));     // takes 0
-    OPENFHE_DEBUG("t1: " << TOC(t1_tot));  // takes 64
+    Matrix<int64_t> z_hat_bbi([]() { return 0; }, k, n);
+    CIPHER_DEBUG("t1d: " << TOC(t1));     // takes 0
+    CIPHER_DEBUG("t1: " << TOC(t1_tot));  // takes 64
     TIC(t2);
     TIC(t2_tot);
-    perturbedSyndrome.SetFormat(Format::COEFFICIENT);
-    OPENFHE_DEBUG("t2a: " << TOC(t2));  // takes 1
+    perturbed_syndrome.set_format(Format::COEFFICIENT);
+    CIPHER_DEBUG("t2a: " << TOC(t2));  // takes 1
     TIC(t2);
-    LatticeGaussSampUtility<NativePoly>::GaussSampGqArbBase(perturbedSyndrome, c, k, modulus, base, dgg, &zHatBBI);
-    OPENFHE_DEBUG("t2b: " << TOC(t2));  // takes 36
+    LatticeGaussSampUtility<NativePoly>::gauss_samp_gq_arb_base(perturbed_syndrome, c, k, modulus, base, dgg, &z_hat_bbi);
+    CIPHER_DEBUG("t2b: " << TOC(t2));  // takes 36
     TIC(t2);
-    // Convert zHat from a matrix of BBI to a vector of Element ring elements
-    // zHat is in the coefficient representation
-    Matrix<NativePoly> zHat = SplitInt64AltIntoElements<NativePoly>(zHatBBI, n, params);
+    // Convert z_hat from a matrix of BBI to a vector of Element ring elements
+    // z_hat is in the coefficient representation
+    Matrix<NativePoly> z_hat = split_int64_alt_into_elements<NativePoly>(z_hat_bbi, n, params);
 
-    OPENFHE_DEBUG("t2c: " << TOC(t2));  // takes 0
+    CIPHER_DEBUG("t2c: " << TOC(t2));  // takes 0
     // Now converting it to the evaluation representation before multiplication
-    zHat.SetFormat(Format::EVALUATION);
-    OPENFHE_DEBUG("t2d: " << TOC(t2));  // takes 17
-    OPENFHE_DEBUG("t2: " << TOC(t2_tot));
+    z_hat.set_format(Format::EVALUATION);
+    CIPHER_DEBUG("t2d: " << TOC(t2));  // takes 17
+    CIPHER_DEBUG("t2: " << TOC(t2_tot));
     // TIC(t3); seems trivial
-    Matrix<NativePoly> zHatPrime(zero_alloc, k + 2, 1);
+    Matrix<NativePoly> z_hat_prime(zero_alloc, k + 2, 1);
 
-    zHatPrime(0, 0) = (*pHat)(0, 0) + T.m_e.Mult(zHat)(0, 0);
-    zHatPrime(1, 0) = (*pHat)(1, 0) + T.m_r.Mult(zHat)(0, 0);
+    z_hat_prime(0, 0) = (*p_hat)(0, 0) + T.e_.mult(z_hat)(0, 0);
+    z_hat_prime(1, 0) = (*p_hat)(1, 0) + T.r_.mult(z_hat)(0, 0);
 
     for (size_t row = 2; row < k + 2; ++row)
-        zHatPrime(row, 0) = (*pHat)(row, 0) + zHat(row - 2, 0);
+        z_hat_prime(row, 0) = (*p_hat)(row, 0) + z_hat(row - 2, 0);
 
-    return zHatPrime;
+    return z_hat_prime;
 }
 
 // Gaussian sampling as described in "Implementing Token-Based Obfuscation under
 // Ring (LWE)"
 
 template <>
-Matrix<Poly> RLWETrapdoorUtility<Poly>::GaussSampSquareMat(size_t n, size_t k, const Matrix<Poly>& A,
-                                                           const RLWETrapdoorPair<Poly>& T, const Matrix<Poly>& U,
+Matrix<Poly> RlweTrapdoorUtility<Poly>::gauss_samp_square_mat(size_t n, size_t k, const Matrix<Poly>& A,
+                                                           const RlweTrapdoorPair<Poly>& T, const Matrix<Poly>& U,
                                                            typename Poly::DggType& dgg,
-                                                           typename Poly::DggType& dggLargeSigma, int64_t base) {
-    const std::shared_ptr<typename Poly::Params> params = U(0, 0).GetParams();
-    auto zero_alloc = Poly::Allocator(params, EVALUATION);
+                                                           typename Poly::DggType& dgg_large_sigma, int64_t base) {
+    const std::shared_ptr<typename Poly::Params> params = U(0, 0).get_params();
+    auto zero_alloc = Poly::allocator(params, EVALUATION);
 
     double c = (base + 1) * SIGMA;
 
-    const typename Poly::Integer& modulus = A(0, 0).GetModulus();
+    const typename Poly::Integer& modulus = A(0, 0).get_modulus();
 
-    size_t d = T.m_r.GetRows();
+    size_t d = T.r_.get_rows();
 
     // spectral bound s
     double s = SPECTRAL_BOUND_D(n, k, base, d);
 
     // perturbation vector in evaluation representation
-    auto pHat = std::make_shared<Matrix<Poly>>(zero_alloc, d * (k + 2), d);
+    auto p_hat = std::make_shared<Matrix<Poly>>(zero_alloc, d * (k + 2), d);
 
-    SamplePertSquareMat(n, s, c, T, dgg, dggLargeSigma, pHat);
+    sample_pert_square_mat(n, s, c, T, dgg, dgg_large_sigma, p_hat);
 
-    // It is assumed that A has dimension d x d*(k + 2) and pHat has the dimension
-    // of d*(k + 2) x d perturbedSyndrome is in the evaluation representation
-    Matrix<Poly> perturbedSyndrome = U - (A.Mult(*pHat));
+    // It is assumed that A has dimension d x d*(k + 2) and p_hat has the dimension
+    // of d*(k + 2) x d perturbed_syndrome is in the evaluation representation
+    Matrix<Poly> perturbed_syndrome = U - (A.mult(*p_hat));
 
-    perturbedSyndrome.SetFormat(Format::COEFFICIENT);
+    perturbed_syndrome.set_format(Format::COEFFICIENT);
 
-    Matrix<Poly> zHatMat(zero_alloc, d * k, d);
+    Matrix<Poly> z_hat_mat(zero_alloc, d * k, d);
 
     for (size_t i = 0; i < d; i++) {
         for (size_t j = 0; j < d; j++) {
-            Matrix<int64_t> zHatBBI([]() { return 0; }, k, n);
+            Matrix<int64_t> z_hat_bbi([]() { return 0; }, k, n);
 
-            LatticeGaussSampUtility<Poly>::GaussSampGqArbBase(perturbedSyndrome(i, j), c, k, modulus, base, dgg,
-                                                              &zHatBBI);
+            LatticeGaussSampUtility<Poly>::gauss_samp_gq_arb_base(perturbed_syndrome(i, j), c, k, modulus, base, dgg,
+                                                              &z_hat_bbi);
 
-            // Convert zHat from a matrix of BBI to a vector of Poly ring elements
-            // zHat is in the coefficient representation
-            Matrix<Poly> zHat = SplitInt64AltIntoElements<Poly>(zHatBBI, n, params);
+            // Convert z_hat from a matrix of BBI to a vector of Poly ring elements
+            // z_hat is in the coefficient representation
+            Matrix<Poly> z_hat = split_int64_alt_into_elements<Poly>(z_hat_bbi, n, params);
 
             // Now converting it to the evaluation representation before
             // multiplication
-            zHat.SetFormat(Format::EVALUATION);
+            z_hat.set_format(Format::EVALUATION);
 
             for (size_t p = 0; p < k; p++)
-                zHatMat(i * k + p, j) = zHat(p, 0);
+                z_hat_mat(i * k + p, j) = z_hat(p, 0);
         }
     }
 
-    Matrix<Poly> zHatPrime(zero_alloc, d * (k + 2), d);
+    Matrix<Poly> z_hat_prime(zero_alloc, d * (k + 2), d);
 
-    Matrix<Poly> rZhat = T.m_r.Mult(zHatMat);  // d x d
-    Matrix<Poly> eZhat = T.m_e.Mult(zHatMat);  // d x d
+    Matrix<Poly> r_zhat = T.r_.mult(z_hat_mat);  // d x d
+    Matrix<Poly> e_zhat = T.e_.mult(z_hat_mat);  // d x d
 
     for (size_t j = 0; j < d; j++) {  // columns
         for (size_t i = 0; i < d; i++) {
-            zHatPrime(i, j) = (*pHat)(i, j) + rZhat(i, j);
-            zHatPrime(i + d, j) = (*pHat)(i + d, j) + eZhat(i, j);
+            z_hat_prime(i, j) = (*p_hat)(i, j) + r_zhat(i, j);
+            z_hat_prime(i + d, j) = (*p_hat)(i + d, j) + e_zhat(i, j);
 
             for (size_t p = 0; p < k; p++) {
-                zHatPrime(i * k + p + 2 * d, j) = (*pHat)(i * k + p + 2 * d, j) + zHatMat(i * k + p, j);
+                z_hat_prime(i * k + p + 2 * d, j) = (*p_hat)(i * k + p + 2 * d, j) + z_hat_mat(i * k + p, j);
             }
         }
     }
 
-    return zHatPrime;
+    return z_hat_prime;
 }
 
 template <>
-Matrix<NativePoly> RLWETrapdoorUtility<NativePoly>::GaussSampSquareMat(size_t n, size_t k, const Matrix<NativePoly>& A,
-                                                                       const RLWETrapdoorPair<NativePoly>& T,
+Matrix<NativePoly> RlweTrapdoorUtility<NativePoly>::gauss_samp_square_mat(size_t n, size_t k, const Matrix<NativePoly>& A,
+                                                                       const RlweTrapdoorPair<NativePoly>& T,
                                                                        const Matrix<NativePoly>& U,
                                                                        typename NativePoly::DggType& dgg,
-                                                                       typename NativePoly::DggType& dggLargeSigma,
+                                                                       typename NativePoly::DggType& dgg_large_sigma,
                                                                        int64_t base) {
-    const std::shared_ptr<typename NativePoly::Params> params = U(0, 0).GetParams();
-    auto zero_alloc = NativePoly::Allocator(params, EVALUATION);
+    const std::shared_ptr<typename NativePoly::Params> params = U(0, 0).get_params();
+    auto zero_alloc = NativePoly::allocator(params, EVALUATION);
 
     double c = (base + 1) * SIGMA;
 
-    const typename NativePoly::Integer& modulus = A(0, 0).GetModulus();
+    const typename NativePoly::Integer& modulus = A(0, 0).get_modulus();
 
-    size_t d = T.m_r.GetRows();
+    size_t d = T.r_.get_rows();
 
     // spectral bound s
     double s = SPECTRAL_BOUND_D(n, k, base, d);
 
     // perturbation vector in evaluation representation
-    auto pHat = std::make_shared<Matrix<NativePoly>>(zero_alloc, d * (k + 2), d);
+    auto p_hat = std::make_shared<Matrix<NativePoly>>(zero_alloc, d * (k + 2), d);
 
-    SamplePertSquareMat(n, s, c, T, dgg, dggLargeSigma, pHat);
+    sample_pert_square_mat(n, s, c, T, dgg, dgg_large_sigma, p_hat);
 
-    // It is assumed that A has dimension d x d*(k + 2) and pHat has the dimension
-    // of d*(k + 2) x d perturbedSyndrome is in the evaluation representation
-    Matrix<NativePoly> perturbedSyndrome = U - (A.Mult(*pHat));
+    // It is assumed that A has dimension d x d*(k + 2) and p_hat has the dimension
+    // of d*(k + 2) x d perturbed_syndrome is in the evaluation representation
+    Matrix<NativePoly> perturbed_syndrome = U - (A.mult(*p_hat));
 
-    perturbedSyndrome.SetFormat(Format::COEFFICIENT);
+    perturbed_syndrome.set_format(Format::COEFFICIENT);
 
-    Matrix<NativePoly> zHatMat(zero_alloc, d * k, d);
+    Matrix<NativePoly> z_hat_mat(zero_alloc, d * k, d);
 
     for (size_t i = 0; i < d; i++) {
         for (size_t j = 0; j < d; j++) {
-            Matrix<int64_t> zHatBBI([]() { return 0; }, k, n);
+            Matrix<int64_t> z_hat_bbi([]() { return 0; }, k, n);
 
-            LatticeGaussSampUtility<NativePoly>::GaussSampGqArbBase(perturbedSyndrome(i, j), c, k, modulus, base, dgg,
-                                                                    &zHatBBI);
+            LatticeGaussSampUtility<NativePoly>::gauss_samp_gq_arb_base(perturbed_syndrome(i, j), c, k, modulus, base, dgg,
+                                                                    &z_hat_bbi);
 
-            // Convert zHat from a matrix of BBI to a vector of NativePoly ring
-            // elements zHat is in the coefficient representation
-            Matrix<NativePoly> zHat = SplitInt64AltIntoElements<NativePoly>(zHatBBI, n, params);
+            // Convert z_hat from a matrix of BBI to a vector of NativePoly ring
+            // elements z_hat is in the coefficient representation
+            Matrix<NativePoly> z_hat = split_int64_alt_into_elements<NativePoly>(z_hat_bbi, n, params);
 
             // Now converting it to the evaluation representation before
             // multiplication
-            zHat.SetFormat(Format::EVALUATION);
+            z_hat.set_format(Format::EVALUATION);
 
             for (size_t p = 0; p < k; p++)
-                zHatMat(i * k + p, j) = zHat(p, 0);
+                z_hat_mat(i * k + p, j) = z_hat(p, 0);
         }
     }
 
-    Matrix<NativePoly> zHatPrime(zero_alloc, d * (k + 2), d);
+    Matrix<NativePoly> z_hat_prime(zero_alloc, d * (k + 2), d);
 
-    Matrix<NativePoly> rZhat = T.m_r.Mult(zHatMat);  // d x d
-    Matrix<NativePoly> eZhat = T.m_e.Mult(zHatMat);  // d x d
+    Matrix<NativePoly> r_zhat = T.r_.mult(z_hat_mat);  // d x d
+    Matrix<NativePoly> e_zhat = T.e_.mult(z_hat_mat);  // d x d
 
     for (size_t j = 0; j < d; j++) {  // columns
         for (size_t i = 0; i < d; i++) {
-            zHatPrime(i, j) = (*pHat)(i, j) + rZhat(i, j);
-            zHatPrime(i + d, j) = (*pHat)(i + d, j) + eZhat(i, j);
+            z_hat_prime(i, j) = (*p_hat)(i, j) + r_zhat(i, j);
+            z_hat_prime(i + d, j) = (*p_hat)(i + d, j) + e_zhat(i, j);
 
             for (size_t p = 0; p < k; p++) {
-                zHatPrime(i * k + p + 2 * d, j) = (*pHat)(i * k + p + 2 * d, j) + zHatMat(i * k + p, j);
+                z_hat_prime(i * k + p + 2 * d, j) = (*p_hat)(i * k + p + 2 * d, j) + z_hat_mat(i * k + p, j);
             }
         }
     }
 
-    return zHatPrime;
+    return z_hat_prime;
 }
 
 template class LatticeGaussSampUtility<Poly>;
-template class RLWETrapdoorPair<Poly>;
-template class RLWETrapdoorUtility<Poly>;
+template class RlweTrapdoorPair<Poly>;
+template class RlweTrapdoorUtility<Poly>;
 
 template class LatticeGaussSampUtility<NativePoly>;
-template class RLWETrapdoorPair<NativePoly>;
-template class RLWETrapdoorUtility<NativePoly>;
+template class RlweTrapdoorPair<NativePoly>;
+template class RlweTrapdoorUtility<NativePoly>;
 
-}  // namespace lbcrypto
+}  // namespace cipher

@@ -42,59 +42,59 @@ CKKS implementation. If NOISE_FLOODING_DECRYPT is set, we flood the decryption b
 #include "cipher/fhe/ciphertext.h"
 #include "cipher/fhe/ckks/crypto_params.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-DecryptResult PKECKKSRNS::Decrypt(ConstCiphertext<DCRTPoly> ciphertext, const PrivateKey<DCRTPoly> privateKey,
+DecryptResult CkksRnsPke::decrypt(ConstCiphertext<RnsPoly> ciphertext, const PrivateKey<RnsPoly> private_key,
                                   NativePoly* plaintext) const {
-    const auto cryptoParams = std::dynamic_pointer_cast<CryptoParametersCKKSRNS>(ciphertext->GetCryptoParameters());
-    const std::vector<DCRTPoly>& cv = ciphertext->GetElements();
-    DCRTPoly b = DecryptCore(cv, privateKey);
-    if (cryptoParams->GetDecryptionNoiseMode() == NOISE_FLOODING_DECRYPT &&
-        cryptoParams->GetExecutionMode() == EXEC_EVALUATION) {
-        auto dgg = cryptoParams->GetFloodingDiscreteGaussianGenerator();
-        DCRTPoly noise(dgg, cv[0].GetParams(), Format::EVALUATION);
+    const auto crypto_params = std::dynamic_pointer_cast<CkksRnsCryptoParams>(ciphertext->get_crypto_parameters());
+    const std::vector<RnsPoly>& cv = ciphertext->get_elements();
+    RnsPoly b = decrypt_core(cv, private_key);
+    if (crypto_params->get_decryption_noise_mode() == NOISE_FLOODING_DECRYPT &&
+        crypto_params->get_execution_mode() == EXEC_EVALUATION) {
+        auto dgg = crypto_params->get_flooding_discrete_gaussian_generator();
+        RnsPoly noise(dgg, cv[0].get_params(), Format::EVALUATION);
         b += noise;
     }
 
-    b.SetFormat(Format::COEFFICIENT);
-    const size_t sizeQl = b.GetParams()->GetParams().size();
+    b.set_format(Format::COEFFICIENT);
+    const size_t size_ql = b.get_params()->get_params().size();
 
-    if (sizeQl != 1) {
-        OPENFHE_THROW(
-                "sizeQl " + std::to_string(sizeQl) +
+    if (size_ql != 1) {
+        CIPHER_THROW(
+                "sizeQl " + std::to_string(size_ql) +
                 "!= 1. If sizeQl = 0, consider increasing the depth. If sizeQl > 1, check parameters (this is unsupported for NativePoly).");
     }
 
-    *plaintext = b.GetElementAtIndex(0);
+    *plaintext = b.get_element_at_index(0);
 
-    return DecryptResult(plaintext->GetLength());
+    return DecryptResult(plaintext->get_length());
 }
 
-DecryptResult PKECKKSRNS::Decrypt(ConstCiphertext<DCRTPoly> ciphertext, const PrivateKey<DCRTPoly> privateKey,
+DecryptResult CkksRnsPke::decrypt(ConstCiphertext<RnsPoly> ciphertext, const PrivateKey<RnsPoly> private_key,
                                   Poly* plaintext) const {
-    const auto cryptoParams = std::dynamic_pointer_cast<CryptoParametersCKKSRNS>(ciphertext->GetCryptoParameters());
-    const std::vector<DCRTPoly>& cv = ciphertext->GetElements();
-    DCRTPoly b = DecryptCore(cv, privateKey);
-    if (cryptoParams->GetDecryptionNoiseMode() == NOISE_FLOODING_DECRYPT &&
-        cryptoParams->GetExecutionMode() == EXEC_EVALUATION) {
-        auto dgg = cryptoParams->GetFloodingDiscreteGaussianGenerator();
-        DCRTPoly noise(dgg, cv[0].GetParams(), Format::EVALUATION);
+    const auto crypto_params = std::dynamic_pointer_cast<CkksRnsCryptoParams>(ciphertext->get_crypto_parameters());
+    const std::vector<RnsPoly>& cv = ciphertext->get_elements();
+    RnsPoly b = decrypt_core(cv, private_key);
+    if (crypto_params->get_decryption_noise_mode() == NOISE_FLOODING_DECRYPT &&
+        crypto_params->get_execution_mode() == EXEC_EVALUATION) {
+        auto dgg = crypto_params->get_flooding_discrete_gaussian_generator();
+        RnsPoly noise(dgg, cv[0].get_params(), Format::EVALUATION);
         b += noise;
     }
 
-    b.SetFormat(Format::COEFFICIENT);
-    const size_t sizeQl = b.GetParams()->GetParams().size();
+    b.set_format(Format::COEFFICIENT);
+    const size_t size_ql = b.get_params()->get_params().size();
 
-    if (sizeQl == 0)
-        OPENFHE_THROW("No towers left; consider increasing the depth.");
+    if (size_ql == 0)
+        CIPHER_THROW("No towers left; consider increasing the depth.");
 
-    if (sizeQl == 1) {
-        *plaintext = Poly(b.GetElementAtIndex(0), Format::COEFFICIENT);
+    if (size_ql == 1) {
+        *plaintext = Poly(b.get_element_at_index(0), Format::COEFFICIENT);
     } else {
-        *plaintext = b.CRTInterpolate();
+        *plaintext = b.crt_interpolate();
     }
 
-    return DecryptResult(plaintext->GetLength());
+    return DecryptResult(plaintext->get_length());
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher

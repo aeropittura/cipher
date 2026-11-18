@@ -39,18 +39,18 @@
 #include "cipher/fhe/rns/param_gen.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Parameter generation for the BFV scheme in the RNS representation: derives the ring dimension and
  * the CRT modulus chain from the noise bounds of the requested computation and the security level.
  */
-class ParameterGenerationBFVRNS : public ParameterGenerationRNS {
+class BfvRnsParamGen : public RnsParamGen {
   public:
-    virtual ~ParameterGenerationBFVRNS() {}
+    virtual ~BfvRnsParamGen() {}
 
     /**
      * Generates the BFV element parameters (ring dimension and CRT moduli) for the requested computation. The
@@ -58,20 +58,20 @@ class ParameterGenerationBFVRNS : public ParameterGenerationRNS {
      * and key switches, the ring dimension is chosen to satisfy the security level (unless a custom one is
      * given), the encoding batch size is set to n when not specified, and the CRT tables are precomputed.
      *
-     * @param cryptoParams the crypto parameters object to be populated with parameters.
-     * @param evalAddCount number of EvalAdds assuming no EvalMult and KeySwitch operations are performed.
-     * @param multiplicativeDepth number of EvalMults assuming no EvalAdd and KeySwitch operations are performed.
-     * @param keySwitchCount number of KeySwitch operations assuming no EvalAdd and EvalMult operations are
+     * @param crypto_params the crypto parameters object to be populated with parameters.
+     * @param eval_add_count number of EvalAdds assuming no eval_mult and key_switch operations are performed.
+     * @param multiplicative_depth number of EvalMults assuming no eval_add and key_switch operations are performed.
+     * @param key_switch_count number of key_switch operations assuming no eval_add and eval_mult operations are
      * performed.
-     * @param dcrBits number of bits in each CRT modulus.
+     * @param dcr_bits number of bits in each CRT modulus.
      * @param n ring dimension in case the user wants to use a custom ring dimension (0 to derive it from the
      * security level).
-     * @param numPartQ number of partitions (digits) of Q for HYBRID key switching.
+     * @param num_part_q number of partitions (digits) of Q for HYBRID key switching.
      * @return true on success (an exception is thrown otherwise).
      */
-    bool ParamsGenBFVRNSInternal(std::shared_ptr<CryptoParametersBase<DCRTPoly>> cryptoParams, uint32_t evalAddCount,
-                                 uint32_t multiplicativeDepth, uint32_t keySwitchCount, size_t dcrBits, uint32_t n,
-                                 uint32_t numPartQ) const override;
+    bool params_gen_bfvrns_internal(std::shared_ptr<BaseCryptoParams<RnsPoly>> crypto_params, uint32_t eval_add_count,
+                                 uint32_t multiplicative_depth, uint32_t key_switch_count, size_t dcr_bits, uint32_t n,
+                                 uint32_t num_part_q) const override;
 
     /////////////////////////////////////
     // SERIALIZATION
@@ -83,11 +83,11 @@ class ParameterGenerationBFVRNS : public ParameterGenerationRNS {
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {}
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "ParameterGenerationBFVRNS";
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_BFV_PARAM_GEN_H_

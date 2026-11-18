@@ -39,7 +39,7 @@
 #include "cipher/fhe/ciphertext.h"
 #include "cipher/fhe/metadata.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Example class inheriting from Metadata and adding a member.
@@ -50,7 +50,7 @@ class MetadataTest : public Metadata {
     /**
      * Default constructor
      */
-    MetadataTest() : Metadata(), m_s("") {}
+    MetadataTest() : Metadata(), s_("") {}
     /**
      * Destructor
      */
@@ -60,7 +60,7 @@ class MetadataTest : public Metadata {
      * Copy constructor
      */
     MetadataTest(const MetadataTest& mdata) : Metadata() {
-        m_s = mdata.m_s;
+        s_ = mdata.s_;
     }
 
     /**
@@ -75,24 +75,24 @@ class MetadataTest : public Metadata {
      * the Clone method.
      *
      */
-    std::shared_ptr<Metadata> Clone() const override {
+    std::shared_ptr<Metadata> clone() const override {
         auto mdata = std::make_shared<MetadataTest>();
-        mdata->m_s = this->m_s;
+        mdata->s_ = this->s_;
         return mdata;
     }
 
     /**
      * Setter method for the only value stored in this Metadata container.
      */
-    void SetMetadata(std::string str) {
-        m_s = std::string(str);
+    void set_metadata(std::string str) {
+        s_ = std::string(str);
     }
 
     /**
      * This method returns the (only) value stored in this Metadata container
      */
-    std::string GetMetadata() const {
-        return m_s;
+    std::string get_metadata() const {
+        return s_;
     }
 
     /**
@@ -100,11 +100,11 @@ class MetadataTest : public Metadata {
      */
     bool operator==(const Metadata& mdata) const override {
         try {
-            const MetadataTest& mdataTest = dynamic_cast<const MetadataTest&>(mdata);
-            return m_s == mdataTest.GetMetadata();  // All Metadata objects without
+            const MetadataTest& mdata_test = dynamic_cast<const MetadataTest&>(mdata);
+            return s_ == mdata_test.get_metadata();  // All Metadata objects without
                                                     // any members are equal
         } catch (const std::bad_cast& e) {
-            OPENFHE_THROW("Tried to downcast an object of different class to MetadataTest");
+            CIPHER_THROW("Tried to downcast an object of different class to MetadataTest");
         }
     }
 
@@ -114,7 +114,7 @@ class MetadataTest : public Metadata {
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
         ar(cereal::base_class<Metadata>(this));
-        ar(cereal::make_nvp("str", m_s));
+        ar(cereal::make_nvp("str", s_));
     }
 
     /**
@@ -122,12 +122,12 @@ class MetadataTest : public Metadata {
      */
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
         ar(cereal::base_class<Metadata>(this));
-        ar(cereal::make_nvp("str", m_s));
+        ar(cereal::make_nvp("str", s_));
     }
 
     /**
@@ -138,14 +138,14 @@ class MetadataTest : public Metadata {
      * @param ciphertext the ciphertext whose metadata to retrieve.
      */
     template <class Element>
-    static const std::shared_ptr<MetadataTest> CloneMetadata(
+    static const std::shared_ptr<MetadataTest> clone_metadata(
             const std::shared_ptr<const CiphertextImpl<Element>> ciphertext) {
-        auto it = ciphertext->FindMetadataByKey("test");
+        auto it = ciphertext->find_metadata_by_key("test");
 
-        if (ciphertext->MetadataFound(it)) {
-            return std::dynamic_pointer_cast<MetadataTest>(ciphertext->GetMetadata(it)->Clone());
+        if (ciphertext->metadata_found(it)) {
+            return std::dynamic_pointer_cast<MetadataTest>(ciphertext->get_metadata(it)->clone());
         } else {
-            OPENFHE_THROW("Attempt to access metadata (MetadataTest) that has not been set.");
+            CIPHER_THROW("Attempt to access metadata (MetadataTest) that has not been set.");
         }
     }
 
@@ -158,14 +158,14 @@ class MetadataTest : public Metadata {
      * @param ciphertext the ciphertext whose metadata to retrieve.
      */
     template <class Element>
-    static const std::shared_ptr<MetadataTest> GetMetadata(
+    static const std::shared_ptr<MetadataTest> get_metadata(
             const std::shared_ptr<const CiphertextImpl<Element>> ciphertext) {
-        auto it = ciphertext->FindMetadataByKey("test");
+        auto it = ciphertext->find_metadata_by_key("test");
 
-        if (ciphertext->MetadataFound(it)) {
-            return std::dynamic_pointer_cast<MetadataTest>(ciphertext->GetMetadata(it));
+        if (ciphertext->metadata_found(it)) {
+            return std::dynamic_pointer_cast<MetadataTest>(ciphertext->get_metadata(it));
         } else {
-            OPENFHE_THROW("Attempt to access metadata (MetadataTest) that has not been set.");
+            CIPHER_THROW("Attempt to access metadata (MetadataTest) that has not been set.");
         }
     }
 
@@ -185,23 +185,23 @@ class MetadataTest : public Metadata {
      * @param ciphertext the ciphertext whose metadata to retrieve.
      */
     template <class Element>
-    static void StoreMetadata(std::shared_ptr<CiphertextImpl<Element>> ciphertext,
+    static void store_metadata(std::shared_ptr<CiphertextImpl<Element>> ciphertext,
                               std::shared_ptr<MetadataTest> mdata) {
-        ciphertext->SetMetadataByKey("test", mdata);
+        ciphertext->set_metadata_by_key("test", mdata);
     }
 
   protected:
     /**
      * Defines how to print the contents of objects of this class.
      */
-    std::ostream& PrintMetadata(std::ostream& out) const override {
-        out << "[ " << m_s << " ]";
+    std::ostream& print_metadata(std::ostream& out) const override {
+        out << "[ " << s_ << " ]";
         return out;
     }
 
-    std::string m_s;
+    std::string s_;
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_TESTS_FHE_SUPPORT_METADATA_TEST_H_

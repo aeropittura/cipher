@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  SchemeletRLWEMP::EncryptCoeff converts each signed plaintext coefficient into its residue modulo
+  SchemeletRlweMp::encrypt_coeff converts each signed plaintext coefficient into its residue modulo
   the ciphertext modulus. That conversion used to negate the operand as a signed value, which is
   undefined for the signed minimum, and skipped the reduction. The existing functional
   bootstrapping tests only feed non-negative coefficients, so the negative branch went untested.
@@ -44,17 +44,17 @@
 #include "cipher/cipher.h"
 #include "cipher/fhe/schemelet/rlwe_mp.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 namespace {
-// Plaintext modulus; DecryptCoeff centres its output, so coefficients must stay inside
+// Plaintext modulus; decrypt_coeff centres its output, so coefficients must stay inside
 // (-PLAINTEXT_MODULUS / 2, PLAINTEXT_MODULUS / 2) to round-trip.
 constexpr int64_t PLAINTEXT_MODULUS = 256;
 
 class UTRLWEMP : public ::testing::Test {
   protected:
     void TearDown() override {
-        CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+        ContextFactory<RnsPoly>::release_all_contexts();
     }
 };
 
@@ -62,27 +62,27 @@ class UTRLWEMP : public ::testing::Test {
 // handled correctly, so this guards the branch rather than reproducing the defect; the reduction
 // itself is covered below.
 TEST_F(UTRLWEMP, NegativeCoefficientsRoundTrip) {
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetSecurityLevel(HEStd_NotSet);
-    parameters.SetRingDim(1024);
-    parameters.SetMultiplicativeDepth(1);
-    parameters.SetScalingModSize(59);
-    parameters.SetFirstModSize(60);
-    parameters.SetBatchSize(8);
-    auto cc = GenCryptoContext(parameters);
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_security_level(HEStd_NotSet);
+    parameters.set_ring_dim(1024);
+    parameters.set_multiplicative_depth(1);
+    parameters.set_scaling_mod_size(59);
+    parameters.set_first_mod_size(60);
+    parameters.set_batch_size(8);
+    auto cc = make_crypto_context(parameters);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
 
-    auto keys = cc->KeyGen();
-    auto elementParams = SchemeletRLWEMP::GetElementParams(keys.secretKey, 0);
+    auto keys = cc->key_gen();
+    auto element_params = SchemeletRlweMp::get_element_params(keys.secret_key, 0);
     const BigInteger Q = BigInteger(1) << 33;
     const BigInteger p = BigInteger(static_cast<uint64_t>(PLAINTEXT_MODULUS));
-    const int64_t halfDown = PLAINTEXT_MODULUS / 2 - 1;
+    const int64_t half_down = PLAINTEXT_MODULUS / 2 - 1;
 
-    const std::vector<int64_t> input{-1, -halfDown, -100, 0, 1, 100, halfDown, -42};
-    auto ciphertext = SchemeletRLWEMP::EncryptCoeff(input, Q, p, keys.secretKey, elementParams);
-    auto output = SchemeletRLWEMP::DecryptCoeff(ciphertext, Q, p, keys.secretKey, elementParams, input.size());
+    const std::vector<int64_t> input{-1, -half_down, -100, 0, 1, 100, half_down, -42};
+    auto ciphertext = SchemeletRlweMp::encrypt_coeff(input, Q, p, keys.secret_key, element_params);
+    auto output = SchemeletRlweMp::decrypt_coeff(ciphertext, Q, p, keys.secret_key, element_params, input.size());
 
     ASSERT_EQ(output.size(), input.size());
     for (size_t i = 0; i < input.size(); ++i)
@@ -93,20 +93,20 @@ TEST_F(UTRLWEMP, NegativeCoefficientsRoundTrip) {
 // residue as Q - |v| without reducing first underflows once |v| > Q, and the signed minimum was
 // additionally negated as a signed value, which is undefined.
 TEST_F(UTRLWEMP, OutOfRangeCoefficientsAreReduced) {
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetSecurityLevel(HEStd_NotSet);
-    parameters.SetRingDim(1024);
-    parameters.SetMultiplicativeDepth(1);
-    parameters.SetScalingModSize(59);
-    parameters.SetFirstModSize(60);
-    parameters.SetBatchSize(8);
-    auto cc = GenCryptoContext(parameters);
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_security_level(HEStd_NotSet);
+    parameters.set_ring_dim(1024);
+    parameters.set_multiplicative_depth(1);
+    parameters.set_scaling_mod_size(59);
+    parameters.set_first_mod_size(60);
+    parameters.set_batch_size(8);
+    auto cc = make_crypto_context(parameters);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
 
-    auto keys = cc->KeyGen();
-    auto elementParams = SchemeletRLWEMP::GetElementParams(keys.secretKey, 0);
+    auto keys = cc->key_gen();
+    auto element_params = SchemeletRlweMp::get_element_params(keys.secret_key, 0);
     const BigInteger p = BigInteger(static_cast<uint64_t>(PLAINTEXT_MODULUS));
 
     // Q divides 2^63, so the signed minimum reduces to zero; the other coefficients sit one step
@@ -119,9 +119,9 @@ TEST_F(UTRLWEMP, OutOfRangeCoefficientsAreReduced) {
     const std::vector<int64_t> expected{0, -5, -7, 5, 7, 0, 0, 0};
 
     std::vector<int64_t> output;
-    ASSERT_NO_THROW(output = SchemeletRLWEMP::DecryptCoeff(
-                            SchemeletRLWEMP::EncryptCoeff(input, Q, p, keys.secretKey, elementParams), Q, p,
-                            keys.secretKey, elementParams, input.size()));
+    ASSERT_NO_THROW(output = SchemeletRlweMp::decrypt_coeff(
+                            SchemeletRlweMp::encrypt_coeff(input, Q, p, keys.secret_key, element_params), Q, p,
+                            keys.secret_key, element_params, input.size()));
     ASSERT_EQ(output.size(), expected.size());
     for (size_t i = 0; i < expected.size(); ++i)
         EXPECT_EQ(output[i], expected[i]) << "coefficient " << i << " (input " << input[i] << ")";

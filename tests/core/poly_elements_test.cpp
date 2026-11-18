@@ -41,7 +41,7 @@
 #include "core/test_defs.h"
 #include "cipher/util/debug.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 // --------------- TESTING METHODS OF LATTICE ELEMENTS ---------------
 // these tests only work on Poly, and have not been ported to DCRT
@@ -52,80 +52,80 @@ using namespace lbcrypto;
 
 template <typename Element>
 void rounding_ops(const std::string& msg) {
-    OPENFHE_DEBUG_FLAG(false);
+    CIPHER_DEBUG_FLAG(false);
     using VecType = typename Element::Vector;
     using ParmType = typename Element::Params;
 
     uint32_t m = 8;
 
     typename VecType::Integer q("73");
-    typename VecType::Integer primitiveRootOfUnity("22");
+    typename VecType::Integer primitive_root_of_unity("22");
     typename VecType::Integer p("8");
 
-    auto ilparams = std::make_shared<ParmType>(m, q, primitiveRootOfUnity);
+    auto ilparams = std::make_shared<ParmType>(m, q, primitive_root_of_unity);
 
     // temporary larger modulus that is used for polynomial multiplication before
     // rounding
     typename VecType::Integer q2("16417");
-    typename VecType::Integer primitiveRootOfUnity2("13161");
+    typename VecType::Integer primitive_root_of_unity2("13161");
 
-    auto ilparams2 = std::make_shared<ParmType>(m, q2, primitiveRootOfUnity2);
+    auto ilparams2 = std::make_shared<ParmType>(m, q2, primitive_root_of_unity2);
 
     Element ilvector2n1(ilparams, Format::COEFFICIENT);
     ilvector2n1 = {"31", "21", "15", "34"};
-    OPENFHE_DEBUGEXP(ilvector2n1);
+    CIPHER_DEBUGEXP(ilvector2n1);
     // test for bug where length was 0
-    EXPECT_EQ(ilvector2n1.GetLength(), m / 2) << msg << " Failure: ={init list string}";
+    EXPECT_EQ(ilvector2n1.get_length(), m / 2) << msg << " Failure: ={init list string}";
 
     Element ilvector2n2(ilparams, Format::COEFFICIENT);
     ilvector2n2 = {"21", "11", "35", "32"};
-    OPENFHE_DEBUGEXP(ilvector2n2);
+    CIPHER_DEBUGEXP(ilvector2n2);
 
-    OPENFHE_DEBUG("unit test for MultiplyAndRound");
-    Element roundingCorrect1(ilparams, Format::COEFFICIENT);
-    roundingCorrect1 = {"3", "2", "2", "4"};
+    CIPHER_DEBUG("unit test for MultiplyAndRound");
+    Element rounding_correct1(ilparams, Format::COEFFICIENT);
+    rounding_correct1 = {"3", "2", "2", "4"};
 
-    OPENFHE_DEBUGEXP(ilvector2n1);
+    CIPHER_DEBUGEXP(ilvector2n1);
 
-    Element rounding1 = ilvector2n1.MultiplyAndRound(p, q);
+    Element rounding1 = ilvector2n1.multiply_and_round(p, q);
 
-    EXPECT_EQ(roundingCorrect1, rounding1) << msg << " Failure: Rounding p*polynomial/q";
+    EXPECT_EQ(rounding_correct1, rounding1) << msg << " Failure: Rounding p*polynomial/q";
 
-    OPENFHE_DEBUG("unit test for MultiplyAndRound after a polynomial");
-    OPENFHE_DEBUG("multiplication using the larger modulus");
+    CIPHER_DEBUG("unit test for MultiplyAndRound after a polynomial");
+    CIPHER_DEBUG("multiplication using the larger modulus");
 
-    Element roundingCorrect2(ilparams2, Format::COEFFICIENT);
-    roundingCorrect2 = {"16316", "16320", "60", "286"};
+    Element rounding_correct2(ilparams2, Format::COEFFICIENT);
+    rounding_correct2 = {"16316", "16320", "60", "286"};
 
-    ilvector2n1.SwitchModulus(q2, primitiveRootOfUnity2, 0, 0);
-    ilvector2n2.SwitchModulus(q2, primitiveRootOfUnity2, 0, 0);
-    OPENFHE_DEBUGEXP(ilvector2n1);
-    OPENFHE_DEBUGEXP(ilvector2n2);
+    ilvector2n1.switch_modulus(q2, primitive_root_of_unity2, 0, 0);
+    ilvector2n2.switch_modulus(q2, primitive_root_of_unity2, 0, 0);
+    CIPHER_DEBUGEXP(ilvector2n1);
+    CIPHER_DEBUGEXP(ilvector2n2);
 
-    ilvector2n1.SwitchFormat();
-    ilvector2n2.SwitchFormat();
-    OPENFHE_DEBUGEXP(ilvector2n1);
-    OPENFHE_DEBUGEXP(ilvector2n2);
+    ilvector2n1.switch_format();
+    ilvector2n2.switch_format();
+    CIPHER_DEBUGEXP(ilvector2n1);
+    CIPHER_DEBUGEXP(ilvector2n2);
 
     Element rounding2 = ilvector2n1 * ilvector2n2;
 
-    OPENFHE_DEBUGEXP(rounding2);
-    rounding2.SwitchFormat();
-    OPENFHE_DEBUGEXP(rounding2);
-    rounding2 = rounding2.MultiplyAndRound(p, q);
-    OPENFHE_DEBUGEXP(rounding2);
-    EXPECT_EQ(roundingCorrect2, rounding2) << msg << " Failure: Rounding p*polynomial1*polynomial2/q";
+    CIPHER_DEBUGEXP(rounding2);
+    rounding2.switch_format();
+    CIPHER_DEBUGEXP(rounding2);
+    rounding2 = rounding2.multiply_and_round(p, q);
+    CIPHER_DEBUGEXP(rounding2);
+    EXPECT_EQ(rounding_correct2, rounding2) << msg << " Failure: Rounding p*polynomial1*polynomial2/q";
 
-    OPENFHE_DEBUG("makes sure the result is correct after");
-    OPENFHE_DEBUG("going back to the original modulus");
+    CIPHER_DEBUG("makes sure the result is correct after");
+    CIPHER_DEBUG("going back to the original modulus");
 
-    rounding2.SwitchModulus(q, primitiveRootOfUnity, 0, 0);
-    OPENFHE_DEBUGEXP(rounding2);
+    rounding2.switch_modulus(q, primitive_root_of_unity, 0, 0);
+    CIPHER_DEBUGEXP(rounding2);
 
-    Element roundingCorrect3(ilparams, Format::COEFFICIENT);
-    roundingCorrect3 = {"45", "49", "60", "67"};
+    Element rounding_correct3(ilparams, Format::COEFFICIENT);
+    rounding_correct3 = {"45", "49", "60", "67"};
 
-    EXPECT_EQ(roundingCorrect3, rounding2) << msg << " Failure p*polynomial1*polynomial2/q (mod q)";
+    EXPECT_EQ(rounding_correct3, rounding2) << msg << " Failure p*polynomial1*polynomial2/q (mod q)";
 }
 
 // instantiate various test for rounding_ops()
@@ -133,43 +133,43 @@ TEST(UTPoly, rounding_ops) {
     RUN_ALL_POLYS(rounding_ops, "Poly rounding_ops");
 }
 
-// TODO DCRTPoly needs an assignment op/ctor
+// TODO RnsPoly needs an assignment op/ctor
 TEST(UTDCRTPoly, rounding_ops) {
-    // std::cerr<<"*** skipping DCRT rounding_ops till MultiplyAndRound is
+    // std::cerr<<"*** skipping DCRT rounding_ops till multiply_and_round is
     // coded"<<std::endl; RUN_BIG_DCRTPOLYS(rounding_ops, "DCRT rounding_ops");
 }
 
 // template for set_get_values()
 template <typename Element>
 void set_get_values(const std::string& msg) {
-    OPENFHE_DEBUG_FLAG(false);
+    CIPHER_DEBUG_FLAG(false);
     using VecType = typename Element::Vector;
     using ParmType = typename Element::Params;
 
     uint32_t m = 8;
 
-    typename VecType::Integer primeModulus("73");
-    typename VecType::Integer primitiveRootOfUnity("22");
+    typename VecType::Integer prime_modulus("73");
+    typename VecType::Integer primitive_root_of_unity("22");
 
-    auto ilparams = std::make_shared<ParmType>(m, primeModulus, primitiveRootOfUnity);
-    {  // test SetValues()
+    auto ilparams = std::make_shared<ParmType>(m, prime_modulus, primitive_root_of_unity);
+    {  // test set_values()
         Element ilvector2n(ilparams);
-        VecType bbv(m / 2, primeModulus);
+        VecType bbv(m / 2, prime_modulus);
         bbv = {"3", "0", "0", "0"};
-        ilvector2n.SetValues(bbv, Format::COEFFICIENT);
-        OPENFHE_DEBUGEXP(ilvector2n);
+        ilvector2n.set_values(bbv, Format::COEFFICIENT);
+        CIPHER_DEBUGEXP(ilvector2n);
         // test for bug where length was 0
-        EXPECT_EQ(ilvector2n.GetLength(), m / 2) << msg << " Failure: ={init list string}";
+        EXPECT_EQ(ilvector2n.get_length(), m / 2) << msg << " Failure: ={init list string}";
 
         Element ilvector2n2(ilparams);
-        VecType bbv2(m / 2, primeModulus);
+        VecType bbv2(m / 2, prime_modulus);
         bbv2 = {"3", "3", "3", "3"};
-        ilvector2n2.SetValues(bbv2, Format::COEFFICIENT);
+        ilvector2n2.set_values(bbv2, Format::COEFFICIENT);
 
-        // test SetValues()
+        // test set_values()
         EXPECT_NE(ilvector2n, ilvector2n2) << msg << " Failure: SetValues NE";
         bbv2 = bbv;
-        ilvector2n2.SetValues(bbv2, Format::COEFFICIENT);
+        ilvector2n2.set_values(bbv2, Format::COEFFICIENT);
         EXPECT_EQ(ilvector2n, ilvector2n2) << msg << " Failure: SetValues EQ";
     }
     {  // test GetValue() and at()
@@ -177,10 +177,10 @@ void set_get_values(const std::string& msg) {
         ilvector2n = {"1", "2", "0", "1"};
         Element bbv(ilparams);
         bbv = {"1", "2", "0", "1"};
-        OPENFHE_DEBUGEXP(ilvector2n);
-        OPENFHE_DEBUGEXP(bbv);
+        CIPHER_DEBUGEXP(ilvector2n);
+        CIPHER_DEBUGEXP(bbv);
 
-        EXPECT_EQ(bbv.GetValues(), ilvector2n.GetValues()) << msg << "Failure: GetValues()";
+        EXPECT_EQ(bbv.get_values(), ilvector2n.get_values()) << msg << "Failure: GetValues()";
 
         uint32_t index = 3;
         bbv[index] = 11;
@@ -199,7 +199,7 @@ TEST(UTPoly, set_get_values) {
     RUN_ALL_POLYS(set_get_values, "Poly set_get_values");
 }
 
-// TODO DCRTPoly needs a set_get_values()
+// TODO RnsPoly needs a set_get_values()
 TEST(UTDCRTPoly, set_get_values) {
     // std::cerr<<"*** skipping DCRT set_get_values till coded"<<std::endl;
     // RUN_BIG_DCRTPOLYS(set_get_values, "DCRT set_values");
@@ -208,26 +208,26 @@ TEST(UTDCRTPoly, set_get_values) {
 // template for at()
 template <typename Element>
 void at(const std::string& msg) {
-    OPENFHE_DEBUG_FLAG(false);
+    CIPHER_DEBUG_FLAG(false);
     using VecType = typename Element::Vector;
     using ParmType = typename Element::Params;
 
     uint32_t m = 8;
 
-    typename VecType::Integer primeModulus("73");
-    typename VecType::Integer primitiveRootOfUnity("22");
+    typename VecType::Integer prime_modulus("73");
+    typename VecType::Integer primitive_root_of_unity("22");
 
-    auto ilparams = std::make_shared<ParmType>(m, primeModulus, primitiveRootOfUnity);
+    auto ilparams = std::make_shared<ParmType>(m, prime_modulus, primitive_root_of_unity);
 
     {  // test and at() and []
         Element ilvector2n(ilparams);
         ilvector2n = {"1", "2", "0", "1"};
         Element bbv(ilparams);
         bbv = {"1", "2", "0", "1"};
-        OPENFHE_DEBUGEXP(ilvector2n);
-        OPENFHE_DEBUGEXP(bbv);
+        CIPHER_DEBUGEXP(ilvector2n);
+        CIPHER_DEBUGEXP(bbv);
         // test for bug where length was 0
-        EXPECT_EQ(ilvector2n.GetLength(), m / 2) << msg << " Failure: ={init list string}";
+        EXPECT_EQ(ilvector2n.get_length(), m / 2) << msg << " Failure: ={init list string}";
 
         uint32_t index = 3;
         bbv[index] = 11;
@@ -250,39 +250,39 @@ TEST(UTPoly, at) {
     RUN_ALL_POLYS(at, "Poly at");
 }
 
-// TODO DCRTPoly needs a at() and []
+// TODO RnsPoly needs a at() and []
 TEST(UTDCRTPoly, at) {
     // std::cerr<<"*** skipping DCRT at till coded"<<std::endl;
     // RUN_BIG_DCRTPOLYS(at, "DCRT at");
 }
 
-// template for switch_modulus
+// template for switch_modulus_impl
 
 template <typename Element>
-void switch_modulus(const std::string& msg) {
-    OPENFHE_DEBUG_FLAG(false);
+void switch_modulus_impl(const std::string& msg) {
+    CIPHER_DEBUG_FLAG(false);
     using VecType = typename Element::Vector;
     using ParmType = typename Element::Params;
     // using IntType = typename Element::Vector::Integer;
 
     uint32_t m = 8;
-    typename VecType::Integer primeModulus("73");
-    typename VecType::Integer primitiveRootOfUnity("22");
+    typename VecType::Integer prime_modulus("73");
+    typename VecType::Integer primitive_root_of_unity("22");
 
-    auto ilparams = std::make_shared<ParmType>(m, primeModulus, primitiveRootOfUnity);
-    OPENFHE_DEBUG("SwitchModulus");
+    auto ilparams = std::make_shared<ParmType>(m, prime_modulus, primitive_root_of_unity);
+    CIPHER_DEBUG("SwitchModulus");
     {
         Element ilv(ilparams, Format::COEFFICIENT);
         ilv = {"56", "1", "37", "2"};
         // test for bug where length was 0
-        EXPECT_EQ(ilv.GetLength(), m / 2) << msg << " Failure: ={init list string}";
+        EXPECT_EQ(ilv.get_length(), m / 2) << msg << " Failure: ={init list string}";
 
         typename VecType::Integer modulus("17");
-        typename VecType::Integer rootOfUnity("15");
+        typename VecType::Integer root_of_unity_value("15");
 
-        ilv.SwitchModulus(modulus, rootOfUnity, 0, 0);
+        ilv.switch_modulus(modulus, root_of_unity_value, 0, 0);
 
-        auto ilparams2 = std::make_shared<ParmType>(m, modulus, rootOfUnity);
+        auto ilparams2 = std::make_shared<ParmType>(m, modulus, root_of_unity_value);
         Element expected(ilparams2, Format::COEFFICIENT);
         expected = {"0", "1", "15", "2"};
         EXPECT_EQ(expected, ilv) << msg << " Failure: SwitchModulus()";
@@ -290,23 +290,23 @@ void switch_modulus(const std::string& msg) {
         Element ilv1(ilparams, Format::COEFFICIENT);
         ilv1 = {"56", "43", "35", "28"};
         typename VecType::Integer modulus1("193");
-        typename VecType::Integer rootOfUnity1("150");
+        typename VecType::Integer root_of_unity1("150");
 
-        ilv1.SwitchModulus(modulus1, rootOfUnity1, 0, 0);
-        auto ilparams3 = std::make_shared<ParmType>(m, modulus1, rootOfUnity1);
+        ilv1.switch_modulus(modulus1, root_of_unity1, 0, 0);
+        auto ilparams3 = std::make_shared<ParmType>(m, modulus1, root_of_unity1);
         Element expected2(ilparams3, Format::COEFFICIENT);
         expected2 = {"176", "163", "35", "28"};
         EXPECT_EQ(expected2, ilv1) << msg << " Failure: SwitchModulus()";
     }
 }
-// instantiations for switch_modulus()
+// instantiations for switch_modulus_impl()
 TEST(UTPoly, switch_modulus) {
-    RUN_ALL_POLYS(switch_modulus, "Poly switch_modulus");
+    RUN_ALL_POLYS(switch_modulus_impl, "Poly switch_modulus");
 }
 
 TEST(UTDCRTPoly, switch_modulus) {
-    // std::cerr<<"*** skipping DCRT switch_modulus till coded"<<std::endl;
-    // //RUN_BIG_DCRTPOLYS(switch_modulus, "Poly switch_modulus");
+    // std::cerr<<"*** skipping DCRT switch_modulus_impl till coded"<<std::endl;
+    // //RUN_BIG_DCRTPOLYS(switch_modulus_impl, "Poly switch_modulus_impl");
 }
 
 // template fore rn_generators()
@@ -315,24 +315,24 @@ void rn_generators(const std::string& msg) {
     using VecType = typename Element::Vector;
     using ParmType = typename Element::Params;
 
-    OPENFHE_DEBUG_FLAG(false);
+    CIPHER_DEBUG_FLAG(false);
     uint32_t m = 8;
-    typename VecType::Integer primeModulus("73");
-    typename VecType::Integer primitiveRootOfUnity("22");
+    typename VecType::Integer prime_modulus("73");
+    typename VecType::Integer primitive_root_of_unity("22");
 
-    float stdDev = 4.0f;
-    typename Element::DggType dgg(stdDev);
+    float std_dev_value = 4.0f;
+    typename Element::DggType dgg(std_dev_value);
     typename Element::BugType bug;
     typename Element::DugType dug;
 
-    auto ilparams = std::make_shared<ParmType>(m, primeModulus, primitiveRootOfUnity);
+    auto ilparams = std::make_shared<ParmType>(m, prime_modulus, primitive_root_of_unity);
 
-    OPENFHE_DEBUG("DestroyPreComputedSamples");
+    CIPHER_DEBUG("DestroyPreComputedSamples");
     {
         Element ilv(ilparams, Format::COEFFICIENT);
         ilv = {"2", "1", "3", "2"};
         // test for bug where length was 0
-        EXPECT_EQ(ilv.GetLength(), m / 2) << msg << " Failure: ={init list string}";
+        EXPECT_EQ(ilv.get_length(), m / 2) << msg << " Failure: ={init list string}";
 
         Element ilvector2n1(ilparams);
         Element ilvector2n2(ilparams);
@@ -341,12 +341,12 @@ void rn_generators(const std::string& msg) {
         Element ilvector2n5(bug, ilparams);
         Element ilvector2n6(dug, ilparams);
 
-        EXPECT_EQ(true, ilvector2n1.IsEmpty()) << msg << " Failure: DestroyPreComputedSamples() 2n1";
-        EXPECT_EQ(true, ilvector2n2.IsEmpty()) << msg << " Failure: DestroyPreComputedSamples() 2n2";
-        EXPECT_EQ(false, ilvector2n3.IsEmpty()) << msg << " Failure: DestroyPreComputedSamples() 2n3";
-        EXPECT_EQ(false, ilvector2n4.IsEmpty()) << msg << " Failure: DestroyPreComputedSamples() 2n4";
-        EXPECT_EQ(false, ilvector2n5.IsEmpty()) << msg << " Failure: DestroyPreComputedSamples() 2n5";
-        EXPECT_EQ(false, ilvector2n6.IsEmpty()) << msg << " Failure: DestroyPreComputedSamples() 2n6";
+        EXPECT_EQ(true, ilvector2n1.is_empty()) << msg << " Failure: DestroyPreComputedSamples() 2n1";
+        EXPECT_EQ(true, ilvector2n2.is_empty()) << msg << " Failure: DestroyPreComputedSamples() 2n2";
+        EXPECT_EQ(false, ilvector2n3.is_empty()) << msg << " Failure: DestroyPreComputedSamples() 2n3";
+        EXPECT_EQ(false, ilvector2n4.is_empty()) << msg << " Failure: DestroyPreComputedSamples() 2n4";
+        EXPECT_EQ(false, ilvector2n5.is_empty()) << msg << " Failure: DestroyPreComputedSamples() 2n5";
+        EXPECT_EQ(false, ilvector2n6.is_empty()) << msg << " Failure: DestroyPreComputedSamples() 2n6";
     }
 }
 
@@ -366,28 +366,28 @@ void poly_other_methods(const std::string& msg) {
     using VecType = typename Element::Vector;
     using ParmType = typename Element::Params;
 
-    OPENFHE_DEBUG_FLAG(false);
+    CIPHER_DEBUG_FLAG(false);
     uint32_t m = 8;
-    typename VecType::Integer primeModulus("73");
-    typename VecType::Integer primitiveRootOfUnity("22");
+    typename VecType::Integer prime_modulus("73");
+    typename VecType::Integer primitive_root_of_unity("22");
 
-    auto ilparams = std::make_shared<ParmType>(m, primeModulus, primitiveRootOfUnity);
+    auto ilparams = std::make_shared<ParmType>(m, prime_modulus, primitive_root_of_unity);
 
     Element ilvector2n(ilparams);
     ilvector2n = {"2", "1", "3", "2"};
     // test for bug where length was 0
-    EXPECT_EQ(ilvector2n.GetLength(), m / 2) << msg << " Failure: ={init list string}";
+    EXPECT_EQ(ilvector2n.get_length(), m / 2) << msg << " Failure: ={init list string}";
 
-    OPENFHE_DEBUG("SwitchFormat");
+    CIPHER_DEBUG("SwitchFormat");
     {
         Element ilv(ilparams, Format::COEFFICIENT);
         ilv = {"2", "1", "3", "2"};
 
-        ilv.SwitchFormat();
+        ilv.switch_format();
 
-        EXPECT_EQ(primeModulus, ilv.GetModulus()) << msg << " Failure: SwitchFormat() ilv modulus";
-        EXPECT_EQ(primitiveRootOfUnity, ilv.GetRootOfUnity()) << msg << " Failure: SwitchFormat() ilv rootOfUnity";
-        EXPECT_EQ(Format::EVALUATION, ilv.GetFormat()) << msg << " Failure: SwitchFormat() ilv format";
+        EXPECT_EQ(prime_modulus, ilv.get_modulus()) << msg << " Failure: SwitchFormat() ilv modulus";
+        EXPECT_EQ(primitive_root_of_unity, ilv.get_root_of_unity()) << msg << " Failure: SwitchFormat() ilv rootOfUnity";
+        EXPECT_EQ(Format::EVALUATION, ilv.get_format()) << msg << " Failure: SwitchFormat() ilv format";
         Element expected(ilparams);
         expected = {"69", "65", "44", "49"};
         EXPECT_EQ(expected, ilv) << msg << " Failure: ivl.SwitchFormat() values";
@@ -395,35 +395,35 @@ void poly_other_methods(const std::string& msg) {
         Element ilv1(ilparams, Format::EVALUATION);
         ilv1 = {"2", "3", "1", "2"};
 
-        ilv1.SwitchFormat();
+        ilv1.switch_format();
 
-        EXPECT_EQ(primeModulus, ilv1.GetModulus()) << msg << " Failure: SwitchFormat() ilv1 modulus";
-        EXPECT_EQ(primitiveRootOfUnity, ilv1.GetRootOfUnity()) << msg << " Failure: SwitchFormat() ilv1 rootOfUnity";
-        EXPECT_EQ(Format::COEFFICIENT, ilv1.GetFormat()) << msg << " Failure: SwitchFormat() ilv1 format";
+        EXPECT_EQ(prime_modulus, ilv1.get_modulus()) << msg << " Failure: SwitchFormat() ilv1 modulus";
+        EXPECT_EQ(primitive_root_of_unity, ilv1.get_root_of_unity()) << msg << " Failure: SwitchFormat() ilv1 rootOfUnity";
+        EXPECT_EQ(Format::COEFFICIENT, ilv1.get_format()) << msg << " Failure: SwitchFormat() ilv1 format";
         Element expected2(ilparams, Format::COEFFICIENT);
         expected2 = {"2", "3", "50", "3"};
         EXPECT_EQ(expected2, ilv1) << msg << " Failure: ivl1.SwitchFormat() values";
     }
 
-    OPENFHE_DEBUG("MultiplicativeInverse");
+    CIPHER_DEBUG("MultiplicativeInverse");
     {
         Element ilv1(ilparams, Format::EVALUATION);
         ilv1 = {"2", "4", "3", "2"};
 
-        Element ilvInverse1 = ilv1.MultiplicativeInverse();
-        Element ilvProduct1 = ilv1 * ilvInverse1;
+        Element ilv_inverse1 = ilv1.multiplicative_inverse();
+        Element ilv_product1 = ilv1 * ilv_inverse1;
 
         for (uint32_t i = 0; i < m / 2; ++i) {
-            EXPECT_EQ(ilvProduct1[i], typename Element::Integer(1))
+            EXPECT_EQ(ilv_product1[i], typename Element::Integer(1))
                     << msg << " Failure: ilvProduct1.MultiplicativeInverse() @ index " << i;
         }
     }
 
-    OPENFHE_DEBUG("Norm");
+    CIPHER_DEBUG("Norm");
     {
         Element ilv(ilparams, Format::COEFFICIENT);
         ilv = {"56", "1", "37", "1"};
-        EXPECT_EQ(36, ilv.Norm()) << msg << " Failure: Norm()";
+        EXPECT_EQ(36, ilv.norm()) << msg << " Failure: Norm()";
     }
 }
 
@@ -448,19 +448,19 @@ void signed_mod(const std::string& msg) {
 
     uint32_t m = 8;
 
-    typename VecType::Integer primeModulus("73");
-    typename VecType::Integer primitiveRootOfUnity("22");
+    typename VecType::Integer prime_modulus("73");
+    typename VecType::Integer primitive_root_of_unity("22");
 
-    auto ilparams = std::make_shared<ParmType>(m, primeModulus, primitiveRootOfUnity);
+    auto ilparams = std::make_shared<ParmType>(m, prime_modulus, primitive_root_of_unity);
 
     Element ilvector2n1(ilparams, Format::COEFFICIENT);
     ilvector2n1 = {"62", "7", "65", "8"};
     // test for bug where length was 0
-    EXPECT_EQ(ilvector2n1.GetLength(), m / 2) << msg << " Failure: ={init list string}";
+    EXPECT_EQ(ilvector2n1.get_length(), m / 2) << msg << " Failure: ={init list string}";
 
     {
         Element ilv1(ilparams, Format::COEFFICIENT);
-        ilv1 = ilvector2n1.Mod(2);
+        ilv1 = ilvector2n1.mod(2);
         Element expected(ilparams, Format::COEFFICIENT);
         expected = {"1", "1", "0", "0"};
         EXPECT_EQ(expected, ilv1) << msg << " Failure: ilv1.Mod(TWO)";
@@ -468,7 +468,7 @@ void signed_mod(const std::string& msg) {
 
     {
         Element ilv1(ilparams, Format::COEFFICIENT);
-        ilv1 = ilvector2n1.Mod(5);
+        ilv1 = ilvector2n1.mod(5);
         Element expected(ilparams, Format::COEFFICIENT);
         expected = {"4", "2", "2", "3"};
         EXPECT_EQ(expected, ilv1) << msg << " Failure: ilv1.Mod(FIVE)";
@@ -485,45 +485,45 @@ TEST(UTDCRTPoly, signed_mod) {
     //  RUN_BIG_DCRTPOLYS(signed_mod, "signed_mod");
 }
 
-// template fore automorphismTransform()
+// template fore automorphism_transform_impl()
 template <typename Element>
-void automorphismTransform(const std::string& msg) {
+void automorphism_transform_impl(const std::string& msg) {
     using VecType = typename Element::Vector;
     using ParmType = typename Element::Params;
 
-    OPENFHE_DEBUG_FLAG(false);
+    CIPHER_DEBUG_FLAG(false);
     uint32_t m = 8;
-    typename VecType::Integer primeModulus("73");
-    typename VecType::Integer primitiveRootOfUnity("22");
+    typename VecType::Integer prime_modulus("73");
+    typename VecType::Integer primitive_root_of_unity("22");
 
-    auto ilparams = std::make_shared<ParmType>(m, primeModulus, primitiveRootOfUnity);
+    auto ilparams = std::make_shared<ParmType>(m, prime_modulus, primitive_root_of_unity);
 
     Element ilvector2n(ilparams);
     ilvector2n = {"2", "1", "3", "2"};
     // test for bug where length was 0
-    EXPECT_EQ(ilvector2n.GetLength(), m / 2) << msg << " Failure: ={init list string}";
+    EXPECT_EQ(ilvector2n.get_length(), m / 2) << msg << " Failure: ={init list string}";
 
-    OPENFHE_DEBUG("AutomorphismTransform");
+    CIPHER_DEBUG("AutomorphismTransform");
     {
         Element ilv(ilparams, Format::COEFFICIENT);
         ilv = {"56", "1", "37", "2"};
 
         uint32_t index = 3;
-        Element ilvAuto(ilv.AutomorphismTransform(index));
+        Element ilv_auto(ilv.automorphism_transform(index));
         Element expected(ilparams, Format::COEFFICIENT);
         expected = {"56", "2", "36", "1"};
-        EXPECT_EQ(expected, ilvAuto) << msg << " Failure: AutomorphismTransform()";
+        EXPECT_EQ(expected, ilv_auto) << msg << " Failure: AutomorphismTransform()";
     }
 }
-// Instantiations of automorphismTransform()
+// Instantiations of automorphism_transform_impl()
 TEST(UTPoly, automorphismTransform) {
-    RUN_ALL_POLYS(automorphismTransform, "Poly automorphismTransform");
+    RUN_ALL_POLYS(automorphism_transform_impl, "Poly automorphismTransform");
 }
 
 // TODO
 TEST(UTDCRTPoly, automorphismTransform) {
-    // std::cerr<<"*** skipping DCRT automorphismTransform till coded"<<std::endl;
-    //  RUN_BIG_DCRTPOLYS(automorphismTransform, "DCRT automorphismTransform");
+    // std::cerr<<"*** skipping DCRT automorphism_transform_impl till coded"<<std::endl;
+    //  RUN_BIG_DCRTPOLYS(automorphism_transform_impl, "DCRT automorphism_transform_impl");
 }
 
 template <typename Element>
@@ -531,35 +531,35 @@ void transposition(const std::string& msg) {
     using VecType = typename Element::Vector;
     using ParmType = typename Element::Params;
 
-    OPENFHE_DEBUG_FLAG(false);
+    CIPHER_DEBUG_FLAG(false);
     uint32_t m = 8;
 
     typename VecType::Integer q("73");
-    typename VecType::Integer primitiveRootOfUnity("22");
+    typename VecType::Integer primitive_root_of_unity("22");
 
-    auto ilparams = std::make_shared<ParmType>(m, q, primitiveRootOfUnity);
+    auto ilparams = std::make_shared<ParmType>(m, q, primitive_root_of_unity);
 
     Element ilvector2n1(ilparams, Format::COEFFICIENT);
     ilvector2n1 = {"31", "21", "15", "34"};
     // test for bug where length was 0
-    EXPECT_EQ(ilvector2n1.GetLength(), m / 2) << msg << " Failure: ={init list string}";
+    EXPECT_EQ(ilvector2n1.get_length(), m / 2) << msg << " Failure: ={init list string}";
 
     // converts to Format::EVALUATION representation
-    ilvector2n1.SwitchFormat();
-    OPENFHE_DEBUG("ilvector2n1 a " << ilvector2n1);
+    ilvector2n1.switch_format();
+    CIPHER_DEBUG("ilvector2n1 a " << ilvector2n1);
 
-    ilvector2n1 = ilvector2n1.Transpose();
-    OPENFHE_DEBUG("ilvector2n1 b " << ilvector2n1);
+    ilvector2n1 = ilvector2n1.transposed();
+    CIPHER_DEBUG("ilvector2n1 b " << ilvector2n1);
 
     // converts back to Format::COEFFICIENT representation
-    ilvector2n1.SwitchFormat();
+    ilvector2n1.switch_format();
 
-    OPENFHE_DEBUG("ilvector2n1 c " << ilvector2n1);
+    CIPHER_DEBUG("ilvector2n1 c " << ilvector2n1);
 
     Element ilvector2n2(ilparams, Format::COEFFICIENT);
     ilvector2n2 = {"31", "39", "58", "52"};
 
-    OPENFHE_DEBUG("ilvector2n2 a " << ilvector2n2);
+    CIPHER_DEBUG("ilvector2n2 a " << ilvector2n2);
 
     EXPECT_EQ(ilvector2n2, ilvector2n1) << msg << " Failure: transposition test";
 }
@@ -575,45 +575,45 @@ TEST(UTDCRTPoly, transposition) {
 }
 
 template <typename Element>
-void Poly_mod_ops_on_two_elements(const std::string& msg) {
+void poly_mod_ops_on_two_elements(const std::string& msg) {
     using VecType = typename Element::Vector;
     using ParmType = typename Element::Params;
 
     uint32_t order = 8;
-    uint32_t nBits = 7;
+    uint32_t n_bits = 7;
 
-    typename VecType::Integer primeModulus = LastPrime<typename VecType::Integer>(nBits, order);
-    auto ilparams = std::make_shared<ParmType>(order, primeModulus);
+    typename VecType::Integer prime_modulus = last_prime<typename VecType::Integer>(n_bits, order);
+    auto ilparams = std::make_shared<ParmType>(order, prime_modulus);
 
-    typename Element::DugType distrUniGen;
+    typename Element::DugType distr_uni_gen;
 
-    Element ilv1(distrUniGen, ilparams);
-    VecType bbv1(ilv1.GetValues());
+    Element ilv1(distr_uni_gen, ilparams);
+    VecType bbv1(ilv1.get_values());
 
-    Element ilv2(distrUniGen, ilparams);
-    VecType bbv2(ilv2.GetValues());
+    Element ilv2(distr_uni_gen, ilparams);
+    VecType bbv2(ilv2.get_values());
 
     {
-        Element ilvResult = ilv1 + ilv2;
-        VecType bbvResult(ilvResult.GetValues());
+        Element ilv_result = ilv1 + ilv2;
+        VecType bbv_result(ilv_result.get_values());
 
         for (uint32_t i = 0; i < order / 2; i++) {
-            EXPECT_EQ(bbvResult[i], (bbv1[i] + bbv2[i]).Mod(primeModulus))
+            EXPECT_EQ(bbv_result[i], (bbv1[i] + bbv2[i]).mod(prime_modulus))
                     << msg << " Poly + operation returns incorrect results.";
         }
     }
 
     {
-        Element ilvResult = ilv1 * ilv2;
-        VecType bbvResult(ilvResult.GetValues());
+        Element ilv_result = ilv1 * ilv2;
+        VecType bbv_result(ilv_result.get_values());
 
         for (uint32_t i = 0; i < order / 2; i++) {
-            EXPECT_EQ(bbvResult[i], (bbv1[i] * bbv2[i]).Mod(primeModulus))
+            EXPECT_EQ(bbv_result[i], (bbv1[i] * bbv2[i]).mod(prime_modulus))
                     << msg << " Poly * operation returns incorrect results.";
         }
     }
 }
 
 TEST(UTPoly, Poly_mod_ops_on_two_elements) {
-    RUN_ALL_POLYS(Poly_mod_ops_on_two_elements, "Poly Poly_mod_ops_on_two_elements");
+    RUN_ALL_POLYS(poly_mod_ops_on_two_elements, "Poly Poly_mod_ops_on_two_elements");
 }

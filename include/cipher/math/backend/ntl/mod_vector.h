@@ -35,7 +35,7 @@
  */
 
 //==================================================================================
-// This file is included only if WITH_NTL is set to ON in CMakeLists.txt
+// This file is included only if CIPHER_WITH_NTL is set to ON in CMakeLists.txt
 //==================================================================================
 #ifndef CIPHER_MATH_BACKEND_NTL_MOD_VECTOR_H_
 #define CIPHER_MATH_BACKEND_NTL_MOD_VECTOR_H_
@@ -44,7 +44,7 @@
 #include <type_traits>
 
 #include "cipher/config.h"
-#ifdef WITH_NTL
+#ifdef CIPHER_WITH_NTL
 
     #include <NTL/SmartPtr.h>
     #include <NTL/vec_ZZ.h>
@@ -81,7 +81,7 @@ namespace NTL {
 template <typename IntegerType>
 class myVecP;
 
-// Create default type for the MATHBACKEND 6 Vector
+// Create default type for the CIPHER_MATH_BACKEND 6 Vector
 using BigVector = myVecP<BigInteger>;
 
 /**
@@ -91,28 +91,28 @@ using BigVector = myVecP<BigInteger>;
 
 template <typename myT>
 class myVecP : public NTL::Vec<myT>,
-               public lbcrypto::BigVectorInterface<myVecP<myT>, myT>,
-               public lbcrypto::Serializable {
+               public cipher::BigVectorInterface<myVecP<myT>, myT>,
+               public cipher::Serializable {
   public:
     // CONSTRUCTORS
 
     myVecP() : Vec<myT>() {
-        m_modulus_state = GARBAGE;
+        modulus_state_ = GARBAGE;
     }
 
-    static inline myVecP Single(const myT& val, const myT& modulus) {
+    static inline myVecP single(const myT& val, const myT& modulus) {
         myVecP vec(1);
-        vec.SetModulus(modulus);
+        vec.set_modulus(modulus);
         vec[0] = val;
         return vec;
     }
 
     explicit myVecP(const size_t length) : Vec<myT>(INIT_SIZE, length) {
-        m_modulus_state = GARBAGE;
+        modulus_state_ = GARBAGE;
     }
 
     myVecP(INIT_SIZE_TYPE, const long length) : Vec<myT>(INIT_SIZE, length) {  // NOLINT
-        m_modulus_state = GARBAGE;
+        modulus_state_ = GARBAGE;
     }
 
     explicit myVecP(const myVecP<myT>& a);
@@ -121,7 +121,7 @@ class myVecP : public NTL::Vec<myT>,
 
     myVecP(const long n, const myT& q);  // NOLINT
     myVecP(uint32_t n, const myT& q, const myT& v) : Vec<myT>(INIT_SIZE, n) {
-        this->SetModulus(q);
+        this->set_modulus(q);
         for (uint32_t i{0}; i < n; ++i)
             (*this)[i] = v;
     }
@@ -181,88 +181,93 @@ class myVecP : public NTL::Vec<myT>,
         this->append(a);
     }
 
-    void SwitchModulus(const myT& newModulus);
-    void LazySwitchModulus(const myT& newModulus);
+    void switch_modulus(const myT& new_modulus);
+    void lazy_switch_modulus(const myT& new_modulus);
 
-    myVecP& MultAccEqNoCheck(const myVecP& a, const myVecP& b) {
-        OPENFHE_THROW("MultAccEqNoCheck() not implemented for mubintvecntl");
+    myVecP& mult_acc_eq_no_check(const myVecP& a, const myVecP& b) {
+        CIPHER_THROW("MultAccEqNoCheck() not implemented for mubintvecntl");
     }
-    myT& MultAccEqNoCheck(const myVecP& v, const myT& i) {
-        OPENFHE_THROW("MultAccEqNoCheck() not implemented for mubintvecntl");
+    myT& mult_acc_eq_no_check(const myVecP& v, const myT& i) {
+        CIPHER_THROW("MultAccEqNoCheck() not implemented for mubintvecntl");
     }
 
     // public modulus accessors
-    inline bool isModulusSet(void) const {
-        return (this->m_modulus_state == INITIALIZED);
+    inline bool is_modulus_set(void) const {
+        return (this->modulus_state_ == INITIALIZED);
     }
 
     // return true if both myVecP have same modulus
     inline bool SameModulus(const myVecP& a) const {
-        return ((this->m_modulus_state == a.m_modulus_state) && (this->m_modulus == a.m_modulus));
+        return ((this->modulus_state_ == a.modulus_state_) && (this->modulus_ == a.modulus_));
     }
 
     // sets modulus and the NTL init function uint64_t argument
-    inline void SetModulus(uint64_t value) {
+    inline void set_modulus(uint64_t value) {
         if (value == 0) {
-            OPENFHE_THROW("SetModulus(uint64_t) cannot be zero");
+            CIPHER_THROW("SetModulus(uint64_t) cannot be zero");
         }
-        this->m_modulus = myT(value);
-        this->m_modulus_state = INITIALIZED;
+        this->modulus_ = myT(value);
+        this->modulus_state_ = INITIALIZED;
     }
 
     // sets modulus and the NTL init function myT argument
-    void SetModulus(const myT& value) {
+    void set_modulus(const myT& value) {
         if (value == myT(0)) {
-            OPENFHE_THROW("SetModulus(myT) cannot be zero");
+            CIPHER_THROW("SetModulus(myT) cannot be zero");
         }
-        this->m_modulus = value;
-        this->m_modulus_state = INITIALIZED;
+        this->modulus_ = value;
+        this->modulus_state_ = INITIALIZED;
     }
 
     // sets modulus and the NTL init function string argument
-    inline void SetModulus(const std::string& value) {
-        this->m_modulus = myT(value);
-        if (this->m_modulus == myT(0)) {
-            OPENFHE_THROW("SetModulus(string) cannot be zero");
+    inline void set_modulus(const std::string& value) {
+        this->modulus_ = myT(value);
+        if (this->modulus_ == myT(0)) {
+            CIPHER_THROW("SetModulus(string) cannot be zero");
         }
-        this->m_modulus_state = INITIALIZED;
+        this->modulus_state_ = INITIALIZED;
     }
 
     // sets modulus and the NTL init function uses same modulus
-    inline void SetModulus(const myVecP& value) {
-        this->m_modulus = value.GetModulus();
-        if (this->m_modulus == myT(0)) {
-            OPENFHE_THROW("SetModulus(myVecP) cannot be zero");
+    inline void set_modulus(const myVecP& value) {
+        this->modulus_ = value.get_modulus();
+        if (this->modulus_ == myT(0)) {
+            CIPHER_THROW("SetModulus(myVecP) cannot be zero");
         }
-        this->m_modulus_state = INITIALIZED;
+        this->modulus_state_ = INITIALIZED;
     }
 
-    const myT& GetModulus() const {
-        if (this->isModulusSet()) {
-            return (this->m_modulus);
+    const myT& get_modulus() const {
+        if (this->is_modulus_set()) {
+            return (this->modulus_);
         } else {
-            OPENFHE_THROW("modulus not set");
+            CIPHER_THROW("modulus not set");
         }
     }
 
     inline int CopyModulus(const myVecP& rhs) {
-        this->m_modulus = rhs.m_modulus;
-        this->m_modulus_state = rhs.m_modulus_state;
-        if (isModulusSet()) {
+        this->modulus_ = rhs.modulus_;
+        this->modulus_state_ = rhs.modulus_state_;
+        if (is_modulus_set()) {
             return (0);
         } else {
-            this->m_modulus_state = GARBAGE;
+            this->modulus_state_ = GARBAGE;
             return (-1);
         }
     }
 
-    size_t GetLength(void) const {
+    size_t get_length(void) const {
         return this->length();
     }
 
     void resize(size_t n) {
         // resize is the STL::vector standard call for this functionality
-        this->SetLength(n);  // SetLength() is an NTL call
+        this->SetLength(n);  // SetLength() is the NTL::Vec member
+    }
+
+    // the library-wide vector interface; forwards to NTL::Vec::SetLength()
+    void set_length(size_t n) {
+        this->SetLength(n);
     }
 
     // MODULUS ARITHMETIC OPERATIONS
@@ -273,7 +278,7 @@ class myVecP : public NTL::Vec<myT>,
      * @param b is the modulus to perform on the current vector entries.
      * @return is the result of the modulus operation on current vector.
      */
-    myVecP Mod(const myT& b) const;
+    myVecP mod(const myT& b) const;
 
     /**
      * Vector modulus operator. In-place variant.
@@ -281,7 +286,7 @@ class myVecP : public NTL::Vec<myT>,
      * @param b is the modulus to perform on the current vector entries.
      * @return is the result of the modulus operation on current vector.
      */
-    myVecP& ModEq(const myT& b);
+    myVecP& mod_eq(const myT& b);
 
     /**
      * Scalar-to-vector modulus addition operation.
@@ -289,10 +294,10 @@ class myVecP : public NTL::Vec<myT>,
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus addition operation.
      */
-    myVecP ModAdd(const myT& b) const {
+    myVecP mod_add(const myT& b) const {
         ModulusCheck("Warning: myVecP::ModAdd");
         myVecP ans(*this);
-        ans.ModAddEq(b);
+        ans.mod_add_eq(b);
         return ans;
     }
 
@@ -302,10 +307,10 @@ class myVecP : public NTL::Vec<myT>,
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus addition operation.
      */
-    myVecP& ModAddEq(const myT& b) {
+    myVecP& mod_add_eq(const myT& b) {
         ModulusCheck("Warning: myVecP::ModAdd");
-        for (uint32_t i = 0; i < this->GetLength(); i++) {
-            this->operator[](i).ModAddEq(b, this->m_modulus);
+        for (uint32_t i = 0; i < this->get_length(); i++) {
+            this->operator[](i).mod_add_eq(b, this->modulus_);
         }
         return *this;
     }
@@ -317,7 +322,7 @@ class myVecP : public NTL::Vec<myT>,
      * @param b is the scalar to add.
      * @return is the result of the modulus addition operation.
      */
-    myVecP ModAddAtIndex(size_t i, const myT& b) const;
+    myVecP mod_add_at_index(size_t i, const myT& b) const;
 
     /**
      * Scalar modulus addition at a particular index. In-place variant.
@@ -326,7 +331,7 @@ class myVecP : public NTL::Vec<myT>,
      * @param b is the scalar to add.
      * @return is the result of the modulus addition operation.
      */
-    myVecP& ModAddAtIndexEq(size_t i, const myT& b);
+    myVecP& mod_add_at_index_eq(size_t i, const myT& b);
 
     /**
      * Vector component wise modulus addition.
@@ -334,10 +339,10 @@ class myVecP : public NTL::Vec<myT>,
      * @param b is the vector to perform operation with.
      * @return is the result of the component wise modulus addition operation.
      */
-    myVecP ModAdd(const myVecP& b) const {
+    myVecP mod_add(const myVecP& b) const {
         ArgCheckVector(b, "myVecP ModAdd()");
         myVecP ans(*this);
-        ans.ModAddEq(b);
+        ans.mod_add_eq(b);
         return ans;
     }
 
@@ -347,17 +352,17 @@ class myVecP : public NTL::Vec<myT>,
      * @param b is the vector to perform operation with.
      * @return is the result of the component wise modulus addition operation.
      */
-    myVecP& ModAddEq(const myVecP& b) {
+    myVecP& mod_add_eq(const myVecP& b) {
         ArgCheckVector(b, "myVecP ModAddEq()");
-        for (uint32_t i = 0; i < this->GetLength(); i++) {
-            this->operator[](i).ModAddEq(b[i], this->m_modulus);
+        for (uint32_t i = 0; i < this->get_length(); i++) {
+            this->operator[](i).mod_add_eq(b[i], this->modulus_);
         }
         return *this;
     }
 
-    myVecP& ModAddNoCheckEq(const myVecP& b) {
-        for (uint32_t i = 0; i < this->GetLength(); i++)
-            this->operator[](i).ModAddEq(b[i], this->m_modulus);
+    myVecP& mod_add_no_check_eq(const myVecP& b) {
+        for (uint32_t i = 0; i < this->get_length(); i++)
+            this->operator[](i).mod_add_eq(b[i], this->modulus_);
         return *this;
     }
 
@@ -371,10 +376,10 @@ class myVecP : public NTL::Vec<myT>,
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus subtraction operation.
      */
-    myVecP ModSub(const myT& b) const {
+    myVecP mod_sub(const myT& b) const {
         ModulusCheck("Warning: myVecP::ModSub");
         myVecP ans(*this);
-        ans.ModSubEq(b);
+        ans.mod_sub_eq(b);
         return ans;
     }
 
@@ -384,10 +389,10 @@ class myVecP : public NTL::Vec<myT>,
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus subtraction operation.
      */
-    myVecP& ModSubEq(const myT& b) {
+    myVecP& mod_sub_eq(const myT& b) {
         ModulusCheck("Warning: myVecP::ModSubEq");
-        for (uint32_t i = 0; i < this->GetLength(); i++) {
-            this->operator[](i).ModSubEq(b, this->m_modulus);
+        for (uint32_t i = 0; i < this->get_length(); i++) {
+            this->operator[](i).mod_sub_eq(b, this->modulus_);
         }
         return (*this);
     }
@@ -398,10 +403,10 @@ class myVecP : public NTL::Vec<myT>,
      * @param b is the vector to perform operation with.
      * @return is the result of the component wise modulus subtraction operation.
      */
-    myVecP ModSub(const myVecP& b) const {
+    myVecP mod_sub(const myVecP& b) const {
         ArgCheckVector(b, "myVecP ModSub()");
         myVecP ans(*this);
-        ans.ModSubEq(b);
+        ans.mod_sub_eq(b);
         return ans;
     }
 
@@ -411,10 +416,10 @@ class myVecP : public NTL::Vec<myT>,
      * @param b is the vector to perform operation with.
      * @return is the result of the component wise modulus subtraction operation.
      */
-    myVecP& ModSubEq(const myVecP& b) {
+    myVecP& mod_sub_eq(const myVecP& b) {
         ArgCheckVector(b, "myVecP ModSubEq()");
-        for (uint32_t i = 0; i < this->GetLength(); i++) {
-            this->operator[](i).ModSubEq(b[i], this->m_modulus);
+        for (uint32_t i = 0; i < this->get_length(); i++) {
+            this->operator[](i).mod_sub_eq(b[i], this->modulus_);
         }
         return (*this);
     }
@@ -429,10 +434,10 @@ class myVecP : public NTL::Vec<myT>,
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus multiplication operation.
      */
-    myVecP ModMul(const myT& b) const {
+    myVecP mod_mul(const myT& b) const {
         ModulusCheck("Warning: myVecP::ModMul");
         myVecP ans(*this);
-        ans.ModMulEq(b);
+        ans.mod_mul_eq(b);
         return ans;
     }
 
@@ -442,10 +447,10 @@ class myVecP : public NTL::Vec<myT>,
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus multiplication operation.
      */
-    myVecP& ModMulEq(const myT& b) {
+    myVecP& mod_mul_eq(const myT& b) {
         ModulusCheck("Warning: myVecP::ModMul");
-        for (uint32_t i = 0; i < this->GetLength(); i++) {
-            this->operator[](i).ModMulEq(b, this->m_modulus);
+        for (uint32_t i = 0; i < this->get_length(); i++) {
+            this->operator[](i).mod_mul_eq(b, this->modulus_);
         }
         return (*this);
     }
@@ -457,10 +462,10 @@ class myVecP : public NTL::Vec<myT>,
      * @return is the result of the component wise modulus multiplication
      * operation.
      */
-    myVecP ModMul(const myVecP& b) const {
+    myVecP mod_mul(const myVecP& b) const {
         ArgCheckVector(b, "myVecP Mul()");
         myVecP ans(*this);
-        ans.ModMulEq(b);
+        ans.mod_mul_eq(b);
         return ans;
     }
 
@@ -471,17 +476,17 @@ class myVecP : public NTL::Vec<myT>,
      * @return is the result of the component wise modulus multiplication
      * operation.
      */
-    myVecP& ModMulEq(const myVecP& b) {
+    myVecP& mod_mul_eq(const myVecP& b) {
         ArgCheckVector(b, "myVecP Mul()");
-        for (uint32_t i = 0; i < this->GetLength(); i++) {
-            this->operator[](i).ModMulEq(b[i], this->m_modulus);
+        for (uint32_t i = 0; i < this->get_length(); i++) {
+            this->operator[](i).mod_mul_eq(b[i], this->modulus_);
         }
         return (*this);
     }
 
-    myVecP& ModMulNoCheckEq(const myVecP& b) {
-        for (uint32_t i = 0; i < this->GetLength(); i++)
-            this->operator[](i).ModMulEq(b[i], this->m_modulus);
+    myVecP& mod_mul_no_check_eq(const myVecP& b) {
+        for (uint32_t i = 0; i < this->get_length(); i++)
+            this->operator[](i).mod_mul_eq(b[i], this->modulus_);
         return (*this);
     }
 
@@ -495,7 +500,7 @@ class myVecP : public NTL::Vec<myT>,
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus exponentiation operation.
      */
-    myVecP ModExp(const myT& b) const;
+    myVecP mod_exp(const myT& b) const;
 
     /**
      * Scalar modulus exponentiation operation. In-place variant.
@@ -503,21 +508,21 @@ class myVecP : public NTL::Vec<myT>,
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus exponentiation operation.
      */
-    myVecP& ModExpEq(const myT& b);
+    myVecP& mod_exp_eq(const myT& b);
 
     /**
      * Modulus inverse operation.
      *
      * @return is the result of the component wise modulus inverse operation.
      */
-    myVecP ModInverse() const;
+    myVecP mod_inverse() const;
 
     /**
      * Modulus inverse operation. In-place variant.
      *
      * @return is the result of the component wise modulus inverse operation.
      */
-    myVecP& ModInverseEq();
+    myVecP& mod_inverse_eq();
 
     /**
      * Modulus 2 operation, also a least significant bit.
@@ -525,7 +530,7 @@ class myVecP : public NTL::Vec<myT>,
      * @return is the result of the component wise modulus 2 operation, also a
      * least significant bit.
      */
-    myVecP ModByTwo() const;
+    myVecP mod_by_two() const;
 
     /**
      * Modulus 2 operation, also a least significant bit. In-place variant.
@@ -533,7 +538,7 @@ class myVecP : public NTL::Vec<myT>,
      * @return is the result of the component wise modulus 2 operation, also a
      * least significant bit.
      */
-    myVecP& ModByTwoEq();
+    myVecP& mod_by_two_eq();
 
     /**
      * Multiply and Rounding operation. Returns [x*p/q] where [] is the rounding
@@ -543,7 +548,7 @@ class myVecP : public NTL::Vec<myT>,
      * @param q is the denominator to be divided.
      * @return is the result of multiply and round operation.
      */
-    myVecP MultiplyAndRound(const myT& p, const myT& q) const;
+    myVecP multiply_and_round(const myT& p, const myT& q) const;
 
     /**
      * Multiply and Rounding operation. Returns [x*p/q] where [] is the rounding
@@ -553,7 +558,7 @@ class myVecP : public NTL::Vec<myT>,
      * @param q is the denominator to be divided.
      * @return is the result of multiply and round operation.
      */
-    myVecP& MultiplyAndRoundEq(const myT& p, const myT& q);
+    myVecP& multiply_and_round_eq(const myT& p, const myT& q);
 
     /**
      * Divide and Rounding operation. Returns [x/q] where [] is the rounding
@@ -562,7 +567,7 @@ class myVecP : public NTL::Vec<myT>,
      * @param q is the denominator to be divided.
      * @return is the result of divide and round operation.
      */
-    myVecP DivideAndRound(const myT& q) const;
+    myVecP divide_and_round(const myT& q) const;
 
     /**
      * Divide and Rounding operation. Returns [x/q] where [] is the rounding
@@ -571,7 +576,7 @@ class myVecP : public NTL::Vec<myT>,
      * @param q is the denominator to be divided.
      * @return is the result of divide and round operation.
      */
-    myVecP& DivideAndRoundEq(const myT& q);
+    myVecP& divide_and_round_eq(const myT& q);
 
     // OTHER FUNCTIONS
 
@@ -592,7 +597,7 @@ class myVecP : public NTL::Vec<myT>,
      * @return is the digit at a specific index for all entries for a given number
      * base
      */
-    myVecP GetDigitAtIndexForBase(size_t index, uint32_t base) const;
+    myVecP get_digit_at_index_for_base(size_t index, uint32_t base) const;
 
     // STRINGS & STREAMS
 
@@ -604,13 +609,13 @@ class myVecP : public NTL::Vec<myT>,
      * @return std ostream object which captures the vector values.
      */
     friend std::ostream& operator<<(std::ostream& os, const myVecP<myT>& ptr_obj) {
-        auto len = ptr_obj.GetLength();
+        auto len = ptr_obj.get_length();
         os << "[";
         for (size_t i = 0; i < len; i++) {
             os << ptr_obj.at(i);
             os << ((i == (len - 1)) ? "]" : " ");
         }
-        os << " modulus: " << ptr_obj.m_modulus;
+        os << " modulus: " << ptr_obj.modulus_;
         return os;
     }
 
@@ -620,52 +625,52 @@ class myVecP : public NTL::Vec<myT>,
     typename std::enable_if<!cereal::traits::is_text_archive<Archive>::value, void>::type save(
             Archive& ar, std::uint32_t const version) const {
         // YSP. This was seg-faulting in MINGW
-        // ar( m_modulus.ToString() );
-        // ar( m_modulus_state );
-        // ar( this->GetLength() );
-        // for(size_t i=0; i<this->GetLength(); i++ )
+        // ar( modulus_.to_string() );
+        // ar( modulus_state_ );
+        // ar( this->get_length() );
+        // for(size_t i=0; i<this->get_length(); i++ )
         //  ar( (*this)[i] );
-        ar(::cereal::make_nvp("m", m_modulus.ToString()));
-        ar(::cereal::make_nvp("ms", m_modulus_state));
-        ar(::cereal::make_nvp("l", this->GetLength()));
-        for (size_t i = 0; i < this->GetLength(); i++) {
-            ar(::cereal::make_nvp("v", (*this)[i].ToString()));
+        ar(::cereal::make_nvp("m", modulus_.to_string()));
+        ar(::cereal::make_nvp("ms", modulus_state_));
+        ar(::cereal::make_nvp("l", this->get_length()));
+        for (size_t i = 0; i < this->get_length(); i++) {
+            ar(::cereal::make_nvp("v", (*this)[i].to_string()));
         }
     }
 
     template <class Archive>
     typename std::enable_if<cereal::traits::is_text_archive<Archive>::value, void>::type save(
             Archive& ar, std::uint32_t const version) const {
-        ar(::cereal::make_nvp("m", m_modulus.ToString()));
-        ar(::cereal::make_nvp("ms", m_modulus_state));
-        ar(::cereal::make_nvp("l", this->GetLength()));
-        for (size_t i = 0; i < this->GetLength(); i++) {
-            ar(::cereal::make_nvp("v", (*this)[i].ToString()));
+        ar(::cereal::make_nvp("m", modulus_.to_string()));
+        ar(::cereal::make_nvp("ms", modulus_state_));
+        ar(::cereal::make_nvp("l", this->get_length()));
+        for (size_t i = 0; i < this->get_length(); i++) {
+            ar(::cereal::make_nvp("v", (*this)[i].to_string()));
         }
     }
 
     template <class Archive>
     typename std::enable_if<!cereal::traits::is_text_archive<Archive>::value, void>::type load(
             Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
         // YSP. This was seg-faulting in MINGW
         // std::string m;
         // ar( m );
-        // m_modulus = m;
-        // ar( m_modulus_state );
+        // modulus_ = m;
+        // ar( modulus_state_ );
         // cereal::size_type len;
         // ar( len );
-        // this->SetLength(len);
+        // this->set_length(len);
         // for(size_t i=0; i<len; i++ )
         //  ar( (*this)[i] );
 
         std::string m;
         ar(::cereal::make_nvp("m", m));
-        m_modulus = m;
-        ar(::cereal::make_nvp("ms", m_modulus_state));
+        modulus_ = m;
+        ar(::cereal::make_nvp("ms", modulus_state_));
         cereal::size_type len;
         ar(::cereal::make_nvp("l", len));
         this->resize(len);
@@ -679,14 +684,14 @@ class myVecP : public NTL::Vec<myT>,
     template <class Archive>
     typename std::enable_if<cereal::traits::is_text_archive<Archive>::value, void>::type load(
             Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
         std::string m;
         ar(::cereal::make_nvp("m", m));
-        m_modulus = m;
-        ar(::cereal::make_nvp("ms", m_modulus_state));
+        modulus_ = m;
+        ar(::cereal::make_nvp("ms", modulus_state_));
         cereal::size_type len;
         ar(::cereal::make_nvp("l", len));
         this->resize(len);
@@ -697,11 +702,11 @@ class myVecP : public NTL::Vec<myT>,
         }
     }
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "NTLVector";
     }
 
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 
@@ -709,31 +714,31 @@ class myVecP : public NTL::Vec<myT>,
     // utility function to warn if modulus is no good
     // use when argument to function is myT
     void ModulusCheck(std::string msg) const {
-        if (!isModulusSet()) {
-            OPENFHE_THROW(msg + " uninitialized this->modulus");
+        if (!is_modulus_set()) {
+            CIPHER_THROW(msg + " uninitialized this->modulus");
         }
     }
 
     // utility function to check argument consistency for vector vector fns
     // use when argument to function is myVecP
     void ArgCheckVector(const myVecP& b, std::string fname) const {
-        if (this->m_modulus != b.m_modulus) {
-            OPENFHE_THROW(fname + " modulus vector modulus vector op of different moduli");
-        } else if (!isModulusSet()) {
-            OPENFHE_THROW(fname + " modulus vector modulus vector op  GARBAGE  moduli");
-        } else if (this->GetLength() != b.GetLength()) {
-            OPENFHE_THROW(fname + " vectors of different lengths");
+        if (this->modulus_ != b.modulus_) {
+            CIPHER_THROW(fname + " modulus vector modulus vector op of different moduli");
+        } else if (!is_modulus_set()) {
+            CIPHER_THROW(fname + " modulus vector modulus vector op  GARBAGE  moduli");
+        } else if (this->get_length() != b.get_length()) {
+            CIPHER_THROW(fname + " vectors of different lengths");
         }
     }
 
     // used to make sure all entries in this are <=current modulus
     void Renormalize(void) {
-        for (size_t i = 0; i < this->GetLength(); ++i) {
-            (*this)[i] %= m_modulus;
+        for (size_t i = 0; i < this->get_length(); ++i) {
+            (*this)[i] %= modulus_;
         }
     }
 
-    myT m_modulus;
+    myT modulus_;
     // TODO: BE 2 has gotten rid of this, we may too.
     enum ModulusState {
         GARBAGE,
@@ -741,17 +746,17 @@ class myVecP : public NTL::Vec<myT>,
                      // state
     };
     // enum to store the state of the
-    ModulusState m_modulus_state;
+    ModulusState modulus_state_;
 
   protected:
-    bool IndexCheck(size_t index) const {
-        return index < this->GetLength();
+    bool index_check(size_t index) const {
+        return index < this->get_length();
     }
 };
 // template class ends
 
 }  // namespace NTL
 
-#endif  // WITH_NTL
+#endif  // CIPHER_WITH_NTL
 
 #endif  // CIPHER_MATH_BACKEND_NTL_MOD_VECTOR_H_

@@ -41,43 +41,43 @@
 enum { DFLT = -999 };  // enum for test cases if you want to use the default value for the parameter
 
 //===========================================================================================================
-struct UnitTestCCParams {
-    lbcrypto::SCHEME schemeId = lbcrypto::INVALID_SCHEME;  // mandatory field indicating what scheme is used
+struct TestContextParams {
+    cipher::SCHEME scheme_id_value = cipher::INVALID_SCHEME;  // mandatory field indicating what scheme is used
 
     // all double values are just data holders. Having them we can use parameters' default values
-    double ringDimension = DFLT;            // CKKSRNS, BFVRNS, BGVRNS
-    double multiplicativeDepth = DFLT;      // CKKSRNS, BGVRNS
-    double scalingModSize = DFLT;           // CKKSRNS, BFVRNS, BGVRNS
-    double digitSize = DFLT;                // CKKSRNS, BFVRNS, BGVRNS
-    double batchSize = DFLT;                // CKKSRNS, BFVRNS, BGVRNS
-    double secretKeyDist = DFLT;            // CKKSRNS, BFVRNS, BGVRNS
-    double maxRelinSkDeg = DFLT;            // CKKSRNS, BFVRNS, BGVRNS
-    double firstModSize = DFLT;             // CKKSRNS, BGVRNS
-    double securityLevel = DFLT;            // BFVRNS, BGVRNS
-    double ksTech = DFLT;                   // CKKSRNS, BGVRNS
-    double scalTech = DFLT;                 // CKKSRNS, BGVRNS
-    double numLargeDigits = DFLT;           // CKKSRNS, BGVRNS
-    double plaintextModulus = DFLT;         // BFVRNS, BGVRNS
-    double standardDeviation = DFLT;        // BFVRNS, BGVRNS
-    double evalAddCount = DFLT;             // BFVRNS,
-    double keySwitchCount = DFLT;           // BFVRNS,
-    double multiplicationTechnique = DFLT;  // BFVRNS,
-    double encryptionTechnique = DFLT;      // BFVRNS,
-    double PREMode = DFLT;                  // BGVRNS, BFVRNS, CKKSRNS
-    double multipartyMode = DFLT;           // BGVRNS, BFVRNS
-    double decryptionNoiseMode = DFLT;      // CKKSRNS
-    double executionMode = DFLT;            // CKKSRNS
-    double noiseEstimate = DFLT;            // CKKSRNS
-    double registerWordSize = DFLT;         // CKKSRNS
-    double compositeDegree = DFLT;          // CKKSRNS
-    double ckksDataType = DFLT;             // CKKSRNS
+    double ring_dimension_value = DFLT;            // CKKSRNS, BFVRNS, BGVRNS
+    double multiplicative_depth = DFLT;      // CKKSRNS, BGVRNS
+    double scaling_mod_size = DFLT;           // CKKSRNS, BFVRNS, BGVRNS
+    double digit_size = DFLT;                // CKKSRNS, BFVRNS, BGVRNS
+    double batch_size = DFLT;                // CKKSRNS, BFVRNS, BGVRNS
+    double secret_key_dist = DFLT;            // CKKSRNS, BFVRNS, BGVRNS
+    double max_relin_sk_deg = DFLT;            // CKKSRNS, BFVRNS, BGVRNS
+    double first_mod_size_value = DFLT;             // CKKSRNS, BGVRNS
+    double security_level = DFLT;            // BFVRNS, BGVRNS
+    double ks_tech = DFLT;                   // CKKSRNS, BGVRNS
+    double scal_tech = DFLT;                 // CKKSRNS, BGVRNS
+    double num_large_digits = DFLT;           // CKKSRNS, BGVRNS
+    double plaintext_modulus = DFLT;         // BFVRNS, BGVRNS
+    double standard_deviation = DFLT;        // BFVRNS, BGVRNS
+    double eval_add_count = DFLT;             // BFVRNS,
+    double key_switch_count = DFLT;           // BFVRNS,
+    double multiplication_technique = DFLT;  // BFVRNS,
+    double encryption_technique = DFLT;      // BFVRNS,
+    double pre_mode = DFLT;                  // BGVRNS, BFVRNS, CKKSRNS
+    double multiparty_mode = DFLT;           // BGVRNS, BFVRNS
+    double decryption_noise_mode = DFLT;      // CKKSRNS
+    double execution_mode = DFLT;            // CKKSRNS
+    double noise_estimate = DFLT;            // CKKSRNS
+    double register_word_size = DFLT;         // CKKSRNS
+    double composite_degree = DFLT;          // CKKSRNS
+    double ckks_data_type = DFLT;             // CKKSRNS
 
-    std::string toString() const;
+    std::string to_string_impl() const;
 };
 //===========================================================================================================
-std::ostream& operator<<(std::ostream& os, const UnitTestCCParams& params);
+std::ostream& operator<<(std::ostream& os, const TestContextParams& params);
 //===========================================================================================================
-inline bool isDefaultValue(double val) {
+inline bool is_default_value(double val) {
     return (DFLT == std::round(val));
 }
 //===========================================================================================================

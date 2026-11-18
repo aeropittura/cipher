@@ -40,7 +40,7 @@
 #include <vector>
 
 #include "cipher/config.h"
-#ifdef WITH_BE4
+#ifdef CIPHER_WITH_BE4
 
     #include "cipher/math/backend/dynamic/mod_vector.h"
     #include "cipher/math/backend.h"
@@ -51,69 +51,69 @@
 //    #include "time.h"
 //    #include <chrono>
 
-namespace bigintdyn {
+namespace dynamic_int {
 
 template <class ubint_el_t>
 mubintvec<ubint_el_t>::mubintvec(uint32_t length, const ubint_el_t& modulus,
                                  std::initializer_list<std::string> rhs) noexcept
-    : m_modulus{modulus}, m_modulus_state{State::INITIALIZED}, m_data(length) {
-    const size_t len = (rhs.size() < m_data.size()) ? rhs.size() : m_data.size();
+    : modulus_{modulus}, modulus_state_{State::INITIALIZED}, data_(length) {
+    const size_t len = (rhs.size() < data_.size()) ? rhs.size() : data_.size();
     for (size_t i = 0; i < len; ++i)
-        m_data[i] = ubint_el_t(*(rhs.begin() + i)) % m_modulus;
+        data_[i] = ubint_el_t(*(rhs.begin() + i)) % modulus_;
 }
 
 template <class ubint_el_t>
 mubintvec<ubint_el_t>::mubintvec(uint32_t length, const ubint_el_t& modulus,
                                  std::initializer_list<uint64_t> rhs) noexcept
-    : m_modulus{modulus}, m_modulus_state{State::INITIALIZED}, m_data(length) {
-    const size_t len = (rhs.size() < m_data.size()) ? rhs.size() : m_data.size();
+    : modulus_{modulus}, modulus_state_{State::INITIALIZED}, data_(length) {
+    const size_t len = (rhs.size() < data_.size()) ? rhs.size() : data_.size();
     for (size_t i = 0; i < len; ++i)
-        m_data[i] = ubint_el_t(*(rhs.begin() + i)) % m_modulus;
+        data_[i] = ubint_el_t(*(rhs.begin() + i)) % modulus_;
 }
 
 template <class ubint_el_t>
 mubintvec<ubint_el_t>::mubintvec(const std::vector<std::string>& s, const ubint_el_t& modulus) noexcept
-    : m_modulus{modulus}, m_modulus_state{State::INITIALIZED}, m_data(s.size()) {
+    : modulus_{modulus}, modulus_state_{State::INITIALIZED}, data_(s.size()) {
     for (size_t i = 0; i < s.size(); ++i)
-        m_data[i] = ubint_el_t(s[i]) % m_modulus;
+        data_[i] = ubint_el_t(s[i]) % modulus_;
 }
 
 template <class ubint_el_t>
 mubintvec<ubint_el_t>::mubintvec(const std::vector<std::string>& s, const std::string& modulus) noexcept
-    : m_modulus{modulus}, m_modulus_state{State::INITIALIZED}, m_data(s.size()) {
+    : modulus_{modulus}, modulus_state_{State::INITIALIZED}, data_(s.size()) {
     for (size_t i = 0; i < s.size(); ++i)
-        m_data[i] = ubint_el_t(s[i]) % m_modulus;
+        data_[i] = ubint_el_t(s[i]) % modulus_;
 }
 
 // if two vectors are different sized, then it will resize target vector
 // will overwrite target modulus
 template <class ubint_el_t>
 mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::operator=(const mubintvec& rhs) noexcept {
-    m_modulus = rhs.m_modulus;
-    m_modulus_state = rhs.m_modulus_state;
-    if (rhs.m_data.size() > m_data.size()) {
-        m_data = rhs.m_data;
+    modulus_ = rhs.modulus_;
+    modulus_state_ = rhs.modulus_state_;
+    if (rhs.data_.size() > data_.size()) {
+        data_ = rhs.data_;
         return *this;
     }
-    std::copy(rhs.m_data.begin(), rhs.m_data.end(), m_data.begin());
-    if (m_data.size() > rhs.m_data.size())
-        m_data.resize(rhs.m_data.size());
+    std::copy(rhs.data_.begin(), rhs.data_.end(), data_.begin());
+    if (data_.size() > rhs.data_.size())
+        data_.resize(rhs.data_.size());
     return *this;
 }
 
 template <class ubint_el_t>
 mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::operator=(std::initializer_list<std::string> rhs) noexcept {
     const size_t len = rhs.size();
-    if (m_data.size() < len)
-        m_data.resize(len);
-    const auto reduce = (m_modulus_state == State::INITIALIZED && m_modulus);
-    for (size_t i = 0; i < m_data.size(); ++i) {
+    if (data_.size() < len)
+        data_.resize(len);
+    const auto reduce = (modulus_state_ == State::INITIALIZED && modulus_);
+    for (size_t i = 0; i < data_.size(); ++i) {
         if (i < len) {
-            m_data[i] = ubint_el_t(*(rhs.begin() + i));
+            data_[i] = ubint_el_t(*(rhs.begin() + i));
             if (reduce)
-                m_data[i].ModEq(m_modulus);
+                data_[i].mod_eq(modulus_);
         } else {
-            m_data[i] = 0;
+            data_[i] = 0;
         }
     }
     return *this;
@@ -122,16 +122,16 @@ mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::operator=(std::initializer_list<st
 template <class ubint_el_t>
 mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::operator=(std::initializer_list<uint64_t> rhs) noexcept {
     const size_t len = rhs.size();
-    if (m_data.size() < len)
-        m_data.resize(len);
-    const auto reduce = (m_modulus_state == State::INITIALIZED && m_modulus);
-    for (size_t i = 0; i < m_data.size(); ++i) {
+    if (data_.size() < len)
+        data_.resize(len);
+    const auto reduce = (modulus_state_ == State::INITIALIZED && modulus_);
+    for (size_t i = 0; i < data_.size(); ++i) {
         if (i < len) {
-            m_data[i] = ubint_el_t(*(rhs.begin() + i));
+            data_[i] = ubint_el_t(*(rhs.begin() + i));
             if (reduce)
-                m_data[i].ModEq(m_modulus);
+                data_[i].mod_eq(modulus_);
         } else {
-            m_data[i] = 0;
+            data_[i] = 0;
         }
     }
     return *this;
@@ -143,394 +143,394 @@ mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::operator=(std::initializer_list<ui
  * > om/2 i' = i-delta
  */
 template <class ubint_el_t>
-void mubintvec<ubint_el_t>::SwitchModulus(const ubint_el_t& modulus) {
-    auto size{m_data.size()};
-    auto halfQ{m_modulus >> 1};
-    if (modulus > m_modulus) {
-        auto diff{modulus - m_modulus};
+void mubintvec<ubint_el_t>::switch_modulus(const ubint_el_t& modulus) {
+    auto size{data_.size()};
+    auto half_q{modulus_ >> 1};
+    if (modulus > modulus_) {
+        auto diff{modulus - modulus_};
         for (size_t i = 0; i < size; ++i) {
-            if (m_data[i] > halfQ)
-                m_data[i] += diff;
+            if (data_[i] > half_q)
+                data_[i] += diff;
         }
     } else {
-        auto diff{modulus - (m_modulus % modulus)};
+        auto diff{modulus - (modulus_ % modulus)};
         for (size_t i = 0; i < size; ++i) {
-            if (m_data[i] > halfQ)
-                m_data[i] += diff;
-            if (m_data[i] >= modulus)
-                m_data[i] %= modulus;
+            if (data_[i] > half_q)
+                data_[i] += diff;
+            if (data_[i] >= modulus)
+                data_[i] %= modulus;
         }
     }
-    this->SetModulus(modulus);
+    this->set_modulus(modulus);
 }
 
 template <class ubint_el_t>
-void mubintvec<ubint_el_t>::LazySwitchModulus(const ubint_el_t& modulus) {
-    for (auto& v : m_data)
-        v.ModEq(modulus);
-    this->SetModulus(modulus);
+void mubintvec<ubint_el_t>::lazy_switch_modulus(const ubint_el_t& modulus) {
+    for (auto& v : data_)
+        v.mod_eq(modulus);
+    this->set_modulus(modulus);
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t> mubintvec<ubint_el_t>::Mod(const ubint_el_t& modulus) const {
+mubintvec<ubint_el_t> mubintvec<ubint_el_t>::mod(const ubint_el_t& modulus) const {
     auto ans(*this);
     if (modulus == 2)
-        return ans.ModByTwoEq();
-    auto size{m_data.size()};
-    auto halfQ{m_modulus >> 1};
-    if (modulus > m_modulus) {
-        auto diff{modulus - m_modulus};
+        return ans.mod_by_two_eq();
+    auto size{data_.size()};
+    auto half_q{modulus_ >> 1};
+    if (modulus > modulus_) {
+        auto diff{modulus - modulus_};
         for (size_t i = 0; i < size; ++i) {
-            if (ans.m_data[i] > halfQ)
-                ans.m_data[i] += diff;
+            if (ans.data_[i] > half_q)
+                ans.data_[i] += diff;
         }
     } else {
-        auto diff{modulus - (m_modulus % modulus)};
+        auto diff{modulus - (modulus_ % modulus)};
         for (size_t i = 0; i < size; ++i) {
-            if (ans.m_data[i] > halfQ)
-                ans.m_data[i] += diff;
-            if (ans.m_data[i] >= modulus)
-                ans.m_data[i] %= modulus;
+            if (ans.data_[i] > half_q)
+                ans.data_[i] += diff;
+            if (ans.data_[i] >= modulus)
+                ans.data_[i] %= modulus;
         }
     }
     return ans;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::ModEq(const ubint_el_t& modulus) {
+mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::mod_eq(const ubint_el_t& modulus) {
     if (modulus == 2)
-        return this->ModByTwoEq();
-    auto size{m_data.size()};
-    auto halfQ{m_modulus >> 1};
-    if (modulus > m_modulus) {
-        auto diff{modulus - m_modulus};
+        return this->mod_by_two_eq();
+    auto size{data_.size()};
+    auto half_q{modulus_ >> 1};
+    if (modulus > modulus_) {
+        auto diff{modulus - modulus_};
         for (size_t i = 0; i < size; ++i) {
-            if (m_data[i] > halfQ)
-                m_data[i] += diff;
+            if (data_[i] > half_q)
+                data_[i] += diff;
         }
     } else {
-        auto diff{modulus - (m_modulus % modulus)};
+        auto diff{modulus - (modulus_ % modulus)};
         for (size_t i = 0; i < size; ++i) {
-            if (m_data[i] > halfQ)
-                m_data[i] += diff;
-            if (m_data[i] >= modulus)
-                m_data[i] %= modulus;
+            if (data_[i] > half_q)
+                data_[i] += diff;
+            if (data_[i] >= modulus)
+                data_[i] %= modulus;
         }
     }
     return *this;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t> mubintvec<ubint_el_t>::ModAdd(const ubint_el_t& b) const {
+mubintvec<ubint_el_t> mubintvec<ubint_el_t>::mod_add(const ubint_el_t& b) const {
     auto ans(*this);
-    auto modulus(m_modulus);
-    auto bLocal(b);
-    if (bLocal >= modulus)
-        bLocal.ModEq(modulus);
-    for (size_t i = 0; i < ans.m_data.size(); ++i)
-        ans[i].ModAddFastEq(bLocal, modulus);
+    auto modulus(modulus_);
+    auto b_local(b);
+    if (b_local >= modulus)
+        b_local.mod_eq(modulus);
+    for (size_t i = 0; i < ans.data_.size(); ++i)
+        ans[i].mod_add_fast_eq(b_local, modulus);
     return ans;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::ModAddEq(const ubint_el_t& b) {
-    auto modulus{m_modulus};
-    auto bLocal{b};
-    if (bLocal >= modulus)
-        bLocal.ModEq(modulus);
-    for (size_t i = 0; i < m_data.size(); ++i)
-        m_data[i].ModAddFastEq(bLocal, modulus);
+mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::mod_add_eq(const ubint_el_t& b) {
+    auto modulus{modulus_};
+    auto b_local{b};
+    if (b_local >= modulus)
+        b_local.mod_eq(modulus);
+    for (size_t i = 0; i < data_.size(); ++i)
+        data_[i].mod_add_fast_eq(b_local, modulus);
     return *this;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t> mubintvec<ubint_el_t>::ModAddAtIndex(size_t i, const ubint_el_t& b) const {
+mubintvec<ubint_el_t> mubintvec<ubint_el_t>::mod_add_at_index(size_t i, const ubint_el_t& b) const {
     auto ans(*this);
-    ans.at(i).ModAddEq(b, m_modulus);
+    ans.at(i).mod_add_eq(b, modulus_);
     return ans;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::ModAddAtIndexEq(size_t i, const ubint_el_t& b) {
-    this->mubintvec::at(i).ModAddEq(b, m_modulus);
+mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::mod_add_at_index_eq(size_t i, const ubint_el_t& b) {
+    this->mubintvec::at(i).mod_add_eq(b, modulus_);
     return *this;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t> mubintvec<ubint_el_t>::ModAdd(const mubintvec& b) const {
-    if (m_modulus != b.m_modulus)
-        OPENFHE_THROW("mubintvec adding vectors of different moduli");
-    if (m_data.size() != b.m_data.size())
-        OPENFHE_THROW("mubintvec adding vectors of different lengths");
+mubintvec<ubint_el_t> mubintvec<ubint_el_t>::mod_add(const mubintvec& b) const {
+    if (modulus_ != b.modulus_)
+        CIPHER_THROW("mubintvec adding vectors of different moduli");
+    if (data_.size() != b.data_.size())
+        CIPHER_THROW("mubintvec adding vectors of different lengths");
     auto ans(*this);
-    for (size_t i = 0; i < ans.m_data.size(); ++i)
-        ans[i].ModAddEq(b.m_data[i], ans.m_modulus);
+    for (size_t i = 0; i < ans.data_.size(); ++i)
+        ans[i].mod_add_eq(b.data_[i], ans.modulus_);
     return ans;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::ModAddEq(const mubintvec& b) {
-    if (m_modulus != b.m_modulus)
-        OPENFHE_THROW("mubintvec adding vectors of different moduli");
-    if (m_data.size() != b.m_data.size())
-        OPENFHE_THROW("mubintvec adding vectors of different lengths");
-    for (size_t i = 0; i < m_data.size(); ++i)
-        m_data[i].ModAddEq(b.m_data[i], m_modulus);
+mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::mod_add_eq(const mubintvec& b) {
+    if (modulus_ != b.modulus_)
+        CIPHER_THROW("mubintvec adding vectors of different moduli");
+    if (data_.size() != b.data_.size())
+        CIPHER_THROW("mubintvec adding vectors of different lengths");
+    for (size_t i = 0; i < data_.size(); ++i)
+        data_[i].mod_add_eq(b.data_[i], modulus_);
     return *this;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::ModAddNoCheckEq(const mubintvec& b) {
-    for (size_t i = 0; i < m_data.size(); ++i)
-        m_data[i].ModAddEq(b.m_data[i], m_modulus);
+mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::mod_add_no_check_eq(const mubintvec& b) {
+    for (size_t i = 0; i < data_.size(); ++i)
+        data_[i].mod_add_eq(b.data_[i], modulus_);
     return *this;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t> mubintvec<ubint_el_t>::ModSub(const ubint_el_t& b) const {
+mubintvec<ubint_el_t> mubintvec<ubint_el_t>::mod_sub(const ubint_el_t& b) const {
     auto ans(*this);
-    auto modulus{m_modulus};
-    auto bLocal{b};
-    if (bLocal >= modulus)
-        bLocal.ModEq(modulus);
-    for (size_t i = 0; i < ans.m_data.size(); ++i)
-        ans[i].ModSubFastEq(bLocal, modulus);
+    auto modulus{modulus_};
+    auto b_local{b};
+    if (b_local >= modulus)
+        b_local.mod_eq(modulus);
+    for (size_t i = 0; i < ans.data_.size(); ++i)
+        ans[i].mod_sub_fast_eq(b_local, modulus);
     return ans;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::ModSubEq(const ubint_el_t& b) {
-    auto modulus{m_modulus};
-    auto bLocal{b};
-    if (bLocal >= modulus)
-        bLocal.ModEq(modulus);
-    for (size_t i = 0; i < m_data.size(); ++i)
-        m_data[i].ModSubFastEq(bLocal, modulus);
+mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::mod_sub_eq(const ubint_el_t& b) {
+    auto modulus{modulus_};
+    auto b_local{b};
+    if (b_local >= modulus)
+        b_local.mod_eq(modulus);
+    for (size_t i = 0; i < data_.size(); ++i)
+        data_[i].mod_sub_fast_eq(b_local, modulus);
     return *this;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t> mubintvec<ubint_el_t>::ModSub(const mubintvec& b) const {
-    if (m_modulus != b.m_modulus)
-        OPENFHE_THROW("mubintvec subtractiong vectors of different moduli");
-    if (m_data.size() != b.m_data.size())
-        OPENFHE_THROW("mubintvec subtractiong vectors of different lengths");
+mubintvec<ubint_el_t> mubintvec<ubint_el_t>::mod_sub(const mubintvec& b) const {
+    if (modulus_ != b.modulus_)
+        CIPHER_THROW("mubintvec subtractiong vectors of different moduli");
+    if (data_.size() != b.data_.size())
+        CIPHER_THROW("mubintvec subtractiong vectors of different lengths");
     auto ans(*this);
-    for (size_t i = 0; i < ans.m_data.size(); ++i)
-        ans[i].ModSubEq(b.m_data[i], ans.m_modulus);
+    for (size_t i = 0; i < ans.data_.size(); ++i)
+        ans[i].mod_sub_eq(b.data_[i], ans.modulus_);
     return ans;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::ModSubEq(const mubintvec& b) {
-    if (m_modulus != b.m_modulus)
-        OPENFHE_THROW("mubintvec subtractiong vectors of different moduli");
-    if (m_data.size() != b.m_data.size())
-        OPENFHE_THROW("mubintvec subtractiong vectors of different lengths");
-    for (size_t i = 0; i < m_data.size(); ++i)
-        m_data[i].ModSubEq(b.m_data[i], m_modulus);
+mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::mod_sub_eq(const mubintvec& b) {
+    if (modulus_ != b.modulus_)
+        CIPHER_THROW("mubintvec subtractiong vectors of different moduli");
+    if (data_.size() != b.data_.size())
+        CIPHER_THROW("mubintvec subtractiong vectors of different lengths");
+    for (size_t i = 0; i < data_.size(); ++i)
+        data_[i].mod_sub_eq(b.data_[i], modulus_);
     return *this;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t> mubintvec<ubint_el_t>::ModMul(const ubint_el_t& b) const {
+mubintvec<ubint_el_t> mubintvec<ubint_el_t>::mod_mul(const ubint_el_t& b) const {
     auto ans(*this);
-    auto bLocal{b};
-    if (bLocal >= ans.m_modulus)
-        bLocal.ModEq(ans.m_modulus);
+    auto b_local{b};
+    if (b_local >= ans.modulus_)
+        b_local.mod_eq(ans.modulus_);
     #ifdef NO_BARRETT
-    for (size_t i = 0; i < ans.m_data.size(); ++i)
-        ans[i].ModMulFastEq(bLocal, ans.m_modulus);
+    for (size_t i = 0; i < ans.data_.size(); ++i)
+        ans[i].mod_mul_fast_eq(b_local, ans.modulus_);
     #else
-    auto mu(ans.m_modulus.ComputeMu());
-    for (size_t i = 0; i < ans.m_data.size(); ++i)
-        ans[i].ModMulFastEq(bLocal, ans.m_modulus, mu);
+    auto mu(ans.modulus_.compute_mu());
+    for (size_t i = 0; i < ans.data_.size(); ++i)
+        ans[i].mod_mul_fast_eq(b_local, ans.modulus_, mu);
     #endif
     return ans;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::ModMulEq(const ubint_el_t& b) {
-    auto bLocal(b);
-    if (bLocal >= m_modulus)
-        bLocal.ModEq(m_modulus);
+mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::mod_mul_eq(const ubint_el_t& b) {
+    auto b_local(b);
+    if (b_local >= modulus_)
+        b_local.mod_eq(modulus_);
     #ifdef NO_BARRETT
-    for (size_t i = 0; i < m_data.size(); ++i)
-        m_data[i].ModMulFastEq(bLocal, m_modulus);
+    for (size_t i = 0; i < data_.size(); ++i)
+        data_[i].mod_mul_fast_eq(b_local, modulus_);
     #else
-    auto mu(m_modulus.ComputeMu());
-    for (size_t i = 0; i < m_data.size(); ++i)
-        m_data[i].ModMulFastEq(bLocal, m_modulus, mu);
+    auto mu(modulus_.compute_mu());
+    for (size_t i = 0; i < data_.size(); ++i)
+        data_[i].mod_mul_fast_eq(b_local, modulus_, mu);
     #endif
     return *this;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t> mubintvec<ubint_el_t>::ModMul(const mubintvec& b) const {
-    if (m_modulus != b.m_modulus)
-        OPENFHE_THROW("mubintvec multiplying vectors of different moduli");
-    if (m_data.size() != b.m_data.size())
-        OPENFHE_THROW("mubintvec multiplying vectors of different lengths");
+mubintvec<ubint_el_t> mubintvec<ubint_el_t>::mod_mul(const mubintvec& b) const {
+    if (modulus_ != b.modulus_)
+        CIPHER_THROW("mubintvec multiplying vectors of different moduli");
+    if (data_.size() != b.data_.size())
+        CIPHER_THROW("mubintvec multiplying vectors of different lengths");
     auto ans(*this);
     #ifdef NO_BARRETT
-    for (size_t i = 0; i < m_data.size(); ++i)
-        ans[i].ModMulFastEq(b[i], ans.m_modulus);
+    for (size_t i = 0; i < data_.size(); ++i)
+        ans[i].mod_mul_fast_eq(b[i], ans.modulus_);
     #else
-    auto mu(ans.m_modulus.ComputeMu());
-    for (size_t i = 0; i < ans.m_data.size(); ++i)
-        ans[i].ModMulFastEq(b[i], ans.m_modulus, mu);
+    auto mu(ans.modulus_.compute_mu());
+    for (size_t i = 0; i < ans.data_.size(); ++i)
+        ans[i].mod_mul_fast_eq(b[i], ans.modulus_, mu);
     #endif
     return ans;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::ModMulEq(const mubintvec& b) {
-    if (m_modulus != b.m_modulus)
-        OPENFHE_THROW("mubintvec multiplying vectors of different moduli");
-    if (m_data.size() != b.m_data.size())
-        OPENFHE_THROW("mubintvec multiplying vectors of different lengths");
+mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::mod_mul_eq(const mubintvec& b) {
+    if (modulus_ != b.modulus_)
+        CIPHER_THROW("mubintvec multiplying vectors of different moduli");
+    if (data_.size() != b.data_.size())
+        CIPHER_THROW("mubintvec multiplying vectors of different lengths");
     #ifdef NO_BARRETT
-    for (size_t i = 0; i < m_data.size(); ++i)
-        m_data[i].ModMulFastEq(b[i], m_modulus);
+    for (size_t i = 0; i < data_.size(); ++i)
+        data_[i].mod_mul_fast_eq(b[i], modulus_);
     #else
-    auto mu(m_modulus.ComputeMu());
-    for (size_t i = 0; i < m_data.size(); ++i)
-        m_data[i].ModMulFastEq(b[i], m_modulus, mu);
+    auto mu(modulus_.compute_mu());
+    for (size_t i = 0; i < data_.size(); ++i)
+        data_[i].mod_mul_fast_eq(b[i], modulus_, mu);
     #endif
     return *this;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::ModMulNoCheckEq(const mubintvec& b) {
+mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::mod_mul_no_check_eq(const mubintvec& b) {
     #ifdef NO_BARRETT
-    for (size_t i = 0; i < m_data.size(); ++i)
-        m_data[i].ModMulFastEq(b[i], m_modulus);
+    for (size_t i = 0; i < data_.size(); ++i)
+        data_[i].mod_mul_fast_eq(b[i], modulus_);
     #else
-    auto mu(m_modulus.ComputeMu());
-    for (size_t i = 0; i < m_data.size(); ++i)
-        m_data[i].ModMulFastEq(b[i], m_modulus, mu);
+    auto mu(modulus_.compute_mu());
+    for (size_t i = 0; i < data_.size(); ++i)
+        data_[i].mod_mul_fast_eq(b[i], modulus_, mu);
     #endif
     return *this;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t> mubintvec<ubint_el_t>::ModExp(const ubint_el_t& b) const {
+mubintvec<ubint_el_t> mubintvec<ubint_el_t>::mod_exp(const ubint_el_t& b) const {
     auto ans(*this);
-    auto modulus{m_modulus};
-    auto bLocal{b};
-    for (size_t i = 0; i < ans.m_data.size(); ++i)
-        ans[i].ModExpEq(bLocal, modulus);
+    auto modulus{modulus_};
+    auto b_local{b};
+    for (size_t i = 0; i < ans.data_.size(); ++i)
+        ans[i].mod_exp_eq(b_local, modulus);
     return ans;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::ModExpEq(const ubint_el_t& b) {
-    auto modulus{m_modulus};
-    auto bLocal{b};
-    for (size_t i = 0; i < m_data.size(); ++i)
-        m_data[i].ModExpEq(bLocal, modulus);
+mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::mod_exp_eq(const ubint_el_t& b) {
+    auto modulus{modulus_};
+    auto b_local{b};
+    for (size_t i = 0; i < data_.size(); ++i)
+        data_[i].mod_exp_eq(b_local, modulus);
     return *this;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t> mubintvec<ubint_el_t>::ModInverse() const {
+mubintvec<ubint_el_t> mubintvec<ubint_el_t>::mod_inverse() const {
     auto ans(*this);
-    for (size_t i = 0; i < ans.m_data.size(); ++i)
-        ans[i].ModInverseEq(ans.m_modulus);
+    for (size_t i = 0; i < ans.data_.size(); ++i)
+        ans[i].mod_inverse_eq(ans.modulus_);
     return ans;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::ModInverseEq() {
-    for (size_t i = 0; i < m_data.size(); ++i)
-        m_data[i].ModInverseEq(m_modulus);
+mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::mod_inverse_eq() {
+    for (size_t i = 0; i < data_.size(); ++i)
+        data_[i].mod_inverse_eq(modulus_);
     return *this;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t> mubintvec<ubint_el_t>::ModByTwo() const {
+mubintvec<ubint_el_t> mubintvec<ubint_el_t>::mod_by_two() const {
     auto ans(*this);
-    auto halfQ{m_modulus >> 1};
-    for (size_t i = 0; i < ans.m_data.size(); ++i)
-        ans[i] = ubint_el_t((ans[i].m_value[0] & 0x1) ^ (ans[i] > halfQ));
+    auto half_q{modulus_ >> 1};
+    for (size_t i = 0; i < ans.data_.size(); ++i)
+        ans[i] = ubint_el_t((ans[i].value_[0] & 0x1) ^ (ans[i] > half_q));
     return ans;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::ModByTwoEq() {
-    auto halfQ{m_modulus >> 1};
-    for (size_t i = 0; i < m_data.size(); ++i)
-        m_data[i] = ubint_el_t((m_data[i].m_value[0] & 0x1) ^ (m_data[i] > halfQ));
+mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::mod_by_two_eq() {
+    auto half_q{modulus_ >> 1};
+    for (size_t i = 0; i < data_.size(); ++i)
+        data_[i] = ubint_el_t((data_[i].value_[0] & 0x1) ^ (data_[i] > half_q));
     return *this;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t> mubintvec<ubint_el_t>::MultiplyAndRound(const ubint_el_t& p, const ubint_el_t& q) const {
+mubintvec<ubint_el_t> mubintvec<ubint_el_t>::multiply_and_round(const ubint_el_t& p, const ubint_el_t& q) const {
     auto ans(*this);
-    auto mv(m_modulus);
-    auto halfQ{m_modulus >> 1};
-    for (size_t i = 0; i < ans.m_data.size(); ++i) {
-        if (ans.m_data[i] > halfQ) {
+    auto mv(modulus_);
+    auto half_q{modulus_ >> 1};
+    for (size_t i = 0; i < ans.data_.size(); ++i) {
+        if (ans.data_[i] > half_q) {
             auto&& tmp{mv - ans[i]};
-            ans[i] = mv - tmp.MultiplyAndRound(p, q);
+            ans[i] = mv - tmp.multiply_and_round(p, q);
         } else {
-            ans[i] = ans[i].MultiplyAndRound(p, q).Mod(mv);
+            ans[i] = ans[i].multiply_and_round(p, q).mod(mv);
         }
     }
     return ans;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::MultiplyAndRoundEq(const ubint_el_t& p, const ubint_el_t& q) {
-    auto mv{m_modulus};
-    auto halfQ{m_modulus >> 1};
-    for (size_t i = 0; i < m_data.size(); ++i) {
-        if (m_data[i] > halfQ) {
-            auto&& tmp{mv - m_data[i]};
-            m_data[i] = mv - tmp.MultiplyAndRound(p, q);
+mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::multiply_and_round_eq(const ubint_el_t& p, const ubint_el_t& q) {
+    auto mv{modulus_};
+    auto half_q{modulus_ >> 1};
+    for (size_t i = 0; i < data_.size(); ++i) {
+        if (data_[i] > half_q) {
+            auto&& tmp{mv - data_[i]};
+            data_[i] = mv - tmp.multiply_and_round(p, q);
         } else {
-            m_data[i] = m_data[i].MultiplyAndRound(p, q).Mod(mv);
+            data_[i] = data_[i].multiply_and_round(p, q).mod(mv);
         }
     }
     return *this;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t> mubintvec<ubint_el_t>::DivideAndRound(const ubint_el_t& q) const {
+mubintvec<ubint_el_t> mubintvec<ubint_el_t>::divide_and_round(const ubint_el_t& q) const {
     auto ans(*this);
-    auto mv{m_modulus};
-    auto halfQ{m_modulus >> 1};
-    for (size_t i = 0; i < ans.m_data.size(); ++i) {
-        if (ans[i] > halfQ) {
+    auto mv{modulus_};
+    auto half_q{modulus_ >> 1};
+    for (size_t i = 0; i < ans.data_.size(); ++i) {
+        if (ans[i] > half_q) {
             auto&& tmp{mv - ans[i]};
-            ans[i] = mv - tmp.DivideAndRound(q);
+            ans[i] = mv - tmp.divide_and_round(q);
         } else {
-            ans[i] = ans[i].DivideAndRoundEq(q);
+            ans[i] = ans[i].divide_and_round_eq(q);
         }
     }
     return ans;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::DivideAndRoundEq(const ubint_el_t& q) {
-    auto mv{m_modulus};
-    auto halfQ{m_modulus >> 1};
-    for (size_t i = 0; i < m_data.size(); ++i) {
-        if (m_data[i] > halfQ) {
-            auto&& tmp{mv - m_data[i]};
-            m_data[i] = mv - tmp.DivideAndRound(q);
+mubintvec<ubint_el_t>& mubintvec<ubint_el_t>::divide_and_round_eq(const ubint_el_t& q) {
+    auto mv{modulus_};
+    auto half_q{modulus_ >> 1};
+    for (size_t i = 0; i < data_.size(); ++i) {
+        if (data_[i] > half_q) {
+            auto&& tmp{mv - data_[i]};
+            data_[i] = mv - tmp.divide_and_round(q);
         } else {
-            m_data[i] = m_data[i].DivideAndRound(q);
+            data_[i] = data_[i].divide_and_round(q);
         }
     }
     return *this;
 }
 
 template <class ubint_el_t>
-mubintvec<ubint_el_t> mubintvec<ubint_el_t>::GetDigitAtIndexForBase(uint32_t index, uint32_t base) const {
+mubintvec<ubint_el_t> mubintvec<ubint_el_t>::get_digit_at_index_for_base(uint32_t index, uint32_t base) const {
     auto ans(*this);
-    for (size_t i = 0; i < m_data.size(); ++i)
-        ans[i] = static_cast<ubint_el_t>(ans[i].GetDigitAtIndexForBase(index, base));
+    for (size_t i = 0; i < data_.size(); ++i)
+        ans[i] = static_cast<ubint_el_t>(ans[i].get_digit_at_index_for_base(index, base));
     return ans;
 }
 

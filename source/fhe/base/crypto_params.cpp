@@ -31,10 +31,10 @@
 #include "cipher/fhe/base/crypto_params.h"
 
 // the code below is from base-cryptoparameters-impl.cpp
-namespace lbcrypto {
+namespace cipher {
 
-// template class CryptoParametersBase<Poly>;
-// template class CryptoParametersBase<NativePoly>;
-template class CryptoParametersBase<DCRTPoly>;
+// template class BaseCryptoParams<Poly>;
+// template class BaseCryptoParams<NativePoly>;
+template class BaseCryptoParams<RnsPoly>;
 
-}  // namespace lbcrypto
+}  // namespace cipher

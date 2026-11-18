@@ -36,7 +36,7 @@
 #include "gtest/gtest.h"
 #include "cipher/util/diagnostic_output.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 namespace {
 
@@ -45,25 +45,25 @@ namespace {
 // pointing at a destroyed stream.
 class ScopedDiagnosticCapture {
   public:
-    ScopedDiagnosticCapture() : m_previousErr(SetOpenFHEErrStream(m_err)), m_previousOut(SetOpenFHEOutStream(m_out)) {}
+    ScopedDiagnosticCapture() : previous_err_(set_cipher_err_stream(err_)), previous_out_(set_cipher_out_stream(out_)) {}
 
     ~ScopedDiagnosticCapture() {
-        SetOpenFHEErrStream(m_previousErr);
-        SetOpenFHEOutStream(m_previousOut);
+        set_cipher_err_stream(previous_err_);
+        set_cipher_out_stream(previous_out_);
     }
 
-    std::string Err() const {
-        return m_err.str();
+    std::string err() const {
+        return err_.str();
     }
     std::string Out() const {
-        return m_out.str();
+        return out_.str();
     }
 
   private:
-    std::ostringstream m_err;
-    std::ostringstream m_out;
-    std::ostream& m_previousErr;
-    std::ostream& m_previousOut;
+    std::ostringstream err_;
+    std::ostringstream out_;
+    std::ostream& previous_err_;
+    std::ostream& previous_out_;
 };
 
 }  // namespace
@@ -71,19 +71,19 @@ class ScopedDiagnosticCapture {
 TEST(UTDiagnosticOutput, redirect_captures_each_channel_separately) {
     ScopedDiagnosticCapture capture;
 
-    OPENFHE_DIAGNOSTIC_ERR << "to err" << std::endl;
-    OPENFHE_DIAGNOSTIC_OUT << "to out" << std::endl;
+    CIPHER_DIAGNOSTIC_ERR << "to err" << std::endl;
+    CIPHER_DIAGNOSTIC_OUT << "to out" << std::endl;
 
-    EXPECT_EQ(capture.Err(), "to err\n");
+    EXPECT_EQ(capture.err(), "to err\n");
     EXPECT_EQ(capture.Out(), "to out\n");
 }
 
 TEST(UTDiagnosticOutput, manipulators_and_chaining_work) {
     ScopedDiagnosticCapture capture;
 
-    OPENFHE_DIAGNOSTIC_ERR << std::hex << 255 << " " << std::dec << 255 << std::endl;
+    CIPHER_DIAGNOSTIC_ERR << std::hex << 255 << " " << std::dec << 255 << std::endl;
 
-    EXPECT_EQ(capture.Err(), "ff 255\n");
+    EXPECT_EQ(capture.err(), "ff 255\n");
     EXPECT_TRUE(capture.Out().empty());
 }
 
@@ -91,15 +91,15 @@ TEST(UTDiagnosticOutput, setter_returns_the_previously_installed_stream) {
     std::ostringstream first;
     std::ostringstream second;
 
-    std::ostream& original = SetOpenFHEErrStream(first);
-    std::ostream& returned = SetOpenFHEErrStream(second);
+    std::ostream& original = set_cipher_err_stream(first);
+    std::ostream& returned = set_cipher_err_stream(second);
     EXPECT_EQ(&returned, &first);
 
-    OPENFHE_DIAGNOSTIC_ERR << "second" << std::endl;
+    CIPHER_DIAGNOSTIC_ERR << "second" << std::endl;
     EXPECT_TRUE(first.str().empty());
     EXPECT_EQ(second.str(), "second\n");
 
     // restoring gives back the stream the channel started on
-    EXPECT_EQ(&SetOpenFHEErrStream(original), &second);
-    EXPECT_EQ(&SetOpenFHEErrStream(original), &original);
+    EXPECT_EQ(&set_cipher_err_stream(original), &second);
+    EXPECT_EQ(&set_cipher_err_stream(original), &original);
 }

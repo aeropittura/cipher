@@ -28,22 +28,8 @@ cipher_print_options()
 #--------------------------------------------------------------------
 # Generated configuration header and sample data
 #--------------------------------------------------------------------
-# Plain (unprefixed) names consumed by config.h.in.
-set(WITH_BE2 ${CIPHER_WITH_BE2})
-set(WITH_BE4 ${CIPHER_WITH_BE4})
-set(WITH_NTL ${CIPHER_WITH_NTL})
-set(WITH_TCM ${CIPHER_WITH_TCM})
-set(WITH_OPENMP ${CIPHER_WITH_OPENMP})
-set(WITH_NATIVEOPT ${CIPHER_WITH_NATIVEOPT})
-set(WITH_NOISE_DEBUG ${CIPHER_WITH_NOISE_DEBUG})
-set(WITH_REDUCED_NOISE ${CIPHER_WITH_REDUCED_NOISE})
-set(WITH_MALLOC_TUNING ${CIPHER_WITH_MALLOC_TUNING})
-set(WITH_NUMA_INTERLEAVE ${CIPHER_WITH_NUMA_INTERLEAVE})
-set(WITH_DEFAULT_DIAGNOSTIC_SINK ${CIPHER_WITH_DEFAULT_DIAGNOSTIC_SINK})
-set(CKKS_M_FACTOR ${CIPHER_CKKS_M_FACTOR})
-set(PARTIAL_SUM_RADIX ${CIPHER_PARTIAL_SUM_RADIX})
-set(MATHBACKEND ${CIPHER_MATH_BACKEND})
-set(NATIVEINT ${CIPHER_NATIVE_INT})
+set(CIPHER_HAVE_INT128 ${HAVE_INT128})
+set(CIPHER_HAVE_INT64 ${HAVE_INT64})
 configure_file(cmake/config.h.in ${PROJECT_BINARY_DIR}/include/cipher/config.h)
 
 set(CIPHER_BUILD_INCLUDE_DIRS

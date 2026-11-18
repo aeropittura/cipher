@@ -34,22 +34,22 @@
 
 #include <cstdint>
 
-inline uint32_t ComputeNumLargeDigits(uint32_t numLargeDigits, uint32_t multDepth) {
-    if (numLargeDigits > 0)
-        return numLargeDigits;
-    if (multDepth > 3)  // if more than 4 towers, use 3 digits
+inline uint32_t compute_num_large_digits(uint32_t num_large_digits, uint32_t mult_depth_value) {
+    if (num_large_digits > 0)
+        return num_large_digits;
+    if (mult_depth_value > 3)  // if more than 4 towers, use 3 digits
         return 3;
-    if (multDepth > 0)  // if 2, 3 or 4 towers, use 2 digits
+    if (mult_depth_value > 0)  // if 2, 3 or 4 towers, use 2 digits
         return 2;
     return 1;  // if 1 tower, use one digit
 }
 
-inline uint32_t ComputeNumLargeDigitsPRE(uint32_t numLargeDigits, uint32_t numHops) {
-    if (numLargeDigits > 0)
-        return numLargeDigits;
-    if (numHops > 4)
+inline uint32_t compute_num_large_digits_pre(uint32_t num_large_digits, uint32_t num_hops) {
+    if (num_large_digits > 0)
+        return num_large_digits;
+    if (num_hops > 4)
         return 3;
-    if (numHops > 1)
+    if (num_hops > 1)
         return 2;
     return 1;
 }

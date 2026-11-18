@@ -41,7 +41,7 @@
 
 #include "cipher/cipher.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 int main() {
     // Step 1: Setup CryptoContext
@@ -49,7 +49,7 @@ int main() {
     // A. Specify main parameters
     /* A1) Multiplicative depth:
      * The CKKS scheme we setup here will work for any computation
-     * that has a multiplicative depth equal to 'multDepth'.
+     * that has a multiplicative depth equal to 'mult_depth_value'.
      * This is the maximum possible depth of a given multiplication,
      * but not the total number of multiplications supported by the
      * scheme.
@@ -64,7 +64,7 @@ int main() {
      * For performance reasons, it's generally preferable to perform operations
      * in the shorted multiplicative depth possible.
      */
-    uint32_t multDepth = 1;
+    uint32_t mult_depth_value = 1;
 
     /* A2) Bit-length of scaling factor.
      * CKKS works for real numbers, but these numbers are encoded as integers.
@@ -74,20 +74,20 @@ int main() {
      * decryption, the scaling factor is removed so the user is presented with
      * the real number result of 0.13.
      *
-     * Parameter 'scaleModSize' determines the bit-length of the scaling
+     * Parameter 'scale_mod_size' determines the bit-length of the scaling
      * factor D, but not the scaling factor itself. The latter is implementation
      * specific, and it may also vary between ciphertexts in certain versions of
      * CKKS (e.g., in FLEXIBLEAUTO).
      *
-     * Choosing 'scaleModSize' depends on the desired accuracy of the
-     * computation, as well as the remaining parameters like multDepth or security
+     * Choosing 'scale_mod_size' depends on the desired accuracy of the
+     * computation, as well as the remaining parameters like mult_depth_value or security
      * standard. This is because the remaining parameters determine how much noise
      * will be incurred during the computation (remember CKKS is an approximate
      * scheme that incurs small amounts of noise with every operation). The
      * scaling factor should be large enough to both accommodate this noise and
      * support results that match the desired accuracy.
      */
-    uint32_t scaleModSize = 50;
+    uint32_t scale_mod_size = 50;
 
     /* A3) Number of plaintext slots used in the ciphertext.
      * CKKS packs multiple plaintext values in each ciphertext.
@@ -97,11 +97,11 @@ int main() {
      * choose, the multiplicative depth we want to support, and the scaling factor
      * size.
      *
-     * Please use method GetRingDimension() to find out the exact ring dimension
+     * Please use method get_ring_dimension() to find out the exact ring dimension
      * being used for these parameters. Give ring dimension N, the maximum batch
      * size is N/2, because of the way CKKS works.
      */
-    uint32_t batchSize = 8;
+    uint32_t batch_size = 8;
 
     /* A4) Desired security level based on FHE standards.
      * This parameter can take four values. Three of the possible values
@@ -118,25 +118,25 @@ int main() {
      * PARAMETERS" in  the following reference for more details:
      * http://homomorphicencryption.org/wp-content/uploads/2018/11/HomomorphicEncryptionStandardv1.1.pdf
      */
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(multDepth);
-    parameters.SetScalingModSize(scaleModSize);
-    parameters.SetBatchSize(batchSize);
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_multiplicative_depth(mult_depth_value);
+    parameters.set_scaling_mod_size(scale_mod_size);
+    parameters.set_batch_size(batch_size);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
 
     // Enable the features that you wish to use
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    std::cout << "CKKS scheme is using ring dimension " << cc->GetRingDimension() << std::endl << std::endl;
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    std::cout << "CKKS scheme is using ring dimension " << cc->get_ring_dimension() << std::endl << std::endl;
 
     // B. Step 2: Key Generation
     /* B1) Generate encryption keys.
      * These are used for encryption/decryption, as well as in generating
      * different kinds of keys.
      */
-    auto keys = cc->KeyGen();
+    auto keys = cc->key_gen();
 
     /* B2) Generate the digit size
      * In CKKS, whenever someone multiplies two ciphertexts encrypted with key s,
@@ -148,7 +148,7 @@ int main() {
      * it becomes valid under original key s. To do so, we need to create what we
      * call a relinearization key with the following line.
      */
-    cc->EvalMultKeyGen(keys.secretKey);
+    cc->eval_mult_key_gen(keys.secret_key);
 
     /* B3) Generate the rotation keys
      * CKKS supports rotating the contents of a packed ciphertext, but to do so,
@@ -168,7 +168,7 @@ int main() {
      * in the output of this demo, since CKKS is approximate, zeros are not exact
      * - they're just very small numbers.
      */
-    cc->EvalRotateKeyGen(keys.secretKey, {1, -2});
+    cc->eval_rotate_key_gen(keys.secret_key, {1, -2});
 
     // Step 3: Encoding and encryption of inputs
 
@@ -177,33 +177,33 @@ int main() {
     std::vector<double> x2 = {5.0, 4.0, 3.0, 2.0, 1.0, 0.75, 0.5, 0.25};
 
     // Encoding as plaintexts
-    Plaintext ptxt1 = cc->MakeCKKSPackedPlaintext(x1);
-    Plaintext ptxt2 = cc->MakeCKKSPackedPlaintext(x2);
+    Plaintext ptxt1 = cc->make_ckks_packed_plaintext(x1);
+    Plaintext ptxt2 = cc->make_ckks_packed_plaintext(x2);
 
     std::cout << "Input x1: " << ptxt1 << std::endl;
     std::cout << "Input x2: " << ptxt2 << std::endl;
 
     // Encrypt the encoded vectors
-    auto c1 = cc->Encrypt(keys.publicKey, ptxt1);
-    auto c2 = cc->Encrypt(keys.publicKey, ptxt2);
+    auto c1 = cc->encrypt(keys.public_key, ptxt1);
+    auto c2 = cc->encrypt(keys.public_key, ptxt2);
 
     // Step 4: Evaluation
 
     // Homomorphic addition
-    auto cAdd = cc->EvalAdd(c1, c2);
+    auto c_add = cc->eval_add(c1, c2);
 
     // Homomorphic subtraction
-    auto cSub = cc->EvalSub(c1, c2);
+    auto c_sub = cc->eval_sub(c1, c2);
 
     // Homomorphic scalar multiplication
-    auto cScalar = cc->EvalMult(c1, 4.0);
+    auto c_scalar = cc->eval_mult(c1, 4.0);
 
     // Homomorphic multiplication
-    auto cMul = cc->EvalMult(c1, c2);
+    auto c_mul = cc->eval_mult(c1, c2);
 
     // Homomorphic rotations
-    auto cRot1 = cc->EvalRotate(c1, 1);
-    auto cRot2 = cc->EvalRotate(c1, -2);
+    auto c_rot1 = cc->eval_rotate(c1, 1);
+    auto c_rot2 = cc->eval_rotate(c1, -2);
 
     // Step 5: Decryption and output
     Plaintext result;
@@ -214,41 +214,41 @@ int main() {
 
     std::cout << std::endl << "Results of homomorphic computations: " << std::endl;
 
-    cc->Decrypt(keys.secretKey, c1, &result);
-    result->SetLength(batchSize);
+    cc->decrypt(keys.secret_key, c1, &result);
+    result->set_length(batch_size);
     std::cout << "x1 = " << result;
-    std::cout << "Estimated precision in bits: " << result->GetLogPrecision() << std::endl;
+    std::cout << "Estimated precision in bits: " << result->get_log_precision() << std::endl;
 
     // Decrypt the result of addition
-    cc->Decrypt(keys.secretKey, cAdd, &result);
-    result->SetLength(batchSize);
+    cc->decrypt(keys.secret_key, c_add, &result);
+    result->set_length(batch_size);
     std::cout << "x1 + x2 = " << result;
-    std::cout << "Estimated precision in bits: " << result->GetLogPrecision() << std::endl;
+    std::cout << "Estimated precision in bits: " << result->get_log_precision() << std::endl;
 
     // Decrypt the result of subtraction
-    cc->Decrypt(keys.secretKey, cSub, &result);
-    result->SetLength(batchSize);
+    cc->decrypt(keys.secret_key, c_sub, &result);
+    result->set_length(batch_size);
     std::cout << "x1 - x2 = " << result << std::endl;
 
     // Decrypt the result of scalar multiplication
-    cc->Decrypt(keys.secretKey, cScalar, &result);
-    result->SetLength(batchSize);
+    cc->decrypt(keys.secret_key, c_scalar, &result);
+    result->set_length(batch_size);
     std::cout << "4 * x1 = " << result << std::endl;
 
     // Decrypt the result of multiplication
-    cc->Decrypt(keys.secretKey, cMul, &result);
-    result->SetLength(batchSize);
+    cc->decrypt(keys.secret_key, c_mul, &result);
+    result->set_length(batch_size);
     std::cout << "x1 * x2 = " << result << std::endl;
 
     // Decrypt the result of rotations
 
-    cc->Decrypt(keys.secretKey, cRot1, &result);
-    result->SetLength(batchSize);
+    cc->decrypt(keys.secret_key, c_rot1, &result);
+    result->set_length(batch_size);
     std::cout << std::endl << "In rotations, very small outputs (~10^-10 here) correspond to 0's:" << std::endl;
     std::cout << "x1 rotate by 1 = " << result << std::endl;
 
-    cc->Decrypt(keys.secretKey, cRot2, &result);
-    result->SetLength(batchSize);
+    cc->decrypt(keys.secret_key, c_rot2, &result);
+    result->set_length(batch_size);
     std::cout << "x1 rotate by -2 = " << result << std::endl;
 
     return 0;

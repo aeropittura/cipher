@@ -40,99 +40,99 @@
 #include "cipher/fhe/key/public_key.h"
 #include "cipher/fhe/rns/crypto_params.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-Ciphertext<DCRTPoly> PKERNS::Encrypt(DCRTPoly plaintext, const PrivateKey<DCRTPoly> privateKey) const {
-    Ciphertext<DCRTPoly> ciphertext(std::make_shared<CiphertextImpl<DCRTPoly>>(privateKey));
+Ciphertext<RnsPoly> RnsPke::encrypt(RnsPoly plaintext, const PrivateKey<RnsPoly> private_key) const {
+    Ciphertext<RnsPoly> ciphertext(std::make_shared<CiphertextImpl<RnsPoly>>(private_key));
 
-    const std::shared_ptr<ParmType> ptxtParams = plaintext.GetParams();
-    std::shared_ptr<std::vector<DCRTPoly>> ba = EncryptZeroCore(privateKey, ptxtParams);
+    const std::shared_ptr<ParmType> ptxt_params = plaintext.get_params();
+    std::shared_ptr<std::vector<RnsPoly>> ba = encrypt_zero_core(private_key, ptxt_params);
 
-    plaintext.SetFormat(EVALUATION);
+    plaintext.set_format(EVALUATION);
 
     (*ba)[0] += plaintext;
 
-    ciphertext->SetElements(std::move(*ba));
-    ciphertext->SetNoiseScaleDeg(1);
+    ciphertext->set_elements(std::move(*ba));
+    ciphertext->set_noise_scale_deg(1);
 
     return ciphertext;
 }
 
-Ciphertext<DCRTPoly> PKERNS::Encrypt(DCRTPoly plaintext, const PublicKey<DCRTPoly> publicKey) const {
-    Ciphertext<DCRTPoly> ciphertext(std::make_shared<CiphertextImpl<DCRTPoly>>(publicKey));
+Ciphertext<RnsPoly> RnsPke::encrypt(RnsPoly plaintext, const PublicKey<RnsPoly> public_key) const {
+    Ciphertext<RnsPoly> ciphertext(std::make_shared<CiphertextImpl<RnsPoly>>(public_key));
 
-    const std::shared_ptr<ParmType> ptxtParams = plaintext.GetParams();
-    std::shared_ptr<std::vector<DCRTPoly>> ba = EncryptZeroCore(publicKey, ptxtParams);
+    const std::shared_ptr<ParmType> ptxt_params = plaintext.get_params();
+    std::shared_ptr<std::vector<RnsPoly>> ba = encrypt_zero_core(public_key, ptxt_params);
 
-    plaintext.SetFormat(EVALUATION);
+    plaintext.set_format(EVALUATION);
 
     (*ba)[0] += plaintext;
 
-    ciphertext->SetElements(std::move(*ba));
-    ciphertext->SetNoiseScaleDeg(1);
+    ciphertext->set_elements(std::move(*ba));
+    ciphertext->set_noise_scale_deg(1);
 
     return ciphertext;
 }
 
-DecryptResult PKERNS::Decrypt(ConstCiphertext<DCRTPoly> ciphertext, const PrivateKey<DCRTPoly> privateKey,
+DecryptResult RnsPke::decrypt(ConstCiphertext<RnsPoly> ciphertext, const PrivateKey<RnsPoly> private_key,
                               Poly* plaintext) const {
-    const std::vector<DCRTPoly>& cv = ciphertext->GetElements();
-    DCRTPoly b = DecryptCore(cv, privateKey);
+    const std::vector<RnsPoly>& cv = ciphertext->get_elements();
+    RnsPoly b = decrypt_core(cv, private_key);
 
-    b.SetFormat(Format::COEFFICIENT);
-    size_t sizeQl = b.GetParams()->GetParams().size();
+    b.set_format(Format::COEFFICIENT);
+    size_t size_ql = b.get_params()->get_params().size();
 
-    if (sizeQl == 0)
-        OPENFHE_THROW("Decryption failure: No towers left; consider increasing the depth.");
+    if (size_ql == 0)
+        CIPHER_THROW("Decryption failure: No towers left; consider increasing the depth.");
 
-    if (sizeQl == 1) {
-        *plaintext = Poly(b.GetElementAtIndex(0), Format::COEFFICIENT);
+    if (size_ql == 1) {
+        *plaintext = Poly(b.get_element_at_index(0), Format::COEFFICIENT);
     } else {
-        *plaintext = b.CRTInterpolate();
+        *plaintext = b.crt_interpolate();
     }
 
-    return DecryptResult(plaintext->GetLength());
+    return DecryptResult(plaintext->get_length());
 }
 
-DecryptResult PKERNS::Decrypt(ConstCiphertext<DCRTPoly> ciphertext, const PrivateKey<DCRTPoly> privateKey,
+DecryptResult RnsPke::decrypt(ConstCiphertext<RnsPoly> ciphertext, const PrivateKey<RnsPoly> private_key,
                               NativePoly* plaintext) const {
-    const std::vector<DCRTPoly>& cv = ciphertext->GetElements();
-    DCRTPoly b = DecryptCore(cv, privateKey);
+    const std::vector<RnsPoly>& cv = ciphertext->get_elements();
+    RnsPoly b = decrypt_core(cv, private_key);
 
-    b.SetFormat(Format::COEFFICIENT);
-    const size_t sizeQl = b.GetParams()->GetParams().size();
-    if (sizeQl != 1) {
-        OPENFHE_THROW(
-                "sizeQl " + std::to_string(sizeQl) +
+    b.set_format(Format::COEFFICIENT);
+    const size_t size_ql = b.get_params()->get_params().size();
+    if (size_ql != 1) {
+        CIPHER_THROW(
+                "sizeQl " + std::to_string(size_ql) +
                 "!= 1. If sizeQl = 0, consider increasing the depth. If sizeQl > 1, check parameters (this is unsupported for NativePoly).");
     }
 
-    *plaintext = b.GetElementAtIndex(0);
+    *plaintext = b.get_element_at_index(0);
 
-    return DecryptResult(plaintext->GetLength());
+    return DecryptResult(plaintext->get_length());
 }
 
-std::shared_ptr<std::vector<DCRTPoly>> PKERNS::EncryptZeroCore(const PrivateKey<DCRTPoly> privateKey,
+std::shared_ptr<std::vector<RnsPoly>> RnsPke::encrypt_zero_core(const PrivateKey<RnsPoly> private_key,
                                                                const std::shared_ptr<ParmType> params) const {
-    const auto cryptoParams = std::dynamic_pointer_cast<CryptoParametersRNS>(privateKey->GetCryptoParameters());
+    const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(private_key->get_crypto_parameters());
 
-    const DCRTPoly& s = privateKey->GetPrivateElement();
-    const auto ns = cryptoParams->GetNoiseScale();
-    const DggType& dgg = cryptoParams->GetDiscreteGaussianGenerator();
+    const RnsPoly& s = private_key->get_private_element();
+    const auto ns = crypto_params->get_noise_scale();
+    const DggType& dgg = crypto_params->get_discrete_gaussian_generator();
     DugType dug;
 
-    const std::shared_ptr<ParmType> elementParams = (params == nullptr) ? cryptoParams->GetElementParams() : params;
+    const std::shared_ptr<ParmType> element_params = (params == nullptr) ? crypto_params->get_element_params() : params;
 
-    DCRTPoly a(dug, elementParams, Format::EVALUATION);
-    DCRTPoly e(dgg, elementParams, Format::EVALUATION);
+    RnsPoly a(dug, element_params, Format::EVALUATION);
+    RnsPoly e(dgg, element_params, Format::EVALUATION);
 
-    uint32_t sizeQ = s.GetParams()->GetParams().size();
-    uint32_t sizeQl = elementParams->GetParams().size();
+    uint32_t size_q = s.get_params()->get_params().size();
+    uint32_t size_ql = element_params->get_params().size();
 
-    DCRTPoly c0, c1;
-    if (sizeQl != sizeQ) {
+    RnsPoly c0, c1;
+    if (size_ql != size_q) {
         // Clone only the towers of the secret key that are still needed.
-        DCRTPoly scopy = s.CloneTowers(0, sizeQl - 1);
+        RnsPoly scopy = s.clone_towers(0, size_ql - 1);
 
         c0 = a * scopy + ns * e;
         c1 = -a;
@@ -142,83 +142,83 @@ std::shared_ptr<std::vector<DCRTPoly>> PKERNS::EncryptZeroCore(const PrivateKey<
         c1 = -a;
     }
 
-    auto result = std::make_shared<std::vector<DCRTPoly>>();
+    auto result = std::make_shared<std::vector<RnsPoly>>();
     result->reserve(2);
     result->push_back(std::move(c0));
     result->push_back(std::move(c1));
     return result;
 }
 
-std::shared_ptr<std::vector<DCRTPoly>> PKERNS::EncryptZeroCore(const PublicKey<DCRTPoly> publicKey,
+std::shared_ptr<std::vector<RnsPoly>> RnsPke::encrypt_zero_core(const PublicKey<RnsPoly> public_key,
                                                                const std::shared_ptr<ParmType> params) const {
-    const auto cryptoParams = std::dynamic_pointer_cast<CryptoParametersRNS>(publicKey->GetCryptoParameters());
+    const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(public_key->get_crypto_parameters());
 
-    const std::vector<DCRTPoly>& pk = publicKey->GetPublicElements();
-    const auto ns = cryptoParams->GetNoiseScale();
-    const DggType& dgg = cryptoParams->GetDiscreteGaussianGenerator();
+    const std::vector<RnsPoly>& pk = public_key->get_public_elements();
+    const auto ns = crypto_params->get_noise_scale();
+    const DggType& dgg = crypto_params->get_discrete_gaussian_generator();
 
     TugType tug;
 
-    const std::shared_ptr<ParmType> elementParams = (params == nullptr) ? cryptoParams->GetElementParams() : params;
-    // TODO (dsuponit): "tug" must be assigned with TernaryUniformGenerator. Otherwise the DCRTPoly constructor crashes.
+    const std::shared_ptr<ParmType> element_params = (params == nullptr) ? crypto_params->get_element_params() : params;
+    // TODO (dsuponit): "tug" must be assigned with TernaryUniformGenerator. Otherwise the RnsPoly constructor crashes.
     // check other files if "tug" is properly assigned
-    // if (cryptoParams->GetSecretKeyDist() != GAUSSIAN) {
-    //    OPENFHE_THROW("TugType tug must be assigned");
+    // if (crypto_params->get_secret_key_dist() != GAUSSIAN) {
+    //    CIPHER_THROW("TugType tug must be assigned");
     //}
-    DCRTPoly v = cryptoParams->GetSecretKeyDist() == GAUSSIAN ? DCRTPoly(dgg, elementParams, Format::EVALUATION) :
-                                                                DCRTPoly(tug, elementParams, Format::EVALUATION);
+    RnsPoly v = crypto_params->get_secret_key_dist() == GAUSSIAN ? RnsPoly(dgg, element_params, Format::EVALUATION) :
+                                                                RnsPoly(tug, element_params, Format::EVALUATION);
 
     // noise generation with the discrete gaussian generator dgg
-    DCRTPoly e0(dgg, elementParams, Format::EVALUATION);
-    DCRTPoly e1(dgg, elementParams, Format::EVALUATION);
+    RnsPoly e0(dgg, element_params, Format::EVALUATION);
+    RnsPoly e1(dgg, element_params, Format::EVALUATION);
 
-    uint32_t sizeQ = pk[0].GetParams()->GetParams().size();
-    uint32_t sizeQl = elementParams->GetParams().size();
+    uint32_t size_q = pk[0].get_params()->get_params().size();
+    uint32_t size_ql = element_params->get_params().size();
 
-    DCRTPoly c0, c1;
-    if (sizeQl != sizeQ) {
+    RnsPoly c0, c1;
+    if (size_ql != size_q) {
         // Clone only the towers of the public keys that are still needed.
-        DCRTPoly p0 = pk[0].CloneTowers(0, sizeQl - 1);
-        DCRTPoly p1 = pk[1].CloneTowers(0, sizeQl - 1);
+        RnsPoly p0 = pk[0].clone_towers(0, size_ql - 1);
+        RnsPoly p1 = pk[1].clone_towers(0, size_ql - 1);
 
         c0 = p0 * v + ns * e0;
         c1 = p1 * v + ns * e1;
     } else {
         // Use public keys as they are
-        const DCRTPoly& p0 = pk[0];
-        const DCRTPoly& p1 = pk[1];
+        const RnsPoly& p0 = pk[0];
+        const RnsPoly& p1 = pk[1];
 
         c0 = p0 * v + ns * e0;
         c1 = p1 * v + ns * e1;
     }
 
-    auto result = std::make_shared<std::vector<DCRTPoly>>();
+    auto result = std::make_shared<std::vector<RnsPoly>>();
     result->reserve(2);
     result->push_back(std::move(c0));
     result->push_back(std::move(c1));
     return result;
 }
 
-DCRTPoly PKERNS::DecryptCore(const std::vector<DCRTPoly>& cv, const PrivateKey<DCRTPoly> privateKey) const {
-    const DCRTPoly& s = privateKey->GetPrivateElement();
+RnsPoly RnsPke::decrypt_core(const std::vector<RnsPoly>& cv, const PrivateKey<RnsPoly> private_key) const {
+    const RnsPoly& s = private_key->get_private_element();
 
-    size_t sizeQl = cv[0].GetParams()->GetParams().size();
-    auto scopy = s.CloneTowers(0, sizeQl - 1);
+    size_t size_ql = cv[0].get_params()->get_params().size();
+    auto scopy = s.clone_towers(0, size_ql - 1);
 
-    DCRTPoly sPower(scopy);
+    RnsPoly s_power(scopy);
 
-    DCRTPoly b(cv[0]);
-    b.SetFormat(Format::EVALUATION);
+    RnsPoly b(cv[0]);
+    b.set_format(Format::EVALUATION);
 
-    DCRTPoly ci;
+    RnsPoly ci;
     for (size_t i = 1; i < cv.size(); i++) {
         ci = cv[i];
-        ci.SetFormat(Format::EVALUATION);
+        ci.set_format(Format::EVALUATION);
 
-        b.MultAccEqNoCheck(sPower, ci);
-        sPower *= scopy;
+        b.mult_acc_eq_no_check(s_power, ci);
+        s_power *= scopy;
     }
     return b;
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher

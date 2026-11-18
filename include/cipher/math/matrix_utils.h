@@ -37,12 +37,12 @@
 #include "cipher/math/backend.h"
 #include "cipher/util/exception.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Converts elements of Z_q to their centered representatives in (-q/2, q/2] as int32_t.
  *
- * The modulus-dependent bounds are computed once, at construction; Convert() then performs at
+ * The modulus-dependent bounds are computed once, at construction; convert() then performs at
  * most two comparisons and one subtraction per element and throws if the centered representative
  * does not fit in an int32_t. Every representative fits if q <= 2^32 - 1. For an even q the
  * class q/2 has the two representatives -q/2 and q/2; the representable one is returned.
@@ -56,24 +56,24 @@ class CenteredToInt32ConverterImpl {
      * @param modulus the ring modulus q
      */
     explicit CenteredToInt32ConverterImpl(const IntType& modulus)
-        : m_modulus(modulus), m_native(modulus.GetMSB() <= 64) {
-        const IntType int32Max(int32MaxValue);
-        const IntType negativeThreshold(modulus / IntType(2));
+        : modulus_(modulus), native_(modulus.get_msb() <= 64) {
+        const IntType int32_max(int32_max_value);
+        const IntType negative_threshold(modulus / IntType(2));
 
         // the largest value mapping to a non-negative int32_t
-        m_maxPositive = (negativeThreshold > int32Max) ? int32Max : negativeThreshold;
+        max_positive_ = (negative_threshold > int32_max) ? int32_max : negative_threshold;
 
         // the smallest value mapping to a negative int32_t
-        m_minNegative = negativeThreshold + IntType(1);
-        if (modulus > IntType(int32MinMagnitude)) {
-            const IntType lowestNegative(modulus - IntType(int32MinMagnitude));
-            if (lowestNegative > m_minNegative)
-                m_minNegative = lowestNegative;
+        min_negative_ = negative_threshold + IntType(1);
+        if (modulus > IntType(int32_min_magnitude)) {
+            const IntType lowest_negative(modulus - IntType(int32_min_magnitude));
+            if (lowest_negative > min_negative_)
+                min_negative_ = lowest_negative;
         }
 
-        if (m_native) {
-            m_modulus64 = modulus.template ConvertToInt<uint64_t>();
-            m_maxPositive64 = m_maxPositive.template ConvertToInt<uint64_t>();
+        if (native_) {
+            modulus64_ = modulus.template convert_to_int<uint64_t>();
+            max_positive64_ = max_positive_.template convert_to_int<uint64_t>();
         }
     }
 
@@ -83,43 +83,43 @@ class CenteredToInt32ConverterImpl {
      * @param value the residue in [0, q)
      * @return the representative in (-q/2, q/2] as int32_t; throws if it does not fit
      */
-    int32_t Convert(const IntType& value) const {
-        if (m_native) {
+    int32_t convert(const IntType& value) const {
+        if (native_) {
             //  q <= 2^64: both bounds and the magnitude fit in a native word, so the comparisons
             //  and the subtraction need no big-integer temporary. A value outside Z_q wraps the
             //  subtraction, which the magnitude bound then rejects
-            const uint64_t v{value.template ConvertToInt<uint64_t>()};
-            if (v <= m_maxPositive64)
+            const uint64_t v{value.template convert_to_int<uint64_t>()};
+            if (v <= max_positive64_)
                 return static_cast<int32_t>(v);
-            const uint64_t magnitude{m_modulus64 - v};
-            if (magnitude <= int32MinMagnitude)
+            const uint64_t magnitude{modulus64_ - v};
+            if (magnitude <= int32_min_magnitude)
                 return static_cast<int32_t>(-static_cast<int64_t>(magnitude));
         } else {
-            if (value <= m_maxPositive)
-                return static_cast<int32_t>(value.template ConvertToInt<uint64_t>());
-            if (value >= m_minNegative && value < m_modulus)
+            if (value <= max_positive_)
+                return static_cast<int32_t>(value.template convert_to_int<uint64_t>());
+            if (value >= min_negative_ && value < modulus_)
                 return static_cast<int32_t>(
-                        -static_cast<int64_t>((m_modulus - value).template ConvertToInt<uint64_t>()));
+                        -static_cast<int64_t>((modulus_ - value).template convert_to_int<uint64_t>()));
         }
-        OPENFHE_THROW("The centered representative of " + value.ToString() + " mod " + m_modulus.ToString() +
+        CIPHER_THROW("The centered representative of " + value.to_string() + " mod " + modulus_.to_string() +
                       " cannot be represented as int32_t");
     }
 
   private:
-    static constexpr uint64_t int32MaxValue{static_cast<uint64_t>(std::numeric_limits<int32_t>::max())};
-    static constexpr uint64_t int32MinMagnitude{int32MaxValue + 1};  // abs(INT32_MIN)
+    static constexpr uint64_t int32_max_value{static_cast<uint64_t>(std::numeric_limits<int32_t>::max())};
+    static constexpr uint64_t int32_min_magnitude{int32_max_value + 1};  // abs(INT32_MIN)
 
-    IntType m_modulus;
-    IntType m_maxPositive;
-    IntType m_minNegative;
-    uint64_t m_modulus64{0};
-    uint64_t m_maxPositive64{0};
-    bool m_native{false};
+    IntType modulus_;
+    IntType max_positive_;
+    IntType min_negative_;
+    uint64_t modulus64_{0};
+    uint64_t max_positive64_{0};
+    bool native_{false};
 };
 
 /// converter for the BigInteger backend
 using CenteredToInt32Converter = CenteredToInt32ConverterImpl<BigInteger>;
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_MATH_MATRIX_UTILS_H_

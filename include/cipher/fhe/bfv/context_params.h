@@ -42,34 +42,34 @@
 
 #include "cipher/fhe/config/params.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-class CryptoContextBFVRNS;
+class BfvRnsContext;
 
-// TODO (dsuponit): review class CCParams<> as we may need to add a class template CCParams<> (see the comments below)
-// every CCParams class should include the following forward declaration as there is
-// no general CCParams class template. This way we may create scheme specific classes
+// TODO (dsuponit): review class ContextParams<> as we may need to add a class template ContextParams<> (see the comments below)
+// every ContextParams class should include the following forward declaration as there is
+// no general ContextParams class template. This way we may create scheme specific classes
 // derived from Params or have them completely independent.
 template <typename T>
-class CCParams;
+class ContextParams;
 //====================================================================================================================
 template <>
 /**
  * @brief Parameters for generating a BFV crypto context. Initializes the BFV defaults and disables the
  * setters that do not apply to BFV (they throw when called).
  */
-class CCParams<CryptoContextBFVRNS> : public Params {
+class ContextParams<BfvRnsContext> : public Params {
   public:
-    CCParams() : Params(BFVRNS_SCHEME) {}
+    ContextParams() : Params(BFVRNS_SCHEME) {}
     /**
      * Constructor from string values; to be used by unit tests only.
      *
-     * @param vals vector with override values in the order given by Params::getAllParamsDataMembers().
+     * @param vals vector with override values in the order given by Params::get_all_params_data_members().
      */
-    explicit CCParams(const std::vector<std::string>& vals) : Params(vals) {}
-    CCParams(const CCParams& obj) = default;
-    CCParams(CCParams&& obj) = default;
-    ~CCParams() = default;
+    explicit ContextParams(const std::vector<std::string>& vals) : Params(vals) {}
+    ContextParams(const ContextParams& obj) = default;
+    ContextParams(ContextParams&& obj) = default;
+    ~ContextParams() = default;
 
     //================================================================================================================
     // DISABLE FUNCTIONS that are not applicable to BFVRNS
@@ -77,110 +77,110 @@ class CCParams<CryptoContextBFVRNS> : public Params {
     /**
      * Not applicable to BFVRNS (throws).
      *
-     * @param scalTech0 ignored.
+     * @param scal_tech0 ignored.
      */
-    void SetScalingTechnique(ScalingTechnique scalTech0) override {
+    void set_scaling_technique(ScalingTechnique scal_tech0) override {
         DISABLED_FOR_BFVRNS;
     }
     /**
      * Not applicable to BFVRNS (throws).
      *
-     * @param firstModSize0 ignored.
+     * @param first_mod_size0 ignored.
      */
-    void SetFirstModSize(uint32_t firstModSize0) override {
+    void set_first_mod_size(uint32_t first_mod_size0) override {
         DISABLED_FOR_BFVRNS;
     }
     /**
      * Not applicable to BFVRNS (throws).
      *
-     * @param PRENumHops0 ignored.
+     * @param pre_num_hops0 ignored.
      */
-    void SetPRENumHops(uint32_t PRENumHops0) override {
+    void set_pre_num_hops(uint32_t pre_num_hops0) override {
         DISABLED_FOR_BFVRNS;
     }
     /**
      * Not applicable to BFVRNS (throws).
      *
-     * @param executionMode0 ignored.
+     * @param execution_mode0 ignored.
      */
-    void SetExecutionMode(ExecutionMode executionMode0) override {
+    void set_execution_mode(ExecutionMode execution_mode0) override {
         DISABLED_FOR_BFVRNS;
     }
     /**
      * Not applicable to BFVRNS (throws).
      *
-     * @param decryptionNoiseMode0 ignored.
+     * @param decryption_noise_mode0 ignored.
      */
-    void SetDecryptionNoiseMode(DecryptionNoiseMode decryptionNoiseMode0) override {
+    void set_decryption_noise_mode(DecryptionNoiseMode decryption_noise_mode0) override {
         DISABLED_FOR_BFVRNS;
     }
     /**
      * Not applicable to BFVRNS (throws).
      *
-     * @param noiseEstimate0 ignored.
+     * @param noise_estimate0 ignored.
      */
-    void SetNoiseEstimate(double noiseEstimate0) override {
+    void set_noise_estimate(double noise_estimate0) override {
         DISABLED_FOR_BFVRNS;
     }
     /**
      * Not applicable to BFVRNS (throws).
      *
-     * @param desiredPrecision0 ignored.
+     * @param desired_precision0 ignored.
      */
-    void SetDesiredPrecision(double desiredPrecision0) override {
+    void set_desired_precision(double desired_precision0) override {
         DISABLED_FOR_BFVRNS;
     }
     /**
      * Not applicable to BFVRNS (throws).
      *
-     * @param statisticalSecurity0 ignored.
+     * @param statistical_security0 ignored.
      */
-    void SetStatisticalSecurity(uint32_t statisticalSecurity0) override {
+    void set_statistical_security(uint32_t statistical_security0) override {
         DISABLED_FOR_BFVRNS;
     }
     /**
      * Not applicable to BFVRNS (throws).
      *
-     * @param numAdversarialQueries0 ignored.
+     * @param num_adversarial_queries0 ignored.
      */
-    void SetNumAdversarialQueries(uint32_t numAdversarialQueries0) override {
+    void set_num_adversarial_queries(uint32_t num_adversarial_queries0) override {
         DISABLED_FOR_BFVRNS;
     }
     /**
      * Not applicable to BFVRNS (throws).
      *
-     * @param interactiveBootCompressionLevel0 ignored.
+     * @param interactive_boot_compression_level0 ignored.
      */
-    void SetInteractiveBootCompressionLevel(CompressionLevel interactiveBootCompressionLevel0) override {
+    void set_interactive_boot_compression_level(CompressionLevel interactive_boot_compression_level0) override {
         DISABLED_FOR_BFVRNS;
     }
     /**
      * Not applicable to BFVRNS (throws).
      *
-     * @param compositeDegree0 ignored.
+     * @param composite_degree0 ignored.
      */
-    void SetCompositeDegree(uint32_t compositeDegree0) override {
+    void set_composite_degree(uint32_t composite_degree0) override {
         DISABLED_FOR_BFVRNS;
     }
     /**
      * Not applicable to BFVRNS (throws).
      *
-     * @param registerWordSize0 ignored.
+     * @param register_word_size0 ignored.
      */
-    void SetRegisterWordSize(uint32_t registerWordSize0) override {
+    void set_register_word_size(uint32_t register_word_size0) override {
         DISABLED_FOR_BFVRNS;
     }
     /**
      * Not applicable to BFVRNS (throws).
      *
-     * @param ckksDataType0 ignored.
+     * @param ckks_data_type0 ignored.
      */
-    void SetCKKSDataType(CKKSDataType ckksDataType0) override {
+    void set_ckks_data_type(CkksDataType ckks_data_type0) override {
         DISABLED_FOR_BFVRNS;
     }
 };
 //====================================================================================================================
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_BFV_CONTEXT_PARAMS_H_

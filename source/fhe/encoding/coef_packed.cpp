@@ -40,99 +40,99 @@
 
 #include "cipher/fhe/constants.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 template <typename P>
-inline static void encodeVec(P& poly, const PlaintextModulus& mod, int64_t lb, int64_t ub,
-                             const std::vector<int64_t>& value, SCHEME schemeID) {
+inline static void encode_vec(P& poly, const PlaintextModulus& mod_value, int64_t lb, int64_t ub,
+                             const std::vector<int64_t>& value, SCHEME scheme_id) {
     if (ub > INT32_MAX || lb < INT32_MIN)
-        OPENFHE_THROW("Cannot encode a coefficient larger than 32 bits");
+        CIPHER_THROW("Cannot encode a coefficient larger than 32 bits");
 
-    poly.SetValuesToZero();
-    for (size_t i = 0; i < value.size() && i < poly.GetLength(); i++) {
+    poly.set_values_to_zero();
+    for (size_t i = 0; i < value.size() && i < poly.get_length(); i++) {
         if (value[i] <= lb || value[i] > ub)
-            OPENFHE_THROW("Cannot encode integer " + std::to_string(value[i]) + " at position " + std::to_string(i) +
-                          " because it is out of range of plaintext modulus " + std::to_string(mod));
+            CIPHER_THROW("Cannot encode integer " + std::to_string(value[i]) + " at position " + std::to_string(i) +
+                          " because it is out of range of plaintext modulus " + std::to_string(mod_value));
 
         if (value[i] < 0) {
-            if (isBFVRNS(schemeID)) {
+            if (is_bfvrns(scheme_id)) {
                 // TODO: Investigate why this doesn't work with q instead of t.
-                uint64_t adjustedVal{mod - static_cast<uint64_t>(llabs(value[i]))};
-                poly[i] = typename P::Integer(adjustedVal);
+                uint64_t adjusted_val{mod_value - static_cast<uint64_t>(llabs(value[i]))};
+                poly[i] = typename P::Integer(adjusted_val);
             } else {
                 // It is more efficient to encode negative numbers using the ciphertext
                 // modulus no noise growth occurs
-                poly[i] = poly.GetModulus() - typename P::Integer(static_cast<uint64_t>(llabs(value[i])));
+                poly[i] = poly.get_modulus() - typename P::Integer(static_cast<uint64_t>(llabs(value[i])));
             }
         } else
             poly[i] = value[i];
     }
 }
 
-bool CoefPackedEncoding::Encode() {
-    if (this->isEncoded)
+bool CoefPackedEncoding::encode() {
+    if (this->is_encoded_)
         return true;
 
-    PlaintextModulus mod = this->encodingParams->GetPlaintextModulus();
-    NativeInteger originalSF = scalingFactorInt;
-    for (size_t j = 1; j < noiseScaleDeg; j++) {
-        scalingFactorInt = scalingFactorInt.ModMul(originalSF, mod);
+    PlaintextModulus mod_value = this->encoding_params->get_plaintext_modulus();
+    NativeInteger original_sf = scaling_factor_int;
+    for (size_t j = 1; j < noise_scale_deg; j++) {
+        scaling_factor_int = scaling_factor_int.mod_mul(original_sf, mod_value);
     }
 
-    if (this->typeFlag == IsNativePoly) {
-        encodeVec(this->encodedNativeVector, mod, LowBound(), HighBound(), this->value, this->GetSchemeID());
-        encodedNativeVector = encodedNativeVector.Times(scalingFactorInt);
+    if (this->type_flag == IsNativePoly) {
+        encode_vec(this->encoded_native_vector, mod_value, low_bound(), high_bound(), this->value, this->get_scheme_id());
+        encoded_native_vector = encoded_native_vector.Times(scaling_factor_int);
     } else {
-        encodeVec(this->encodedVector, mod, LowBound(), HighBound(), this->value, this->GetSchemeID());
+        encode_vec(this->encoded_vector, mod_value, low_bound(), high_bound(), this->value, this->get_scheme_id());
 
-        if (this->typeFlag == IsDCRTPoly) {
-            this->encodedVectorDCRT = this->encodedVector;
-            encodedVectorDCRT = encodedVectorDCRT.Times(scalingFactorInt);
-            this->encodedVectorDCRT.SetFormat(Format::EVALUATION);
+        if (this->type_flag == IsDCRTPoly) {
+            this->encoded_vector_dcrt = this->encoded_vector;
+            encoded_vector_dcrt = encoded_vector_dcrt.Times(scaling_factor_int);
+            this->encoded_vector_dcrt.set_format(Format::EVALUATION);
         }
     }
 
-    this->isEncoded = true;
+    this->is_encoded_ = true;
     return true;
 }
 
 template <typename P>
-inline static void fillVec(const P& poly, const PlaintextModulus& mod, std::vector<int64_t>& value) {
+inline static void fill_vec(const P& poly, const PlaintextModulus& mod_value, std::vector<int64_t>& value) {
     value.clear();
-    value.reserve(poly.GetLength());
+    value.reserve(poly.get_length());
 
-    int64_t half = int64_t(mod) / 2;
-    const typename P::Integer& q = poly.GetModulus();
-    typename P::Integer qHalf = q >> 1;
+    int64_t half = int64_t(mod_value) / 2;
+    const typename P::Integer& q = poly.get_modulus();
+    typename P::Integer q_half = q >> 1;
 
-    for (size_t i = 0; i < poly.GetLength(); i++) {
+    for (size_t i = 0; i < poly.get_length(); i++) {
         int64_t val;
-        if (poly[i] > qHalf)
-            val = (-(q - poly[i]).ConvertToInt());
+        if (poly[i] > q_half)
+            val = (-(q - poly[i]).convert_to_int());
         else
-            val = poly[i].ConvertToInt();
+            val = poly[i].convert_to_int();
         if (val > half)
-            val -= mod;
+            val -= mod_value;
         value.push_back(val);
     }
 }
 
-bool CoefPackedEncoding::Decode() {
-    PlaintextModulus mod = this->encodingParams->GetPlaintextModulus();
+bool CoefPackedEncoding::decode() {
+    PlaintextModulus mod_value = this->encoding_params->get_plaintext_modulus();
 
-    if (this->typeFlag == IsNativePoly) {
-        NativeInteger scfInv = scalingFactorInt.ModInverse(mod);
-        NativePoly temp = encodedNativeVector.Times(scfInv).Mod(mod);
-        fillVec(temp, mod, this->value);
+    if (this->type_flag == IsNativePoly) {
+        NativeInteger scf_inv = scaling_factor_int.mod_inverse(mod_value);
+        NativePoly temp = encoded_native_vector.Times(scf_inv).mod(mod_value);
+        fill_vec(temp, mod_value, this->value);
         // clears the values containing information about the noise
-        encodedNativeVector.SetValuesToZero();
+        encoded_native_vector.set_values_to_zero();
     } else {
-        fillVec(this->encodedVector, mod, this->value);
+        fill_vec(this->encoded_vector, mod_value, this->value);
         // clears the values containing information about the noise
-        this->encodedVector.SetValuesToZero();
+        this->encoded_vector.set_values_to_zero();
     }
 
     return true;
 }
 
-} /* namespace lbcrypto */
+} /* namespace cipher */

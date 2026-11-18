@@ -42,14 +42,14 @@
 #include "cipher/math/backend.h"
 #include "cipher/util/serializable.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Class that stores the LWE scheme secret key; contains a vector
  */
-class LWEPrivateKeyImpl : public Serializable {
+class LwePrivateKeyImpl : public Serializable {
   public:
-    LWEPrivateKeyImpl() = default;
+    LwePrivateKeyImpl() = default;
 
     /**
      * Constructs an LWE secret key from its vector
@@ -57,7 +57,7 @@ class LWEPrivateKeyImpl : public Serializable {
      * @param s the secret key vector; its length is the LWE dimension and its entries (ternary or Gaussian
      * secrets) are stored as residues modulo the LWE modulus
      */
-    explicit LWEPrivateKeyImpl(const NativeVector& s) : m_s(s) {}
+    explicit LwePrivateKeyImpl(const NativeVector& s) : s_(s) {}
 
     /**
      * Constructs an LWE secret key from its vector, moving it
@@ -65,90 +65,90 @@ class LWEPrivateKeyImpl : public Serializable {
      * @param s the secret key vector; its length is the LWE dimension and its entries (ternary or Gaussian
      * secrets) are stored as residues modulo the LWE modulus
      */
-    explicit LWEPrivateKeyImpl(NativeVector&& s) noexcept : m_s(std::move(s)) {}
+    explicit LwePrivateKeyImpl(NativeVector&& s) noexcept : s_(std::move(s)) {}
 
-    LWEPrivateKeyImpl(const LWEPrivateKeyImpl& rhs) : m_s(rhs.m_s) {}
+    LwePrivateKeyImpl(const LwePrivateKeyImpl& rhs) : s_(rhs.s_) {}
 
-    LWEPrivateKeyImpl(LWEPrivateKeyImpl&& rhs) noexcept : m_s(std::move(rhs.m_s)) {}
+    LwePrivateKeyImpl(LwePrivateKeyImpl&& rhs) noexcept : s_(std::move(rhs.s_)) {}
 
-    LWEPrivateKeyImpl& operator=(const LWEPrivateKeyImpl& rhs) {
-        m_s = rhs.m_s;
+    LwePrivateKeyImpl& operator=(const LwePrivateKeyImpl& rhs) {
+        s_ = rhs.s_;
         return *this;
     }
 
-    LWEPrivateKeyImpl& operator=(LWEPrivateKeyImpl&& rhs) noexcept {
-        m_s = std::move(rhs.m_s);
+    LwePrivateKeyImpl& operator=(LwePrivateKeyImpl&& rhs) noexcept {
+        s_ = std::move(rhs.s_);
         return *this;
     }
 
-    const NativeVector& GetElement() const {
-        return m_s;
+    const NativeVector& get_element() const {
+        return s_;
     }
 
-    void SetElement(const NativeVector& s) {
-        m_s = s;
+    void set_element(const NativeVector& s) {
+        s_ = s;
     }
 
-    void SetElement(NativeVector&& s) noexcept {
-        m_s = std::move(s);
+    void set_element(NativeVector&& s) noexcept {
+        s_ = std::move(s);
     }
 
     /**
      * @return the LWE dimension (the length of the secret key vector)
      */
-    uint32_t GetLength() const {
-        return m_s.GetLength();
+    uint32_t get_length() const {
+        return s_.get_length();
     }
 
     /**
      * @return the modulus of the secret key vector
      */
-    NativeInteger GetModulus() const {
-        return m_s.GetModulus();
+    NativeInteger get_modulus() const {
+        return s_.get_modulus();
     }
 
     /**
      * @param other the secret key to compare with
      * @return true if both keys have the same vector
      */
-    bool operator==(const LWEPrivateKeyImpl& other) const {
-        return m_s == other.m_s;
+    bool operator==(const LwePrivateKeyImpl& other) const {
+        return s_ == other.s_;
     }
 
     /**
      * @param other the secret key to compare with
      * @return true if the key vectors differ
      */
-    bool operator!=(const LWEPrivateKeyImpl& other) const {
+    bool operator!=(const LwePrivateKeyImpl& other) const {
         return !(*this == other);
     }
 
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
-        ar(::cereal::make_nvp("s", m_s));
+        ar(::cereal::make_nvp("s", s_));
     }
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
-        ar(::cereal::make_nvp("s", m_s));
+        ar(::cereal::make_nvp("s", s_));
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "LWEPrivateKey";
     }
 
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 
   private:
-    NativeVector m_s;
+    NativeVector s_;
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_BOOLEAN_LWE_PRIVATE_KEY_H_

@@ -42,72 +42,72 @@
 #include "cipher/util/inttypes.h"
 #include "cipher/util/utilities.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 /************************************************
  *	TESTING Modular operations for 128-bit backend
  ************************************************/
-#if NATIVEINT == 128
+#if CIPHER_NATIVE_INT == 128
 TEST(UT128, modular_operations) {
-    intnat::NativeInteger modulus = ((intnat::NativeInteger(1) << 120) + intnat::NativeInteger(123456789));
-    intnat::NativeInteger mu = modulus.ComputeMu();
+    native_int::NativeInteger modulus = ((native_int::NativeInteger(1) << 120) + native_int::NativeInteger(123456789));
+    native_int::NativeInteger mu = modulus.compute_mu();
 
-    intnat::NativeInteger a = (intnat::NativeInteger(1) << 110) + intnat::NativeInteger(1234);
-    intnat::NativeInteger b = (intnat::NativeInteger(1) << 115) + intnat::NativeInteger(6789);
+    native_int::NativeInteger a = (native_int::NativeInteger(1) << 110) + native_int::NativeInteger(1234);
+    native_int::NativeInteger b = (native_int::NativeInteger(1) << 115) + native_int::NativeInteger(6789);
 
-    intnat::NativeInteger c = (intnat::NativeInteger(1) << 120) + intnat::NativeInteger(6);
+    native_int::NativeInteger c = (native_int::NativeInteger(1) << 120) + native_int::NativeInteger(6);
 
-    intnat::NativeInteger result = a;
+    native_int::NativeInteger result = a;
 
-    result.ModMulEq(b, modulus, mu);
+    result.mod_mul_eq(b, modulus, mu);
 
     EXPECT_EQ(BigInteger("784483038650039308657432244878529921"), BigInteger(result)) << "Failure in ModMulEq";
 
-    result = a.ModMul(b, modulus, mu);
+    result = a.mod_mul(b, modulus, mu);
 
     EXPECT_EQ(BigInteger("784483038650039308657432244878529921"), BigInteger(result)) << "Failure in ModMul";
 
-    result = a.ModMulFast(b, modulus, mu);
+    result = a.mod_mul_fast(b, modulus, mu);
 
     EXPECT_EQ(BigInteger("784483038650039308657432244878529921"), BigInteger(result)) << "Failure in ModMulFast";
 
     result = a;
 
-    result.ModMulFastEq(b, modulus, mu);
+    result.mod_mul_fast_eq(b, modulus, mu);
 
     EXPECT_EQ(BigInteger("784483038650039308657432244878529921"), BigInteger(result)) << "Failure in ModMulFastEq";
 
-    intnat::NativeInteger precon = b.PrepModMulConst(modulus);
+    native_int::NativeInteger precon = b.prep_mod_mul_const(modulus);
 
-    result = a.ModMulFastConst(b, modulus, precon);
+    result = a.mod_mul_fast_const(b, modulus, precon);
 
     EXPECT_EQ(BigInteger("784483038650039308657432244878529921"), BigInteger(result)) << "Failure in ModMulFastConst";
 
     result = a;
 
-    result.ModMulFastConstEq(b, modulus, precon);
+    result.mod_mul_fast_const_eq(b, modulus, precon);
 
     EXPECT_EQ(BigInteger("784483038650039308657432244878529921"), BigInteger(result)) << "Failure in ModMulFastConstEq";
 
-    result = a.ModExp(b, modulus);
+    result = a.mod_exp(b, modulus);
 
     EXPECT_EQ(BigInteger("420836984722658338771647831749821018"), BigInteger(result)) << "Failure in ModExp";
 
     result = a;
 
-    result.ModExpEq(b, modulus);
+    result.mod_exp_eq(b, modulus);
 
     EXPECT_EQ(BigInteger("420836984722658338771647831749821018"), BigInteger(result)) << "Failure in ModExpEq";
 
-    result = a.ModAddFast(c, modulus);
+    result = a.mod_add_fast(c, modulus);
 
     EXPECT_EQ(BigInteger("1298074214633706907132623958849475"), BigInteger(result)) << "Failure in ModAddFast";
 
-    result = a.ModSubFast(c, modulus);
+    result = a.mod_sub_fast(c, modulus);
 
     EXPECT_EQ(BigInteger("1298074214633706907132624205763041"), BigInteger(result)) << "Failure in ModSubFast";
 
-    result = a.ModInverse(modulus);
+    result = a.mod_inverse(modulus);
 
     EXPECT_EQ(BigInteger("859455677183853192994953853474516202"), BigInteger(result)) << "Failure in ModInverse";
 }
@@ -116,8 +116,8 @@ TEST(UT128, NTT_operations) {
     uint32_t m1 = 16;
     uint32_t bits = 100;
 
-    auto x1p = std::make_shared<ILNativeParams>(m1, bits);
-    auto x2p = std::make_shared<ILNativeParams>(m1 / 2, bits);
+    auto x1p = std::make_shared<NativePolyParams>(m1, bits);
+    auto x2p = std::make_shared<NativePolyParams>(m1 / 2, bits);
 
     NativePoly x1(x1p, Format::COEFFICIENT);
     x1 = {431, 3414, 1234, 7845, 2145, 7415, 5471, 8452};
@@ -125,16 +125,16 @@ TEST(UT128, NTT_operations) {
     NativePoly x2(x2p, Format::COEFFICIENT);
     x2 = {4127, 9647, 1987, 5410};
 
-    NativePoly x1Clone(x1);
-    NativePoly x2Clone(x2);
+    NativePoly x1_clone(x1);
+    NativePoly x2_clone(x2);
 
-    x1.SwitchFormat();
-    x2.SwitchFormat();
-    x1.SwitchFormat();
-    x2.SwitchFormat();
+    x1.switch_format();
+    x2.switch_format();
+    x1.switch_format();
+    x2.switch_format();
 
-    EXPECT_EQ(x1, x1Clone) << "Failure in NTT test #1";
-    EXPECT_EQ(x2, x2Clone) << "Failure in NTT test #2";
+    EXPECT_EQ(x1, x1_clone) << "Failure in NTT test #1";
+    EXPECT_EQ(x2, x2_clone) << "Failure in NTT test #2";
 }
 
 #endif

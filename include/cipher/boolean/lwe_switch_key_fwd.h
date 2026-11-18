@@ -33,13 +33,13 @@
 
 #include <memory>
 
-namespace lbcrypto {
+namespace cipher {
 
-class LWESwitchingKeyImpl;
+class LweSwitchingKeyImpl;
 
-using LWESwitchingKey = std::shared_ptr<LWESwitchingKeyImpl>;
-using ConstLWESwitchingKey = const std::shared_ptr<const LWESwitchingKeyImpl>;
+using LweSwitchingKey = std::shared_ptr<LweSwitchingKeyImpl>;
+using ConstLweSwitchingKey = const std::shared_ptr<const LweSwitchingKeyImpl>;
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_BOOLEAN_LWE_SWITCH_KEY_FWD_H_

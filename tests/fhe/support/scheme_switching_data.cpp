@@ -42,24 +42,24 @@
 #include "cipher/fhe/key/key_ser.h"
 #include "cipher/fhe/ckks/ser.h"
 
-// includes for getProgramPath()
+// includes for get_program_path()
 #if defined(_WIN32) && (defined(__MINGW32__) || defined(__MINGW64__))
     #include <windows.h>
 #elif defined(__APPLE__)
     #include <mach-o/dyld.h>
 #endif
 
-namespace lbcrypto {
+namespace cipher {
 
 // Helper function to get the absolute path to the running unittests executable
-std::filesystem::path getProgramPath() {
+std::filesystem::path get_program_path() {
 #if defined(_WIN32) && (defined(__MINGW32__) || defined(__MINGW64__))
     // MinGW: Unicode-safe wide API. Use a big static buffer (32K).
     wchar_t buf[32768];
     const DWORD cap = static_cast<DWORD>(sizeof(buf) / sizeof(buf[0]));
     const DWORD len = GetModuleFileNameW(nullptr, buf, cap);
     if (len == 0 || len >= cap)
-        OPENFHE_THROW("Cannot get the executable path for Windows/MinGW.");
+        CIPHER_THROW("Cannot get the executable path for Windows/MinGW.");
 
     return std::filesystem::path(buf, buf + len);
 #elif defined(__APPLE__)
@@ -67,37 +67,37 @@ std::filesystem::path getProgramPath() {
     _NSGetExecutablePath(nullptr, &size);  // ask required size
     std::string tmp(size, '\0');
     if (_NSGetExecutablePath(tmp.data(), &size) != 0)
-        OPENFHE_THROW("Can not get the executable path for macOS.");
+        CIPHER_THROW("Can not get the executable path for macOS.");
 
     return std::filesystem::path(tmp.c_str());
 #elif defined(__linux__)
     std::error_code ec;
     auto p = std::filesystem::read_symlink("/proc/self/exe", ec);
     if (ec)
-        OPENFHE_THROW("Cannot read /proc/self/exe.");
+        CIPHER_THROW("Cannot read /proc/self/exe.");
 
     return p;
 #else
-    OPENFHE_THROW("This architecture is not supported.");
+    CIPHER_THROW("This architecture is not supported.");
 #endif
 }
 
-std::string DataAndLocation::getDataDir() {
-    const std::filesystem::path exe = getProgramPath();
-    const std::filesystem::path exeDir = exe.empty() ? std::filesystem::current_path() : exe.parent_path();
+std::string DataAndLocation::get_data_dir() {
+    const std::filesystem::path exe = get_program_path();
+    const std::filesystem::path exe_dir = exe.empty() ? std::filesystem::current_path() : exe.parent_path();
 
     // One level up (e.g., .../build/tests -> .../build)
-    const std::filesystem::path baseDir = exeDir.parent_path();
-    const std::filesystem::path dataDir = baseDir / "data";
+    const std::filesystem::path base_dir = exe_dir.parent_path();
+    const std::filesystem::path data_dir = base_dir / "data";
 
     std::error_code ec;
-    std::filesystem::path abs = std::filesystem::weakly_canonical(dataDir, ec);
+    std::filesystem::path abs = std::filesystem::weakly_canonical(data_dir, ec);
     if (ec || abs.empty()) {
         ec.clear();                                    // don't carry the old error forward
-        abs = std::filesystem::absolute(dataDir, ec);  // fallback
+        abs = std::filesystem::absolute(data_dir, ec);  // fallback
     }
     if (ec || abs.empty()) {
-        OPENFHE_THROW(std::string("Cannot resolve data directory: ") + dataDir.string());
+        CIPHER_THROW(std::string("Cannot resolve data directory: ") + data_dir.string());
     }
 
     // Uncomment, if you want to ensure that the dir exists
@@ -107,176 +107,176 @@ std::string DataAndLocation::getDataDir() {
 }
 
 // Macros to be used in this source file only
-#define THROW_SERIALIZATION_ERROR   OPENFHE_THROW(std::string("Error serializing to ") + outFile)
-#define THROW_DESERIALIZATION_ERROR OPENFHE_THROW(std::string("Error deserializing from ") + outFile)
-#define THROW_CAN_NOT_OPEN_FILE     OPENFHE_THROW(std::string("Can not open ") + outFile)
+#define THROW_SERIALIZATION_ERROR   CIPHER_THROW(std::string("Error serializing to ") + out_file)
+#define THROW_DESERIALIZATION_ERROR CIPHER_THROW(std::string("Error deserializing from ") + out_file)
+#define THROW_CAN_NOT_OPEN_FILE     CIPHER_THROW(std::string("Can not open ") + out_file)
 #define SERTYPE                     SerType::BINARY
 
-void SchemeSwitchingDataSerializer::Serialize() {
+void SchemeSwitchingDataSerializer::to_stream() {
     // check if all 5 data memebers to be serialized are valid (not NULL)
-    if (nullptr == cryptoContext)
-        OPENFHE_THROW("cryptoContext is nullptr");
-    else if (nullptr == publicKey)
-        OPENFHE_THROW("publicKey is nullptr");
-    else if (nullptr == binFHECryptoContext)
-        OPENFHE_THROW("binFHECryptoContext is nullptr");
-    else if (nullptr == FHEWtoCKKSSwitchKey)
-        OPENFHE_THROW("FHEWtoCKKSSwitchKey is nullptr");
-    else if (nullptr == RAWCiphertext)
-        OPENFHE_THROW("RAWCiphertext is nullptr");
+    if (nullptr == crypto_context)
+        CIPHER_THROW("cryptoContext is nullptr");
+    else if (nullptr == public_key)
+        CIPHER_THROW("publicKey is nullptr");
+    else if (nullptr == bin_fhe_crypto_context)
+        CIPHER_THROW("binFHECryptoContext is nullptr");
+    else if (nullptr == fhew_to_ckks_switch_key)
+        CIPHER_THROW("FHEWtoCKKSSwitchKey is nullptr");
+    else if (nullptr == raw_ciphertext)
+        CIPHER_THROW("RAWCiphertext is nullptr");
 
-    std::string outFile;
+    std::string out_file;
     //=============================================================================================================
-    outFile = dataDirectory + "/" + cryptoContextFile;
-    if (!Serial::SerializeToFile(outFile, cryptoContext, SERTYPE)) {
+    out_file = data_directory + "/" + crypto_context_file;
+    if (!serialization::serialize_to_file(out_file, crypto_context, SERTYPE)) {
         THROW_SERIALIZATION_ERROR;
     }
     //=============================================================================================================
-    outFile = dataDirectory + "/" + pubKeyFile;
-    if (!Serial::SerializeToFile(outFile, publicKey, SERTYPE)) {
+    out_file = data_directory + "/" + pub_key_file;
+    if (!serialization::serialize_to_file(out_file, public_key, SERTYPE)) {
         THROW_SERIALIZATION_ERROR;
     }
     //=============================================================================================================
-    outFile = dataDirectory + "/" + multKeyFile;
-    std::ofstream multKeyFile(outFile, std::ios::out | std::ios::binary);
-    if (multKeyFile.is_open()) {
-        if (!cryptoContext->SerializeEvalMultKey(multKeyFile, SERTYPE)) {
+    out_file = data_directory + "/" + mult_key_file;
+    std::ofstream mult_key_file(out_file, std::ios::out | std::ios::binary);
+    if (mult_key_file.is_open()) {
+        if (!crypto_context->serialize_eval_mult_key(mult_key_file, SERTYPE)) {
             THROW_SERIALIZATION_ERROR;
         }
-        multKeyFile.close();
+        mult_key_file.close();
     } else {
         THROW_CAN_NOT_OPEN_FILE;
     }
     //=============================================================================================================
-    outFile = dataDirectory + "/" + rotKeyFile;
-    std::ofstream rotationKeyFile(outFile, std::ios::out | std::ios::binary);
-    if (rotationKeyFile.is_open()) {
-        if (!cryptoContext->SerializeEvalAutomorphismKey(rotationKeyFile, SERTYPE)) {
+    out_file = data_directory + "/" + rot_key_file;
+    std::ofstream rotation_key_file(out_file, std::ios::out | std::ios::binary);
+    if (rotation_key_file.is_open()) {
+        if (!crypto_context->serialize_eval_automorphism_key(rotation_key_file, SERTYPE)) {
             THROW_SERIALIZATION_ERROR;
         }
-        rotationKeyFile.close();
+        rotation_key_file.close();
     } else {
         THROW_CAN_NOT_OPEN_FILE;
     }
     //=============================================================================================================
-    outFile = dataDirectory + "/" + FHEWtoCKKSSwitchKeyFile;
-    if (!Serial::SerializeToFile(outFile, FHEWtoCKKSSwitchKey, SERTYPE)) {
+    out_file = data_directory + "/" + fhew_to_ckks_switch_key_file;
+    if (!serialization::serialize_to_file(out_file, fhew_to_ckks_switch_key, SERTYPE)) {
         THROW_SERIALIZATION_ERROR;
     }
     //=============================================================================================================
-    outFile = dataDirectory + "/" + ciphertextFile;
-    if (!Serial::SerializeToFile(outFile, RAWCiphertext, SERTYPE)) {
+    out_file = data_directory + "/" + ciphertext_file;
+    if (!serialization::serialize_to_file(out_file, raw_ciphertext, SERTYPE)) {
         THROW_SERIALIZATION_ERROR;
     }
     //=============================================================================================================
-    outFile = dataDirectory + "/" + binFHECryptoContextFile;
-    if (!Serial::SerializeToFile(outFile, binFHECryptoContext, SERTYPE)) {
+    out_file = data_directory + "/" + bin_fhe_crypto_context_file;
+    if (!serialization::serialize_to_file(out_file, bin_fhe_crypto_context, SERTYPE)) {
         THROW_SERIALIZATION_ERROR;
     }
     //=============================================================================================================
-    outFile = dataDirectory + "/" + binFHEBootKeyFile;
-    if (!Serial::SerializeToFile(outFile, binFHECryptoContext->GetBTKey(), SERTYPE)) {
+    out_file = data_directory + "/" + bin_fhe_boot_key_file;
+    if (!serialization::serialize_to_file(out_file, bin_fhe_crypto_context->get_bt_key(), SERTYPE)) {
         THROW_SERIALIZATION_ERROR;
     }
     //=============================================================================================================
     std::vector<uint32_t> indices;
-    auto BTKeyMap = binFHECryptoContext->GetBTKeyMap();
-    for (auto it = BTKeyMap->begin(); it != BTKeyMap->end(); ++it) {
+    auto bt_key_map = bin_fhe_crypto_context->get_bt_key_map();
+    for (auto it = bt_key_map->begin(); it != bt_key_map->end(); ++it) {
         uint32_t index = it->first;
-        RingGSWBTKey thekey = it->second;
+        RingGswBtKey thekey = it->second;
 
-        outFile = createMapFileName(index, baseBTKeyFile);
-        if (!Serial::SerializeToFile(outFile, thekey, SERTYPE)) {
+        out_file = create_map_file_name(index, base_bt_key_file);
+        if (!serialization::serialize_to_file(out_file, thekey, SERTYPE)) {
             THROW_SERIALIZATION_ERROR;
         }
 
         indices.push_back(index);
     }
-    outFile = dataDirectory + "/" + keyIndexFile;
-    if (!Serial::SerializeToFile(outFile, indices, SERTYPE)) {
+    out_file = data_directory + "/" + key_index_file;
+    if (!serialization::serialize_to_file(out_file, indices, SERTYPE)) {
         THROW_SERIALIZATION_ERROR;
     }
     //=============================================================================================================
 }
 
-void SchemeSwitchingDataDeserializer::Deserialize() {
-    std::string outFile;
+void SchemeSwitchingDataDeserializer::from_stream() {
+    std::string out_file;
     //=============================================================================================================
-    outFile = dataDirectory + "/" + cryptoContextFile;
-    if (!Serial::DeserializeFromFile(outFile, cryptoContext, SERTYPE)) {
+    out_file = data_directory + "/" + crypto_context_file;
+    if (!serialization::deserialize_from_file(out_file, crypto_context, SERTYPE)) {
         THROW_DESERIALIZATION_ERROR;
     }
     //=============================================================================================================
-    outFile = dataDirectory + "/" + pubKeyFile;
-    if (!Serial::DeserializeFromFile(outFile, publicKey, SERTYPE)) {
+    out_file = data_directory + "/" + pub_key_file;
+    if (!serialization::deserialize_from_file(out_file, public_key, SERTYPE)) {
         THROW_DESERIALIZATION_ERROR;
     }
     //=============================================================================================================
-    outFile = dataDirectory + "/" + multKeyFile;
-    std::ifstream multKeyFile(outFile, std::ios::in | std::ios::binary);
-    if (multKeyFile.is_open()) {
-        if (!cryptoContext->DeserializeEvalMultKey(multKeyFile, SERTYPE)) {
+    out_file = data_directory + "/" + mult_key_file;
+    std::ifstream mult_key_file(out_file, std::ios::in | std::ios::binary);
+    if (mult_key_file.is_open()) {
+        if (!crypto_context->deserialize_eval_mult_key(mult_key_file, SERTYPE)) {
             THROW_DESERIALIZATION_ERROR;
         }
-        multKeyFile.close();
+        mult_key_file.close();
     } else {
         THROW_CAN_NOT_OPEN_FILE;
     }
     //=============================================================================================================
-    outFile = dataDirectory + "/" + rotKeyFile;
-    std::ifstream rotationKeyFile(outFile, std::ios::in | std::ios::binary);
-    if (rotationKeyFile.is_open()) {
-        if (!cryptoContext->DeserializeEvalAutomorphismKey(rotationKeyFile, SERTYPE)) {
+    out_file = data_directory + "/" + rot_key_file;
+    std::ifstream rotation_key_file(out_file, std::ios::in | std::ios::binary);
+    if (rotation_key_file.is_open()) {
+        if (!crypto_context->deserialize_eval_automorphism_key(rotation_key_file, SERTYPE)) {
             THROW_DESERIALIZATION_ERROR;
         }
-        rotationKeyFile.close();
+        rotation_key_file.close();
     } else {
         THROW_CAN_NOT_OPEN_FILE;
     }
     //=============================================================================================================
-    outFile = dataDirectory + "/" + FHEWtoCKKSSwitchKeyFile;
-    if (!Serial::DeserializeFromFile(outFile, FHEWtoCKKSSwitchKey, SERTYPE)) {
+    out_file = data_directory + "/" + fhew_to_ckks_switch_key_file;
+    if (!serialization::deserialize_from_file(out_file, fhew_to_ckks_switch_key, SERTYPE)) {
         THROW_DESERIALIZATION_ERROR;
     }
-    cryptoContext->SetSwkFC(FHEWtoCKKSSwitchKey);
+    crypto_context->set_swk_fc(fhew_to_ckks_switch_key);
     //=============================================================================================================
-    outFile = dataDirectory + "/" + ciphertextFile;
-    if (!Serial::DeserializeFromFile(outFile, RAWCiphertext, SERTYPE)) {
-        THROW_DESERIALIZATION_ERROR;
-    }
-    //=============================================================================================================
-    outFile = dataDirectory + "/" + binFHECryptoContextFile;
-    if (!Serial::DeserializeFromFile(outFile, binFHECryptoContext, SERTYPE)) {
+    out_file = data_directory + "/" + ciphertext_file;
+    if (!serialization::deserialize_from_file(out_file, raw_ciphertext, SERTYPE)) {
         THROW_DESERIALIZATION_ERROR;
     }
     //=============================================================================================================
-    RingGSWBTKey BTKey;
-    outFile = dataDirectory + "/" + binFHEBootKeyFile;
-    if (!Serial::DeserializeFromFile(outFile, BTKey, SERTYPE)) {
+    out_file = data_directory + "/" + bin_fhe_crypto_context_file;
+    if (!serialization::deserialize_from_file(out_file, bin_fhe_crypto_context, SERTYPE)) {
         THROW_DESERIALIZATION_ERROR;
     }
-    binFHECryptoContext->BTKeyLoad(BTKey);
+    //=============================================================================================================
+    RingGswBtKey BT_key;
+    out_file = data_directory + "/" + bin_fhe_boot_key_file;
+    if (!serialization::deserialize_from_file(out_file, BT_key, SERTYPE)) {
+        THROW_DESERIALIZATION_ERROR;
+    }
+    bin_fhe_crypto_context->bt_key_load(BT_key);
     //=============================================================================================================
     std::vector<uint32_t> indices;
-    outFile = dataDirectory + "/" + keyIndexFile;
-    if (!Serial::DeserializeFromFile(outFile, indices, SERTYPE)) {
+    out_file = data_directory + "/" + key_index_file;
+    if (!serialization::deserialize_from_file(out_file, indices, SERTYPE)) {
         THROW_SERIALIZATION_ERROR;
     } else if (!indices.size()) {
-        std::string errMsg(std::string("Error deserializing from ") + outFile + ". No indices found.");
-        OPENFHE_THROW(errMsg);
+        std::string err_msg(std::string("Error deserializing from ") + out_file + ". No indices found.");
+        CIPHER_THROW(err_msg);
     }
     for (uint32_t index : indices) {
-        RingGSWBTKey thekey;
-        outFile = createMapFileName(index, baseBTKeyFile);
-        if (!Serial::DeserializeFromFile(outFile, thekey, SERTYPE)) {
+        RingGswBtKey thekey;
+        out_file = create_map_file_name(index, base_bt_key_file);
+        if (!serialization::deserialize_from_file(out_file, thekey, SERTYPE)) {
             THROW_DESERIALIZATION_ERROR;
         }
 
         // add single keys to the map
-        binFHECryptoContext->BTKeyMapLoadSingleElement(index, thekey);
+        bin_fhe_crypto_context->bt_key_map_load_single_element(index, thekey);
     }
-    cryptoContext->SetBinCCForSchemeSwitch(binFHECryptoContext);
+    crypto_context->set_bin_cc_for_scheme_switch(bin_fhe_crypto_context);
     //=============================================================================================================
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher

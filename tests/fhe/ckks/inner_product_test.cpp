@@ -38,18 +38,18 @@
 #include "cipher/fhe/ckks/context_gen.h"
 #include "cipher/util/debug.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 namespace {
 class UTCKKSRNS_INNERPRODUCT : public ::testing::Test {
   protected:
     void SetUp() {
-        OpenFHEParallelControls.UnitTestStart();
+        cipher_parallel_controls.unit_test_start();
     }
 
     void TearDown() {
-        CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
-        OpenFHEParallelControls.UnitTestStop();
+        ContextFactory<RnsPoly>::release_all_contexts();
+        cipher_parallel_controls.unit_test_stop();
     }
 
   public:
@@ -60,7 +60,7 @@ enum TEST_ESTIMATED_RESULT { SUCCESS, FAILURE };
 }  // anonymous namespace
 
 template <class T>
-T plainInnerProduct(std::vector<T> vec) {
+T plain_inner_product(std::vector<T> vec) {
     T res = 0.0;
     for (auto& el : vec) {
         res += (el * el);
@@ -72,49 +72,49 @@ T plainInnerProduct(std::vector<T> vec) {
 
 // declaration for Automorphism Test on BFVrns scheme with polynomial operation
 // in power of 2 cyclotomics.
-double CKKSrnsInnerProduct(const std::vector<double> testVec) {
-    lbcrypto::SecurityLevel securityLevel = lbcrypto::HEStd_NotSet;
-    uint32_t dcrtBits = 59;
-    uint32_t ringDim = 1 << 8;
-    uint32_t batchSize = ringDim / 2;
-    lbcrypto::CCParams<lbcrypto::CryptoContextCKKSRNS> parameters;
-    uint32_t multDepth = 10;
+double ckks_rns_inner_product(const std::vector<double> test_vec) {
+    cipher::SecurityLevel security_level = cipher::HEStd_NotSet;
+    uint32_t dcrt_bits = 59;
+    uint32_t ring_dim = 1 << 8;
+    uint32_t batch_size = ring_dim / 2;
+    cipher::ContextParams<cipher::CkksRnsContext> parameters;
+    uint32_t mult_depth_value = 10;
 
-    parameters.SetMultiplicativeDepth(multDepth);
-    parameters.SetScalingModSize(dcrtBits);
-    parameters.SetBatchSize(batchSize);
-    parameters.SetSecurityLevel(securityLevel);
-    parameters.SetRingDim(ringDim);
+    parameters.set_multiplicative_depth(mult_depth_value);
+    parameters.set_scaling_mod_size(dcrt_bits);
+    parameters.set_batch_size(batch_size);
+    parameters.set_security_level(security_level);
+    parameters.set_ring_dim(ring_dim);
 
-    lbcrypto::CryptoContext<lbcrypto::DCRTPoly> cc;
-    cc = GenCryptoContext(parameters);
+    cipher::CryptoContext<cipher::RnsPoly> cc;
+    cc = make_crypto_context(parameters);
 
-    cc->Enable(PKE);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
+    cc->enable(PKE);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
 
-    KeyPair<DCRTPoly> keys = cc->KeyGen();
-    cc->EvalMultKeyGen(keys.secretKey);
-    cc->EvalSumKeyGen(keys.secretKey);
+    KeyPair<RnsPoly> keys = cc->key_gen();
+    cc->eval_mult_key_gen(keys.secret_key);
+    cc->eval_sum_key_gen(keys.secret_key);
 
-    Plaintext plaintext1 = cc->MakeCKKSPackedPlaintext(testVec);
-    auto ct1 = cc->Encrypt(keys.publicKey, plaintext1);
-    auto finalResult = cc->EvalInnerProduct(ct1, ct1, batchSize);
-    lbcrypto::Plaintext res;
-    cc->Decrypt(keys.secretKey, finalResult, &res);
-    res->SetLength(testVec.size());
-    return res->GetCKKSPackedValue()[0].real();
+    Plaintext plaintext1 = cc->make_ckks_packed_plaintext(test_vec);
+    auto ct1 = cc->encrypt(keys.public_key, plaintext1);
+    auto final_result = cc->eval_inner_product(ct1, ct1, batch_size);
+    cipher::Plaintext res;
+    cc->decrypt(keys.secret_key, final_result, &res);
+    res->set_length(test_vec.size());
+    return res->get_ckks_packed_value()[0].real();
 }
 
 TEST_F(UTCKKSRNS_INNERPRODUCT, Test_CKKSrns_INNERPRODUCT) {
-    std::vector<double> testVec{1, 2, 3, 4, 5};
+    std::vector<double> test_vec{1, 2, 3, 4, 5};
 
-    for (size_t i = 0; i < testVec.size(); i++) {
-        testVec[i] += (testVec[i] / 100.0);
+    for (size_t i = 0; i < test_vec.size(); i++) {
+        test_vec[i] += (test_vec[i] / 100.0);
     }
-    auto innerProductHE = CKKSrnsInnerProduct(testVec);
+    auto inner_product_he = ckks_rns_inner_product(test_vec);
 
-    double expectedResult = plainInnerProduct(testVec);
+    double expected_result = plain_inner_product(test_vec);
 
-    EXPECT_LT(std::abs(expectedResult - innerProductHE), 0.00001);
+    EXPECT_LT(std::abs(expected_result - inner_product_he), 0.00001);
 }

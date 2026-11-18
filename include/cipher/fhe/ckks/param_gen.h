@@ -40,76 +40,76 @@
 #include "cipher/fhe/rns/param_gen.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Parameter generation for the CKKS scheme in RNS form: generates the modulus chain (one prime per level,
- * or compositeDegree primes per level for the COMPOSITESCALING* techniques), the auxiliary moduli of key
+ * or composite_degree primes per level for the COMPOSITESCALING* techniques), the auxiliary moduli of key
  * switching and the CRT tables, and validates the ring dimension against the security level.
  */
-class ParameterGenerationCKKSRNS : public ParameterGenerationRNS {
+class CkksRnsParamGen : public RnsParamGen {
   protected:
     /**
-     * Generates the modulus chain for composite scaling: each level consists of compositeDegree primes of at most
-     * registerWordSize bits whose product approximates 2^dcrtBits (the scaling factor), and the first level of
-     * primes whose product approximates 2^firstModSize; all primes are distinct and congruent to 1 modulo the
-     * cyclotomic order. Requires firstModSize > dcrtBits.
+     * Generates the modulus chain for composite scaling: each level consists of composite_degree primes of at most
+     * register_word_size bits whose product approximates 2^dcrt_bits (the scaling factor), and the first level of
+     * primes whose product approximates 2^first_mod_size_value; all primes are distinct and congruent to 1 modulo the
+     * cyclotomic order. Requires first_mod_size_value > dcrt_bits.
      *
-     * @param moduliQ output: the moduli of the chain (size numPrimes)
-     * @param rootsQ output: the corresponding roots of unity
-     * @param compositeDegree number of primes per level
-     * @param numPrimes total number of primes in the chain
-     * @param firstModSize size in bits of the modulus of the first level
-     * @param dcrtBits size in bits of the scaling factor (the modulus of each further level)
-     * @param cyclOrder cyclotomic order
-     * @param registerWordSize maximum size in bits of each prime
+     * @param moduli_q output: the moduli of the chain (size num_primes_value)
+     * @param roots_q output: the corresponding roots of unity
+     * @param composite_degree number of primes per level
+     * @param num_primes_value total number of primes in the chain
+     * @param first_mod_size_value size in bits of the modulus of the first level
+     * @param dcrt_bits size in bits of the scaling factor (the modulus of each further level)
+     * @param cycl_order cyclotomic order
+     * @param register_word_size maximum size in bits of each prime
      */
-    void CompositePrimeModuliGen(std::vector<NativeInteger>& moduliQ, std::vector<NativeInteger>& rootsQ,
-                                 uint32_t compositeDegree, uint32_t numPrimes, uint32_t firstModSize, uint32_t dcrtBits,
-                                 uint32_t cyclOrder, uint32_t registerWordSize) const;
+    void composite_prime_moduli_gen(std::vector<NativeInteger>& moduli_q, std::vector<NativeInteger>& roots_q,
+                                 uint32_t composite_degree, uint32_t num_primes_value, uint32_t first_mod_size_value, uint32_t dcrt_bits,
+                                 uint32_t cycl_order, uint32_t register_word_size) const;
 
     /**
-     * Generates the modulus chain with one prime per level: primes of dcrtBits bits alternating around 2^dcrtBits
+     * Generates the modulus chain with one prime per level: primes of dcrt_bits bits alternating around 2^dcrt_bits
      * (or, for FLEXIBLEAUTO and FLEXIBLEAUTOEXT, chosen so that the level-specific scaling factors stay close to
-     * 2^dcrtBits), a first prime of firstModSize bits and, for FLEXIBLEAUTOEXT, an extra prime of extraModsize
+     * 2^dcrt_bits), a first prime of first_mod_size_value bits and, for FLEXIBLEAUTOEXT, an extra prime of extra_modsize
      * bits at the top of the chain.
      *
-     * @param moduliQ output: the moduli of the chain (size numPrimes)
-     * @param rootsQ output: the corresponding roots of unity
-     * @param scalTech scaling technique
-     * @param numPrimes total number of primes in the chain
-     * @param firstModSize size in bits of the first modulus
-     * @param dcrtBits size in bits of the scaling factor (the modulus of each further level)
-     * @param cyclOrder cyclotomic order
-     * @param extraModsize size in bits of the extra modulus of FLEXIBLEAUTOEXT
+     * @param moduli_q output: the moduli of the chain (size num_primes_value)
+     * @param roots_q output: the corresponding roots of unity
+     * @param scal_tech scaling technique
+     * @param num_primes_value total number of primes in the chain
+     * @param first_mod_size_value size in bits of the first modulus
+     * @param dcrt_bits size in bits of the scaling factor (the modulus of each further level)
+     * @param cycl_order cyclotomic order
+     * @param extra_modsize size in bits of the extra modulus of FLEXIBLEAUTOEXT
      */
-    void SinglePrimeModuliGen(std::vector<NativeInteger>& moduliQ, std::vector<NativeInteger>& rootsQ,
-                              ScalingTechnique scalTech, uint32_t numPrimes, uint32_t firstModSize, uint32_t dcrtBits,
-                              uint32_t cyclOrder, uint32_t extraModsize) const;
+    void single_prime_moduli_gen(std::vector<NativeInteger>& moduli_q, std::vector<NativeInteger>& roots_q,
+                              ScalingTechnique scal_tech, uint32_t num_primes_value, uint32_t first_mod_size_value, uint32_t dcrt_bits,
+                              uint32_t cycl_order, uint32_t extra_modsize) const;
 
   public:
-    virtual ~ParameterGenerationCKKSRNS() = default;
+    virtual ~CkksRnsParamGen() = default;
 
     /**
-     * Generates the CKKS parameters: the modulus chain (see SinglePrimeModuliGen and CompositePrimeModuliGen), the
-     * auxiliary moduli of HYBRID key switching, the CRT tables (CryptoParametersCKKSRNS::PrecomputeCRTTables) and
+     * Generates the CKKS parameters: the modulus chain (see single_prime_moduli_gen and composite_prime_moduli_gen), the
+     * auxiliary moduli of HYBRID key switching, the CRT tables (CkksRnsCryptoParams::precompute_crt_tables) and
      * the ring dimension, which is chosen from the security level when not set and validated otherwise.
      *
-     * @param cryptoParams the crypto parameters to complete
-     * @param cyclOrder cyclotomic order (twice the ring dimension; 0 = chosen from the security level)
-     * @param numPrimes number of levels in the modulus chain (multiplicative depth + 1)
-     * @param scalingModSize size in bits of the scaling factor
-     * @param firstModSize size in bits of the first modulus
-     * @param mulPartQ number of digits (partitions of Q) for HYBRID key switching
-     * @param mPIntBootCiphertextCompressionLevel compression level of interactive multiparty bootstrapping
+     * @param crypto_params the crypto parameters to complete
+     * @param cycl_order cyclotomic order (twice the ring dimension; 0 = chosen from the security level)
+     * @param num_primes_value number of levels in the modulus chain (multiplicative depth + 1)
+     * @param scaling_mod_size size in bits of the scaling factor
+     * @param first_mod_size_value size in bits of the first modulus
+     * @param mul_part_q number of digits (partitions of Q) for HYBRID key switching
+     * @param m_p_int_boot_ciphertext_compression_level compression level of interactive multiparty bootstrapping
      * @return true on success
      */
-    bool ParamsGenCKKSRNSInternal(std::shared_ptr<CryptoParametersBase<DCRTPoly>> cryptoParams, uint32_t cyclOrder,
-                                  uint32_t numPrimes, uint32_t scalingModSize, uint32_t firstModSize, uint32_t mulPartQ,
-                                  CompressionLevel mPIntBootCiphertextCompressionLevel) const override;
+    bool params_gen_ckksrns_internal(std::shared_ptr<BaseCryptoParams<RnsPoly>> crypto_params, uint32_t cycl_order,
+                                  uint32_t num_primes_value, uint32_t scaling_mod_size, uint32_t first_mod_size_value, uint32_t mul_part_q,
+                                  CompressionLevel m_p_int_boot_ciphertext_compression_level) const override;
 
     /////////////////////////////////////
     // SERIALIZATION
@@ -121,11 +121,11 @@ class ParameterGenerationCKKSRNS : public ParameterGenerationRNS {
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {}
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "ParameterGenerationCKKSRNS";
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_CKKS_PARAM_GEN_H_

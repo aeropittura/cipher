@@ -37,84 +37,84 @@
 
 #include "cipher/fhe/context.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 class DataAndLocation {
-    std::string getDataDir();
+    std::string get_data_dir();
 
   protected:
-    CryptoContext<DCRTPoly> cryptoContext{nullptr};
-    PublicKey<DCRTPoly> publicKey{nullptr};
-    std::shared_ptr<lbcrypto::BinFHEContext> binFHECryptoContext{nullptr};
-    Ciphertext<DCRTPoly> FHEWtoCKKSSwitchKey{nullptr};
-    Ciphertext<DCRTPoly> RAWCiphertext{nullptr};
+    CryptoContext<RnsPoly> crypto_context{nullptr};
+    PublicKey<RnsPoly> public_key{nullptr};
+    std::shared_ptr<cipher::BooleanContext> bin_fhe_crypto_context{nullptr};
+    Ciphertext<RnsPoly> fhew_to_ckks_switch_key{nullptr};
+    Ciphertext<RnsPoly> raw_ciphertext{nullptr};
 
     // Save-Load locations
-    std::string dataDirectory = "data";
-    const std::string cryptoContextFile = "cryptocontext.txt";
-    const std::string pubKeyFile = "key_pub.txt";
-    const std::string multKeyFile = "key_mult.txt";
-    const std::string rotKeyFile = "key_rot.txt";
-    const std::string FHEWtoCKKSSwitchKeyFile = "key_switch_fhew_ckks.txt";
-    const std::string ciphertextFile = "ciphertext.txt";  // RAW ciphertext
-    const std::string binFHECryptoContextFile = "binfhe_cryptocontext.txt";
-    const std::string binFHEBootKeyFile = "key_binfhe_boot.txt";
-    const std::string baseBTKeyFile = "key_bt.txt";
-    const std::string keyIndexFile = "key_indices.txt";
+    std::string data_directory = "data";
+    const std::string crypto_context_file = "cryptocontext.txt";
+    const std::string pub_key_file = "key_pub.txt";
+    const std::string mult_key_file = "key_mult.txt";
+    const std::string rot_key_file = "key_rot.txt";
+    const std::string fhew_to_ckks_switch_key_file = "key_switch_fhew_ckks.txt";
+    const std::string ciphertext_file = "ciphertext.txt";  // RAW ciphertext
+    const std::string bin_fhe_crypto_context_file = "binfhe_cryptocontext.txt";
+    const std::string bin_fhe_boot_key_file = "key_binfhe_boot.txt";
+    const std::string base_bt_key_file = "key_bt.txt";
+    const std::string key_index_file = "key_indices.txt";
 
-    std::string createMapFileName(uint32_t index, const std::string& baseFileName) {
-        return std::string(dataDirectory) + "/" + std::to_string(index) + "_" + baseFileName;
+    std::string create_map_file_name(uint32_t index, const std::string& base_file_name) {
+        return std::string(data_directory) + "/" + std::to_string(index) + "_" + base_file_name;
     }
 
     DataAndLocation() = default;
-    DataAndLocation(CryptoContext<DCRTPoly> cryptoContext0, PublicKey<DCRTPoly> publicKey0,
-                    Ciphertext<DCRTPoly> RAWCiphertext0)
-        : cryptoContext(cryptoContext0),
-          publicKey(publicKey0),
-          binFHECryptoContext(cryptoContext0->GetBinCCForSchemeSwitch()),
-          FHEWtoCKKSSwitchKey(cryptoContext0->GetSwkFC()),
-          RAWCiphertext(RAWCiphertext0) {}
+    DataAndLocation(CryptoContext<RnsPoly> crypto_context0, PublicKey<RnsPoly> public_key0,
+                    Ciphertext<RnsPoly> raw_ciphertext0)
+        : crypto_context(crypto_context0),
+          public_key(public_key0),
+          bin_fhe_crypto_context(crypto_context0->get_bin_cc_for_scheme_switch()),
+          fhew_to_ckks_switch_key(crypto_context0->get_swk_fc()),
+          raw_ciphertext(raw_ciphertext0) {}
 
   public:
-    void SetDataDirectory(const std::string& dir) {
+    void set_data_directory(const std::string& dir) {
         if (dir.empty()) {
-            OPENFHE_THROW("dir is an empty string");
+            CIPHER_THROW("dir is an empty string");
         }
 
         // remove slash if it is the last charactes in "dir"
         if (dir.back() == '/')
-            dataDirectory = dir.substr(0, dir.size() - 1);
+            data_directory = dir.substr(0, dir.size() - 1);
         else
-            dataDirectory = dir;
+            data_directory = dir;
     }
 };
 
 class SchemeSwitchingDataSerializer : public DataAndLocation {
   public:
-    SchemeSwitchingDataSerializer(CryptoContext<DCRTPoly> cryptoContext0, PublicKey<DCRTPoly> publicKey0,
-                                  Ciphertext<DCRTPoly> RAWCiphertext0)
-        : DataAndLocation(cryptoContext0, publicKey0, RAWCiphertext0) {}
+    SchemeSwitchingDataSerializer(CryptoContext<RnsPoly> crypto_context0, PublicKey<RnsPoly> public_key0,
+                                  Ciphertext<RnsPoly> raw_ciphertext0)
+        : DataAndLocation(crypto_context0, public_key0, raw_ciphertext0) {}
 
-    void Serialize();
+    void to_stream();
 };
 
 class SchemeSwitchingDataDeserializer : public DataAndLocation {
   public:
     SchemeSwitchingDataDeserializer() = default;
 
-    CryptoContext<DCRTPoly> getCryptoContext() {
-        return cryptoContext;
+    CryptoContext<RnsPoly> get_crypto_context_impl() {
+        return crypto_context;
     }
-    PublicKey<DCRTPoly> getPublicKey() {
-        return publicKey;
+    PublicKey<RnsPoly> get_public_key_impl() {
+        return public_key;
     }
-    Ciphertext<DCRTPoly> getRAWCiphertext() {
-        return RAWCiphertext;
+    Ciphertext<RnsPoly> get_raw_ciphertext() {
+        return raw_ciphertext;
     }
 
-    void Deserialize();
+    void from_stream();
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_TESTS_FHE_SUPPORT_SCHEME_SWITCHING_DATA_H_

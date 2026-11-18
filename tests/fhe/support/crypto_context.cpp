@@ -40,180 +40,180 @@
 #include "cipher/fhe/bgv/context_gen.h"
 #include "cipher/fhe/ckks/context_gen.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 template <typename U>
-static void setCryptoContextParametersFromUnitTestCCParams(const UnitTestCCParams& params, U& parameters) {
-    if (!isDefaultValue(params.ringDimension)) {
-        parameters.SetRingDim(static_cast<uint32_t>(std::round(params.ringDimension)));
+static void set_crypto_context_parameters_from_unit_test_cc_params(const TestContextParams& params, U& parameters) {
+    if (!is_default_value(params.ring_dimension_value)) {
+        parameters.set_ring_dim(static_cast<uint32_t>(std::round(params.ring_dimension_value)));
     }
-    if (!isDefaultValue(params.multiplicativeDepth)) {
-        parameters.SetMultiplicativeDepth(static_cast<uint32_t>(std::round(params.multiplicativeDepth)));
+    if (!is_default_value(params.multiplicative_depth)) {
+        parameters.set_multiplicative_depth(static_cast<uint32_t>(std::round(params.multiplicative_depth)));
     }
-    if constexpr (std::is_same_v<U, CCParams<CryptoContextBGVRNS>> == false) {
-        if (!isDefaultValue(params.scalingModSize)) {
-            parameters.SetScalingModSize(static_cast<uint32_t>(std::round(params.scalingModSize)));
+    if constexpr (std::is_same_v<U, ContextParams<BgvRnsContext>> == false) {
+        if (!is_default_value(params.scaling_mod_size)) {
+            parameters.set_scaling_mod_size(static_cast<uint32_t>(std::round(params.scaling_mod_size)));
         }
     }
-    if (!isDefaultValue(params.digitSize)) {
-        parameters.SetDigitSize(static_cast<uint32_t>(std::round(params.digitSize)));
+    if (!is_default_value(params.digit_size)) {
+        parameters.set_digit_size(static_cast<uint32_t>(std::round(params.digit_size)));
     }
-    if (!isDefaultValue(params.batchSize)) {
-        parameters.SetBatchSize(static_cast<uint32_t>(std::round(params.batchSize)));
+    if (!is_default_value(params.batch_size)) {
+        parameters.set_batch_size(static_cast<uint32_t>(std::round(params.batch_size)));
     }
-    if (!isDefaultValue(params.secretKeyDist)) {
-        parameters.SetSecretKeyDist(static_cast<SecretKeyDist>(std::round(params.secretKeyDist)));
+    if (!is_default_value(params.secret_key_dist)) {
+        parameters.set_secret_key_dist(static_cast<SecretKeyDist>(std::round(params.secret_key_dist)));
     }
-    if (!isDefaultValue(params.maxRelinSkDeg)) {
-        parameters.SetMaxRelinSkDeg(static_cast<int>(std::round(params.maxRelinSkDeg)));
+    if (!is_default_value(params.max_relin_sk_deg)) {
+        parameters.set_max_relin_sk_deg(static_cast<int>(std::round(params.max_relin_sk_deg)));
     }
-    if constexpr (std::is_same_v<U, CCParams<CryptoContextBFVRNS>> == false) {
-        if (!isDefaultValue(params.firstModSize)) {
-            parameters.SetFirstModSize(static_cast<uint32_t>(std::round(params.firstModSize)));
+    if constexpr (std::is_same_v<U, ContextParams<BfvRnsContext>> == false) {
+        if (!is_default_value(params.first_mod_size_value)) {
+            parameters.set_first_mod_size(static_cast<uint32_t>(std::round(params.first_mod_size_value)));
         }
     }
-    if (!isDefaultValue(params.securityLevel)) {
-        parameters.SetSecurityLevel(static_cast<SecurityLevel>(std::round(params.securityLevel)));
+    if (!is_default_value(params.security_level)) {
+        parameters.set_security_level(static_cast<SecurityLevel>(std::round(params.security_level)));
     }
-    if (!isDefaultValue(params.ksTech)) {
-        parameters.SetKeySwitchTechnique(static_cast<KeySwitchTechnique>(std::round(params.ksTech)));
+    if (!is_default_value(params.ks_tech)) {
+        parameters.set_key_switch_technique(static_cast<KeySwitchTechnique>(std::round(params.ks_tech)));
     }
-    if constexpr (std::is_same_v<U, CCParams<CryptoContextBFVRNS>> == false) {
-        if (!isDefaultValue(params.scalTech)) {
-            parameters.SetScalingTechnique(static_cast<ScalingTechnique>(std::round(params.scalTech)));
+    if constexpr (std::is_same_v<U, ContextParams<BfvRnsContext>> == false) {
+        if (!is_default_value(params.scal_tech)) {
+            parameters.set_scaling_technique(static_cast<ScalingTechnique>(std::round(params.scal_tech)));
         }
     }
-    if (!isDefaultValue(params.numLargeDigits)) {
-        parameters.SetNumLargeDigits(static_cast<uint32_t>(std::round(params.numLargeDigits)));
+    if (!is_default_value(params.num_large_digits)) {
+        parameters.set_num_large_digits(static_cast<uint32_t>(std::round(params.num_large_digits)));
     }
-    if constexpr (std::is_same_v<U, CCParams<CryptoContextCKKSRNS>> == false) {
-        if (!isDefaultValue(params.plaintextModulus)) {
-            parameters.SetPlaintextModulus(static_cast<PlaintextModulus>(std::round(params.plaintextModulus)));
+    if constexpr (std::is_same_v<U, ContextParams<CkksRnsContext>> == false) {
+        if (!is_default_value(params.plaintext_modulus)) {
+            parameters.set_plaintext_modulus(static_cast<PlaintextModulus>(std::round(params.plaintext_modulus)));
         }
     }
-    if (!isDefaultValue(params.standardDeviation)) {
-        parameters.SetStandardDeviation(params.standardDeviation);
+    if (!is_default_value(params.standard_deviation)) {
+        parameters.set_standard_deviation(params.standard_deviation);
     }
-    if constexpr (std::is_same_v<U, CCParams<CryptoContextBFVRNS>> == true) {
-        if (!isDefaultValue(params.multiplicationTechnique)) {
-            parameters.SetMultiplicationTechnique(
-                    static_cast<MultiplicationTechnique>(std::round(params.multiplicationTechnique)));
+    if constexpr (std::is_same_v<U, ContextParams<BfvRnsContext>> == true) {
+        if (!is_default_value(params.multiplication_technique)) {
+            parameters.set_multiplication_technique(
+                    static_cast<MultiplicationTechnique>(std::round(params.multiplication_technique)));
         }
     }
-    if constexpr (std::is_same_v<U, CCParams<CryptoContextBFVRNS>> == true) {
-        if (!isDefaultValue(params.encryptionTechnique)) {
-            parameters.SetEncryptionTechnique(static_cast<EncryptionTechnique>(std::round(params.encryptionTechnique)));
+    if constexpr (std::is_same_v<U, ContextParams<BfvRnsContext>> == true) {
+        if (!is_default_value(params.encryption_technique)) {
+            parameters.set_encryption_technique(static_cast<EncryptionTechnique>(std::round(params.encryption_technique)));
         }
     }
-    if constexpr (std::is_same_v<U, CCParams<CryptoContextCKKSRNS>> == false) {
-        if (!isDefaultValue(params.evalAddCount)) {
-            parameters.SetEvalAddCount(static_cast<uint32_t>(std::round(params.evalAddCount)));
+    if constexpr (std::is_same_v<U, ContextParams<CkksRnsContext>> == false) {
+        if (!is_default_value(params.eval_add_count)) {
+            parameters.set_eval_add_count(static_cast<uint32_t>(std::round(params.eval_add_count)));
         }
     }
-    if constexpr (std::is_same_v<U, CCParams<CryptoContextCKKSRNS>> == false) {
-        if (!isDefaultValue(params.keySwitchCount)) {
-            parameters.SetKeySwitchCount(static_cast<uint32_t>(std::round(params.keySwitchCount)));
+    if constexpr (std::is_same_v<U, ContextParams<CkksRnsContext>> == false) {
+        if (!is_default_value(params.key_switch_count)) {
+            parameters.set_key_switch_count(static_cast<uint32_t>(std::round(params.key_switch_count)));
         }
     }
-    if (!isDefaultValue(params.PREMode)) {
-        parameters.SetPREMode(static_cast<ProxyReEncryptionMode>(std::round(params.PREMode)));
+    if (!is_default_value(params.pre_mode)) {
+        parameters.set_pre_mode(static_cast<ProxyReEncryptionMode>(std::round(params.pre_mode)));
     }
-    if constexpr (std::is_same_v<U, CCParams<CryptoContextCKKSRNS>> == false) {
-        if (!isDefaultValue(params.multipartyMode)) {
-            parameters.SetMultipartyMode(static_cast<MultipartyMode>(std::round(params.multipartyMode)));
+    if constexpr (std::is_same_v<U, ContextParams<CkksRnsContext>> == false) {
+        if (!is_default_value(params.multiparty_mode)) {
+            parameters.set_multiparty_mode(static_cast<MultipartyMode>(std::round(params.multiparty_mode)));
         }
     }
-    if constexpr (std::is_same_v<U, CCParams<CryptoContextCKKSRNS>> == true) {
-        if (!isDefaultValue(params.decryptionNoiseMode)) {
-            parameters.SetDecryptionNoiseMode(static_cast<DecryptionNoiseMode>(std::round(params.decryptionNoiseMode)));
+    if constexpr (std::is_same_v<U, ContextParams<CkksRnsContext>> == true) {
+        if (!is_default_value(params.decryption_noise_mode)) {
+            parameters.set_decryption_noise_mode(static_cast<DecryptionNoiseMode>(std::round(params.decryption_noise_mode)));
         }
     }
-    if constexpr (std::is_same_v<U, CCParams<CryptoContextCKKSRNS>> == true) {
-        if (!isDefaultValue(params.executionMode)) {
-            parameters.SetExecutionMode(static_cast<ExecutionMode>(std::round(params.executionMode)));
+    if constexpr (std::is_same_v<U, ContextParams<CkksRnsContext>> == true) {
+        if (!is_default_value(params.execution_mode)) {
+            parameters.set_execution_mode(static_cast<ExecutionMode>(std::round(params.execution_mode)));
         }
     }
-    if constexpr (std::is_same_v<U, CCParams<CryptoContextCKKSRNS>> == true) {
-        if (!isDefaultValue(params.noiseEstimate)) {
-            parameters.SetNoiseEstimate(params.noiseEstimate);
+    if constexpr (std::is_same_v<U, ContextParams<CkksRnsContext>> == true) {
+        if (!is_default_value(params.noise_estimate)) {
+            parameters.set_noise_estimate(params.noise_estimate);
         }
     }
-    if constexpr (std::is_same_v<U, CCParams<CryptoContextCKKSRNS>> == true) {
-        if (!isDefaultValue(params.registerWordSize)) {
-            parameters.SetRegisterWordSize(params.registerWordSize);
+    if constexpr (std::is_same_v<U, ContextParams<CkksRnsContext>> == true) {
+        if (!is_default_value(params.register_word_size)) {
+            parameters.set_register_word_size(params.register_word_size);
         }
     }
-    if constexpr (std::is_same_v<U, CCParams<CryptoContextCKKSRNS>> == true) {
-        if (!isDefaultValue(params.compositeDegree)) {
-            parameters.SetCompositeDegree(params.compositeDegree);
+    if constexpr (std::is_same_v<U, ContextParams<CkksRnsContext>> == true) {
+        if (!is_default_value(params.composite_degree)) {
+            parameters.set_composite_degree(params.composite_degree);
         }
     }
-    if constexpr (std::is_same_v<U, CCParams<CryptoContextCKKSRNS>> == true) {
-        if (!isDefaultValue(params.ckksDataType)) {
-            parameters.SetCKKSDataType(static_cast<CKKSDataType>(std::round(params.ckksDataType)));
+    if constexpr (std::is_same_v<U, ContextParams<CkksRnsContext>> == true) {
+        if (!is_default_value(params.ckks_data_type)) {
+            parameters.set_ckks_data_type(static_cast<CkksDataType>(std::round(params.ckks_data_type)));
         }
     }
 }
 //===========================================================================================================
-CryptoContext<Element> UnitTestGenerateContext(const UnitTestCCParams& params) {
+CryptoContext<Element> unit_test_generate_context(const TestContextParams& params) {
     CryptoContext<Element> cc(nullptr);
-    if (CKKSRNS_SCHEME == params.schemeId) {
-        CCParams<CryptoContextCKKSRNS> parameters;
-        setCryptoContextParametersFromUnitTestCCParams(params, parameters);
+    if (CKKSRNS_SCHEME == params.scheme_id_value) {
+        ContextParams<CkksRnsContext> parameters;
+        set_crypto_context_parameters_from_unit_test_cc_params(params, parameters);
 
-        cc = GenCryptoContext(parameters);
-    } else if (BFVRNS_SCHEME == params.schemeId) {
-        CCParams<CryptoContextBFVRNS> parameters;
-        setCryptoContextParametersFromUnitTestCCParams(params, parameters);
+        cc = make_crypto_context(parameters);
+    } else if (BFVRNS_SCHEME == params.scheme_id_value) {
+        ContextParams<BfvRnsContext> parameters;
+        set_crypto_context_parameters_from_unit_test_cc_params(params, parameters);
 
-        cc = GenCryptoContext(parameters);
-    } else if (BGVRNS_SCHEME == params.schemeId) {
-        CCParams<CryptoContextBGVRNS> parameters;
-        setCryptoContextParametersFromUnitTestCCParams(params, parameters);
+        cc = make_crypto_context(parameters);
+    } else if (BGVRNS_SCHEME == params.scheme_id_value) {
+        ContextParams<BgvRnsContext> parameters;
+        set_crypto_context_parameters_from_unit_test_cc_params(params, parameters);
 
-        cc = GenCryptoContext(parameters);
+        cc = make_crypto_context(parameters);
     }
 
     if (!cc)
-        OPENFHE_THROW("Error generating crypto context.");
+        CIPHER_THROW("Error generating crypto context.");
 
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
-    cc->Enable(PRE);
-    cc->Enable(FHE);
-    cc->Enable(MULTIPARTY);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
+    cc->enable(PRE);
+    cc->enable(FHE);
+    cc->enable(MULTIPARTY);
 
     return cc;
 }
 
 //===========================================================================================================
-CryptoContext<Element> UnitTestGenerateContext(const BaseTestCase& testCase) {
+CryptoContext<Element> unit_test_generate_context(const BaseTestCase& test_case_value) {
     CryptoContext<Element> cc(nullptr);
-    auto paramOverrides = testCase.getCryptoContextParamOverrides();
-    lbcrypto::SCHEME schemeId = lbcrypto::convertToSCHEME(*paramOverrides.begin());
-    if (CKKSRNS_SCHEME == schemeId) {
-        CCParams<CryptoContextCKKSRNS> parameters(paramOverrides);
-        cc = GenCryptoContext(parameters);
-    } else if (BFVRNS_SCHEME == schemeId) {
-        CCParams<CryptoContextBFVRNS> parameters(paramOverrides);
-        cc = GenCryptoContext(parameters);
-    } else if (BGVRNS_SCHEME == schemeId) {
-        CCParams<CryptoContextBGVRNS> parameters(paramOverrides);
-        cc = GenCryptoContext(parameters);
+    auto param_overrides = test_case_value.get_crypto_context_param_overrides();
+    cipher::SCHEME scheme_id_value = cipher::convert_to_scheme(*param_overrides.begin());
+    if (CKKSRNS_SCHEME == scheme_id_value) {
+        ContextParams<CkksRnsContext> parameters(param_overrides);
+        cc = make_crypto_context(parameters);
+    } else if (BFVRNS_SCHEME == scheme_id_value) {
+        ContextParams<BfvRnsContext> parameters(param_overrides);
+        cc = make_crypto_context(parameters);
+    } else if (BGVRNS_SCHEME == scheme_id_value) {
+        ContextParams<BgvRnsContext> parameters(param_overrides);
+        cc = make_crypto_context(parameters);
     }
 
     if (!cc)
-        OPENFHE_THROW("Error generating crypto context.");
+        CIPHER_THROW("Error generating crypto context.");
 
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
-    cc->Enable(PRE);
-    cc->Enable(FHE);
-    cc->Enable(MULTIPARTY);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
+    cc->enable(PRE);
+    cc->enable(FHE);
+    cc->enable(MULTIPARTY);
 
     return cc;
 }

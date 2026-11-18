@@ -36,10 +36,10 @@
 #include "cipher/fhe/key/public_key.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Container holding the public key and the matching secret (private) key produced by key generation
@@ -49,9 +49,9 @@ template <class Element>
 class KeyPair {
   public:
     /** shared pointer to the public key (may be null) */
-    PublicKey<Element> publicKey;
+    PublicKey<Element> public_key;
     /** shared pointer to the secret key (may be null) */
-    PrivateKey<Element> secretKey;
+    PrivateKey<Element> secret_key;
 
     /**
      * Constructs a key pair from existing shared pointers to a public key and a secret key.
@@ -59,7 +59,7 @@ class KeyPair {
      * @param a the public key
      * @param b the secret key
      */
-    KeyPair(const PublicKey<Element>& a, const PrivateKey<Element>& b) : publicKey(a), secretKey(b) {}
+    KeyPair(const PublicKey<Element>& a, const PrivateKey<Element>& b) : public_key(a), secret_key(b) {}
 
     /**
      * Constructs a key pair that takes ownership of raw key pointers; by default it creates an empty pair.
@@ -68,7 +68,7 @@ class KeyPair {
      * @param b raw pointer to a secret key (ownership is transferred); nullptr for an empty secret key
      */
     explicit KeyPair(PublicKeyImpl<Element>* a = nullptr, PrivateKeyImpl<Element>* b = nullptr)
-        : publicKey(a), secretKey(b) {}
+        : public_key(a), secret_key(b) {}
 
     /**
      * Checks whether both keys of the pair are present.
@@ -76,7 +76,7 @@ class KeyPair {
      * @return true if both the public key and the secret key are non-null
      */
     bool good() const {
-        return publicKey && secretKey;
+        return public_key && secret_key;
     }
 
     /**
@@ -89,6 +89,6 @@ class KeyPair {
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_KEY_KEY_PAIR_H_

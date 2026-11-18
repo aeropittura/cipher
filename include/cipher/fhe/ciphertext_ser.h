@@ -39,15 +39,15 @@
 #include "cipher/fhe/ciphertext.h"
 #include "cipher/util/serial.h"
 
-extern template class lbcrypto::CiphertextImpl<lbcrypto::Poly>;
-extern template class lbcrypto::CiphertextImpl<lbcrypto::NativePoly>;
-extern template class lbcrypto::CiphertextImpl<lbcrypto::DCRTPoly>;
+extern template class cipher::CiphertextImpl<cipher::Poly>;
+extern template class cipher::CiphertextImpl<cipher::NativePoly>;
+extern template class cipher::CiphertextImpl<cipher::RnsPoly>;
 
-CEREAL_CLASS_VERSION(lbcrypto::CiphertextImpl<lbcrypto::Poly>,
-                     lbcrypto::CiphertextImpl<lbcrypto::Poly>::SerializedVersion());
-CEREAL_CLASS_VERSION(lbcrypto::CiphertextImpl<lbcrypto::NativePoly>,
-                     lbcrypto::CiphertextImpl<lbcrypto::NativePoly>::SerializedVersion());
-CEREAL_CLASS_VERSION(lbcrypto::CiphertextImpl<lbcrypto::DCRTPoly>,
-                     lbcrypto::CiphertextImpl<lbcrypto::DCRTPoly>::SerializedVersion());
+CEREAL_CLASS_VERSION(cipher::CiphertextImpl<cipher::Poly>,
+                     cipher::CiphertextImpl<cipher::Poly>::serialized_version());
+CEREAL_CLASS_VERSION(cipher::CiphertextImpl<cipher::NativePoly>,
+                     cipher::CiphertextImpl<cipher::NativePoly>::serialized_version());
+CEREAL_CLASS_VERSION(cipher::CiphertextImpl<cipher::RnsPoly>,
+                     cipher::CiphertextImpl<cipher::RnsPoly>::serialized_version());
 
 #endif  // CIPHER_FHE_CIPHERTEXT_SER_H_

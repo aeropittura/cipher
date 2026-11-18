@@ -76,7 +76,7 @@
 
 #include "cipher/math/distribution_gen.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /// standard deviation above which sampling switches from Peikert's inversion method
 /// (precomputed CDF table) to Karney's rejection method
@@ -103,7 +103,7 @@ class DiscreteGaussianGeneratorImpl {
      * @brief Check if the gaussian generator has been initialized with a standard deviation
      * @return true if the standard deviation has been set to a value above 1
      */
-    bool IsInitialized() const;
+    bool is_initialized() const;
 
     /**
      * @brief Initializes the generator.
@@ -114,26 +114,26 @@ class DiscreteGaussianGeneratorImpl {
      * @brief  Returns the standard deviation of the generator.
      * @return The analytically obtained standard deviation of the generator.
      */
-    double GetStd() const;
+    double get_std() const;
 
     /**
      * @brief     Sets the standard deviation of the generator.
      * @param std The analytic standard deviation of the generator.
      */
-    void SetStd(double std);
+    void set_std(double std);
 
     /**
      * @brief      Returns a generated signed integer. Uses Peikert's inversion method
      * @return     a value generated with the distribution.
      */
-    int64_t GenerateInt() const;
+    int64_t generate_int() const;
 
     /**
      * @brief      Returns a generated signed integer. Uses Peikert's inversion method
      * @param g    The pseudorandom generator to draw from.
      * @return     a value generated with the distribution.
      */
-    int64_t GenerateInt(PRNG& g) const;
+    int64_t generate_int(PRNG& g) const;
 
     /**
      * @brief      Returns a generated integer vector. Uses Peikert's inversion method
@@ -141,7 +141,7 @@ class DiscreteGaussianGeneratorImpl {
      * @param size The number of values to return.
      * @return     vector of integer values generated with the distribution
      */
-    std::vector<int64_t> GenerateIntVector(uint32_t size) const;
+    std::vector<int64_t> generate_int_vector(uint32_t size) const;
 
     /**
      * @brief  Returns a generated integer. Uses Peikert's inversion method
@@ -149,7 +149,7 @@ class DiscreteGaussianGeneratorImpl {
      * @param modulus modulus of the polynomial ring; negative samples are returned as modulus - |value|.
      * @return A random value within this Discrete Gaussian Distribution.
      */
-    typename VecType::Integer GenerateInteger(const typename VecType::Integer& modulus) const;
+    typename VecType::Integer generate_integer(const typename VecType::Integer& modulus) const;
 
     /**
      * @brief           Generates a vector of random values within this Discrete
@@ -161,7 +161,7 @@ class DiscreteGaussianGeneratorImpl {
      * @return          The vector of values within this Discrete Gaussian
      * Distribution.
      */
-    VecType GenerateVector(uint32_t size, const typename VecType::Integer& modulus) const;
+    VecType generate_vector(uint32_t size, const typename VecType::Integer& modulus) const;
 
     /**
      * @brief  Returns a generated integer. Uses rejection method.
@@ -171,7 +171,7 @@ class DiscreteGaussianGeneratorImpl {
      * @param modulus modulus of the polynomial ring; negative samples are returned as modulus - |value|.
      * @return A random value within this Discrete Gaussian Distribution.
      */
-    typename VecType::Integer GenerateInteger(double mean, double stddev, size_t n,
+    typename VecType::Integer generate_integer(double mean, double stddev, size_t n,
                                               const typename VecType::Integer& modulus) const;
 
     /**
@@ -181,7 +181,7 @@ class DiscreteGaussianGeneratorImpl {
      * @param n is ring dimension
      * @return A random value within this Discrete Gaussian Distribution.
      */
-    int32_t GenerateInteger(double mean, double stddev, size_t n) const;
+    int32_t generate_integer(double mean, double stddev, size_t n) const;
 
     /*
      * Returns a generated integer (int32_t). Uses rejection method.
@@ -199,7 +199,7 @@ class DiscreteGaussianGeneratorImpl {
      * @param stddev standard deviation of discrete Gaussian distribution.
      * @return A random value within this Discrete Gaussian Distribution.
      */
-    static int64_t GenerateIntegerKarney(double mean, double stddev);
+    static int64_t generate_integer_karney(double mean, double stddev);
 
     /**
      * @brief Returns a generated integer. Uses Karney's method defined as
@@ -209,25 +209,25 @@ class DiscreteGaussianGeneratorImpl {
      * @param g The pseudorandom generator to draw from.
      * @return A random value within this Discrete Gaussian Distribution.
      */
-    static int64_t GenerateIntegerKarney(double mean, double stddev, PRNG& g);
+    static int64_t generate_integer_karney(double mean, double stddev, PRNG& g);
 
   private:
     // Gyana to add precomputation methods and data members
     // all parameters are set as int because it is assumed that they are used for
     // generating "small" polynomials only
-    double m_std{1.0};
-    double m_a{0.0};
-    std::vector<double> m_vals;
-    bool m_peikert{false};
+    double std_{1.0};
+    double a_{0.0};
+    std::vector<double> vals_;
+    bool peikert_{false};
 
-    static int64_t FindInVector(const std::vector<double>& S, double search);
+    static int64_t find_in_vector(const std::vector<double>& S, double search);
 
-    static double UnnormalizedGaussianPDF(const double& mean, const double& sigma, int32_t x) {
+    static double unnormalized_gaussian_pdf(const double& mean, const double& sigma, int32_t x) {
         return std::pow(M_E, -std::pow(x - mean, 2) / (2. * sigma * sigma));
     }
 
-    static double UnnormalizedGaussianPDFOptimized(const double& mean, const double& sigmaFactor, int32_t x) {
-        return std::pow(M_E, sigmaFactor * (x - mean) * (x - mean));
+    static double unnormalized_gaussian_pdf_optimized(const double& mean, const double& sigma_factor, int32_t x) {
+        return std::pow(M_E, sigma_factor * (x - mean) * (x - mean));
     }
 
     /**
@@ -237,28 +237,28 @@ class DiscreteGaussianGeneratorImpl {
      * @param n Number to test with exp(-n/2) probability
      * @return Accept/Reject result
      */
-    static bool AlgorithmP(PRNG& g, int32_t n);
+    static bool algorithm_p(PRNG& g, int32_t n);
     /**
      * @brief Subroutine used by Karney's Method to generate an integer with
      * probability exp(-k/2)(1 - exp(-1/2)).
      * @param g Mersenne Twister Engine used for deviates
      * @return Random number k
      */
-    static int32_t AlgorithmG(PRNG& g);
+    static int32_t algorithm_g(PRNG& g);
     /**
      * @brief Generates a Bernoulli random value H which is true with probability
      * exp(-1/2).
      * @param g Mersenne Twister Engine used for uniform deviates
      * @return Bernoulli random value H
      */
-    static bool AlgorithmH(PRNG& g);
+    static bool algorithm_h(PRNG& g);
     /**
      * @brief Generates a Bernoulli random value H which is true with probability
      * exp(-1/2). Uses double precision.
      * @param g Mersenne Twister Engine used for uniform deviates
      * @return Bernoulli random value H
      */
-    static bool AlgorithmHDouble(PRNG& g);
+    static bool algorithm_h_double(PRNG& g);
     /**
      * @brief Bernoulli trial with probability exp(-x(2k + x)/(2k + 2)).
      * @param g Mersenne Twister Engine used for uniform deviates
@@ -266,7 +266,7 @@ class DiscreteGaussianGeneratorImpl {
      * @param x Deviate x used for calculations
      * @return Whether the number of runs are even or not
      */
-    static bool AlgorithmB(PRNG& g, int32_t k, double x);
+    static bool algorithm_b(PRNG& g, int32_t k, double x);
     /**
      * @brief Bernoulli trial with probability exp(-x(2k + x)/(2k + 2)). Uses
      * double precision.
@@ -275,9 +275,9 @@ class DiscreteGaussianGeneratorImpl {
      * @param x Deviate x used for calculations
      * @return Whether the number of runs are even or not
      */
-    static bool AlgorithmBDouble(PRNG& g, int32_t k, double x);
+    static bool algorithm_b_double(PRNG& g, int32_t k, double x);
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_MATH_DISCRETE_GAUSSIAN_GEN_H_

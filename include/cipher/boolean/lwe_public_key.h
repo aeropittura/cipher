@@ -42,14 +42,14 @@
 #include "cipher/math/backend.h"
 #include "cipher/util/serializable.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Class that stores the LWE scheme public key; contains a vector
  */
-class LWEPublicKeyImpl : public Serializable {
+class LwePublicKeyImpl : public Serializable {
   public:
-    LWEPublicKeyImpl() = default;
+    LwePublicKeyImpl() = default;
 
     /**
      * Constructs an LWE public key (A, v) from its components
@@ -57,7 +57,7 @@ class LWEPublicKeyImpl : public Serializable {
      * @param A the uniformly random matrix, stored by rows: N vectors of dimension N with modulus Q
      * @param v the vector v = A s + e, i.e. v[j] = <A[j], s> + e_j mod Q, for the secret key s
      */
-    LWEPublicKeyImpl(const std::vector<NativeVector>& A, const NativeVector& v) : m_A(A), m_v(v) {}
+    LwePublicKeyImpl(const std::vector<NativeVector>& A, const NativeVector& v) : A_(A), v_(v) {}
 
     /**
      * Constructs an LWE public key (A, v) from its components, moving them
@@ -65,107 +65,107 @@ class LWEPublicKeyImpl : public Serializable {
      * @param A the uniformly random matrix, stored by rows: N vectors of dimension N with modulus Q
      * @param v the vector v = A s + e, i.e. v[j] = <A[j], s> + e_j mod Q, for the secret key s
      */
-    LWEPublicKeyImpl(std::vector<NativeVector>&& A, NativeVector&& v) noexcept : m_A(std::move(A)), m_v(std::move(v)) {}
+    LwePublicKeyImpl(std::vector<NativeVector>&& A, NativeVector&& v) noexcept : A_(std::move(A)), v_(std::move(v)) {}
 
-    LWEPublicKeyImpl(const LWEPublicKeyImpl& rhs) : m_A(rhs.m_A), m_v(rhs.m_v) {}
+    LwePublicKeyImpl(const LwePublicKeyImpl& rhs) : A_(rhs.A_), v_(rhs.v_) {}
 
-    LWEPublicKeyImpl(LWEPublicKeyImpl&& rhs) noexcept : m_A(std::move(rhs.m_A)), m_v(std::move(rhs.m_v)) {}
+    LwePublicKeyImpl(LwePublicKeyImpl&& rhs) noexcept : A_(std::move(rhs.A_)), v_(std::move(rhs.v_)) {}
 
-    LWEPublicKeyImpl& operator=(const LWEPublicKeyImpl& rhs) {
-        m_A = rhs.m_A;
-        m_v = rhs.m_v;
+    LwePublicKeyImpl& operator=(const LwePublicKeyImpl& rhs) {
+        A_ = rhs.A_;
+        v_ = rhs.v_;
         return *this;
     }
 
-    LWEPublicKeyImpl& operator=(LWEPublicKeyImpl&& rhs) noexcept {
-        m_A = std::move(rhs.m_A);
-        m_v = std::move(rhs.m_v);
+    LwePublicKeyImpl& operator=(LwePublicKeyImpl&& rhs) noexcept {
+        A_ = std::move(rhs.A_);
+        v_ = std::move(rhs.v_);
         return *this;
     }
 
-    const std::vector<NativeVector>& GetA() const {
-        return m_A;
+    const std::vector<NativeVector>& get_A() const {
+        return A_;
     }
 
-    const NativeVector& Getv() const {
-        return m_v;
+    const NativeVector& get_v() const {
+        return v_;
     }
 
-    void SetA(const std::vector<NativeVector>& A) {
-        m_A = A;
+    void set_A(const std::vector<NativeVector>& A) {
+        A_ = A;
     }
 
-    void SetA(std::vector<NativeVector>&& A) noexcept {
-        m_A = std::move(A);
+    void set_A(std::vector<NativeVector>&& A) noexcept {
+        A_ = std::move(A);
     }
 
-    void Setv(const NativeVector& v) {
-        m_v = v;
+    void set_v(const NativeVector& v) {
+        v_ = v;
     }
 
-    void Setv(NativeVector&& v) noexcept {
-        m_v = std::move(v);
+    void set_v(NativeVector&& v) noexcept {
+        v_ = std::move(v);
     }
 
     /**
      * @return the dimension of the key (the length of v)
      */
-    uint32_t GetLength() const {
-        return m_v.GetLength();
+    uint32_t get_length() const {
+        return v_.get_length();
     }
 
     /**
      * @return the modulus of the key (the modulus of v)
      */
-    NativeInteger GetModulus() const {
-        return m_v.GetModulus();
+    NativeInteger get_modulus() const {
+        return v_.get_modulus();
     }
 
     /**
      * @param other the public key to compare with
      * @return true if both keys have the same A and v
      */
-    bool operator==(const LWEPublicKeyImpl& other) const {
-        return (m_A == other.m_A) && (m_v == other.m_v);
+    bool operator==(const LwePublicKeyImpl& other) const {
+        return (A_ == other.A_) && (v_ == other.v_);
     }
 
     /**
      * @param other the public key to compare with
      * @return true if the keys differ in A or v
      */
-    bool operator!=(const LWEPublicKeyImpl& other) const {
+    bool operator!=(const LwePublicKeyImpl& other) const {
         return !(*this == other);
     }
 
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
-        ar(::cereal::make_nvp("A", m_A));
-        ar(::cereal::make_nvp("v", m_v));
+        ar(::cereal::make_nvp("A", A_));
+        ar(::cereal::make_nvp("v", v_));
     }
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
-        ar(::cereal::make_nvp("A", m_A));
-        ar(::cereal::make_nvp("v", m_v));
+        ar(::cereal::make_nvp("A", A_));
+        ar(::cereal::make_nvp("v", v_));
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "LWEPublicKey";
     }
 
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 
   private:
-    std::vector<NativeVector> m_A;  ///< the uniformly random matrix A, stored by rows
-    NativeVector m_v;               ///< the vector v = A s + e
+    std::vector<NativeVector> A_;  ///< the uniformly random matrix A, stored by rows
+    NativeVector v_;               ///< the vector v = A s + e
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_BOOLEAN_LWE_PUBLIC_KEY_H_

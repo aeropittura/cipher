@@ -71,7 +71,7 @@
 #include <string>
 #include <vector>
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * \class Serializable
@@ -89,7 +89,7 @@ class Serializable {
      * @brief Returns the name identifying the derived class in serialized form; every serializable class provides it.
      * @return the serialized object name
      */
-    virtual std::string SerializedObjectName() const = 0;
+    virtual std::string serialized_object_name() const = 0;
 };
 
 /**
@@ -108,6 +108,6 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
     return os;
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_UTIL_SERIALIZABLE_H_

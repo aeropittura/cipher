@@ -51,42 +51,42 @@
 #include "cipher/fhe/ckks/ser.h"
 #include "cipher/fhe/ckks/context_gen.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
-void CKKS_serialize(benchmark::State& state) {
+void ckks_serialize(benchmark::State& state) {
     // create a cryptocontext
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetRingDim(512);
-    parameters.SetMultiplicativeDepth(3);
-    parameters.SetScalingModSize(50);
-    parameters.SetDigitSize(20);
-    parameters.SetSecurityLevel(HEStd_NotSet);
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_ring_dim(512);
+    parameters.set_multiplicative_depth(3);
+    parameters.set_scaling_mod_size(50);
+    parameters.set_digit_size(20);
+    parameters.set_security_level(HEStd_NotSet);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(MULTIPARTY);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(MULTIPARTY);
 
     // DEBUG("step 0");
     {
         std::stringstream s;
-        CryptoContext<DCRTPoly> ccNew;
+        CryptoContext<RnsPoly> cc_new;
         while (state.KeepRunning()) {
-            Serial::Serialize(cc, s, SerType::BINARY);
-            Serial::Deserialize(cc, s, SerType::BINARY);
+            serialization::to_stream(cc, s, SerType::BINARY);
+            serialization::from_stream(cc, s, SerType::BINARY);
         }
     }
 
-    KeyPair<DCRTPoly> kp = cc->KeyGen();
-    KeyPair<DCRTPoly> kpnew;
+    KeyPair<RnsPoly> kp = cc->key_gen();
+    KeyPair<RnsPoly> kpnew;
 
     // DEBUG("step 1");
     {
         std::stringstream s;
         while (state.KeepRunning()) {
-            Serial::Serialize(kp.publicKey, s, SerType::BINARY);
-            Serial::Deserialize(kpnew.publicKey, s, SerType::BINARY);
+            serialization::to_stream(kp.public_key, s, SerType::BINARY);
+            serialization::from_stream(kpnew.public_key, s, SerType::BINARY);
         }
     }
 
@@ -94,32 +94,32 @@ void CKKS_serialize(benchmark::State& state) {
     {
         std::stringstream s;
         while (state.KeepRunning()) {
-            Serial::Serialize(kp.secretKey, s, SerType::BINARY);
-            Serial::Deserialize(kpnew.secretKey, s, SerType::BINARY);
+            serialization::to_stream(kp.secret_key, s, SerType::BINARY);
+            serialization::from_stream(kpnew.secret_key, s, SerType::BINARY);
         }
     }
 
     // DEBUG("step 3");
     std::vector<std::complex<double>> vals = {1.0, 3.0, 5.0, 7.0, 9.0, 2.0, 4.0, 6.0, 8.0, 11.0};
-    Plaintext plaintextShort = cc->MakeCKKSPackedPlaintext(vals);
-    Plaintext plaintextShortL2D2 = cc->MakeCKKSPackedPlaintext(vals, 2, 2);
-    Ciphertext<DCRTPoly> ciphertext = cc->Encrypt(kp.publicKey, plaintextShort);
-    Ciphertext<DCRTPoly> ciphertextL2D2 = cc->Encrypt(kp.publicKey, plaintextShortL2D2);
+    Plaintext plaintext_short = cc->make_ckks_packed_plaintext(vals);
+    Plaintext plaintext_short_l2_d2 = cc->make_ckks_packed_plaintext(vals, 2, 2);
+    Ciphertext<RnsPoly> ciphertext = cc->encrypt(kp.public_key, plaintext_short);
+    Ciphertext<RnsPoly> ciphertext_l2_d2 = cc->encrypt(kp.public_key, plaintext_short_l2_d2);
 
-    Ciphertext<DCRTPoly> newC;
-    Ciphertext<DCRTPoly> newCL2D2;
+    Ciphertext<RnsPoly> new_c;
+    Ciphertext<RnsPoly> new_cl2_d2;
     {
         std::stringstream s;
         std::stringstream s2;
         while (state.KeepRunning()) {
-            Serial::Serialize(ciphertext, s, SerType::BINARY);
-            Serial::Deserialize(newC, s, SerType::BINARY);
-            Serial::Serialize(ciphertextL2D2, s2, SerType::BINARY);
-            Serial::Deserialize(newCL2D2, s2, SerType::BINARY);
+            serialization::to_stream(ciphertext, s, SerType::BINARY);
+            serialization::from_stream(new_c, s, SerType::BINARY);
+            serialization::to_stream(ciphertext_l2_d2, s2, SerType::BINARY);
+            serialization::from_stream(new_cl2_d2, s2, SerType::BINARY);
         }
     }
 }
 
-BENCHMARK(CKKS_serialize)->Unit(benchmark::kMicrosecond)->MinTime(10.0);
+BENCHMARK(ckks_serialize)->Unit(benchmark::kMicrosecond)->MinTime(10.0);
 
 BENCHMARK_MAIN();

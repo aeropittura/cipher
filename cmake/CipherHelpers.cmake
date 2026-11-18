@@ -45,9 +45,9 @@ function(cipher_add_module name)
             "$<BUILD_INTERFACE:${CIPHER_BUILD_INCLUDE_DIRS}>"
             "$<INSTALL_INTERFACE:${Cipher_INSTALL_INCLUDEDIR}>"
             "$<INSTALL_INTERFACE:${Cipher_INSTALL_INCLUDEDIR}/cipher/extern>")
-        target_compile_definitions(${lib} PUBLIC MATHBACKEND=${CIPHER_MATH_BACKEND})
+        target_compile_definitions(${lib} PUBLIC CIPHER_MATH_BACKEND=${CIPHER_MATH_BACKEND})
         if(CIPHER_WITH_OPENMP)
-            target_compile_definitions(${lib} PUBLIC PARALLEL)
+            target_compile_definitions(${lib} PUBLIC CIPHER_PARALLEL)
         endif()
         set(_deps "")
         foreach(dep IN LISTS ARG_DEPENDS)

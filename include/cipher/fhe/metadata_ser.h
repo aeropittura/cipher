@@ -35,7 +35,7 @@
 #include "cipher/fhe/metadata.h"
 #include "cipher/util/serial.h"
 
-CEREAL_CLASS_VERSION(lbcrypto::Metadata, lbcrypto::Metadata::SerializedVersion());
-CEREAL_REGISTER_TYPE(lbcrypto::Metadata);
+CEREAL_CLASS_VERSION(cipher::Metadata, cipher::Metadata::serialized_version());
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::Metadata, "lbcrypto::Metadata");
 
 #endif  // CIPHER_FHE_METADATA_SER_H_

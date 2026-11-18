@@ -50,7 +50,7 @@
 #include "cipher/fhe/encoding/plaintext.h"
 #include "cipher/util/inttypes.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /// STL pair (plaintext modulus, cyclotomic order) used as a key for some tables in PackedEncoding
 using ModulusM = std::pair<NativeInteger, uint64_t>;
@@ -60,7 +60,7 @@ using ModulusM = std::pair<NativeInteger, uint64_t>;
  * @brief Type used for representing IntArray types.
  * Provides conversion functions to encode and decode plaintext data as type
  * vector<int64_t>. This class uses bit packing techniques to enable efficient
- * computing on vectors of integers. It is NOT supported for DCRTPoly
+ * computing on vectors of integers. It is NOT supported for RnsPoly
  */
 
 class PackedEncoding : public PlaintextImpl {
@@ -70,37 +70,37 @@ class PackedEncoding : public PlaintextImpl {
     // these two constructors are used inside of Decrypt
     /**
      * @brief Constructs an empty packed plaintext over the given element parameters.
-     * @param vp element parameters of the polynomial (Poly, NativePoly or DCRTPoly parameters)
+     * @param vp element parameters of the polynomial (Poly, NativePoly or RnsPoly parameters)
      * @param ep encoding parameters
      */
     template <typename T, typename std::enable_if<std::is_same<T, Poly::Params>::value ||
                                                           std::is_same<T, NativePoly::Params>::value ||
-                                                          std::is_same<T, DCRTPoly::Params>::value,
+                                                          std::is_same<T, RnsPoly::Params>::value,
                                                   bool>::type = true>
     PackedEncoding(std::shared_ptr<T> vp, EncodingParams ep) : PlaintextImpl(vp, ep, PACKED_ENCODING) {}
 
     /**
      * @brief Constructs a packed plaintext holding the given slot values (not encoded yet; call Encode).
-     * @param vp element parameters of the polynomial (Poly, NativePoly or DCRTPoly parameters)
+     * @param vp element parameters of the polynomial (Poly, NativePoly or RnsPoly parameters)
      * @param ep encoding parameters
      * @param coeffs the slot values
      */
     template <typename T, typename std::enable_if<std::is_same<T, Poly::Params>::value ||
                                                           std::is_same<T, NativePoly::Params>::value ||
-                                                          std::is_same<T, DCRTPoly::Params>::value,
+                                                          std::is_same<T, RnsPoly::Params>::value,
                                                   bool>::type = true>
     PackedEncoding(std::shared_ptr<T> vp, EncodingParams ep, const std::vector<int64_t>& coeffs)
         : PlaintextImpl(vp, ep, PACKED_ENCODING), value(coeffs) {}
 
     /**
      * @brief Constructs a packed plaintext holding the given slot values (not encoded yet; call Encode).
-     * @param vp element parameters of the polynomial (Poly, NativePoly or DCRTPoly parameters)
+     * @param vp element parameters of the polynomial (Poly, NativePoly or RnsPoly parameters)
      * @param ep encoding parameters
      * @param coeffs the slot values
      */
     template <typename T, typename std::enable_if<std::is_same<T, Poly::Params>::value ||
                                                           std::is_same<T, NativePoly::Params>::value ||
-                                                          std::is_same<T, DCRTPoly::Params>::value,
+                                                          std::is_same<T, RnsPoly::Params>::value,
                                                   bool>::type = true>
     PackedEncoding(std::shared_ptr<T> vp, EncodingParams ep, std::initializer_list<int64_t> coeffs)
         : PlaintextImpl(vp, ep, PACKED_ENCODING), value(coeffs) {}
@@ -128,12 +128,12 @@ class PackedEncoding : public PlaintextImpl {
 
     /**
      * @brief Gets the generator of the automorphism group used for slot rotations of the packed encoding with the
-     * given cyclotomic order (set by SetParams).
+     * given cyclotomic order (set by set_params).
      * @param m the cyclotomic order
      * @return the generator
      */
-    static uint32_t GetAutomorphismGenerator(uint32_t m) {
-        return m_automorphismGenerator[m];
+    static uint32_t get_automorphism_generator(uint32_t m) {
+        return automorphism_generator_[m];
     }
 
     /**
@@ -141,28 +141,28 @@ class PackedEncoding : public PlaintextImpl {
      * modulus, with the CRT permutation of the slots).
      * @return true on success
      */
-    bool Encode() override;
+    bool encode() override;
 
     /**
      * @brief Decodes the polynomial into the slot values (number-theoretic transform modulo the plaintext
      * modulus), mapping them to the centered range [-p/2, p/2).
      * @return true on success
      */
-    bool Decode() override;
+    bool decode() override;
 
     /**
      * @brief Gets the decoded (or to be encoded) slot values.
      * @return the integer vector
      */
-    const std::vector<int64_t>& GetPackedValue() const override {
+    const std::vector<int64_t>& get_packed_value() const override {
         return value;
     }
 
     /**
-     * SetIntVectorValue
+     * set_int_vector_value
      * @param val integer vector to initialize the plaintext
      */
-    void SetIntVectorValue(const std::vector<int64_t>& val) override {
+    void set_int_vector_value(const std::vector<int64_t>& val) override {
         value = val;
     }
 
@@ -171,7 +171,7 @@ class PackedEncoding : public PlaintextImpl {
      *
      * @return the length of the plaintext in terms of the number of elements.
      */
-    size_t GetLength() const override {
+    size_t get_length() const override {
         return value.size();
     }
 
@@ -180,49 +180,49 @@ class PackedEncoding : public PlaintextImpl {
      * @param m the encoding cyclotomic order.
      * @param params data structure storing encoding parameters
      */
-    static void SetParams(uint32_t m, EncodingParams params);
+    static void set_params(uint32_t m, EncodingParams params);
 
     /**
      * @brief Method to set encoding params (this method should eventually be
-     * replaced by void SetParams(uint32_t m, EncodingParams params);)
+     * replaced by void set_params(uint32_t m, EncodingParams params);)
      * @param m the encoding cyclotomic order.
      * @param modulus is the plaintext modulus
      */
-    static void SetParams(uint32_t m, const PlaintextModulus& modulus)
+    static void set_params(uint32_t m, const PlaintextModulus& modulus)
             __attribute__((deprecated("use SetParams(uint32_t m, EncodingParams p)")));
 
     /**
-     * SetLength of the plaintext to the given size
+     * set_length of the plaintext to the given size
      * @param siz the new number of elements
      */
-    void SetLength(size_t siz) override {
+    void set_length(size_t siz) override {
         value.resize(siz);
     }
 
     /**
      * @brief Destructor method.
      */
-    static void Destroy();
+    static void destroy();
 
   protected:
     /**
-     * @brief PrintValue() is called by operator<<
+     * @brief print_value() is called by operator<<
      * @param out stream to print to
      */
-    void PrintValue(std::ostream& out) const override {
+    void print_value(std::ostream& out) const override {
         out << "(";
         // for sanity's sake: get rid of all trailing zeroes and print "..." instead
         size_t i = value.size();
-        bool allZeroes = true;
+        bool all_zeroes = true;
         while (i > 0) {
             --i;
             if (value[i] != 0) {
-                allZeroes = false;
+                all_zeroes = false;
                 break;
             }
         }
 
-        if (allZeroes == false) {
+        if (all_zeroes == false) {
             for (size_t j = 0; j <= i; ++j)
                 out << value[j] << ", ";
         }
@@ -236,7 +236,7 @@ class PackedEncoding : public PlaintextImpl {
      * @param rhs - the other plaintext to compare to.
      * @return whether the two plaintext are equivalent.
      */
-    bool CompareTo(const PlaintextImpl& rhs) const override {
+    bool compare_to(const PlaintextImpl& rhs) const override {
         if (typeid(rhs) != typeid(PackedEncoding))
             return false;
 
@@ -246,19 +246,19 @@ class PackedEncoding : public PlaintextImpl {
 
   private:
     // initial root of unity for plaintext space
-    static std::map<ModulusM, NativeInteger> m_initRoot;
+    static std::map<ModulusM, NativeInteger> init_root_;
     // modulus and root of unity to be used for Arbitrary CRT
-    static std::map<ModulusM, NativeInteger> m_bigModulus;
-    static std::map<ModulusM, NativeInteger> m_bigRoot;
+    static std::map<ModulusM, NativeInteger> big_modulus_;
+    static std::map<ModulusM, NativeInteger> big_root_;
 
     // stores the list of primitive roots used in packing.
-    static std::map<uint32_t, uint32_t> m_automorphismGenerator;
-    static std::map<uint32_t, std::vector<uint32_t>> m_toCRTPerm;
-    static std::map<uint32_t, std::vector<uint32_t>> m_fromCRTPerm;
+    static std::map<uint32_t, uint32_t> automorphism_generator_;
+    static std::map<uint32_t, std::vector<uint32_t>> to_crt_perm_;
+    static std::map<uint32_t, std::vector<uint32_t>> from_crt_perm_;
 
-    static void SetParams_2n(uint32_t m, NativeInteger modulusNI);
+    static void set_params_2n(uint32_t m, NativeInteger modulus_ni);
 
-    static void SetParams_2n(uint32_t m, EncodingParams params);
+    static void set_params_2n(uint32_t m, EncodingParams params);
 
     /**
      * @brief Packs the slot values into aggregate plaintext space.
@@ -267,10 +267,10 @@ class PackedEncoding : public PlaintextImpl {
      * @param modulus is the plaintext modulus used for packing.
      */
     template <typename P>
-    void Pack(P* ring, const PlaintextModulus& modulus) const;
+    void pack_into(P* ring, const PlaintextModulus& modulus) const;
 
-    // Optimized version of packing designed for DCRTPoly and NativePoly
-    void PackNativeVector(const PlaintextModulus& modulus, uint32_t m, NativeVector* values) const;
+    // Optimized version of packing designed for RnsPoly and NativePoly
+    void pack_native_vector(const PlaintextModulus& modulus, uint32_t m, NativeVector* values) const;
 
     /**
      * @brief Unpacks the data from aggregated plaintext to slot values.
@@ -279,9 +279,9 @@ class PackedEncoding : public PlaintextImpl {
      * @param modulus is the plaintext modulus used in packing operation.
      */
     template <typename P>
-    void Unpack(P* ring, const PlaintextModulus& modulus) const;
+    void unpack(P* ring, const PlaintextModulus& modulus) const;
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_ENCODING_PACKED_H_

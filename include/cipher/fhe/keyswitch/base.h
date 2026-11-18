@@ -48,10 +48,10 @@
 #include "cipher/util/exception.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Abstract interface for key switching.
@@ -66,15 +66,15 @@ namespace lbcrypto {
  * https://eprint.iacr.org/2021/204 for the description and the noise analysis of the three variants and of their
  * RNS instantiations.
  *
- * The high-level operations KeySwitch and KeySwitchInPlace are composed of three core steps that are also exposed
+ * The high-level operations key_switch and key_switch_in_place are composed of three core steps that are also exposed
  * separately. This lets callers hoist the expensive, key-independent digit decomposition of an element and reuse it
  * for several key switchings (fast rotations), and, for hybrid key switching, accumulate several key switched terms
  * in the extended basis QP before a single division by P:
- *   1. EvalKeySwitchPrecomputeCore: digit decomposition of the element to be switched;
- *   2. EvalFastKeySwitchCore or EvalFastKeySwitchCoreExt: inner product of the digits with the key switching key;
- *   3. KeySwitchDown: division by P for results left in the extended basis (hybrid only).
+ *   1. eval_key_switch_precompute_core: digit decomposition of the element to be switched;
+ *   2. eval_fast_key_switch_core or eval_fast_key_switch_core_ext: inner product of the digits with the key switching key;
+ *   3. key_switch_down: division by P for results left in the extended basis (hybrid only).
  *
- * @tparam Element ring element type (DCRTPoly for the RNS instantiations)
+ * @tparam Element ring element type (RnsPoly for the RNS instantiations)
  */
 template <class Element>
 class KeySwitchBase {
@@ -94,84 +94,84 @@ class KeySwitchBase {
     virtual ~KeySwitchBase() = default;
 
     /**
-     * Generates a key switching key from oldPrivateKey to newPrivateKey, i.e., an encryption of the old secret key
+     * Generates a key switching key from old_private_key to new_private_key, i.e., an encryption of the old secret key
      * under the new one. The layout of the key (number of components and their modulus) depends on the key switching
      * method; see the derived classes.
      *
-     * @param oldPrivateKey private key the ciphertexts to be switched are encrypted under
-     * @param newPrivateKey private key the switched ciphertexts should decrypt under
+     * @param old_private_key private key the ciphertexts to be switched are encrypted under
+     * @param new_private_key private key the switched ciphertexts should decrypt under
      * @return the key switching key
      */
-    virtual EvalKey<Element> KeySwitchGenInternal(const PrivateKey<Element> oldPrivateKey,
-                                                  const PrivateKey<Element> newPrivateKey) const {
-        OPENFHE_THROW(NOT_SUPPORTED_ERROR);
+    virtual EvalKey<Element> key_switch_gen_internal(const PrivateKey<Element> old_private_key,
+                                                  const PrivateKey<Element> new_private_key) const {
+        CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
     /**
-     * Generates a key switching key from oldPrivateKey to newPrivateKey reusing the uniformly random "a" components
+     * Generates a key switching key from old_private_key to new_private_key reusing the uniformly random "a" components
      * of an existing key switching key. This is used in threshold FHE, where every party has to generate its share of
      * the joint key with respect to the same "a" components so that the shares can be added.
      *
-     * @param oldPrivateKey private key the ciphertexts to be switched are encrypted under
-     * @param newPrivateKey private key the switched ciphertexts should decrypt under
-     * @param evalKey key switching key whose "a" components are reused; if null, fresh components are sampled
+     * @param old_private_key private key the ciphertexts to be switched are encrypted under
+     * @param new_private_key private key the switched ciphertexts should decrypt under
+     * @param eval_key key switching key whose "a" components are reused; if null, fresh components are sampled
      * @return the key switching key
      */
-    virtual EvalKey<Element> KeySwitchGenInternal(const PrivateKey<Element> oldPrivateKey,
-                                                  const PrivateKey<Element> newPrivateKey,
-                                                  const EvalKey<Element> evalKey) const {
-        OPENFHE_THROW(NOT_SUPPORTED_ERROR);
+    virtual EvalKey<Element> key_switch_gen_internal(const PrivateKey<Element> old_private_key,
+                                                  const PrivateKey<Element> new_private_key,
+                                                  const EvalKey<Element> eval_key) const {
+        CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
     /**
-     * Generates a key switching key from oldPrivateKey to the secret key of newPublicKey using only the public key of
+     * Generates a key switching key from old_private_key to the secret key of new_public_key using only the public key of
      * the target, i.e., the components of the old secret key are encrypted with the public-key encryption procedure.
      * This is how re-encryption keys are generated for proxy re-encryption.
      *
-     * @param oldPrivateKey private key the ciphertexts to be switched are encrypted under
-     * @param newPublicKey public key of the party the switched ciphertexts should decrypt for
+     * @param old_private_key private key the ciphertexts to be switched are encrypted under
+     * @param new_public_key public key of the party the switched ciphertexts should decrypt for
      * @return the key switching key
      */
-    virtual EvalKey<Element> KeySwitchGenInternal(const PrivateKey<Element> oldPrivateKey,
-                                                  const PublicKey<Element> newPublicKey) const {
-        OPENFHE_THROW(NOT_SUPPORTED_ERROR);
+    virtual EvalKey<Element> key_switch_gen_internal(const PrivateKey<Element> old_private_key,
+                                                  const PublicKey<Element> new_public_key) const {
+        CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
     /**
-     * Key switches a ciphertext to the key of evalKey and returns the result as a new ciphertext; the input is
-     * copied and KeySwitchInPlace is applied to the copy.
+     * Key switches a ciphertext to the key of eval_key and returns the result as a new ciphertext; the input is
+     * copied and key_switch_in_place is applied to the copy.
      *
      * @param ciphertext ciphertext to be key switched
-     * @param evalKey key switching key
+     * @param eval_key key switching key
      * @return the key switched ciphertext (two elements)
      */
-    virtual Ciphertext<Element> KeySwitch(ConstCiphertext<Element> ciphertext, const EvalKey<Element> evalKey) const;
+    virtual Ciphertext<Element> key_switch(ConstCiphertext<Element> ciphertext, const EvalKey<Element> eval_key) const;
 
     /**
      * Key switches a ciphertext in place. The last element of the ciphertext (c1 for a two-element ciphertext, c2
-     * after a homomorphic multiplication) is key switched with KeySwitchCore, and the two resulting elements are
+     * after a homomorphic multiplication) is key switched with key_switch_core, and the two resulting elements are
      * added to c0 and c1 (c1 is replaced when the ciphertext has only two elements). The result has two elements.
      *
      * @param ciphertext ciphertext to be key switched; holds the result
-     * @param evalKey key switching key
+     * @param eval_key key switching key
      */
-    virtual void KeySwitchInPlace(Ciphertext<Element>& ciphertext, const EvalKey<Element> evalKey) const {
-        OPENFHE_THROW(NOT_SUPPORTED_ERROR);
+    virtual void key_switch_in_place(Ciphertext<Element>& ciphertext, const EvalKey<Element> eval_key) const {
+        CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
     /**
      * Raises a ciphertext from its current basis Ql to the extended basis QlP of hybrid key switching by multiplying
      * every element by P (the residues for the P moduli are zero). The result can be added to the output of
-     * EvalFastKeySwitchCoreExt, so that the original ciphertext and several key switched terms are accumulated in the
-     * extended basis and divided by P only once with KeySwitchDown. Supported by hybrid key switching only.
+     * eval_fast_key_switch_core_ext, so that the original ciphertext and several key switched terms are accumulated in the
+     * extended basis and divided by P only once with key_switch_down. Supported by hybrid key switching only.
      *
      * @param ciphertext ciphertext in basis Ql
-     * @param addFirst if true, the first element c0 is raised as well; if false, it is set to zero and only the
+     * @param add_first if true, the first element c0 is raised as well; if false, it is set to zero and only the
      * remaining elements are raised (used when c0 is handled separately, e.g., in hoisted rotations)
      * @return the ciphertext in basis QlP
      */
-    virtual Ciphertext<Element> KeySwitchExt(ConstCiphertext<Element> ciphertext, bool addFirst) const {
-        OPENFHE_THROW(NOT_SUPPORTED_ERROR);
+    virtual Ciphertext<Element> key_switch_ext(ConstCiphertext<Element> ciphertext, bool add_first) const {
+        CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
     /**
@@ -182,19 +182,19 @@ class KeySwitchBase {
      * @param ciphertext ciphertext in basis QlP
      * @return the ciphertext in basis Ql
      */
-    virtual Ciphertext<Element> KeySwitchDown(ConstCiphertext<Element> ciphertext) const {
-        OPENFHE_THROW(NOT_SUPPORTED_ERROR);
+    virtual Ciphertext<Element> key_switch_down(ConstCiphertext<Element> ciphertext) const {
+        CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
     /**
-     * Same as KeySwitchDown, but only for the first element c0 of the ciphertext. Supported by hybrid key switching
+     * Same as key_switch_down, but only for the first element c0 of the ciphertext. Supported by hybrid key switching
      * only.
      *
      * @param ciphertext ciphertext in basis QlP
      * @return the first element switched to basis Ql
      */
-    virtual Element KeySwitchDownFirstElement(ConstCiphertext<Element> ciphertext) const {
-        OPENFHE_THROW(NOT_SUPPORTED_ERROR);
+    virtual Element key_switch_down_first_element(ConstCiphertext<Element> ciphertext) const {
+        CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
     /////////////////////////////////////////
     // CORE OPERATIONS
@@ -202,14 +202,14 @@ class KeySwitchBase {
 
     /**
      * Key switches a single ring element a (typically c1 or c2 of a ciphertext): computes the digit decomposition of a
-     * with EvalKeySwitchPrecomputeCore and its inner product with the key switching key with EvalFastKeySwitchCore.
+     * with eval_key_switch_precompute_core and its inner product with the key switching key with eval_fast_key_switch_core.
      *
      * @param a ring element to be key switched, in basis Ql
-     * @param evalKey key switching key
+     * @param eval_key key switching key
      * @return the pair (b', a') in basis Ql such that b' + a' * sB = a * sA + noise
      */
-    virtual std::vector<Element> KeySwitchCore(const Element& a, const EvalKey<Element> evalKey) const {
-        OPENFHE_THROW(NOT_SUPPORTED_ERROR);
+    virtual std::vector<Element> key_switch_core(const Element& a, const EvalKey<Element> eval_key) const {
+        CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
     /**
@@ -219,47 +219,47 @@ class KeySwitchBase {
      * one ciphertext (hoisting).
      *
      * @param c ring element to be decomposed, in basis Ql
-     * @param cryptoParamsBase crypto parameters holding the key switching precomputations
+     * @param crypto_params_base crypto parameters holding the key switching precomputations
      * @return the digits of c
      */
-    virtual std::shared_ptr<std::vector<Element>> EvalKeySwitchPrecomputeCore(
-            const Element& c, std::shared_ptr<CryptoParametersBase<Element>> cryptoParamsBase) const {
-        OPENFHE_THROW(NOT_SUPPORTED_ERROR);
+    virtual std::shared_ptr<std::vector<Element>> eval_key_switch_precompute_core(
+            const Element& c, std::shared_ptr<BaseCryptoParams<Element>> crypto_params_base) const {
+        CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
     /**
      * Completes the key switching of an element from its digits: computes the inner products of the digits with the
      * two component vectors of the key switching key and, for hybrid key switching, divides the results by P.
      *
-     * @param digits digits of the element computed by EvalKeySwitchPrecomputeCore
-     * @param evalKey key switching key
-     * @param paramsQl parameters of the basis Ql of the element (its current level)
+     * @param digits digits of the element computed by eval_key_switch_precompute_core
+     * @param eval_key key switching key
+     * @param params_ql parameters of the basis Ql of the element (its current level)
      * @return the pair (b', a') in basis Ql such that b' + a' * sB = a * sA + noise
      */
-    virtual std::vector<Element> EvalFastKeySwitchCore(const std::shared_ptr<std::vector<Element>> digits,
-                                                       const EvalKey<Element> evalKey,
-                                                       const std::shared_ptr<ParmType> paramsQl) const {
-        OPENFHE_THROW(NOT_SUPPORTED_ERROR);
+    virtual std::vector<Element> eval_fast_key_switch_core(const std::shared_ptr<std::vector<Element>> digits,
+                                                       const EvalKey<Element> eval_key,
+                                                       const std::shared_ptr<ParmType> params_ql) const {
+        CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 
     /**
-     * Same as EvalFastKeySwitchCore, but leaves the result in the extended basis QlP, i.e., without dividing by P.
+     * Same as eval_fast_key_switch_core, but leaves the result in the extended basis QlP, i.e., without dividing by P.
      * This allows summing the results of several key switchings (and the original ciphertext raised with
-     * KeySwitchExt) before a single KeySwitchDown, which saves the divisions by P and reduces noise. Supported by
+     * key_switch_ext) before a single key_switch_down, which saves the divisions by P and reduces noise. Supported by
      * hybrid key switching only.
      *
-     * @param digits digits of the element computed by EvalKeySwitchPrecomputeCore
-     * @param evalKey key switching key
-     * @param paramsQl parameters of the basis Ql of the element (its current level)
+     * @param digits digits of the element computed by eval_key_switch_precompute_core
+     * @param eval_key key switching key
+     * @param params_ql parameters of the basis Ql of the element (its current level)
      * @return the pair (b', a') in basis QlP such that b' + a' * sB = P * a * sA + noise
      */
-    virtual std::vector<Element> EvalFastKeySwitchCoreExt(const std::shared_ptr<std::vector<Element>> digits,
-                                                          const EvalKey<Element> evalKey,
-                                                          const std::shared_ptr<ParmType> paramsQl) const {
-        OPENFHE_THROW(NOT_SUPPORTED_ERROR);
+    virtual std::vector<Element> eval_fast_key_switch_core_ext(const std::shared_ptr<std::vector<Element>> digits,
+                                                          const EvalKey<Element> eval_key,
+                                                          const std::shared_ptr<ParmType> params_ql) const {
+        CIPHER_THROW(NOT_SUPPORTED_ERROR);
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_KEYSWITCH_BASE_H_

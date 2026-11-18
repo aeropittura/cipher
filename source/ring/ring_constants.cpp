@@ -36,9 +36,9 @@
 #include "cipher/ring/ring_constants.h"
 #include "cipher/util/exception.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-SecretKeyDist convertToSecretKeyDist(const std::string& str) {
+SecretKeyDist convert_to_secret_key_dist(const std::string& str) {
     if (str == "GAUSSIAN")
         return GAUSSIAN;
     if (str == "UNIFORM_TERNARY")
@@ -49,22 +49,22 @@ SecretKeyDist convertToSecretKeyDist(const std::string& str) {
         return SPARSE_ENCAPSULATED;
     // if (str == "BINARY")
     //     return BINARY;
-    OPENFHE_THROW("Unknown SecretKeyDist: " + str);
+    CIPHER_THROW("Unknown SecretKeyDist: " + str);
 }
 
-SecretKeyDist convertToSecretKeyDist(uint32_t num) {
-    auto keyDist = static_cast<SecretKeyDist>(num);
-    switch (keyDist) {
+SecretKeyDist convert_to_secret_key_dist(uint32_t num) {
+    auto key_dist = static_cast<SecretKeyDist>(num);
+    switch (key_dist) {
         case GAUSSIAN:
         case UNIFORM_TERNARY:
         case SPARSE_TERNARY:
         case SPARSE_ENCAPSULATED:
             // case BINARY:
-            return keyDist;
+            return key_dist;
         default:
             break;
     }
-    OPENFHE_THROW("Unknown value for SecretKeyDist " + std::to_string(num));
+    CIPHER_THROW("Unknown value for SecretKeyDist " + std::to_string(num));
 }
 
 std::ostream& operator<<(std::ostream& s, SecretKeyDist m) {
@@ -91,4 +91,4 @@ std::ostream& operator<<(std::ostream& s, SecretKeyDist m) {
     return s;
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher

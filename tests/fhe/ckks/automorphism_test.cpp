@@ -42,7 +42,7 @@
 #include "fhe/support/test_utils.h"
 #include "gtest/gtest.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 //===========================================================================================================
 enum TEST_CASE_TYPE : int {
@@ -87,24 +87,24 @@ enum TEST_CASE_ERROR {
 };
 
 struct TEST_CASE_UTCKKSRNS_AUTOMORPHISM {
-    TEST_CASE_TYPE testCaseType;
+    TEST_CASE_TYPE test_case_type;
     // test case description - MUST BE UNIQUE
     std::string description;
 
-    UnitTestCCParams params;
+    TestContextParams params;
 
     // additional test case data
     TEST_CASE_ERROR error;
-    const std::vector<int32_t> indexList;
+    const std::vector<int32_t> index_list;
 
-    std::string buildTestName() const {
+    std::string build_test_name() const {
         std::stringstream ss;
-        ss << testCaseType << "_" << description;
+        ss << test_case_type << "_" << description;
         return ss.str();
     }
-    std::string toString() const {
+    std::string to_string_impl() const {
         std::stringstream ss;
-        ss << "testCaseType [" << testCaseType << "], " << params.toString();
+        ss << "testCaseType [" << test_case_type << "], " << params.to_string_impl();
         return ss.str();
     }
 };
@@ -112,11 +112,11 @@ struct TEST_CASE_UTCKKSRNS_AUTOMORPHISM {
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
 static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNS_AUTOMORPHISM>& test) {
-    return test.param.buildTestName();
+    return test.param.build_test_name();
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_UTCKKSRNS_AUTOMORPHISM& test) {
-    return os << test.toString();
+    return os << test.to_string_impl();
 }
 //===========================================================================================================
 constexpr uint32_t SMODSIZE = 50;
@@ -124,47 +124,47 @@ constexpr uint32_t RING_DIM = 16;
 constexpr uint32_t BATCH = 8;
 constexpr uint32_t MULT_DEPTH = 1;
 constexpr SecurityLevel SEC_LVL = HEStd_NotSet;
-static const std::vector<int32_t> initIndexList{3, 5, 7, 9, 11, 13, 15};
-static const std::vector<int32_t> cornerCaseIndexList{0};
+static const std::vector<int32_t> init_index_list{3, 5, 7, 9, 11, 13, 15};
+static const std::vector<int32_t> corner_case_index_list{0};
 
 // clang-format off
-static std::vector<TEST_CASE_UTCKKSRNS_AUTOMORPHISM> testCasesUTCKKSRNS_AUTOMORPHISM = {
-    // TestType,                Descr,  Scheme,         RDim,     MultDepth,  SModSize, DSize,BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, ScalTech,        LDigits, PtMod, StdDev, EvalAddCt, KSCt, MultTech, EncTech, PREMode, Error,               indexList
-    { EVAL_AT_INDX_PACKED_ARRAY, "01", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   SUCCESS,             initIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "02", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   CORNER_CASES,        cornerCaseIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "03", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_INPUT_DATA,  initIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "04", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PRIVATE_KEY, initIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "05", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PUBLIC_KEY,  initIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "06", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   NO_KEY_GEN_CALL,     initIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "07", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_INDEX,       initIndexList },
+static std::vector<TEST_CASE_UTCKKSRNS_AUTOMORPHISM> test_cases_utckksrns_automorphism = {
+    // TestType,                Descr,  Scheme,         RDim,     MultDepth,  SModSize, DSize,BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, Error,               index_list
+    { EVAL_AT_INDX_PACKED_ARRAY, "01", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   SUCCESS,             init_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "02", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   CORNER_CASES,        corner_case_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "03", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_INPUT_DATA,  init_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "04", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PRIVATE_KEY, init_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "05", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PUBLIC_KEY,  init_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "06", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   NO_KEY_GEN_CALL,     init_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "07", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_INDEX,       init_index_list },
     // ==========================================
-    { EVAL_AT_INDX_PACKED_ARRAY, "11", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   SUCCESS,             initIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "12", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   CORNER_CASES,        cornerCaseIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "13", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_INPUT_DATA,  initIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "14", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PRIVATE_KEY, initIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "15", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PUBLIC_KEY,  initIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "16", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   NO_KEY_GEN_CALL,     initIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "17", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_INDEX,       initIndexList },
+    { EVAL_AT_INDX_PACKED_ARRAY, "11", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   SUCCESS,             init_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "12", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   CORNER_CASES,        corner_case_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "13", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_INPUT_DATA,  init_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "14", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PRIVATE_KEY, init_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "15", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PUBLIC_KEY,  init_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "16", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   NO_KEY_GEN_CALL,     init_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "17", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_INDEX,       init_index_list },
     // ==========================================
-#if NATIVEINT != 128
-    { EVAL_AT_INDX_PACKED_ARRAY, "21", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   SUCCESS,             initIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "22", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   CORNER_CASES,        cornerCaseIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "23", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_INPUT_DATA,  initIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "24", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PRIVATE_KEY, initIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "25", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PUBLIC_KEY,  initIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "26", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   NO_KEY_GEN_CALL,     initIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "27", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_INDEX,       initIndexList },
+#if CIPHER_NATIVE_INT != 128
+    { EVAL_AT_INDX_PACKED_ARRAY, "21", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   SUCCESS,             init_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "22", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   CORNER_CASES,        corner_case_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "23", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_INPUT_DATA,  init_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "24", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PRIVATE_KEY, init_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "25", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PUBLIC_KEY,  init_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "26", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   NO_KEY_GEN_CALL,     init_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "27", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_INDEX,       init_index_list },
     // ==========================================
-    { EVAL_AT_INDX_PACKED_ARRAY, "31", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   SUCCESS,             initIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "32", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   CORNER_CASES,        cornerCaseIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "33", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_INPUT_DATA,  initIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "34", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PRIVATE_KEY, initIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "35", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PUBLIC_KEY,  initIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "36", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   NO_KEY_GEN_CALL,     initIndexList },
-    { EVAL_AT_INDX_PACKED_ARRAY, "37", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_INDEX,       initIndexList },
+    { EVAL_AT_INDX_PACKED_ARRAY, "31", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   SUCCESS,             init_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "32", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   CORNER_CASES,        corner_case_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "33", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_INPUT_DATA,  init_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "34", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PRIVATE_KEY, init_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "35", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PUBLIC_KEY,  init_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "36", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   NO_KEY_GEN_CALL,     init_index_list },
+    { EVAL_AT_INDX_PACKED_ARRAY, "37", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_INDEX,       init_index_list },
 #endif
     // ==========================================
-    // TestType,            Descr,  Scheme,         RDim,     MultDepth,  SModSize, DSize,BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, ScalTech,        LDigits, PtMod, StdDev, EvalAddCt, KSCt, MultTech, EncTech, PREMode, Error,               indexList
+    // TestType,            Descr,  Scheme,         RDim,     MultDepth,  SModSize, DSize,BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, Error,               index_list
     { EVAL_SUM_PACKED_ARRAY, "01", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   SUCCESS },
     { EVAL_SUM_PACKED_ARRAY, "02", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PRIVATE_KEY },
     { EVAL_SUM_PACKED_ARRAY, "03", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PUBLIC_KEY },
@@ -176,7 +176,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_AUTOMORPHISM> testCasesUTCKKSRNS_AUTOMORP
     { EVAL_SUM_PACKED_ARRAY, "13", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PUBLIC_KEY },
     { EVAL_SUM_PACKED_ARRAY, "14", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_BATCH_SIZE },
     { EVAL_SUM_PACKED_ARRAY, "15", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDAUTO,       DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   NO_KEY_GEN_CALL },
-#if NATIVEINT != 128
+#if CIPHER_NATIVE_INT != 128
     { EVAL_SUM_PACKED_ARRAY, "21", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   SUCCESS },
     { EVAL_SUM_PACKED_ARRAY, "22", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PRIVATE_KEY },
     { EVAL_SUM_PACKED_ARRAY, "23", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PUBLIC_KEY },
@@ -190,94 +190,94 @@ static std::vector<TEST_CASE_UTCKKSRNS_AUTOMORPHISM> testCasesUTCKKSRNS_AUTOMORP
     { EVAL_SUM_PACKED_ARRAY, "35", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   NO_KEY_GEN_CALL },
 #endif
     // ==========================================
-    // TestType,    Descr,  Scheme,         RDim,     MultDepth,  SModSize, DSize,BatchSz,    SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, ScalTech, LDigits, PtMod, StdDev, EvalAddCt, KSCt, MultTech, EncTech, PREMode, Error,               indexList
+    // TestType,    Descr,  Scheme,         RDim,     MultDepth,  SModSize, DSize,BatchSz,    SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, ScalTech, LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, Error,               index_list
     { EVAL_SUM_ROWS, "01", {CKKSRNS_SCHEME, RING_DIM, DFLT,       DFLT,     DFLT, RING_DIM/2, DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   DFLT,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   SUCCESS },
     // ==========================================
-    // TestType,    Descr,  Scheme,         RDim,     MultDepth,  SModSize, DSize,BatchSz,    SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, ScalTech, LDigits, PtMod, StdDev, EvalAddCt, KSCt, MultTech, EncTech, PREMode, Error,               indexList
+    // TestType,    Descr,  Scheme,         RDim,     MultDepth,  SModSize, DSize,BatchSz,    SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, ScalTech, LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, Error,               index_list
     { EVAL_SUM_COLS, "01", {CKKSRNS_SCHEME, RING_DIM, DFLT,       DFLT,     DFLT, RING_DIM/2, DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   DFLT,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   SUCCESS },
 };
 // clang-format on
 //===========================================================================================================
 
 class UTCKKSRNS_AUTOMORPHISM : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_AUTOMORPHISM> {
-    using Element = DCRTPoly;
+    using Element = RnsPoly;
     const double eps = EPSILON;
 
     const std::vector<int64_t> vector8{1, 2, 3, 4, 5, 6, 7, 8};
     const std::vector<int64_t> vector10{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-    const std::vector<int64_t> vectorFailure{1, 2, 3, 4};
-    const uint32_t invalidIndexAutomorphism = 4;
-    const std::vector<std::complex<double>> vectorComplexFailure{1.0, 2.0, 3.0, 4.0};
-    const std::vector<std::complex<double>> vector8Complex{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0};
-    const std::complex<double> vector8ComplexSum =
-            std::accumulate(vector8Complex.begin(), vector8Complex.end(), std::complex<double>(0));  // 36.0;
-    const int64_t vector8Sum = std::accumulate(vector8.begin(), vector8.end(), int64_t(0));          // 36
+    const std::vector<int64_t> vector_failure{1, 2, 3, 4};
+    const uint32_t invalid_index_automorphism = 4;
+    const std::vector<std::complex<double>> vector_complex_failure{1.0, 2.0, 3.0, 4.0};
+    const std::vector<std::complex<double>> vector8_complex{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0};
+    const std::complex<double> vector8_complex_sum =
+            std::accumulate(vector8_complex.begin(), vector8_complex.end(), std::complex<double>(0));  // 36.0;
+    const int64_t vector8_sum = std::accumulate(vector8.begin(), vector8.end(), int64_t(0));          // 36
 
   protected:
     void SetUp() {
-        OpenFHEParallelControls.UnitTestStart();
+        cipher_parallel_controls.unit_test_start();
     }
 
     void TearDown() {
-        CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
-        OpenFHEParallelControls.UnitTestStop();
+        ContextFactory<RnsPoly>::release_all_contexts();
+        cipher_parallel_controls.unit_test_stop();
     }
 
-    void UnitTest_EvalAtIndexPackedArray(const TEST_CASE_UTCKKSRNS_AUTOMORPHISM& testData,
+    void unit_test_eval_at_index_packed_array(const TEST_CASE_UTCKKSRNS_AUTOMORPHISM& test_data,
                                          const std::string& failmsg = std::string()) {
-        for (auto index : testData.indexList) {
+        for (auto index : test_data.index_list) {
             try {
-                CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+                CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
                 // Initialize the public key containers.
-                KeyPair<Element> kp = cc->KeyGen();
+                KeyPair<Element> kp = cc->key_gen();
 
-                std::vector<std::complex<double>> inputVec =
-                        (INVALID_INPUT_DATA == testData.error) ? vectorComplexFailure : vector8Complex;
-                Plaintext intArray = cc->MakeCKKSPackedPlaintext(inputVec);
+                std::vector<std::complex<double>> input_vec =
+                        (INVALID_INPUT_DATA == test_data.error) ? vector_complex_failure : vector8_complex;
+                Plaintext int_array = cc->make_ckks_packed_plaintext(input_vec);
 
                 std::vector<int32_t> indices{index, -index};
-                if (NO_KEY_GEN_CALL != testData.error) {
-                    if (INVALID_PRIVATE_KEY == testData.error) {
-                        cc->EvalAtIndexKeyGen(nullptr, indices);
+                if (NO_KEY_GEN_CALL != test_data.error) {
+                    if (INVALID_PRIVATE_KEY == test_data.error) {
+                        cc->eval_at_index_key_gen(nullptr, indices);
                     } else {
-                        cc->EvalAtIndexKeyGen(kp.secretKey, indices);
+                        cc->eval_at_index_key_gen(kp.secret_key, indices);
                     }
                 }
 
-                Ciphertext<Element> ciphertext = (INVALID_PUBLIC_KEY == testData.error) ?
-                                                         cc->Encrypt(PublicKey<Element>(nullptr), intArray) :
-                                                         cc->Encrypt(kp.publicKey, intArray);
+                Ciphertext<Element> ciphertext = (INVALID_PUBLIC_KEY == test_data.error) ?
+                                                         cc->encrypt(PublicKey<Element>(nullptr), int_array) :
+                                                         cc->encrypt(kp.public_key, int_array);
 
-                if (INVALID_INDEX == testData.error)
-                    index = invalidIndexAutomorphism;
-                Ciphertext<Element> p1 = cc->EvalAtIndex(ciphertext, index);
-                Ciphertext<Element> p2 = cc->EvalAtIndex(p1, -index);
+                if (INVALID_INDEX == test_data.error)
+                    index = invalid_index_automorphism;
+                Ciphertext<Element> p1 = cc->eval_at_index(ciphertext, index);
+                Ciphertext<Element> p2 = cc->eval_at_index(p1, -index);
 
-                Plaintext intArrayNew;
-                cc->Decrypt(kp.secretKey, p2, &intArrayNew);
+                Plaintext int_array_new;
+                cc->decrypt(kp.secret_key, p2, &int_array_new);
 
-                intArrayNew->SetLength(inputVec.size());
+                int_array_new->set_length(input_vec.size());
 
-                std::string errMsg(" for index[" + std::to_string(index) + "]");
-                switch (testData.error) {
+                std::string err_msg(" for index[" + std::to_string(index) + "]");
+                switch (test_data.error) {
                     case SUCCESS:
                     case CORNER_CASES:
                         // should not fail
-                        checkEquality(intArrayNew->GetCKKSPackedValue(), vector8Complex, eps, errMsg);
+                        check_equality(int_array_new->get_ckks_packed_value(), vector8_complex, eps, err_msg);
                         break;
                     case INVALID_INPUT_DATA:
                         // should fail
-                        EXPECT_FALSE(checkEquality(intArrayNew->GetCKKSPackedValue(), vector8Complex)) << errMsg;
+                        EXPECT_FALSE(check_equality(int_array_new->get_ckks_packed_value(), vector8_complex)) << err_msg;
                         break;
                     default:
                         // make it fail
-                        std::cerr << __func__ << " failed " << errMsg << std::endl;
+                        std::cerr << __func__ << " failed " << err_msg << std::endl;
                         EXPECT_EQ(0, 1);
                         break;
                 }
             } catch (std::exception& e) {
-                switch (testData.error) {
+                switch (test_data.error) {
                     case SUCCESS:
                     case CORNER_CASES:
                     case INVALID_INPUT_DATA:
@@ -295,43 +295,43 @@ class UTCKKSRNS_AUTOMORPHISM : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
         }
     }
 
-    void UnitTest_EvalSumPackedArray(const TEST_CASE_UTCKKSRNS_AUTOMORPHISM& testData,
+    void unit_test_eval_sum_packed_array(const TEST_CASE_UTCKKSRNS_AUTOMORPHISM& test_data,
                                      const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
             // Initialize the public key containers.
-            KeyPair<Element> kp = cc->KeyGen();
+            KeyPair<Element> kp = cc->key_gen();
 
-            std::vector<std::complex<double>> inputVec = vector8Complex;
-            Plaintext intArray = cc->MakeCKKSPackedPlaintext(inputVec);
+            std::vector<std::complex<double>> input_vec = vector8_complex;
+            Plaintext int_array = cc->make_ckks_packed_plaintext(input_vec);
 
-            if (NO_KEY_GEN_CALL != testData.error) {
-                if (INVALID_PRIVATE_KEY == testData.error)
-                    cc->EvalSumKeyGen(nullptr);
+            if (NO_KEY_GEN_CALL != test_data.error) {
+                if (INVALID_PRIVATE_KEY == test_data.error)
+                    cc->eval_sum_key_gen(nullptr);
                 else
-                    cc->EvalSumKeyGen(kp.secretKey);
+                    cc->eval_sum_key_gen(kp.secret_key);
             }
 
-            Ciphertext<Element> ciphertext = (INVALID_PUBLIC_KEY == testData.error) ?
-                                                     cc->Encrypt(PublicKey<Element>(nullptr), intArray) :
-                                                     cc->Encrypt(kp.publicKey, intArray);
+            Ciphertext<Element> ciphertext = (INVALID_PUBLIC_KEY == test_data.error) ?
+                                                     cc->encrypt(PublicKey<Element>(nullptr), int_array) :
+                                                     cc->encrypt(kp.public_key, int_array);
 
-            uint32_t batchSz = (INVALID_BATCH_SIZE == testData.error) ? (BATCH * 2) : BATCH;
-            Ciphertext<Element> p1 = cc->EvalSum(ciphertext, batchSz);
+            uint32_t batch_sz = (INVALID_BATCH_SIZE == test_data.error) ? (BATCH * 2) : BATCH;
+            Ciphertext<Element> p1 = cc->eval_sum(ciphertext, batch_sz);
 
-            Plaintext intArrayNew;
-            cc->Decrypt(kp.secretKey, p1, &intArrayNew);
+            Plaintext int_array_new;
+            cc->decrypt(kp.secret_key, p1, &int_array_new);
 
-            switch (testData.error) {
+            switch (test_data.error) {
                 case SUCCESS:
                 case CORNER_CASES:
                     // should not fail
-                    EXPECT_TRUE(checkEquality(intArrayNew->GetCKKSPackedValue()[0], vector8ComplexSum));
+                    EXPECT_TRUE(check_equality(int_array_new->get_ckks_packed_value()[0], vector8_complex_sum));
                     break;
                 case INVALID_INPUT_DATA:
                     // should fail
-                    EXPECT_FALSE(checkEquality(intArrayNew->GetCKKSPackedValue()[0], vector8ComplexSum));
+                    EXPECT_FALSE(check_equality(int_array_new->get_ckks_packed_value()[0], vector8_complex_sum));
                     break;
                 default:
                     // make it fail
@@ -339,7 +339,7 @@ class UTCKKSRNS_AUTOMORPHISM : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
                     break;
             }
         } catch (std::exception& e) {
-            switch (testData.error) {
+            switch (test_data.error) {
                 case SUCCESS:
                 case CORNER_CASES:
                 case INVALID_INPUT_DATA:
@@ -356,36 +356,36 @@ class UTCKKSRNS_AUTOMORPHISM : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
         }
     }
 
-    void UnitTest_EvalSumRows(const TEST_CASE_UTCKKSRNS_AUTOMORPHISM& testData,
+    void unit_test_eval_sum_rows(const TEST_CASE_UTCKKSRNS_AUTOMORPHISM& test_data,
                               const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
-            KeyPair<Element> kp = cc->KeyGen();
+            KeyPair<Element> kp = cc->key_gen();
 
             std::vector<double> mat{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0};
-            uint32_t rowSize = 4;
-            uint32_t batchSize = cc->GetEncodingParams()->GetBatchSize();
+            uint32_t row_size = 4;
+            uint32_t batch_size = cc->get_encoding_params()->get_batch_size();
 
-            const std::vector<std::complex<double>> outputSumRows{6.0, 8.0, 10.0, 12.0, 6.0, 8.0, 10.0, 12.0};
+            const std::vector<std::complex<double>> output_sum_rows{6.0, 8.0, 10.0, 12.0, 6.0, 8.0, 10.0, 12.0};
 
             // Encoding as plaintexts
-            Plaintext ptxtMat = cc->MakeCKKSPackedPlaintext(mat);
+            Plaintext ptxt_mat = cc->make_ckks_packed_plaintext(mat);
 
             // Encrypt the encoded vectors
-            auto ctMat = cc->Encrypt(kp.publicKey, ptxtMat);
+            auto ct_mat = cc->encrypt(kp.public_key, ptxt_mat);
 
-            auto evalSumRowKeys = cc->EvalSumRowsKeyGen(kp.secretKey, rowSize);
+            auto eval_sum_row_keys = cc->eval_sum_rows_key_gen(kp.secret_key, row_size);
 
             // Evaluation
-            auto ctRowsSum = cc->EvalSumRows(ctMat, rowSize, *evalSumRowKeys);
+            auto ct_rows_sum = cc->eval_sum_rows(ct_mat, row_size, *eval_sum_row_keys);
 
             // Decrypt
             Plaintext result;
-            cc->Decrypt(kp.secretKey, ctRowsSum, &result);
-            result->SetLength(batchSize);
+            cc->decrypt(kp.secret_key, ct_rows_sum, &result);
+            result->set_length(batch_size);
             // std::cout << "sum Rows: " << result;
-            checkEquality(result->GetCKKSPackedValue(), outputSumRows, eps,
+            check_equality(result->get_ckks_packed_value(), output_sum_rows, eps,
                           failmsg + " EvalSumRowsKeyGen()/EvalSumRows fails - result is incorrect");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
@@ -396,36 +396,36 @@ class UTCKKSRNS_AUTOMORPHISM : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
         }
     }
 
-    void UnitTest_EvalSumCols(const TEST_CASE_UTCKKSRNS_AUTOMORPHISM& testData,
+    void unit_test_eval_sum_cols(const TEST_CASE_UTCKKSRNS_AUTOMORPHISM& test_data,
                               const std::string& failmsg = std::string()) {
         try {
-            CryptoContext<Element> cc(UnitTestGenerateContext(testData.params));
+            CryptoContext<Element> cc(unit_test_generate_context(test_data.params));
 
-            KeyPair<Element> kp = cc->KeyGen();
+            KeyPair<Element> kp = cc->key_gen();
 
             std::vector<double> mat{8.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
-            uint32_t colSize = 4;
-            uint32_t batchSize = cc->GetEncodingParams()->GetBatchSize();
+            uint32_t col_size = 4;
+            uint32_t batch_size = cc->get_encoding_params()->get_batch_size();
 
-            const std::vector<std::complex<double>> outputSumCols{14.0, 14.0, 14.0, 14.0, 22.0, 22.0, 22.0, 22.0};
+            const std::vector<std::complex<double>> output_sum_cols{14.0, 14.0, 14.0, 14.0, 22.0, 22.0, 22.0, 22.0};
 
             // Encoding as plaintexts
-            Plaintext ptxtMat = cc->MakeCKKSPackedPlaintext(mat);
+            Plaintext ptxt_mat = cc->make_ckks_packed_plaintext(mat);
 
             // Encrypt the encoded vectors
-            auto ctMat = cc->Encrypt(kp.publicKey, ptxtMat);
+            auto ct_mat = cc->encrypt(kp.public_key, ptxt_mat);
 
-            auto evalSumColKeys = cc->EvalSumColsKeyGen(kp.secretKey);
+            auto eval_sum_col_keys = cc->eval_sum_cols_key_gen(kp.secret_key);
 
             // Evaluation
-            auto ctColsSum = cc->EvalSumCols(ctMat, colSize, *evalSumColKeys);
+            auto ct_cols_sum = cc->eval_sum_cols(ct_mat, col_size, *eval_sum_col_keys);
 
             // Decrypt
             Plaintext result;
-            cc->Decrypt(kp.secretKey, ctColsSum, &result);
-            result->SetLength(batchSize);
+            cc->decrypt(kp.secret_key, ct_cols_sum, &result);
+            result->set_length(batch_size);
             // std::cout << "sum Cols: " << result;
-            checkEquality(result->GetCKKSPackedValue(), outputSumCols, eps,
+            check_equality(result->get_ckks_packed_value(), output_sum_cols, eps,
                           failmsg + " EvalSumColsKeyGen()/EvalSumCols fails - result is incorrect");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
@@ -438,26 +438,26 @@ class UTCKKSRNS_AUTOMORPHISM : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
 };
 //===========================================================================================================
 TEST_P(UTCKKSRNS_AUTOMORPHISM, Automorphism) {
-    setupSignals();
+    setup_signals();
     auto test = GetParam();
 
-    switch (test.testCaseType) {
+    switch (test.test_case_type) {
         case EVAL_AT_INDX_PACKED_ARRAY:
-            UnitTest_EvalAtIndexPackedArray(test, test.buildTestName());
+            unit_test_eval_at_index_packed_array(test, test.build_test_name());
             break;
         case EVAL_SUM_PACKED_ARRAY:
-            UnitTest_EvalSumPackedArray(test, test.buildTestName());
+            unit_test_eval_sum_packed_array(test, test.build_test_name());
             break;
         case EVAL_SUM_ROWS:
-            UnitTest_EvalSumRows(test, test.buildTestName());
+            unit_test_eval_sum_rows(test, test.build_test_name());
             break;
         case EVAL_SUM_COLS:
-            UnitTest_EvalSumCols(test, test.buildTestName());
+            unit_test_eval_sum_cols(test, test.build_test_name());
             break;
         default:
             break;
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_AUTOMORPHISM, ::testing::ValuesIn(testCasesUTCKKSRNS_AUTOMORPHISM),
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_AUTOMORPHISM, ::testing::ValuesIn(test_cases_utckksrns_automorphism),
                          testName);

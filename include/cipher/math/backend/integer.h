@@ -41,14 +41,14 @@
 
 #include "cipher/util/inttypes.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Interface (CRTP base) implemented by every big-integer backend; T is the derived
  * integer type. Naming conventions: the plain method returns a new value, the "Eq" suffix
  * performs the operation in place on *this and returns *this, and "Fast" variants skip the
  * reduction of their inputs (the operands must already be < modulus). The "Barrett"
- * overloads take mu, the value precomputed by ComputeMu() for the modulus.
+ * overloads take mu, the value precomputed by compute_mu() for the modulus.
  * @tparam T the derived big-integer type
  */
 template <typename T>
@@ -68,7 +68,7 @@ class BigIntegerInterface {
      *
      * @param str is the string representation of the value
      */
-    void SetValue(const std::string& str);
+    void set_value(const std::string& str);
 
     // ARITHMETIC OPERATIONS
 
@@ -78,7 +78,7 @@ class BigIntegerInterface {
      * @param b is the value to add.
      * @return result of the addition operation.
      */
-    T Add(const T& b) const;
+    T add(const T& b) const;
 
     /**
      * Addition operation. In-place variant.
@@ -86,15 +86,15 @@ class BigIntegerInterface {
      * @param b is the value to add.
      * @return result of the addition operation.
      */
-    T& AddEq(const T& b);
+    T& add_eq(const T& b);
 
     /// inline operators for the addition operation.
     friend T operator+(const T& a, const T& b) {
-        return a.Add(b);
+        return a.add(b);
     }
     /// inline in-place operator for the addition operation.
     friend T& operator+=(T& a, const T& b) {
-        return a.AddEq(b);
+        return a.add_eq(b);
     }
 
     /**
@@ -103,7 +103,7 @@ class BigIntegerInterface {
      * @param b is the value to subtract.
      * @return is the result of the subtraction operation.
      */
-    T Sub(const T& b) const;
+    T sub(const T& b) const;
 
     /**
      * Subtraction operation. In-place variant.
@@ -111,15 +111,15 @@ class BigIntegerInterface {
      * @param b is the value to subtract.
      * @return is the result of the subtraction operation.
      */
-    T& SubEq(const T& b);
+    T& sub_eq(const T& b);
 
     /// inline operators for the subtraction operation.
     friend T operator-(const T& a, const T& b) {
-        return a.Sub(b);
+        return a.sub(b);
     }
     /// inline in-place operator for the subtraction operation.
     friend T& operator-=(T& a, const T& b) {
-        return a.SubEq(b);
+        return a.sub_eq(b);
     }
 
     /**
@@ -128,7 +128,7 @@ class BigIntegerInterface {
      * @param b is the value to multiply with.
      * @return is the result of the multiplication operation.
      */
-    T Mul(const T& b) const;
+    T mul(const T& b) const;
 
     /**
      * Multiplication operation. In-place variant.
@@ -136,15 +136,15 @@ class BigIntegerInterface {
      * @param b is the value to multiply with.
      * @return is the result of the multiplication operation.
      */
-    T& MulEq(const T& b);
+    T& mul_eq(const T& b);
 
     /// inline operators for the multiplication operation.
     friend T operator*(const T& a, const T& b) {
-        return a.Mul(b);
+        return a.mul(b);
     }
     /// inline in-place operator for the multiplication operation.
     friend T& operator*=(T& a, const T& b) {
-        return a.MulEq(b);
+        return a.mul_eq(b);
     }
 
     /**
@@ -153,7 +153,7 @@ class BigIntegerInterface {
      * @param b is the value to divide by.
      * @return is the result of the division operation.
      */
-    T DividedBy(const T& b) const;
+    T divided_by(const T& b) const;
 
     /**
      * Division operation. In-place variant.
@@ -161,15 +161,15 @@ class BigIntegerInterface {
      * @param b is the value to divide by.
      * @return is the result of the division operation.
      */
-    T& DividedByEq(const T& b);
+    T& divided_by_eq(const T& b);
 
     /// inline operators for the division operation.
     friend T operator/(const T& a, const T& b) {
-        return a.DividedBy(b);
+        return a.divided_by(b);
     }
     /// inline in-place operator for the division operation.
     friend T& operator/=(T& a, const T& b) {
-        return a.DividedByEq(b);
+        return a.divided_by_eq(b);
     }
 
     /**
@@ -180,7 +180,7 @@ class BigIntegerInterface {
      * @param q is the denominator to be divided.
      * @return is the result of multiply and round operation.
      */
-    T MultiplyAndRound(const T& p, const T& q) const;
+    T multiply_and_round(const T& p, const T& q) const;
 
     /**
      * Multiply and Rounding operation. Returns [x*p/q] where [] is the rounding
@@ -190,7 +190,7 @@ class BigIntegerInterface {
      * @param q is the denominator to be divided.
      * @return is the result of multiply and round operation.
      */
-    T& MultiplyAndRoundEq(const T& p, const T& q);
+    T& multiply_and_round_eq(const T& p, const T& q);
 
     /**
      * Divide and Rounding operation. Returns [x/q] where [] is the rounding
@@ -199,7 +199,7 @@ class BigIntegerInterface {
      * @param q is the denominator to be divided.
      * @return is the result of divide and round operation.
      */
-    T DivideAndRound(const T& q) const;
+    T divide_and_round(const T& q) const;
 
     /**
      * Divide and Rounding operation. Returns [x/q] where [] is the rounding
@@ -208,7 +208,7 @@ class BigIntegerInterface {
      * @param q is the denominator to be divided.
      * @return is the result of divide and round operation.
      */
-    T& DivideAndRoundEq(const T& q);
+    T& divide_and_round_eq(const T& q);
 
     // MODULAR ARITHMETIC OPERATIONS
 
@@ -218,7 +218,7 @@ class BigIntegerInterface {
      * @param modulus is the modulus to perform.
      * @return is the result of the modulus operation.
      */
-    T Mod(const T& modulus) const;
+    T mod(const T& modulus) const;
 
     /**
      * Naive modulus operation. In-place variant.
@@ -226,15 +226,15 @@ class BigIntegerInterface {
      * @param modulus is the modulus to perform.
      * @return is the result of the modulus operation.
      */
-    T& ModEq(const T& modulus);
+    T& mod_eq(const T& modulus);
 
     /// inline operators for the modulus operation.
     friend T operator%(const T& a, const T& b) {
-        return a.Mod(b);
+        return a.mod(b);
     }
     /// inline in-place operator for the modulus operation.
     friend T& operator%=(T& a, const T& b) {
-        return a.ModEq(b);
+        return a.mod_eq(b);
     }
 
     /**
@@ -242,7 +242,7 @@ class BigIntegerInterface {
      *
      * @return the precomputed parameter mu.
      */
-    T ComputeMu() const;
+    T compute_mu() const;
 
     /**
      * Barrett modulus operation.
@@ -253,7 +253,7 @@ class BigIntegerInterface {
      * @param mu is the Barrett value.
      * @return is the result of the modulus operation.
      */
-    T Mod(const T& modulus, const T& mu) const;
+    T mod(const T& modulus, const T& mu) const;
 
     /**
      * Barrett modulus operation using the precomputed value mu. In-place variant.
@@ -262,7 +262,7 @@ class BigIntegerInterface {
      * @param mu is the Barrett value.
      * @return is the result of the modulus operation.
      */
-    T& ModEq(const T& modulus, const T& mu);
+    T& mod_eq(const T& modulus, const T& mu);
 
     /**
      * Modulus addition operation.
@@ -271,7 +271,7 @@ class BigIntegerInterface {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus addition operation.
      */
-    T ModAdd(const T& b, const T& modulus) const;
+    T mod_add(const T& b, const T& modulus) const;
 
     /**
      * Modulus addition operation. In-place variant.
@@ -280,7 +280,7 @@ class BigIntegerInterface {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus addition operation.
      */
-    T& ModAddEq(const T& b, const T& modulus);
+    T& mod_add_eq(const T& b, const T& modulus);
 
     /**
      * Modulus addition where operands are < modulus.
@@ -289,7 +289,7 @@ class BigIntegerInterface {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus addition operation.
      */
-    T ModAddFast(const T& b, const T& modulus) const;
+    T mod_add_fast(const T& b, const T& modulus) const;
 
     /**
      * Modulus addition where operands are < modulus. In-place variant.
@@ -298,7 +298,7 @@ class BigIntegerInterface {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus addition operation.
      */
-    T& ModAddFastEq(const T& b, const T& modulus);
+    T& mod_add_fast_eq(const T& b, const T& modulus);
 
     /**
      * Barrett modulus addition operation.
@@ -308,7 +308,7 @@ class BigIntegerInterface {
      * @param mu is the Barrett value.
      * @return is the result of the modulus addition operation.
      */
-    T ModAdd(const T& b, const T& modulus, const T& mu) const;
+    T mod_add(const T& b, const T& modulus, const T& mu) const;
 
     /**
      * Barrett modulus addition operation. In-place variant.
@@ -318,7 +318,7 @@ class BigIntegerInterface {
      * @param mu is the Barrett value.
      * @return is the result of the modulus addition operation.
      */
-    T& ModAddEq(const T& b, const T& modulus, const T& mu);
+    T& mod_add_eq(const T& b, const T& modulus, const T& mu);
 
     /**
      * Modulus subtraction operation.
@@ -327,7 +327,7 @@ class BigIntegerInterface {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus subtraction operation.
      */
-    T ModSub(const T& b, const T& modulus) const;
+    T mod_sub(const T& b, const T& modulus) const;
 
     /**
      * Modulus subtraction operation. In-place variant.
@@ -336,7 +336,7 @@ class BigIntegerInterface {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus subtraction operation.
      */
-    T& ModSubEq(const T& b, const T& modulus);
+    T& mod_sub_eq(const T& b, const T& modulus);
 
     /**
      * Modulus subtraction where operands are < modulus.
@@ -345,7 +345,7 @@ class BigIntegerInterface {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus subtraction operation.
      */
-    T ModSubFast(const T& b, const T& modulus) const;
+    T mod_sub_fast(const T& b, const T& modulus) const;
 
     /**
      * Modulus subtraction where operands are < modulus. In-place variant.
@@ -354,7 +354,7 @@ class BigIntegerInterface {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus subtraction operation.
      */
-    T& ModSubFastEq(const T& b, const T& modulus);
+    T& mod_sub_fast_eq(const T& b, const T& modulus);
 
     /**
      * Barrett modulus subtraction operation.
@@ -364,7 +364,7 @@ class BigIntegerInterface {
      * @param mu is the Barrett value.
      * @return is the result of the modulus subtraction operation.
      */
-    T ModSub(const T& b, const T& modulus, const T& mu) const;
+    T mod_sub(const T& b, const T& modulus, const T& mu) const;
 
     /**
      * Barrett modulus subtraction operation. In-place variant.
@@ -374,7 +374,7 @@ class BigIntegerInterface {
      * @param mu is the Barrett value.
      * @return is the result of the modulus subtraction operation.
      */
-    T& ModSubEq(const T& b, const T& modulus, const T& mu);
+    T& mod_sub_eq(const T& b, const T& modulus, const T& mu);
 
     /**
      * Modulus multiplication operation.
@@ -383,7 +383,7 @@ class BigIntegerInterface {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus multiplication operation.
      */
-    T ModMul(const T& b, const T& modulus) const;
+    T mod_mul(const T& b, const T& modulus) const;
 
     /**
      * Modulus multiplication operation. In-place variant.
@@ -392,7 +392,7 @@ class BigIntegerInterface {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus multiplication operation.
      */
-    T& ModMulEq(const T& b, const T& modulus);
+    T& mod_mul_eq(const T& b, const T& modulus);
 
     /**
      * Barrett modulus multiplication.
@@ -402,7 +402,7 @@ class BigIntegerInterface {
      * @param mu is the Barrett value.
      * @return is the result of the modulus multiplication operation.
      */
-    T ModMul(const T& b, const T& modulus, const T& mu) const;
+    T mod_mul(const T& b, const T& modulus, const T& mu) const;
 
     /**
      * Barrett modulus multiplication. In-place variant.
@@ -412,7 +412,7 @@ class BigIntegerInterface {
      * @param mu is the Barrett value.
      * @return is the result of the modulus multiplication operation.
      */
-    T& ModMulEq(const T& b, const T& modulus, const T& mu);
+    T& mod_mul_eq(const T& b, const T& modulus, const T& mu);
 
     /**
      * Modulus multiplication that assumes the operands are < modulus.
@@ -421,7 +421,7 @@ class BigIntegerInterface {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus multiplication operation.
      */
-    T ModMulFast(const T& b, const T& modulus) const;
+    T mod_mul_fast(const T& b, const T& modulus) const;
 
     /**
      * Modulus multiplication that assumes the operands are < modulus. In-place variant.
@@ -430,7 +430,7 @@ class BigIntegerInterface {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus multiplication operation.
      */
-    T& ModMulFastEq(const T& b, const T& modulus);
+    T& mod_mul_fast_eq(const T& b, const T& modulus);
 
     /**
      * Barrett modulus multiplication that assumes the operands are < modulus.
@@ -440,7 +440,7 @@ class BigIntegerInterface {
      * @param mu is the Barrett value.
      * @return is the result of the modulus multiplication operation.
      */
-    T ModMulFast(const T& b, const T& modulus, const T& mu) const;
+    T mod_mul_fast(const T& b, const T& modulus, const T& mu) const;
 
     /**
      * Barrett modulus multiplication that assumes the operands are < modulus. In-place variant.
@@ -450,7 +450,7 @@ class BigIntegerInterface {
      * @param mu is the Barrett value.
      * @return is the result of the modulus multiplication operation.
      */
-    T& ModMulFastEq(const T& b, const T& modulus, const T& mu);
+    T& mod_mul_fast_eq(const T& b, const T& modulus, const T& mu);
 
     /**
      * NTL-optimized modular multiplication using a precomputation for the
@@ -458,10 +458,10 @@ class BigIntegerInterface {
      *
      * @param b is the scalar to multiply.
      * @param modulus is the modulus to perform operations with.
-     * @param bInv NTL precomputation for b.
+     * @param b_inv NTL precomputation for b.
      * @return is the result of the modulus multiplication operation.
      */
-    T ModMulFastConst(const T& b, const T& modulus, const T& bInv) const;
+    T mod_mul_fast_const(const T& b, const T& modulus, const T& b_inv) const;
 
     /**
      * NTL-optimized modular multiplication using a precomputation for the
@@ -469,10 +469,10 @@ class BigIntegerInterface {
      *
      * @param b is the scalar to multiply.
      * @param modulus is the modulus to perform operations with.
-     * @param bInv NTL precomputation for b.
+     * @param b_inv NTL precomputation for b.
      * @return is the result of the modulus multiplication operation.
      */
-    T& ModMulFastConstEq(const T& b, const T& modulus, const T& bInv);
+    T& mod_mul_fast_const_eq(const T& b, const T& modulus, const T& b_inv);
 
     /**
      * Modulus exponentiation operation.
@@ -481,7 +481,7 @@ class BigIntegerInterface {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus exponentiation operation.
      */
-    T ModExp(const T& b, const T& modulus) const;
+    T mod_exp(const T& b, const T& modulus) const;
 
     /**
      * Modulus exponentiation operation. In-place variant.
@@ -490,7 +490,7 @@ class BigIntegerInterface {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus exponentiation operation.
      */
-    T& ModExpEq(const T& b, const T& modulus);
+    T& mod_exp_eq(const T& b, const T& modulus);
 
     /**
      * Modulus inverse operation.
@@ -498,7 +498,7 @@ class BigIntegerInterface {
      * @param modulus is the modulus to perform.
      * @return is the result of the modulus inverse operation.
      */
-    T ModInverse(const T& modulus) const;
+    T mod_inverse(const T& modulus) const;
 
     /**
      * Modulus inverse operation. In-place variant.
@@ -506,7 +506,7 @@ class BigIntegerInterface {
      * @param modulus is the modulus to perform.
      * @return is the result of the modulus inverse operation.
      */
-    T& ModInverseEq(const T& modulus);
+    T& mod_inverse_eq(const T& modulus);
 
     // SHIFT OPERATIONS
 
@@ -516,7 +516,7 @@ class BigIntegerInterface {
      * @param shift # of bits.
      * @return result of the shift operation.
      */
-    T LShift(uint16_t shift) const;
+    T l_shift(uint16_t shift) const;
 
     /**
      * Left shift operation. In-place variant.
@@ -524,15 +524,15 @@ class BigIntegerInterface {
      * @param shift # of bits.
      * @return result of the shift operation.
      */
-    T& LShiftEq(uint16_t shift);
+    T& l_shift_eq(uint16_t shift);
 
     /// inline operators for the left shift operations.
     friend T operator<<(const T& a, uint16_t shift) {
-        return a.LShift(shift);
+        return a.l_shift(shift);
     }
     /// inline in-place operator for the left shift operation.
     friend T& operator<<=(T& a, uint16_t shift) {
-        return a.LShiftEq(shift);
+        return a.l_shift_eq(shift);
     }
 
     /**
@@ -541,7 +541,7 @@ class BigIntegerInterface {
      * @param shift # of bits.
      * @return result of the shift operation.
      */
-    T RShift(uint16_t shift) const;
+    T r_shift(uint16_t shift) const;
 
     /**
      * Right shift operation. In-place variant.
@@ -549,15 +549,15 @@ class BigIntegerInterface {
      * @param shift # of bits.
      * @return result of the shift operation.
      */
-    T& RShiftEq(uint16_t shift);
+    T& r_shift_eq(uint16_t shift);
 
     /// inline operators for the right shift operations.
     friend T operator>>(const T& a, uint16_t shift) {
-        return a.RShift(shift);
+        return a.r_shift(shift);
     }
     /// inline in-place operator for the right shift operation.
     friend T& operator>>=(T& a, uint16_t shift) {
-        return a.RShiftEq(shift);
+        return a.r_shift_eq(shift);
     }
 
     /**
@@ -600,7 +600,7 @@ class BigIntegerInterface {
      *
      * @return the int representation of the value.
      */
-    uint64_t ConvertToInt() const;
+    uint64_t convert_to_int() const;
 
     // OTHER FUNCTIONS
 
@@ -609,7 +609,7 @@ class BigIntegerInterface {
      *
      * @return the index of the most significant bit.
      */
-    uint32_t GetMSB() const;
+    uint32_t get_msb() const;
 
     /**
      * Get the number of digits using a specific base - support for arbitrary base
@@ -618,7 +618,7 @@ class BigIntegerInterface {
      * @param base is the base with which to determine length in.
      * @return the length of the representation in a specific base.
      */
-    uint32_t GetLengthForBase(uint32_t base) const;
+    uint32_t get_length_for_base(uint32_t base) const;
 
     /**
      * Get the digit at a specific index using a specific base - support for arbitrary base
@@ -633,7 +633,7 @@ class BigIntegerInterface {
      * @param base is the base of the digit decomposition.
      * @return the digit at the specific index in the specific base.
      */
-    uint32_t GetDigitAtIndexForBase(uint32_t index, uint32_t base) const;
+    uint32_t get_digit_at_index_for_base(uint32_t index, uint32_t base) const;
 
     // STRINGS
 
@@ -645,7 +645,7 @@ class BigIntegerInterface {
      *
      * @return the value of this T as a string.
      */
-    const std::string ToString() const;
+    const std::string to_string() const;
 
   protected:
     ~BigIntegerInterface() = default;
@@ -655,6 +655,6 @@ class BigIntegerInterface {
 
 // TODO
 class BigMatrixInterface {};
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_MATH_BACKEND_INTEGER_H_

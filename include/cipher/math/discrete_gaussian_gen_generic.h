@@ -109,7 +109,7 @@
 
 #include "cipher/math/distribution_gen.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /// algorithm used by a BaseSampler: Knuth-Yao (DDG tree) or Peikert's inversion method
 enum BaseSamplerType { KNUTH_YAO = 0, PEIKERT = 1 };
@@ -131,17 +131,17 @@ class BitGenerator {
      * @brief Method for generating a random bit
      * @return A random bit
      */
-    short Generate() {  // NOLINT
-        if (m_counter == 0) {
-            m_sequence = (PseudoRandomNumberGenerator::GetPRNG())();
-            m_counter = 32;
+    short generate() {  // NOLINT
+        if (counter_ == 0) {
+            sequence_ = (PseudoRandomNumberGenerator::get_prng())();
+            counter_ = 32;
         }
-        return static_cast<short>((m_sequence >> (--m_counter)) & 0x1);  // NOLINT
+        return static_cast<short>((sequence_ >> (--counter_)) & 0x1);  // NOLINT
     }
 
   private:
-    uint32_t m_sequence{0};
-    uint32_t m_counter{0};
+    uint32_t sequence_{0};
+    uint32_t counter_{0};
 };
 /**
  * @brief Class definiton for base samplers with precomputation that is used for
@@ -155,15 +155,15 @@ class BaseSampler {
      * @param std Standard deviation of the distribution
      * @param generator Pointer to the bit generator that the sampler will use the
      * random bits from
-     * @param bType Type of the base sampler, PEIKERT by default
+     * @param b_type_value Type of the base sampler, PEIKERT by default
      */
-    BaseSampler(double mean, double std, BitGenerator* generator, BaseSamplerType bType = PEIKERT);
+    BaseSampler(double mean, double std, BitGenerator* generator, BaseSamplerType b_type_value = PEIKERT);
     BaseSampler() = default;
     /**
      * @brief Method for generating integer from the base sampler
      * @return A random integer from the distribution
      */
-    virtual int64_t GenerateInteger();
+    virtual int64_t generate_integer();
     /**
      * @brief Destroyer for the base sampler
      */
@@ -172,8 +172,8 @@ class BaseSampler {
      * @brief Method for generating a random bit from the bit generator within
      * @return A random bit
      */
-    short RandomBit() {  // NOLINT
-        return bg->Generate();
+    short random_bit() {  // NOLINT
+        return bg->generate();
     }
 
   private:
@@ -202,7 +202,7 @@ class BaseSampler {
 
     int fin;
 
-    std::vector<std::vector<short>> DDGTree;  // NOLINT
+    std::vector<std::vector<short>> ddg_tree;  // NOLINT
 
     // short *DDGColumn = nullptr;
 
@@ -210,32 +210,32 @@ class BaseSampler {
      *Array that stores the Hamming Weights of the probability matrix used in
      *Knuth-Yao sampling
      */
-    std::vector<uint32_t> hammingWeights;
+    std::vector<uint32_t> hamming_weights;
     /**
      *Size of probability matrix used in Knuth-Yao
      */
-    int32_t b_matrixSize;
+    int32_t b_matrix_size;
 
     /**
      *Index of first bit with non zero Hamming weight in the probability table
      */
-    int32_t firstNonZero;
+    int32_t first_non_zero;
 
-    int32_t endIndex;
+    int32_t end_index;
 
-    std::vector<double> m_vals;
+    std::vector<double> vals_;
     /**
      * @brief Sub-procedure called by Peikert's inversion sampling
      * @param S Vector containing the CDF values
      * @param search Searched probability value
      * @return Index that is the smallest bigger value than search
      */
-    uint32_t FindInVector(const std::vector<double>& S, double search) const;
+    uint32_t find_in_vector(const std::vector<double>& S, double search) const;
     /**
      * @brief Generates DDG tree used through the sampling in Knuth-Yao
-     * @param probMatrix The probability matrix used for filling the DDG tree
+     * @param prob_matrix The probability matrix used for filling the DDG tree
      */
-    void GenerateDDGTree(const std::vector<uint64_t>& probMatrix);
+    void generate_ddg_tree(const std::vector<uint64_t>& prob_matrix);
     /**
      * @brief Initializes the generator used for Peikert's Inversion method.
      * @param mean Mean of the distribution that the sampler will be using
@@ -249,16 +249,16 @@ class BaseSampler {
      * @param stddev standard deviation of Discrete Gaussian Distribution
      * @param mean Center of the distribution
      */
-    void GenerateProbMatrix(double stddev, double mean);
+    void generate_prob_matrix(double stddev, double mean);
     /**
      * @brief Returns a generated integer. Uses Naive Knuth-Yao method
      * @return A random value within the Discrete Gaussian Distribution
      */
-    int64_t GenerateIntegerKnuthYao();
+    int64_t generate_integer_knuth_yao();
     /**
      * @brief Returns a generated integer. Uses Peikert's inversion method.
      */
-    int64_t GenerateIntegerPeikert() const;
+    int64_t generate_integer_peikert() const;
 };
 /**
  * @brief Class for combining samples from two base samplers, which is used for
@@ -279,8 +279,8 @@ class SamplerCombiner final : public BaseSampler {
      * @brief Return the combined value for two samplers with given coefficients
      * @return Combined value of the samplers with given coefficents
      */
-    int64_t GenerateInteger() override {
-        return x1 * sampler1->GenerateInteger() + x2 * sampler2->GenerateInteger();
+    int64_t generate_integer() override {
+        return x1 * sampler1->generate_integer() + x2 * sampler2->generate_integer();
     }
     /**
      * @brief Destructor
@@ -319,15 +319,15 @@ class DiscreteGaussianGeneratorGeneric {
      * @param std Standard deviation of the desired distribution
      * @return A random value within the Discrete Gaussian Distribution
      */
-    int64_t GenerateInteger(double mean, double std);
+    int64_t generate_integer(double mean, double std);
 
     /**
      * @brief Returns a sample from the first base sampler (center 0), bypassing the generic
      * combination step.
      * @return A random value within the Discrete Gaussian Distribution of the first base sampler
      */
-    int64_t GenerateInteger() {
-        return base_samplers[0]->GenerateInteger();
+    int64_t generate_integer() {
+        return base_samplers[0]->generate_integer();
     }
     /**
      * @brief Destructor
@@ -339,12 +339,12 @@ class DiscreteGaussianGeneratorGeneric {
      * @brief Subroutine used by Sample C
      * @param center Center of the distribution
      */
-    int64_t flipAndRound(double center);
+    int64_t flip_and_round(double center);
     /**
      * @brief Sample C defined in the paper
      * @param center Center of the distribution
      */
-    int64_t SampleC(int64_t center);
+    int64_t sample_c(int64_t center);
 
     BaseSampler* wide_sampler;
     BaseSampler** base_samplers;
@@ -359,11 +359,11 @@ class DiscreteGaussianGeneratorGeneric {
      * @ param n Desired bit number
      * @ return The nth bit of the number starting from 0 being the LSB
      */
-    short extractBit(int64_t number, int n) {  // NOLINT
+    short extract_bit(int64_t number, int n) {  // NOLINT
         return (number >> n) & 0x1;
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_MATH_DISCRETE_GAUSSIAN_GEN_GENERIC_H_

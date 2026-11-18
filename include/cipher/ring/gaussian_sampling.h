@@ -46,7 +46,7 @@
 #include "cipher/math/matrix.h"
 #include "cipher/math/number_theory.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 // Statistical error in Gaussian sampling
 // corresponds to statistical error of 2^(-80)
@@ -94,7 +94,7 @@ class LatticeGaussSampUtility {
      * @param z a set of k sampled polynomials corresponding to the gadget matrix
      * G; represented as Z^(k x n)
      */
-    static void GaussSampGq(const Element& u, double stddev, size_t k, const typename Element::Integer& q, int64_t base,
+    static void gauss_samp_gq(const Element& u, double stddev, size_t k, const typename Element::Integer& q, int64_t base,
                             typename Element::DggType& dgg, Matrix<int64_t>* z);
 
     /**
@@ -111,11 +111,11 @@ class LatticeGaussSampUtility {
      * @param z a set of k sampled polynomials corresponding to the gadget matrix
      * G; represented as Z^(k x n)
      */
-    static void GaussSampGqArbBase(const Element& u, double stddev, size_t k, const typename Element::Integer& q,
+    static void gauss_samp_gq_arb_base(const Element& u, double stddev, size_t k, const typename Element::Integer& q,
                                    int64_t base, typename Element::DggType& dgg, Matrix<int64_t>* z);
 
     /**
-     * Subroutine used by ZSampleSigmaP as described Algorithm 4 in
+     * Subroutine used by z_sample_sigma_p as described Algorithm 4 in
      * https://eprint.iacr.org/2017/844.pdf
      *
      * @param a field element in DFT format
@@ -125,11 +125,11 @@ class LatticeGaussSampUtility {
      * @param dgg discrete Gaussian generator
      * @param p non-spherical perturbation vector; output of the function
      */
-    static void ZSampleSigma2x2(const Field2n& a, const Field2n& b, const Field2n& d, const Matrix<Field2n>& c,
+    static void z_sample_sigma2x2(const Field2n& a, const Field2n& b, const Field2n& d, const Matrix<Field2n>& c,
                                 const typename Element::DggType& dgg, std::shared_ptr<Matrix<int64_t>> p);
 
     /**
-     * Subroutine used by SamplePertSquareMat as described in "Implementing
+     * Subroutine used by sample_pert_square_mat as described in "Implementing
      * Token-Based Obfuscation under (Ring) LWE"
      *
      * @param A a matrix of field elements in DFT format
@@ -139,12 +139,12 @@ class LatticeGaussSampUtility {
      * @param dgg discrete Gaussian generator
      * @param p non-spherical perturbation matrix; output of the function
      */
-    static void SampleMat(const Matrix<Field2n>& A, const Matrix<Field2n>& B, const Matrix<Field2n>& D,
+    static void sample_mat(const Matrix<Field2n>& A, const Matrix<Field2n>& B, const Matrix<Field2n>& D,
                           const Matrix<Field2n>& C, const typename Element::DggType& dgg,
                           std::shared_ptr<Matrix<int64_t>> p);
 
     /**
-     * Subroutine used by ZSampleSigma2x2 as described Algorithm 4 in
+     * Subroutine used by z_sample_sigma2x2 as described Algorithm 4 in
      * https://eprint.iacr.org/2017/844.pdf
      *
      * @param f field element in Coefficient format
@@ -153,39 +153,39 @@ class LatticeGaussSampUtility {
      * @param n ring dimension used for rejection sampling
      * @return the sampled integer vector as a column matrix
      */
-    static std::shared_ptr<Matrix<int64_t>> ZSampleF(const Field2n& f, const Field2n& c,
+    static std::shared_ptr<Matrix<int64_t>> z_sample_f(const Field2n& f, const Field2n& c,
                                                      const typename Element::DggType& dgg, size_t n);
 
   private:
-    // subroutine used by GaussSampGq
+    // subroutine used by gauss_samp_gq
     // Discrete sampling variant
     // As described in Figure 2 of https://eprint.iacr.org/2017/308.pdf
-    static void Perturb(double sigma, size_t k, size_t n, const std::vector<double>& l, const std::vector<double>& h,
+    static void perturb(double sigma, size_t k, size_t n, const std::vector<double>& l, const std::vector<double>& h,
                         int64_t base, typename Element::DggType& dgg, std::vector<int64_t>* p);
 
-    // subroutine used by GaussSampGqArbBase
+    // subroutine used by gauss_samp_gq_arb_base
     // Continuous sampling variant
     // As described in Algorithm 3 of https://eprint.iacr.org/2017/844.pdf
-    static void PerturbFloat(double sigma, size_t k, size_t n, const std::vector<double>& l,
+    static void perturb_float(double sigma, size_t k, size_t n, const std::vector<double>& l,
                              const std::vector<double>& h, int64_t base, typename Element::DggType& dgg,
                              std::vector<double>* p);
 
-    // subroutine used by GaussSampGq
+    // subroutine used by gauss_samp_gq
     // As described in Algorithm 3 of https://eprint.iacr.org/2017/844.pdf
-    static void SampleC(const Matrix<double>& c, size_t k, size_t n, double sigma, typename Element::DggType& dgg,
+    static void sample_c(const Matrix<double>& c, size_t k, size_t n, double sigma, typename Element::DggType& dgg,
                         Matrix<double>* a, std::vector<int64_t>* z);
 
-    // subroutine earlier used by ZSampleF
+    // subroutine earlier used by z_sample_f
     // Algorithm utilizes the same permutation algorithm as discussed in
     // https://eprint.iacr.org/2017/844.pdf
-    static Matrix<int32_t> Permute(Matrix<int32_t>* p);
+    static Matrix<int32_t> permute(Matrix<int32_t>* p);
 
-    // subroutine used by ZSampleF
+    // subroutine used by z_sample_f
     // Algorithm utilizes the same inverse permutation algorithm as discussed in
     // https://eprint.iacr.org/2017/844.pdf
-    static void InversePermute(std::shared_ptr<Matrix<int64_t>> p);
+    static void inverse_permute(std::shared_ptr<Matrix<int64_t>> p);
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_RING_GAUSSIAN_SAMPLING_H_

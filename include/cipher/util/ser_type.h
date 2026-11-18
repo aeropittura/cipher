@@ -36,7 +36,7 @@
 #ifndef CIPHER_UTIL_SER_TYPE_H_
 #define CIPHER_UTIL_SER_TYPE_H_
 
-namespace lbcrypto {
+namespace cipher {
 
 namespace SerType {
 
@@ -48,6 +48,6 @@ static const SERBINARY BINARY;  // should be const static to avoid compilation f
 
 }  // namespace SerType
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_UTIL_SER_TYPE_H_

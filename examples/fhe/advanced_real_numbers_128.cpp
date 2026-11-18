@@ -42,14 +42,14 @@
 
 #include "cipher/cipher.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
-void AutomaticRescaleDemo(ScalingTechnique scalTech);
-void ManualRescaleDemo(ScalingTechnique scalTech);
-void HybridKeySwitchingDemo1();
-void HybridKeySwitchingDemo2();
-void FastRotationsDemo1();
-void FastRotationsDemo2();
+void automatic_rescale_demo(ScalingTechnique scal_tech);
+void manual_rescale_demo(ScalingTechnique scal_tech);
+void hybrid_key_switching_demo1();
+void hybrid_key_switching_demo2();
+void fast_rotations_demo1();
+void fast_rotations_demo2();
 
 int main(int argc, char* argv[]) {
     /*
@@ -98,11 +98,11 @@ int main(int argc, char* argv[]) {
      *
      */
 
-#if NATIVEINT == 128
-    AutomaticRescaleDemo(FIXEDAUTO);
+#if CIPHER_NATIVE_INT == 128
+    automatic_rescale_demo(FIXEDAUTO);
     // Note that FLEXIBLEAUTO is not supported for 128-bit CKKS
 
-    ManualRescaleDemo(FIXEDMANUAL);
+    manual_rescale_demo(FIXEDMANUAL);
 
     /*
      * Our implementation of CKKS supports two different algorithms
@@ -118,8 +118,8 @@ int main(int argc, char* argv[]) {
      * key switching technique, and this is why we devote the third and
      * fourth part of this demo to HYBRID key switching.
      */
-    HybridKeySwitchingDemo1();
-    HybridKeySwitchingDemo2();
+    hybrid_key_switching_demo1();
+    hybrid_key_switching_demo2();
 
     /*
      * The final parts of this demo showcase our implementation of an
@@ -127,11 +127,11 @@ int main(int argc, char* argv[]) {
      * we want to perform multiple different rotations to the same
      * ciphertext, we can compute one part of the rotation algorithm once,
      * and reuse it multiple times. Please refer to the documentation of
-     * EvalFastRotationPrecompute in keyswitch-bv.h/cpp and keyswitch-hybrid.h/cpp
+     * eval_fast_rotation_precompute in keyswitch-bv.h/cpp and keyswitch-hybrid.h/cpp
      * for more details on hoisting in BV and HYBRID key switching.
      */
-    FastRotationsDemo1();
-    FastRotationsDemo2();
+    fast_rotations_demo1();
+    fast_rotations_demo2();
 #else
     std::cout << "This demo only runs for 128-bit CKKS." << std::endl;
 #endif
@@ -139,9 +139,9 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-void AutomaticRescaleDemo(ScalingTechnique scalTech) {
+void automatic_rescale_demo(ScalingTechnique scal_tech) {
     /* Please read comments in main() for an introduction to what the
-     * rescale operation is. Knowing about Rescale() is not necessary
+     * rescale operation is. Knowing about rescale() is not necessary
      * to use the FIXEDAUTO CKKS variant, it is however needed to
      * understand what's happening underneath.
      *
@@ -151,34 +151,34 @@ void AutomaticRescaleDemo(ScalingTechnique scalTech) {
      *    computations without worrying about the depth of ciphertexts
      *    or rescaling.
      */
-    if (scalTech == FIXEDAUTO) {
+    if (scal_tech == FIXEDAUTO) {
         std::cout << "\n\n\n ===== FixedAutoDemo ============= " << std::endl;
     }
 
-    uint32_t batchSize = 8;
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(6);
-    parameters.SetScalingModSize(90);
-    parameters.SetBatchSize(batchSize);
+    uint32_t batch_size = 8;
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_multiplicative_depth(6);
+    parameters.set_scaling_mod_size(90);
+    parameters.set_batch_size(batch_size);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
 
-    std::cout << "CKKS scheme is using ring dimension " << cc->GetRingDimension() << std::endl << std::endl;
+    std::cout << "CKKS scheme is using ring dimension " << cc->get_ring_dimension() << std::endl << std::endl;
 
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
 
-    auto keys = cc->KeyGen();
-    cc->EvalMultKeyGen(keys.secretKey);
+    auto keys = cc->key_gen();
+    cc->eval_mult_key_gen(keys.secret_key);
 
     // Input
     std::vector<double> x = {1.0, 1.01, 1.02, 1.03, 1.04, 1.05, 1.06, 1.07};
-    Plaintext ptxt = cc->MakeCKKSPackedPlaintext(x);
+    Plaintext ptxt = cc->make_ckks_packed_plaintext(x);
 
     std::cout << "Input x: " << ptxt << std::endl;
 
-    auto c = cc->Encrypt(keys.publicKey, ptxt);
+    auto c = cc->encrypt(keys.public_key, ptxt);
 
     /* Computing f(x) = c*x^18 + c*x^9 + d
      *
@@ -186,35 +186,35 @@ void AutomaticRescaleDemo(ScalingTechnique scalTech) {
      * that has a multiplicative depth of 5 or 6.
      *
      * The result is correct, even though there is no call to
-     * the Rescale() operation.
+     * the rescale() operation.
      */
-    auto c2 = cc->EvalMult(c, c);                          // x^2
-    auto c4 = cc->EvalMult(c2, c2);                        // x^4
-    auto c8 = cc->EvalMult(c4, c4);                        // x^8
-    auto c16 = cc->EvalMult(c8, c8);                       // x^16
-    auto c9 = cc->EvalMult(c8, c);                         // x^9
-    auto c18 = cc->EvalMult(c16, c2);                      // x^18
-    auto cRes1 = cc->EvalAdd(cc->EvalAdd(c18, c9), 1.0);   // Final result 1
-    auto cRes2 = cc->EvalSub(cc->EvalAdd(c18, c9), 1.0);   // Final result 2
-    auto cRes3 = cc->EvalMult(cc->EvalAdd(c18, c9), 0.5);  // Final result 3
+    auto c2 = cc->eval_mult(c, c);                          // x^2
+    auto c4 = cc->eval_mult(c2, c2);                        // x^4
+    auto c8 = cc->eval_mult(c4, c4);                        // x^8
+    auto c16 = cc->eval_mult(c8, c8);                       // x^16
+    auto c9 = cc->eval_mult(c8, c);                         // x^9
+    auto c18 = cc->eval_mult(c16, c2);                      // x^18
+    auto c_res1 = cc->eval_add(cc->eval_add(c18, c9), 1.0);   // Final result 1
+    auto c_res2 = cc->eval_sub(cc->eval_add(c18, c9), 1.0);   // Final result 2
+    auto c_res3 = cc->eval_mult(cc->eval_add(c18, c9), 0.5);  // Final result 3
 
     Plaintext result1, result2, result3;
     std::cout.precision(8);
 
-    cc->Decrypt(keys.secretKey, cRes1, &result1);
-    result1->SetLength(batchSize);
+    cc->decrypt(keys.secret_key, c_res1, &result1);
+    result1->set_length(batch_size);
     std::cout << "x^18 + x^9 + 1 = " << result1 << std::endl;
 
-    cc->Decrypt(keys.secretKey, cRes2, &result2);
-    result2->SetLength(batchSize);
+    cc->decrypt(keys.secret_key, c_res2, &result2);
+    result2->set_length(batch_size);
     std::cout << "x^18 + x^9 - 1 = " << result2 << std::endl;
 
-    cc->Decrypt(keys.secretKey, cRes3, &result3);
-    result3->SetLength(batchSize);
+    cc->decrypt(keys.secret_key, c_res3, &result3);
+    result3->set_length(batch_size);
     std::cout << "0.5*x^18 + 0.5*x^9 = " << result3 << std::endl;
 }
 
-void ManualRescaleDemo(ScalingTechnique scalTech) {
+void manual_rescale_demo(ScalingTechnique scal_tech) {
     /* Please read comments in main() for an introduction to what the
      * rescale operation is, and what's the FIXEDMANUAL variant of CKKS.
      *
@@ -229,7 +229,7 @@ void ManualRescaleDemo(ScalingTechnique scalTech) {
      * adjust one of them if their ciphertext moduli do not match. The way
      * this is done in the original CKKS paper is through an operation called
      * Modulus Switch. In our implementation, we call this operation
-     * LevelReduce, and both FIXEDMANUAL and FIXEDAUTO do it automatically.
+     * level_reduce, and both FIXEDMANUAL and FIXEDAUTO do it automatically.
      * As far as we know, automatic level reduce does not incur any performance
      * penalty and this is why it is performed in both FIXEDMANUAL and
      * FIXEDAUTO.
@@ -239,68 +239,68 @@ void ManualRescaleDemo(ScalingTechnique scalTech) {
      */
     std::cout << "\n\n\n ===== FixedManualDemo ============= " << std::endl;
 
-    uint32_t batchSize = 8;
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(5);
-    parameters.SetScalingModSize(90);
-    parameters.SetBatchSize(batchSize);
+    uint32_t batch_size = 8;
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_multiplicative_depth(5);
+    parameters.set_scaling_mod_size(90);
+    parameters.set_batch_size(batch_size);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
 
-    std::cout << "CKKS scheme is using ring dimension " << cc->GetRingDimension() << std::endl << std::endl;
+    std::cout << "CKKS scheme is using ring dimension " << cc->get_ring_dimension() << std::endl << std::endl;
 
-    auto keys = cc->KeyGen();
-    cc->EvalMultKeyGen(keys.secretKey);
+    auto keys = cc->key_gen();
+    cc->eval_mult_key_gen(keys.secret_key);
 
     // Input
     std::vector<double> x = {1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7};
-    Plaintext ptxt = cc->MakeCKKSPackedPlaintext(x);
+    Plaintext ptxt = cc->make_ckks_packed_plaintext(x);
 
     std::cout << "Input x: " << ptxt << std::endl;
 
-    auto c = cc->Encrypt(keys.publicKey, ptxt);
+    auto c = cc->encrypt(keys.public_key, ptxt);
 
     /* Computing f(x) = x^18 + x^9 + 1
      *
      * Compare the following with the corresponding code
      * for FIXEDAUTO. Here we need to track the depth of ciphertexts
-     * and call Rescale() whenever needed. In this instance it's still
+     * and call rescale() whenever needed. In this instance it's still
      * not hard to do so, but this can be quite tedious in other
      * complicated computations (e.g., in bootstrapping).
      *
      */
     // x^2
-    auto c2_depth2 = cc->EvalMult(c, c);
-    auto c2_depth1 = cc->Rescale(c2_depth2);
+    auto c2_depth2 = cc->eval_mult(c, c);
+    auto c2_depth1 = cc->rescale(c2_depth2);
     // x^4
-    auto c4_depth2 = cc->EvalMult(c2_depth1, c2_depth1);
-    auto c4_depth1 = cc->Rescale(c4_depth2);
+    auto c4_depth2 = cc->eval_mult(c2_depth1, c2_depth1);
+    auto c4_depth1 = cc->rescale(c4_depth2);
     // x^8
-    auto c8_depth2 = cc->EvalMult(c4_depth1, c4_depth1);
-    auto c8_depth1 = cc->Rescale(c8_depth2);
+    auto c8_depth2 = cc->eval_mult(c4_depth1, c4_depth1);
+    auto c8_depth1 = cc->rescale(c8_depth2);
     // x^16
-    auto c16_depth2 = cc->EvalMult(c8_depth1, c8_depth1);
-    auto c16_depth1 = cc->Rescale(c16_depth2);
+    auto c16_depth2 = cc->eval_mult(c8_depth1, c8_depth1);
+    auto c16_depth1 = cc->rescale(c16_depth2);
     // x^9
-    auto c9_depth2 = cc->EvalMult(c8_depth1, c);
+    auto c9_depth2 = cc->eval_mult(c8_depth1, c);
     // x^18
-    auto c18_depth2 = cc->EvalMult(c16_depth1, c2_depth1);
+    auto c18_depth2 = cc->eval_mult(c16_depth1, c2_depth1);
     // Final result
-    auto cRes_depth2 = cc->EvalAdd(cc->EvalAdd(c18_depth2, c9_depth2), 1.0);
-    auto cRes_depth1 = cc->Rescale(cRes_depth2);
+    auto c_res_depth2 = cc->eval_add(cc->eval_add(c18_depth2, c9_depth2), 1.0);
+    auto c_res_depth1 = cc->rescale(c_res_depth2);
 
     Plaintext result;
     std::cout.precision(8);
 
-    cc->Decrypt(keys.secretKey, cRes_depth1, &result);
-    result->SetLength(batchSize);
+    cc->decrypt(keys.secret_key, c_res_depth1, &result);
+    result->set_length(batch_size);
     std::cout << "x^18 + x^9 + 1 = " << result << std::endl;
 }
 
-void HybridKeySwitchingDemo1() {
+void hybrid_key_switching_demo1() {
     /*
      * Please refer to comments in the demo-simple_real_number.cpp
      * for a brief introduction on what key switching is and to
@@ -314,13 +314,13 @@ void HybridKeySwitchingDemo1() {
 
     std::cout << "\n\n\n ===== HybridKeySwitchingDemo1 ============= " << std::endl;
 
-    uint32_t batchSize = 8;
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(5);
-    parameters.SetScalingModSize(90);
-    parameters.SetBatchSize(batchSize);
-    parameters.SetScalingTechnique(FIXEDAUTO);
-    // uint32_t ringDimension = 0;  // 0 means the library will choose it based on securityLevel
+    uint32_t batch_size = 8;
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_multiplicative_depth(5);
+    parameters.set_scaling_mod_size(90);
+    parameters.set_batch_size(batch_size);
+    parameters.set_scaling_technique(FIXEDAUTO);
+    // uint32_t ring_dimension_value = 0;  // 0 means the library will choose it based on security_level
     /*
      * dnum is the number of large digits in HYBRID decomposition
      *
@@ -329,7 +329,7 @@ void HybridKeySwitchingDemo1() {
      * - If multiplicative depth is > 3, then dnum = 3 digits are used.
      * - If multiplicative depth is 3, then dnum = 2 digits are used.
      * - If multiplicative depth is < 3, then dnum is set to be equal to
-     * multDepth+1
+     * mult_depth_value+1
      */
 
     uint32_t dnum = 2;
@@ -340,11 +340,11 @@ void HybridKeySwitchingDemo1() {
      * In our RNS implementation of CKKS, every ciphertext corresponds
      * to a large number (which is represented as small integers in RNS)
      * modulo a ciphertext modulus Q, which is defined as the product of
-     * (multDepth+1) prime numbers: Q = q0 * q1 * ... * qL. Each qi is
+     * (mult_depth_value+1) prime numbers: Q = q0 * q1 * ... * qL. Each qi is
      * selected to be close to the scaling factor D=2^p, hence the total
      * size of Q is approximately:
      *
-     * sizeof(Q) = (multDepth+1)*scaleModSize.
+     * sizeof(Q) = (mult_depth_value+1)*scale_mod_size.
      *
      * HYBRID key switching takes a number d that's defined modulo Q,
      * and performs 4 steps:
@@ -373,36 +373,36 @@ void HybridKeySwitchingDemo1() {
      * cases mean that we can use smaller ring dimension and get
      * better performance overall.
      *
-     * We show this effect with demos HybridKeySwitchingDemo1 and
-     * HybridKeySwitchingDemo2.
+     * We show this effect with demos hybrid_key_switching_demo1 and
+     * hybrid_key_switching_demo2.
      *
      */
-    parameters.SetNumLargeDigits(dnum);
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
+    parameters.set_num_large_digits(dnum);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
 
-    std::cout << "CKKS scheme is using ring dimension " << cc->GetRingDimension() << std::endl;
+    std::cout << "CKKS scheme is using ring dimension " << cc->get_ring_dimension() << std::endl;
 
     std::cout << "- Using HYBRID key switching with " << dnum << " digits" << std::endl << std::endl;
 
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
 
-    auto keys = cc->KeyGen();
-    cc->EvalRotateKeyGen(keys.secretKey, {1, -2});
+    auto keys = cc->key_gen();
+    cc->eval_rotate_key_gen(keys.secret_key, {1, -2});
 
     // Input
     std::vector<double> x = {1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7};
-    Plaintext ptxt = cc->MakeCKKSPackedPlaintext(x);
+    Plaintext ptxt = cc->make_ckks_packed_plaintext(x);
 
     std::cout << "Input x: " << ptxt << std::endl;
 
-    auto c = cc->Encrypt(keys.publicKey, ptxt);
+    auto c = cc->encrypt(keys.public_key, ptxt);
 
     TimeVar t;
     TIC(t);
-    auto cRot1 = cc->EvalRotate(c, 1);
-    auto cRot2 = cc->EvalRotate(cRot1, -2);
+    auto c_rot1 = cc->eval_rotate(c, 1);
+    auto c_rot2 = cc->eval_rotate(c_rot1, -2);
     double time2digits = TOC(t);
     // Take note and compare the runtime to the runtime
     // of the same computation in the next demo.
@@ -410,8 +410,8 @@ void HybridKeySwitchingDemo1() {
     Plaintext result;
     std::cout.precision(8);
 
-    cc->Decrypt(keys.secretKey, cRot2, &result);
-    result->SetLength(batchSize);
+    cc->decrypt(keys.secret_key, c_rot2, &result);
+    result->set_length(batch_size);
     std::cout << "x rotate by -1 = " << result << std::endl;
     std::cout << " - 2 rotations with HYBRID (2 digits) took " << time2digits << "ms" << std::endl;
 
@@ -421,58 +421,58 @@ void HybridKeySwitchingDemo1() {
      * dnum.
      */
 #if 0
-  const auto cryptoParamsCKKS =
-      std::dynamic_pointer_cast<CryptoParametersCKKSRNS>(
-          cc->GetCryptoParameters());
+  const auto crypto_params_ckks =
+      std::dynamic_pointer_cast<CkksRnsCryptoParams>(
+          cc->get_crypto_parameters());
 
-  auto paramsQ = cc->GetElementParams()->GetParams();
+  auto params_q = cc->get_element_params()->get_params();
   std::cout << "\nModuli in Q:" << std::endl;
-  for (uint32_t i = 0; i < paramsQ.size(); i++) {
+  for (uint32_t i = 0; i < params_q.size(); i++) {
     // q0 is a bit larger because its default size is 60 bits.
-    // One can change this by supplying the firstModSize argument
+    // One can change this by supplying the first_mod_size_value argument
     // in genCryptoContextCKKS.
-    std::cout << "q" << i << ": " << paramsQ[i]->GetModulus() << std::endl;
+    std::cout << "q" << i << ": " << params_q[i]->get_modulus() << std::endl;
   }
-  auto paramsQP = cryptoParamsCKKS->GetParamsQP();
+  auto params_qp = crypto_params_ckks->get_params_qp();
   std::cout << "Moduli in P: " << std::endl;
   BigInteger P = BigInteger(1);
-  for (uint32_t i = 0; i < paramsQP->GetParams().size(); i++) {
-    if (i > paramsQ.size()) {
-      P = P * BigInteger(paramsQP->GetParams()[i]->GetModulus());
-      std::cout << "p" << i - paramsQ.size() << ": "
-                << paramsQP->GetParams()[i]->GetModulus() << std::endl;
+  for (uint32_t i = 0; i < params_qp->get_params().size(); i++) {
+    if (i > params_q.size()) {
+      P = P * BigInteger(params_qp->get_params()[i]->get_modulus());
+      std::cout << "p" << i - params_q.size() << ": "
+                << params_qp->get_params()[i]->get_modulus() << std::endl;
     }
   }
-  auto QBitLength = cc->GetModulus().GetLengthForBase(2);
-  auto PBitLength = P.GetLengthForBase(2);
-  std::cout << "\nQ = " << cc->GetModulus() << " (bit length: " << QBitLength
+  auto QBitLength = cc->get_modulus().get_length_for_base(2);
+  auto PBitLength = P.get_length_for_base(2);
+  std::cout << "\nQ = " << cc->get_modulus() << " (bit length: " << QBitLength
             << ")" << std::endl;
   std::cout << "P = " << P << " (bit length: " << PBitLength << ")"
             << std::endl;
   std::cout << "Total bit-length of ciphertext modulus: "
             << QBitLength + PBitLength << std::endl;
   std::cout << "Given this ciphertext modulus, a ring dimension of "
-            << cc->GetRingDimension() << " gives us 128-bit security."
+            << cc->get_ring_dimension() << " gives us 128-bit security."
             << std::endl;
 #endif
 }
 
-void HybridKeySwitchingDemo2() {
+void hybrid_key_switching_demo2() {
     /*
-     * Please refer to comments in HybridKeySwitchingDemo1.
+     * Please refer to comments in hybrid_key_switching_demo1.
      *
      */
 
     std::cout << "\n\n\n ===== HybridKeySwitchingDemo2 ============= " << std::endl;
 
-    uint32_t batchSize = 8;
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(5);
-    parameters.SetScalingModSize(90);
-    parameters.SetBatchSize(batchSize);
-    parameters.SetScalingTechnique(FIXEDAUTO);
+    uint32_t batch_size = 8;
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_multiplicative_depth(5);
+    parameters.set_scaling_mod_size(90);
+    parameters.set_batch_size(batch_size);
+    parameters.set_scaling_technique(FIXEDAUTO);
 
-    // uint32_t ringDimension = 0;  // 0 means the library will choose it based on securityLevel
+    // uint32_t ring_dimension_value = 0;  // 0 means the library will choose it based on security_level
     /*
      * Here we use dnum = 3 digits. Even though 3 digits are
      * more than the two digits in the previous demo and the
@@ -490,42 +490,42 @@ void HybridKeySwitchingDemo2() {
      */
     uint32_t dnum = 3;
 
-    parameters.SetNumLargeDigits(dnum);
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
+    parameters.set_num_large_digits(dnum);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
 
     // Compare the ring dimension in this demo to the one in
     // the previous.
-    std::cout << "CKKS scheme is using ring dimension " << cc->GetRingDimension() << std::endl;
+    std::cout << "CKKS scheme is using ring dimension " << cc->get_ring_dimension() << std::endl;
 
     std::cout << "- Using HYBRID key switching with " << dnum << " digits" << std::endl << std::endl;
 
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
 
-    auto keys = cc->KeyGen();
-    cc->EvalRotateKeyGen(keys.secretKey, {1, -2});
+    auto keys = cc->key_gen();
+    cc->eval_rotate_key_gen(keys.secret_key, {1, -2});
 
     // Input
     std::vector<double> x = {1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7};
-    Plaintext ptxt = cc->MakeCKKSPackedPlaintext(x);
+    Plaintext ptxt = cc->make_ckks_packed_plaintext(x);
 
     std::cout << "Input x: " << ptxt << std::endl;
 
-    auto c = cc->Encrypt(keys.publicKey, ptxt);
+    auto c = cc->encrypt(keys.public_key, ptxt);
 
     TimeVar t;
     TIC(t);
-    auto cRot1 = cc->EvalRotate(c, 1);
-    auto cRot2 = cc->EvalRotate(cRot1, -2);
+    auto c_rot1 = cc->eval_rotate(c, 1);
+    auto c_rot2 = cc->eval_rotate(c_rot1, -2);
     // The runtime here is smaller than in the previous demo.
     double time3digits = TOC(t);
 
     Plaintext result;
     std::cout.precision(8);
 
-    cc->Decrypt(keys.secretKey, cRot2, &result);
-    result->SetLength(batchSize);
+    cc->decrypt(keys.secret_key, c_rot2, &result);
+    result->set_length(batch_size);
     std::cout << "x rotate by -1 = " << result << std::endl;
     std::cout << " - 2 rotations with HYBRID (3 digits) took " << time3digits << "ms" << std::endl;
 
@@ -535,41 +535,41 @@ void HybridKeySwitchingDemo2() {
      * dnum.
      */
 #if 0
-  const auto cryptoParamsCKKS =
-      std::dynamic_pointer_cast<CryptoParametersCKKSRNS>(
-          cc->GetCryptoParameters());
+  const auto crypto_params_ckks =
+      std::dynamic_pointer_cast<CkksRnsCryptoParams>(
+          cc->get_crypto_parameters());
 
-  auto paramsQ = cc->GetElementParams()->GetParams();
+  auto params_q = cc->get_element_params()->get_params();
   std::cout << "\nModuli in Q:" << std::endl;
-  for (uint32_t i = 0; i < paramsQ.size(); i++) {
+  for (uint32_t i = 0; i < params_q.size(); i++) {
     // q0 is a bit larger because its default size is 60 bits.
-    // One can change this by supplying the firstModSize argument
+    // One can change this by supplying the first_mod_size_value argument
     // in genCryptoContextCKKS.
-    std::cout << "q" << i << ": " << paramsQ[i]->GetModulus() << std::endl;
+    std::cout << "q" << i << ": " << params_q[i]->get_modulus() << std::endl;
   }
-  auto paramsQP = cryptoParamsCKKS->GetParamsQP();
+  auto params_qp = crypto_params_ckks->get_params_qp();
   std::cout << "Moduli in P: " << std::endl;
   BigInteger P = BigInteger(1);
-  for (uint32_t i = 0; i < paramsQP->GetParams().size(); i++) {
-    if (i > paramsQ.size()) {
-      P = P * BigInteger(paramsQP->GetParams()[i]->GetModulus());
-      std::cout << "p" << i - paramsQ.size() << ": "
-                << paramsQP->GetParams()[i]->GetModulus() << std::endl;
+  for (uint32_t i = 0; i < params_qp->get_params().size(); i++) {
+    if (i > params_q.size()) {
+      P = P * BigInteger(params_qp->get_params()[i]->get_modulus());
+      std::cout << "p" << i - params_q.size() << ": "
+                << params_qp->get_params()[i]->get_modulus() << std::endl;
     }
   }
-  auto QBitLength = cc->GetModulus().GetLengthForBase(2);
-  auto PBitLength = P.GetLengthForBase(2);
-  std::cout << "\nQ = " << cc->GetModulus() << " (bit length: " << QBitLength
+  auto QBitLength = cc->get_modulus().get_length_for_base(2);
+  auto PBitLength = P.get_length_for_base(2);
+  std::cout << "\nQ = " << cc->get_modulus() << " (bit length: " << QBitLength
             << ")" << std::endl;
   std::cout << "P = " << P << " (bit length: " << PBitLength << ")"
             << std::endl;
   std::cout << "Given this ciphertext modulus, a ring dimension of "
-            << cc->GetRingDimension() << " gives us 128-bit security."
+            << cc->get_ring_dimension() << " gives us 128-bit security."
             << std::endl;
 #endif
 }
 
-void FastRotationsDemo1() {
+void fast_rotations_demo1() {
     /*
      * In CKKS, whenever someone applies a rotation R() to a ciphertext
      * encrypted with key s, we get a result which is not valid under
@@ -577,7 +577,7 @@ void FastRotationsDemo1() {
      * every rotation we need to perform key switching, making them as
      * expensive as multiplications.
      *
-     * As mentioned earlier (in comments of HybridKeySwitchingDemo1),
+     * As mentioned earlier (in comments of hybrid_key_switching_demo1),
      * key switching involves the following steps:
      * 1 - Digit decomposition
      * 2 - Extend ciphertext modulus from Q to Q*P
@@ -606,82 +606,82 @@ void FastRotationsDemo1() {
 
     std::cout << "\n\n\n ===== FastRotationsDemo1 ============= " << std::endl;
 
-    uint32_t batchSize = 8;
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(1);
-    parameters.SetScalingModSize(90);
-    parameters.SetBatchSize(batchSize);
+    uint32_t batch_size = 8;
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_multiplicative_depth(1);
+    parameters.set_scaling_mod_size(90);
+    parameters.set_batch_size(batch_size);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
 
-    uint32_t N = cc->GetRingDimension();
+    uint32_t N = cc->get_ring_dimension();
     std::cout << "CKKS scheme is using ring dimension " << N << std::endl << std::endl;
 
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
 
-    auto keys = cc->KeyGen();
-    cc->EvalRotateKeyGen(keys.secretKey, {1, 2, 3, 4, 5, 6, 7});
+    auto keys = cc->key_gen();
+    cc->eval_rotate_key_gen(keys.secret_key, {1, 2, 3, 4, 5, 6, 7});
 
     // Input
     std::vector<double> x = {0, 0, 0, 0, 0, 0, 0, 1};
-    Plaintext ptxt = cc->MakeCKKSPackedPlaintext(x);
+    Plaintext ptxt = cc->make_ckks_packed_plaintext(x);
 
     std::cout << "Input x: " << ptxt << std::endl;
 
-    auto c = cc->Encrypt(keys.publicKey, ptxt);
+    auto c = cc->encrypt(keys.public_key, ptxt);
 
-    Ciphertext<DCRTPoly> cRot1, cRot2, cRot3, cRot4, cRot5, cRot6, cRot7;
+    Ciphertext<RnsPoly> c_rot1, c_rot2, c_rot3, c_rot4, c_rot5, c_rot6, c_rot7;
 
     // First, we perform 7 regular (non-hoisted) rotations
     // and measure the runtime.
     TimeVar t;
     TIC(t);
-    cRot1 = cc->EvalRotate(c, 1);
-    cRot2 = cc->EvalRotate(c, 2);
-    cRot3 = cc->EvalRotate(c, 3);
-    cRot4 = cc->EvalRotate(c, 4);
-    cRot5 = cc->EvalRotate(c, 5);
-    cRot6 = cc->EvalRotate(c, 6);
-    cRot7 = cc->EvalRotate(c, 7);
-    double timeNoHoisting = TOC(t);
+    c_rot1 = cc->eval_rotate(c, 1);
+    c_rot2 = cc->eval_rotate(c, 2);
+    c_rot3 = cc->eval_rotate(c, 3);
+    c_rot4 = cc->eval_rotate(c, 4);
+    c_rot5 = cc->eval_rotate(c, 5);
+    c_rot6 = cc->eval_rotate(c, 6);
+    c_rot7 = cc->eval_rotate(c, 7);
+    double time_no_hoisting = TOC(t);
 
-    auto cResNoHoist = c + cRot1 + cRot2 + cRot3 + cRot4 + cRot5 + cRot6 + cRot7;
+    auto c_res_no_hoist = c + c_rot1 + c_rot2 + c_rot3 + c_rot4 + c_rot5 + c_rot6 + c_rot7;
 
-    // M is the cyclotomic order and we need it to call EvalFastRotation
+    // M is the cyclotomic order and we need it to call eval_fast_rotation
     uint32_t M = 2 * N;
 
     // Then, we perform 7 rotations with hoisting.
     TIC(t);
-    auto cPrecomp = cc->EvalFastRotationPrecompute(c);
-    cRot1 = cc->EvalFastRotation(c, 1, M, cPrecomp);
-    cRot2 = cc->EvalFastRotation(c, 2, M, cPrecomp);
-    cRot3 = cc->EvalFastRotation(c, 3, M, cPrecomp);
-    cRot4 = cc->EvalFastRotation(c, 4, M, cPrecomp);
-    cRot5 = cc->EvalFastRotation(c, 5, M, cPrecomp);
-    cRot6 = cc->EvalFastRotation(c, 6, M, cPrecomp);
-    cRot7 = cc->EvalFastRotation(c, 7, M, cPrecomp);
-    double timeHoisting = TOC(t);
+    auto c_precomp = cc->eval_fast_rotation_precompute(c);
+    c_rot1 = cc->eval_fast_rotation(c, 1, M, c_precomp);
+    c_rot2 = cc->eval_fast_rotation(c, 2, M, c_precomp);
+    c_rot3 = cc->eval_fast_rotation(c, 3, M, c_precomp);
+    c_rot4 = cc->eval_fast_rotation(c, 4, M, c_precomp);
+    c_rot5 = cc->eval_fast_rotation(c, 5, M, c_precomp);
+    c_rot6 = cc->eval_fast_rotation(c, 6, M, c_precomp);
+    c_rot7 = cc->eval_fast_rotation(c, 7, M, c_precomp);
+    double time_hoisting = TOC(t);
     // The time with hoisting should be faster than without hoisting.
 
-    auto cResHoist = c + cRot1 + cRot2 + cRot3 + cRot4 + cRot5 + cRot6 + cRot7;
+    auto c_res_hoist = c + c_rot1 + c_rot2 + c_rot3 + c_rot4 + c_rot5 + c_rot6 + c_rot7;
 
     Plaintext result;
     std::cout.precision(8);
 
-    cc->Decrypt(keys.secretKey, cResNoHoist, &result);
-    result->SetLength(batchSize);
+    cc->decrypt(keys.secret_key, c_res_no_hoist, &result);
+    result->set_length(batch_size);
     std::cout << "Result without hoisting = " << result << std::endl;
-    std::cout << " - 7 rotations on x without hoisting took " << timeNoHoisting << "ms" << std::endl;
+    std::cout << " - 7 rotations on x without hoisting took " << time_no_hoisting << "ms" << std::endl;
 
-    cc->Decrypt(keys.secretKey, cResHoist, &result);
-    result->SetLength(batchSize);
+    cc->decrypt(keys.secret_key, c_res_hoist, &result);
+    result->set_length(batch_size);
     std::cout << "Result with hoisting = " << result << std::endl;
-    std::cout << " - 7 rotations on x with hoisting took " << timeHoisting << "ms" << std::endl;
+    std::cout << " - 7 rotations on x with hoisting took " << time_hoisting << "ms" << std::endl;
 }
 
-void FastRotationsDemo2() {
+void fast_rotations_demo2() {
     /*
      * This demo is identical to the previous one, with the exception
      * that we use BV key switching instead of HYBRID.
@@ -696,23 +696,23 @@ void FastRotationsDemo2() {
 
     std::cout << "\n\n\n ===== FastRotationsDemo2 ============= " << std::endl;
 
-    uint32_t batchSize = 8;
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(1);
-    parameters.SetScalingModSize(90);
-    parameters.SetBatchSize(batchSize);
-    parameters.SetScalingTechnique(FIXEDAUTO);
-    parameters.SetKeySwitchTechnique(BV);
+    uint32_t batch_size = 8;
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_multiplicative_depth(1);
+    parameters.set_scaling_mod_size(90);
+    parameters.set_batch_size(batch_size);
+    parameters.set_scaling_technique(FIXEDAUTO);
+    parameters.set_key_switch_technique(BV);
     /*
      * This controls how many multiplications are possible without rescaling.
-     * The number of multiplications (maxRelinSkDeg) is maxDepth - 1.
+     * The number of multiplications (max_relin_sk_deg) is maxDepth - 1.
      * This is useful for an optimization technique called lazy
      * re-linearization (only applicable in FIXEDMANUAL, as
      * FIXEDAUTO implements automatic rescaling).
      */
     // This is the size of the first modulus
-    // by default, firstModSize is set to 105
-    uint32_t firstModSize = 100;
+    // by default, first_mod_size_value is set to 105
+    uint32_t first_mod_size_value = 100;
     /*
      * The digit size is only used in BV key switching and
      * it allows us to perform digit decomposition at a finer granularity.
@@ -721,86 +721,86 @@ void FastRotationsDemo2() {
      * qi's that comprise the ciphertext modulus Q. When using BV, in
      * certain cases like having to perform rotations without any
      * preceding multiplication, we need to have smaller digits to prevent
-     * noise from corrupting the result. In this case, using digitSize = 10
+     * noise from corrupting the result. In this case, using digit_size = 10
      * does the trick. Users are encouraged to set this to 0 (i.e., RNS
      * decomposition) and see how the results are incorrect.
      */
-    uint32_t digitSize = 10;
+    uint32_t digit_size = 10;
 
-    parameters.SetFirstModSize(firstModSize);
-    parameters.SetDigitSize(digitSize);
+    parameters.set_first_mod_size(first_mod_size_value);
+    parameters.set_digit_size(digit_size);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
 
-    uint32_t N = cc->GetRingDimension();
+    uint32_t N = cc->get_ring_dimension();
     std::cout << "CKKS scheme is using ring dimension " << N << std::endl << std::endl;
 
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
 
-    auto keys = cc->KeyGen();
-    cc->EvalRotateKeyGen(keys.secretKey, {1, 2, 3, 4, 5, 6, 7});
+    auto keys = cc->key_gen();
+    cc->eval_rotate_key_gen(keys.secret_key, {1, 2, 3, 4, 5, 6, 7});
 
     // Input
     std::vector<double> x = {0, 0, 0, 0, 0, 0, 0, 1};
-    Plaintext ptxt = cc->MakeCKKSPackedPlaintext(x);
+    Plaintext ptxt = cc->make_ckks_packed_plaintext(x);
 
     std::cout << "Input x: " << ptxt << std::endl;
 
-    auto c = cc->Encrypt(keys.publicKey, ptxt);
+    auto c = cc->encrypt(keys.public_key, ptxt);
 
-    Ciphertext<DCRTPoly> cRot1, cRot2, cRot3, cRot4, cRot5, cRot6, cRot7;
+    Ciphertext<RnsPoly> c_rot1, c_rot2, c_rot3, c_rot4, c_rot5, c_rot6, c_rot7;
 
     // First, we perform 7 regular (non-hoisted) rotations
     // and measure the runtime.
     TimeVar t;
     TIC(t);
-    cRot1 = cc->EvalRotate(c, 1);
-    cRot2 = cc->EvalRotate(c, 2);
-    cRot3 = cc->EvalRotate(c, 3);
-    cRot4 = cc->EvalRotate(c, 4);
-    cRot5 = cc->EvalRotate(c, 5);
-    cRot6 = cc->EvalRotate(c, 6);
-    cRot7 = cc->EvalRotate(c, 7);
-    double timeNoHoisting = TOC(t);
+    c_rot1 = cc->eval_rotate(c, 1);
+    c_rot2 = cc->eval_rotate(c, 2);
+    c_rot3 = cc->eval_rotate(c, 3);
+    c_rot4 = cc->eval_rotate(c, 4);
+    c_rot5 = cc->eval_rotate(c, 5);
+    c_rot6 = cc->eval_rotate(c, 6);
+    c_rot7 = cc->eval_rotate(c, 7);
+    double time_no_hoisting = TOC(t);
 
-    auto cResNoHoist = c + cRot1 + cRot2 + cRot3 + cRot4 + cRot5 + cRot6 + cRot7;
+    auto c_res_no_hoist = c + c_rot1 + c_rot2 + c_rot3 + c_rot4 + c_rot5 + c_rot6 + c_rot7;
 
-    // M is the cyclotomic order and we need it to call EvalFastRotation
+    // M is the cyclotomic order and we need it to call eval_fast_rotation
     uint32_t M = 2 * N;
 
     // Then, we perform 7 rotations with hoisting.
     TIC(t);
-    auto cPrecomp = cc->EvalFastRotationPrecompute(c);
-    cRot1 = cc->EvalFastRotation(c, 1, M, cPrecomp);
-    cRot2 = cc->EvalFastRotation(c, 2, M, cPrecomp);
-    cRot3 = cc->EvalFastRotation(c, 3, M, cPrecomp);
-    cRot4 = cc->EvalFastRotation(c, 4, M, cPrecomp);
-    cRot5 = cc->EvalFastRotation(c, 5, M, cPrecomp);
-    cRot6 = cc->EvalFastRotation(c, 6, M, cPrecomp);
-    cRot7 = cc->EvalFastRotation(c, 7, M, cPrecomp);
-    double timeHoisting = TOC(t);
+    auto c_precomp = cc->eval_fast_rotation_precompute(c);
+    c_rot1 = cc->eval_fast_rotation(c, 1, M, c_precomp);
+    c_rot2 = cc->eval_fast_rotation(c, 2, M, c_precomp);
+    c_rot3 = cc->eval_fast_rotation(c, 3, M, c_precomp);
+    c_rot4 = cc->eval_fast_rotation(c, 4, M, c_precomp);
+    c_rot5 = cc->eval_fast_rotation(c, 5, M, c_precomp);
+    c_rot6 = cc->eval_fast_rotation(c, 6, M, c_precomp);
+    c_rot7 = cc->eval_fast_rotation(c, 7, M, c_precomp);
+    double time_hoisting = TOC(t);
     /* The time with hoisting should be faster than without hoisting.
      * Also, the benefits from hoisting should be more pronounced in this
      * case because we're using BV. Of course, we also observe less
      * accurate results than when using HYBRID, because of using
-     * digitSize = 10 (Users can decrease digitSize to see the accuracy
+     * digit_size = 10 (Users can decrease digit_size to see the accuracy
      * increase, and performance decrease).
      */
 
-    auto cResHoist = c + cRot1 + cRot2 + cRot3 + cRot4 + cRot5 + cRot6 + cRot7;
+    auto c_res_hoist = c + c_rot1 + c_rot2 + c_rot3 + c_rot4 + c_rot5 + c_rot6 + c_rot7;
 
     Plaintext result;
     std::cout.precision(8);
 
-    cc->Decrypt(keys.secretKey, cResNoHoist, &result);
-    result->SetLength(batchSize);
+    cc->decrypt(keys.secret_key, c_res_no_hoist, &result);
+    result->set_length(batch_size);
     std::cout << "Result without hoisting = " << result << std::endl;
-    std::cout << " - 7 rotations on x without hoisting took " << timeNoHoisting << "ms" << std::endl;
+    std::cout << " - 7 rotations on x without hoisting took " << time_no_hoisting << "ms" << std::endl;
 
-    cc->Decrypt(keys.secretKey, cResHoist, &result);
-    result->SetLength(batchSize);
+    cc->decrypt(keys.secret_key, c_res_hoist, &result);
+    result->set_length(batch_size);
     std::cout << "Result with hoisting = " << result << std::endl;
-    std::cout << " - 7 rotations on x with hoisting took " << timeHoisting << "ms" << std::endl;
+    std::cout << " - 7 rotations on x with hoisting took " << time_hoisting << "ms" << std::endl;
 }

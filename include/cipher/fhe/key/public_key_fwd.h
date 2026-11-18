@@ -37,7 +37,7 @@
 
 #include <memory>
 
-namespace lbcrypto {
+namespace cipher {
 
 template <typename Element>
 class PublicKeyImpl;
@@ -49,6 +49,6 @@ class PublicKeyImpl;
 template <typename Element>
 using PublicKey = std::shared_ptr<PublicKeyImpl<Element>>;
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_KEY_PUBLIC_KEY_FWD_H_

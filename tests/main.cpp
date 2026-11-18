@@ -37,16 +37,16 @@
 #include "cipher/util/utilities.h"
 
 using namespace std;
-using namespace lbcrypto;
+using namespace cipher;
 using namespace testing;
 
 static string lead = "****** ";
 
 class MinimalistPrinter : public EmptyTestEventListener {
-    // in modern GoogleTest (v1.11+ or v1.17.0) internal::COLOR_GREEN and internal::ColoredPrintf(...) are no longer accessible, so
+    // in modern GoogleTest (v1.11+ or v1.17.0) internal::COLOR_GREEN and internal::colored_printf(...) are no longer accessible, so
     enum class Color { kDefault, kRed, kGreen, kYellow };
 
-    void ColoredPrintf(Color color, const char* fmt, ...) {
+    void colored_printf(Color color, const char* fmt, ...) {
         const char* color_code = "";
         switch (color) {
             case Color::kRed:
@@ -77,7 +77,7 @@ class MinimalistPrinter : public EmptyTestEventListener {
 
   public:
     void OnTestProgramStart(const ::testing::UnitTest& unit_test) {
-        cout << lead << "OpenFHE Version " << GetOPENFHEVersion() << endl;
+        cout << lead << "OpenFHE Version " << library_version() << endl;
         cout << lead << "Date " << testing::internal::FormatEpochTimeInMillisAsIso8601(unit_test.start_timestamp())
              << endl;
     }
@@ -98,7 +98,7 @@ class MinimalistPrinter : public EmptyTestEventListener {
         }
 
         if (tr->Skipped()) {
-            ColoredPrintf(Color::kGreen, "[ RUN      ] ");
+            colored_printf(Color::kGreen, "[ RUN      ] ");
             printf("%s.%s\n", test_info.test_case_name(), test_info.name());
             fflush(stdout);
 
@@ -114,7 +114,7 @@ class MinimalistPrinter : public EmptyTestEventListener {
                 cout << pr.summary() << endl;
             }
 
-            ColoredPrintf(Color::kYellow, "[  SKIPPED ] ");
+            colored_printf(Color::kYellow, "[  SKIPPED ] ");
             printf("%s.%s\n", test_info.test_case_name(), test_info.name());
             fflush(stdout);
             return;
@@ -125,7 +125,7 @@ class MinimalistPrinter : public EmptyTestEventListener {
             if (!pr.failed())
                 continue;
 
-            ColoredPrintf(Color::kGreen, "[ RUN      ] ");
+            colored_printf(Color::kGreen, "[ RUN      ] ");
             printf("%s.%s\n", test_info.test_case_name(), test_info.name());
             fflush(stdout);
 
@@ -135,7 +135,7 @@ class MinimalistPrinter : public EmptyTestEventListener {
 
             cout << pr.summary() << endl;
 
-            ColoredPrintf(Color::kRed, "[  FAILED  ] ");
+            colored_printf(Color::kRed, "[  FAILED  ] ");
             printf("%s.%s\n", test_info.test_case_name(), test_info.name());
             fflush(stdout);
             internal::PrintFullTestCommentIfPresent(test_info);
@@ -166,7 +166,7 @@ class MinimalistPrinter : public EmptyTestEventListener {
                 if (!test_info.should_run() || !test_info.result()->Failed()) {
                     continue;
                 }
-                ColoredPrintf(Color::kRed, "[  FAILED  ] ");
+                colored_printf(Color::kRed, "[  FAILED  ] ");
                 printf("%s.%s", test_case.name(), test_info.name());
                 internal::PrintFullTestCommentIfPresent(test_info);
                 printf("\n");
@@ -175,15 +175,15 @@ class MinimalistPrinter : public EmptyTestEventListener {
     }
 };
 
-bool TestB2 = false;
-bool TestB4 = false;
-bool TestB6 = false;
-bool TestNative = true;
+bool test_b2 = false;
+bool test_b4 = false;
+bool test_b6 = false;
+bool test_native = true;
 
-inline const std::string& GetMathBackendParameters() {
-    static std::string id = std::to_string(MATHBACKEND) +
-#ifdef WITH_BE2
-                            (MATHBACKEND == 2 ? " (Internal Int Size " + std::to_string(sizeof(integral_dtype) * 8) +
+inline const std::string& get_math_backend_parameters() {
+    static std::string id = std::to_string(CIPHER_MATH_BACKEND) +
+#ifdef CIPHER_WITH_BE2
+                            (CIPHER_MATH_BACKEND == 2 ? " (Internal Int Size " + std::to_string(sizeof(integral_dtype) * 8) +
                                                         ", Bit Length " + std::to_string(BigIntegerBitLength) + ")" :
                                                 "") +
 #endif
@@ -200,24 +200,24 @@ int main(int argc, char** argv) {
         if (string(argv[i]) == "-t") {
             terse = true;
         } else if (string(argv[i]) == "-all") {
-#ifdef WITH_BE2
-            TestB2 = true;
+#ifdef CIPHER_WITH_BE2
+            test_b2 = true;
 #endif
-#ifdef WITH_BE4
-            TestB4 = true;
+#ifdef CIPHER_WITH_BE4
+            test_b4 = true;
 #endif
-#ifdef WITH_NTL
-            TestB6 = true;
+#ifdef CIPHER_WITH_NTL
+            test_b6 = true;
 #endif
             beset = true;
         } else if (string(argv[i]) == "-2") {
-            TestB2 = true;
+            test_b2 = true;
             beset = true;
         } else if (string(argv[i]) == "-4") {
-            TestB4 = true;
+            test_b4 = true;
             beset = true;
         } else if (string(argv[i]) == "-6") {
-            TestB6 = true;
+            test_b6 = true;
             beset = true;
         }
     }
@@ -232,12 +232,12 @@ int main(int argc, char** argv) {
     ::testing::TestEventListeners& listeners = ::testing::UnitTest::GetInstance()->listeners();
 
     if (!beset) {
-        if (MATHBACKEND == 2)
-            TestB2 = true;
-        else if (MATHBACKEND == 4)
-            TestB4 = true;
-        else if (MATHBACKEND == 6)
-            TestB6 = true;
+        if (CIPHER_MATH_BACKEND == 2)
+            test_b2 = true;
+        else if (CIPHER_MATH_BACKEND == 4)
+            test_b4 = true;
+        else if (CIPHER_MATH_BACKEND == 6)
+            test_b6 = true;
     }
 
     if (terse) {
@@ -245,12 +245,12 @@ int main(int argc, char** argv) {
         delete listeners.Release(listeners.default_result_printer());
         listeners.Append(new MinimalistPrinter);
     } else {
-        cout << "OpenFHE Version: " << GetOPENFHEVersion() << endl;
-        cout << "Default Backend: " << GetMathBackendParameters() << endl;
+        cout << "OpenFHE Version: " << library_version() << endl;
+        cout << "Default Backend: " << get_math_backend_parameters() << endl;
     }
 
-    std::cout << "Testing Backends: " << (TestB2 ? "2 " : "") << (TestB4 ? "4 " : "") << (TestB6 ? "6 " : "")
-              << (TestNative ? "Native " : "") << std::endl;
+    std::cout << "Testing Backends: " << (test_b2 ? "2 " : "") << (test_b4 ? "4 " : "") << (test_b6 ? "6 " : "")
+              << (test_native ? "Native " : "") << std::endl;
 
     return RUN_ALL_TESTS();
 }

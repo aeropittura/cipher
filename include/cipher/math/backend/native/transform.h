@@ -53,7 +53,7 @@
  * @namespace intnat
  * The namespace of intnat
  */
-namespace intnat {
+namespace native_int {
 
 /**
  * @brief Hash functor for std::pair keys, used by the unordered maps of the transforms.
@@ -69,7 +69,7 @@ struct HashPair {
     size_t operator()(const std::pair<T1, T2>& p) const {
         auto hash1 = std::hash<T1>{}(std::get<0>(p));
         auto hash2 = std::hash<T2>{}(std::get<1>(p));
-        return HashCombine(hash1, hash2);
+        return hash_combine(hash1, hash2);
     }
 
     /**
@@ -79,7 +79,7 @@ struct HashPair {
      * @param rhs is the second hash.
      * @return the combined hash.
      */
-    static size_t HashCombine(size_t lhs, size_t rhs) {
+    static size_t hash_combine(size_t lhs, size_t rhs) {
         lhs ^= rhs + 0x9e3779b9 + (lhs << 6) + (lhs >> 2);
         return lhs;
     }
@@ -98,66 +98,66 @@ class NumberTheoreticTransformNat {
      *
      * @param[in] element is the input to the transform of type VecType and length n
      * s.t. n|q-1.
-     * @param rootOfUnityTable is the table with the root of unity powers.
+     * @param root_of_unity_table is the table with the root of unity powers.
      * @param[out] result is the result of the transform, a VecType should be of the same
      * size as input or a throw if an error occurs.
      */
-    void ForwardTransformIterative(const VecType& element, const VecType& rootOfUnityTable, VecType* result);
+    void forward_transform_iterative(const VecType& element, const VecType& root_of_unity_table, VecType* result);
 
     /**
      * Inverse transform in the ring Z_q[X]/(X^n-1) with prime q and power-of-two
      * n s.t. n|q-1.
      *
      * @param[in] element is the input to the transform of type VecType and length n.
-     * @param rootOfUnityInverseTable is the table with the inverse n-th root of unity
+     * @param root_of_unity_inverse_table is the table with the inverse n-th root of unity
      * powers.
      * @param[out] result is the result of the transform, a VecType should be of the same
      * size as input or a throw if an error occurs.
      */
-    void InverseTransformIterative(const VecType& element, const VecType& rootOfUnityInverseTable, VecType* result);
+    void inverse_transform_iterative(const VecType& element, const VecType& root_of_unity_inverse_table, VecType* result);
 
     /**
      * Forward transform in the ring Z_q[X]/(X^n-1) taking the Shoup precomputations for the
      * root table; the output is bit-identical to the two-table form.
      *
      * @param[in] element is the input to the transform of type VecType and length n.
-     * @param rootOfUnityTable is the table with the root of unity powers.
-     * @param preconRootOfUnityTable is the table of Shoup precomputations for rootOfUnityTable.
+     * @param root_of_unity_table is the table with the root of unity powers.
+     * @param precon_root_of_unity_table is the table of Shoup precomputations for root_of_unity_table.
      * @param[out] result is the result of the transform, a VecType should be of the same
      * size as input or a throw if an error occurs.
      */
-    void ForwardTransformIterative(const VecType& element, const VecType& rootOfUnityTable,
-                                   const VecType& preconRootOfUnityTable, VecType* result);
+    void forward_transform_iterative(const VecType& element, const VecType& root_of_unity_table,
+                                   const VecType& precon_root_of_unity_table, VecType* result);
 
     /**
      * Inverse transform in the ring Z_q[X]/(X^n-1) taking the Shoup precomputations for the
      * inverse root table; the output is bit-identical to the two-table form.
      *
      * @param[in] element is the input to the transform of type VecType and length n.
-     * @param rootOfUnityInverseTable is the table with the inverse n-th root of unity powers.
-     * @param preconRootOfUnityInverseTable is the table of Shoup precomputations for
-     * rootOfUnityInverseTable.
+     * @param root_of_unity_inverse_table is the table with the inverse n-th root of unity powers.
+     * @param precon_root_of_unity_inverse_table is the table of Shoup precomputations for
+     * root_of_unity_inverse_table.
      * @param[out] result is the result of the transform, a VecType should be of the same
      * size as input or a throw if an error occurs.
      */
-    void InverseTransformIterative(const VecType& element, const VecType& rootOfUnityInverseTable,
-                                   const VecType& preconRootOfUnityInverseTable, VecType* result);
+    void inverse_transform_iterative(const VecType& element, const VecType& root_of_unity_inverse_table,
+                                   const VecType& precon_root_of_unity_inverse_table, VecType* result);
 
     /**
-     * Copies \p element into \p result and calls ForwardTransformToBitReverseInPlace()
+     * Copies \p element into \p result and calls forward_transform_to_bit_reverse_in_place()
      *
      * Forward transform in the ring Z_q[X]/(X^n+1) with prime q and power-of-two
      * n s.t. 2n|q-1. Bit reversing indexes. [Algorithm 1 in
      * https://eprint.iacr.org/2016/504.pdf]
      *
      * @param[in] element is the input to the transform of type VecType and length n.
-     * @param rootOfUnityTable is the table with the n-th root of unity powers in
+     * @param root_of_unity_table is the table with the n-th root of unity powers in
      * bit reverse order.
      * @param[out] result is the result of the transform, a VecType should be of the same
      * size as input or a throw if an error occurs.
-     * @see ForwardTransformToBitReverseInPlace()
+     * @see forward_transform_to_bit_reverse_in_place()
      */
-    void ForwardTransformToBitReverse(const VecType& element, const VecType& rootOfUnityTable, VecType* result);
+    void forward_transform_to_bit_reverse(const VecType& element, const VecType& root_of_unity_table, VecType* result);
     /**
      * In-place forward transform in the ring Z_q[X]/(X^n+1) with prime q and
      * power-of-two n s.t. 2n|q-1. Bit reversing indexes. [Algorithm 1 in
@@ -168,14 +168,14 @@ class NumberTheoreticTransformNat {
      * the peeled final stage, so an unreduced input exceeds the bound that schedule is derived
      * from and the transform returns a wrong result.
      *
-     * @param rootOfUnityTable is the table with the n-th root of unity powers in
+     * @param root_of_unity_table is the table with the n-th root of unity powers in
      * bit reverse order.
      * @param[in,out] element is the input/output of the transform of type VecType and length n.
      */
-    void ForwardTransformToBitReverseInPlace(const VecType& rootOfUnityTable, VecType* element);
+    void forward_transform_to_bit_reverse_in_place(const VecType& root_of_unity_table, VecType* element);
 
     /**
-     * Copies \p element into \p result and calls ForwardTransformToBitReverseInPlace()
+     * Copies \p element into \p result and calls forward_transform_to_bit_reverse_in_place()
      *
      * Forward transform in the ring Z_q[X]/(X^n+1) with prime q and power-of-two
      * n s.t. 2n|q-1. Bit reversing indexes. The method works for the
@@ -183,16 +183,16 @@ class NumberTheoreticTransformNat {
      * https://eprint.iacr.org/2016/504.pdf]
      *
      * @param element is the input to the transform of type VecType and length n.
-     * @param rootOfUnityTable is the table with the root of unity powers in bit
+     * @param root_of_unity_table is the table with the root of unity powers in bit
      * reverse order.
-     * @param preconRootOfUnityTable is NTL-specific precomputations for
+     * @param precon_root_of_unity_table is NTL-specific precomputations for
      * optimized NativeInteger modulo multiplications.
      * @param[out] result is the result of the transform, a VecType should be of the same
      * size as input or a throw if an error occurs.
-     * @see ForwardTransformToBitReverseInPlace()
+     * @see forward_transform_to_bit_reverse_in_place()
      */
-    void ForwardTransformToBitReverse(const VecType& element, const VecType& rootOfUnityTable,
-                                      const VecType& preconRootOfUnityTable, VecType* result);
+    void forward_transform_to_bit_reverse(const VecType& element, const VecType& root_of_unity_table,
+                                      const VecType& precon_root_of_unity_table, VecType* result);
 
     /**
      * In-place forward transform in the ring Z_q[X]/(X^n+1) with prime q and
@@ -203,48 +203,48 @@ class NumberTheoreticTransformNat {
      * Every coefficient of \p element must already be reduced to [0, modulus), for the reason
      * given on the two-argument overload above.
      *
-     * @param rootOfUnityTable is the table with the root of unity powers in bit
+     * @param root_of_unity_table is the table with the root of unity powers in bit
      * reverse order.
-     * @param preconRootOfUnityTable is NTL-specific precomputations for
+     * @param precon_root_of_unity_table is NTL-specific precomputations for
      * optimized NativeInteger modulo multiplications.
      * @param[in,out] element is the input/output of the transform of type VecType and length n.
      */
-    void ForwardTransformToBitReverseInPlace(const VecType& rootOfUnityTable, const VecType& preconRootOfUnityTable,
+    void forward_transform_to_bit_reverse_in_place(const VecType& root_of_unity_table, const VecType& precon_root_of_unity_table,
                                              VecType* element);
 
     /**
-     * Copies \p element into \p result and calls InverseTransformFromBitReverseInPlace()
+     * Copies \p element into \p result and calls inverse_transform_from_bit_reverse_in_place()
      *
      * Inverse transform in the ring Z_q[X]/(X^n+1) with prime q and power-of-two
      * n s.t. 2n|q-1. Bit reversing indexes. [Algorithm 2 in
      * https://eprint.iacr.org/2016/504.pdf]
      *
      * @param element is the input to the transform of type VecType and length n.
-     * @param rootOfUnityInverseTable is the table with the inverse 2n-th root of
+     * @param root_of_unity_inverse_table is the table with the inverse 2n-th root of
      * unity powers in bit reverse order.
-     * @param cycloOrderInv is inverse of n modulo q
+     * @param cyclo_order_inv is inverse of n modulo q
      * @param[out] result is the result of the transform, a VecType should be of the same
      * size as input or a throw if an error occurs.
-     * @see InverseTransformFromBitReverseInPlace()
+     * @see inverse_transform_from_bit_reverse_in_place()
      */
-    void InverseTransformFromBitReverse(const VecType& element, const VecType& rootOfUnityInverseTable,
-                                        const IntType& cycloOrderInv, VecType* result);
+    void inverse_transform_from_bit_reverse(const VecType& element, const VecType& root_of_unity_inverse_table,
+                                        const IntType& cyclo_order_inv, VecType* result);
 
     /**
      * In-place inverse transform in the ring Z_q[X]/(X^n+1) with prime q and
      * power-of-two n s.t. 2n|q-1. Bit reversing indexes. [Algorithm 2 in
      * https://eprint.iacr.org/2016/504.pdf]
      *
-     * @param rootOfUnityInverseTable is the table with the inverse 2n-th root of
+     * @param root_of_unity_inverse_table is the table with the inverse 2n-th root of
      * unity powers in bit reverse order.
-     * @param cycloOrderInv is inverse of n modulo q
+     * @param cyclo_order_inv is inverse of n modulo q
      * @param[in,out] element is the input/output of the transform of type VecType and length n.
      */
-    void InverseTransformFromBitReverseInPlace(const VecType& rootOfUnityInverseTable, const IntType& cycloOrderInv,
+    void inverse_transform_from_bit_reverse_in_place(const VecType& root_of_unity_inverse_table, const IntType& cyclo_order_inv,
                                                VecType* element);
 
     /**
-     * Copies \p element into \p result and calls InverseTransformFromBitReverseInPlace()
+     * Copies \p element into \p result and calls inverse_transform_from_bit_reverse_in_place()
      *
      * Inverse transform in the ring Z_q[X]/(X^n+1) with prime q and power-of-two
      * n s.t. 2n|q-1. Bit reversing indexes. The method works for the
@@ -252,20 +252,20 @@ class NumberTheoreticTransformNat {
      * https://eprint.iacr.org/2016/504.pdf]
      *
      * @param element is the input to the transform of type VecType and length n.
-     * @param rootOfUnityInverseTable is the table with the inverse 2n-th root of
+     * @param root_of_unity_inverse_table is the table with the inverse 2n-th root of
      * unity powers in bit reverse order.
-     * @param preconRootOfUnityInverseTable is NTL-specific precomputations for
+     * @param precon_root_of_unity_inverse_table is NTL-specific precomputations for
      * optimized NativeInteger modulo multiplications.
-     * @param cycloOrderInv is inverse of n modulo q
-     * @param preconCycloOrderInv is NTL-specific precomputations for optimized
+     * @param cyclo_order_inv is inverse of n modulo q
+     * @param precon_cyclo_order_inv is NTL-specific precomputations for optimized
      * NativeInteger modulo multiplications.
      * @param[out] result is the result of the transform, a VecType should be of the same
      * size as input or a throw if an error occurs.
-     * @see InverseTransformFromBitReverseInPlace()
+     * @see inverse_transform_from_bit_reverse_in_place()
      */
-    void InverseTransformFromBitReverse(const VecType& element, const VecType& rootOfUnityInverseTable,
-                                        const VecType& preconRootOfUnityInverseTable, const IntType& cycloOrderInv,
-                                        const IntType& preconCycloOrderInv, VecType* result);
+    void inverse_transform_from_bit_reverse(const VecType& element, const VecType& root_of_unity_inverse_table,
+                                        const VecType& precon_root_of_unity_inverse_table, const IntType& cyclo_order_inv,
+                                        const IntType& precon_cyclo_order_inv, VecType* result);
 
     /**
      * In-place Inverse transform in the ring Z_q[X]/(X^n+1) with prime q and
@@ -273,18 +273,18 @@ class NumberTheoreticTransformNat {
      * NativeInteger case based on NTL's modular multiplication. [Algorithm 2 in
      * https://eprint.iacr.org/2016/504.pdf]
      *
-     * @param rootOfUnityInverseTable is the table with the inverse 2n-th root of
+     * @param root_of_unity_inverse_table is the table with the inverse 2n-th root of
      * unity powers in bit reverse order.
-     * @param preconRootOfUnityInverseTable is NTL-specific precomputations for
+     * @param precon_root_of_unity_inverse_table is NTL-specific precomputations for
      * optimized NativeInteger modulo multiplications.
-     * @param cycloOrderInv is inverse of n modulo q
-     * @param preconCycloOrderInv is NTL-specific precomputations for optimized
+     * @param cyclo_order_inv is inverse of n modulo q
+     * @param precon_cyclo_order_inv is NTL-specific precomputations for optimized
      * NativeInteger modulo multiplications.
      * @param[in,out] element is the input/output of the transform of type VecType and length n.
      */
-    void InverseTransformFromBitReverseInPlace(const VecType& rootOfUnityInverseTable,
-                                               const VecType& preconRootOfUnityInverseTable,
-                                               const IntType& cycloOrderInv, const IntType& preconCycloOrderInv,
+    void inverse_transform_from_bit_reverse_in_place(const VecType& root_of_unity_inverse_table,
+                                               const VecType& precon_root_of_unity_inverse_table,
+                                               const IntType& cyclo_order_inv, const IntType& precon_cyclo_order_inv,
                                                VecType* element);
 };
 
@@ -292,102 +292,102 @@ class NumberTheoreticTransformNat {
  * @brief Golden Chinese Remainder Transform FFT implementation.
  */
 template <typename VecType>
-class ChineseRemainderTransformFTTNat final : public lbcrypto::ChineseRemainderTransformFTTInterface<VecType> {
+class ChineseRemainderTransformFttNat final : public cipher::ChineseRemainderTransformFttInterface<VecType> {
     using IntType = typename VecType::Integer;
 
   public:
     /**
-     * Copies \p element into \p result and calls NumberTheoreticTransform::ForwardTransformToBitReverseInPlace()
+     * Copies \p element into \p result and calls NumberTheoreticTransform::forward_transform_to_bit_reverse_in_place()
      *
      * Forward Transform in the ring Z_q[X]/(X^n+1) with prime q and power-of-two
      * n s.t. 2n|q-1. Bit reversing indexes.
      *
      * @param[in] element is the input to the transform of type VecType and length n.
-     * @param rootOfUnity is the 2n-th root of unity in Z_q. Used to precompute
-     * the root of unity tables if needed. If rootOfUnity == 0 or 1, then the
+     * @param root_of_unity_value is the 2n-th root of unity in Z_q. Used to precompute
+     * the root of unity tables if needed. If root_of_unity_value == 0 or 1, then the
      * result == input.
-     * @param CycloOrder is 2n, should be a power-of-two or a throw if an error
+     * @param cyclo_order_value is 2n, should be a power-of-two or a throw if an error
      * occurs.
      * @param[out] result is the result of the transform, a VecType should be of the same
      * size as input or a throw of error occurs.
-     * @see NumberTheoreticTransform::ForwardTransformToBitReverseInPlace()
+     * @see NumberTheoreticTransform::forward_transform_to_bit_reverse_in_place()
      */
-    void ForwardTransformToBitReverse(const VecType& element, const IntType& rootOfUnity, const uint32_t CycloOrder,
+    void forward_transform_to_bit_reverse(const VecType& element, const IntType& root_of_unity_value, const uint32_t cyclo_order_value,
                                       VecType* result);
 
     /**
      * In-place Forward Transform in the ring Z_q[X]/(X^n+1) with prime q and
      * power-of-two n s.t. 2n|q-1. Bit reversing indexes.
      *
-     * @param rootOfUnity is the 2n-th root of unity in Z_q. Used to precompute
-     * the root of unity tables if needed. If rootOfUnity == 0 or 1, then the
+     * @param root_of_unity_value is the 2n-th root of unity in Z_q. Used to precompute
+     * the root of unity tables if needed. If root_of_unity_value == 0 or 1, then the
      * result == input.
-     * @param CycloOrder is 2n, should be a power-of-two or a throw if an error
+     * @param cyclo_order_value is 2n, should be a power-of-two or a throw if an error
      * occurs.
      * @param[in,out] element is the input to the transform of type VecType and length n.
-     * @see NumberTheoreticTransform::ForwardTransformToBitReverseInPlace()
+     * @see NumberTheoreticTransform::forward_transform_to_bit_reverse_in_place()
      */
-    void ForwardTransformToBitReverseInPlace(const IntType& rootOfUnity, const uint32_t CycloOrder, VecType* element);
+    void forward_transform_to_bit_reverse_in_place(const IntType& root_of_unity_value, const uint32_t cyclo_order_value, VecType* element);
 
     /**
-     * Copies \p element into \p result and calls NumberTheoreticTransform::InverseTransformFromBitReverseInPlace()
+     * Copies \p element into \p result and calls NumberTheoreticTransform::inverse_transform_from_bit_reverse_in_place()
      *
      * Inverse Transform in the ring Z_q[X]/(X^n+1) with prime q and power-of-two
      * n s.t. 2n|q-1. Bit reversing indexes.
      *
      * @param[in] element is the input to the transform of type VecType and length n.
-     * @param rootOfUnity is the 2n-th root of unity in Z_q. Used to precompute
-     * the root of unity tables if needed. If rootOfUnity == 0 or 1, then the
+     * @param root_of_unity_value is the 2n-th root of unity in Z_q. Used to precompute
+     * the root of unity tables if needed. If root_of_unity_value == 0 or 1, then the
      * result == input.
-     * @param CycloOrder is 2n, should be a power-of-two or a throw if an error
+     * @param cyclo_order_value is 2n, should be a power-of-two or a throw if an error
      * occurs.
      * @param[out] result is the result of the transform, a VecType should be of the same
      * size as input or a throw if an error occurs.
-     * @see NumberTheoreticTransform::InverseTransformFromBitReverseInPlace()
+     * @see NumberTheoreticTransform::inverse_transform_from_bit_reverse_in_place()
      */
-    void InverseTransformFromBitReverse(const VecType& element, const IntType& rootOfUnity, const uint32_t CycloOrder,
+    void inverse_transform_from_bit_reverse(const VecType& element, const IntType& root_of_unity_value, const uint32_t cyclo_order_value,
                                         VecType* result);
 
     /**
      * In-place Inverse Transform in the ring Z_q[X]/(X^n+1) with prime q and
      * power-of-two n s.t. 2n|q-1. Bit reversing indexes.
      *
-     * @param rootOfUnity is the 2n-th root of unity in Z_q. Used to precompute
-     * the root of unity tables if needed. If rootOfUnity == 0 or 1, then the
+     * @param root_of_unity_value is the 2n-th root of unity in Z_q. Used to precompute
+     * the root of unity tables if needed. If root_of_unity_value == 0 or 1, then the
      * result == input.
-     * @param CycloOrder is 2n, should be a power-of-two or a throw if an error
+     * @param cyclo_order_value is 2n, should be a power-of-two or a throw if an error
      * occurs.
      * @param[in,out] element is the input/output of the transform of type VecType and length n.
-     * @see NumberTheoreticTransform::InverseTransformFromBitReverseInPlace()
+     * @see NumberTheoreticTransform::inverse_transform_from_bit_reverse_in_place()
      */
-    void InverseTransformFromBitReverseInPlace(const IntType& rootOfUnity, const uint32_t CycloOrder, VecType* element);
+    void inverse_transform_from_bit_reverse_in_place(const IntType& root_of_unity_value, const uint32_t cyclo_order_value, VecType* element);
 
     /**
      * Precomputation of root of unity tables for transforms in the ring
      * Z_q[X]/(X^n+1)
      *
-     * @param rootOfUnity is the 2n-th root of unity in Z_q used to precompute
+     * @param root_of_unity_value is the 2n-th root of unity in Z_q used to precompute
      * the root of unity tables.
-     * @param CycloOrder is a power-of-two, equal to 2n.
+     * @param cyclo_order_value is a power-of-two, equal to 2n.
      * @param modulus is q, the prime modulus
      */
-    void PreCompute(const IntType& rootOfUnity, const uint32_t CycloOrder, const IntType& modulus);
+    void pre_compute(const IntType& root_of_unity_value, const uint32_t cyclo_order_value, const IntType& modulus);
 
     /**
      * Precomputation of root of unity tables for transforms in the ring
      * Z_q[X]/(X^n+1)
      *
-     * @param rootOfUnity is the vector of 2n-th roots of unity, one per modulus
-     * in moduliChain, used to precompute the root of unity tables.
-     * @param CycloOrder is a power-of-two, equal to 2n.
-     * @param moduliChain is the vector of prime moduli qi such that 2n|qi-1
+     * @param root_of_unity_value is the vector of 2n-th roots of unity, one per modulus
+     * in moduli_chain, used to precompute the root of unity tables.
+     * @param cyclo_order_value is a power-of-two, equal to 2n.
+     * @param moduli_chain is the vector of prime moduli qi such that 2n|qi-1
      */
-    void PreCompute(std::vector<IntType>& rootOfUnity, const uint32_t CycloOrder, std::vector<IntType>& moduliChain);
+    void pre_compute(std::vector<IntType>& root_of_unity_value, const uint32_t cyclo_order_value, std::vector<IntType>& moduli_chain);
 
     /**
      * Reset cached values for the root of unity tables to empty.
      */
-    void Reset();
+    void reset();
 
     /**
      * All precomputed tables for one modulus: the forward/inverse roots of unity in
@@ -398,36 +398,36 @@ class ChineseRemainderTransformFTTNat final : public lbcrypto::ChineseRemainderT
      */
     struct Tables {
         /// forward roots of unity in bit-reversed order
-        VecType rootReverse;
-        /// Shoup precomputations for rootReverse
-        VecType preconRootReverse;
+        VecType root_reverse;
+        /// Shoup precomputations for root_reverse
+        VecType precon_root_reverse;
         /// inverse roots of unity in bit-reversed order
-        VecType rootInverseReverse;
-        /// Shoup precomputations for rootInverseReverse
-        VecType preconRootInverseReverse;
+        VecType root_inverse_reverse;
+        /// Shoup precomputations for root_inverse_reverse
+        VecType precon_root_inverse_reverse;
         /// inverses of the transform sizes, indexed by log2 of the size
-        VecType cycloOrderInverse;
-        /// Shoup precomputations for cycloOrderInverse
-        VecType preconCycloOrderInverse;
+        VecType cyclo_order_inverse;
+        /// Shoup precomputations for cyclo_order_inverse
+        VecType precon_cyclo_order_inverse;
     };
 
     /**
      * Single lookup-or-build entry for the tables of one modulus: one map traversal
      * per transform instead of one per table, with reads and fills synchronized. The cached
-     * bundle is reused when its size matches cycloOrder/2 and rebuilt otherwise.
+     * bundle is reused when its size matches cyclo_order/2 and rebuilt otherwise.
      *
-     * @param rootOfUnity is the 2n-th root of unity modulo modulus used to build the tables.
-     * @param CycloOrder is the cyclotomic order (twice the transform size).
+     * @param root_of_unity_value is the 2n-th root of unity modulo modulus used to build the tables.
+     * @param cyclo_order_value is the cyclotomic order (twice the transform size).
      * @param modulus is the modulus the tables are keyed on.
      * @return the immutable table bundle for the modulus.
      */
-    static std::shared_ptr<const Tables> GetTables(const IntType& rootOfUnity, uint32_t CycloOrder,
+    static std::shared_ptr<const Tables> get_tables(const IntType& root_of_unity_value, uint32_t cyclo_order_value,
                                                    const IntType& modulus);
 
   private:
-    static std::map<IntType, std::shared_ptr<const Tables>> m_tablesByModulus;
+    static std::map<IntType, std::shared_ptr<const Tables>> tables_by_modulus_;
 
-    static std::shared_mutex& TablesMutex() {
+    static std::shared_mutex& tables_mutex() {
         static std::shared_mutex m;
         return m;
     }
@@ -445,7 +445,7 @@ using ModulusRootPair = std::pair<ModulusRoot<IntType>, ModulusRoot<IntType>>;
  * @brief Bluestein Fast Fourier Transform implementation
  */
 template <typename VecType>
-class BluesteinFFTNat {
+class BluesteinFftNat {
     using IntType = typename VecType::Integer;
 
   public:
@@ -454,33 +454,33 @@ class BluesteinFFTNat {
      *
      * @param element is the element to perform the transform on.
      * @param root is the root of unity w.r.t. the modulus of element used to compute the power table.
-     * @param cycloOrder is the cyclotomic order.
+     * @param cyclo_order is the cyclotomic order.
      * @return is the output result of the transform.
      */
-    VecType ForwardTransform(const VecType& element, const IntType& root, const uint32_t cycloOrder);
+    VecType forward_transform(const VecType& element, const IntType& root, const uint32_t cyclo_order);
 
     /**
      * Forward transform with an explicit NTT modulus and root; all tables for (modulus of
-     * element, root), nttModulusRoot and their pair must have been precomputed by the
-     * PreCompute* methods.
+     * element, root), ntt_modulus_root and their pair must have been precomputed by the
+     * pre_compute* methods.
      *
-     * @param element is the element to perform the transform on; its length must equal cycloOrder.
+     * @param element is the element to perform the transform on; its length must equal cyclo_order.
      * @param root is the root of unity w.r.t. the modulus of element used to compute the power table.
-     * @param cycloOrder is the cyclotomic order.
-     * @param nttModulusRoot is the (modulus, root of unity) pair of the NTT used internally.
+     * @param cyclo_order is the cyclotomic order.
+     * @param ntt_modulus_root is the (modulus, root of unity) pair of the NTT used internally.
      * @return is the output result of the transform.
      */
-    VecType ForwardTransform(const VecType& element, const IntType& root, const uint32_t cycloOrder,
-                             const ModulusRoot<IntType>& nttModulusRoot);
+    VecType forward_transform(const VecType& element, const IntType& root, const uint32_t cyclo_order,
+                             const ModulusRoot<IntType>& ntt_modulus_root);
 
     /**
      *
      * @param a is the input vector to be padded with zeros.
-     * @param finalSize is the length of the output vector.
-     * @return output vector padded with (finalSize - initial size)additional
+     * @param final_size is the length of the output vector.
+     * @return output vector padded with (final_size - initial size)additional
      * zeros.
      */
-    VecType PadZeros(const VecType& a, const uint32_t finalSize);
+    VecType pad_zeros(const VecType& a, const uint32_t final_size);
 
     /**
      *
@@ -494,61 +494,61 @@ class BluesteinFFTNat {
     /**
      * @brief Precomputes the modulus needed for NTT operation in forward
      * Bluestein transform.
-     * @param cycloOrder is the cyclotomic order of the polynomial.
+     * @param cyclo_order is the cyclotomic order of the polynomial.
      * @param modulus is the modulus of the polynomial.
      */
-    void PreComputeDefaultNTTModulusRoot(uint32_t cycloOrder, const IntType& modulus);
+    void pre_compute_default_ntt_modulus_root(uint32_t cyclo_order, const IntType& modulus);
 
     /**
      * @brief Precomputes the root of unity table needed for NTT operation in
      * forward Bluestein transform.
-     * @param cycloOrder is the cyclotomic order of the polynomial ring.
-     * @param nttModulusRoot is the (modulus, root of unity) pair used for the NTT operation.
+     * @param cyclo_order is the cyclotomic order of the polynomial ring.
+     * @param ntt_modulus_root is the (modulus, root of unity) pair used for the NTT operation.
      */
-    void PreComputeRootTableForNTT(uint32_t cycloOrder, const ModulusRoot<IntType>& nttModulusRoot);
+    void pre_compute_root_table_for_ntt(uint32_t cyclo_order, const ModulusRoot<IntType>& ntt_modulus_root);
 
     /**
      * @brief precomputes the powers of root used in forward Bluestein transform.
-     * @param cycloOrder is the cyclotomic order of the polynomial ring.
-     * @param modulusRoot is the pair (modulus, root) of the polynomial ring's modulus
+     * @param cyclo_order is the cyclotomic order of the polynomial ring.
+     * @param modulus_root is the pair (modulus, root) of the polynomial ring's modulus
      * and a root of unity s.t. root^2m = 1.
      */
-    void PreComputePowers(uint32_t cycloOrder, const ModulusRoot<IntType>& modulusRoot);
+    void pre_compute_powers(uint32_t cyclo_order, const ModulusRoot<IntType>& modulus_root);
 
     /**
      * @brief precomputes the NTT transform of the power of root of unity used in
      * the Bluestein transform.
-     * @param cycloOrder is the cyclotomic order of the polynomial ring.
-     * @param modulusRootPair is the pair ((modulus, root), (bigMod, bigRoot)), where
+     * @param cyclo_order is the cyclotomic order of the polynomial ring.
+     * @param modulus_root_pair is the pair ((modulus, root), (big_mod, big_root)), where
      * modulus is the modulus of the polynomial ring, root is the root of unity s.t.
-     * root^2m = 1, and bigMod and bigRoot are the modulus and root of unity required
+     * root^2m = 1, and big_mod and big_root are the modulus and root of unity required
      * for the NTT transform.
      */
-    void PreComputeRBTable(uint32_t cycloOrder, const ModulusRootPair<IntType>& modulusRootPair);
+    void pre_compute_rb_table(uint32_t cyclo_order, const ModulusRootPair<IntType>& modulus_root_pair);
 
     /**
      * Reset cached values for the transform to empty.
      */
-    void Reset();
+    void reset();
 
     /// map to store the root of unity table with modulus as key.
-    static std::map<ModulusRoot<IntType>, VecType> m_rootOfUnityTableByModulusRoot;
+    static std::map<ModulusRoot<IntType>, VecType> root_of_unity_table_by_modulus_root_;
 
     /// map to store the root of unity inverse table with modulus as key.
-    static std::map<ModulusRoot<IntType>, VecType> m_rootOfUnityInverseTableByModulusRoot;
+    static std::map<ModulusRoot<IntType>, VecType> root_of_unity_inverse_table_by_modulus_root_;
 
     /// map to store the power of roots as a table with modulus + root of unity as
     /// key.
-    static std::map<ModulusRoot<IntType>, VecType> m_powersTableByModulusRoot;
+    static std::map<ModulusRoot<IntType>, VecType> powers_table_by_modulus_root_;
 
     /// map to store the forward transform of power table with modulus + root of
     /// unity as key.
-    static std::map<ModulusRootPair<IntType>, VecType> m_RBTableByModulusRootPair;
+    static std::map<ModulusRootPair<IntType>, VecType> rb_table_by_modulus_root_pair_;
 
-    /// Shoup precomputations matching m_rootOfUnityTableByModulusRoot.
-    static std::map<ModulusRoot<IntType>, VecType> m_preconRootOfUnityTableByModulusRoot;
-    /// Shoup precomputations matching m_rootOfUnityInverseTableByModulusRoot.
-    static std::map<ModulusRoot<IntType>, VecType> m_preconRootOfUnityInverseTableByModulusRoot;
+    /// Shoup precomputations matching root_of_unity_table_by_modulus_root_.
+    static std::map<ModulusRoot<IntType>, VecType> precon_root_of_unity_table_by_modulus_root_;
+    /// Shoup precomputations matching root_of_unity_inverse_table_by_modulus_root_.
+    static std::map<ModulusRoot<IntType>, VecType> precon_root_of_unity_inverse_table_by_modulus_root_;
 
     /**
      * Mutex guarding every Bluestein/arbitrary-cyclotomic static cache: fills are lazy and the
@@ -557,21 +557,21 @@ class BluesteinFFTNat {
      *
      * @return the shared recursive mutex.
      */
-    static std::recursive_mutex& CacheMutex() {
+    static std::recursive_mutex& cache_mutex() {
         static std::recursive_mutex m;
         return m;
     }
 
   private:
     // map to store the precomputed NTT modulus with modulus as key.
-    static std::map<IntType, ModulusRoot<IntType>> m_defaultNTTModulusRoot;
+    static std::map<IntType, ModulusRoot<IntType>> default_ntt_modulus_root_;
 };
 
 /**
  * @brief Chinese Remainder Transform for arbitrary cyclotomics.
  */
 template <typename VecType>
-class ChineseRemainderTransformArbNat final : public lbcrypto::ChineseRemainderTransformArbInterface<VecType> {
+class ChineseRemainderTransformArbNat final : public cipher::ChineseRemainderTransformArbInterface<VecType> {
     using IntType = typename VecType::Integer;
 
   public:
@@ -581,141 +581,141 @@ class ChineseRemainderTransformArbNat final : public lbcrypto::ChineseRemainderT
      * @param poly is the cyclotomic polynomial.
      * @param mod is the modulus of the polynomial ring.
      */
-    void SetCylotomicPolynomial(const VecType& poly, const IntType& mod);
+    void set_cylotomic_polynomial(const VecType& poly, const IntType& mod_value);
 
     /**
      * Forward transform.
      *
      * @param element is the element to perform the transform on.
      * @param root is the 2mth root of unity w.r.t the ring modulus.
-     * @param bigMod is the additional modulus needed for NTT operation.
-     * @param bigRoot is the additional root of unity w.r.t bigMod needed for NTT
+     * @param big_mod is the additional modulus needed for NTT operation.
+     * @param big_root is the additional root of unity w.r.t big_mod needed for NTT
      * operation.
-     * @param cycloOrder is the cyclotomic order of the ring element.
+     * @param cyclo_order is the cyclotomic order of the ring element.
      * @return is the output result of the transform.
      */
-    VecType ForwardTransform(const VecType& element, const IntType& root, const IntType& bigMod, const IntType& bigRoot,
-                             const uint32_t cycloOrder);
+    VecType forward_transform(const VecType& element, const IntType& root, const IntType& big_mod, const IntType& big_root,
+                             const uint32_t cyclo_order);
 
     /**
      * Inverse transform.
      *
      * @param element is the element to perform the transform on.
      * @param root is the 2mth root of unity w.r.t the ring modulus.
-     * @param bigMod is the additional modulus needed for NTT operation.
-     * @param bigRoot is the additional root of unity w.r.t bigMod needed for NTT
+     * @param big_mod is the additional modulus needed for NTT operation.
+     * @param big_root is the additional root of unity w.r.t big_mod needed for NTT
      * operation.
-     * @param cycloOrder is the cyclotomic order of the ring element.
+     * @param cyclo_order is the cyclotomic order of the ring element.
      * @return is the output result of the transform.
      */
-    VecType InverseTransform(const VecType& element, const IntType& root, const IntType& bigMod, const IntType& bigRoot,
-                             const uint32_t cycloOrder);
+    VecType inverse_transform(const VecType& element, const IntType& root, const IntType& big_mod, const IntType& big_root,
+                             const uint32_t cyclo_order);
 
     /**
      * Reset cached values for the transform to empty.
      */
-    void Reset();
+    void reset();
 
     /**
      * @brief Precomputes the root of unity and modulus needed for NTT operation
      * in forward Bluestein transform.
-     * @param cyclotoOrder is the cyclotomic order of the polynomial ring.
+     * @param cycloto_order is the cyclotomic order of the polynomial ring.
      * @param modulus is the modulus of the polynomial ring.
      */
-    void PreCompute(const uint32_t cyclotoOrder, const IntType& modulus);
+    void pre_compute(const uint32_t cycloto_order, const IntType& modulus);
 
     /**
      * @brief Sets the precomputed root of unity and modulus needed for NTT
      * operation in forward Bluestein transform.
-     * @param cyclotoOrder is the cyclotomic order of the polynomial ring.
+     * @param cycloto_order is the cyclotomic order of the polynomial ring.
      * @param modulus is the modulus of the polynomial ring.
-     * @param nttMod is the modulus needed for the NTT operation in forward
+     * @param ntt_mod is the modulus needed for the NTT operation in forward
      * Bluestein transform.
-     * @param nttRoot is the root of unity needed for the NTT operation in forward
+     * @param ntt_root is the root of unity needed for the NTT operation in forward
      * Bluestein transform.
      */
-    void SetPreComputedNTTModulus(uint32_t cyclotoOrder, const IntType& modulus, const IntType& nttMod,
-                                  const IntType& nttRoot);
+    void set_pre_computed_ntt_modulus(uint32_t cycloto_order, const IntType& modulus, const IntType& ntt_mod,
+                                  const IntType& ntt_root);
 
     /**
      * @brief Sets the precomputed root of unity and modulus needed for NTT
-     * operation and computes m_cyclotomicPolyReveseNTTMap,m_cyclotomicPolyNTTMap.
+     * operation and computes m_cyclotomicPolyReveseNTTMap,cyclotomic_poly_ntt_map_.
      * Always called after setting the cyclotomic polynomial.
-     * @param cyclotoOrder is the cyclotomic order of the polynomial ring.
+     * @param cycloto_order is the cyclotomic order of the polynomial ring.
      * @param modulus is the modulus of the polynomial ring.
-     * @param nttMod is the modulus needed for the NTT operation in forward
+     * @param ntt_mod is the modulus needed for the NTT operation in forward
      * Bluestein transform.
-     * @param nttRoot is the root of unity needed for the NTT operation in forward
+     * @param ntt_root is the root of unity needed for the NTT operation in forward
      * Bluestein transform.
      */
-    void SetPreComputedNTTDivisionModulus(uint32_t cyclotoOrder, const IntType& modulus, const IntType& nttMod,
-                                          const IntType& nttRoot);
+    void set_pre_computed_ntt_division_modulus(uint32_t cycloto_order, const IntType& modulus, const IntType& ntt_mod,
+                                          const IntType& ntt_root);
 
     /**
      * @brief Computes the inverse of the cyclotomic polynomial using
      * Newton-Iteration method.
-     * @param cycloPoly is the cyclotomic polynomial.
+     * @param cyclo_poly is the cyclotomic polynomial.
      * @param modulus is the modulus of the polynomial ring.
      * @param power is the number of coefficients of the result; the inverse is computed modulo x^power.
      * @return inverse polynomial.
      */
-    VecType InversePolyMod(const VecType& cycloPoly, const IntType& modulus, uint32_t power);
+    VecType inverse_poly_mod(const VecType& cyclo_poly, const IntType& modulus, uint32_t power);
 
   private:
     /**
      * @brief Padding zeroes to a vector
      * @param element is the input of type VecType to be padded with zeros.
-     * @param cycloOrder is the cyclotomic order of the ring
+     * @param cyclo_order is the cyclotomic order of the ring
      * @param forward is a flag for forward/inverse transform padding.
      * @return is result vector with &element values with padded zeros to it
      */
-    VecType Pad(const VecType& element, const uint32_t cycloOrder, bool forward);
+    VecType pad(const VecType& element, const uint32_t cyclo_order, bool forward);
 
     /**
      * @brief Dropping elements from a vector
      * @param element is the input of type VecType.
-     * @param cycloOrder is the cyclotomic order of the ring
+     * @param cyclo_order is the cyclotomic order of the ring
      * @param forward is a flag for forward/inverse transform dropping.
-     * @param bigMod is a modulus used to precompute the root of unity tables if
+     * @param big_mod is a modulus used to precompute the root of unity tables if
      * needed. The tables are used in the inverse dropping computations
-     * @param bigRoot is a root of unity used to precompute the root of unity
+     * @param big_root is a root of unity used to precompute the root of unity
      * tables if needed. The tables are used in the inverse dropping computations
      * @return is result vector with &element values with dropped elements from it
      */
-    VecType Drop(const VecType& element, const uint32_t cycloOrder, bool forward, const IntType& bigMod,
-                 const IntType& bigRoot);
+    VecType drop(const VecType& element, const uint32_t cyclo_order, bool forward, const IntType& big_mod,
+                 const IntType& big_root);
 
     // map to store the cyclotomic polynomial with polynomial ring's modulus as
     // key.
-    static std::map<IntType, VecType> m_cyclotomicPolyMap;
+    static std::map<IntType, VecType> cyclotomic_poly_map_;
 
     // map to store the forward NTT transform of the inverse of cyclotomic
     // polynomial with polynomial ring's modulus as key.
-    static std::map<IntType, VecType> m_cyclotomicPolyReverseNTTMap;
+    static std::map<IntType, VecType> cyclotomic_poly_reverse_ntt_map_;
 
     // map to store the forward NTT transform of the cyclotomic polynomial with
     // polynomial ring's modulus as key.
-    static std::map<IntType, VecType> m_cyclotomicPolyNTTMap;
+    static std::map<IntType, VecType> cyclotomic_poly_ntt_map_;
 
     // map to store the root of unity table used in NTT based polynomial division.
-    static std::map<IntType, VecType> m_rootOfUnityDivisionTableByModulus;
+    static std::map<IntType, VecType> root_of_unity_division_table_by_modulus_;
 
     // map to store the root of unity table for computing forward NTT of inverse
     // cyclotomic polynomial used in NTT based polynomial division.
-    static std::map<IntType, VecType> m_rootOfUnityDivisionInverseTableByModulus;
+    static std::map<IntType, VecType> root_of_unity_division_inverse_table_by_modulus_;
 
     // Shoup precomputations matching the two division tables above.
-    static std::map<IntType, VecType> m_rootOfUnityDivisionPreconTableByModulus;
-    static std::map<IntType, VecType> m_rootOfUnityDivisionInversePreconTableByModulus;
+    static std::map<IntType, VecType> root_of_unity_division_precon_table_by_modulus_;
+    static std::map<IntType, VecType> root_of_unity_division_inverse_precon_table_by_modulus_;
 
     // modulus used in NTT based polynomial division.
-    static std::map<IntType, IntType> m_DivisionNTTModulus;
+    static std::map<IntType, IntType> division_ntt_modulus_;
 
     // root of unity used in NTT based polynomial division.
-    static std::map<IntType, IntType> m_DivisionNTTRootOfUnity;
+    static std::map<IntType, IntType> division_ntt_root_of_unity_;
 
     // dimension of the NTT transform in NTT based polynomial division.
-    static std::map<uint32_t, uint32_t> m_nttDivisionDim;
+    static std::map<uint32_t, uint32_t> ntt_division_dim_;
 };
 
 }  // namespace intnat
@@ -723,32 +723,32 @@ class ChineseRemainderTransformArbNat final : public lbcrypto::ChineseRemainderT
 #define TRANSFORM_IMPLEMENTATION "cipher/math/backend/native/transform_impl.h"
 
 #define MAKE_TRANSFORM_TYPES                                                      \
-    template class intnat::NumberTheoreticTransformNat<intnat::NativeVector>;     \
-    template class intnat::ChineseRemainderTransformFTTNat<intnat::NativeVector>; \
-    template class intnat::BluesteinFFTNat<intnat::NativeVector>;                 \
-    template class intnat::ChineseRemainderTransformArbNat<intnat::NativeVector>;
+    template class native_int::NumberTheoreticTransformNat<native_int::NativeVector>;     \
+    template class native_int::ChineseRemainderTransformFttNat<native_int::NativeVector>; \
+    template class native_int::BluesteinFftNat<native_int::NativeVector>;                 \
+    template class native_int::ChineseRemainderTransformArbNat<native_int::NativeVector>;
 
 #define EXTERN_TRANSFORM_TYPES                                                           \
-    extern template class intnat::NumberTheoreticTransformNat<intnat::NativeVector>;     \
-    extern template class intnat::ChineseRemainderTransformFTTNat<intnat::NativeVector>; \
-    extern template class intnat::BluesteinFFTNat<intnat::NativeVector>;                 \
-    extern template class intnat::ChineseRemainderTransformArbNat<intnat::NativeVector>;
+    extern template class native_int::NumberTheoreticTransformNat<native_int::NativeVector>;     \
+    extern template class native_int::ChineseRemainderTransformFttNat<native_int::NativeVector>; \
+    extern template class native_int::BluesteinFftNat<native_int::NativeVector>;                 \
+    extern template class native_int::ChineseRemainderTransformArbNat<native_int::NativeVector>;
 
 // Same set at 32-bit width, for use alongside the native width in a 64-bit build.
 #define MAKE_TRANSFORM_TYPES32                                                      \
-    template class intnat::NumberTheoreticTransformNat<intnat::NativeVector32>;     \
-    template class intnat::ChineseRemainderTransformFTTNat<intnat::NativeVector32>; \
-    template class intnat::BluesteinFFTNat<intnat::NativeVector32>;                 \
-    template class intnat::ChineseRemainderTransformArbNat<intnat::NativeVector32>;
+    template class native_int::NumberTheoreticTransformNat<native_int::NativeVector32>;     \
+    template class native_int::ChineseRemainderTransformFttNat<native_int::NativeVector32>; \
+    template class native_int::BluesteinFftNat<native_int::NativeVector32>;                 \
+    template class native_int::ChineseRemainderTransformArbNat<native_int::NativeVector32>;
 
 #define EXTERN_TRANSFORM_TYPES32                                                           \
-    extern template class intnat::NumberTheoreticTransformNat<intnat::NativeVector32>;     \
-    extern template class intnat::ChineseRemainderTransformFTTNat<intnat::NativeVector32>; \
-    extern template class intnat::BluesteinFFTNat<intnat::NativeVector32>;                 \
-    extern template class intnat::ChineseRemainderTransformArbNat<intnat::NativeVector32>;
+    extern template class native_int::NumberTheoreticTransformNat<native_int::NativeVector32>;     \
+    extern template class native_int::ChineseRemainderTransformFttNat<native_int::NativeVector32>; \
+    extern template class native_int::BluesteinFftNat<native_int::NativeVector32>;                 \
+    extern template class native_int::ChineseRemainderTransformArbNat<native_int::NativeVector32>;
 
 EXTERN_TRANSFORM_TYPES
-#if NATIVEINT != 32
+#if CIPHER_NATIVE_INT != 32
 EXTERN_TRANSFORM_TYPES32
 #endif
 

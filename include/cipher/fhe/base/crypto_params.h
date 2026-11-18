@@ -40,10 +40,10 @@
 #include "cipher/util/serializable.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief main implementation class to capture essential cryptoparameters of
@@ -51,7 +51,7 @@ namespace lbcrypto {
  * @tparam Element a ring element.
  */
 template <typename Element>
-class CryptoParametersBase : public Serializable {
+class BaseCryptoParams : public Serializable {
     using ParmType = typename Element::Params;
     using IntType = typename Element::Integer;
     using DugType = typename Element::DugType;
@@ -59,23 +59,23 @@ class CryptoParametersBase : public Serializable {
     using TugType = typename Element::TugType;
 
   public:
-    CryptoParametersBase() = default;
+    BaseCryptoParams() = default;
 
-    virtual ~CryptoParametersBase() = default;
+    virtual ~BaseCryptoParams() = default;
 
     // NOTE: some getters and setters are declared "virtual" as they should be overriden and disabled in
-    // some scheme-specific parameter classes derived from CryptoParametersBase
+    // some scheme-specific parameter classes derived from BaseCryptoParams
     /**
      * Returns the value of plaintext modulus p
      *
      * @return the plaintext modulus.
      */
-    virtual PlaintextModulus GetPlaintextModulus() const {
-        return m_encodingParams->GetPlaintextModulus();
+    virtual PlaintextModulus get_plaintext_modulus() const {
+        return encoding_params_->get_plaintext_modulus();
     }
 
-    uint32_t GetBatchSize() const {
-        return m_encodingParams->GetBatchSize();
+    uint32_t get_batch_size() const {
+        return encoding_params_->get_batch_size();
     }
 
     /**
@@ -83,12 +83,12 @@ class CryptoParametersBase : public Serializable {
      *
      * @return the ring element parameters.
      */
-    const std::shared_ptr<typename Element::Params> GetElementParams() const {
-        return m_params;
+    const std::shared_ptr<typename Element::Params> get_element_params() const {
+        return params_;
     }
 
-    uint32_t GetRingDimension() const {
-        return m_params->GetRingDimension();
+    uint32_t get_ring_dimension() const {
+        return params_->get_ring_dimension();
     }
 
     /**
@@ -98,51 +98,51 @@ class CryptoParametersBase : public Serializable {
      *
      * @return the element parameters for the public key.
      */
-    virtual const std::shared_ptr<typename Element::Params> GetParamsPK() const = 0;
+    virtual const std::shared_ptr<typename Element::Params> get_params_pk() const = 0;
 
     /**
      * Returns the reference to encoding params
      *
      * @return the encoding parameters.
      */
-    const EncodingParams GetEncodingParams() const {
-        return m_encodingParams;
+    const EncodingParams get_encoding_params() const {
+        return encoding_params_;
     }
 
     /**
      * Sets the value of plaintext modulus p
-     * @param plaintextModulus the plaintext modulus
+     * @param plaintext_modulus the plaintext modulus
      */
-    void SetPlaintextModulus(PlaintextModulus plaintextModulus) {
-        m_encodingParams->SetPlaintextModulus(plaintextModulus);
+    void set_plaintext_modulus(PlaintextModulus plaintext_modulus) {
+        encoding_params_->set_plaintext_modulus(plaintext_modulus);
     }
 
-    void SetBatchSize(uint32_t batchSize) {
-        m_encodingParams->SetBatchSize(batchSize);
+    void set_batch_size(uint32_t batch_size) {
+        encoding_params_->set_batch_size(batch_size);
     }
 
-    bool operator==(const CryptoParametersBase<Element>& rhs) const {
-        return CompareTo(rhs);
+    bool operator==(const BaseCryptoParams<Element>& rhs) const {
+        return compare_to(rhs);
     }
 
-    bool operator!=(const CryptoParametersBase<Element>& rhs) const {
+    bool operator!=(const BaseCryptoParams<Element>& rhs) const {
         return !(*this == rhs);
     }
 
     /**
      * Overload to allow printing of parameters to an iostream
      * NOTE that the implementation relies on calling the virtual
-     * PrintParameters method
+     * print_parameters method
      * @param out - the stream to print to
      * @param item - reference to the item to print
      * @return the stream
      */
-    friend std::ostream& operator<<(std::ostream& out, const CryptoParametersBase& item) {
-        item.PrintParameters(out);
+    friend std::ostream& operator<<(std::ostream& out, const BaseCryptoParams& item) {
+        item.print_parameters(out);
         return out;
     }
 
-    virtual uint32_t GetDigitSize() const {
+    virtual uint32_t get_digit_size() const {
         return 0;
     }
 
@@ -152,7 +152,7 @@ class CryptoParametersBase : public Serializable {
      *
      * @return maximum power of secret key
      */
-    virtual uint32_t GetMaxRelinSkDeg() const {
+    virtual uint32_t get_max_relin_sk_deg() const {
         return 0;
     }
 
@@ -160,16 +160,16 @@ class CryptoParametersBase : public Serializable {
      * Sets the reference to element params
      * @param params the ring element parameters
      */
-    virtual void SetElementParams(std::shared_ptr<typename Element::Params> params) {
-        m_params = params;
+    virtual void set_element_params(std::shared_ptr<typename Element::Params> params) {
+        params_ = params;
     }
 
     /**
      * Sets the reference to encoding params
-     * @param encodingParams the encoding parameters
+     * @param encoding_params the encoding parameters
      */
-    virtual void SetEncodingParams(EncodingParams encodingParams) {
-        m_encodingParams = encodingParams;
+    virtual void set_encoding_params(EncodingParams encoding_params) {
+        encoding_params_ = encoding_params;
     }
 
     /////////////////////////////////////
@@ -178,24 +178,24 @@ class CryptoParametersBase : public Serializable {
 
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
-        ar(::cereal::make_nvp("elp", m_params));
-        ar(::cereal::make_nvp("enp", m_encodingParams));
+        ar(::cereal::make_nvp("elp", params_));
+        ar(::cereal::make_nvp("enp", encoding_params_));
     }
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
-        ar(::cereal::make_nvp("elp", m_params));
-        ar(::cereal::make_nvp("enp", m_encodingParams));
+        ar(::cereal::make_nvp("elp", params_));
+        ar(::cereal::make_nvp("enp", encoding_params_));
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "CryptoParametersBase";
     }
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 
@@ -204,10 +204,10 @@ class CryptoParametersBase : public Serializable {
      * Constructor that creates default encoding parameters for the given plaintext modulus; the element
      * parameters are left unset.
      *
-     * @param plaintextModulus the plaintext modulus.
+     * @param plaintext_modulus the plaintext modulus.
      */
-    explicit CryptoParametersBase(const PlaintextModulus& plaintextModulus) {
-        m_encodingParams = std::make_shared<EncodingParamsImpl>(plaintextModulus);
+    explicit BaseCryptoParams(const PlaintextModulus& plaintext_modulus) {
+        encoding_params_ = std::make_shared<EncodingParamsImpl>(plaintext_modulus);
     }
 
     /**
@@ -215,43 +215,43 @@ class CryptoParametersBase : public Serializable {
      * given plaintext modulus.
      *
      * @param params the ring element parameters.
-     * @param plaintextModulus the plaintext modulus.
+     * @param plaintext_modulus the plaintext modulus.
      */
-    CryptoParametersBase(std::shared_ptr<typename Element::Params> params, const PlaintextModulus& plaintextModulus) {
-        m_params = params;
-        m_encodingParams = std::make_shared<EncodingParamsImpl>(plaintextModulus);
+    BaseCryptoParams(std::shared_ptr<typename Element::Params> params, const PlaintextModulus& plaintext_modulus) {
+        params_ = params;
+        encoding_params_ = std::make_shared<EncodingParamsImpl>(plaintext_modulus);
     }
 
     /**
      * Constructor that sets the element parameters and the encoding parameters.
      *
      * @param params the ring element parameters.
-     * @param encodingParams the encoding parameters.
+     * @param encoding_params the encoding parameters.
      */
-    CryptoParametersBase(std::shared_ptr<typename Element::Params> params, EncodingParams encodingParams) {
-        m_params = params;
-        m_encodingParams = encodingParams;
+    BaseCryptoParams(std::shared_ptr<typename Element::Params> params, EncodingParams encoding_params) {
+        params_ = params;
+        encoding_params_ = encoding_params;
     }
 
     /**
      * Constructor that copies the parameters of another object and replaces its element parameters.
      *
      * @param from the parameters to copy.
-     * @param newElemParms the ring element parameters of the new object.
+     * @param new_elem_parms the ring element parameters of the new object.
      */
-    CryptoParametersBase(CryptoParametersBase<Element>* from, std::shared_ptr<typename Element::Params> newElemParms) {
+    BaseCryptoParams(BaseCryptoParams<Element>* from, std::shared_ptr<typename Element::Params> new_elem_parms) {
         *this = *from;
-        m_params = newElemParms;
+        params_ = new_elem_parms;
     }
 
     /**
-     * @brief CompareTo() is a method to compare two CryptoParametersBase objects. It is called by operator==()
+     * @brief compare_to() is a method to compare two BaseCryptoParams objects. It is called by operator==()
      *
-     * @param rhs - the other CryptoParametersBase object to compare to.
-     * @return whether the two CryptoParametersBase objects are equivalent.
+     * @param rhs - the other BaseCryptoParams object to compare to.
+     * @return whether the two BaseCryptoParams objects are equivalent.
      */
-    virtual bool CompareTo(const CryptoParametersBase<Element>& rhs) const {
-        return (*m_encodingParams == *(rhs.m_encodingParams) && *m_params == *(rhs.m_params));
+    virtual bool compare_to(const BaseCryptoParams<Element>& rhs) const {
+        return (*encoding_params_ == *(rhs.encoding_params_) && *params_ == *(rhs.params_));
     }
 
     /**
@@ -260,18 +260,18 @@ class CryptoParametersBase : public Serializable {
      *
      * @param out the stream to print to.
      */
-    virtual void PrintParameters(std::ostream& out) const {
-        out << "Element Parameters: " << *m_params << std::endl;
-        out << "Encoding Parameters: " << *m_encodingParams << std::endl;
+    virtual void print_parameters(std::ostream& out) const {
+        out << "Element Parameters: " << *params_ << std::endl;
+        out << "Encoding Parameters: " << *encoding_params_ << std::endl;
     }
 
     /// element-specific parameters
-    std::shared_ptr<typename Element::Params> m_params;
+    std::shared_ptr<typename Element::Params> params_;
 
     /// encoding-specific parameters
-    EncodingParams m_encodingParams;
+    EncodingParams encoding_params_;
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_BASE_CRYPTO_PARAMS_H_

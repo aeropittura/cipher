@@ -48,112 +48,112 @@
 #include "cipher/util/inttypes.h"
 #include "cipher/util/parallel.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-std::complex<double>* DiscreteFourierTransform::rootOfUnityTable = nullptr;
-std::unordered_map<uint32_t, DiscreteFourierTransform::PrecomputedValues> DiscreteFourierTransform::precomputedValues;
+std::complex<double>* DiscreteFourierTransform::root_of_unity_table = nullptr;
+std::unordered_map<uint32_t, DiscreteFourierTransform::PrecomputedValues> DiscreteFourierTransform::precomputed_values;
 
 DiscreteFourierTransform::PrecomputedValues::PrecomputedValues(uint32_t m, uint32_t nh) {
-    m_M = m;
-    m_Nh = nh;
+    M_ = m;
+    nh_ = nh;
 
-    m_rotGroup.resize(m_Nh);
-    uint32_t fivePows = 1;
-    for (size_t i = 0; i < m_Nh; ++i) {
-        m_rotGroup[i] = fivePows;
-        fivePows *= 5;
-        fivePows %= m_M;
+    rot_group_.resize(nh_);
+    uint32_t five_pows = 1;
+    for (size_t i = 0; i < nh_; ++i) {
+        rot_group_[i] = five_pows;
+        five_pows *= 5;
+        five_pows %= M_;
     }
 
-    m_ksiPows.resize(m_M + 1);
-    for (size_t j = 0; j < m_M; ++j) {
-        double angle = 2.0 * M_PI * j / m_M;
-        m_ksiPows[j].real(cos(angle));
-        m_ksiPows[j].imag(sin(angle));
+    ksi_pows_.resize(M_ + 1);
+    for (size_t j = 0; j < M_; ++j) {
+        double angle = 2.0 * M_PI * j / M_;
+        ksi_pows_[j].real(cos(angle));
+        ksi_pows_[j].imag(sin(angle));
     }
 
-    m_ksiPows[m_M] = m_ksiPows[0];
+    ksi_pows_[M_] = ksi_pows_[0];
 
-    m_fwdTw.resize(m_Nh > 0 ? m_Nh - 1 : 0);
-    m_invTw.resize(m_fwdTw.size());
-    for (uint32_t lenh = 1; lenh <= m_Nh / 2; lenh <<= 1) {
+    fwd_tw_.resize(nh_ > 0 ? nh_ - 1 : 0);
+    inv_tw_.resize(fwd_tw_.size());
+    for (uint32_t lenh = 1; lenh <= nh_ / 2; lenh <<= 1) {
         uint32_t lenq = lenh << 3;
-        uint32_t gap = m_M / lenq;
-        auto* fwd = &m_fwdTw[lenh - 1];
-        auto* inv = &m_invTw[lenh - 1];
+        uint32_t gap = M_ / lenq;
+        auto* fwd = &fwd_tw_[lenh - 1];
+        auto* inv = &inv_tw_[lenh - 1];
         for (uint32_t j = 0; j < lenh; ++j) {
-            uint32_t rg = m_rotGroup[j] % lenq;
-            fwd[j] = m_ksiPows[rg * gap];
-            inv[j] = m_ksiPows[(lenq - rg) * gap];
+            uint32_t rg = rot_group_[j] % lenq;
+            fwd[j] = ksi_pows_[rg * gap];
+            inv[j] = ksi_pows_[(lenq - rg) * gap];
         }
     }
 }
 
-std::shared_mutex& DiscreteFourierTransform::PrecompMutex() {
+std::shared_mutex& DiscreteFourierTransform::precomp_mutex() {
     static std::shared_mutex mtx;
     return mtx;
 }
 
-const DiscreteFourierTransform::PrecomputedValues& DiscreteFourierTransform::GetPrecomp(uint32_t cyclOrder) {
-    std::shared_lock<std::shared_mutex> lock(PrecompMutex());
-    const auto it = precomputedValues.find(cyclOrder);
-    if (it == precomputedValues.end()) {
-        std::string errMsg("DiscreteFourierTransform::Initialize() must be called for cyclOrder = ");
-        errMsg += std::to_string(cyclOrder);
-        OPENFHE_THROW(errMsg);
+const DiscreteFourierTransform::PrecomputedValues& DiscreteFourierTransform::get_precomp(uint32_t cycl_order) {
+    std::shared_lock<std::shared_mutex> lock(precomp_mutex());
+    const auto it = precomputed_values.find(cycl_order);
+    if (it == precomputed_values.end()) {
+        std::string err_msg("DiscreteFourierTransform::Initialize() must be called for cyclOrder = ");
+        err_msg += std::to_string(cycl_order);
+        CIPHER_THROW(err_msg);
     }
     return it->second;
 }
 
-void DiscreteFourierTransform::Reset() {
-    if (rootOfUnityTable) {
-        delete[] rootOfUnityTable;
-        rootOfUnityTable = nullptr;
+void DiscreteFourierTransform::reset() {
+    if (root_of_unity_table) {
+        delete[] root_of_unity_table;
+        root_of_unity_table = nullptr;
     }
 }
 
 void DiscreteFourierTransform::Initialize(uint32_t m, uint32_t nh) {
-    // add a PrecomputedValues object to the map of precomputedValues only if it doesn't already exist for the given cyclotomic order
-    std::unique_lock<std::shared_mutex> lock(PrecompMutex());
-    precomputedValues.try_emplace(m, m, nh);
+    // add a PrecomputedValues object to the map of precomputed_values only if it doesn't already exist for the given cyclotomic order
+    std::unique_lock<std::shared_mutex> lock(precomp_mutex());
+    precomputed_values.try_emplace(m, m, nh);
 }
 
-void DiscreteFourierTransform::PreComputeTable(uint32_t s) {
-    Reset();
+void DiscreteFourierTransform::pre_compute_table(uint32_t s) {
+    reset();
 
-    rootOfUnityTable = new std::complex<double>[s];
+    root_of_unity_table = new std::complex<double>[s];
     for (size_t j = 0; j < s; j++) {
-        rootOfUnityTable[j] = std::polar(1.0, -2 * M_PI * j / s);
+        root_of_unity_table[j] = std::polar(1.0, -2 * M_PI * j / s);
     }
 }
 
-std::vector<std::complex<double>> DiscreteFourierTransform::FFTForwardTransform(std::vector<std::complex<double>>& A) {
+std::vector<std::complex<double>> DiscreteFourierTransform::fft_forward_transform(std::vector<std::complex<double>>& A) {
     uint32_t m = A.size();
     std::vector<std::complex<double>> B(A);
     uint32_t l = std::floor(std::log2(m));
 
     // static uint32_t maxMCached(262144);
     static uint32_t LOGM_MAX(18);  // maximum supported is 2^18 = 262144
-    static std::vector<uint32_t> cachedM(LOGM_MAX + 1, 0);
-    static std::vector<std::vector<double>> cosTable(LOGM_MAX + 1);
-    static std::vector<std::vector<double>> sinTable(LOGM_MAX + 1);
+    static std::vector<uint32_t> cached_m(LOGM_MAX + 1, 0);
+    static std::vector<std::vector<double>> cos_table(LOGM_MAX + 1);
+    static std::vector<std::vector<double>> sin_table(LOGM_MAX + 1);
 
 #pragma omp critical
     {
-        if (m != cachedM[l]) {
-            cachedM[l] = m;
-            sinTable[l].resize(m / 2);
-            cosTable[l].resize(m / 2);
+        if (m != cached_m[l]) {
+            cached_m[l] = m;
+            sin_table[l].resize(m / 2);
+            cos_table[l].resize(m / 2);
             for (uint32_t i = 0; i < m / 2; i++) {
-                cosTable[l][i] = cos(2 * M_PI * i / m);
-                sinTable[l][i] = sin(2 * M_PI * i / m);
+                cos_table[l][i] = cos(2 * M_PI * i / m);
+                sin_table[l][i] = sin(2 * M_PI * i / m);
             }
         }
     }
 
     // Bit-reversed addressing permutation
     for (uint32_t i = 0; i < m; i++) {
-        uint32_t j = ReverseBits(i, 32) >> (32 - l);
+        uint32_t j = reverse_bits(i, 32) >> (32 - l);
         if (j > i) {
             double temp = B[i].real();
             B[i].real(B[j].real());
@@ -170,8 +170,8 @@ std::vector<std::complex<double>> DiscreteFourierTransform::FFTForwardTransform(
         uint32_t tablestep = m / size;
         for (uint32_t i = 0; i < m; i += size) {
             for (uint32_t j = i, k = 0; j < i + halfsize; j++, k += tablestep) {
-                double tpre = B[j + halfsize].real() * cosTable[l][k] + B[j + halfsize].imag() * sinTable[l][k];
-                double tpim = -B[j + halfsize].real() * sinTable[l][k] + B[j + halfsize].imag() * cosTable[l][k];
+                double tpre = B[j + halfsize].real() * cos_table[l][k] + B[j + halfsize].imag() * sin_table[l][k];
+                double tpim = -B[j + halfsize].real() * sin_table[l][k] + B[j + halfsize].imag() * cos_table[l][k];
                 B[j + halfsize].real(B[j].real() - tpre);
                 B[j + halfsize].imag(B[j].imag() - tpim);
                 B[j].real(B[j].real() + tpre);
@@ -185,8 +185,8 @@ std::vector<std::complex<double>> DiscreteFourierTransform::FFTForwardTransform(
     return B;
 }
 
-std::vector<std::complex<double>> DiscreteFourierTransform::FFTInverseTransform(std::vector<std::complex<double>>& A) {
-    std::vector<std::complex<double>> result = DiscreteFourierTransform::FFTForwardTransform(A);
+std::vector<std::complex<double>> DiscreteFourierTransform::fft_inverse_transform(std::vector<std::complex<double>>& A) {
+    std::vector<std::complex<double>> result = DiscreteFourierTransform::fft_forward_transform(A);
     double n = result.size() / 2;
     for (int i = 0; i < n; i++) {
         result[i] = std::complex<double>(result[i].real() / n, result[i].imag() / n);
@@ -194,51 +194,51 @@ std::vector<std::complex<double>> DiscreteFourierTransform::FFTInverseTransform(
     return result;
 }
 
-std::vector<std::complex<double>> DiscreteFourierTransform::ForwardTransform(std::vector<std::complex<double>> A) {
+std::vector<std::complex<double>> DiscreteFourierTransform::forward_transform(std::vector<std::complex<double>> A) {
     int n = A.size();
     A.resize(2 * n);
     for (int i = 0; i < n; i++) {
         A[n + i] = 0;
     }
-    // if (rootOfUnityTable == nullptr) {
-    //   PreComputeTable(2 * n);
+    // if (root_of_unity_table == nullptr) {
+    //   pre_compute_table(2 * n);
     // }
-    std::vector<std::complex<double>> dft = FFTForwardTransform(A);
-    std::vector<std::complex<double>> dftRemainder(dft.size() / 2);
+    std::vector<std::complex<double>> dft = fft_forward_transform(A);
+    std::vector<std::complex<double>> dft_remainder(dft.size() / 2);
     size_t k = 0;
     for (int i = dft.size() - 1; i > 0; i--) {
         if (i % 2 != 0) {
-            dftRemainder[k] = dft[i];
+            dft_remainder[k] = dft[i];
             k++;
-            // dftRemainder.push_back(dft[i]);
+            // dft_remainder.push_back(dft[i]);
         }
     }
-    return dftRemainder;
+    return dft_remainder;
 }
 
-std::vector<std::complex<double>> DiscreteFourierTransform::InverseTransform(std::vector<std::complex<double>> A) {
+std::vector<std::complex<double>> DiscreteFourierTransform::inverse_transform(std::vector<std::complex<double>> A) {
     size_t n = A.size();
     std::vector<std::complex<double>> dft(2 * n);
     for (size_t i = 0; i < n; i++) {
         dft[2 * i] = 0;
         dft[2 * i + 1] = A[i];
     }
-    std::vector<std::complex<double>> invDft = FFTInverseTransform(dft);
-    std::vector<std::complex<double>> invDftRemainder(invDft.size() / 2);
-    for (size_t i = 0; i < invDft.size() / 2; i++) {
-        invDftRemainder[i] = invDft[i];
+    std::vector<std::complex<double>> inv_dft = fft_inverse_transform(dft);
+    std::vector<std::complex<double>> inv_dft_remainder(inv_dft.size() / 2);
+    for (size_t i = 0; i < inv_dft.size() / 2; i++) {
+        inv_dft_remainder[i] = inv_dft[i];
     }
-    return invDftRemainder;
+    return inv_dft_remainder;
 }
 
-void DiscreteFourierTransform::FFTSpecialInv(std::vector<std::complex<double>>& vals, uint32_t cyclOrder) {
-    const PrecomputedValues& pv = GetPrecomp(cyclOrder);
+void DiscreteFourierTransform::fft_special_inv(std::vector<std::complex<double>>& vals, uint32_t cycl_order) {
+    const PrecomputedValues& pv = get_precomp(cycl_order);
 
-    const size_t valsSize = vals.size();
-    for (size_t len = valsSize; len >= 2; len >>= 1) {
+    const size_t vals_size = vals.size();
+    for (size_t len = vals_size; len >= 2; len >>= 1) {
         const size_t lenh = len >> 1;
-        const auto* tw = &pv.m_invTw[lenh - 1];
-        for (size_t i = 0; i < valsSize; i += len) {
+        const auto* tw = &pv.inv_tw_[lenh - 1];
+        for (size_t i = 0; i < vals_size; i += len) {
             auto* lo = &vals[i];
             auto* hi = lo + lenh;
             for (size_t j = 0; j < lenh; ++j) {
@@ -255,21 +255,21 @@ void DiscreteFourierTransform::FFTSpecialInv(std::vector<std::complex<double>>& 
     }
     BitReverse(vals);
 
-    const double inv = 1.0 / static_cast<double>(valsSize);
-    for (size_t i = 0; i < valsSize; ++i) {
+    const double inv = 1.0 / static_cast<double>(vals_size);
+    for (size_t i = 0; i < vals_size; ++i) {
         vals[i] *= inv;
     }
 }
 
-void DiscreteFourierTransform::FFTSpecial(std::vector<std::complex<double>>& vals, uint32_t cyclOrder) {
-    const PrecomputedValues& pv = GetPrecomp(cyclOrder);
+void DiscreteFourierTransform::fft_special(std::vector<std::complex<double>>& vals, uint32_t cycl_order) {
+    const PrecomputedValues& pv = get_precomp(cycl_order);
 
     BitReverse(vals);
-    const size_t valsSize = vals.size();
-    for (size_t len = 2; len <= valsSize; len <<= 1) {
+    const size_t vals_size = vals.size();
+    for (size_t len = 2; len <= vals_size; len <<= 1) {
         const size_t lenh = len >> 1;
-        const auto* tw = &pv.m_fwdTw[lenh - 1];
-        for (size_t i = 0; i < valsSize; i += len) {
+        const auto* tw = &pv.fwd_tw_[lenh - 1];
+        for (size_t i = 0; i < vals_size; i += len) {
             auto* lo = &vals[i];
             auto* hi = lo + lenh;
             for (size_t j = 0; j < lenh; ++j) {
@@ -300,4 +300,4 @@ void DiscreteFourierTransform::BitReverse(std::vector<std::complex<double>>& val
     }
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher

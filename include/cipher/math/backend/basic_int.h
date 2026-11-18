@@ -42,15 +42,15 @@
 #define COMPOSITESCALING_MAX_MODULUS_SIZE 121
 
 // clang-format off
-#if NATIVEINT == 128
+#if CIPHER_NATIVE_INT == 128
     #define MAX_MODULUS_SIZE MAX_MODULUS_SIZE128
     using BasicInteger    = unsigned __int128;
     using DoubleNativeInt = unsigned __int128;
     using uint128_t       = unsigned __int128;
     using int128_t        = __int128;
-#elif NATIVEINT == 64
+#elif CIPHER_NATIVE_INT == 64
     #define MAX_MODULUS_SIZE MAX_MODULUS_SIZE64
-    #if defined(HAVE_INT128)
+    #if defined(CIPHER_HAVE_INT128)
         using BasicInteger    = uint64_t;
         using DoubleNativeInt = unsigned __int128;
         using uint128_t       = unsigned __int128;
@@ -61,7 +61,7 @@
         using uint128_t       = uint64_t;
         using int128_t        = int64_t;
     #endif
-#elif NATIVEINT == 32
+#elif CIPHER_NATIVE_INT == 32
     #define MAX_MODULUS_SIZE MAX_MODULUS_SIZE32
     using BasicInteger    = uint32_t;
     using DoubleNativeInt = uint64_t;

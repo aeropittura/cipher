@@ -51,7 +51,7 @@
 #include "cipher/util/inttypes.h"
 #include "cipher/util/utilities.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 template <typename Element>
 void switch_format_simple_single_crt(const std::string& msg) {
@@ -73,20 +73,20 @@ void switch_format_simple_single_crt(const std::string& msg) {
     Element x3(x3p, Format::COEFFICIENT);
     x3 = {9647, 1987};
 
-    Element x1Clone(x1);
-    Element x2Clone(x2);
-    Element x3Clone(x3);
+    Element x1_clone(x1);
+    Element x2_clone(x2);
+    Element x3_clone(x3);
 
-    x1.SwitchFormat();
-    x2.SwitchFormat();
-    x3.SwitchFormat();
-    x1.SwitchFormat();
-    x2.SwitchFormat();
-    x3.SwitchFormat();
+    x1.switch_format();
+    x2.switch_format();
+    x3.switch_format();
+    x1.switch_format();
+    x2.switch_format();
+    x3.switch_format();
 
-    EXPECT_EQ(x1, x1Clone) << msg;
-    EXPECT_EQ(x2, x2Clone) << msg;
-    EXPECT_EQ(x3, x3Clone) << msg;
+    EXPECT_EQ(x1, x1_clone) << msg;
+    EXPECT_EQ(x2, x2_clone) << msg;
+    EXPECT_EQ(x3, x3_clone) << msg;
 }
 
 TEST(UTNTT, switch_format_simple_single_crt) {
@@ -99,7 +99,7 @@ void switch_format_simple_double_crt(const std::string& msg) {
     uint32_t init_size = 2;
     uint32_t init_bits = 28;
 
-    auto params = std::make_shared<ILDCRTParams<typename Element::Integer>>(init_m, init_size, init_bits);
+    auto params = std::make_shared<RnsParams<typename Element::Integer>>(init_m, init_size, init_bits);
 
     Element x1(params, Format::COEFFICIENT);
     x1 = {431, 3414, 1234, 7845, 2145, 7415, 5471, 8452};
@@ -107,16 +107,16 @@ void switch_format_simple_double_crt(const std::string& msg) {
     Element x2(params, Format::COEFFICIENT);
     x2 = {4127, 9647, 1987, 5410, 6541, 7014, 9741, 1256};
 
-    Element x1Clone(x1);
-    Element x2Clone(x2);
+    Element x1_clone(x1);
+    Element x2_clone(x2);
 
-    x1.SwitchFormat();
-    x2.SwitchFormat();
-    x1.SwitchFormat();
-    x2.SwitchFormat();
+    x1.switch_format();
+    x2.switch_format();
+    x1.switch_format();
+    x2.switch_format();
 
-    EXPECT_EQ(x1, x1Clone) << msg;
-    EXPECT_EQ(x2, x2Clone) << msg;
+    EXPECT_EQ(x1, x1_clone) << msg;
+    EXPECT_EQ(x2, x2_clone) << msg;
 }
 
 TEST(UTNTT, switch_format_simple_double_crt) {

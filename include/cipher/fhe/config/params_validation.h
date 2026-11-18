@@ -33,14 +33,14 @@
 
 #include "cipher/fhe/config/params.h"
 
-namespace lbcrypto {
+namespace cipher {
 /**
  * @brief Validate parameters for generating cryptocontext. Doesn't validate the parameters which set functions
  *        are disabled as they cannot be set by users
  * @param parameters scheme-specific parameters to generate cryptocontext
  */
-void validateParametersForCryptocontext(const Params& parameters);
+void validate_parameters_for_cryptocontext(const Params& parameters);
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_CONFIG_PARAMS_VALIDATION_H_

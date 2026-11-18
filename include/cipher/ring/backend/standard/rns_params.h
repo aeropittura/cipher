@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  Wraps parameters for integer lattice operations using double-CRT representation. Inherits from ElemParams
+  Wraps parameters for integer lattice operations using double-CRT representation. Inherits from ElementParams
  */
 
 #ifndef CIPHER_RING_BACKEND_STANDARD_RNS_PARAMS_H_
@@ -51,7 +51,7 @@
 #include "cipher/util/exception.h"
 #include "cipher/util/inttypes.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Parameters for array of ideal lattices (used for Double-CRT).
@@ -66,10 +66,10 @@ namespace lbcrypto {
  * Heidelberg
  */
 template <typename IntType>
-class ILDCRTParams final : public ElemParams<IntType> {
+class RnsParams final : public ElementParams<IntType> {
   public:
     using Integer = IntType;
-    using ILNativeParams = ILParamsImpl<NativeInteger>;
+    using NativePolyParams = PolyParamsImpl<NativeInteger>;
 
     /**
      * @brief Constructor building the tower chain for a target composite modulus: native primes of MAX_MODULUS_SIZE
@@ -79,73 +79,73 @@ class ILDCRTParams final : public ElemParams<IntType> {
      *
      * @param corder the cyclotomic order.
      * @param modulus the lower bound on the composite modulus.
-     * @param rootOfUnity not used; the root of unity of each tower is computed from its modulus.
+     * @param root_of_unity_value not used; the root of unity of each tower is computed from its modulus.
      */
-    ILDCRTParams(uint32_t corder, const IntType& modulus, const IntType& rootOfUnity = IntType(0))
-        : ElemParams<IntType>(corder, modulus) {
+    RnsParams(uint32_t corder, const IntType& modulus, const IntType& root_of_unity_value = IntType(0))
+        : ElementParams<IntType>(corder, modulus) {
         // NOTE params generation uses this constructor to make an empty params that
         // it will later populate during the gen process. For that special case...
         // we don't populate, and we just return
         if (corder == 0)
             return;
 
-        auto q{LastPrime<NativeInteger>(MAX_MODULUS_SIZE, corder)};
-        m_params.reserve(32);
-        m_params.push_back(std::make_shared<ILNativeParams>(corder, q));
+        auto q{last_prime<NativeInteger>(MAX_MODULUS_SIZE, corder)};
+        params_.reserve(32);
+        params_.push_back(std::make_shared<NativePolyParams>(corder, q));
 
-        IntType compositeModulus(1);
-        while ((compositeModulus *= IntType(q.template ConvertToInt<BasicInteger>())) < modulus)
-            m_params.push_back(std::make_shared<ILNativeParams>(corder, (q = PreviousPrime(q, corder))));
-        ElemParams<IntType>::m_ciphertextModulus = compositeModulus;
+        IntType composite_modulus(1);
+        while ((composite_modulus *= IntType(q.template convert_to_int<BasicInteger>())) < modulus)
+            params_.push_back(std::make_shared<NativePolyParams>(corder, (q = previous_prime(q, corder))));
+        ElementParams<IntType>::ciphertext_modulus_ = composite_modulus;
     }
 
     /**
      * @brief Constructor with basic parameter set.
-     * q is selected as LastPrime(bits, order)
+     * q is selected as last_prime(bits, order)
      * @param corder the order of the ciphertext.
      * @param depth is the size of the tower.
      * @param bits is the number of bits of each tower's moduli.
      */
-    explicit ILDCRTParams(uint32_t corder = 0, uint32_t depth = 1, uint32_t bits = MAX_MODULUS_SIZE)
-        : ElemParams<IntType>(corder, 0) {
+    explicit RnsParams(uint32_t corder = 0, uint32_t depth = 1, uint32_t bits = MAX_MODULUS_SIZE)
+        : ElementParams<IntType>(corder, 0) {
         if (corder == 0)
             return;
         if (bits > MAX_MODULUS_SIZE)
-            OPENFHE_THROW("Invalid bits for ILDCRTParams");
+            CIPHER_THROW("Invalid bits for ILDCRTParams");
 
-        auto q{LastPrime<NativeInteger>(bits, corder)};
-        m_params.reserve(depth);
-        m_params.push_back(std::make_shared<ILNativeParams>(corder, q));
+        auto q{last_prime<NativeInteger>(bits, corder)};
+        params_.reserve(depth);
+        params_.push_back(std::make_shared<NativePolyParams>(corder, q));
 
-        IntType compositeModulus(q.template ConvertToInt<BasicInteger>());
+        IntType composite_modulus(q.template convert_to_int<BasicInteger>());
         for (uint32_t _ = 1; _ < depth; ++_) {
-            m_params.push_back(std::make_shared<ILNativeParams>(corder, (q = PreviousPrime(q, corder))));
-            compositeModulus *= IntType(q.template ConvertToInt<BasicInteger>());
+            params_.push_back(std::make_shared<NativePolyParams>(corder, (q = previous_prime(q, corder))));
+            composite_modulus *= IntType(q.template convert_to_int<BasicInteger>());
         }
-        ElemParams<IntType>::m_ciphertextModulus = compositeModulus;
+        ElementParams<IntType>::ciphertext_modulus_ = composite_modulus;
     }
 
     /**
      * @brief Constructor with some pre-computed parameters provided as input.
      * @param corder the order of the ciphertext
      * @param moduli the list of the smaller moduli of the component polynomials.
-     * @param rootsOfUnity the list of the smaller roots of unity of the component
+     * @param roots_of_unity_value the list of the smaller roots of unity of the component
      * polynomials.
      */
-    ILDCRTParams(uint32_t corder, const std::vector<NativeInteger>& moduli,
-                 const std::vector<NativeInteger>& rootsOfUnity)
-        : ElemParams<IntType>(corder, 0) {
+    RnsParams(uint32_t corder, const std::vector<NativeInteger>& moduli,
+                 const std::vector<NativeInteger>& roots_of_unity_value)
+        : ElementParams<IntType>(corder, 0) {
         size_t limbs{moduli.size()};
-        if (limbs != rootsOfUnity.size())
-            OPENFHE_THROW("sizes of moduli and roots of unity do not match 1");
+        if (limbs != roots_of_unity_value.size())
+            CIPHER_THROW("sizes of moduli and roots of unity do not match 1");
 
-        m_params.reserve(limbs);
-        IntType compositeModulus(1);
+        params_.reserve(limbs);
+        IntType composite_modulus(1);
         for (size_t i = 0; i < limbs; ++i) {
-            m_params.push_back(std::make_shared<ILNativeParams>(corder, moduli[i], rootsOfUnity[i]));
-            compositeModulus *= IntType(moduli[i].template ConvertToInt<BasicInteger>());
+            params_.push_back(std::make_shared<NativePolyParams>(corder, moduli[i], roots_of_unity_value[i]));
+            composite_modulus *= IntType(moduli[i].template convert_to_int<BasicInteger>());
         }
-        ElemParams<IntType>::m_ciphertextModulus = compositeModulus;
+        ElementParams<IntType>::ciphertext_modulus_ = composite_modulus;
     }
 
     /**
@@ -155,26 +155,26 @@ class ILDCRTParams final : public ElemParams<IntType> {
      *
      * @param corder the cyclotomic order.
      * @param moduli the moduli of the component polynomials.
-     * @param rootsOfUnity the roots of unity of the component polynomials.
-     * @param moduliBig the big moduli of the component polynomials.
-     * @param rootsOfUnityBig the big roots of unity of the component polynomials.
+     * @param roots_of_unity_value the roots of unity of the component polynomials.
+     * @param moduli_big the big moduli of the component polynomials.
+     * @param roots_of_unity_big the big roots of unity of the component polynomials.
      */
-    ILDCRTParams(uint32_t corder, const std::vector<NativeInteger>& moduli,
-                 const std::vector<NativeInteger>& rootsOfUnity, const std::vector<NativeInteger>& moduliBig,
-                 const std::vector<NativeInteger>& rootsOfUnityBig)
-        : ElemParams<IntType>(corder, 0) {
+    RnsParams(uint32_t corder, const std::vector<NativeInteger>& moduli,
+                 const std::vector<NativeInteger>& roots_of_unity_value, const std::vector<NativeInteger>& moduli_big,
+                 const std::vector<NativeInteger>& roots_of_unity_big)
+        : ElementParams<IntType>(corder, 0) {
         size_t limbs{moduli.size()};
-        if (limbs != rootsOfUnity.size() || limbs != moduliBig.size() || limbs != rootsOfUnityBig.size())
-            OPENFHE_THROW("sizes of moduli and roots of unity do not match 2");
+        if (limbs != roots_of_unity_value.size() || limbs != moduli_big.size() || limbs != roots_of_unity_big.size())
+            CIPHER_THROW("sizes of moduli and roots of unity do not match 2");
 
-        m_params.reserve(limbs);
-        IntType compositeModulus(1);
+        params_.reserve(limbs);
+        IntType composite_modulus(1);
         for (size_t i = 0; i < limbs; ++i) {
-            m_params.push_back(std::make_shared<ILNativeParams>(corder, moduli[i], rootsOfUnity[i], moduliBig[i],
-                                                                rootsOfUnityBig[i]));
-            compositeModulus *= IntType(moduli[i].template ConvertToInt<BasicInteger>());
+            params_.push_back(std::make_shared<NativePolyParams>(corder, moduli[i], roots_of_unity_value[i], moduli_big[i],
+                                                                roots_of_unity_big[i]));
+            composite_modulus *= IntType(moduli[i].template convert_to_int<BasicInteger>());
         }
-        ElemParams<IntType>::m_ciphertextModulus = compositeModulus;
+        ElementParams<IntType>::ciphertext_modulus_ = composite_modulus;
     }
 
     /**
@@ -185,15 +185,15 @@ class ILDCRTParams final : public ElemParams<IntType> {
      * @param corder the order of the ciphertext
      * @param moduli is the tower of moduli
      */
-    ILDCRTParams(uint32_t corder, const std::vector<NativeInteger>& moduli) : ElemParams<IntType>(corder, 0) {
+    RnsParams(uint32_t corder, const std::vector<NativeInteger>& moduli) : ElementParams<IntType>(corder, 0) {
         size_t limbs{moduli.size()};
-        m_params.reserve(limbs);
-        IntType compositeModulus(1);
+        params_.reserve(limbs);
+        IntType composite_modulus(1);
         for (size_t i = 0; i < limbs; ++i) {
-            m_params.push_back(std::make_shared<ILNativeParams>(corder, moduli[i]));
-            compositeModulus *= IntType(moduli[i].template ConvertToInt<BasicInteger>());
+            params_.push_back(std::make_shared<NativePolyParams>(corder, moduli[i]));
+            composite_modulus *= IntType(moduli[i].template convert_to_int<BasicInteger>());
         }
-        ElemParams<IntType>::m_ciphertextModulus = compositeModulus;
+        ElementParams<IntType>::ciphertext_modulus_ = composite_modulus;
     }
 
     /**
@@ -203,31 +203,31 @@ class ILDCRTParams final : public ElemParams<IntType> {
      * against the component moduli.
      * @param params the componet parameters.
      */
-    ILDCRTParams(uint32_t corder, const std::vector<std::shared_ptr<ILNativeParams>>& params)
-        : ElemParams<IntType>(corder, 0), m_params(params) {
-        RecalculateModulus();
+    RnsParams(uint32_t corder, const std::vector<std::shared_ptr<NativePolyParams>>& params)
+        : ElementParams<IntType>(corder, 0), params_(params) {
+        recalculate_modulus();
     }
 
-    ILDCRTParams(const ILDCRTParams& rhs) : ElemParams<IntType>(rhs), m_params(rhs.m_params) {}
+    RnsParams(const RnsParams& rhs) : ElementParams<IntType>(rhs), params_(rhs.params_) {}
 
-    ILDCRTParams(ILDCRTParams&& rhs) noexcept
-        : ElemParams<IntType>(std::move(rhs)), m_params(std::move(rhs.m_params)) {}
+    RnsParams(RnsParams&& rhs) noexcept
+        : ElementParams<IntType>(std::move(rhs)), params_(std::move(rhs.params_)) {}
 
     /**
      * Assignment Operator.
      *
-     * @param rhs the copied ILDCRTParams.
-     * @return the resulting ILDCRTParams.
+     * @param rhs the copied RnsParams.
+     * @return the resulting RnsParams.
      */
-    ILDCRTParams& operator=(const ILDCRTParams& rhs) {
-        ElemParams<IntType>::operator=(rhs);
-        m_params = rhs.m_params;
+    RnsParams& operator=(const RnsParams& rhs) {
+        ElementParams<IntType>::operator=(rhs);
+        params_ = rhs.params_;
         return *this;
     }
 
-    ILDCRTParams& operator=(ILDCRTParams&& rhs) noexcept {
-        ElemParams<IntType>::operator=(std::move(rhs));
-        m_params = std::move(rhs.m_params);
+    RnsParams& operator=(RnsParams&& rhs) noexcept {
+        ElementParams<IntType>::operator=(std::move(rhs));
+        params_ = std::move(rhs.params_);
         return *this;
     }
 
@@ -236,8 +236,8 @@ class ILDCRTParams final : public ElemParams<IntType> {
      * @brief Getter method for the component parameters.
      * @return A vector of the component polynomial parameters.
      */
-    const std::vector<std::shared_ptr<ILNativeParams>>& GetParams() const {
-        return m_params;
+    const std::vector<std::shared_ptr<NativePolyParams>>& get_params() const {
+        return params_;
     }
 
     /**
@@ -247,11 +247,11 @@ class ILDCRTParams final : public ElemParams<IntType> {
      * @param end The index of the last tower to include.
      * @return A vector of the component polynomial parameters.
      */
-    std::vector<std::shared_ptr<ILNativeParams>> GetParamPartition(uint32_t start, uint32_t end) const {
-        if (end < start || end >= m_params.size())
-            OPENFHE_THROW("Incorrect parameters for GetParamPartition - (start: " + std::to_string(start) +
+    std::vector<std::shared_ptr<NativePolyParams>> get_param_partition(uint32_t start, uint32_t end) const {
+        if (end < start || end >= params_.size())
+            CIPHER_THROW("Incorrect parameters for GetParamPartition - (start: " + std::to_string(start) +
                           ", end:" + std::to_string(end) + ")");
-        return std::vector<std::shared_ptr<ILNativeParams>>(m_params.begin() + start, m_params.begin() + end + 1);
+        return std::vector<std::shared_ptr<NativePolyParams>>(params_.begin() + start, params_.begin() + end + 1);
     }
 
     /**
@@ -260,8 +260,8 @@ class ILDCRTParams final : public ElemParams<IntType> {
      * unguarded if the index is out of bounds.
      * @return the parameters at index i.
      */
-    std::shared_ptr<ILNativeParams>& operator[](size_t i) {
-        return m_params[i];
+    std::shared_ptr<NativePolyParams>& operator[](size_t i) {
+        return params_[i];
     }
     /**
      * @brief Const version of operator[](): the component parameters at index i, unguarded.
@@ -269,8 +269,8 @@ class ILDCRTParams final : public ElemParams<IntType> {
      * @param i the index of the parameters to return.
      * @return the parameters at index i.
      */
-    const std::shared_ptr<ILNativeParams>& operator[](size_t i) const {
-        return m_params[i];
+    const std::shared_ptr<NativePolyParams>& operator[](size_t i) const {
+        return params_[i];
     }
 
     /**
@@ -278,50 +278,50 @@ class ILDCRTParams final : public ElemParams<IntType> {
      *
      */
 
-    void PopLastParam() {
-        ElemParams<IntType>::m_ciphertextModulus /=
-                IntType(m_params.back()->GetModulus().template ConvertToInt<BasicInteger>());
-        m_params.pop_back();
+    void pop_last_param() {
+        ElementParams<IntType>::ciphertext_modulus_ /=
+                IntType(params_.back()->get_modulus().template convert_to_int<BasicInteger>());
+        params_.pop_back();
     }
 
     /**
      * @brief Removes the first parameter set and adjust the multiplied moduli.
      *
      */
-    void PopFirstParam() {
-        ElemParams<IntType>::m_ciphertextModulus /=
-                IntType(m_params[0]->GetModulus().template ConvertToInt<BasicInteger>());
-        m_params.erase(m_params.begin());
+    void pop_first_param() {
+        ElementParams<IntType>::ciphertext_modulus_ /=
+                IntType(params_[0]->get_modulus().template convert_to_int<BasicInteger>());
+        params_.erase(params_.begin());
     }
 
     /**
      * Destructor.
      */
-    ~ILDCRTParams() override = default;
+    ~RnsParams() override = default;
 
     /**
-     * @brief Equality operator checks if the ElemParams are the same.
+     * @brief Equality operator checks if the ElementParams are the same.
      *
-     * @param other ElemParams to compare against.
+     * @param other ElementParams to compare against.
      * @return the equality check results.
      */
-    bool operator==(const ElemParams<IntType>& other) const override {
+    bool operator==(const ElementParams<IntType>& other) const override {
         // ATTENTION: the following changes was made to fix failures in openfhe-python tests linked with clang++-18
         // ========================================================================================================
-        // make sure that "other" is of the ILDCRTParams<IntType> datatype as we have to "static_cast" it.
-        // dynamic_cast doesn't work. only after removing "final" from ILDCRTParams, dynamic_cast starts working.
+        // make sure that "other" is of the RnsParams<IntType> datatype as we have to "static_cast" it.
+        // dynamic_cast doesn't work. only after removing "final" from RnsParams, dynamic_cast starts working.
         // it suggests that clang handles "final" differently in templates. most likely, it optimizes some things
         // more aggressively, which affects RTTI and base class behavior (especially in templates).
-        if (typeid(other) != typeid(ILDCRTParams<IntType>))
+        if (typeid(other) != typeid(RnsParams<IntType>))
             return false;
-        const auto& dcrtParams = static_cast<const ILDCRTParams<IntType>&>(other);
+        const auto& dcrt_params = static_cast<const RnsParams<IntType>&>(other);
 
-        if (ElemParams<IntType>::operator==(dcrtParams) == false)
+        if (ElementParams<IntType>::operator==(dcrt_params) == false)
             return false;
-        if (m_params.size() != dcrtParams.m_params.size())
+        if (params_.size() != dcrt_params.params_.size())
             return false;
-        for (size_t i = 0; i < m_params.size(); ++i) {
-            if (*m_params[i] != *(dcrtParams.m_params[i]))
+        for (size_t i = 0; i < params_.size(); ++i) {
+            if (*params_[i] != *(dcrt_params.params_[i]))
                 return false;
         }
         return true;
@@ -331,62 +331,62 @@ class ILDCRTParams final : public ElemParams<IntType> {
      * @brief Method to recalculate the composite modulus from the component
      * moduli.
      */
-    void RecalculateModulus() {
-        ElemParams<IntType>::m_ciphertextModulus = 1;
-        for (size_t i = 0; i < m_params.size(); ++i)
-            ElemParams<IntType>::m_ciphertextModulus *=
-                    IntType(m_params[i]->GetModulus().template ConvertToInt<BasicInteger>());
+    void recalculate_modulus() {
+        ElementParams<IntType>::ciphertext_modulus_ = 1;
+        for (size_t i = 0; i < params_.size(); ++i)
+            ElementParams<IntType>::ciphertext_modulus_ *=
+                    IntType(params_[i]->get_modulus().template convert_to_int<BasicInteger>());
     }
 
     /**
      * @brief Method to recalculate the big composite modulus from the component
      * moduli.
      */
-    void RecalculateBigModulus() {
-        ElemParams<IntType>::m_bigCiphertextModulus = 1;
-        for (size_t i = 0; i < m_params.size(); ++i)
-            ElemParams<IntType>::m_bigCiphertextModulus *=
-                    IntType(m_params[i]->GetBigModulus().template ConvertToInt<BasicInteger>());
+    void recalculate_big_modulus() {
+        ElementParams<IntType>::big_ciphertext_modulus_ = 1;
+        for (size_t i = 0; i < params_.size(); ++i)
+            ElementParams<IntType>::big_ciphertext_modulus_ *=
+                    IntType(params_[i]->get_big_modulus().template convert_to_int<BasicInteger>());
     }
 
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
-        ar(::cereal::base_class<ElemParams<IntType>>(this));
-        ar(::cereal::make_nvp("p", m_params));
+        ar(::cereal::base_class<ElementParams<IntType>>(this));
+        ar(::cereal::make_nvp("p", params_));
     }
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
-        ar(::cereal::base_class<ElemParams<IntType>>(this));
-        ar(::cereal::make_nvp("p", m_params));
+        ar(::cereal::base_class<ElementParams<IntType>>(this));
+        ar(::cereal::make_nvp("p", params_));
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "DCRTParams";
     }
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 
   protected:
     std::ostream& doprint(std::ostream& out) const override {
         out << "ILDCRTParams ";
-        ElemParams<IntType>::doprint(out);
+        ElementParams<IntType>::doprint(out);
         out << std::endl << "  m_params:" << std::endl;
-        for (size_t i = 0; i < m_params.size(); ++i)
-            out << "    " << i << ": " << *m_params[i];
+        for (size_t i = 0; i < params_.size(); ++i)
+            out << "    " << i << ": " << *params_[i];
         return out << std::endl;
     }
 
   private:
-    // array of smaller ILParams
-    std::vector<std::shared_ptr<ILNativeParams>> m_params;
+    // array of smaller PolyParams
+    std::vector<std::shared_ptr<NativePolyParams>> params_;
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_RING_BACKEND_STANDARD_RNS_PARAMS_H_

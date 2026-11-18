@@ -43,29 +43,29 @@
 
 #include "cipher/cipher.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 int main(int argc, char* argv[]) {
     TimeVar t;
 
-    double timeEvalLinearWSum(0.0);
+    double time_eval_linear_w_sum(0.0);
 
     std::cout << "\n======EXAMPLE FOR EVAL LINEAR WEIGHTED SUM========\n" << std::endl;
 
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(1);
-    parameters.SetScalingModSize(50);
-    parameters.SetBatchSize(8);
-    parameters.SetSecurityLevel(HEStd_NotSet);
-    parameters.SetRingDim(2048);
-    parameters.SetScalingTechnique(FLEXIBLEAUTO);
-    parameters.SetFirstModSize(60);
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_multiplicative_depth(1);
+    parameters.set_scaling_mod_size(50);
+    parameters.set_batch_size(8);
+    parameters.set_security_level(HEStd_NotSet);
+    parameters.set_ring_dim(2048);
+    parameters.set_scaling_technique(FLEXIBLEAUTO);
+    parameters.set_first_mod_size(60);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
 
     std::vector<std::vector<std::complex<double>>> input;
 
@@ -77,51 +77,51 @@ int main(int argc, char* argv[]) {
     input.push_back({0.5, 0.7, -1.9, 2.95, 1.96, 0.0});
     input.push_back({0.0, 0.0, 1.0, 0.0, 0.0, 0.0});
 
-    size_t encodedLength = input.size();
+    size_t encoded_length = input.size();
 
     std::vector<double> coefficients({0.15, 0.75, 1.25, 1, 0, 0.5, 0.5});
 
-    auto keyPair = cc->KeyGen();
+    auto key_pair = cc->key_gen();
 
     std::cout << "Generating evaluation key for homomorphic multiplication...";
-    cc->EvalMultKeyGen(keyPair.secretKey);
+    cc->eval_mult_key_gen(key_pair.secret_key);
     std::cout << "Completed." << std::endl;
 
-    std::vector<ReadOnlyCiphertext<DCRTPoly>> ciphertextVec;
-    for (uint32_t i = 0; i < encodedLength; ++i) {
-        Plaintext plaintext = cc->MakeCKKSPackedPlaintext(input[i]);
-        ciphertextVec.push_back(cc->Encrypt(keyPair.publicKey, plaintext));
+    std::vector<ReadOnlyCiphertext<RnsPoly>> ciphertext_vec;
+    for (uint32_t i = 0; i < encoded_length; ++i) {
+        Plaintext plaintext = cc->make_ckks_packed_plaintext(input[i]);
+        ciphertext_vec.push_back(cc->encrypt(key_pair.public_key, plaintext));
     }
 
     TIC(t);
 
-    auto result = cc->EvalLinearWSum(ciphertextVec, coefficients);
+    auto result = cc->eval_linear_w_sum(ciphertext_vec, coefficients);
 
-    timeEvalLinearWSum = TOC(t);
+    time_eval_linear_w_sum = TOC(t);
 
-    std::vector<std::complex<double>> unencIP;
+    std::vector<std::complex<double>> unenc_ip;
     for (uint32_t i = 0; i < input[0].size(); ++i) {
         std::complex<double> x = 0;
-        for (uint32_t j = 0; j < encodedLength; ++j) {
+        for (uint32_t j = 0; j < encoded_length; ++j) {
             x += input[j][i] * coefficients[j];
         }
-        unencIP.push_back(x);
+        unenc_ip.push_back(x);
     }
 
-    Plaintext plaintextDec;
+    Plaintext plaintext_dec;
 
-    cc->Decrypt(keyPair.secretKey, result, &plaintextDec);
+    cc->decrypt(key_pair.secret_key, result, &plaintext_dec);
 
-    plaintextDec->SetLength(encodedLength);
+    plaintext_dec->set_length(encoded_length);
 
     std::cout << std::setprecision(10) << std::endl;
 
     std::cout << "\n Result of evaluating a linear weighted sum with coefficients " << coefficients << " \n";
-    std::cout << plaintextDec << std::endl;
+    std::cout << plaintext_dec << std::endl;
 
-    std::cout << "\n Expected result: " << unencIP << std::endl;
+    std::cout << "\n Expected result: " << unenc_ip << std::endl;
 
-    std::cout << "\n Evaluation time: " << timeEvalLinearWSum << " ms" << std::endl;
+    std::cout << "\n Evaluation time: " << time_eval_linear_w_sum << " ms" << std::endl;
 
     return 0;
 }

@@ -40,12 +40,12 @@
 
 #include "cipher/boolean/context.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 int main() {
     // Sample Program: Step 1: Set CryptoContext
 
-    auto cc = BinFHEContext();
+    auto cc = BooleanContext();
 
     // Set the ciphertext modulus to be 1 << 23
     // Note that normally we do not use this way to obtain the input ciphertext.
@@ -53,47 +53,47 @@ int main() {
     // modulus is already provided (e.g., by extracting from a CKKS ciphertext).
     // However, we do not provide such a step in this example.
     // Therefore, we use a brute force way to create a large LWE ciphertext.
-    uint32_t logQ = 23;
-    cc.GenerateBinFHEContext(STD128, false, logQ, 0, GINX, false);
+    uint32_t log_q = 23;
+    cc.generate_boolean_context(STD128, false, log_q, 0, GINX, false);
 
-    uint32_t Q = 1 << logQ;
+    uint32_t Q = 1 << log_q;
 
     int q = 4096;                                                    // q
-    int factor = 1 << int(logQ - std::log2(q));                      // Q/q
-    uint64_t P = cc.GetMaxPlaintextSpace().ConvertToInt() * factor;  // Obtain the maximum plaintext space
+    int factor = 1 << int(log_q - std::log2(q));                      // Q/q
+    uint64_t P = cc.get_max_plaintext_space().convert_to_int() * factor;  // Obtain the maximum plaintext space
 
     // Sample Program: Step 2: Key Generation
     // Generate the secret key
-    auto sk = cc.KeyGen();
+    auto sk = cc.key_gen();
 
     std::cout << "Generating the bootstrapping keys..." << std::endl;
 
     // Generate the bootstrapping keys (refresh and switching keys)
-    cc.BTKeyGen(sk);
+    cc.bt_key_gen(sk);
 
     std::cout << "Completed the key generation." << std::endl;
 
     // Sample Program: Step 3: Encryption
-    auto ct1 = cc.Encrypt(sk, P / 2 + 1, LARGE_DIM, P, Q);
+    auto ct1 = cc.encrypt(sk, P / 2 + 1, LARGE_DIM, P, Q);
     std::cout << "Encrypted value: " << P / 2 + 1 << std::endl;
 
     // Sample Program: Step 4: Evaluation
     // Decompose the large ciphertext into small ciphertexts that fit in q
-    auto decomp = cc.EvalDecomp(ct1);
+    auto decomp = cc.eval_decomp(ct1);
 
     // Sample Program: Step 5: Decryption
-    uint64_t p = cc.GetMaxPlaintextSpace().ConvertToInt();
+    uint64_t p = cc.get_max_plaintext_space().convert_to_int();
     std::cout << "Decomposed value: ";
     for (size_t i = 0; i < decomp.size(); i++) {
         ct1 = decomp[i];
-        LWEPlaintext result;
+        LwePlaintext result;
         if (i == decomp.size() - 1) {
-            // after every evalfloor, the least significant digit is dropped so the last modulus is computed as log p = (log P) mod (log GetMaxPlaintextSpace)
-            auto logp = GetMSB(P - 1) % GetMSB(p - 1);
+            // after every evalfloor, the least significant digit is dropped so the last modulus is computed as log p = (log P) mod (log get_max_plaintext_space)
+            auto logp = get_msb(P - 1) % get_msb(p - 1);
             p = 1 << logp;
         }
-        cc.Decrypt(sk, ct1, &result, p);
-        std::cout << "(" << result << " * " << cc.GetMaxPlaintextSpace() << "^" << i << ")";
+        cc.decrypt(sk, ct1, &result, p);
+        std::cout << "(" << result << " * " << cc.get_max_plaintext_space() << "^" << i << ")";
         if (i != decomp.size() - 1) {
             std::cout << " + ";
         }

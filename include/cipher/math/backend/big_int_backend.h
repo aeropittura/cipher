@@ -44,15 +44,15 @@
 namespace bigintbackend {
 
 /*! Define the underlying default math implementation being used by defining
- * MATHBACKEND */
+ * CIPHER_MATH_BACKEND */
 
 // Each math backend is defined in its own namespace, and can be used at any
 // time by referencing the objects in its namespace
 
-// Selecting a math backend by defining MATHBACKEND means defining which
+// Selecting a math backend by defining CIPHER_MATH_BACKEND means defining which
 // underlying implementation is the default BigInteger and BigVector
 
-#if MATHBACKEND == 2
+#if CIPHER_MATH_BACKEND == 2
 // Uses bigintfxd:: definition as default
 // Implemented as an array of integers
 // Configurable maximum bit length and type of underlying integer
@@ -60,7 +60,7 @@ namespace bigintbackend {
 using BigInteger = M2Integer;
 using BigVector = M2Vector;
 
-#elif MATHBACKEND == 4
+#elif CIPHER_MATH_BACKEND == 4
 // This uses bigintdyn:: definition as default
 // This backend supports arbitrary bitwidths; no memory pool is
 //     used; can grow up to RAM limitation
@@ -69,7 +69,7 @@ using BigVector = M2Vector;
 using BigInteger = M4Integer;
 using BigVector = M4Vector;
 
-#elif MATHBACKEND == 6
+#elif CIPHER_MATH_BACKEND == 6
 //     This uses bigintntl:: definition as default
 //     GMP 6.1.2 / NTL 10.3.0 backend
 

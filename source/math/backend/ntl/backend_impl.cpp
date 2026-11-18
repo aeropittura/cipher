@@ -34,7 +34,7 @@
  */
 
 //==================================================================================
-// This file is included only if WITH_NTL is set to ON in CMakeLists.txt
+// This file is included only if CIPHER_WITH_NTL is set to ON in CMakeLists.txt
 //==================================================================================
 
 #include <cstdint>
@@ -43,7 +43,7 @@
 #include <vector>
 
 #include "cipher/config.h"
-#ifdef WITH_NTL
+#ifdef CIPHER_WITH_NTL
 
     #include "cipher/math/binary_uniform_gen_impl.h"
     #include "cipher/math/discrete_gaussian_gen_impl.h"
@@ -59,41 +59,41 @@ template class NTL::ChineseRemainderTransformFTTNtl<NTL::BigVector>;
 template class NTL::BluesteinFFTNtl<NTL::BigVector>;
 template class NTL::ChineseRemainderTransformArbNtl<NTL::BigVector>;
 
-namespace lbcrypto {
+namespace cipher {
 
 template class DiscreteGaussianGeneratorImpl<M6Vector>;
 template class BinaryUniformGeneratorImpl<M6Vector>;
 template class TernaryUniformGeneratorImpl<M6Vector>;
 template class DiscreteUniformGeneratorImpl<M6Vector>;
 
-template M6Integer RootOfUnity<M6Integer>(uint32_t m, const M6Integer& modulo);
-template std::vector<M6Integer> RootsOfUnity(uint32_t m, const std::vector<M6Integer>& moduli);
-template M6Integer GreatestCommonDivisor(const M6Integer& a, const M6Integer& b);
-template bool MillerRabinPrimalityTest(const M6Integer& p, const uint32_t niter);
-template const M6Integer PollardRhoFactorization(const M6Integer& n);
-template void PrimeFactorize(M6Integer n, std::set<M6Integer>& primeFactors);
-template M6Integer FirstPrime(uint32_t nBits, uint64_t m);
-template M6Integer LastPrime(uint32_t nBits, uint64_t m);
-template M6Integer NextPrime(const M6Integer& q, uint64_t m);
-template M6Integer PreviousPrime(const M6Integer& q, uint64_t m);
-template std::vector<M6Integer> GetTotientList(const M6Integer& n);
-template M6Vector PolyMod(const M6Vector& dividend, const M6Vector& divisor, const M6Integer& modulus);
-template M6Vector PolynomialMultiplication(const M6Vector& a, const M6Vector& b);
-template M6Vector GetCyclotomicPolynomial(uint32_t m, const M6Integer& modulus);
-template M6Integer SyntheticRemainder(const M6Vector& dividend, const M6Integer& a, const M6Integer& modulus);
-template M6Vector SyntheticPolyRemainder(const M6Vector& dividend, const M6Vector& aList, const M6Integer& modulus);
-template M6Vector PolynomialPower<M6Vector>(const M6Vector& input, uint32_t power);
-template M6Vector SyntheticPolynomialDivision(const M6Vector& dividend, const M6Integer& a, const M6Integer& modulus);
-template M6Integer FindGeneratorCyclic(const M6Integer& modulo);
-template bool IsGenerator(const M6Integer& g, const M6Integer& modulo);
-template std::shared_ptr<std::vector<int64_t>> GetDigits(const M6Integer& u, uint64_t base, uint32_t k);
+template M6Integer root_of_unity<M6Integer>(uint32_t m, const M6Integer& modulo);
+template std::vector<M6Integer> roots_of_unity(uint32_t m, const std::vector<M6Integer>& moduli);
+template M6Integer greatest_common_divisor(const M6Integer& a, const M6Integer& b);
+template bool miller_rabin_primality_test(const M6Integer& p, const uint32_t niter);
+template const M6Integer pollard_rho_factorization(const M6Integer& n);
+template void prime_factorize(M6Integer n, std::set<M6Integer>& prime_factors);
+template M6Integer first_prime(uint32_t n_bits, uint64_t m);
+template M6Integer last_prime(uint32_t n_bits, uint64_t m);
+template M6Integer next_prime(const M6Integer& q, uint64_t m);
+template M6Integer previous_prime(const M6Integer& q, uint64_t m);
+template std::vector<M6Integer> get_totient_list(const M6Integer& n);
+template M6Vector poly_mod(const M6Vector& dividend, const M6Vector& divisor, const M6Integer& modulus);
+template M6Vector polynomial_multiplication(const M6Vector& a, const M6Vector& b);
+template M6Vector get_cyclotomic_polynomial(uint32_t m, const M6Integer& modulus);
+template M6Integer synthetic_remainder(const M6Vector& dividend, const M6Integer& a, const M6Integer& modulus);
+template M6Vector synthetic_poly_remainder(const M6Vector& dividend, const M6Vector& a_list, const M6Integer& modulus);
+template M6Vector polynomial_power<M6Vector>(const M6Vector& input, uint32_t power);
+template M6Vector synthetic_polynomial_division(const M6Vector& dividend, const M6Integer& a, const M6Integer& modulus);
+template M6Integer find_generator_cyclic(const M6Integer& modulo);
+template bool is_generator(const M6Integer& g, const M6Integer& modulo);
+template std::shared_ptr<std::vector<int64_t>> get_digits(const M6Integer& u, uint64_t base, uint32_t k);
 
 template class Matrix<M6Integer>;
 template class Matrix<M6Vector>;
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
-CEREAL_CLASS_VERSION(M6Integer, M6Integer::SerializedVersion());
-CEREAL_CLASS_VERSION(M6Vector, M6Vector::SerializedVersion());
+CEREAL_CLASS_VERSION(M6Integer, M6Integer::serialized_version());
+CEREAL_CLASS_VERSION(M6Vector, M6Vector::serialized_version());
 
-#endif  // WITH_NTL
+#endif  // CIPHER_WITH_NTL

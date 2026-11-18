@@ -35,23 +35,23 @@
 #include <sstream>
 #include <string>
 
-std::string UnitTestCCParams::toString() const {
+std::string TestContextParams::to_string_impl() const {
     std::stringstream ss;
-    ss << "schemeId [" << schemeId << "], " << "ringDimension [" << ringDimension << "], " << "multiplicativeDepth ["
-       << multiplicativeDepth << "], " << "scalingModSize [" << scalingModSize << "], " << "digitSize [" << digitSize
-       << "], " << "batchSize [" << batchSize << "], " << "secretKeyDist [" << secretKeyDist << "], "
-       << "maxRelinSkDeg [" << maxRelinSkDeg << "], " << "firstModSize [" << firstModSize << "], " << "securityLevel ["
-       << securityLevel << "], " << "ksTech [" << ksTech << "], " << "scalTech [" << scalTech << "], "
-       << "numLargeDigits [" << numLargeDigits << "], " << "plaintextModulus [" << plaintextModulus << "], "
-       << "standardDeviation [" << standardDeviation << "], " << "evalAddCount [" << evalAddCount << "], "
-       << "keySwitchCount [" << keySwitchCount << "], " << "multiplicationTechnique [" << multiplicationTechnique
-       << "], " << "encryptionTechnique [" << encryptionTechnique << "], " << "PREMode [" << PREMode << "], "
-       << "multipartyMode [" << multipartyMode << "], " << "decryptionNoiseMode [" << decryptionNoiseMode << "], "
-       << "executionMode [" << executionMode << "], " << "noiseEstimate [" << noiseEstimate << "], "
-       << "registerWordSize [" << registerWordSize << "], " << "compositeDegree [" << compositeDegree << "] ";
+    ss << "schemeId [" << scheme_id_value << "], " << "ringDimension [" << ring_dimension_value << "], " << "multiplicativeDepth ["
+       << multiplicative_depth << "], " << "scalingModSize [" << scaling_mod_size << "], " << "digitSize [" << digit_size
+       << "], " << "batchSize [" << batch_size << "], " << "secretKeyDist [" << secret_key_dist << "], "
+       << "maxRelinSkDeg [" << max_relin_sk_deg << "], " << "firstModSize [" << first_mod_size_value << "], " << "securityLevel ["
+       << security_level << "], " << "ksTech [" << ks_tech << "], " << "scalTech [" << scal_tech << "], "
+       << "numLargeDigits [" << num_large_digits << "], " << "plaintextModulus [" << plaintext_modulus << "], "
+       << "standardDeviation [" << standard_deviation << "], " << "evalAddCount [" << eval_add_count << "], "
+       << "keySwitchCount [" << key_switch_count << "], " << "multiplicationTechnique [" << multiplication_technique
+       << "], " << "encryptionTechnique [" << encryption_technique << "], " << "PREMode [" << pre_mode << "], "
+       << "multipartyMode [" << multiparty_mode << "], " << "decryptionNoiseMode [" << decryption_noise_mode << "], "
+       << "executionMode [" << execution_mode << "], " << "noiseEstimate [" << noise_estimate << "], "
+       << "registerWordSize [" << register_word_size << "], " << "compositeDegree [" << composite_degree << "] ";
     return ss.str();
 }
 //===========================================================================================================
-std::ostream& operator<<(std::ostream& os, const UnitTestCCParams& params) {
-    return os << params.toString();
+std::ostream& operator<<(std::ostream& os, const TestContextParams& params) {
+    return os << params.to_string_impl();
 }

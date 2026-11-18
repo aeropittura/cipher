@@ -35,4 +35,4 @@
 
 #include "cipher/fhe/encoding/encoding_params.h"
 
-CEREAL_CLASS_VERSION(lbcrypto::EncodingParamsImpl, lbcrypto::EncodingParamsImpl::SerializedVersion());
+CEREAL_CLASS_VERSION(cipher::EncodingParamsImpl, cipher::EncodingParamsImpl::serialized_version());

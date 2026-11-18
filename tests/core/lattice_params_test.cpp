@@ -42,27 +42,27 @@
 #include "cipher/ring/standard_params.h"
 #include "cipher/util/inttypes.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
-class UTLatticeParams : public ::testing::Test {
+class LatticeParamsTest : public ::testing::Test {
   protected:
     virtual void SetUp() {
-        OpenFHEParallelControls.UnitTestStart();
+        cipher_parallel_controls.unit_test_start();
     }
 
     virtual void TearDown() {
-        OpenFHEParallelControls.UnitTestStop();
+        cipher_parallel_controls.unit_test_stop();
     }
 };
 
 // tests the edge cases when log q is right near the point where the ring dimension
 // needs to be doubled to be compliant with the HE security standard
-TEST_F(UTLatticeParams, edge_cases) {
-    uint32_t maxQ = StdLatticeParm::FindMaxQ(HEStd_ternary, HEStd_128_classic, 4096);
-    uint32_t ringDim = StdLatticeParm::FindRingDim(HEStd_ternary, HEStd_128_classic, maxQ);
-    EXPECT_EQ(ringDim, (uint32_t)4096) << "Ring dimension is incorrect for an edge case of curQ = maxQ";
-    ringDim = StdLatticeParm::FindRingDim(HEStd_ternary, HEStd_128_classic, maxQ - 1);
-    EXPECT_EQ(ringDim, (uint32_t)4096) << "Ring dimension is incorrect for an edge case of curQ = maxQ - 1";
-    ringDim = StdLatticeParm::FindRingDim(HEStd_ternary, HEStd_128_classic, maxQ + 1);
-    EXPECT_EQ(ringDim, (uint32_t)8192) << "Ring dimension is incorrect for an edge case of curQ = maxQ + 1";
+TEST_F(LatticeParamsTest, edge_cases) {
+    uint32_t max_q = StdLatticeParm::find_max_q(HEStd_ternary, HEStd_128_classic, 4096);
+    uint32_t ring_dim = StdLatticeParm::find_ring_dim(HEStd_ternary, HEStd_128_classic, max_q);
+    EXPECT_EQ(ring_dim, (uint32_t)4096) << "Ring dimension is incorrect for an edge case of curQ = maxQ";
+    ring_dim = StdLatticeParm::find_ring_dim(HEStd_ternary, HEStd_128_classic, max_q - 1);
+    EXPECT_EQ(ring_dim, (uint32_t)4096) << "Ring dimension is incorrect for an edge case of curQ = maxQ - 1";
+    ring_dim = StdLatticeParm::find_ring_dim(HEStd_ternary, HEStd_128_classic, max_q + 1);
+    EXPECT_EQ(ring_dim, (uint32_t)8192) << "Ring dimension is incorrect for an edge case of curQ = maxQ + 1";
 }

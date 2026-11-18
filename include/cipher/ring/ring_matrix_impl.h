@@ -46,28 +46,28 @@
 // this is the implementation of matrixes of things that are in core
 // and that need template specializations
 
-namespace lbcrypto {
+namespace cipher {
 
 template <typename Element>
-Matrix<typename Element::Integer> Rotate(Matrix<Element> const& inMat) {
-    Matrix<Element> mat(inMat);
-    mat.SetFormat(Format::COEFFICIENT);
-    size_t n = mat(0, 0).GetLength();
-    typename Element::Integer const& modulus = mat(0, 0).GetModulus();
-    size_t rows = mat.GetRows() * n;
-    size_t cols = mat.GetCols() * n;
-    Matrix<typename Element::Integer> result(Element::Integer::Allocator, rows, cols);
-    for (size_t row = 0; row < mat.GetRows(); ++row) {
-        for (size_t col = 0; col < mat.GetCols(); ++col) {
-            for (size_t rotRow = 0; rotRow < n; ++rotRow) {
-                for (size_t rotCol = 0; rotCol < n; ++rotCol) {
-                    result(row * n + rotRow, col * n + rotCol) =
-                            mat(row, col).GetValues().at((rotRow - rotCol + n) % n);
+Matrix<typename Element::Integer> Rotate(Matrix<Element> const& in_mat) {
+    Matrix<Element> mat(in_mat);
+    mat.set_format(Format::COEFFICIENT);
+    size_t n = mat(0, 0).get_length();
+    typename Element::Integer const& modulus = mat(0, 0).get_modulus();
+    size_t rows = mat.get_rows() * n;
+    size_t cols = mat.get_cols() * n;
+    Matrix<typename Element::Integer> result(Element::Integer::allocator, rows, cols);
+    for (size_t row = 0; row < mat.get_rows(); ++row) {
+        for (size_t col = 0; col < mat.get_cols(); ++col) {
+            for (size_t rot_row = 0; rot_row < n; ++rot_row) {
+                for (size_t rot_col = 0; rot_col < n; ++rot_col) {
+                    result(row * n + rot_row, col * n + rot_col) =
+                            mat(row, col).get_values().at((rot_row - rot_col + n) % n);
                     //  negate (mod q) upper-right triangle to account for
                     //  (mod x^n + 1)
-                    if (rotRow < rotCol) {
-                        result(row * n + rotRow, col * n + rotCol) =
-                                modulus.ModSub(result(row * n + rotRow, col * n + rotCol), modulus);
+                    if (rot_row < rot_col) {
+                        result(row * n + rot_row, col * n + rot_col) =
+                                modulus.mod_sub(result(row * n + rot_row, col * n + rot_col), modulus);
                     }
                 }
             }
@@ -81,28 +81,28 @@ Matrix<typename Element::Integer> Rotate(Matrix<Element> const& inMat) {
  *  rotations in Format::COEFFICIENT form.
  */
 template <typename Element>
-Matrix<typename Element::Vector> RotateVecResult(Matrix<Element> const& inMat) {
-    Matrix<Element> mat(inMat);
-    mat.SetFormat(Format::COEFFICIENT);
-    size_t n = mat(0, 0).GetLength();
-    typename Element::Integer const& modulus = mat(0, 0).GetModulus();
+Matrix<typename Element::Vector> rotate_vec_result(Matrix<Element> const& in_mat) {
+    Matrix<Element> mat(in_mat);
+    mat.set_format(Format::COEFFICIENT);
+    size_t n = mat(0, 0).get_length();
+    typename Element::Integer const& modulus = mat(0, 0).get_modulus();
     typename Element::Vector zero(1, modulus);
-    size_t rows = mat.GetRows() * n;
-    size_t cols = mat.GetCols() * n;
-    auto singleElemBinVecAlloc = [=]() {
+    size_t rows = mat.get_rows() * n;
+    size_t cols = mat.get_cols() * n;
+    auto single_elem_bin_vec_alloc = [=]() {
         return typename Element::Vector(1, modulus);
     };
-    Matrix<typename Element::Vector> result(singleElemBinVecAlloc, rows, cols);
-    for (size_t row = 0; row < mat.GetRows(); ++row) {
-        for (size_t col = 0; col < mat.GetCols(); ++col) {
-            for (size_t rotRow = 0; rotRow < n; ++rotRow) {
-                for (size_t rotCol = 0; rotCol < n; ++rotCol) {
-                    typename Element::Vector& elem = result(row * n + rotRow, col * n + rotCol);
-                    elem.at(0) = mat(row, col).GetValues().at((rotRow - rotCol + n) % n);
+    Matrix<typename Element::Vector> result(single_elem_bin_vec_alloc, rows, cols);
+    for (size_t row = 0; row < mat.get_rows(); ++row) {
+        for (size_t col = 0; col < mat.get_cols(); ++col) {
+            for (size_t rot_row = 0; rot_row < n; ++rot_row) {
+                for (size_t rot_col = 0; rot_col < n; ++rot_col) {
+                    typename Element::Vector& elem = result(row * n + rot_row, col * n + rot_col);
+                    elem.at(0) = mat(row, col).get_values().at((rot_row - rot_col + n) % n);
                     //  negate (mod q) upper-right triangle to account for
                     //  (mod x^n + 1)
-                    if (rotRow < rotCol) {
-                        result(row * n + rotRow, col * n + rotCol) = zero.ModSub(elem);
+                    if (rot_row < rot_col) {
+                        result(row * n + rot_row, col * n + rot_col) = zero.mod_sub(elem);
                     }
                 }
             }
@@ -112,24 +112,24 @@ Matrix<typename Element::Vector> RotateVecResult(Matrix<Element> const& inMat) {
 }
 
 template <typename Element>
-void Matrix<Element>::SetFormat(Format format) {
-    if (data[0][0].GetFormat() != format)
-        this->SwitchFormat();
+void Matrix<Element>::set_format(Format format) {
+    if (data[0][0].get_format() != format)
+        this->switch_format();
 }
 
 template <typename Element>
-void Matrix<Element>::SwitchFormat() {
+void Matrix<Element>::switch_format() {
     if (rows == 1) {
         // TODO: figure out why this is causing a segfault with GCC10
-        // #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(cols))
+        // #pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(cols))
         for (size_t col = 0; col < cols; ++col) {
-            data[0][col].SwitchFormat();
+            data[0][col].switch_format();
         }
     } else {
-        // #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(rows))
+        // #pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(rows))
         for (size_t row = 0; row < rows; ++row) {
             for (size_t col = 0; col < cols; ++col) {
-                data[row][col].SwitchFormat();
+                data[row][col].switch_format();
             }
         }
     }
@@ -143,15 +143,15 @@ void Matrix<Element>::SwitchFormat() {
  * @return the matrix of centered representatives; throws if one does not fit in an int32_t.
  */
 template <typename T>
-Matrix<int32_t> ConvertToInt32(const Matrix<T>& input, const T& modulus) {
-    size_t rows = input.GetRows();
-    size_t cols = input.GetCols();
+Matrix<int32_t> convert_to_int32(const Matrix<T>& input, const T& modulus) {
+    size_t rows = input.get_rows();
+    size_t cols = input.get_cols();
     Matrix<int32_t> result([]() { return 0; }, rows, cols);
     const CenteredToInt32ConverterImpl<T> converter(modulus);
     for (size_t i = 0; i < rows; ++i) {
-        const auto& inputRow = input.GetData()[i];
+        const auto& input_row = input.get_data()[i];
         for (size_t j = 0; j < cols; ++j) {
-            result(i, j) = converter.Convert(inputRow[j]);
+            result(i, j) = converter.convert(input_row[j]);
         }
     }
     return result;
@@ -166,20 +166,20 @@ Matrix<int32_t> ConvertToInt32(const Matrix<T>& input, const T& modulus) {
  * @return the matrix of centered representatives; throws if one does not fit in an int32_t.
  */
 template <typename V>
-Matrix<int32_t> ConvertToInt32(const Matrix<V>& input, const typename V::Integer& modulus) {
-    size_t rows = input.GetRows();
-    size_t cols = input.GetCols();
+Matrix<int32_t> convert_to_int32(const Matrix<V>& input, const typename V::Integer& modulus) {
+    size_t rows = input.get_rows();
+    size_t cols = input.get_cols();
     Matrix<int32_t> result([]() { return 0; }, rows, cols);
     const CenteredToInt32ConverterImpl<typename V::Integer> converter(modulus);
     for (size_t i = 0; i < rows; ++i) {
-        const auto& inputRow = input.GetData()[i];
+        const auto& input_row = input.get_data()[i];
         for (size_t j = 0; j < cols; ++j) {
-            result(i, j) = converter.Convert(inputRow[j][0]);
+            result(i, j) = converter.convert(input_row[j][0]);
         }
     }
     return result;
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_RING_RING_MATRIX_IMPL_H_

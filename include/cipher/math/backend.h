@@ -47,13 +47,13 @@
 #include "cipher/math/backend/vector.h"
 #include "cipher/version.h"
 
-namespace lbcrypto {
-// Promote BigInteger and BigVector to lbcrypto namespace
+namespace cipher {
+// Promote BigInteger and BigVector to cipher namespace
 /// the multiprecision integer of the selected big-integer backend
 using BigInteger = bigintbackend::BigInteger;
 /// the vector of multiprecision integers of the selected big-integer backend
 using BigVector = bigintbackend::BigVector;
-}  // namespace lbcrypto
+}  // namespace cipher
 
 //==============================================================================================
 
@@ -65,49 +65,49 @@ using BigVector = bigintbackend::BigVector;
  * @tparam VecType the vector type
  */
 template <typename VecType>
-struct FTTTypedef {
+struct FttTypedef {
     /// the transform class for this vector type
     typedef void type;
 };
 
 /// @brief Power-of-two NTT for NativeVector.
 template <>
-struct FTTTypedef<NativeVector> {
+struct FttTypedef<NativeVector> {
     /// the transform class for this vector type
-    typedef NatChineseRemainderTransformFTT<NativeVector> type;
+    typedef NatChineseRemainderTransformFtt<NativeVector> type;
 };
 
-#if NATIVEINT != 32
+#if CIPHER_NATIVE_INT != 32
 /// @brief Power-of-two NTT for NativeVector32 (only when the default word is not 32 bits).
 template <>
-struct FTTTypedef<NativeVector32> {
+struct FttTypedef<NativeVector32> {
     /// the transform class for this vector type
-    typedef NatChineseRemainderTransformFTT<NativeVector32> type;
+    typedef NatChineseRemainderTransformFtt<NativeVector32> type;
 };
 #endif
 
-#ifdef WITH_BE2
+#ifdef CIPHER_WITH_BE2
 /// @brief Power-of-two NTT for the fixed-size big-integer backend (BE2).
 template <>
-struct FTTTypedef<M2Vector> {
+struct FttTypedef<M2Vector> {
     /// the transform class for this vector type
-    typedef bigintfxd::ChineseRemainderTransformFTTFxd<M2Vector> type;
+    typedef fixed_int::ChineseRemainderTransformFttFxd<M2Vector> type;
 };
 #endif
 
-#ifdef WITH_BE4
+#ifdef CIPHER_WITH_BE4
 /// @brief Power-of-two NTT for the dynamic-size big-integer backend (BE4).
 template <>
-struct FTTTypedef<M4Vector> {
+struct FttTypedef<M4Vector> {
     /// the transform class for this vector type
-    typedef bigintdyn::ChineseRemainderTransformFTTDyn<M4Vector> type;
+    typedef dynamic_int::ChineseRemainderTransformFttDyn<M4Vector> type;
 };
 #endif
 
-#ifdef WITH_NTL
+#ifdef CIPHER_WITH_NTL
 /// @brief Power-of-two NTT for the NTL big-integer backend (BE6).
 template <>
-struct FTTTypedef<M6Vector> {
+struct FttTypedef<M6Vector> {
     /// the transform class for this vector type
     typedef NTL::ChineseRemainderTransformFTTNtl<M6Vector> type;
 };
@@ -115,7 +115,7 @@ struct FTTTypedef<M6Vector> {
 
 /// the power-of-two cyclotomic NTT class for a vector type
 template <typename VecType>
-using ChineseRemainderTransformFTT = typename FTTTypedef<VecType>::type;
+using ChineseRemainderTransformFtt = typename FttTypedef<VecType>::type;
 
 //==============================================================================================
 
@@ -137,7 +137,7 @@ struct ArbTypedef<NativeVector> {
     typedef NatChineseRemainderTransformArb<NativeVector> type;
 };
 
-#if NATIVEINT != 32
+#if CIPHER_NATIVE_INT != 32
 /// @brief Arbitrary-cyclotomic NTT for NativeVector32 (only when the default word is not 32 bits).
 template <>
 struct ArbTypedef<NativeVector32> {
@@ -146,25 +146,25 @@ struct ArbTypedef<NativeVector32> {
 };
 #endif
 
-#ifdef WITH_BE2
+#ifdef CIPHER_WITH_BE2
 /// @brief Arbitrary-cyclotomic NTT for the fixed-size big-integer backend (BE2).
 template <>
 struct ArbTypedef<M2Vector> {
     /// the transform class for this vector type
-    typedef bigintfxd::ChineseRemainderTransformArbFxd<M2Vector> type;
+    typedef fixed_int::ChineseRemainderTransformArbFxd<M2Vector> type;
 };
 #endif
 
-#ifdef WITH_BE4
+#ifdef CIPHER_WITH_BE4
 /// @brief Arbitrary-cyclotomic NTT for the dynamic-size big-integer backend (BE4).
 template <>
 struct ArbTypedef<M4Vector> {
     /// the transform class for this vector type
-    typedef bigintdyn::ChineseRemainderTransformArbDyn<M4Vector> type;
+    typedef dynamic_int::ChineseRemainderTransformArbDyn<M4Vector> type;
 };
 #endif
 
-#ifdef WITH_NTL
+#ifdef CIPHER_WITH_NTL
 /// @brief Arbitrary-cyclotomic NTT for the NTL big-integer backend (BE6).
 template <>
 struct ArbTypedef<M6Vector> {

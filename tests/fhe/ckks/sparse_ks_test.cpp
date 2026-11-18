@@ -32,7 +32,7 @@
 /*
   Regression test for the sparse secret encapsulation key switching
   (https://github.com/openfheorg/openfhe-development/issues/1041): the noise added by
-  KeySwitchSparse must stay at the modulus switching (rounding) noise level.
+  key_switch_sparse must stay at the modulus switching (rounding) noise level.
 */
 
 #include <cstdint>
@@ -52,11 +52,11 @@
 #include "cipher/fhe/ckks/context_gen.h"
 #include "cipher/util/debug.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 // Regression test for https://github.com/openfheorg/openfhe-development/issues/1041: the
 // noise added by the sparse encapsulation key switching must stay at the modulus switching
-// (rounding) noise level. The noise added by KeySwitchSparse decomposes as
+// (rounding) noise level. The noise added by key_switch_sparse decomposes as
 // floor(c1*e/P') + delta_0 + delta_1*s_new, where the delta rounding terms are inherent to
 // any modulus switch and are bounded by (1 + ||s_new||_1)/2 = 16.5 per coefficient for a
 // Hamming weight 32 secret. With the auxiliary modulus P' of ~66 bits (two 33-bit primes)
@@ -64,71 +64,71 @@ using namespace lbcrypto;
 // With a single ~60-bit auxiliary prime (the previous approach) the key switching term
 // dominates at ~2^8, so this test fails.
 TEST(UTCKKSRNS_SPARSE_KS, KeySwitchSparseAddedNoise) {
-    setupSignals();
-    OpenFHEParallelControls.UnitTestStart();
+    setup_signals();
+    cipher_parallel_controls.unit_test_start();
 
     const std::string failmsg("KeySwitchSparseAddedNoise");
 
     try {
         // scaling factor close to the first modulus: the regime where the sparse
         // encapsulation key switching noise is exposed
-        CCParams<CryptoContextCKKSRNS> parameters;
-        parameters.SetMultiplicativeDepth(2);
-        parameters.SetScalingModSize(59);
-        parameters.SetFirstModSize(60);
-        parameters.SetScalingTechnique(FIXEDMANUAL);
-        parameters.SetSecretKeyDist(SPARSE_ENCAPSULATED);
-        parameters.SetSecurityLevel(HEStd_NotSet);
-        parameters.SetRingDim(1 << 12);
-        parameters.SetKeySwitchTechnique(HYBRID);
+        ContextParams<CkksRnsContext> parameters;
+        parameters.set_multiplicative_depth(2);
+        parameters.set_scaling_mod_size(59);
+        parameters.set_first_mod_size(60);
+        parameters.set_scaling_technique(FIXEDMANUAL);
+        parameters.set_secret_key_dist(SPARSE_ENCAPSULATED);
+        parameters.set_security_level(HEStd_NotSet);
+        parameters.set_ring_dim(1 << 12);
+        parameters.set_key_switch_technique(HYBRID);
 
-        auto cc = GenCryptoContext(parameters);
-        cc->Enable(PKE);
-        cc->Enable(KEYSWITCH);
-        cc->Enable(LEVELEDSHE);
-        cc->Enable(ADVANCEDSHE);
-        cc->Enable(FHE);
+        auto cc = make_crypto_context(parameters);
+        cc->enable(PKE);
+        cc->enable(KEYSWITCH);
+        cc->enable(LEVELEDSHE);
+        cc->enable(ADVANCEDSHE);
+        cc->enable(FHE);
 
-        auto keyPair = cc->KeyGen();
-        auto cryptoParams =
-                std::dynamic_pointer_cast<CryptoParametersCKKSRNS>(keyPair.secretKey->GetCryptoParameters());
+        auto key_pair = cc->key_gen();
+        auto crypto_params =
+                std::dynamic_pointer_cast<CkksRnsCryptoParams>(key_pair.secret_key->get_crypto_parameters());
 
         // encode at the last level so the ciphertext has a single tower (q0), as at the
         // modulus raise step of bootstrapping
         std::vector<double> x = {0.25, 0.5, 0.75, 1.0, 0.375, 0.675, 0.125, 0.925};
-        auto ptxt = cc->MakeCKKSPackedPlaintext(x, 1, cryptoParams->GetMultiplicativeDepth());
-        auto ctxt = cc->Encrypt(keyPair.publicKey, ptxt);
+        auto ptxt = cc->make_ckks_packed_plaintext(x, 1, crypto_params->get_multiplicative_depth());
+        auto ctxt = cc->encrypt(key_pair.public_key, ptxt);
 
         // sparse key used for the modraising step
-        DCRTPoly::TugType tug;
-        auto skNew = std::make_shared<PrivateKeyImpl<DCRTPoly>>(cc);
-        skNew->SetPrivateElement(DCRTPoly(tug, cryptoParams->GetElementParams(), Format::EVALUATION, 32));
+        RnsPoly::TugType tug;
+        auto sk_new = std::make_shared<PrivateKeyImpl<RnsPoly>>(cc);
+        sk_new->set_private_element(RnsPoly(tug, crypto_params->get_element_params(), Format::EVALUATION, 32));
 
-        auto evalKey = FHECKKSRNS::KeySwitchGenSparse(keyPair.secretKey, skNew);
-        auto ctresult = FHECKKSRNS::KeySwitchSparse(ctxt, evalKey);
+        auto eval_key = CkksRnsFhe::key_switch_gen_sparse(key_pair.secret_key, sk_new);
+        auto ctresult = CkksRnsFhe::key_switch_sparse(ctxt, eval_key);
 
         // the noise added by the key switch: difference of the raw decryptions b + a*s
         // over q0 under the respective secret keys (the shared encryption noise cancels)
-        const auto sOld0 = keyPair.secretKey->GetPrivateElement().GetElementAtIndex(0);
-        const auto sNew0 = skNew->GetPrivateElement().GetElementAtIndex(0);
-        const auto& cvo = ctxt->GetElements();
-        const auto& cvn = ctresult->GetElements();
-        auto diff = (cvo[0].GetElementAtIndex(0) + cvo[1].GetElementAtIndex(0) * sOld0) -
-                    (cvn[0].GetElementAtIndex(0) + cvn[1].GetElementAtIndex(0) * sNew0);
-        diff.SetFormat(Format::COEFFICIENT);
+        const auto s_old0 = key_pair.secret_key->get_private_element().get_element_at_index(0);
+        const auto s_new0 = sk_new->get_private_element().get_element_at_index(0);
+        const auto& cvo = ctxt->get_elements();
+        const auto& cvn = ctresult->get_elements();
+        auto diff = (cvo[0].get_element_at_index(0) + cvo[1].get_element_at_index(0) * s_old0) -
+                    (cvn[0].get_element_at_index(0) + cvn[1].get_element_at_index(0) * s_new0);
+        diff.set_format(Format::COEFFICIENT);
 
-        const NativeInteger q = diff.GetModulus();
+        const NativeInteger q = diff.get_modulus();
         const NativeInteger half = q >> 1;
-        NativeInteger maxNoise(0);
-        for (uint32_t i = 0; i < diff.GetLength(); ++i) {
+        NativeInteger max_noise(0);
+        for (uint32_t i = 0; i < diff.get_length(); ++i) {
             NativeInteger v = diff[i];
             if (v > half)
                 v = q - v;
-            if (v > maxNoise)
-                maxNoise = v;
+            if (v > max_noise)
+                max_noise = v;
         }
 
-        EXPECT_LE(maxNoise.ConvertToInt<uint64_t>(), 32u)
+        EXPECT_LE(max_noise.convert_to_int<uint64_t>(), 32u)
                 << "the noise added by the sparse encapsulation key switching exceeds the modulus switching noise level";
     } catch (std::exception& e) {
         std::cerr << "Exception thrown from KeySwitchSparseAddedNoise: " << e.what() << std::endl;
@@ -137,6 +137,6 @@ TEST(UTCKKSRNS_SPARSE_KS, KeySwitchSparseAddedNoise) {
         UNIT_TEST_HANDLE_ALL_EXCEPTIONS;
     }
 
-    CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
-    OpenFHEParallelControls.UnitTestStop();
+    ContextFactory<RnsPoly>::release_all_contexts();
+    cipher_parallel_controls.unit_test_stop();
 }

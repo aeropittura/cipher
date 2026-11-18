@@ -39,7 +39,7 @@
 #include <vector>
 
 #include "cipher/config.h"
-#ifdef WITH_BE4
+#ifdef CIPHER_WITH_BE4
 
     #include "cipher/math/binary_uniform_gen_impl.h"
     #include "cipher/math/discrete_gaussian_gen_impl.h"
@@ -50,46 +50,46 @@
     #include "cipher/math/number_theory_impl.h"
     #include "cipher/math/ternary_uniform_gen_impl.h"
 
-template class bigintdyn::NumberTheoreticTransformDyn<bigintdyn::BigVector>;
-template class bigintdyn::ChineseRemainderTransformFTTDyn<bigintdyn::BigVector>;
-template class bigintdyn::BluesteinFFTDyn<bigintdyn::BigVector>;
-template class bigintdyn::ChineseRemainderTransformArbDyn<bigintdyn::BigVector>;
+template class dynamic_int::NumberTheoreticTransformDyn<dynamic_int::BigVector>;
+template class dynamic_int::ChineseRemainderTransformFttDyn<dynamic_int::BigVector>;
+template class dynamic_int::BluesteinFftDyn<dynamic_int::BigVector>;
+template class dynamic_int::ChineseRemainderTransformArbDyn<dynamic_int::BigVector>;
 
-namespace lbcrypto {
+namespace cipher {
 
 template class DiscreteGaussianGeneratorImpl<M4Vector>;
 template class BinaryUniformGeneratorImpl<M4Vector>;
 template class TernaryUniformGeneratorImpl<M4Vector>;
 template class DiscreteUniformGeneratorImpl<M4Vector>;
 
-template M4Integer RootOfUnity<M4Integer>(uint32_t m, const M4Integer& modulo);
-template std::vector<M4Integer> RootsOfUnity(uint32_t m, const std::vector<M4Integer>& moduli);
-template M4Integer GreatestCommonDivisor(const M4Integer& a, const M4Integer& b);
-template bool MillerRabinPrimalityTest(const M4Integer& p, const uint32_t niter);
-template const M4Integer PollardRhoFactorization(const M4Integer& n);
-template void PrimeFactorize(M4Integer n, std::set<M4Integer>& primeFactors);
-template M4Integer FirstPrime(uint32_t nBits, uint64_t m);
-template M4Integer LastPrime(uint32_t nBits, uint64_t m);
-template M4Integer NextPrime(const M4Integer& q, uint64_t m);
-template M4Integer PreviousPrime(const M4Integer& q, uint64_t m);
-template std::vector<M4Integer> GetTotientList(const M4Integer& n);
-template M4Vector PolyMod(const M4Vector& dividend, const M4Vector& divisor, const M4Integer& modulus);
-template M4Vector PolynomialMultiplication(const M4Vector& a, const M4Vector& b);
-template M4Vector GetCyclotomicPolynomial(uint32_t m, const M4Integer& modulus);
-template M4Integer SyntheticRemainder(const M4Vector& dividend, const M4Integer& a, const M4Integer& modulus);
-template M4Vector SyntheticPolyRemainder(const M4Vector& dividend, const M4Vector& aList, const M4Integer& modulus);
-template M4Vector PolynomialPower<M4Vector>(const M4Vector& input, uint32_t power);
-template M4Vector SyntheticPolynomialDivision(const M4Vector& dividend, const M4Integer& a, const M4Integer& modulus);
-template M4Integer FindGeneratorCyclic(const M4Integer& modulo);
-template bool IsGenerator(const M4Integer& g, const M4Integer& modulo);
-template std::shared_ptr<std::vector<int64_t>> GetDigits(const M4Integer& u, uint64_t base, uint32_t k);
+template M4Integer root_of_unity<M4Integer>(uint32_t m, const M4Integer& modulo);
+template std::vector<M4Integer> roots_of_unity(uint32_t m, const std::vector<M4Integer>& moduli);
+template M4Integer greatest_common_divisor(const M4Integer& a, const M4Integer& b);
+template bool miller_rabin_primality_test(const M4Integer& p, const uint32_t niter);
+template const M4Integer pollard_rho_factorization(const M4Integer& n);
+template void prime_factorize(M4Integer n, std::set<M4Integer>& prime_factors);
+template M4Integer first_prime(uint32_t n_bits, uint64_t m);
+template M4Integer last_prime(uint32_t n_bits, uint64_t m);
+template M4Integer next_prime(const M4Integer& q, uint64_t m);
+template M4Integer previous_prime(const M4Integer& q, uint64_t m);
+template std::vector<M4Integer> get_totient_list(const M4Integer& n);
+template M4Vector poly_mod(const M4Vector& dividend, const M4Vector& divisor, const M4Integer& modulus);
+template M4Vector polynomial_multiplication(const M4Vector& a, const M4Vector& b);
+template M4Vector get_cyclotomic_polynomial(uint32_t m, const M4Integer& modulus);
+template M4Integer synthetic_remainder(const M4Vector& dividend, const M4Integer& a, const M4Integer& modulus);
+template M4Vector synthetic_poly_remainder(const M4Vector& dividend, const M4Vector& a_list, const M4Integer& modulus);
+template M4Vector polynomial_power<M4Vector>(const M4Vector& input, uint32_t power);
+template M4Vector synthetic_polynomial_division(const M4Vector& dividend, const M4Integer& a, const M4Integer& modulus);
+template M4Integer find_generator_cyclic(const M4Integer& modulo);
+template bool is_generator(const M4Integer& g, const M4Integer& modulo);
+template std::shared_ptr<std::vector<int64_t>> get_digits(const M4Integer& u, uint64_t base, uint32_t k);
 
 template class Matrix<M4Integer>;
 template class Matrix<M4Vector>;
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
-CEREAL_CLASS_VERSION(M4Integer, M4Integer::SerializedVersion());
-CEREAL_CLASS_VERSION(M4Vector, M4Vector::SerializedVersion());
+CEREAL_CLASS_VERSION(M4Integer, M4Integer::serialized_version());
+CEREAL_CLASS_VERSION(M4Vector, M4Vector::serialized_version());
 
 #endif

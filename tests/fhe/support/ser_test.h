@@ -45,58 +45,58 @@
 #include "cipher/fhe/globals.h"
 #include "gtest/gtest.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 template <typename Element, typename ST>
-void UnitTestContextWithSertype(CryptoContext<Element> cc, const ST& sertype,
+void unit_test_context_with_sertype(CryptoContext<Element> cc, const ST& sertype,
                                 const std::string& failmsg = std::string()) {
     try {
-        KeyPair<Element> kp = cc->KeyGen();
-        cc->EvalMultKeyGen(kp.secretKey);
-        cc->EvalSumKeyGen(kp.secretKey);
+        KeyPair<Element> kp = cc->key_gen();
+        cc->eval_mult_key_gen(kp.secret_key);
+        cc->eval_sum_key_gen(kp.secret_key);
 
         std::stringstream s;
-        Serial::Serialize(cc, s, sertype);
+        serialization::to_stream(cc, s, sertype);
 
         // std::cerr << " Output " << s.str() << std::endl;
 
-        DisablePrecomputeCRTTablesAfterDeserializaton();
+        disable_precompute_crt_tables_after_deserializaton();
         CryptoContext<Element> newcc;
-        Serial::Deserialize(newcc, s, sertype);
+        serialization::from_stream(newcc, s, sertype);
 
         ASSERT_TRUE(newcc) << failmsg << " Deserialize failed";
 
         EXPECT_EQ(*cc, *newcc) << failmsg << " Mismatched context";
 
-        EXPECT_EQ(*cc->GetScheme(), *newcc->GetScheme()) << failmsg << " Scheme mismatch after ser/deser";
-        EXPECT_EQ(*cc->GetCryptoParameters(), *newcc->GetCryptoParameters())
+        EXPECT_EQ(*cc->get_scheme(), *newcc->get_scheme()) << failmsg << " Scheme mismatch after ser/deser";
+        EXPECT_EQ(*cc->get_crypto_parameters(), *newcc->get_crypto_parameters())
                 << failmsg << " Crypto parms mismatch after ser/deser";
-        EXPECT_EQ(*cc->GetEncodingParams(), *newcc->GetEncodingParams())
+        EXPECT_EQ(*cc->get_encoding_params(), *newcc->get_encoding_params())
                 << failmsg << " Encoding parms mismatch after ser/deser";
-        EXPECT_EQ(cc->GetScheme()->GetEnabled(), newcc->GetScheme()->GetEnabled())
+        EXPECT_EQ(cc->get_scheme()->get_enabled(), newcc->get_scheme()->get_enabled())
                 << failmsg << " Enabled features mismatch after ser/deser";
 
         s.str("");
         s.clear();
-        Serial::Serialize(kp.publicKey, s, sertype);
+        serialization::to_stream(kp.public_key, s, sertype);
 
-        PublicKey<Element> newPub;
-        Serial::Deserialize(newPub, s, sertype);
-        ASSERT_TRUE(newPub) << failmsg << " Key deserialize failed";
+        PublicKey<Element> new_pub;
+        serialization::from_stream(new_pub, s, sertype);
+        ASSERT_TRUE(new_pub) << failmsg << " Key deserialize failed";
 
-        EXPECT_EQ(*kp.publicKey, *newPub) << failmsg << " Key mismatch";
+        EXPECT_EQ(*kp.public_key, *new_pub) << failmsg << " Key mismatch";
 
-        CryptoContext<Element> newccFromkey = newPub->GetCryptoContext();
-        EXPECT_EQ(*cc, *newccFromkey) << failmsg << " Key deser has wrong context";
-        EnablePrecomputeCRTTablesAfterDeserializaton();
+        CryptoContext<Element> newcc_fromkey = new_pub->get_crypto_context();
+        EXPECT_EQ(*cc, *newcc_fromkey) << failmsg << " Key deser has wrong context";
+        enable_precompute_crt_tables_after_deserializaton();
     } catch (std::exception& e) {
-        EnablePrecomputeCRTTablesAfterDeserializaton();
+        enable_precompute_crt_tables_after_deserializaton();
 
         std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
         // make it fail
         EXPECT_TRUE(0 == 1) << failmsg;
     } catch (...) {
-        EnablePrecomputeCRTTablesAfterDeserializaton();
+        enable_precompute_crt_tables_after_deserializaton();
 
         UNIT_TEST_HANDLE_ALL_EXCEPTIONS;
     }

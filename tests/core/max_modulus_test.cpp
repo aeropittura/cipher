@@ -33,7 +33,7 @@
   Differential coverage of the NativeInteger modular-multiplication family at
   MAX_MODULUS_SIZE (and one bit below), checked against the multiprecision backend.
   Pins the maximum-modulus contract on every build configuration; in particular,
-  builds without a 128-bit integer type reduce through the two-word (typeD) path,
+  builds without a 128-bit integer type reduce through the two-word (TypeD) path,
   which is exercised here at the widths where it previously overflowed (issue #667).
 */
 
@@ -45,63 +45,63 @@
 #include "cipher/math/number_theory.h"
 #include "cipher/util/inttypes.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 namespace {
 BigInteger Ref(const NativeInteger& x) {
-    return BigInteger(x.ToString());
+    return BigInteger(x.to_string());
 }
 
-NativeInteger FromRef(const BigInteger& x) {
-    return NativeInteger(x.ToString());
+NativeInteger from_ref(const BigInteger& x) {
+    return NativeInteger(x.to_string());
 }
 }  // namespace
 
 TEST(UTMaxModulus, mod_mul_family_at_max_modulus_size) {
     for (uint32_t bits : {uint32_t(MAX_MODULUS_SIZE) - 1, uint32_t(MAX_MODULUS_SIZE)}) {
-        NativeInteger q{LastPrime<NativeInteger>(bits, 65536)};
-        NativeInteger mu{q.ComputeMu()};
-        BigInteger qRef{Ref(q)};
+        NativeInteger q{last_prime<NativeInteger>(bits, 65536)};
+        NativeInteger mu{q.compute_mu()};
+        BigInteger q_ref{Ref(q)};
 
         DiscreteUniformGeneratorImpl<NativeVector> dug;
         constexpr uint32_t n = 512;
-        NativeVector av{dug.GenerateVector(n, q)};
-        NativeVector bv{dug.GenerateVector(n, q)};
+        NativeVector av{dug.generate_vector(n, q)};
+        NativeVector bv{dug.generate_vector(n, q)};
 
         for (uint32_t i = 0; i < n; ++i) {
             NativeInteger a{av[i]};
             NativeInteger b{bv[i]};
-            NativeInteger expect{FromRef((Ref(a) * Ref(b)).Mod(qRef))};
+            NativeInteger expect{from_ref((Ref(a) * Ref(b)).mod(q_ref))};
 
-            EXPECT_EQ(a.ModMul(b, q), expect) << "ModMul bits=" << bits;
-            EXPECT_EQ(a.ModMul(b, q, mu), expect) << "ModMul(mu) bits=" << bits;
-            EXPECT_EQ(a.ModMulFast(b, q), expect) << "ModMulFast bits=" << bits;
-            EXPECT_EQ(a.ModMulFast(b, q, mu), expect) << "ModMulFast(mu) bits=" << bits;
+            EXPECT_EQ(a.mod_mul(b, q), expect) << "ModMul bits=" << bits;
+            EXPECT_EQ(a.mod_mul(b, q, mu), expect) << "ModMul(mu) bits=" << bits;
+            EXPECT_EQ(a.mod_mul_fast(b, q), expect) << "ModMulFast bits=" << bits;
+            EXPECT_EQ(a.mod_mul_fast(b, q, mu), expect) << "ModMulFast(mu) bits=" << bits;
             NativeInteger c{a};
-            c.ModMulFastEq(b, q, mu);
+            c.mod_mul_fast_eq(b, q, mu);
             EXPECT_EQ(c, expect) << "ModMulFastEq(mu) bits=" << bits;
-            EXPECT_EQ(a.ModMulFastConst(b, q, b.PrepModMulConst(q)), expect) << "ModMulFastConst bits=" << bits;
+            EXPECT_EQ(a.mod_mul_fast_const(b, q, b.prep_mod_mul_const(q)), expect) << "ModMulFastConst bits=" << bits;
 
             // unreduced input through the Barrett normalization path (value in [q, 2q))
-            NativeInteger u{a.Add(q)};
-            EXPECT_EQ(u.Mod(q, mu), a) << "Mod(mu) unreduced bits=" << bits;
-            EXPECT_EQ(u.ModAdd(b, q, mu), a.ModAdd(b, q)) << "ModAdd(mu) unreduced bits=" << bits;
-            EXPECT_EQ(u.ModSub(b, q, mu), a.ModSub(b, q)) << "ModSub(mu) unreduced bits=" << bits;
+            NativeInteger u{a.add(q)};
+            EXPECT_EQ(u.mod(q, mu), a) << "Mod(mu) unreduced bits=" << bits;
+            EXPECT_EQ(u.mod_add(b, q, mu), a.mod_add(b, q)) << "ModAdd(mu) unreduced bits=" << bits;
+            EXPECT_EQ(u.mod_sub(b, q, mu), a.mod_sub(b, q)) << "ModSub(mu) unreduced bits=" << bits;
         }
 
         // vector-level multiply (hoisted-Barrett loop)
-        NativeVector pv{av.ModMul(bv)};
+        NativeVector pv{av.mod_mul(bv)};
         for (uint32_t i = 0; i < n; ++i) {
-            EXPECT_EQ(pv[i], FromRef((Ref(av[i]) * Ref(bv[i])).Mod(qRef))) << "NativeVector::ModMul bits=" << bits;
+            EXPECT_EQ(pv[i], from_ref((Ref(av[i]) * Ref(bv[i])).mod(q_ref))) << "NativeVector::ModMul bits=" << bits;
         }
 
         // Fermat: 3^(q-1) = 1 mod q for prime q
-        EXPECT_EQ(NativeInteger(3).ModExp(q - 1, q), NativeInteger(1)) << "ModExp bits=" << bits;
+        EXPECT_EQ(NativeInteger(3).mod_exp(q - 1, q), NativeInteger(1)) << "ModExp bits=" << bits;
     }
 
-    // FirstPrime scans candidates (and returns a prime) one bit ABOVE the cap, so
-    // Miller-Rabin's ModExp/ModMul must be exact at MAX_MODULUS_SIZE + 1 bits
-    NativeInteger p1{FirstPrime<NativeInteger>(MAX_MODULUS_SIZE, 65536)};
-    EXPECT_EQ(p1.GetMSB(), uint32_t(MAX_MODULUS_SIZE) + 1);
-    EXPECT_EQ(NativeInteger(3).ModExp(p1 - 1, p1), NativeInteger(1)) << "ModExp above cap";
+    // first_prime scans candidates (and returns a prime) one bit ABOVE the cap, so
+    // Miller-Rabin's mod_exp/mod_mul must be exact at MAX_MODULUS_SIZE + 1 bits
+    NativeInteger p1{first_prime<NativeInteger>(MAX_MODULUS_SIZE, 65536)};
+    EXPECT_EQ(p1.get_msb(), uint32_t(MAX_MODULUS_SIZE) + 1);
+    EXPECT_EQ(NativeInteger(3).mod_exp(p1 - 1, p1), NativeInteger(1)) << "ModExp above cap";
 }

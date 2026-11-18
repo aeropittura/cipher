@@ -40,7 +40,7 @@
 #include "gtest/gtest.h"
 #include "cipher/util/demangle.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 #if defined(__EMSCRIPTEN__)
     #define UNIT_TEST_EXCEPTION_TYPE_NAME_BINFHE "EMSCRIPTEN_UNKNOWN"
@@ -132,30 +132,30 @@ static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
 }
 //===========================================================================================================
 struct TEST_CASE_UTGENERAL_FHEW {
-    TEST_CASE_TYPE testCaseType;
+    TEST_CASE_TYPE test_case_type;
     // test case description - MUST BE UNIQUE
     std::string description;
 
-    BINFHE_PARAMSET securityLevel;
+    BINFHE_PARAMSET security_level;
     BINFHE_METHOD method;
     uint32_t num_of_inputs;
-    LWEPlaintextModulus ptmodulus;
+    LwePlaintextModulus ptmodulus;
 
     BINGATE gate;
 
-    std::vector<LWEPlaintext> results;
+    std::vector<LwePlaintext> results;
 
     // additional test case data
     // ........
 
-    std::string buildTestName() const {
+    std::string build_test_name() const {
         std::stringstream ss;
-        ss << testCaseType << "_" << description;
+        ss << test_case_type << "_" << description;
         return ss.str();
     }
-    std::string toString() const {
+    std::string to_string_impl() const {
         std::stringstream ss;
-        ss << "testCaseType [" << testCaseType << "], BINFHE_PARAMSET: " << securityLevel
+        ss << "testCaseType [" << test_case_type << "], BINFHE_PARAMSET: " << security_level
            << ", BINFHE_METHOD: " << method << ", number of inputs: " << num_of_inputs << ", BINGATE: " << gate;
         return ss.str();
     }
@@ -164,15 +164,15 @@ struct TEST_CASE_UTGENERAL_FHEW {
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
 static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTGENERAL_FHEW>& test) {
-    return test.param.buildTestName();
+    return test.param.build_test_name();
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_UTGENERAL_FHEW& test) {
-    return os << test.toString();
+    return os << test.to_string_impl();
 }
 //===========================================================================================================
 // clang-format off
-static std::vector<TEST_CASE_UTGENERAL_FHEW> testCasesUTGENERAL_FHEW = {
+static std::vector<TEST_CASE_UTGENERAL_FHEW> test_cases_utgeneral_fhew = {
     // TestType,          Descr, ParamSet,         Method,  num_of_inputs, ptmodulus, Gate,     Results
     { FHEW_AND,           "01",  TOY,              GINX,    2,             4,         AND,      {1, 0, 0, 0} },
     { FHEW_AND,           "02",  TOY,              AP,      2,             4,         AND,      {1, 0, 0, 0} },
@@ -277,45 +277,45 @@ static std::vector<TEST_CASE_UTGENERAL_FHEW> testCasesUTGENERAL_FHEW = {
 class UTGENERAL_FHEW : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_FHEW> {
   protected:
     void SetUp() {
-        OpenFHEParallelControls.UnitTestStart();
+        cipher_parallel_controls.unit_test_start();
     }
     void TearDown() {
-        OpenFHEParallelControls.UnitTestStop();
+        cipher_parallel_controls.unit_test_stop();
     }
 
     // ---------------  TESTING METHODS OF FANDHEW ---------------
-    void UnitTest_FHEW_KeySwitch(const TEST_CASE_UTGENERAL_FHEW& testData, const std::string& failmsg = std::string()) {
+    void unit_test_fhew_key_switch(const TEST_CASE_UTGENERAL_FHEW& test_data, const std::string& failmsg = std::string()) {
         try {
-            auto cc = BinFHEContext();
-            cc.GenerateBinFHEContext(testData.securityLevel, testData.method);
+            auto cc = BooleanContext();
+            cc.generate_boolean_context(test_data.security_level, test_data.method);
 
-            NativeInteger Q = cc.GetParams()->GetLWEParams()->GetQ();
+            NativeInteger Q = cc.get_params()->get_lwe_params()->get_Q();
 
-            auto sk = cc.KeyGen();
-            auto skN = cc.KeyGenN();
+            auto sk = cc.key_gen();
+            auto sk_n = cc.key_gen_n();
 
-            auto ctQN1 = cc.Encrypt(skN, 1, SMALL_DIM, 4, Q);
-            auto ctQN0 = cc.Encrypt(skN, 0, SMALL_DIM, 4, Q);
+            auto ct_qn1 = cc.encrypt(sk_n, 1, SMALL_DIM, 4, Q);
+            auto ct_qn0 = cc.encrypt(sk_n, 0, SMALL_DIM, 4, Q);
 
-            NativeVector newSK = sk->GetElement();
-            newSK.SwitchModulus(Q);
-            auto skQ = std::make_shared<LWEPrivateKeyImpl>(newSK);
+            NativeVector new_sk = sk->get_element();
+            new_sk.switch_modulus(Q);
+            auto sk_q = std::make_shared<LwePrivateKeyImpl>(new_sk);
 
-            auto keySwitchHint = cc.KeySwitchGen(sk, skN);
+            auto key_switch_hint = cc.key_switch_gen(sk, sk_n);
 
-            LWECiphertext eQ1 = cc.GetLWEScheme()->KeySwitch(cc.GetParams()->GetLWEParams(), keySwitchHint, ctQN1);
-            LWECiphertext eQ0 = cc.GetLWEScheme()->KeySwitch(cc.GetParams()->GetLWEParams(), keySwitchHint, ctQN0);
+            LweCiphertext e_q1 = cc.get_lwe_scheme()->key_switch(cc.get_params()->get_lwe_params(), key_switch_hint, ct_qn1);
+            LweCiphertext e_q0 = cc.get_lwe_scheme()->key_switch(cc.get_params()->get_lwe_params(), key_switch_hint, ct_qn0);
 
-            LWEPlaintext resultAfterKeySwitch1;
-            cc.Decrypt(skQ, eQ1, &resultAfterKeySwitch1);
+            LwePlaintext result_after_key_switch1;
+            cc.decrypt(sk_q, e_q1, &result_after_key_switch1);
 
-            LWEPlaintext resultAfterKeySwitch0;
-            cc.Decrypt(skQ, eQ0, &resultAfterKeySwitch0);
+            LwePlaintext result_after_key_switch0;
+            cc.decrypt(sk_q, e_q0, &result_after_key_switch0);
 
-            std::string failed = testData.toString() + " failed";
+            std::string failed = test_data.to_string_impl() + " failed";
 
-            EXPECT_EQ(testData.results[0], resultAfterKeySwitch1) << failed;
-            EXPECT_EQ(testData.results[1], resultAfterKeySwitch0) << failed;
+            EXPECT_EQ(test_data.results[0], result_after_key_switch1) << failed;
+            EXPECT_EQ(test_data.results[1], result_after_key_switch0) << failed;
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -325,37 +325,37 @@ class UTGENERAL_FHEW : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_FHEW>
         }
     }
 
-    void UnitTest_FHEW_ModSwitch(const TEST_CASE_UTGENERAL_FHEW& testData, const std::string& failmsg = std::string()) {
+    void unit_test_fhew_mod_switch(const TEST_CASE_UTGENERAL_FHEW& test_data, const std::string& failmsg = std::string()) {
         try {
-            auto cc = BinFHEContext();
-            cc.GenerateBinFHEContext(testData.securityLevel, testData.method);
+            auto cc = BooleanContext();
+            cc.generate_boolean_context(test_data.security_level, test_data.method);
 
-            NativeInteger Q = cc.GetParams()->GetLWEParams()->GetQ();
+            NativeInteger Q = cc.get_params()->get_lwe_params()->get_Q();
 
-            auto sk = cc.KeyGen();
+            auto sk = cc.key_gen();
 
             // switch secret key to Q
-            NativeVector newSK = sk->GetElement();
-            newSK.SwitchModulus(Q);
-            auto skQ = std::make_shared<LWEPrivateKeyImpl>(newSK);
+            NativeVector new_sk = sk->get_element();
+            new_sk.switch_modulus(Q);
+            auto sk_q = std::make_shared<LwePrivateKeyImpl>(new_sk);
 
-            auto ctQ1 = cc.Encrypt(skQ, 1, SMALL_DIM, 4, Q);
-            auto ctQ0 = cc.Encrypt(skQ, 0, SMALL_DIM, 4, Q);
+            auto ct_q1 = cc.encrypt(sk_q, 1, SMALL_DIM, 4, Q);
+            auto ct_q0 = cc.encrypt(sk_q, 0, SMALL_DIM, 4, Q);
 
             // switches the modulus from Q to q
-            auto ct1 = cc.GetLWEScheme()->ModSwitch(cc.GetParams()->GetLWEParams()->Getq(), ctQ1);
-            auto ct0 = cc.GetLWEScheme()->ModSwitch(cc.GetParams()->GetLWEParams()->Getq(), ctQ0);
+            auto ct1 = cc.get_lwe_scheme()->mod_switch(cc.get_params()->get_lwe_params()->get_q(), ct_q1);
+            auto ct0 = cc.get_lwe_scheme()->mod_switch(cc.get_params()->get_lwe_params()->get_q(), ct_q0);
 
-            LWEPlaintext resultAfterModSwitch1;
-            cc.Decrypt(sk, ct1, &resultAfterModSwitch1);
+            LwePlaintext result_after_mod_switch1;
+            cc.decrypt(sk, ct1, &result_after_mod_switch1);
 
-            LWEPlaintext resultAfterModSwitch0;
-            cc.Decrypt(sk, ct0, &resultAfterModSwitch0);
+            LwePlaintext result_after_mod_switch0;
+            cc.decrypt(sk, ct0, &result_after_mod_switch0);
 
-            std::string failed = testData.toString() + " failed";
+            std::string failed = test_data.to_string_impl() + " failed";
 
-            EXPECT_EQ(1, resultAfterModSwitch1) << failed;
-            EXPECT_EQ(0, resultAfterModSwitch0) << failed;
+            EXPECT_EQ(1, result_after_mod_switch1) << failed;
+            EXPECT_EQ(0, result_after_mod_switch0) << failed;
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -365,29 +365,29 @@ class UTGENERAL_FHEW : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_FHEW>
         }
     }
 
-    void UnitTest_FHEW_NOT(const TEST_CASE_UTGENERAL_FHEW& testData, const std::string& failmsg = std::string()) {
+    void unit_test_fhew_not(const TEST_CASE_UTGENERAL_FHEW& test_data, const std::string& failmsg = std::string()) {
         try {
-            auto cc = BinFHEContext();
-            cc.GenerateBinFHEContext(testData.securityLevel, testData.method);
+            auto cc = BooleanContext();
+            cc.generate_boolean_context(test_data.security_level, test_data.method);
 
-            auto sk = cc.KeyGen();
+            auto sk = cc.key_gen();
 
-            auto ct1 = cc.Encrypt(sk, 1);
-            auto ct0 = cc.Encrypt(sk, 0);
+            auto ct1 = cc.encrypt(sk, 1);
+            auto ct0 = cc.encrypt(sk, 0);
 
-            auto ct1Not = cc.EvalNOT(ct1);
-            auto ct0Not = cc.EvalNOT(ct0);
+            auto ct1_not = cc.eval_not(ct1);
+            auto ct0_not = cc.eval_not(ct0);
 
-            LWEPlaintext result1;
-            cc.Decrypt(sk, ct1Not, &result1);
+            LwePlaintext result1;
+            cc.decrypt(sk, ct1_not, &result1);
 
-            LWEPlaintext result0;
-            cc.Decrypt(sk, ct0Not, &result0);
+            LwePlaintext result0;
+            cc.decrypt(sk, ct0_not, &result0);
 
-            std::string failed = testData.toString() + " failed";
+            std::string failed = test_data.to_string_impl() + " failed";
 
-            EXPECT_EQ(testData.results[0], result1) << failed;
-            EXPECT_EQ(testData.results[1], result0) << failed;
+            EXPECT_EQ(test_data.results[0], result1) << failed;
+            EXPECT_EQ(test_data.results[1], result0) << failed;
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -397,40 +397,40 @@ class UTGENERAL_FHEW : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_FHEW>
         }
     }
 
-    void UnitTest_FHEW(const TEST_CASE_UTGENERAL_FHEW& testData, const std::string& failmsg = std::string()) {
+    void unit_test_fhew(const TEST_CASE_UTGENERAL_FHEW& test_data, const std::string& failmsg = std::string()) {
         try {
-            auto cc = BinFHEContext();
-            cc.GenerateBinFHEContext(testData.securityLevel, testData.method);
+            auto cc = BooleanContext();
+            cc.generate_boolean_context(test_data.security_level, test_data.method);
 
-            auto sk = cc.KeyGen();
+            auto sk = cc.key_gen();
 
-            cc.BTKeyGen(sk);
+            cc.bt_key_gen(sk);
 
-            auto ct1 = cc.Encrypt(sk, 1);
-            auto ct0 = cc.Encrypt(sk, 0);
-            auto ct1Alt = cc.Encrypt(sk, 1);
-            auto ct0Alt = cc.Encrypt(sk, 0);
+            auto ct1 = cc.encrypt(sk, 1);
+            auto ct0 = cc.encrypt(sk, 0);
+            auto ct1_alt = cc.encrypt(sk, 1);
+            auto ct0_alt = cc.encrypt(sk, 0);
 
-            auto ct11 = cc.EvalBinGate(testData.gate, ct1, ct1Alt);
-            auto ct01 = cc.EvalBinGate(testData.gate, ct0, ct1);
-            auto ct10 = cc.EvalBinGate(testData.gate, ct1, ct0);
-            auto ct00 = cc.EvalBinGate(testData.gate, ct0, ct0Alt);
+            auto ct11 = cc.eval_bin_gate(test_data.gate, ct1, ct1_alt);
+            auto ct01 = cc.eval_bin_gate(test_data.gate, ct0, ct1);
+            auto ct10 = cc.eval_bin_gate(test_data.gate, ct1, ct0);
+            auto ct00 = cc.eval_bin_gate(test_data.gate, ct0, ct0_alt);
 
-            LWEPlaintext result11;
-            cc.Decrypt(sk, ct11, &result11);
-            LWEPlaintext result01;
-            cc.Decrypt(sk, ct01, &result01);
-            LWEPlaintext result10;
-            cc.Decrypt(sk, ct10, &result10);
-            LWEPlaintext result00;
-            cc.Decrypt(sk, ct00, &result00);
+            LwePlaintext result11;
+            cc.decrypt(sk, ct11, &result11);
+            LwePlaintext result01;
+            cc.decrypt(sk, ct01, &result01);
+            LwePlaintext result10;
+            cc.decrypt(sk, ct10, &result10);
+            LwePlaintext result00;
+            cc.decrypt(sk, ct00, &result00);
 
-            std::string failed = testData.toString() + " failed";
+            std::string failed = test_data.to_string_impl() + " failed";
 
-            EXPECT_EQ(testData.results[0], result11) << failed;
-            EXPECT_EQ(testData.results[1], result01) << failed;
-            EXPECT_EQ(testData.results[2], result10) << failed;
-            EXPECT_EQ(testData.results[3], result00) << failed;
+            EXPECT_EQ(test_data.results[0], result11) << failed;
+            EXPECT_EQ(test_data.results[1], result01) << failed;
+            EXPECT_EQ(test_data.results[2], result10) << failed;
+            EXPECT_EQ(test_data.results[3], result00) << failed;
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -440,42 +440,42 @@ class UTGENERAL_FHEW : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_FHEW>
         }
     }
 
-    void UnitTest_FHEW_MULTIINPUT(const TEST_CASE_UTGENERAL_FHEW& testData,
+    void unit_test_fhew_multiinput(const TEST_CASE_UTGENERAL_FHEW& test_data,
                                   const std::string& failmsg = std::string()) {
         try {
-            auto cc = BinFHEContext();
-            cc.GenerateBinFHEContext(testData.securityLevel, testData.method);
+            auto cc = BooleanContext();
+            cc.generate_boolean_context(test_data.security_level, test_data.method);
 
-            auto sk = cc.KeyGen();
+            auto sk = cc.key_gen();
 
-            cc.BTKeyGen(sk);
+            cc.bt_key_gen(sk);
 
-            std::vector<LWECiphertext> ctvec;
-            if (testData.num_of_inputs == 3) {
-                auto ct1 = cc.Encrypt(sk, 1, SMALL_DIM, testData.ptmodulus);
-                auto ct2 = cc.Encrypt(sk, 1, SMALL_DIM, testData.ptmodulus);
-                auto ct3 = cc.Encrypt(sk, 0, SMALL_DIM, testData.ptmodulus);
+            std::vector<LweCiphertext> ctvec;
+            if (test_data.num_of_inputs == 3) {
+                auto ct1 = cc.encrypt(sk, 1, SMALL_DIM, test_data.ptmodulus);
+                auto ct2 = cc.encrypt(sk, 1, SMALL_DIM, test_data.ptmodulus);
+                auto ct3 = cc.encrypt(sk, 0, SMALL_DIM, test_data.ptmodulus);
                 ctvec.push_back(ct1);
                 ctvec.push_back(ct2);
                 ctvec.push_back(ct3);
-            } else if (testData.num_of_inputs == 4) {
-                auto ct1 = cc.Encrypt(sk, 1, SMALL_DIM, testData.ptmodulus);
-                auto ct2 = cc.Encrypt(sk, 0, SMALL_DIM, testData.ptmodulus);
-                auto ct3 = cc.Encrypt(sk, 0, SMALL_DIM, testData.ptmodulus);
-                auto ct4 = cc.Encrypt(sk, 0, SMALL_DIM, testData.ptmodulus);
+            } else if (test_data.num_of_inputs == 4) {
+                auto ct1 = cc.encrypt(sk, 1, SMALL_DIM, test_data.ptmodulus);
+                auto ct2 = cc.encrypt(sk, 0, SMALL_DIM, test_data.ptmodulus);
+                auto ct3 = cc.encrypt(sk, 0, SMALL_DIM, test_data.ptmodulus);
+                auto ct4 = cc.encrypt(sk, 0, SMALL_DIM, test_data.ptmodulus);
                 ctvec.push_back(ct1);
                 ctvec.push_back(ct2);
                 ctvec.push_back(ct3);
                 ctvec.push_back(ct4);
             }
 
-            auto ct11 = cc.EvalBinGate(testData.gate, ctvec);
-            LWEPlaintext result11;
-            cc.Decrypt(sk, ct11, &result11, testData.ptmodulus);
+            auto ct11 = cc.eval_bin_gate(test_data.gate, ctvec);
+            LwePlaintext result11;
+            cc.decrypt(sk, ct11, &result11, test_data.ptmodulus);
 
-            std::string failed = testData.toString() + " failed";
+            std::string failed = test_data.to_string_impl() + " failed";
 
-            EXPECT_EQ(testData.results[0], result11) << failed;
+            EXPECT_EQ(test_data.results[0], result11) << failed;
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -485,47 +485,47 @@ class UTGENERAL_FHEW : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_FHEW>
         }
     }
 
-    void UnitTest_FHEW_CMUX(const TEST_CASE_UTGENERAL_FHEW& testData, const std::string& failmsg = std::string()) {
+    void unit_test_fhew_cmux(const TEST_CASE_UTGENERAL_FHEW& test_data, const std::string& failmsg = std::string()) {
         try {
-            auto cc = BinFHEContext();
-            cc.GenerateBinFHEContext(testData.securityLevel, testData.method);
+            auto cc = BooleanContext();
+            cc.generate_boolean_context(test_data.security_level, test_data.method);
 
-            auto sk = cc.KeyGen();
-            cc.BTKeyGen(sk);
+            auto sk = cc.key_gen();
+            cc.bt_key_gen(sk);
 
-            auto ct1 = cc.Encrypt(sk, 1, SMALL_DIM, testData.ptmodulus);
-            auto ct2 = cc.Encrypt(sk, 1, SMALL_DIM, testData.ptmodulus);
-            auto ct3 = cc.Encrypt(sk, 0, SMALL_DIM, testData.ptmodulus);
-            auto ct4 = cc.Encrypt(sk, 0, SMALL_DIM, testData.ptmodulus);
+            auto ct1 = cc.encrypt(sk, 1, SMALL_DIM, test_data.ptmodulus);
+            auto ct2 = cc.encrypt(sk, 1, SMALL_DIM, test_data.ptmodulus);
+            auto ct3 = cc.encrypt(sk, 0, SMALL_DIM, test_data.ptmodulus);
+            auto ct4 = cc.encrypt(sk, 0, SMALL_DIM, test_data.ptmodulus);
 
             // 1, 0, 0
-            std::vector<LWECiphertext> ct134;
+            std::vector<LweCiphertext> ct134;
             ct134.push_back(ct1);
             ct134.push_back(ct3);
             ct134.push_back(ct4);
 
             // 1, 0, 1
-            std::vector<LWECiphertext> ct132;
+            std::vector<LweCiphertext> ct132;
             ct132.push_back(ct1);
             ct132.push_back(ct3);
             ct132.push_back(ct2);
 
             // 1, 0, 1
-            auto ctCMUX0 = cc.EvalBinGate(testData.gate, ct132);
+            auto ct_cmux0 = cc.eval_bin_gate(test_data.gate, ct132);
 
             // 1, 0, 0
-            auto ctCMUX1 = cc.EvalBinGate(testData.gate, ct134);
+            auto ct_cmux1 = cc.eval_bin_gate(test_data.gate, ct134);
 
-            LWEPlaintext result1;
-            cc.Decrypt(sk, ctCMUX1, &result1, testData.ptmodulus);
+            LwePlaintext result1;
+            cc.decrypt(sk, ct_cmux1, &result1, test_data.ptmodulus);
 
-            LWEPlaintext result0;
-            cc.Decrypt(sk, ctCMUX0, &result0, testData.ptmodulus);
+            LwePlaintext result0;
+            cc.decrypt(sk, ct_cmux0, &result0, test_data.ptmodulus);
 
-            std::string failed = testData.toString() + " failed";
+            std::string failed = test_data.to_string_impl() + " failed";
 
-            EXPECT_EQ(testData.results[0], result1) << failed;
-            EXPECT_EQ(testData.results[1], result0) << failed;
+            EXPECT_EQ(test_data.results[0], result1) << failed;
+            EXPECT_EQ(test_data.results[1], result0) << failed;
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -537,10 +537,10 @@ class UTGENERAL_FHEW : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_FHEW>
 };
 //===========================================================================================================
 TEST_P(UTGENERAL_FHEW, BINFHE) {
-    // setupSignals();
+    // setup_signals();
     auto test = GetParam();
 
-    switch (test.testCaseType) {
+    switch (test.test_case_type) {
         case FHEW_AND:
         case FHEW_NAND:
         case FHEW_OR:
@@ -548,30 +548,30 @@ TEST_P(UTGENERAL_FHEW, BINFHE) {
         case FHEW_XOR:
         case FHEW_XNOR:
         case FHEW_SIGNED_MODE:
-            UnitTest_FHEW(test, test.buildTestName());
+            unit_test_fhew(test, test.build_test_name());
             break;
         case FHEW_AND3:
         case FHEW_OR3:
         case FHEW_AND4:
         case FHEW_OR4:
         case FHEW_MAJORITY:
-            UnitTest_FHEW_MULTIINPUT(test, test.buildTestName());
+            unit_test_fhew_multiinput(test, test.build_test_name());
             break;
         case FHEW_CMUX:
-            UnitTest_FHEW_CMUX(test, test.buildTestName());
+            unit_test_fhew_cmux(test, test.build_test_name());
             break;
         case FHEW_KEY_SWITCH:
-            UnitTest_FHEW_KeySwitch(test, test.buildTestName());
+            unit_test_fhew_key_switch(test, test.build_test_name());
             break;
         case FHEW_MOD_SWITCH:
-            UnitTest_FHEW_ModSwitch(test, test.buildTestName());
+            unit_test_fhew_mod_switch(test, test.build_test_name());
             break;
         case FHEW_NOT:
-            UnitTest_FHEW_NOT(test, test.buildTestName());
+            unit_test_fhew_not(test, test.build_test_name());
             break;
         default:
             break;
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTGENERAL_FHEW, ::testing::ValuesIn(testCasesUTGENERAL_FHEW), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTGENERAL_FHEW, ::testing::ValuesIn(test_cases_utgeneral_fhew), testName);

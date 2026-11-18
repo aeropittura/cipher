@@ -41,31 +41,31 @@
 #include "cipher/fhe/rns/multiparty.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 /**
  * @brief CKKS implementation of the multiparty (threshold FHE) capability: fusion of the partial decryptions and
  * the interactive multi-party bootstrapping protocol (common random element, masked decryption shares and their
  * re-encryption, with the scale adjustments CKKS needs).
  */
-class MultipartyCKKSRNS : public MultipartyRNS {
+class CkksRnsMultiparty : public RnsMultiparty {
   public:
-    virtual ~MultipartyCKKSRNS() = default;
+    virtual ~CkksRnsMultiparty() = default;
 
-    DecryptResult MultipartyDecryptFusion(const std::vector<Ciphertext<DCRTPoly>>& ciphertextVec,
+    DecryptResult multiparty_decrypt_fusion(const std::vector<Ciphertext<RnsPoly>>& ciphertext_vec,
                                           Poly* plaintext) const override;
 
-    DecryptResult MultipartyDecryptFusion(const std::vector<Ciphertext<DCRTPoly>>& ciphertextVec,
+    DecryptResult multiparty_decrypt_fusion(const std::vector<Ciphertext<RnsPoly>>& ciphertext_vec,
                                           NativePoly* plaintext) const override;
 
-    Ciphertext<DCRTPoly> IntBootAdjustScale(ConstCiphertext<DCRTPoly> ciphertext) const override;
+    Ciphertext<RnsPoly> int_boot_adjust_scale(ConstCiphertext<RnsPoly> ciphertext) const override;
 
-    Ciphertext<DCRTPoly> IntMPBootAdjustScale(ConstCiphertext<DCRTPoly> ciphertext) const override;
+    Ciphertext<RnsPoly> int_mp_boot_adjust_scale(ConstCiphertext<RnsPoly> ciphertext) const override;
 
-    Ciphertext<DCRTPoly> IntMPBootRandomElementGen(std::shared_ptr<CryptoParametersCKKSRNS> params,
-                                                   const PublicKey<DCRTPoly> publicKey) const override;
+    Ciphertext<RnsPoly> int_mp_boot_random_element_gen(std::shared_ptr<CkksRnsCryptoParams> params,
+                                                   const PublicKey<RnsPoly> public_key) const override;
 
     /**
      * Threshold FHE: generates a common random polynomial for multi-party interactive bootstrapping with the element
@@ -75,20 +75,20 @@ class MultipartyCKKSRNS : public MultipartyRNS {
      * @param ciphertext the ciphertext to be bootstrapped, which sets the modulus chain of the random element
      * @return a ciphertext holding the common random polynomial as its single element
      */
-    Ciphertext<DCRTPoly> IntMPBootRandomElementGen(std::shared_ptr<CryptoParametersCKKSRNS> params,
-                                                   ConstCiphertext<DCRTPoly>& ciphertext) const override;
+    Ciphertext<RnsPoly> int_mp_boot_random_element_gen(std::shared_ptr<CkksRnsCryptoParams> params,
+                                                   ConstCiphertext<RnsPoly>& ciphertext) const override;
 
-    std::vector<Ciphertext<DCRTPoly>> IntMPBootDecrypt(const PrivateKey<DCRTPoly> privateKey,
-                                                       ConstCiphertext<DCRTPoly> ciphertext,
-                                                       ConstCiphertext<DCRTPoly> a) const override;
+    std::vector<Ciphertext<RnsPoly>> int_mp_boot_decrypt(const PrivateKey<RnsPoly> private_key,
+                                                       ConstCiphertext<RnsPoly> ciphertext,
+                                                       ConstCiphertext<RnsPoly> a) const override;
 
-    std::vector<Ciphertext<DCRTPoly>> IntMPBootAdd(
-            std::vector<std::vector<Ciphertext<DCRTPoly>>>& sharesPairVec) const override;
+    std::vector<Ciphertext<RnsPoly>> int_mp_boot_add(
+            std::vector<std::vector<Ciphertext<RnsPoly>>>& shares_pair_vec) const override;
 
-    Ciphertext<DCRTPoly> IntMPBootEncrypt(const PublicKey<DCRTPoly> publicKey,
-                                          const std::vector<Ciphertext<DCRTPoly>>& sharesPair,
-                                          ConstCiphertext<DCRTPoly> a,
-                                          ConstCiphertext<DCRTPoly> ciphertext) const override;
+    Ciphertext<RnsPoly> int_mp_boot_encrypt(const PublicKey<RnsPoly> public_key,
+                                          const std::vector<Ciphertext<RnsPoly>>& shares_pair,
+                                          ConstCiphertext<RnsPoly> a,
+                                          ConstCiphertext<RnsPoly> ciphertext) const override;
 
     /////////////////////////////////////
     // SERIALIZATION
@@ -100,11 +100,11 @@ class MultipartyCKKSRNS : public MultipartyRNS {
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {}
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "MultipartyCKKSRNS";
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_CKKS_MULTIPARTY_H_

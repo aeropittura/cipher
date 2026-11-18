@@ -43,34 +43,34 @@
 
 #include "cipher/util/exception.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-std::vector<double> EvalChebyshevCoefficients(std::function<double(double)> func, double a, double b, uint32_t degree) {
+std::vector<double> eval_chebyshev_coefficients(std::function<double(double)> func, double a, double b, uint32_t degree) {
     if (degree == 0)
-        OPENFHE_THROW("The degree of approximation can not be zero");
+        CIPHER_THROW("The degree of approximation can not be zero");
     // the number of coefficients to be generated should be degree+1 as zero is also included
-    size_t coeffTotal{degree + 1};
-    double bMinusA = 0.5 * (b - a);
-    double bPlusA = 0.5 * (b + a);
-    double PiByDeg = M_PI / static_cast<double>(coeffTotal);
-    std::vector<double> functionPoints(coeffTotal);
-    for (size_t i = 0; i < coeffTotal; ++i)
-        functionPoints[i] = func(std::cos(PiByDeg * (i + 0.5)) * bMinusA + bPlusA);
+    size_t coeff_total{degree + 1};
+    double b_minus_a = 0.5 * (b - a);
+    double b_plus_a = 0.5 * (b + a);
+    double pi_by_deg = M_PI / static_cast<double>(coeff_total);
+    std::vector<double> function_points(coeff_total);
+    for (size_t i = 0; i < coeff_total; ++i)
+        function_points[i] = func(std::cos(pi_by_deg * (i + 0.5)) * b_minus_a + b_plus_a);
 
-    double multFactor = 2.0 / static_cast<double>(coeffTotal);
-    std::vector<double> coefficients(coeffTotal);
-    for (size_t i = 0; i < coeffTotal; ++i) {
-        for (size_t j = 0; j < coeffTotal; ++j)
-            coefficients[i] += functionPoints[j] * std::cos(PiByDeg * i * (j + 0.5));
-        coefficients[i] *= multFactor;
+    double mult_factor = 2.0 / static_cast<double>(coeff_total);
+    std::vector<double> coefficients(coeff_total);
+    for (size_t i = 0; i < coeff_total; ++i) {
+        for (size_t j = 0; j < coeff_total; ++j)
+            coefficients[i] += function_points[j] * std::cos(pi_by_deg * i * (j + 0.5));
+        coefficients[i] *= mult_factor;
     }
     return coefficients;
 }
 
-// A cleartext version of CryptoContext<...>::EvalChebyshevFunction(...)
-std::vector<double> EvalChebyshevFunctionPtxt(std::function<double(double)> func, const std::vector<double>& ptxt,
+// A cleartext version of CryptoContext<...>::eval_chebyshev_function(...)
+std::vector<double> eval_chebyshev_function_ptxt(std::function<double(double)> func, const std::vector<double>& ptxt,
                                               double a, double b, size_t degree) {
-    auto coeffs = EvalChebyshevCoefficients(func, a, b, degree);
+    auto coeffs = eval_chebyshev_coefficients(func, a, b, degree);
 
     // The standard practice is to halve the 1st coefficient.
     // See, for example, the Chebyshev Series section at
@@ -85,12 +85,12 @@ std::vector<double> EvalChebyshevFunctionPtxt(std::function<double(double)> func
         return std::vector<double>(ptxt.size(), coeffs[0]);
 
     // If [a,b] is different than [-1,1] then need to scale the input
-    double scaleFactor = 2.0 / (b - a);
-    double offset = (b + a) * scaleFactor / -2.0;
+    double scale_factor = 2.0 / (b - a);
+    double offset = (b + a) * scale_factor / -2.0;
 
     std::vector<double> result(ptxt.size());
     for (size_t i = 0; i < ptxt.size(); i++) {
-        double x = ptxt[i] * scaleFactor + offset;
+        double x = ptxt[i] * scale_factor + offset;
         double x2 = 2 * x;
 
         double t_prev = 1.0;  // T0(x) = 1
@@ -109,4 +109,4 @@ std::vector<double> EvalChebyshevFunctionPtxt(std::function<double(double)> func
     return result;
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher

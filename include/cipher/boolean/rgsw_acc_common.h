@@ -45,15 +45,15 @@
 // internal path, templated on the polynomial type so each algorithm exists exactly once. P's
 // word type is P::Integer::Integer (BasicInteger for NativePoly, uint32_t for NativePoly32).
 
-namespace lbcrypto {
+namespace cipher {
 
 // NativeInteger at width of P::Integer: identity for NativePoly, narrowing copy for NativePoly32
 template <typename Int>
-Int AtWidth(const NativeInteger& x) {
+Int at_width(const NativeInteger& x) {
     if constexpr (std::is_same_v<Int, NativeInteger>)
         return x;
     else
-        return Int(x.template ConvertToInt<typename Int::Integer>());
+        return Int(x.template convert_to_int<typename Int::Integer>());
 }
 
 enum class GadgetTerm { NONE, ADD, SUB };
@@ -68,200 +68,200 @@ struct GadgetMonomial {
 
 // X^m for an exponent m given modulo q: scaled to the cyclotomic order 2N and folded past N into
 // a sign, since X^N = -1
-inline GadgetMonomial MonomialOf(const std::shared_ptr<RingGSWCryptoParams>& params, LWEPlaintext m) {
-    const int64_t q = params->Getq().ConvertToInt<int64_t>();
-    const int64_t N = params->GetN();
+inline GadgetMonomial monomial_of(const std::shared_ptr<RingGswCryptoParams>& params, LwePlaintext m) {
+    const int64_t q = params->get_q().convert_to_int<int64_t>();
+    const int64_t N = params->get_N();
     const int64_t mm = (((m % q) + q) % q) * (2 * N / q);
     if (mm >= N)
         return {static_cast<uint32_t>(mm - N), GadgetTerm::SUB};
     return {static_cast<uint32_t>(mm), GadgetTerm::ADD};
 }
 
-// RGSW encryption of mono under skNTT at the width of P, with the gadget base assigned to LWE
-// index `index`: 2(digitsG - 1) rows, the first digit being dropped by the approximate decomposition
+// RGSW encryption of mono under sk_ntt at the width of P, with the gadget base assigned to LWE
+// index `index`: 2(digits_g - 1) rows, the first digit being dropped by the approximate decomposition
 template <typename P, typename PP>
-std::vector<std::vector<P>> RGSWEncrypt(const std::shared_ptr<RingGSWCryptoParams>& params, const PP& polyParams,
-                                        const P& skNTT, const DiscreteGaussianGeneratorImpl<typename P::Vector>& dgg,
+std::vector<std::vector<P>> rgsw_encrypt(const std::shared_ptr<RingGswCryptoParams>& params, const PP& poly_params,
+                                        const P& sk_ntt, const DiscreteGaussianGeneratorImpl<typename P::Vector>& dgg,
                                         uint32_t index, GadgetMonomial mono) {
     using Int = typename P::Integer;
     DiscreteUniformGeneratorImpl<typename P::Vector> dug;
-    const Int Q{AtWidth<Int>(params->GetQ())};
+    const Int Q{at_width<Int>(params->get_Q())};
 
     // approximate gadget decomposition is used; the first digit is ignored
-    const auto& bp = params->GetBaseGParams(index);
-    uint32_t digitsG2{(bp.digitsG - 1) << 1};
-    const auto& Gpow{*bp.gpow};
+    const auto& bp = params->get_base_g_params(index);
+    uint32_t digits_g2{(bp.digits_g - 1) << 1};
+    const auto& gpow_value{*bp.gpow};
 
-    std::vector<std::vector<P>> result(digitsG2, std::vector<P>(2));
+    std::vector<std::vector<P>> result(digits_g2, std::vector<P>(2));
     P tmp;
-    for (uint32_t i = 0; i < digitsG2; ++i) {
-        result[i][0] = P(dug, polyParams, Format::COEFFICIENT);
+    for (uint32_t i = 0; i < digits_g2; ++i) {
+        result[i][0] = P(dug, poly_params, Format::COEFFICIENT);
         tmp = result[i][0];
-        tmp.SetFormat(Format::EVALUATION);
-        result[i][1] = P(dgg, polyParams, Format::COEFFICIENT);
-        const Int g{AtWidth<Int>(Gpow[(i >> 1) + 1])};
+        tmp.set_format(Format::EVALUATION);
+        result[i][1] = P(dgg, poly_params, Format::COEFFICIENT);
+        const Int g{at_width<Int>(gpow_value[(i >> 1) + 1])};
         if (mono.term == GadgetTerm::ADD)  // (i even) Add G Multiple, (i odd) [a,as+e] + X^m*G
-            result[i][i & 0x1][mono.position].ModAddFastEq(g, Q);
+            result[i][i & 0x1][mono.position].mod_add_fast_eq(g, Q);
         else if (mono.term == GadgetTerm::SUB)  // (i even) Sub G Multiple, (i odd) [a,as+e] - X^m*G
-            result[i][i & 0x1][mono.position].ModSubFastEq(g, Q);
-        result[i][0].SetFormat(Format::EVALUATION);
-        result[i][1].SetFormat(Format::EVALUATION);
-        result[i][1] += (tmp *= skNTT);
+            result[i][i & 0x1][mono.position].mod_sub_fast_eq(g, Q);
+        result[i][0].set_format(Format::EVALUATION);
+        result[i][1].set_format(Format::EVALUATION);
+        result[i][1] += (tmp *= sk_ntt);
     }
     return result;
 }
 
-// RGSW encryption of skNTT(X^k) * G under skNTT at the width of P, for the LMKCDEY automorphism
-// keys: digitsG - 1 rows, sampled directly in evaluation form
+// RGSW encryption of sk_ntt(X^k) * G under sk_ntt at the width of P, for the LMKCDEY automorphism
+// keys: digits_g - 1 rows, sampled directly in evaluation form
 template <typename P, typename PP>
-std::vector<std::vector<P>> RGSWEncryptAutomorphism(const std::shared_ptr<RingGSWCryptoParams>& params,
-                                                    const PP& polyParams, const P& skNTT,
+std::vector<std::vector<P>> rgsw_encrypt_automorphism(const std::shared_ptr<RingGswCryptoParams>& params,
+                                                    const PP& poly_params, const P& sk_ntt,
                                                     const DiscreteGaussianGeneratorImpl<typename P::Vector>& dgg,
-                                                    LWEPlaintext k) {
+                                                    LwePlaintext k) {
     using Int = typename P::Integer;
-    const auto& Gpow{params->GetGPower()};
-    auto skAuto{skNTT.AutomorphismTransform(k)};
+    const auto& gpow_value{params->get_g_power()};
+    auto sk_auto{sk_ntt.automorphism_transform(k)};
 
     // approximate gadget decomposition is used; the first digit is ignored
-    uint32_t digitsG{params->GetDigitsG() - 1};
-    std::vector<std::vector<P>> result(digitsG, std::vector<P>(2));
+    uint32_t digits_g{params->get_digits_g() - 1};
+    std::vector<std::vector<P>> result(digits_g, std::vector<P>(2));
     DiscreteUniformGeneratorImpl<typename P::Vector> dug;
-    for (uint32_t i = 0; i < digitsG; ++i) {
-        const Int g{AtWidth<Int>(Gpow[i + 1])};
-        result[i][0] = P(dug, polyParams, Format::EVALUATION);
-        result[i][1] = P(dgg, polyParams, Format::EVALUATION) - skAuto * g;
-        result[i][1] += result[i][0] * skNTT;
+    for (uint32_t i = 0; i < digits_g; ++i) {
+        const Int g{at_width<Int>(gpow_value[i + 1])};
+        result[i][0] = P(dug, poly_params, Format::EVALUATION);
+        result[i][1] = P(dgg, poly_params, Format::EVALUATION) - sk_auto * g;
+        result[i][1] += result[i][0] * sk_ntt;
     }
     return result;
 }
 
-// Excess-H signed digit decomposition of an RLWE ciphertext (both components) into digitsG2
-// digits. Biasing by H (gHalf in every digit position) turns balanced-digit extraction into
-// independent unsigned windows: digit_k(x) = (((x + H) >> k*gBits) & gMask) - gHalf.
-// Requires digitsG*gBits + 1 <= word bits, which holds for all supported parameter sets.
+// Excess-H signed digit decomposition of an RLWE ciphertext (both components) into digits_g2
+// digits. Biasing by H (g_half in every digit position) turns balanced-digit extraction into
+// independent unsigned windows: digit_k(x) = (((x + H) >> k*g_bits) & g_mask) - g_half.
+// Requires digits_g*g_bits + 1 <= word bits, which holds for all supported parameter sets.
 template <typename P>
-void ExcessHDigitDecompose(typename P::Integer::Integer Q, const RingGSWCryptoParams::BaseGParams& bp,
+void excess_h_digit_decompose(typename P::Integer::Integer Q, const RingGswCryptoParams::BaseGParams& bp,
                            const std::vector<P>& input, std::vector<P>& output) {
     using I = typename P::Integer::Integer;
-    I QHalf{Q >> 1};
-    uint32_t gBits{bp.gBits};
-    I gHalf{static_cast<I>(bp.baseG >> 1)};
-    I gMask{static_cast<I>(bp.baseG - 1)};
-    I QmHalf{Q - gHalf};
-    uint32_t digitsG{bp.digitsG};
+    I Q_half{Q >> 1};
+    uint32_t g_bits{bp.g_bits};
+    I g_half{static_cast<I>(bp.base_g >> 1)};
+    I g_mask{static_cast<I>(bp.base_g - 1)};
+    I qm_half{Q - g_half};
+    uint32_t digits_g{bp.digits_g};
     I H{0};
-    for (uint32_t i{0}; i < digitsG; ++i)
-        H += gHalf << (i * gBits);
+    for (uint32_t i{0}; i < digits_g; ++i)
+        H += g_half << (i * g_bits);
     // approximate gadget decomposition is used; the first digit is ignored
-    uint32_t digitsG2{(digitsG - 1) << 1};
-    uint32_t N{input[0].GetLength()};
+    uint32_t digits_g2{(digits_g - 1) << 1};
+    uint32_t N{input[0].get_length()};
 
     std::vector<I> w0(N), w1(N);
     for (uint32_t k{0}; k < N; ++k) {
-        auto t0{input[0][k].template ConvertToInt<I>()};
-        w0[k] = t0 + H - (t0 < QHalf ? 0 : Q);
-        auto t1{input[1][k].template ConvertToInt<I>()};
-        w1[k] = t1 + H - (t1 < QHalf ? 0 : Q);
+        auto t0{input[0][k].template convert_to_int<I>()};
+        w0[k] = t0 + H - (t0 < Q_half ? 0 : Q);
+        auto t1{input[1][k].template convert_to_int<I>()};
+        w1[k] = t1 + H - (t1 < Q_half ? 0 : Q);
     }
 
-    for (uint32_t d{0}; d < digitsG2; d += 2) {
-        uint32_t shift{((d >> 1) + 1) * gBits};
-        // Q/2 + H can exceed baseG^digitsG, so the top window must keep the carry out of digitsG*gBits.
-        auto mask{(d + 2 < digitsG2) ? gMask : static_cast<I>(-1)};
+    for (uint32_t d{0}; d < digits_g2; d += 2) {
+        uint32_t shift{((d >> 1) + 1) * g_bits};
+        // Q/2 + H can exceed base_g^digits_g, so the top window must keep the carry out of digits_g*g_bits.
+        auto mask{(d + 2 < digits_g2) ? g_mask : static_cast<I>(-1)};
         auto& out0{output[d + 0]};
         auto& out1{output[d + 1]};
         for (uint32_t k{0}; k < N; ++k) {
             auto r0{(w0[k] >> shift) & mask};
-            out0[k] = (r0 < gHalf) ? r0 + QmHalf : r0 - gHalf;
+            out0[k] = (r0 < g_half) ? r0 + qm_half : r0 - g_half;
             auto r1{(w1[k] >> shift) & mask};
-            out1[k] = (r1 < gHalf) ? r1 + QmHalf : r1 - gHalf;
+            out1[k] = (r1 < g_half) ? r1 + qm_half : r1 - g_half;
         }
     }
 }
 
-// Single-ring-element overload producing digitsG - 1 digits (for LMKCDEY automorphism key switch)
+// Single-ring-element overload producing digits_g - 1 digits (for LMKCDEY automorphism key switch)
 template <typename P>
-void ExcessHDigitDecompose(typename P::Integer::Integer Q, const RingGSWCryptoParams::BaseGParams& bp, const P& input,
+void excess_h_digit_decompose(typename P::Integer::Integer Q, const RingGswCryptoParams::BaseGParams& bp, const P& input,
                            std::vector<P>& output) {
     using I = typename P::Integer::Integer;
-    I QHalf{Q >> 1};
-    uint32_t gBits{bp.gBits};
-    I gHalf{static_cast<I>(bp.baseG >> 1)};
-    I gMask{static_cast<I>(bp.baseG - 1)};
-    I QmHalf{Q - gHalf};
-    uint32_t digitsG{bp.digitsG};
+    I Q_half{Q >> 1};
+    uint32_t g_bits{bp.g_bits};
+    I g_half{static_cast<I>(bp.base_g >> 1)};
+    I g_mask{static_cast<I>(bp.base_g - 1)};
+    I qm_half{Q - g_half};
+    uint32_t digits_g{bp.digits_g};
     I H{0};
-    for (uint32_t i{0}; i < digitsG; ++i)
-        H += gHalf << (i * gBits);
-    uint32_t N{input.GetLength()};
+    for (uint32_t i{0}; i < digits_g; ++i)
+        H += g_half << (i * g_bits);
+    uint32_t N{input.get_length()};
 
     std::vector<I> w(N);
     for (uint32_t k{0}; k < N; ++k) {
-        auto t0{input[k].template ConvertToInt<I>()};
-        w[k] = t0 + H - (t0 < QHalf ? 0 : Q);
+        auto t0{input[k].template convert_to_int<I>()};
+        w[k] = t0 + H - (t0 < Q_half ? 0 : Q);
     }
 
     // approximate gadget decomposition is used; the first digit is ignored
-    for (uint32_t d{0}; d < digitsG - 1; ++d) {
-        uint32_t shift{(d + 1) * gBits};
-        // Q/2 + H can exceed baseG^digitsG, so the top window must keep the carry out of digitsG*gBits.
-        auto mask{(d + 2 < digitsG) ? gMask : static_cast<I>(-1)};
+    for (uint32_t d{0}; d < digits_g - 1; ++d) {
+        uint32_t shift{(d + 1) * g_bits};
+        // Q/2 + H can exceed base_g^digits_g, so the top window must keep the carry out of digits_g*g_bits.
+        auto mask{(d + 2 < digits_g) ? g_mask : static_cast<I>(-1)};
         auto& out{output[d]};
         for (uint32_t k{0}; k < N; ++k) {
             auto r0{(w[k] >> shift) & mask};
-            out[k] = (r0 < gHalf) ? r0 + QmHalf : r0 - gHalf;
+            out[k] = (r0 < g_half) ? r0 + qm_half : r0 - g_half;
         }
     }
 }
 
 // acc = dct * ev (matrix product over the gadget digits);
 template <typename P>
-void GadgetMatrixProduct(std::vector<P>& acc, std::vector<P>& dct, const std::vector<std::vector<P>>& ev,
+void gadget_matrix_product(std::vector<P>& acc, std::vector<P>& dct, const std::vector<std::vector<P>>& ev,
                          uint32_t rows) {
     acc[0] = (dct[0] * ev[0][0]);
     for (uint32_t d = 1; d < rows; ++d)
-        acc[0].MultAccEqNoCheck(dct[d], ev[d][0]);
+        acc[0].mult_acc_eq_no_check(dct[d], ev[d][0]);
     acc[1] = (dct[0] *= ev[0][1]);
     for (uint32_t d = 1; d < rows; ++d)
-        acc[1].MultAccEqNoCheck(dct[d], ev[d][1]);
+        acc[1].mult_acc_eq_no_check(dct[d], ev[d][1]);
 }
 
 // DM/LMKCDEY acc (no monomial): decompose, NTT the digits, external product with one RGSW key.
 template <typename P, typename PP>
-void AddToAccNoMonomial(const PP& polyParams, typename P::Integer::Integer Q,
-                        const RingGSWCryptoParams::BaseGParams& bp, const std::vector<std::vector<P>>& ev,
+void add_to_acc_no_monomial(const PP& poly_params, typename P::Integer::Integer Q,
+                        const RingGswCryptoParams::BaseGParams& bp, const std::vector<std::vector<P>>& ev,
                         std::vector<P>& acc) {
     using I = typename P::Integer::Integer;
-    thread_local std::vector<P> ctScratch, dctScratch;
-    thread_local std::vector<I> w0Scratch, w1Scratch;
-    auto& ct = ctScratch;
-    auto& dct = dctScratch;
-    auto& w0 = w0Scratch;
-    auto& w1 = w1Scratch;
+    thread_local std::vector<P> ct_scratch, dct_scratch;
+    thread_local std::vector<I> w0_scratch, w1_scratch;
+    auto& ct = ct_scratch;
+    auto& dct = dct_scratch;
+    auto& w0 = w0_scratch;
+    auto& w1 = w1_scratch;
     ct = acc;
 
-    uint32_t N{acc[0].GetLength()};
+    uint32_t N{acc[0].get_length()};
     if (w0.size() != N) {
         w0.resize(N);
         w1.resize(N);
     }
 
-    uint32_t digitsG2{(bp.digitsG - 1) << 1};
-    if (dct.size() < digitsG2 || dct[0].GetParams() != polyParams) {
-        dct.assign(digitsG2, P(polyParams, Format::COEFFICIENT, true));
+    uint32_t digits_g2{(bp.digits_g - 1) << 1};
+    if (dct.size() < digits_g2 || dct[0].get_params() != poly_params) {
+        dct.assign(digits_g2, P(poly_params, Format::COEFFICIENT, true));
     } else {
         for (auto& d : dct)
-            d.OverrideFormat(Format::COEFFICIENT);
+            d.override_format(Format::COEFFICIENT);
     }
 
-    int nthreads = OpenFHEParallelControls.GetThreadLimit(bp.teamWidth > 4 ? bp.teamWidth : 4);
+    int nthreads = cipher_parallel_controls.get_thread_limit(bp.team_width > 4 ? bp.team_width : 4);
     if (nthreads < 2) {
-        ct[0].SetFormat(Format::COEFFICIENT);
-        ct[1].SetFormat(Format::COEFFICIENT);
-        ExcessHDigitDecompose(Q, bp, ct, dct);
-        for (uint32_t d = 0; d < digitsG2; ++d)
-            dct[d].SetFormat(Format::EVALUATION);
-        GadgetMatrixProduct(acc, dct, ev, digitsG2);
+        ct[0].set_format(Format::COEFFICIENT);
+        ct[1].set_format(Format::COEFFICIENT);
+        excess_h_digit_decompose(Q, bp, ct, dct);
+        for (uint32_t d = 0; d < digits_g2; ++d)
+            dct[d].set_format(Format::EVALUATION);
+        gadget_matrix_product(acc, dct, ev, digits_g2);
         return;
     }
 
@@ -269,31 +269,31 @@ void AddToAccNoMonomial(const PP& polyParams, typename P::Integer::Integer Q,
     {
 #pragma omp for schedule(static) nowait
         for (uint32_t i = 0; i < 2; ++i)
-            ct[i].SetFormat(Format::COEFFICIENT);
+            ct[i].set_format(Format::COEFFICIENT);
 
 #pragma omp barrier
         // the shared form spreads the decomposition across the region at the price of one
         // more barrier, which only repays itself once the gadget is wide and the split deep
-        if (digitsG2 >= 8 && nthreads >= 4) {
-            ExcessHDigitDecomposeShared(Q, bp, ct, dct, w0, w1);
+        if (digits_g2 >= 8 && nthreads >= 4) {
+            excess_h_digit_decompose_shared(Q, bp, ct, dct, w0, w1);
         } else {
-#pragma omp single
-            ExcessHDigitDecompose(Q, bp, ct, dct);
+#pragma omp single_value
+            excess_h_digit_decompose(Q, bp, ct, dct);
         }
 
 #pragma omp for schedule(static)
-        for (uint32_t d = 0; d < digitsG2; ++d)
-            dct[d].SetFormat(Format::EVALUATION);
+        for (uint32_t d = 0; d < digits_g2; ++d)
+            dct[d].set_format(Format::EVALUATION);
 
-        // each column writes only its own acc element, so GadgetMatrixProduct's in-place
+        // each column writes only its own acc element, so gadget_matrix_product's in-place
         // reuse of dct[0] for the second column cannot be used here. nowait: the region's
         // own closing barrier is the one the caller needs
 #pragma omp for schedule(static) nowait
         for (uint32_t j = 0; j < 2; ++j) {
             acc[j] = dct[0];
             acc[j] *= ev[0][j];
-            for (uint32_t d = 1; d < digitsG2; ++d)
-                acc[j].MultAccEqNoCheck(dct[d], ev[d][j]);
+            for (uint32_t d = 1; d < digits_g2; ++d)
+                acc[j].mult_acc_eq_no_check(dct[d], ev[d][j]);
         }
     }
 }
@@ -303,129 +303,129 @@ void AddToAccNoMonomial(const PP& polyParams, typename P::Integer::Integer Q,
 // w0 and w1 are the caller's, and must be sized N before the region opens: every thread runs
 // this body and each fills part of the one shared pair.
 template <typename P>
-void ExcessHDigitDecomposeShared(typename P::Integer::Integer Q, const RingGSWCryptoParams::BaseGParams& bp,
+void excess_h_digit_decompose_shared(typename P::Integer::Integer Q, const RingGswCryptoParams::BaseGParams& bp,
                                  const std::vector<P>& input, std::vector<P>& output,
                                  std::vector<typename P::Integer::Integer>& w0,
                                  std::vector<typename P::Integer::Integer>& w1) {
     using I = typename P::Integer::Integer;
-    I QHalf{Q >> 1};
-    uint32_t gBits{bp.gBits};
-    I gHalf{static_cast<I>(bp.baseG >> 1)};
-    I gMask{static_cast<I>(bp.baseG - 1)};
-    I QmHalf{Q - gHalf};
-    uint32_t digitsG{bp.digitsG};
+    I Q_half{Q >> 1};
+    uint32_t g_bits{bp.g_bits};
+    I g_half{static_cast<I>(bp.base_g >> 1)};
+    I g_mask{static_cast<I>(bp.base_g - 1)};
+    I qm_half{Q - g_half};
+    uint32_t digits_g{bp.digits_g};
     I H{0};
-    for (uint32_t i{0}; i < digitsG; ++i)
-        H += gHalf << (i * gBits);
-    uint32_t digitsG2{(digitsG - 1) << 1};
-    uint32_t N{input[0].GetLength()};
+    for (uint32_t i{0}; i < digits_g; ++i)
+        H += g_half << (i * g_bits);
+    uint32_t digits_g2{(digits_g - 1) << 1};
+    uint32_t N{input[0].get_length()};
 
 #pragma omp for schedule(static)
     for (uint32_t k = 0; k < N; ++k) {
-        auto t0{input[0][k].template ConvertToInt<I>()};
-        w0[k] = t0 + H - (t0 < QHalf ? 0 : Q);
-        auto t1{input[1][k].template ConvertToInt<I>()};
-        w1[k] = t1 + H - (t1 < QHalf ? 0 : Q);
+        auto t0{input[0][k].template convert_to_int<I>()};
+        w0[k] = t0 + H - (t0 < Q_half ? 0 : Q);
+        auto t1{input[1][k].template convert_to_int<I>()};
+        w1[k] = t1 + H - (t1 < Q_half ? 0 : Q);
     }
 
 #pragma omp for schedule(static)
-    for (uint32_t d = 0; d < digitsG2; d += 2) {
-        uint32_t shift{((d >> 1) + 1) * gBits};
-        auto mask{(d + 2 < digitsG2) ? gMask : static_cast<I>(-1)};
+    for (uint32_t d = 0; d < digits_g2; d += 2) {
+        uint32_t shift{((d >> 1) + 1) * g_bits};
+        auto mask{(d + 2 < digits_g2) ? g_mask : static_cast<I>(-1)};
         auto& out0{output[d + 0]};
         auto& out1{output[d + 1]};
         for (uint32_t k{0}; k < N; ++k) {
             auto r0{(w0[k] >> shift) & mask};
-            out0[k] = (r0 < gHalf) ? r0 + QmHalf : r0 - gHalf;
+            out0[k] = (r0 < g_half) ? r0 + qm_half : r0 - g_half;
             auto r1{(w1[k] >> shift) & mask};
-            out1[k] = (r1 < gHalf) ? r1 + QmHalf : r1 - gHalf;
+            out1[k] = (r1 < g_half) ? r1 + qm_half : r1 - g_half;
         }
     }
 }
 
 // The LMKCDEY automorphism: permute both components by X -> X^a, then switch key of
-// a-component back with automorphism key ak. Uses default gadget base and digitsG - 1 digits.
+// a-component back with automorphism key ak. Uses default gadget base and digits_g - 1 digits.
 template <typename P, typename PP>
-void AutomorphismKeySwitch(uint32_t a, const std::vector<uint32_t>& autoMap, const PP& polyParams,
-                           typename P::Integer::Integer Q, const RingGSWCryptoParams::BaseGParams& bp,
+void automorphism_key_switch(uint32_t a, const std::vector<uint32_t>& auto_map, const PP& poly_params,
+                           typename P::Integer::Integer Q, const RingGswCryptoParams::BaseGParams& bp,
                            const std::vector<std::vector<P>>& ev, std::vector<P>& acc) {
-    acc[1] = acc[1].AutomorphismTransform(a, autoMap);
+    acc[1] = acc[1].automorphism_transform(a, auto_map);
 
-    P cta(acc[0].AutomorphismTransform(a, autoMap));
-    acc[0].SetValuesToZero();
-    cta.SetFormat(Format::COEFFICIENT);
+    P cta(acc[0].automorphism_transform(a, auto_map));
+    acc[0].set_values_to_zero();
+    cta.set_format(Format::COEFFICIENT);
 
     // approximate gadget decomposition is used; the first digit is ignored
-    uint32_t digitsG{bp.digitsG - 1};
-    thread_local std::vector<P> dctaScratch;
-    auto& dcta = dctaScratch;
-    if (dcta.size() != digitsG || dcta[0].GetParams() != polyParams) {
-        dcta.assign(digitsG, P(polyParams, Format::COEFFICIENT, true));
+    uint32_t digits_g{bp.digits_g - 1};
+    thread_local std::vector<P> dcta_scratch;
+    auto& dcta = dcta_scratch;
+    if (dcta.size() != digits_g || dcta[0].get_params() != poly_params) {
+        dcta.assign(digits_g, P(poly_params, Format::COEFFICIENT, true));
     } else {
         for (auto& d : dcta)
-            d.OverrideFormat(Format::COEFFICIENT);
+            d.override_format(Format::COEFFICIENT);
     }
 
-    ExcessHDigitDecompose(Q, bp, cta, dcta);
+    excess_h_digit_decompose(Q, bp, cta, dcta);
 
-    int nthreads = OpenFHEParallelControls.GetThreadLimit(bp.teamWidth > 4 ? bp.teamWidth : 4);
+    int nthreads = cipher_parallel_controls.get_thread_limit(bp.team_width > 4 ? bp.team_width : 4);
     if (nthreads < 2) {
-        for (uint32_t d = 0; d < digitsG; ++d)
-            dcta[d].SetFormat(Format::EVALUATION);
-        for (uint32_t d = 0; d < digitsG; ++d)
-            acc[0].MultAccEqNoCheck(dcta[d], ev[d][0]);
-        for (uint32_t d = 0; d < digitsG; ++d)
-            acc[1].MultAccEqNoCheck(dcta[d], ev[d][1]);
+        for (uint32_t d = 0; d < digits_g; ++d)
+            dcta[d].set_format(Format::EVALUATION);
+        for (uint32_t d = 0; d < digits_g; ++d)
+            acc[0].mult_acc_eq_no_check(dcta[d], ev[d][0]);
+        for (uint32_t d = 0; d < digits_g; ++d)
+            acc[1].mult_acc_eq_no_check(dcta[d], ev[d][1]);
         return;
     }
 
 #pragma omp parallel num_threads(nthreads)
     {
 #pragma omp for schedule(static)
-        for (uint32_t d = 0; d < digitsG; ++d)
-            dcta[d].SetFormat(Format::EVALUATION);
+        for (uint32_t d = 0; d < digits_g; ++d)
+            dcta[d].set_format(Format::EVALUATION);
 
 #pragma omp for schedule(static) nowait
         for (uint32_t j = 0; j < 2; ++j)
-            for (uint32_t d = 0; d < digitsG; ++d)
-                acc[j].MultAccEqNoCheck(dcta[d], ev[d][j]);
+            for (uint32_t d = 0; d < digits_g; ++d)
+                acc[j].mult_acc_eq_no_check(dcta[d], ev[d][j]);
     }
 }
 
-#if NATIVEINT != 32
+#if CIPHER_NATIVE_INT != 32
 // a *= b (mod q) using b's Shoup constants: one high-word estimate per lane, vectorizable at
 // every ISA where the Barrett form is not
-inline void ShoupMulEq32(NativePoly32& a, const NativePoly32& b, const NativeVector32& bPrecon, uint32_t q) {
-    uint32_t N{static_cast<uint32_t>(a.GetLength())};
+inline void shoup_mul_eq32(NativePoly32& a, const NativePoly32& b, const NativeVector32& b_precon, uint32_t q) {
+    uint32_t N{static_cast<uint32_t>(a.get_length())};
     for (size_t k = 0; k < N; ++k) {
-        uint32_t x{static_cast<uint32_t>(a[k].ConvertToInt())};
-        uint32_t hi{static_cast<uint32_t>((static_cast<uint64_t>(x) * bPrecon[k].ConvertToInt()) >> 32)};
-        uint32_t r{x * static_cast<uint32_t>(b[k].ConvertToInt()) - hi * q};
+        uint32_t x{static_cast<uint32_t>(a[k].convert_to_int())};
+        uint32_t hi{static_cast<uint32_t>((static_cast<uint64_t>(x) * b_precon[k].convert_to_int()) >> 32)};
+        uint32_t r{x * static_cast<uint32_t>(b[k].convert_to_int()) - hi * q};
         a[k] = NativeInteger32(r - (q & (uint32_t(0) - static_cast<uint32_t>(r >= q))));
     }
 }
 
 // Inner product over the gadget digits with ONE modular reduction instead of one per digit.
-inline void LazyInnerProduct32(NativePoly32& out, const std::vector<NativePoly32>& dct,
+inline void lazy_inner_product32(NativePoly32& out, const std::vector<NativePoly32>& dct,
                                const std::vector<std::vector<NativePoly32>>& ev, uint32_t col, uint32_t rows,
-                               uint32_t kBegin, uint32_t kEnd, uint32_t N, uint32_t q, uint64_t mu) {
+                               uint32_t k_begin, uint32_t k_end, uint32_t N, uint32_t q, uint64_t mu) {
     thread_local std::vector<uint64_t> acc;
     if (acc.size() < N)
         acc.resize(N);
     {
-        const auto& d0{dct[0].GetValues()};
-        const auto& e0{ev[0][col].GetValues()};
-        for (uint32_t k = kBegin; k < kEnd; ++k)
-            acc[k] = static_cast<uint64_t>(d0[k].ConvertToInt()) * e0[k].ConvertToInt();
+        const auto& d0{dct[0].get_values()};
+        const auto& e0{ev[0][col].get_values()};
+        for (uint32_t k = k_begin; k < k_end; ++k)
+            acc[k] = static_cast<uint64_t>(d0[k].convert_to_int()) * e0[k].convert_to_int();
     }
     for (uint32_t i = 1; i < rows; ++i) {
-        const auto& di{dct[i].GetValues()};
-        const auto& ei{ev[i][col].GetValues()};
-        for (uint32_t k = kBegin; k < kEnd; ++k)
-            acc[k] += static_cast<uint64_t>(di[k].ConvertToInt()) * ei[k].ConvertToInt();
+        const auto& di{dct[i].get_values()};
+        const auto& ei{ev[i][col].get_values()};
+        for (uint32_t k = k_begin; k < k_end; ++k)
+            acc[k] += static_cast<uint64_t>(di[k].convert_to_int()) * ei[k].convert_to_int();
     }
-    for (uint32_t k = kBegin; k < kEnd; ++k) {
-    #if defined(HAVE_INT128)
+    for (uint32_t k = k_begin; k < k_end; ++k) {
+    #if defined(CIPHER_HAVE_INT128)
         uint64_t x{acc[k]};
         uint64_t hi{static_cast<uint64_t>((static_cast<uint128_t>(x) * mu) >> 64)};
         uint64_t r{x - hi * q};
@@ -447,43 +447,43 @@ inline void LazyInnerProduct32(NativePoly32& out, const std::vector<NativePoly32
 // 32-bit overload of the accumulation body above: identical shape, with the lazy inner product
 // replacing the per-digit reduction. Exact-match overload resolution routes the NativePoly32
 // instantiations here; results are bit-identical to the generic body. The automorphism key
-// switch stays on the generic poly-op body: its row count (digitsG - 1) is too small for the
+// switch stays on the generic poly-op body: its row count (digits_g - 1) is too small for the
 // lazy kernel to pay.
-inline void AddToAccNoMonomial(const std::shared_ptr<ILNativeParams32>& polyParams, uint32_t Q,
-                               const RingGSWCryptoParams::BaseGParams& bp,
+inline void add_to_acc_no_monomial(const std::shared_ptr<NativePolyParams32>& poly_params, uint32_t Q,
+                               const RingGswCryptoParams::BaseGParams& bp,
                                const std::vector<std::vector<NativePoly32>>& ev, std::vector<NativePoly32>& acc) {
-    thread_local std::vector<NativePoly32> ctScratch, dctScratch;
-    thread_local std::vector<uint32_t> w0Scratch, w1Scratch;
-    auto& ct = ctScratch;
-    auto& dct = dctScratch;
+    thread_local std::vector<NativePoly32> ct_scratch, dct_scratch;
+    thread_local std::vector<uint32_t> w0_scratch, w1_scratch;
+    auto& ct = ct_scratch;
+    auto& dct = dct_scratch;
     ct = acc;
 
-    uint32_t digitsG2{(bp.digitsG - 1) << 1};
-    if (dct.size() < digitsG2 || dct[0].GetParams() != polyParams) {
-        dct.assign(digitsG2, NativePoly32(polyParams, Format::COEFFICIENT, true));
+    uint32_t digits_g2{(bp.digits_g - 1) << 1};
+    if (dct.size() < digits_g2 || dct[0].get_params() != poly_params) {
+        dct.assign(digits_g2, NativePoly32(poly_params, Format::COEFFICIENT, true));
     } else {
         for (auto& d : dct)
-            d.OverrideFormat(Format::COEFFICIENT);
+            d.override_format(Format::COEFFICIENT);
     }
 
-    uint32_t N{static_cast<uint32_t>(polyParams->GetRingDimension())};
-    auto& w0 = w0Scratch;
-    auto& w1 = w1Scratch;
+    uint32_t N{static_cast<uint32_t>(poly_params->get_ring_dimension())};
+    auto& w0 = w0_scratch;
+    auto& w1 = w1_scratch;
     if (w0.size() != N) {
         w0.resize(N);
         w1.resize(N);
     }
     uint64_t mu{static_cast<uint64_t>(-1) / Q};
 
-    int nthreads = OpenFHEParallelControls.GetThreadLimit(bp.teamWidth > 4 ? bp.teamWidth : 4);
+    int nthreads = cipher_parallel_controls.get_thread_limit(bp.team_width > 4 ? bp.team_width : 4);
     if (nthreads < 2) {
-        ct[0].SetFormat(Format::COEFFICIENT);
-        ct[1].SetFormat(Format::COEFFICIENT);
-        ExcessHDigitDecompose(Q, bp, ct, dct);
-        for (uint32_t d = 0; d < digitsG2; ++d)
-            dct[d].SetFormat(Format::EVALUATION);
-        LazyInnerProduct32(acc[0], dct, ev, 0, digitsG2, 0, N, N, Q, mu);
-        LazyInnerProduct32(acc[1], dct, ev, 1, digitsG2, 0, N, N, Q, mu);
+        ct[0].set_format(Format::COEFFICIENT);
+        ct[1].set_format(Format::COEFFICIENT);
+        excess_h_digit_decompose(Q, bp, ct, dct);
+        for (uint32_t d = 0; d < digits_g2; ++d)
+            dct[d].set_format(Format::EVALUATION);
+        lazy_inner_product32(acc[0], dct, ev, 0, digits_g2, 0, N, N, Q, mu);
+        lazy_inner_product32(acc[1], dct, ev, 1, digits_g2, 0, N, N, Q, mu);
         return;
     }
 
@@ -491,132 +491,132 @@ inline void AddToAccNoMonomial(const std::shared_ptr<ILNativeParams32>& polyPara
     {
     #pragma omp for schedule(static) nowait
         for (uint32_t i = 0; i < 2; ++i)
-            ct[i].SetFormat(Format::COEFFICIENT);
+            ct[i].set_format(Format::COEFFICIENT);
 
     #pragma omp barrier
-        if (digitsG2 >= 8 && nthreads >= 4) {
-            ExcessHDigitDecomposeShared(Q, bp, ct, dct, w0, w1);
+        if (digits_g2 >= 8 && nthreads >= 4) {
+            excess_h_digit_decompose_shared(Q, bp, ct, dct, w0, w1);
         } else {
-    #pragma omp single
-            ExcessHDigitDecompose(Q, bp, ct, dct);
+    #pragma omp single_value
+            excess_h_digit_decompose(Q, bp, ct, dct);
         }
 
     #pragma omp for schedule(static)
-        for (uint32_t d = 0; d < digitsG2; ++d)
-            dct[d].SetFormat(Format::EVALUATION);
+        for (uint32_t d = 0; d < digits_g2; ++d)
+            dct[d].set_format(Format::EVALUATION);
 
     #pragma omp for schedule(static) nowait
         for (uint32_t blk = 0; blk < static_cast<uint32_t>(nthreads); ++blk) {
             uint32_t kb{(N * blk) / static_cast<uint32_t>(nthreads)};
             uint32_t ke{(N * (blk + 1)) / static_cast<uint32_t>(nthreads)};
-            LazyInnerProduct32(acc[0], dct, ev, 0, digitsG2, kb, ke, N, Q, mu);
-            LazyInnerProduct32(acc[1], dct, ev, 1, digitsG2, kb, ke, N, Q, mu);
+            lazy_inner_product32(acc[0], dct, ev, 0, digits_g2, kb, ke, N, Q, mu);
+            lazy_inner_product32(acc[1], dct, ev, 1, digits_g2, kb, ke, N, Q, mu);
         }
     }
 }
 
-#endif  // NATIVEINT != 32
+#endif  // CIPHER_NATIVE_INT != 32
 
 // The DM digit schedule: one accumulation per nonzero base-R digit of each LWE coefficient.
 template <typename AddFn>
-void DMAccSchedule(NativeInteger q, uint32_t baseR, size_t digitsRCount, const NativeVector& a, AddFn&& addToAcc) {
-    if (a.GetModulus() != q)
-        OPENFHE_THROW("Ciphertext modulus must equal the LWE modulus q");
-    NativeInteger baseRN{baseR};
-    uint32_t n{static_cast<uint32_t>(a.GetLength())};
+void dm_acc_schedule(NativeInteger q, uint32_t base_r, size_t digits_r_count, const NativeVector& a, AddFn&& add_to_acc) {
+    if (a.get_modulus() != q)
+        CIPHER_THROW("Ciphertext modulus must equal the LWE modulus q");
+    NativeInteger base_rn{base_r};
+    uint32_t n{static_cast<uint32_t>(a.get_length())};
     for (uint32_t i = 0; i < n; ++i) {
-        auto aI = NativeInteger(0).ModSubFast(a[i], q);
-        for (size_t k = 0; k < digitsRCount; ++k, aI /= baseRN) {
-            auto a0 = (aI.Mod(baseRN)).ConvertToInt<uint32_t>();
+        auto a_i = NativeInteger(0).mod_sub_fast(a[i], q);
+        for (size_t k = 0; k < digits_r_count; ++k, a_i /= base_rn) {
+            auto a0 = (a_i.mod(base_rn)).convert_to_int<uint32_t>();
             if (a0)
-                addToAcc(i, a0, k);
+                add_to_acc(i, a0, k);
         }
     }
 }
 
 // The LMKCDEY rotation schedule over the generator's orbit, as described in
 // https://eprint.iacr.org/2022/198: group the coefficients by discrete log, walk the orbit
-// applying at most numAutoKeys-sized automorphism hops between accumulations. The caller applies
+// applying at most num_auto_keys-sized automorphism hops between accumulations. The caller applies
 // the initial X -> X^{-gen} transform of the accumulator body before invoking this.
-// addToAcc(i) performs the external product for LWE coefficient i;
-// automorphism(power, k) applies X -> X^power using automorphism key k.
+// add_to_acc(i) performs the external product for LWE coefficient i;
+// automorphism_value(power, k) applies X -> X^power using automorphism key k.
 template <typename AddFn, typename AutoFn>
-void LMKCDEYAccSchedule(NativeInteger q, uint32_t N, uint32_t numAutoKeys, const std::vector<int32_t>& logGen,
-                        const NativeVector& a, AddFn&& addToAcc, AutoFn&& automorphism) {
-    if (a.GetModulus() != q)
-        OPENFHE_THROW("Ciphertext modulus must equal the LWE modulus q");
+void lmkcdey_acc_schedule(NativeInteger q, uint32_t N, uint32_t num_auto_keys, const std::vector<int32_t>& log_gen,
+                        const NativeVector& a, AddFn&& add_to_acc, AutoFn&& automorphism_value) {
+    if (a.get_modulus() != q)
+        CIPHER_THROW("Ciphertext modulus must equal the LWE modulus q");
     // assume a is all-odd ciphertext (using round-to-odd technique)
-    size_t n{a.GetLength()};
-    uint32_t Nh{N / 2};
+    size_t n{a.get_length()};
+    uint32_t nh_value{N / 2};
     uint32_t M{2 * N};
-    NativeInteger MNative{M};
+    NativeInteger m_native{M};
 
-    std::unordered_map<int32_t, std::vector<int32_t>> permuteMap;
-    for (size_t i = 0; i < n; i++) {  // put all a_i in the permuteMap
+    std::unordered_map<int32_t, std::vector<int32_t>> permute_map;
+    for (size_t i = 0; i < n; i++) {  // put all a_i in the permute_map
         // make it odd; round-to-odd(https://eprint.iacr.org/2022/198) will improve error.
-        int32_t aIOdd = NativeInteger(0).ModSubFast(a[i], MNative).ConvertToInt<uint32_t>() | 0x1;
-        permuteMap[logGen[aIOdd]].push_back(i);
+        int32_t a_i_odd = NativeInteger(0).mod_sub_fast(a[i], m_native).convert_to_int<uint32_t>() | 0x1;
+        permute_map[log_gen[a_i_odd]].push_back(i);
     }
 
     NativeInteger gen(5);
-    uint32_t genInt{5};
-    uint32_t nSkips{0};
+    uint32_t gen_int{5};
+    uint32_t n_skips{0};
 
     // for a_j = -5^i
-    for (uint32_t i = Nh - 1; i > 0; i--) {
-        auto it = permuteMap.find(-static_cast<int32_t>(i));
-        if (it != permuteMap.end()) {
-            if (nSkips != 0) {  // Rotation by 5^nSkips
-                automorphism(gen.ModExp(nSkips, M), nSkips);
-                nSkips = 0;
+    for (uint32_t i = nh_value - 1; i > 0; i--) {
+        auto it = permute_map.find(-static_cast<int32_t>(i));
+        if (it != permute_map.end()) {
+            if (n_skips != 0) {  // Rotation by 5^n_skips
+                automorphism_value(gen.mod_exp(n_skips, M), n_skips);
+                n_skips = 0;
             }
             for (auto idx : it->second)
-                addToAcc(idx);
+                add_to_acc(idx);
         }
-        nSkips++;
+        n_skips++;
 
-        if (nSkips == numAutoKeys || i == 1) {
-            automorphism(gen.ModExp(nSkips, M), nSkips);
-            nSkips = 0;
+        if (n_skips == num_auto_keys || i == 1) {
+            automorphism_value(gen.mod_exp(n_skips, M), n_skips);
+            n_skips = 0;
         }
     }
 
     // for -1
-    auto itM = permuteMap.find(M);
-    if (itM != permuteMap.end()) {
-        for (auto idx : itM->second)
-            addToAcc(idx);
+    auto it_m = permute_map.find(M);
+    if (it_m != permute_map.end()) {
+        for (auto idx : it_m->second)
+            add_to_acc(idx);
     }
 
-    automorphism(NativeInteger(M - genInt), 0);
+    automorphism_value(NativeInteger(M - gen_int), 0);
 
     // for a_j = 5^i
-    for (size_t i = Nh - 1; i > 0; i--) {
-        auto it = permuteMap.find(i);
-        if (it != permuteMap.end()) {
-            if (nSkips != 0) {  // Rotation by 5^nSkips
-                automorphism(gen.ModExp(nSkips, M), nSkips);
-                nSkips = 0;
+    for (size_t i = nh_value - 1; i > 0; i--) {
+        auto it = permute_map.find(i);
+        if (it != permute_map.end()) {
+            if (n_skips != 0) {  // Rotation by 5^n_skips
+                automorphism_value(gen.mod_exp(n_skips, M), n_skips);
+                n_skips = 0;
             }
             for (auto idx : it->second)
-                addToAcc(idx);
+                add_to_acc(idx);
         }
-        nSkips++;
+        n_skips++;
 
-        if (nSkips == numAutoKeys || i == 1) {
-            automorphism(gen.ModExp(nSkips, M), nSkips);
-            nSkips = 0;
+        if (n_skips == num_auto_keys || i == 1) {
+            automorphism_value(gen.mod_exp(n_skips, M), n_skips);
+            n_skips = 0;
         }
     }
 
     // for 0
-    auto it0 = permuteMap.find(0);
-    if (it0 != permuteMap.end()) {
+    auto it0 = permute_map.find(0);
+    if (it0 != permute_map.end()) {
         for (auto idx : it0->second)
-            addToAcc(idx);
+            add_to_acc(idx);
     }
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_BOOLEAN_RGSW_ACC_COMMON_H_

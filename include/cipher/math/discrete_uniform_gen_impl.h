@@ -44,31 +44,31 @@
 #include "cipher/math/distribution_gen.h"
 #include "cipher/util/exception.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 template <typename VecType>
 DiscreteUniformGeneratorImpl<VecType>::DiscreteUniformGeneratorImpl(const typename VecType::Integer& modulus) {
-    SetModulus(modulus);
+    set_modulus(modulus);
 }
 
 template <typename VecType>
-void DiscreteUniformGeneratorImpl<VecType>::SetModulus(const typename VecType::Integer& modulus) {
-    m_modulus = modulus;
-    if (m_modulus == typename VecType::Integer(0)) {
-        m_chunks = 0;  // GenerateInteger/GenerateVector throw on a zero modulus before sampling
+void DiscreteUniformGeneratorImpl<VecType>::set_modulus(const typename VecType::Integer& modulus) {
+    modulus_ = modulus;
+    if (modulus_ == typename VecType::Integer(0)) {
+        chunks_ = 0;  // generate_integer/generate_vector throw on a zero modulus before sampling
         return;
     }
-    m_chunks = (m_modulus.GetMSB() + DUG_CHUNK_WIDTH - 1) / DUG_CHUNK_WIDTH;
+    chunks_ = (modulus_.get_msb() + DUG_CHUNK_WIDTH - 1) / DUG_CHUNK_WIDTH;
 
     // all-ones over the draw domain;
     typename VecType::Integer dmax{DUG_CHUNK_MAX};
-    for (uint32_t i{1}; i < m_chunks; ++i)
+    for (uint32_t i{1}; i < chunks_; ++i)
         dmax = (dmax << DUG_CHUNK_WIDTH) + typename VecType::Integer{DUG_CHUNK_MAX};
-    m_limit = (dmax / m_modulus) * m_modulus;
+    limit_ = (dmax / modulus_) * modulus_;
 }
 
 template <typename VecType>
-typename VecType::Integer DiscreteUniformGeneratorImpl<VecType>::GenerateIntegerWith(
+typename VecType::Integer DiscreteUniformGeneratorImpl<VecType>::generate_integer_with(
         PRNG& prng, std::uniform_int_distribution<uint32_t>& dist) const {
     // Draw ceil(MSB/32) raw 32-bit words, reject draws at or above the largest contained
     // multiple of the modulus, and reduce: every residue then appears exactly
@@ -78,40 +78,40 @@ typename VecType::Integer DiscreteUniformGeneratorImpl<VecType>::GenerateInteger
     // pays inside std::uniform_int_distribution.
     while (true) {
         typename VecType::Integer x{};
-        for (uint32_t i{0}, shift{0}; i < m_chunks; ++i, shift += DUG_CHUNK_WIDTH)
+        for (uint32_t i{0}, shift{0}; i < chunks_; ++i, shift += DUG_CHUNK_WIDTH)
             x += typename VecType::Integer{dist(prng)} << shift;
-        if (x < m_limit)
-            return x.ModEq(m_modulus);
+        if (x < limit_)
+            return x.mod_eq(modulus_);
     }
 }
 
 template <typename VecType>
-typename VecType::Integer DiscreteUniformGeneratorImpl<VecType>::GenerateInteger() const {
-    if (m_modulus == typename VecType::Integer(0))
-        OPENFHE_THROW("0 modulus?");
+typename VecType::Integer DiscreteUniformGeneratorImpl<VecType>::generate_integer() const {
+    if (modulus_ == typename VecType::Integer(0))
+        CIPHER_THROW("0 modulus?");
     std::uniform_int_distribution<uint32_t> dist(DUG_CHUNK_MIN, DUG_CHUNK_MAX);
-    return GenerateIntegerWith(PseudoRandomNumberGenerator::GetPRNG(), dist);
+    return generate_integer_with(PseudoRandomNumberGenerator::get_prng(), dist);
 }
 
 template <typename VecType>
-VecType DiscreteUniformGeneratorImpl<VecType>::GenerateVector(const uint32_t size) const {
-    if (m_modulus == typename VecType::Integer(0))
-        OPENFHE_THROW("0 modulus?");
-    VecType v(size, m_modulus);
-    auto& prng = PseudoRandomNumberGenerator::GetPRNG();
+VecType DiscreteUniformGeneratorImpl<VecType>::generate_vector(const uint32_t size) const {
+    if (modulus_ == typename VecType::Integer(0))
+        CIPHER_THROW("0 modulus?");
+    VecType v(size, modulus_);
+    auto& prng = PseudoRandomNumberGenerator::get_prng();
     std::uniform_int_distribution<uint32_t> dist(DUG_CHUNK_MIN, DUG_CHUNK_MAX);
     for (uint32_t i = 0; i < size; ++i)
-        v[i] = GenerateIntegerWith(prng, dist);
+        v[i] = generate_integer_with(prng, dist);
     return v;
 }
 
 template <typename VecType>
-VecType DiscreteUniformGeneratorImpl<VecType>::GenerateVector(const uint32_t size,
+VecType DiscreteUniformGeneratorImpl<VecType>::generate_vector(const uint32_t size,
                                                               const typename VecType::Integer& modulus) {
-    SetModulus(modulus);
-    return GenerateVector(size);
+    set_modulus(modulus);
+    return generate_vector(size);
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_MATH_DISCRETE_UNIFORM_GEN_IMPL_H_

@@ -202,23 +202,23 @@ int main(void) {
       blake2xb_state S;
       uint8_t *p = buf;
       size_t mlen = BLAKE2_KAT_LENGTH;
-      int err = 0;
+      int err_value = 0;
 
-      if ((err = blake2xb_init_key(&S, outlen, key, BLAKE2B_KEYBYTES)) < 0) {
+      if ((err_value = blake2xb_init_key(&S, outlen, key, BLAKE2B_KEYBYTES)) < 0) {
         goto fail;
       }
 
       while (mlen >= step) {
-        if ((err = blake2xb_update(&S, p, step)) < 0) {
+        if ((err_value = blake2xb_update(&S, p, step)) < 0) {
           goto fail;
         }
         mlen -= step;
         p += step;
       }
-      if ((err = blake2xb_update(&S, p, mlen)) < 0) {
+      if ((err_value = blake2xb_update(&S, p, mlen)) < 0) {
         goto fail;
       }
-      if ((err = blake2xb_final(&S, hash, outlen)) < 0) {
+      if ((err_value = blake2xb_final(&S, hash, outlen)) < 0) {
         goto fail;
       }
 

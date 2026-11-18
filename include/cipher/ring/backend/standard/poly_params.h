@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  Wraps parameters for integer lattice operations. Inherits from ElemParams
+  Wraps parameters for integer lattice operations. Inherits from ElementParams
  */
 
 #ifndef CIPHER_RING_BACKEND_STANDARD_POLY_PARAMS_H_
@@ -47,20 +47,20 @@
 #include "cipher/util/exception.h"
 #include "cipher/util/inttypes.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
- * @class ILParamsImpl
+ * @class PolyParamsImpl
  * @brief Wrapper class to hold the parameters for integer lattice operations
  * and their inheritors.
  */
 template <typename IntType>
-class ILParamsImpl final : public ElemParams<IntType> {
+class PolyParamsImpl final : public ElementParams<IntType> {
   public:
     using Integer = IntType;
 
-    constexpr ILParamsImpl() : ElemParams<IntType>() {}
-    ~ILParamsImpl() override = default;
+    constexpr PolyParamsImpl() : ElementParams<IntType>() {}
+    ~PolyParamsImpl() override = default;
 
     /**
      * @brief Constructor computing the missing parameters: the modulus (last
@@ -68,45 +68,45 @@ class ILParamsImpl final : public ElemParams<IntType> {
      * @param order the cyclotomic order.
      * @param bits the bit width of the modulus to select.
      */
-    explicit ILParamsImpl(uint32_t order, uint32_t bits = MAX_MODULUS_SIZE)
-        : ILParamsImpl<IntType>(order, LastPrime<IntType>(bits, order)) {}
+    explicit PolyParamsImpl(uint32_t order, uint32_t bits = MAX_MODULUS_SIZE)
+        : PolyParamsImpl<IntType>(order, last_prime<IntType>(bits, order)) {}
 
     /**
      * @brief Constructor computing the root of unity for the given cyclotomic order and modulus.
      * @param order the cyclotomic order.
      * @param modulus the modulus.
      */
-    explicit ILParamsImpl(uint32_t order, const IntType& modulus)
-        : ElemParams<IntType>(order, modulus, RootOfUnity<IntType>(order, modulus)) {}
+    explicit PolyParamsImpl(uint32_t order, const IntType& modulus)
+        : ElementParams<IntType>(order, modulus, root_of_unity<IntType>(order, modulus)) {}
 
     /**
      * @brief Constructor with the cyclotomic order, the modulus and its root of unity given.
      * @param order the cyclotomic order.
      * @param modulus the modulus.
-     * @param rootOfUnity the root of unity for the modulus.
+     * @param root_of_unity_value the root of unity for the modulus.
      */
-    ILParamsImpl(uint32_t order, const IntType& modulus, const IntType& rootOfUnity)
-        : ElemParams<IntType>(order, modulus, rootOfUnity) {}
+    PolyParamsImpl(uint32_t order, const IntType& modulus, const IntType& root_of_unity_value)
+        : ElementParams<IntType>(order, modulus, root_of_unity_value) {}
 
     /**
      * @brief Constructor with all parameters given, including the big modulus and big root of unity used for
      * arbitrary cyclotomics.
      * @param order the cyclotomic order.
      * @param modulus the modulus.
-     * @param rootOfUnity the root of unity for the modulus.
-     * @param bigModulus the big modulus.
-     * @param bigRootOfUnity the root of unity for the big modulus.
+     * @param root_of_unity_value the root of unity for the modulus.
+     * @param big_modulus the big modulus.
+     * @param big_root_of_unity the root of unity for the big modulus.
      */
-    ILParamsImpl(uint32_t order, const IntType& modulus, const IntType& rootOfUnity, const IntType& bigModulus,
-                 const IntType& bigRootOfUnity)
-        : ElemParams<IntType>(order, modulus, rootOfUnity, bigModulus, bigRootOfUnity) {}
+    PolyParamsImpl(uint32_t order, const IntType& modulus, const IntType& root_of_unity_value, const IntType& big_modulus,
+                 const IntType& big_root_of_unity)
+        : ElementParams<IntType>(order, modulus, root_of_unity_value, big_modulus, big_root_of_unity) {}
 
     /**
      * @brief Copy constructor.
      *
      * @param rhs the input set of parameters which is copied.
      */
-    ILParamsImpl(const ILParamsImpl& rhs) : ElemParams<IntType>(rhs) {}
+    PolyParamsImpl(const PolyParamsImpl& rhs) : ElementParams<IntType>(rhs) {}
 
     /**
      * @brief Copy Assignment Operator.
@@ -114,8 +114,8 @@ class ILParamsImpl final : public ElemParams<IntType> {
      * @param rhs the params to be copied.
      * @return this object
      */
-    ILParamsImpl& operator=(const ILParamsImpl& rhs) {
-        ElemParams<IntType>::operator=(rhs);
+    PolyParamsImpl& operator=(const PolyParamsImpl& rhs) {
+        ElementParams<IntType>::operator=(rhs);
         return *this;
     }
 
@@ -124,58 +124,58 @@ class ILParamsImpl final : public ElemParams<IntType> {
      *
      * @param rhs the input set of parameters which is moved.
      */
-    ILParamsImpl(ILParamsImpl&& rhs) noexcept : ElemParams<IntType>(std::move(rhs)) {}
+    PolyParamsImpl(PolyParamsImpl&& rhs) noexcept : ElementParams<IntType>(std::move(rhs)) {}
 
-    ILParamsImpl& operator=(ILParamsImpl&& rhs) noexcept {
-        ElemParams<IntType>::operator=(std::move(rhs));
+    PolyParamsImpl& operator=(PolyParamsImpl&& rhs) noexcept {
+        ElementParams<IntType>::operator=(std::move(rhs));
         return *this;
     }
 
     /**
-     * @brief Equality operator: true only when rhs is also an ILParamsImpl and
+     * @brief Equality operator: true only when rhs is also an PolyParamsImpl and
      * all wrapped parameters are equal.
      * @param rhs the parameter set to compare to.
-     * @return true if rhs is an ILParamsImpl with the same parameters, false otherwise.
+     * @return true if rhs is an PolyParamsImpl with the same parameters, false otherwise.
      */
-    bool operator==(const ElemParams<IntType>& rhs) const override {
+    bool operator==(const ElementParams<IntType>& rhs) const override {
         // ATTENTION: dynamic_cast was replaced with typeid() to fix failures in unittests linked with clang++-18 and running on MacOS
         // ===========================================================================================================================
-        // see a similar change in "operator==()" for "class ILDCRTParams" (ildcrtparams.h)
-        if (typeid(rhs) != typeid(const ILParamsImpl<IntType>))
+        // see a similar change in "operator==()" for "class RnsParams" (ildcrtparams.h)
+        if (typeid(rhs) != typeid(const PolyParamsImpl<IntType>))
             return false;
 
-        return ElemParams<IntType>::operator==(rhs);
+        return ElementParams<IntType>::operator==(rhs);
     }
 
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
-        ar(::cereal::base_class<ElemParams<IntType>>(this));
+        ar(::cereal::base_class<ElementParams<IntType>>(this));
     }
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion())
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version())
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
-        ar(::cereal::base_class<ElemParams<IntType>>(this));
+        ar(::cereal::base_class<ElementParams<IntType>>(this));
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "ILParms";
     }
 
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 
   protected:
     std::ostream& doprint(std::ostream& out) const override {
         out << "ILParams ";
-        ElemParams<IntType>::doprint(out);
+        ElementParams<IntType>::doprint(out);
         return out << std::endl;
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_RING_BACKEND_STANDARD_POLY_PARAMS_H_

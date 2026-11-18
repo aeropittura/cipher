@@ -49,73 +49,73 @@
 #include "cipher/util/serializable.h"
 #include "cipher/util/utilities.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-class RingGSWEvalKeyImpl;
-using RingGSWEvalKey = std::shared_ptr<RingGSWEvalKeyImpl>;
-using ConstRingGSWEvalKey = const std::shared_ptr<const RingGSWEvalKeyImpl>;
+class RingGswEvalKeyImpl;
+using RingGswEvalKey = std::shared_ptr<RingGswEvalKeyImpl>;
+using ConstRingGswEvalKey = const std::shared_ptr<const RingGswEvalKeyImpl>;
 
 /**
  * @brief Class that stores a RingGSW ciphertext; a two-dimensional vector of
  * ring elements
  */
-class RingGSWEvalKeyImpl : public Serializable {
+class RingGswEvalKeyImpl : public Serializable {
   public:
-    RingGSWEvalKeyImpl() = default;
+    RingGswEvalKeyImpl() = default;
 
     /**
-     * Allocates a rowSize x colSize matrix of default-constructed ring elements
+     * Allocates a row_size x col_size matrix of default-constructed ring elements
      *
-     * Every row of a RingGSW ciphertext is an RLWE pair (a, b) stored as columns 0 and 1, so colSize is 2.
-     * An RGSW encryption of a monomial has 2 * (digitsG - 1) rows: row 2t adds the gadget power baseG^(t + 1)
+     * Every row of a RingGSW ciphertext is an RLWE pair (a, b) stored as columns 0 and 1, so col_size is 2.
+     * An RGSW encryption of a monomial has 2 * (digits_g - 1) rows: row 2t adds the gadget power base_g^(t + 1)
      * times the monomial to "a" and row 2t + 1 adds it to "b" (the first gadget digit is dropped by the
-     * approximate gadget decomposition). An LMKCDEY automorphism key has digitsG - 1 rows.
+     * approximate gadget decomposition). An LMKCDEY automorphism key has digits_g - 1 rows.
      *
-     * @param rowSize the number of rows (RLWE pairs)
-     * @param colSize the number of ring elements per row
+     * @param row_size the number of rows (RLWE pairs)
+     * @param col_size the number of ring elements per row
      */
-    RingGSWEvalKeyImpl(uint32_t rowSize, uint32_t colSize) noexcept
-        : m_elements(rowSize, std::vector<NativePoly>(colSize)) {}
+    RingGswEvalKeyImpl(uint32_t row_size, uint32_t col_size) noexcept
+        : elements_(row_size, std::vector<NativePoly>(col_size)) {}
 
     /**
      * Constructs a RingGSW ciphertext from its matrix of ring elements
      *
      * @param elements the ring elements indexed [row][column]; each row is an RLWE pair (a, b) in columns 0 and 1
      */
-    explicit RingGSWEvalKeyImpl(const std::vector<std::vector<NativePoly>>& elements) : m_elements(elements) {}
+    explicit RingGswEvalKeyImpl(const std::vector<std::vector<NativePoly>>& elements) : elements_(elements) {}
 
     /**
      * Constructs a RingGSW ciphertext from its matrix of ring elements, moving it
      *
      * @param elements the ring elements indexed [row][column]; each row is an RLWE pair (a, b) in columns 0 and 1
      */
-    explicit RingGSWEvalKeyImpl(std::vector<std::vector<NativePoly>>&& elements) noexcept
-        : m_elements(std::move(elements)) {}
+    explicit RingGswEvalKeyImpl(std::vector<std::vector<NativePoly>>&& elements) noexcept
+        : elements_(std::move(elements)) {}
 
-    RingGSWEvalKeyImpl(const RingGSWEvalKeyImpl& rhs) : m_elements(rhs.m_elements) {}
+    RingGswEvalKeyImpl(const RingGswEvalKeyImpl& rhs) : elements_(rhs.elements_) {}
 
-    RingGSWEvalKeyImpl(RingGSWEvalKeyImpl&& rhs) noexcept : m_elements(std::move(rhs.m_elements)) {}
+    RingGswEvalKeyImpl(RingGswEvalKeyImpl&& rhs) noexcept : elements_(std::move(rhs.elements_)) {}
 
-    RingGSWEvalKeyImpl& operator=(const RingGSWEvalKeyImpl& rhs) {
-        RingGSWEvalKeyImpl::m_elements = rhs.m_elements;
+    RingGswEvalKeyImpl& operator=(const RingGswEvalKeyImpl& rhs) {
+        RingGswEvalKeyImpl::elements_ = rhs.elements_;
         return *this;
     }
 
-    RingGSWEvalKeyImpl& operator=(RingGSWEvalKeyImpl&& rhs) noexcept {
-        RingGSWEvalKeyImpl::m_elements = std::move(rhs.m_elements);
+    RingGswEvalKeyImpl& operator=(RingGswEvalKeyImpl&& rhs) noexcept {
+        RingGswEvalKeyImpl::elements_ = std::move(rhs.elements_);
         return *this;
     }
 
-    const std::vector<std::vector<NativePoly>>& GetElements() const {
-        return m_elements;
+    const std::vector<std::vector<NativePoly>>& get_elements() const {
+        return elements_;
     }
 
-    void SetElements(const std::vector<std::vector<NativePoly>>& elements) {
-        m_elements = elements;
+    void set_elements(const std::vector<std::vector<NativePoly>>& elements) {
+        elements_ = elements;
     }
 
-    void SetElements(std::vector<std::vector<NativePoly>>&& elements) noexcept {
-        m_elements = std::move(elements);
+    void set_elements(std::vector<std::vector<NativePoly>>&& elements) noexcept {
+        elements_ = std::move(elements);
     }
 
     /**
@@ -124,11 +124,11 @@ class RingGSWEvalKeyImpl : public Serializable {
      *
      * @param format the representation to switch all ring elements to
      */
-    void SetFormat(const Format format) {
-        for (size_t i = 0; i < m_elements.size(); ++i) {
-            auto& l1 = m_elements[i];
+    void set_format(const Format format) {
+        for (size_t i = 0; i < elements_.size(); ++i) {
+            auto& l1 = elements_[i];
             for (size_t j = 0; j < l1.size(); ++j)
-                l1[j].SetFormat(format);
+                l1[j].set_format(format);
         }
     }
 
@@ -137,7 +137,7 @@ class RingGSWEvalKeyImpl : public Serializable {
      * @return the row i (an RLWE pair)
      */
     std::vector<NativePoly>& operator[](uint32_t i) {
-        return m_elements[i];
+        return elements_[i];
     }
 
     /**
@@ -145,7 +145,7 @@ class RingGSWEvalKeyImpl : public Serializable {
      * @return the row i (an RLWE pair)
      */
     const std::vector<NativePoly>& operator[](uint32_t i) const {
-        return m_elements[i];
+        return elements_[i];
     }
 
     /**
@@ -154,12 +154,12 @@ class RingGSWEvalKeyImpl : public Serializable {
      * @param other the RingGSW ciphertext to compare with
      * @return true if both have the same dimensions and equal ring elements
      */
-    bool operator==(const RingGSWEvalKeyImpl& other) const {
-        if (m_elements.size() != other.m_elements.size())
+    bool operator==(const RingGswEvalKeyImpl& other) const {
+        if (elements_.size() != other.elements_.size())
             return false;
-        for (size_t i = 0; i < m_elements.size(); ++i) {
-            const auto& l1 = m_elements[i];
-            const auto& o1 = other.m_elements[i];
+        for (size_t i = 0; i < elements_.size(); ++i) {
+            const auto& l1 = elements_[i];
+            const auto& o1 = other.elements_[i];
             if (l1.size() != o1.size())
                 return false;
             for (size_t j = 0; j < l1.size(); ++j) {
@@ -174,36 +174,36 @@ class RingGSWEvalKeyImpl : public Serializable {
      * @param other the RingGSW ciphertext to compare with
      * @return true if the dimensions or any ring element differ
      */
-    bool operator!=(const RingGSWEvalKeyImpl& other) const {
+    bool operator!=(const RingGswEvalKeyImpl& other) const {
         return !(*this == other);
     }
 
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
-        ar(::cereal::make_nvp("elements", m_elements));
+        ar(::cereal::make_nvp("elements", elements_));
     }
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
-        ar(::cereal::make_nvp("elements", m_elements));
+        ar(::cereal::make_nvp("elements", elements_));
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "RingGSWEvalKey";
     }
 
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 
   private:
-    std::vector<std::vector<NativePoly>> m_elements;  ///< ring elements indexed [row][column]; columns are (a, b)
+    std::vector<std::vector<NativePoly>> elements_;  ///< ring elements indexed [row][column]; columns are (a, b)
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_BOOLEAN_RGSW_EVAL_KEY_H_

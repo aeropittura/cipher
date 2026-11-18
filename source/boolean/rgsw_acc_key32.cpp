@@ -38,96 +38,96 @@
 
 #include "cipher/util/exception.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-#if NATIVEINT != 32
+#if CIPHER_NATIVE_INT != 32
 
-bool RingGSWACCKey32Impl::Fits(const RingGSWCryptoParams& params) {
-    auto method = params.GetMethod();
+bool RingGswAccKey32Impl::fits(const RingGswCryptoParams& params) {
+    auto method = params.get_method();
     if (method != BINFHE_METHOD::GINX && method != BINFHE_METHOD::AP && method != BINFHE_METHOD::LMKCDEY)
         return false;
-    if (params.GetQ().GetMSB() > MAX_MODULUS_SIZE32)
+    if (params.get_Q().get_msb() > MAX_MODULUS_SIZE32)
         return false;
-    uint64_t Q{params.GetQ().ConvertToInt<uint64_t>()};
-    auto ok = [Q](const RingGSWCryptoParams::BaseGParams& bp) {
+    uint64_t Q{params.get_Q().convert_to_int<uint64_t>()};
+    auto ok = [Q](const RingGswCryptoParams::BaseGParams& bp) {
         // excess-H headroom: the biased value must stay inside a 32-bit word
-        if (bp.digitsG * bp.gBits + 1 > 32)
+        if (bp.digits_g * bp.g_bits + 1 > 32)
             return false;
-        // uint64 headroom for the lazy inner product: digitsG2 * (Q-1)^2 < 2^64
-        uint64_t d2{static_cast<uint64_t>((bp.digitsG - 1) << 1)};
+        // uint64 headroom for the lazy inner product: digits_g2 * (Q-1)^2 < 2^64
+        uint64_t d2{static_cast<uint64_t>((bp.digits_g - 1) << 1)};
         return d2 <= static_cast<uint64_t>(-1) / ((Q - 1) * (Q - 1));
     };
-    const auto& byIndex = params.GetBaseGByIndex();
-    if (byIndex.empty())
-        return ok(params.GetDefaultBaseGParams());
-    for (const auto& bp : byIndex)
+    const auto& by_index = params.get_base_g_by_index();
+    if (by_index.empty())
+        return ok(params.get_default_base_g_params());
+    for (const auto& bp : by_index)
         if (!ok(bp))
             return false;
     // the LMKCDEY automorphism key switch uses the default base regardless of the per-index map
-    if (method == BINFHE_METHOD::LMKCDEY && !ok(params.GetDefaultBaseGParams()))
+    if (method == BINFHE_METHOD::LMKCDEY && !ok(params.get_default_base_g_params()))
         return false;
     return true;
 }
 
-RingGSWACCKey32Impl::RingGSWACCKey32Impl(const std::shared_ptr<RingGSWCryptoParams>& params,
-                                         const RingGSWACCKeyImpl& ek) {
-    const auto& src = ek.GetElements();
+RingGswAccKey32Impl::RingGswAccKey32Impl(const std::shared_ptr<RingGswCryptoParams>& params,
+                                         const RingGswAccKeyImpl& ek) {
+    const auto& src = ek.get_elements();
     if (src.empty() || src[0].empty() || src[0][0].empty())
-        OPENFHE_THROW("RingGSWACCKey32Impl: empty accumulator key");
-    Init(params);
-    m_key.assign(src.size(),
+        CIPHER_THROW("RingGSWACCKey32Impl: empty accumulator key");
+    init(params);
+    key_.assign(src.size(),
                  std::vector<std::vector<EvalKey32>>(src[0].size(), std::vector<EvalKey32>(src[0][0].size())));
     for (size_t i = 0; i < src.size(); ++i)
         for (size_t j = 0; j < src[i].size(); ++j)
             for (size_t k = 0; k < src[i][j].size(); ++k)
                 if (src[i][j][k] != nullptr)
-                    SetEvalKey(i, j, k, *src[i][j][k]);
+                    set_eval_key(i, j, k, *src[i][j][k]);
 }
 
-RingGSWACCKey32Impl::RingGSWACCKey32Impl(const std::shared_ptr<RingGSWCryptoParams>& params, uint32_t d1, uint32_t d2,
+RingGswAccKey32Impl::RingGswAccKey32Impl(const std::shared_ptr<RingGswCryptoParams>& params, uint32_t d1, uint32_t d2,
                                          uint32_t d3) {
-    Init(params);
-    m_key.assign(d1, std::vector<std::vector<EvalKey32>>(d2, std::vector<EvalKey32>(d3)));
+    init(params);
+    key_.assign(d1, std::vector<std::vector<EvalKey32>>(d2, std::vector<EvalKey32>(d3)));
 }
 
 // shared setup for both constructors
-void RingGSWACCKey32Impl::Init(const std::shared_ptr<RingGSWCryptoParams>& params) {
-    if (!Fits(*params))
-        OPENFHE_THROW("parameters do not qualify for the 32-bit internal path");
+void RingGswAccKey32Impl::init(const std::shared_ptr<RingGswCryptoParams>& params) {
+    if (!fits(*params))
+        CIPHER_THROW("parameters do not qualify for the 32-bit internal path");
 
-    m_N = params->GetN();
-    m_polyParams = params->GetPolyParams32();
+    N_ = params->get_N();
+    poly_params_ = params->get_poly_params32();
     // force the lazy monomial build now: construction is single-threaded, gates may not be
-    if (params->GetMethod() == BINFHE_METHOD::GINX)
-        params->GetMonomialsPrecon32();
+    if (params->get_method() == BINFHE_METHOD::GINX)
+        params->get_monomials_precon32();
 }
 
-void RingGSWACCKey32Impl::SetEvalKey(uint32_t i, uint32_t j, uint32_t k, const RingGSWEvalKeyImpl& ek) {
-    const auto& el = ek.GetElements();
-    auto& dst = m_key[i][j][k];
+void RingGswAccKey32Impl::set_eval_key(uint32_t i, uint32_t j, uint32_t k, const RingGswEvalKeyImpl& ek) {
+    const auto& el = ek.get_elements();
+    auto& dst = key_[i][j][k];
     dst.resize(el.size());
     for (size_t d = 0; d < el.size(); ++d) {
         dst[d].clear();
         dst[d].reserve(el[d].size());
         for (size_t col = 0; col < el[d].size(); ++col)
-            dst[d].push_back(NarrowPoly32(el[d][col], m_polyParams));
+            dst[d].push_back(narrow_poly32(el[d][col], poly_params_));
     }
 }
 
-RingGSWACCKey RingGSWACCKey32Impl::Widen(const std::shared_ptr<RingGSWCryptoParams>& params) const {
-    const auto& polyParams = params->GetPolyParams();
-    auto ek = std::make_shared<RingGSWACCKeyImpl>(m_key.size(), m_key[0].size(), m_key[0][0].size());
-    for (size_t i = 0; i < m_key.size(); ++i) {
-        for (size_t j = 0; j < m_key[i].size(); ++j) {
-            for (size_t k = 0; k < m_key[i][j].size(); ++k) {
-                const auto& src = m_key[i][j][k];
+RingGswAccKey RingGswAccKey32Impl::widen(const std::shared_ptr<RingGswCryptoParams>& params) const {
+    const auto& poly_params = params->get_poly_params();
+    auto ek = std::make_shared<RingGswAccKeyImpl>(key_.size(), key_[0].size(), key_[0][0].size());
+    for (size_t i = 0; i < key_.size(); ++i) {
+        for (size_t j = 0; j < key_[i].size(); ++j) {
+            for (size_t k = 0; k < key_[i][j].size(); ++k) {
+                const auto& src = key_[i][j][k];
                 if (src.empty())
                     continue;
-                auto dst = std::make_shared<RingGSWEvalKeyImpl>(static_cast<uint32_t>(src.size()), 2);
+                auto dst = std::make_shared<RingGswEvalKeyImpl>(static_cast<uint32_t>(src.size()), 2);
                 for (size_t d = 0; d < src.size(); ++d) {
                     for (size_t col = 0; col < src[d].size(); ++col) {
-                        NativePoly p(polyParams, src[d][col].GetFormat(), true);
-                        WidenPoly32Into(src[d][col], p);
+                        NativePoly p(poly_params, src[d][col].get_format(), true);
+                        widen_poly32_into(src[d][col], p);
                         (*dst)[d][col] = std::move(p);
                     }
                 }
@@ -138,16 +138,16 @@ RingGSWACCKey RingGSWACCKey32Impl::Widen(const std::shared_ptr<RingGSWCryptoPara
     return ek;
 }
 
-uint64_t RingGSWACCKey32Impl::KeyBytes() const {
+uint64_t RingGswAccKey32Impl::key_bytes() const {
     uint64_t polys = 0;
-    for (const auto& i : m_key)
+    for (const auto& i : key_)
         for (const auto& j : i)
             for (const auto& k : j)
                 for (const auto& d : k)
                     polys += d.size();
-    return polys * static_cast<uint64_t>(m_N) * sizeof(uint32_t);
+    return polys * static_cast<uint64_t>(N_) * sizeof(uint32_t);
 }
 
-#endif  // NATIVEINT != 32
+#endif  // CIPHER_NATIVE_INT != 32
 
-}  // namespace lbcrypto
+}  // namespace cipher

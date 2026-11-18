@@ -40,24 +40,24 @@
 #include "cipher/util/hash.h"
 #include "cipher/util/utilities.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 TEST(Utilities, IsPowerOfTwo) {
     std::vector<uint32_t> powers_of_two{1, 2, 4, 8, 16, 32, 512, 1024, 2048, 4096, 16384, 32768};
     std::vector<uint32_t> not_powers_of_two{0, 3, 5, 7, 9, 31, 33, 1025, 4095};
 
     for (auto power_of_two : powers_of_two) {
-        EXPECT_TRUE(IsPowerOfTwo(power_of_two));
+        EXPECT_TRUE(is_power_of_two(power_of_two));
     }
 
     for (auto not_power_of_two : not_powers_of_two) {
-        EXPECT_FALSE(IsPowerOfTwo(not_power_of_two));
+        EXPECT_FALSE(is_power_of_two(not_power_of_two));
     }
 }
 
 TEST(Utilities, HashUtil) {
     const std::string abc = "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
-    EXPECT_EQ(abc, HashUtil::HashString("abc"));
+    EXPECT_EQ(abc, HashUtil::hash_string("abc"));
 
     std::vector<int64_t> digest;
     HashUtil::Hash("abc", SHA_256, digest);
@@ -66,15 +66,15 @@ TEST(Utilities, HashUtil) {
         EXPECT_EQ(std::stoll(abc.substr(2 * i, 2), nullptr, 16), digest[i]) << "byte " << i;
 
     // a message byte above 0x7f must not be sign-extended into the message schedule
-    std::vector<int64_t> digestHigh;
-    HashUtil::Hash("\xff", SHA_256, digestHigh);
+    std::vector<int64_t> digest_high;
+    HashUtil::Hash("\xff", SHA_256, digest_high);
     const std::string ff = "a8100ae6aa1940d0b663bb31cd466142ebbdbd5187131b92d93818987832eb89";
-    ASSERT_EQ(32u, digestHigh.size());
-    for (size_t i = 0; i < digestHigh.size(); ++i)
-        EXPECT_EQ(std::stoll(ff.substr(2 * i, 2), nullptr, 16), digestHigh[i]) << "byte " << i;
-    EXPECT_EQ(ff, HashUtil::HashString("\xff"));
+    ASSERT_EQ(32u, digest_high.size());
+    for (size_t i = 0; i < digest_high.size(); ++i)
+        EXPECT_EQ(std::stoll(ff.substr(2 * i, 2), nullptr, 16), digest_high[i]) << "byte " << i;
+    EXPECT_EQ(ff, HashUtil::hash_string("\xff"));
 
     // an unimplemented algorithm must not silently return another algorithm's digest
     std::vector<int64_t> digest512;
-    EXPECT_THROW(HashUtil::Hash("abc", SHA_512, digest512), OpenFHEException);
+    EXPECT_THROW(HashUtil::Hash("abc", SHA_512, digest512), CipherException);
 }

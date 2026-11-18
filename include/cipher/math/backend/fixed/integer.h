@@ -44,7 +44,7 @@
 #include <cstdint>
 
 #include "cipher/config.h"
-#ifdef WITH_BE2
+#ifdef CIPHER_WITH_BE2
 
     #include <cstdlib>
     #include <cstring>
@@ -75,7 +75,7 @@ most use cases The bitwidth can be decreased to the least value still supporting
 BigIntegerFixedT operations for a specific application - to achieve smaller runtimes
 **/
     #ifndef BigIntegerBitLength
-        #if (NATIVEINT < 128)
+        #if (CIPHER_NATIVE_INT < 128)
             #define BigIntegerBitLength 3500  // for 32-bit and 64-bit native backend
         #else
             #define BigIntegerBitLength 8000  // for 128-bit native backend
@@ -90,10 +90,10 @@ BigIntegerFixedT operations for a specific application - to achieve smaller runt
  * @namespace bigintfxd
  * The namespace of bigintfxd
  */
-namespace bigintfxd {
+namespace fixed_int {
 
 using U64BITS = uint64_t;
-    #if defined(HAVE_INT128)
+    #if defined(CIPHER_HAVE_INT128)
 using U128BITS = uint128_t;
     #endif
 
@@ -101,7 +101,7 @@ using U128BITS = uint128_t;
 template <typename uint_type, uint32_t BITLENGTH>
 class BigIntegerFixedT;
 
-// Create default type for the MATHBACKEND 2 integer
+// Create default type for the CIPHER_MATH_BACKEND 2 integer
 using BigInteger = BigIntegerFixedT<integral_dtype, BigIntegerBitLength>;
 
 /**The following structs are needed for initialization of BigIntegerFixedT at the
@@ -243,7 +243,7 @@ struct DoubleDataType<uint32_t> {
  */
 template <>
 struct DoubleDataType<uint64_t> {
-    #if defined(HAVE_INT128)
+    #if defined(CIPHER_HAVE_INT128)
     typedef uint128_t T;
     #else
     typedef uint64_t T;
@@ -259,7 +259,7 @@ constexpr double LOG2_10 = 3.32192809;  //!< @brief A pre-computed constant of L
  * @tparam BITLENGTH maximum bitwidth supported for big integers
  */
 template <typename uint_type, uint32_t BITLENGTH>
-class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<uint_type, BITLENGTH>> {
+class BigIntegerFixedT : public cipher::BigIntegerInterface<BigIntegerFixedT<uint_type, BITLENGTH>> {
   public:
     // CONSTRUCTORS
 
@@ -297,7 +297,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param val is the initial integer represented as a uint64_t.
      */
     BigIntegerFixedT(uint64_t val);  // NOLINT
-    #if defined(HAVE_INT128)
+    #if defined(CIPHER_HAVE_INT128)
     BigIntegerFixedT(U128BITS val);  // NOLINT
     #endif
 
@@ -313,7 +313,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
 
     /**
      * Constructor for all other types that have not already got their own constructors.
-     * These other data types must have a member function ConvertToInt() defined.
+     * These other data types must have a member function convert_to_int() defined.
      *
      * @param val is the initial integer represented as a big integer.
      */
@@ -322,14 +322,14 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
                       !std::is_same<T, int>::value && !std::is_same<T, uint32_t>::value &&
                               !std::is_same<T, uint64_t>::value && !std::is_same<T, long>::value &&  // NOLINT
                               !std::is_same<T, long long>::value &&                                  // NOLINT
-    #if defined(HAVE_INT128)
+    #if defined(CIPHER_HAVE_INT128)
                               !std::is_same<T, U128BITS>::value &&
     #endif
                               !std::is_same<T, const std::string>::value && !std::is_same<T, const char*>::value &&
                               !std::is_same<T, const char>::value && !std::is_same<T, BigIntegerFixedT>::value &&
                               !std::is_same<T, double>::value,
                       bool>::type = true>
-    BigIntegerFixedT(const T& val) : BigIntegerFixedT(val.ConvertToInt()) {  // NOLINT
+    BigIntegerFixedT(const T& val) : BigIntegerFixedT(val.convert_to_int()) {  // NOLINT
     }
 
     /**
@@ -390,7 +390,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param strval is the string representation of the big binary integer to be
      * copied.
      */
-    void SetValue(const std::string& strval);
+    void set_value(const std::string& strval);
 
     /**
      * Basic set method for setting the value of a big binary integer
@@ -398,12 +398,12 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param val is the big binary integer representation of the big binary
      * integer to be assigned.
      */
-    void SetValue(const BigIntegerFixedT& val);
+    void set_value(const BigIntegerFixedT& val);
 
     /**
      *  Set this int to 1.
      */
-    void SetIdentity() {
+    void set_identity() {
         *this = 1;
     }
 
@@ -413,7 +413,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param idx is the index of the int to set in the uint array.
      * @param value is the native integer value to store at that index.
      */
-    void SetIntAtIndex(uint32_t idx, uint_type value);
+    void set_int_at_index(uint32_t idx, uint_type value);
 
     // ARITHMETIC OPERATIONS
 
@@ -423,7 +423,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param b is the value to add.
      * @return result of the addition operation.
      */
-    BigIntegerFixedT Add(const BigIntegerFixedT& b) const;
+    BigIntegerFixedT add(const BigIntegerFixedT& b) const;
 
     /**
      * Addition operation. In-place variant.
@@ -431,7 +431,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param b is the value to add.
      * @return result of the addition operation.
      */
-    BigIntegerFixedT& AddEq(const BigIntegerFixedT& b);
+    BigIntegerFixedT& add_eq(const BigIntegerFixedT& b);
 
     /**
      * Subtraction operation.
@@ -439,7 +439,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param b is the value to subtract.
      * @return is the result of the subtraction operation.
      */
-    BigIntegerFixedT Sub(const BigIntegerFixedT& b) const;
+    BigIntegerFixedT sub(const BigIntegerFixedT& b) const;
 
     /**
      * Subtraction operation. In-place variant.
@@ -447,14 +447,14 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param b is the value to subtract.
      * @return is the result of the subtraction operation.
      */
-    BigIntegerFixedT& SubEq(const BigIntegerFixedT& b);
+    BigIntegerFixedT& sub_eq(const BigIntegerFixedT& b);
 
     /**
      * Operator for unary minus
      * @return is the result of subtracting this value from zero.
      */
     BigIntegerFixedT operator-() const {
-        return BigIntegerFixedT(0).Sub(*this);
+        return BigIntegerFixedT(0).sub(*this);
     }
 
     /**
@@ -463,7 +463,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param b is the value to multiply with.
      * @return is the result of the multiplication operation.
      */
-    BigIntegerFixedT Mul(const BigIntegerFixedT& b) const;
+    BigIntegerFixedT mul(const BigIntegerFixedT& b) const;
 
     /**
      * Multiplication operation. In-place variant.
@@ -471,7 +471,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param b is the value to multiply with.
      * @return is the result of the multiplication operation.
      */
-    BigIntegerFixedT& MulEq(const BigIntegerFixedT& b);
+    BigIntegerFixedT& mul_eq(const BigIntegerFixedT& b);
 
     /**
      * Division operation.
@@ -479,7 +479,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param b is the value to divide by.
      * @return is the result of the division operation.
      */
-    BigIntegerFixedT DividedBy(const BigIntegerFixedT& b) const;
+    BigIntegerFixedT divided_by(const BigIntegerFixedT& b) const;
 
     /**
      * Division operation. In-place variant.
@@ -487,7 +487,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param b is the value to divide by.
      * @return is the result of the division operation.
      */
-    BigIntegerFixedT& DividedByEq(const BigIntegerFixedT& b);
+    BigIntegerFixedT& divided_by_eq(const BigIntegerFixedT& b);
 
     /**
      * Exponentiation operation. Returns x^p.
@@ -503,7 +503,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param p the exponent.
      * @return is the result of the exponentiation operation.
      */
-    BigIntegerFixedT& ExpEq(uint32_t p);
+    BigIntegerFixedT& exp_eq(uint32_t p);
 
     /**
      * Multiply and Rounding operation. Returns [x*p/q] where [] is the rounding
@@ -513,7 +513,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param q is the denominator to be divided.
      * @return is the result of multiply and round operation.
      */
-    BigIntegerFixedT MultiplyAndRound(const BigIntegerFixedT& p, const BigIntegerFixedT& q) const;
+    BigIntegerFixedT multiply_and_round(const BigIntegerFixedT& p, const BigIntegerFixedT& q) const;
 
     /**
      * Multiply and Rounding operation. Returns [x*p/q] where [] is the rounding
@@ -523,7 +523,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param q is the denominator to be divided.
      * @return is the result of multiply and round operation.
      */
-    BigIntegerFixedT& MultiplyAndRoundEq(const BigIntegerFixedT& p, const BigIntegerFixedT& q);
+    BigIntegerFixedT& multiply_and_round_eq(const BigIntegerFixedT& p, const BigIntegerFixedT& q);
 
     /**
      * Divide and Rounding operation. Returns [x/q] where [] is the rounding
@@ -532,7 +532,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param q is the denominator to be divided.
      * @return is the result of divide and round operation.
      */
-    BigIntegerFixedT DivideAndRound(const BigIntegerFixedT& q) const;
+    BigIntegerFixedT divide_and_round(const BigIntegerFixedT& q) const;
 
     /**
      * Divide and Rounding operation. Returns [x/q] where [] is the rounding
@@ -541,7 +541,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param q is the denominator to be divided.
      * @return is the result of divide and round operation.
      */
-    BigIntegerFixedT& DivideAndRoundEq(const BigIntegerFixedT& q);
+    BigIntegerFixedT& divide_and_round_eq(const BigIntegerFixedT& q);
 
     // MODULAR ARITHMETIC OPERATIONS
 
@@ -551,7 +551,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param modulus is the modulus to perform.
      * @return is the result of the modulus operation.
      */
-    BigIntegerFixedT Mod(const BigIntegerFixedT& modulus) const;
+    BigIntegerFixedT mod(const BigIntegerFixedT& modulus) const;
 
     /**
      * Naive modulus operation. In-place variant.
@@ -559,14 +559,14 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param modulus is the modulus to perform.
      * @return is the result of the modulus operation.
      */
-    BigIntegerFixedT& ModEq(const BigIntegerFixedT& modulus);
+    BigIntegerFixedT& mod_eq(const BigIntegerFixedT& modulus);
 
     /**
      * Pre-computes the mu factor that is used in Barrett modulo reduction
      *
      * @return the value of mu
      */
-    BigIntegerFixedT ComputeMu() const;
+    BigIntegerFixedT compute_mu() const;
 
     /**
      * Barrett modulus operation.
@@ -577,7 +577,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param mu is the Barrett value.
      * @return is the result of the modulus operation.
      */
-    BigIntegerFixedT Mod(const BigIntegerFixedT& modulus, const BigIntegerFixedT& mu) const;
+    BigIntegerFixedT mod(const BigIntegerFixedT& modulus, const BigIntegerFixedT& mu) const;
 
     /**
      * Barrett modulus operation. In-place variant.
@@ -588,7 +588,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param mu is the Barrett value.
      * @return is the result of the modulus operation.
      */
-    BigIntegerFixedT& ModEq(const BigIntegerFixedT& modulus, const BigIntegerFixedT& mu);
+    BigIntegerFixedT& mod_eq(const BigIntegerFixedT& modulus, const BigIntegerFixedT& mu);
 
     /**
      * Modulus addition operation.
@@ -597,7 +597,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus addition operation.
      */
-    BigIntegerFixedT ModAdd(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus) const;
+    BigIntegerFixedT mod_add(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus) const;
 
     /**
      * Modulus addition operation. In-place variant.
@@ -606,7 +606,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus addition operation.
      */
-    BigIntegerFixedT& ModAddEq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus);
+    BigIntegerFixedT& mod_add_eq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus);
 
     /**
      * Modulus addition where operands are < modulus.
@@ -615,7 +615,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus addition operation.
      */
-    BigIntegerFixedT ModAddFast(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus) const;
+    BigIntegerFixedT mod_add_fast(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus) const;
 
     /**
      * Modulus addition where operands are < modulus. In-place variant.
@@ -624,7 +624,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus addition operation.
      */
-    BigIntegerFixedT& ModAddFastEq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus);
+    BigIntegerFixedT& mod_add_fast_eq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus);
 
     /**
      * Barrett modulus addition operation.
@@ -634,7 +634,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param mu is the Barrett value.
      * @return is the result of the modulus addition operation.
      */
-    BigIntegerFixedT ModAdd(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
+    BigIntegerFixedT mod_add(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
                             const BigIntegerFixedT& mu) const;
 
     /**
@@ -645,7 +645,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param mu is the Barrett value.
      * @return is the result of the modulus addition operation.
      */
-    BigIntegerFixedT& ModAddEq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus, const BigIntegerFixedT& mu);
+    BigIntegerFixedT& mod_add_eq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus, const BigIntegerFixedT& mu);
 
     /**
      * Modulus subtraction operation.
@@ -654,7 +654,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus subtraction operation.
      */
-    BigIntegerFixedT ModSub(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus) const;
+    BigIntegerFixedT mod_sub(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus) const;
 
     /**
      * Modulus subtraction operation. In-place variant.
@@ -663,7 +663,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus subtraction operation.
      */
-    BigIntegerFixedT& ModSubEq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus);
+    BigIntegerFixedT& mod_sub_eq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus);
 
     /**
      * Modulus subtraction where operands are < modulus.
@@ -672,7 +672,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus subtraction operation.
      */
-    BigIntegerFixedT ModSubFast(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus) const;
+    BigIntegerFixedT mod_sub_fast(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus) const;
 
     /**
      * Modulus subtraction where operands are < modulus. In-place variant.
@@ -681,7 +681,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus subtraction operation.
      */
-    BigIntegerFixedT& ModSubFastEq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus);
+    BigIntegerFixedT& mod_sub_fast_eq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus);
 
     /**
      * Barrett modulus subtraction operation.
@@ -691,7 +691,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param mu is the Barrett value.
      * @return is the result of the modulus subtraction operation.
      */
-    BigIntegerFixedT ModSub(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
+    BigIntegerFixedT mod_sub(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
                             const BigIntegerFixedT& mu) const;
 
     /**
@@ -702,7 +702,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param mu is the Barrett value.
      * @return is the result of the modulus subtraction operation.
      */
-    BigIntegerFixedT& ModSubEq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus, const BigIntegerFixedT& mu);
+    BigIntegerFixedT& mod_sub_eq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus, const BigIntegerFixedT& mu);
 
     /**
      * Modulus multiplication operation.
@@ -711,7 +711,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus multiplication operation.
      */
-    BigIntegerFixedT ModMul(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus) const;
+    BigIntegerFixedT mod_mul(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus) const;
 
     /**
      * Modulus multiplication operation. In-place variant.
@@ -720,7 +720,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus multiplication operation.
      */
-    BigIntegerFixedT& ModMulEq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus);
+    BigIntegerFixedT& mod_mul_eq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus);
 
     /**
      * Barrett modulus multiplication.
@@ -730,7 +730,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param mu is the Barrett value.
      * @return is the result of the modulus multiplication operation.
      */
-    BigIntegerFixedT ModMul(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
+    BigIntegerFixedT mod_mul(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
                             const BigIntegerFixedT& mu) const;
 
     /**
@@ -741,7 +741,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param mu is the Barrett value.
      * @return is the result of the modulus multiplication operation.
      */
-    BigIntegerFixedT& ModMulEq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus, const BigIntegerFixedT& mu);
+    BigIntegerFixedT& mod_mul_eq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus, const BigIntegerFixedT& mu);
 
     /**
      * Modulus multiplication that assumes the operands are < modulus.
@@ -750,7 +750,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus multiplication operation.
      */
-    BigIntegerFixedT ModMulFast(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus) const;
+    BigIntegerFixedT mod_mul_fast(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus) const;
 
     /**
      * Modulus multiplication that assumes the operands are < modulus. In-place
@@ -760,7 +760,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus multiplication operation.
      */
-    BigIntegerFixedT& ModMulFastEq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus);
+    BigIntegerFixedT& mod_mul_fast_eq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus);
 
     /**
      * Barrett modulus multiplication that assumes the operands are < modulus.
@@ -770,7 +770,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param mu is the Barrett value.
      * @return is the result of the modulus multiplication operation.
      */
-    BigIntegerFixedT ModMulFast(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
+    BigIntegerFixedT mod_mul_fast(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
                                 const BigIntegerFixedT& mu) const;
 
     /**
@@ -782,17 +782,17 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param mu is the Barrett value.
      * @return is the result of the modulus multiplication operation.
      */
-    BigIntegerFixedT& ModMulFastEq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
+    BigIntegerFixedT& mod_mul_fast_eq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
                                    const BigIntegerFixedT& mu);
 
-    BigIntegerFixedT ModMulFastConst(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
-                                     const BigIntegerFixedT& bInv) const {
-        OPENFHE_THROW("ModMulFastConst is not implemented for backend 2");
+    BigIntegerFixedT mod_mul_fast_const(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
+                                     const BigIntegerFixedT& b_inv) const {
+        CIPHER_THROW("ModMulFastConst is not implemented for backend 2");
     }
 
-    BigIntegerFixedT& ModMulFastConstEq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
-                                        const BigIntegerFixedT& bInv) {
-        OPENFHE_THROW("ModMulFastConstEq is not implemented for backend 2");
+    BigIntegerFixedT& mod_mul_fast_const_eq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
+                                        const BigIntegerFixedT& b_inv) {
+        CIPHER_THROW("ModMulFastConstEq is not implemented for backend 2");
     }
 
     /**
@@ -802,7 +802,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus exponentiation operation.
      */
-    BigIntegerFixedT ModExp(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus) const;
+    BigIntegerFixedT mod_exp(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus) const;
 
     /**
      * Modulus exponentiation operation. Square-and-multiply algorithm is used.
@@ -812,7 +812,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus exponentiation operation.
      */
-    BigIntegerFixedT& ModExpEq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus);
+    BigIntegerFixedT& mod_exp_eq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus);
 
     /**
      * Modulus inverse operation.
@@ -820,7 +820,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param modulus is the modulus to perform.
      * @return is the result of the modulus inverse operation.
      */
-    BigIntegerFixedT ModInverse(const BigIntegerFixedT& modulus) const;
+    BigIntegerFixedT mod_inverse(const BigIntegerFixedT& modulus) const;
 
     /**
      * Modulus inverse operation. In-place variant.
@@ -828,7 +828,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param modulus is the modulus to perform.
      * @return is the result of the modulus inverse operation.
      */
-    BigIntegerFixedT& ModInverseEq(const BigIntegerFixedT& modulus);
+    BigIntegerFixedT& mod_inverse_eq(const BigIntegerFixedT& modulus);
 
     // SHIFT OPERATIONS
 
@@ -838,7 +838,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param shift # of bits.
      * @return result of the shift operation.
      */
-    BigIntegerFixedT LShift(uint16_t shift) const;
+    BigIntegerFixedT l_shift(uint16_t shift) const;
 
     /**
      * Left shift operation. In-place variant.
@@ -846,7 +846,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param shift # of bits.
      * @return result of the shift operation.
      */
-    BigIntegerFixedT& LShiftEq(uint16_t shift);
+    BigIntegerFixedT& l_shift_eq(uint16_t shift);
 
     /**
      * Right shift operation.
@@ -854,7 +854,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param shift # of bits.
      * @return result of the shift operation.
      */
-    BigIntegerFixedT RShift(uint16_t shift) const;
+    BigIntegerFixedT r_shift(uint16_t shift) const;
 
     /**
      * Right shift operation. In-place variant.
@@ -862,7 +862,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param shift # of bits.
      * @return result of the shift operation.
      */
-    BigIntegerFixedT& RShiftEq(uint16_t shift);
+    BigIntegerFixedT& r_shift_eq(uint16_t shift);
 
     // COMPARE
 
@@ -882,22 +882,22 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      *
      * @return the int representation of the value as T.
      */
-    // TODO (dsuponit): make ConvertToInt() a template utility function
+    // TODO (dsuponit): make convert_to_int() a template utility function
     template <typename T = BasicInteger,
               std::enable_if_t<std::is_integral_v<T> || std::is_same_v<T, int128_t> || std::is_same_v<T, uint128_t>,
                                bool> = true>
-    T ConvertToInt() const {
+    T convert_to_int() const {
         constexpr uint32_t bits = sizeof(T) * CHAR_BIT;
         T result = 0;
         // set num to number of equisized chunks
-        uint32_t num = bits / m_uintBitLength;
-        uint32_t ceilInt = m_nSize - ceilIntByUInt(m_MSB);
+        uint32_t num = bits / uint_bit_length_;
+        uint32_t ceil_int = n_size_ - ceil_int_by_u_int(msb_);
         // copy the values by shift and add
-        for (uint32_t i = 0; i < num && (m_nSize - i - 1) >= ceilInt; i++) {
-            result += ((T)m_value[m_nSize - i - 1] << (m_uintBitLength * i));
+        for (uint32_t i = 0; i < num && (n_size_ - i - 1) >= ceil_int; i++) {
+            result += ((T)value_[n_size_ - i - 1] << (uint_bit_length_ * i));
         }
-        if (m_MSB > bits) {
-            OPENFHE_THROW(std::string("MSB cannot be bigger than ") + std::to_string(bits));
+        if (msb_ > bits) {
+            CIPHER_THROW(std::string("MSB cannot be bigger than ") + std::to_string(bits));
         }
         return result;
     }
@@ -907,7 +907,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      *
      * @return double representation of the value.
      */
-    double ConvertToDouble() const;
+    double convert_to_double() const;
 
     /**
      * Convert a value from an int to a BigIntegerFixedT.
@@ -915,15 +915,15 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param m the value to convert from.
      * @return int represented as a big binary int.
      */
-    static BigIntegerFixedT intToBigInteger(uint32_t m);
+    static BigIntegerFixedT int_to_big_integer(uint32_t m);
 
     /**
      * Convert a string representation of a binary number to a decimal BigIntegerFixedT.
      *
-     * @param bitString the binary num in string.
+     * @param bit_string the binary num in string.
      * @return the binary number represented as a big binary int.
      */
-    static BigIntegerFixedT FromBinaryString(const std::string& bitString);
+    static BigIntegerFixedT from_binary_string(const std::string& bit_string);
 
     // OTHER FUNCTIONS
 
@@ -932,8 +932,8 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      *
      * @return the index of the most significant bit.
      */
-    uint32_t GetMSB() const {
-        return m_MSB;
+    uint32_t get_msb() const {
+        return msb_;
     }
 
     /**
@@ -943,8 +943,8 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param base is the base with which to determine length in.
      * @return the length of the representation in a specific base.
      */
-    uint32_t GetLengthForBase(uint32_t base) const {
-        return m_MSB;
+    uint32_t get_length_for_base(uint32_t base) const {
+        return msb_;
     }
 
     /**
@@ -961,15 +961,15 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param base is the base with which to determine length in.
      * @return is the requested digit
      */
-    uint32_t GetDigitAtIndexForBase(uint32_t index, uint32_t base) const;
+    uint32_t get_digit_at_index_for_base(uint32_t index, uint32_t base) const;
 
     /**
      * Tests whether the BigIntegerFixedT is a power of 2.
      *
-     * @param m_numToCheck is the value to check.
+     * @param num_to_check_ is the value to check.
      * @return true if the input is a power of 2, false otherwise.
      */
-    bool CheckIfPowerOfTwo(const BigIntegerFixedT& m_numToCheck);
+    bool check_if_power_of_two(const BigIntegerFixedT& num_to_check_);
 
     /**
      * Gets the bit at the specified index.
@@ -977,13 +977,13 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param index is the index of the bit to get.
      * @return resulting bit.
      */
-    uint8_t GetBitAtIndex(uint32_t index) const;
+    uint8_t get_bit_at_index(uint32_t index) const;
 
     /**
      * A zero allocator that is called by the Matrix class. It is used to
      * initialize a Matrix of BigIntegerFixedT objects.
      */
-    static BigIntegerFixedT Allocator() {
+    static BigIntegerFixedT allocator() {
         return BigIntegerFixedT(0);
     }
 
@@ -995,9 +995,9 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      *
      * @return value of this BigIntegerFixedT in base 10 represented as a string.
      */
-    const std::string ToString() const;
+    const std::string to_string() const;
 
-    static const std::string IntegerTypeName() {
+    static const std::string integer_type_name() {
         return "UBFIXINT";
     }
 
@@ -1006,14 +1006,14 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * Used primarily for debugging
      * @return string with the space-separated limb values, most significant limb first
      */
-    std::string GetInternalRepresentation(void) const {
+    std::string get_internal_representation(void) const {
         std::string ret("");
-        size_t ceilInt = ceilIntByUInt(m_MSB);  // max limb used
-        size_t minIndex = static_cast<size_t>(m_nSize - ceilInt);
+        size_t ceil_int = ceil_int_by_u_int(msb_);  // max limb used
+        size_t min_index = static_cast<size_t>(n_size_ - ceil_int);
 
-        for (size_t i = m_nSize - 1; i >= minIndex; i--) {
-            ret += std::to_string(m_value[i]);
-            if (i != minIndex)
+        for (size_t i = n_size_ - 1; i >= min_index; i--) {
+            ret += std::to_string(value_[i]);
+            if (i != min_index)
                 ret += " ";
         }
         return ret;
@@ -1026,36 +1026,36 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param ptr_obj is BigIntegerFixedT to be printed.
      * @return is the ostream object.
      */
-    template <typename uint_type_c, uint32_t BITLENGTH_c>
-    friend std::ostream& operator<<(std::ostream& os, const BigIntegerFixedT<uint_type_c, BITLENGTH_c>& ptr_obj) {
+    template <typename uint_type_c, uint32_t bitlength_c>
+    friend std::ostream& operator<<(std::ostream& os, const BigIntegerFixedT<uint_type_c, bitlength_c>& ptr_obj) {
         uint32_t counter;
         // initiate to object to be printed
-        auto print_obj = new BigIntegerFixedT<uint_type_c, BITLENGTH_c>(ptr_obj);
-        // print_VALUE array stores the decimal value in the array
-        uint8_t* print_VALUE = new uint8_t[ptr_obj.m_numDigitInPrintval];
-        for (size_t i = 0; i < ptr_obj.m_numDigitInPrintval; i++) {
+        auto print_obj = new BigIntegerFixedT<uint_type_c, bitlength_c>(ptr_obj);
+        // print_value_value array stores the decimal value in the array
+        uint8_t* print_value_value = new uint8_t[ptr_obj.num_digit_in_printval_];
+        for (size_t i = 0; i < ptr_obj.num_digit_in_printval_; i++) {
             // reset to zero
-            *(print_VALUE + i) = 0;
+            *(print_value_value + i) = 0;
         }
         // starts the conversion from base r to decimal value
-        for (size_t i = print_obj->m_MSB; i > 0; i--) {
-            // print_VALUE = print_VALUE*2
-            BigIntegerFixedT<uint_type_c, BITLENGTH_c>::double_bitVal(print_VALUE);
-            // adds the bit value to the print_VALUE
-            BigIntegerFixedT<uint_type_c, BITLENGTH_c>::add_bitVal(print_VALUE, print_obj->GetBitAtIndex(i));
+        for (size_t i = print_obj->msb_; i > 0; i--) {
+            // print_value_value = print_value_value*2
+            BigIntegerFixedT<uint_type_c, bitlength_c>::double_bit_val(print_value_value);
+            // adds the bit value to the print_value_value
+            BigIntegerFixedT<uint_type_c, bitlength_c>::add_bit_val(print_value_value, print_obj->get_bit_at_index(i));
         }
-        // find the first occurence of non-zero value in print_VALUE
-        for (counter = 0; counter < ptr_obj.m_numDigitInPrintval - 1; counter++) {
-            if (static_cast<int>(print_VALUE[counter]) != 0) {
+        // find the first occurence of non-zero value in print_value_value
+        for (counter = 0; counter < ptr_obj.num_digit_in_printval_ - 1; counter++) {
+            if (static_cast<int>(print_value_value[counter]) != 0) {
                 break;
             }
         }
         // start inserting values into the ostream object
-        for (; counter < ptr_obj.m_numDigitInPrintval; counter++) {
-            os << static_cast<int>(print_VALUE[counter]);
+        for (; counter < ptr_obj.num_digit_in_printval_; counter++) {
+            os << static_cast<int>(print_value_value[counter]);
         }
         // deallocate the memory since values are inserted into the ostream object
-        delete[] print_VALUE;
+        delete[] print_value_value;
         delete print_obj;
         return os;
     }
@@ -1065,44 +1065,44 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
     template <class Archive>
     typename std::enable_if<!cereal::traits::is_text_archive<Archive>::value, void>::type save(
             Archive& ar, std::uint32_t const version) const {
-        ar(::cereal::binary_data(m_value, sizeof(m_value)));
-        ar(::cereal::binary_data(&m_MSB, sizeof(m_MSB)));
+        ar(::cereal::binary_data(value_, sizeof(value_)));
+        ar(::cereal::binary_data(&msb_, sizeof(msb_)));
     }
 
     template <class Archive>
     typename std::enable_if<cereal::traits::is_text_archive<Archive>::value, void>::type save(
             Archive& ar, std::uint32_t const version) const {
-        ar(::cereal::make_nvp("v", m_value));
-        ar(::cereal::make_nvp("m", m_MSB));
+        ar(::cereal::make_nvp("v", value_));
+        ar(::cereal::make_nvp("m", msb_));
     }
 
     template <class Archive>
     typename std::enable_if<!cereal::traits::is_text_archive<Archive>::value, void>::type load(
             Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
-        ar(::cereal::binary_data(m_value, sizeof(m_value)));
-        ar(::cereal::binary_data(&m_MSB, sizeof(m_MSB)));
+        ar(::cereal::binary_data(value_, sizeof(value_)));
+        ar(::cereal::binary_data(&msb_, sizeof(msb_)));
     }
 
     template <class Archive>
     typename std::enable_if<cereal::traits::is_text_archive<Archive>::value, void>::type load(
             Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
-        ar(::cereal::make_nvp("v", m_value));
-        ar(::cereal::make_nvp("m", m_MSB));
+        ar(::cereal::make_nvp("v", value_));
+        ar(::cereal::make_nvp("m", msb_));
     }
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "FXDInteger";
     }
 
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 
@@ -1113,43 +1113,43 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      *
      * @param v The input string
      */
-    void AssignVal(const std::string& v);
+    void assign_val(const std::string& v);
 
     /**
      * Sets the MSB to the correct value from the BigIntegerFixedT.
      */
-    void SetMSB();
+    void set_msb();
 
     /**
      * Sets the MSB to the correct value from the BigIntegerFixedT.
-     * @param guessIdxChar is the hint of the MSB position.
+     * @param guess_idx_char is the hint of the MSB position.
      */
-    void SetMSB(uint32_t guessIdxChar);
+    void set_msb(uint32_t guess_idx_char);
 
   private:
     // array storing the native integers.
     // array size is the ceiling of BITLENGTH/(bits in the integral data type)
-    uint_type m_value[(BITLENGTH + 8 * sizeof(uint_type) - 1) / (8 * sizeof(uint_type))];
+    uint_type value_[(BITLENGTH + 8 * sizeof(uint_type) - 1) / (8 * sizeof(uint_type))];
 
     // variable that stores the MOST SIGNIFICANT BIT position in the number.
-    uint16_t m_MSB;
+    uint16_t msb_;
 
     // variable to store the bit width of the integral data type.
-    static const uint8_t m_uintBitLength;
+    static const uint8_t uint_bit_length_;
 
     // variable to store the maximum value of the integral data type.
-    static const uint_type m_uintMax;
+    static const uint_type uint_max_;
 
     // variable to store the log(base 2) of the number of bits in the integral
     // data type.
-    static const uint8_t m_logUintBitLength;
+    static const uint8_t log_uint_bit_length_;
 
     // variable to store the size of the data array.
-    static const uint32_t m_nSize;
+    static const uint32_t n_size_;
 
     // The maximum number of digits in BigIntegerFixedT. It is used by the cout(ostream)
     // function for printing the bigbinarynumber.
-    static const uint32_t m_numDigitInPrintval;
+    static const uint32_t num_digit_in_printval_;
 
     /**
      * function to return the ceiling of the number divided by the number of bits
@@ -1157,10 +1157,10 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param Number is the number to be divided.
      * @return the ceiling of Number/(bits in the integral data type)
      */
-    static uint_type ceilIntByUInt(const uint_type Number);
+    static uint_type ceil_int_by_u_int(const uint_type number_value);
 
     // currently unused array
-    static const BigIntegerFixedT* m_modChain;
+    static const BigIntegerFixedT* mod_chain_;
 
     /**
      * function to return the MSB of number.
@@ -1168,7 +1168,7 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @return the MSB position in the number x.
      */
 
-    static uint32_t GetMSBUint_type(uint_type x);
+    static uint32_t get_msb_uint_type(uint_type x);
 
     // Duint_type is the data type that has twice as many bits in the integral
     // data type.
@@ -1179,41 +1179,41 @@ class BigIntegerFixedT : public lbcrypto::BigIntegerInterface<BigIntegerFixedT<u
      * @param x is the number.
      * @return the MSB position in the number x.
      */
-    static uint32_t GetMSBDUint_type(Duint_type x);
+    static uint32_t get_msbd_uint_type(Duint_type x);
 
     /**
      * function that returns the BigIntegerFixedT after multiplication by a uint.
      * @param b is the number to be multiplied.
      * @return the BigIntegerFixedT after the multiplication.
      */
-    BigIntegerFixedT MulByUint(const uint_type b) const;
+    BigIntegerFixedT mul_by_uint(const uint_type b) const;
 
     /**
      * function that stores in ans the BigIntegerFixedT after multiplication by a uint.
      * @param b is the number to be multiplied.
      * @param[out] ans is the BigIntegerFixedT after the multiplication.
      */
-    void MulByUintToInt(const uint_type b, BigIntegerFixedT* ans) const;
+    void mul_by_uint_to_int(const uint_type b, BigIntegerFixedT* ans) const;
 
     /**
      * function that returns the decimal value from the binary array a.
      * @param a is a pointer to the binary array.
      * @return the decimal value.
      */
-    static uint_type UintInBinaryToDecimal(uint8_t* a);
+    static uint_type uint_in_binary_to_decimal(uint8_t* a);
 
     /**
      * function that mutiplies by 2 to the binary array.
      * @param a is a pointer to the binary array.
      */
-    static void double_bitVal(uint8_t* a);
+    static void double_bit_val(uint8_t* a);
 
     /**
      * function that adds bit b to the binary array.
      * @param a is a pointer to the binary array.
      * @param b is a bit value to be added.
      */
-    static void add_bitVal(uint8_t* a, uint8_t b);
+    static void add_bit_val(uint8_t* a, uint8_t b);
 };
 
 }  // namespace bigintfxd

@@ -46,23 +46,23 @@
  * Subroutines used by the linear transformation homomorphic capability
  */
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
- * @brief Quotient and remainder of a polynomial long division (LongDivisionPoly, LongDivisionChebyshev).
+ * @brief Quotient and remainder of a polynomial long division (long_division_poly, long_division_chebyshev).
  */
 template <typename VecDType>
-struct longDiv {
+struct LongDiv {
     std::vector<VecDType> q;  ///< coefficients of the quotient
     std::vector<VecDType> r;  ///< coefficients of the remainder
-    longDiv() = default;
+    LongDiv() = default;
     /**
      * Constructs the result from the quotient and remainder coefficients.
      *
      * @param q0 coefficients of the quotient
      * @param r0 coefficients of the remainder
      */
-    longDiv(const std::vector<VecDType>& q0, const std::vector<VecDType>& r0) : q(q0), r(r0) {}
+    LongDiv(const std::vector<VecDType>& q0, const std::vector<VecDType>& r0) : q(q0), r(r0) {}
 };
 
 /**
@@ -72,7 +72,7 @@ struct longDiv {
  * @param delta the tolerance
  * @return true if |v - 1| > delta
  */
-inline bool IsNotEqualOne(double v, double delta = 0x1p-44) {
+inline bool is_not_equal_one(double v, double delta = 0x1p-44) {
     return std::abs(v - 1.0) > delta;
 }
 /**
@@ -82,7 +82,7 @@ inline bool IsNotEqualOne(double v, double delta = 0x1p-44) {
  * @param delta the tolerance
  * @return true if |v| > delta
  */
-inline bool IsNotEqualZero(double v, double delta = 0x1p-44) {
+inline bool is_not_equal_zero(double v, double delta = 0x1p-44) {
     return std::abs(v) > delta;
 }
 /**
@@ -92,7 +92,7 @@ inline bool IsNotEqualZero(double v, double delta = 0x1p-44) {
  * @param delta the tolerance
  * @return true if |v + 1| > delta
  */
-inline bool IsNotEqualNegOne(double v, double delta = 0x1p-44) {
+inline bool is_not_equal_neg_one(double v, double delta = 0x1p-44) {
     return std::abs(v + 1.0) > delta;
 }
 /**
@@ -102,8 +102,8 @@ inline bool IsNotEqualNegOne(double v, double delta = 0x1p-44) {
  * @param delta the tolerance
  * @return true if |Re(val) - 1| > delta or |Im(val)| > delta
  */
-inline bool IsNotEqualOne(std::complex<double> val, double delta = 0x1p-44) {
-    return IsNotEqualOne(val.real(), delta) || IsNotEqualZero(val.imag(), delta);
+inline bool is_not_equal_one(std::complex<double> val, double delta = 0x1p-44) {
+    return is_not_equal_one(val.real(), delta) || is_not_equal_zero(val.imag(), delta);
 }
 /**
  * Checks whether a complex value differs from 0 by more than a tolerance in its real or imaginary part.
@@ -112,8 +112,8 @@ inline bool IsNotEqualOne(std::complex<double> val, double delta = 0x1p-44) {
  * @param delta the tolerance
  * @return true if |Re(val)| > delta or |Im(val)| > delta
  */
-inline bool IsNotEqualZero(std::complex<double> val, double delta = 0x1p-44) {
-    return IsNotEqualZero(val.real(), delta) || IsNotEqualZero(val.imag(), delta);
+inline bool is_not_equal_zero(std::complex<double> val, double delta = 0x1p-44) {
+    return is_not_equal_zero(val.real(), delta) || is_not_equal_zero(val.imag(), delta);
 }
 
 /**
@@ -122,7 +122,7 @@ inline bool IsNotEqualZero(std::complex<double> val, double delta = 0x1p-44) {
  * @param val the value
  * @return the value itself
  */
-inline double ToReal(double val) {
+inline double to_real(double val) {
     return val;
 }
 /**
@@ -131,7 +131,7 @@ inline double ToReal(double val) {
  * @param val the value
  * @return the value as a double
  */
-inline double ToReal(int64_t val) {
+inline double to_real(int64_t val) {
     return static_cast<double>(val);
 }
 /**
@@ -140,7 +140,7 @@ inline double ToReal(int64_t val) {
  * @param val the value
  * @return the real part of the value
  */
-inline double ToReal(std::complex<double> val) {
+inline double to_real(std::complex<double> val) {
     return val.real();
 }
 
@@ -155,9 +155,9 @@ template <typename VecDType>
 uint32_t Degree(const std::vector<VecDType>& coefficients, double delta = 0.0) {
     uint32_t i = coefficients.size();
     if (i == 0)
-        OPENFHE_THROW("Coefficients vector can not be empty");
+        CIPHER_THROW("Coefficients vector can not be empty");
     while (i > 0) {
-        if (IsNotEqualZero(coefficients[--i], delta))
+        if (is_not_equal_zero(coefficients[--i], delta))
             break;
     }
     return i;
@@ -171,7 +171,7 @@ uint32_t Degree(const std::vector<VecDType>& coefficients, double delta = 0.0) {
  * @return a struct with the coefficients for the quotient and remainder.
  */
 template <typename VecDType>
-std::shared_ptr<longDiv<VecDType>> LongDivisionPoly(const std::vector<VecDType>& f, const std::vector<VecDType>& g);
+std::shared_ptr<LongDiv<VecDType>> long_division_poly(const std::vector<VecDType>& f, const std::vector<VecDType>& g);
 
 /**
  * Computes the quotient and remainder of the long division of two polynomials in the Chebyshev series basis
@@ -181,7 +181,7 @@ std::shared_ptr<longDiv<VecDType>> LongDivisionPoly(const std::vector<VecDType>&
  * @return a struct with the coefficients for the quotient and remainder.
  */
 template <typename VecDType>
-std::shared_ptr<longDiv<VecDType>> LongDivisionChebyshev(const std::vector<VecDType>& f,
+std::shared_ptr<LongDiv<VecDType>> long_division_chebyshev(const std::vector<VecDType>& f,
                                                          const std::vector<VecDType>& g);
 
 /**
@@ -191,7 +191,7 @@ std::shared_ptr<longDiv<VecDType>> LongDivisionChebyshev(const std::vector<VecDT
  * @param n the degree of a polynomial.
  * @return a vector containing k and m.
  */
-std::vector<uint32_t> ComputeDegreesPS(uint32_t n);
+std::vector<uint32_t> compute_degrees_ps(uint32_t n);
 
 /**
  * Gets the multiplicative depth of evaluating a polynomial of the given degree from a table that covers degrees
@@ -201,21 +201,21 @@ std::vector<uint32_t> ComputeDegreesPS(uint32_t n);
  * @param degree degree of the polynomial
  * @return the multiplicative depth
  */
-uint32_t GetDepthByDegree(size_t degree);
+uint32_t get_depth_by_degree(size_t degree);
 
 /**
  * Get the depth for a given vector of coefficients for the Paterson-Stockmeyer algorithm.
  * The functions is based on the table described in src/pke/examples/FUNCTION_EVALUATION.md
  *
  * @param vec vector of coefficients
- * @param isNormalized true if the vector normalized. false is the default value
+ * @param is_normalized true if the vector normalized. false is the default value
  * @return multiplicative depth
  */
 template <typename VecDType>
-uint32_t GetMultiplicativeDepthByCoeffVector(const std::vector<VecDType>& vec, bool isNormalized = false) {
+uint32_t get_multiplicative_depth_by_coeff_vector(const std::vector<VecDType>& vec, bool is_normalized = false) {
     if (vec.size() == 0)
-        OPENFHE_THROW("Cannot perform operation on empty vector. vec.size() == 0");
-    return GetDepthByDegree(vec.size() - 1) - isNormalized;
+        CIPHER_THROW("Cannot perform operation on empty vector. vec.size() == 0");
+    return get_depth_by_degree(vec.size() - 1) - is_normalized;
 }
 
 /**
@@ -226,7 +226,7 @@ uint32_t GetMultiplicativeDepthByCoeffVector(const std::vector<VecDType>& vec, b
  *
  * @return the vector corresponding to the shifted diagonal
  */
-std::vector<std::complex<double>> ExtractShiftedDiagonal(const std::vector<std::vector<std::complex<double>>>& A,
+std::vector<std::complex<double>> extract_shifted_diagonal(const std::vector<std::vector<std::complex<double>>>& A,
                                                          int i);
 
 /**
@@ -249,7 +249,7 @@ std::vector<VecDType> Rotate(const std::vector<VecDType>& a, int32_t index);
  * @return the rotated vector, mimicking the BFV subring rotations
  */
 template <typename VecDType>
-std::vector<VecDType> RotateTwoHalves(const std::vector<VecDType>& a, int32_t index);
+std::vector<VecDType> rotate_two_halves(const std::vector<VecDType>& a, int32_t index);
 
 /**
  * Clones the current vector up to the size indicated by the 'slots' variable
@@ -279,29 +279,29 @@ std::vector<VecDType> Fill(const std::vector<VecDType>& a, uint32_t slots);
 */
 
 /**
- * Computes the coefficients for the FFT encoding for CoeffEncodingCollapse such that every
+ * Computes the coefficients for the FFT encoding for coeff_encoding_collapse such that every
  * iteration occupies one level.
  *
  * @param pows vector of roots of unity powers.
- * @param rotGroup rotation group indices to appropriately choose the elements of pows to compute iFFT.
+ * @param rot_group rotation group indices to appropriately choose the elements of pows to compute iFFT.
  * @param flag_i flag that is 0 when we compute the coefficients for conj(U_0^T) and is 1 for conj(i*U_0^T).
  * @return the coefficients of each layer of the iFFT (one vector per layer)
  */
-std::vector<std::vector<std::complex<double>>> CoeffEncodingOneLevel(const std::vector<std::complex<double>>& pows,
-                                                                     const std::vector<uint32_t>& rotGroup,
+std::vector<std::vector<std::complex<double>>> coeff_encoding_one_level(const std::vector<std::complex<double>>& pows,
+                                                                     const std::vector<uint32_t>& rot_group,
                                                                      bool flag_i);
 
 /**
- * Computes the coefficients for the FFT decoding for CoeffDecodingCollapse such that every
+ * Computes the coefficients for the FFT decoding for coeff_decoding_collapse such that every
  * iteration occupies one level.
  *
  * @param pows vector of roots of unity powers.
- * @param rotGroup rotation group indices to appropriately choose the elements of pows to compute iFFT.
+ * @param rot_group rotation group indices to appropriately choose the elements of pows to compute iFFT.
  * @param flag_i flag that is 0 when we compute the coefficients for U_0 and is 1 for i*U_0.
  * @return the coefficients of each layer of the FFT (one vector per layer)
  */
-std::vector<std::vector<std::complex<double>>> CoeffDecodingOneLevel(const std::vector<std::complex<double>>& pows,
-                                                                     const std::vector<uint32_t>& rotGroup,
+std::vector<std::vector<std::complex<double>>> coeff_decoding_one_level(const std::vector<std::complex<double>>& pows,
+                                                                     const std::vector<uint32_t>& rot_group,
                                                                      bool flag_i);
 
 /**
@@ -309,13 +309,13 @@ std::vector<std::vector<std::complex<double>>> CoeffDecodingOneLevel(const std::
  * EvalLTFFTPrecomputeEncoding.
  *
  * @param pows vector of roots of unity powers.
- * @param rotGroup rotation group indices to appropriately choose the elements of pows to compute iFFT.
- * @param levelBudget the user specified budget for levels.
+ * @param rot_group rotation group indices to appropriately choose the elements of pows to compute iFFT.
+ * @param level_budget the user specified budget for levels.
  * @param flag_i flag that is 0 when we compute the coefficients for conj(U_0^T) and is 1 for conj(i*U_0^T).
  * @return the coefficients of each level of the collapsed iFFT (one vector of diagonals per level)
  */
-std::vector<std::vector<std::vector<std::complex<double>>>> CoeffEncodingCollapse(
-        const std::vector<std::complex<double>>& pows, const std::vector<uint32_t>& rotGroup, uint32_t levelBudget,
+std::vector<std::vector<std::vector<std::complex<double>>>> coeff_encoding_collapse(
+        const std::vector<std::complex<double>>& pows, const std::vector<uint32_t>& rot_group, uint32_t level_budget,
         bool flag_i);
 
 /**
@@ -323,13 +323,13 @@ std::vector<std::vector<std::vector<std::complex<double>>>> CoeffEncodingCollaps
  * EvalLTFFTPrecomputeDecoding.
  *
  * @param pows vector of roots of unity powers.
- * @param rotGroup rotation group indices to appropriately choose the elements of pows to compute FFT.
- * @param levelBudget the user specified budget for levels.
+ * @param rot_group rotation group indices to appropriately choose the elements of pows to compute FFT.
+ * @param level_budget the user specified budget for levels.
  * @param flag_i flag that is 0 when we compute the coefficients for U_0 and is 1 for i*U_0.
  * @return the coefficients of each level of the collapsed FFT (one vector of diagonals per level)
  */
-std::vector<std::vector<std::vector<std::complex<double>>>> CoeffDecodingCollapse(
-        const std::vector<std::complex<double>>& pows, const std::vector<uint32_t>& rotGroup, uint32_t levelBudget,
+std::vector<std::vector<std::vector<std::complex<double>>>> coeff_decoding_collapse(
+        const std::vector<std::complex<double>>& pows, const std::vector<uint32_t>& rot_group, uint32_t level_budget,
         bool flag_i);
 
 /**
@@ -339,21 +339,21 @@ std::vector<std::vector<std::vector<std::complex<double>>>> CoeffDecodingCollaps
  * @param slots number of slots and size of vector that is rotated.
  * @return the equivalent non-negative rotation index modulo slots
  */
-uint32_t ReduceRotation(int32_t index, uint32_t slots);
+uint32_t reduce_rotation(int32_t index, uint32_t slots);
 
 /**
  * @brief Parameters of the homomorphic encoding or decoding (FFT-like linear transform) in bootstrapping.
  */
 struct ckks_boot_params {
     uint32_t lvlb;             ///< level budget
-    uint32_t layersCollapse;   ///< layers to collapse in one level
-    uint32_t remCollapse;      ///< remaining layers to collapse
-    uint32_t numRotations;     ///< number of rotations in one level
+    uint32_t layers_collapse;   ///< layers to collapse in one level
+    uint32_t rem_collapse;      ///< remaining layers to collapse
+    uint32_t num_rotations;     ///< number of rotations in one level
     uint32_t b;                ///< baby step in the baby-step giant-step strategy
     uint32_t g;                ///< giant step in the baby-step giant-step strategy
-    uint32_t numRotationsRem;  ///< number of rotations in the remaining level
-    uint32_t bRem;             ///< baby step in the baby-step giant-step strategy for the remaining level
-    uint32_t gRem;             ///< giant step in the baby-step giant-step strategy for the remaining level
+    uint32_t num_rotations_rem;  ///< number of rotations in the remaining level
+    uint32_t b_rem;             ///< baby step in the baby-step giant-step strategy for the remaining level
+    uint32_t g_rem;             ///< giant step in the baby-step giant-step strategy for the remaining level
 };
 
 /**
@@ -362,11 +362,11 @@ struct ckks_boot_params {
  * last level takes the remainder), the number of rotations per level, and the baby and giant steps.
  *
  * @param slots number of slots
- * @param levelBudget the allocated level budget for the computation.
+ * @param level_budget the allocated level budget for the computation.
  * @param dim1 the value for the inner dimension in the baby-step giant-step strategy (0 = chosen automatically)
  * @return struct with parameters for the homomorphic encoding and decoding in bootstrapping
  */
-struct ckks_boot_params GetCollapsedFFTParams(uint32_t slots, uint32_t levelBudget = 4, uint32_t dim1 = 0);
+struct ckks_boot_params get_collapsed_fft_params(uint32_t slots, uint32_t level_budget = 4, uint32_t dim1 = 0);
 
 /**
  *  Gets inner loop dimension for baby step giant step algorithm for linear transform,
@@ -374,28 +374,28 @@ struct ckks_boot_params GetCollapsedFFTParams(uint32_t slots, uint32_t levelBudg
  * @param slots number of slots.
  * @return the value for the inner dimension in the baby-step giant-step strategy
  */
-uint32_t getRatioBSGSLT(uint32_t slots);
+uint32_t get_ratio_bsgslt(uint32_t slots);
 
 /**
  * Assembles a list of rotation indices necessary to perform the
  * linear transform in scheme switching (needs to be ran once to each LT).
  * @param dim1 baby-step dimension
  * @param m cyclotomic order
- * @param blockDimension dimension related to the linear transform computation matrix
+ * @param block_dimension dimension related to the linear transform computation matrix
  * @return vector of rotation indices necessary
  */
-std::vector<int32_t> FindLTRotationIndicesSwitch(uint32_t dim1, uint32_t m, uint32_t blockDimension);
+std::vector<int32_t> find_lt_rotation_indices_switch(uint32_t dim1, uint32_t m, uint32_t block_dimension);
 
 /**
  * Assembles a list of rotation indices necessary to perform all the
  * linear transforms in argmin.
  * @param m cyclotomic order
- * @param blockDimension dimension related to the linear transform computation matrix
+ * @param block_dimension dimension related to the linear transform computation matrix
  * @param cols dimension of columns of the linear transform
  * @return vector of rotation indices necessary
  */
-std::vector<int32_t> FindLTRotationIndicesSwitchArgmin(uint32_t m, uint32_t blockDimension, uint32_t cols);
+std::vector<int32_t> find_lt_rotation_indices_switch_argmin(uint32_t m, uint32_t block_dimension, uint32_t cols);
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_CKKS_UTILS_H_

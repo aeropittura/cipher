@@ -47,60 +47,60 @@ BFV implementation. See https://eprint.iacr.org/2021/204 for details.
 #include "cipher/fhe/bfv/crypto_params.h"
 #include "cipher/fhe/config/scheme_utils.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-bool ParameterGenerationBFVRNS::ParamsGenBFVRNSInternal(std::shared_ptr<CryptoParametersBase<DCRTPoly>> cryptoParams,
-                                                        uint32_t evalAddCount, uint32_t multiplicativeDepth,
-                                                        uint32_t keySwitchCount, size_t dcrtBits, uint32_t nCustom,
-                                                        uint32_t numDigits) const {
-    if (!cryptoParams)
-        OPENFHE_THROW("No crypto parameters are supplied to BFVrns ParamsGen");
+bool BfvRnsParamGen::params_gen_bfvrns_internal(std::shared_ptr<BaseCryptoParams<RnsPoly>> crypto_params,
+                                                        uint32_t eval_add_count, uint32_t multiplicative_depth,
+                                                        uint32_t key_switch_count, size_t dcrt_bits, uint32_t n_custom,
+                                                        uint32_t num_digits) const {
+    if (!crypto_params)
+        CIPHER_THROW("No crypto parameters are supplied to BFVrns ParamsGen");
 
-    if ((dcrtBits < DCRT_MODULUS::MIN_SIZE) || (dcrtBits > DCRT_MODULUS::MAX_SIZE)) {
-        OPENFHE_THROW("Number of bits in CRT moduli should be in the range from " +
+    if ((dcrt_bits < DCRT_MODULUS::MIN_SIZE) || (dcrt_bits > DCRT_MODULUS::MAX_SIZE)) {
+        CIPHER_THROW("Number of bits in CRT moduli should be in the range from " +
                       std::to_string(DCRT_MODULUS::MIN_SIZE) + " to " + std::to_string(DCRT_MODULUS::MAX_SIZE));
     }
 
-    const auto cryptoParamsBFVRNS = std::dynamic_pointer_cast<CryptoParametersBFVRNS>(cryptoParams);
+    const auto crypto_params_bfvrns = std::dynamic_pointer_cast<BfvRnsCryptoParams>(crypto_params);
 
-    KeySwitchTechnique ksTech = cryptoParamsBFVRNS->GetKeySwitchTechnique();
-    ScalingTechnique scalTech = cryptoParamsBFVRNS->GetScalingTechnique();
-    EncryptionTechnique encTech = cryptoParamsBFVRNS->GetEncryptionTechnique();
-    MultiplicationTechnique multTech = cryptoParamsBFVRNS->GetMultiplicationTechnique();
-    ProxyReEncryptionMode PREMode = cryptoParamsBFVRNS->GetPREMode();
-    MultipartyMode multipartyMode = cryptoParamsBFVRNS->GetMultipartyMode();
+    KeySwitchTechnique ks_tech = crypto_params_bfvrns->get_key_switch_technique();
+    ScalingTechnique scal_tech = crypto_params_bfvrns->get_scaling_technique();
+    EncryptionTechnique enc_tech = crypto_params_bfvrns->get_encryption_technique();
+    MultiplicationTechnique mult_tech = crypto_params_bfvrns->get_multiplication_technique();
+    ProxyReEncryptionMode pre_mode = crypto_params_bfvrns->get_pre_mode();
+    MultipartyMode multiparty_mode = crypto_params_bfvrns->get_multiparty_mode();
 
-    if ((PREMode != INDCPA) && (PREMode != NOT_SET)) {
+    if ((pre_mode != INDCPA) && (pre_mode != NOT_SET)) {
         std::stringstream s;
-        s << "This PRE mode " << PREMode << " is not supported for BFVRNS";
-        OPENFHE_THROW(s.str());
+        s << "This PRE mode " << pre_mode << " is not supported for BFVRNS";
+        CIPHER_THROW(s.str());
     }
 
-    double sigma = cryptoParamsBFVRNS->GetDistributionParameter();
-    double alpha = cryptoParamsBFVRNS->GetAssuranceMeasure();
-    double p = static_cast<double>(cryptoParamsBFVRNS->GetPlaintextModulus());
-    uint32_t digitSize = cryptoParamsBFVRNS->GetDigitSize();
-    SecurityLevel stdLevel = cryptoParamsBFVRNS->GetStdLevel();
-    uint32_t auxBits = DCRT_MODULUS::MAX_SIZE;
+    double sigma = crypto_params_bfvrns->get_distribution_parameter();
+    double alpha = crypto_params_bfvrns->get_assurance_measure();
+    double p = static_cast<double>(crypto_params_bfvrns->get_plaintext_modulus());
+    uint32_t digit_size = crypto_params_bfvrns->get_digit_size();
+    SecurityLevel std_level = crypto_params_bfvrns->get_std_level();
+    uint32_t aux_bits = DCRT_MODULUS::MAX_SIZE;
 
     // Bound of the Gaussian error polynomial
-    double Berr = sigma * std::sqrt(alpha);
+    double berr = sigma * std::sqrt(alpha);
 
     // Bound of the key polynomial
-    double Bkey = 0;
+    double bkey = 0;
 
-    DistributionType distType;
+    DistributionType dist_type;
 
-    uint32_t thresholdParties = cryptoParamsBFVRNS->GetThresholdNumOfParties();
+    uint32_t threshold_parties = crypto_params_bfvrns->get_threshold_num_of_parties();
     // supports both discrete Gaussian (GAUSSIAN) and ternary uniform distribution
     // (UNIFORM_TERNARY) cases
-    if (cryptoParamsBFVRNS->GetSecretKeyDist() == GAUSSIAN) {
-        Bkey = std::sqrt(thresholdParties) * Berr;
-        distType = HEStd_error;
+    if (crypto_params_bfvrns->get_secret_key_dist() == GAUSSIAN) {
+        bkey = std::sqrt(threshold_parties) * berr;
+        dist_type = HEStd_error;
     } else {
-        // Bkey set to thresholdParties * 1 for ternary distribution
-        Bkey = thresholdParties;
-        distType = HEStd_ternary;
+        // Bkey set to threshold_parties * 1 for ternary distribution
+        bkey = threshold_parties;
+        dist_type = HEStd_ternary;
     }
 
     // expansion factor delta for a multiplication of a Gaussian polynomial by a random polynomial
@@ -109,302 +109,302 @@ bool ParameterGenerationBFVRNS::ParamsGenBFVRNSInternal(std::shared_ptr<CryptoPa
     };
 
     // expansion factor delta for modulus switching
-    auto deltaMS = [](uint32_t n) -> double {
+    auto delta_ms = [](uint32_t n) -> double {
         return (4. * std::sqrt(n));
     };
 
     // norm of fresh ciphertext polynomial (for EXTENDED the noise is reduced to modulus switching noise)
-    auto Vnorm = [&](uint32_t n) -> double {
-        if (encTech == EXTENDED)
-            return (1. + deltaMS(n) * Bkey) / 2.;
+    auto vnorm = [&](uint32_t n) -> double {
+        if (enc_tech == EXTENDED)
+            return (1. + delta_ms(n) * bkey) / 2.;
         else
-            return Berr * (1. + 2. * delta(n) * Bkey);
+            return berr * (1. + 2. * delta(n) * bkey);
     };
 
     // GAUSSIAN security constraint
-    auto nRLWE = [&](double logq) -> double {
-        if (stdLevel == HEStd_NotSet) {
+    auto n_rlwe = [&](double logq) -> double {
+        if (std_level == HEStd_NotSet) {
             return 0;
         } else {
             // takes into account the noise added during the threshold FHE instantiation of BFV
-            if (multipartyMode == NOISE_FLOODING_MULTIPARTY)
-                logq += cryptoParamsBFVRNS->EstimateMultipartyFloodingLogQ();
+            if (multiparty_mode == NOISE_FLOODING_MULTIPARTY)
+                logq += crypto_params_bfvrns->estimate_multiparty_flooding_log_q();
             // adds logP in the case of HYBRID key switching
-            if (ksTech == HYBRID) {
+            if (ks_tech == HYBRID) {
                 // number of RNS limbs
-                uint32_t k = static_cast<uint32_t>(std::ceil(std::ceil(logq) / dcrtBits));
+                uint32_t k = static_cast<uint32_t>(std::ceil(std::ceil(logq) / dcrt_bits));
                 // set the number of digits
-                uint32_t numPartQ = ComputeNumLargeDigits(numDigits, k - 1);
-                auto hybridKSInfo =
-                        CryptoParametersRNS::EstimateLogP(numPartQ, dcrtBits, dcrtBits, 0, k, auxBits, scalTech);
-                logq += std::get<0>(hybridKSInfo);
+                uint32_t num_part_q = compute_num_large_digits(num_digits, k - 1);
+                auto hybrid_ks_info =
+                        RnsCryptoParams::estimate_log_p(num_part_q, dcrt_bits, dcrt_bits, 0, k, aux_bits, scal_tech);
+                logq += std::get<0>(hybrid_ks_info);
             }
             return static_cast<double>(
-                    StdLatticeParm::FindRingDim(distType, stdLevel, static_cast<uint32_t>(std::ceil(logq))));
+                    StdLatticeParm::find_ring_dim(dist_type, std_level, static_cast<uint32_t>(std::ceil(logq))));
         }
     };
 
-    auto noiseKS = [&](uint32_t n, double logqPrev, double w, bool mult) -> double {
-        if (ksTech == HYBRID) {
+    auto noise_ks = [&](uint32_t n, double logq_prev, double w, bool mult_value) -> double {
+        if (ks_tech == HYBRID) {
             // conservative estimate for HYBRID to avoid the use of method of
             // iterative approximations; we do not know the number
             // of digits and moduli at this point and use upper bounds
-            double numTowers = std::ceil(logqPrev / dcrtBits);
-#if defined(WITH_REDUCED_NOISE)
-            return numTowers * (delta(n) * Berr + deltaMS(n) * Bkey + 1.0) / 2.0;
+            double num_towers = std::ceil(logq_prev / dcrt_bits);
+#if defined(CIPHER_WITH_REDUCED_NOISE)
+            return num_towers * (delta(n) * berr + delta_ms(n) * bkey + 1.0) / 2.0;
 #else
-            return numTowers * (delta(n) * Berr + deltaMS(n) * Bkey + 1.0);
+            return num_towers * (delta(n) * berr + delta_ms(n) * bkey + 1.0);
 #endif
         } else {
-            double numDigitsPerTower = (digitSize == 0) ? 1 : ((dcrtBits / digitSize) + 1);
-            return delta(n) * numDigitsPerTower * (std::floor(logqPrev / (dcrtBits)) + 1) * w * Berr / 2.0;
+            double num_digits_per_tower = (digit_size == 0) ? 1 : ((dcrt_bits / digit_size) + 1);
+            return delta(n) * num_digits_per_tower * (std::floor(logq_prev / (dcrt_bits)) + 1) * w * berr / 2.0;
         }
     };
 
     // initial values
-    uint32_t n = (nCustom != 0) ? nCustom : 512;
+    uint32_t n = (n_custom != 0) ? n_custom : 512;
 
     double logq = 0.;
 
-    // only public key encryption and EvalAdd (optional when evalAddCount = 0)
+    // only public key encryption and eval_add (optional when eval_add_count = 0)
     // operations are supported the correctness constraint from section 3.5 of
     // https://eprint.iacr.org/2014/062.pdf is used
     // optimization (noise reduction) from Section 3.1 of https://eprint.iacr.org/2021/204.pdf
     // is also applied
-    if ((multiplicativeDepth == 0) && (keySwitchCount == 0)) {
+    if ((multiplicative_depth == 0) && (key_switch_count == 0)) {
         // Correctness constraint
-        auto logqBFV = [&](uint32_t n) -> double {
-            return std::log2(p * (4 * ((evalAddCount + 1) * Vnorm(n) + evalAddCount) + p));
+        auto logq_bfv = [&](uint32_t n) -> double {
+            return std::log2(p * (4 * ((eval_add_count + 1) * vnorm(n) + eval_add_count) + p));
         };
 
         // initial value
-        logq = logqBFV(n);
+        logq = logq_bfv(n);
 
-        while (nRLWE(logq) > n) {
+        while (n_rlwe(logq) > n) {
             n = 2 * n;
-            logq = logqBFV(n);
+            logq = logq_bfv(n);
         }
 
         // this code updates n and q to account for the discrete size of CRT moduli
-        // = dcrtBits
-        int32_t k = static_cast<int32_t>(std::ceil(std::ceil(logq) / dcrtBits));
+        // = dcrt_bits
+        int32_t k = static_cast<int32_t>(std::ceil(std::ceil(logq) / dcrt_bits));
 
-        double logqCeil = k * dcrtBits;
+        double logq_ceil = k * dcrt_bits;
 
-        while (nRLWE(logqCeil) > n) {
+        while (n_rlwe(logq_ceil) > n) {
             n = 2 * n;
-            logq = logqBFV(n);
-            k = static_cast<int32_t>(std::ceil(std::ceil(logq) / dcrtBits));
-            logqCeil = k * dcrtBits;
+            logq = logq_bfv(n);
+            k = static_cast<int32_t>(std::ceil(std::ceil(logq) / dcrt_bits));
+            logq_ceil = k * dcrt_bits;
         }
-    } else if ((multiplicativeDepth == 0) && (keySwitchCount > 0) && (evalAddCount == 0)) {
+    } else if ((multiplicative_depth == 0) && (key_switch_count > 0) && (eval_add_count == 0)) {
         // this case supports automorphism w/o any other operations
         // base for relinearization
 
-        double w = std::pow(2, (digitSize == 0 ? dcrtBits : digitSize));
+        double w = std::pow(2, (digit_size == 0 ? dcrt_bits : digit_size));
 
         // Correctness constraint
-        auto logqBFV = [&](uint32_t n, double logqPrev) -> double {
-            return std::log2(p * (4 * (Vnorm(n) + keySwitchCount * noiseKS(n, logqPrev, w, false)) + p));
+        auto logq_bfv = [&](uint32_t n, double logq_prev) -> double {
+            return std::log2(p * (4 * (vnorm(n) + key_switch_count * noise_ks(n, logq_prev, w, false)) + p));
         };
 
         // initial values
-        double logqPrev = 6. * std::log2(10);
-        logq = logqBFV(n, logqPrev);
-        logqPrev = logq;
+        double logq_prev = 6. * std::log2(10);
+        logq = logq_bfv(n, logq_prev);
+        logq_prev = logq;
 
         // increases n up to the level where desired security level is achieved
-        while (nRLWE(logq) > n) {
+        while (n_rlwe(logq) > n) {
             n = 2 * n;
-            logq = logqBFV(n, logqPrev);
-            logqPrev = logq;
+            logq = logq_bfv(n, logq_prev);
+            logq_prev = logq;
         }
 
-        logq = logqBFV(n, logqPrev);
+        logq = logq_bfv(n, logq_prev);
 
         // let logq converge with prescribed accuracy
-        while (std::fabs(logq - logqPrev) > std::log2(1.001)) {
-            logqPrev = logq;
-            logq = logqBFV(n, logqPrev);
+        while (std::fabs(logq - logq_prev) > std::log2(1.001)) {
+            logq_prev = logq;
+            logq = logq_bfv(n, logq_prev);
         }
 
         // this code updates n and q to account for the discrete size of CRT
-        // moduli = dcrtBits
-        int32_t k = static_cast<int32_t>(std::ceil(std::ceil(logq) / dcrtBits));
+        // moduli = dcrt_bits
+        int32_t k = static_cast<int32_t>(std::ceil(std::ceil(logq) / dcrt_bits));
 
-        double logqCeil = k * dcrtBits;
-        logqPrev = logqCeil;
+        double logq_ceil = k * dcrt_bits;
+        logq_prev = logq_ceil;
 
-        while (nRLWE(logqCeil) > n) {
+        while (n_rlwe(logq_ceil) > n) {
             n = 2 * n;
-            logq = logqBFV(n, logqPrev);
-            k = static_cast<int32_t>(std::ceil(std::ceil(logq) / dcrtBits));
-            logqCeil = k * dcrtBits;
-            logqPrev = logqCeil;
+            logq = logq_bfv(n, logq_prev);
+            k = static_cast<int32_t>(std::ceil(std::ceil(logq) / dcrt_bits));
+            logq_ceil = k * dcrt_bits;
+            logq_prev = logq_ceil;
         }
-    } else if ((evalAddCount == 0) && (multiplicativeDepth > 0) && (keySwitchCount == 0)) {
-        // Only EvalMult operations are used in the correctness constraint
+    } else if ((eval_add_count == 0) && (multiplicative_depth > 0) && (key_switch_count == 0)) {
+        // Only eval_mult operations are used in the correctness constraint
         // the correctness constraint from Section 3.1 of https://eprint.iacr.org/2021/204.pdf
         // is used
 
         // base for relinearization
-        double w = std::pow(2, (digitSize == 0 ? dcrtBits : digitSize));
+        double w = std::pow(2, (digit_size == 0 ? dcrt_bits : digit_size));
 
-        // function used in the EvalMult constraint
+        // function used in the eval_mult constraint
         auto C1 = [&](uint32_t n) -> double {
-            return delta(n) * deltaMS(n) * p * Bkey;
+            return delta(n) * delta_ms(n) * p * bkey;
         };
 
-        // function used in the EvalMult constraint
-        auto C2 = [&](uint32_t n, double logqPrev) -> double {
-            return delta(n) * deltaMS(n) * Bkey * Bkey / 2.0 + noiseKS(n, logqPrev, w, true);
+        // function used in the eval_mult constraint
+        auto C2 = [&](uint32_t n, double logq_prev) -> double {
+            return delta(n) * delta_ms(n) * bkey * bkey / 2.0 + noise_ks(n, logq_prev, w, true);
         };
 
         // main correctness constraint
-        auto logqBFV = [&](uint32_t n, double logqPrev) -> double {
-            return std::log2(4 * p) + (multiplicativeDepth - 1) * std::log2(C1(n)) +
-                   std::log2(C1(n) * Vnorm(n) + multiplicativeDepth * C2(n, logqPrev));
+        auto logq_bfv = [&](uint32_t n, double logq_prev) -> double {
+            return std::log2(4 * p) + (multiplicative_depth - 1) * std::log2(C1(n)) +
+                   std::log2(C1(n) * vnorm(n) + multiplicative_depth * C2(n, logq_prev));
         };
 
         // initial values
-        double logqPrev = 6. * std::log2(10);
-        logq = logqBFV(n, logqPrev);
-        logqPrev = logq;
+        double logq_prev = 6. * std::log2(10);
+        logq = logq_bfv(n, logq_prev);
+        logq_prev = logq;
 
         // increases n up to the level where desired security level is achieved
-        while (nRLWE(logq) > n) {
+        while (n_rlwe(logq) > n) {
             n = 2 * n;
-            logq = logqBFV(n, logqPrev);
-            logqPrev = logq;
+            logq = logq_bfv(n, logq_prev);
+            logq_prev = logq;
         }
 
-        logq = logqBFV(n, logqPrev);
+        logq = logq_bfv(n, logq_prev);
 
         // let logq converge with prescribed accuracy
-        while (std::fabs(logq - logqPrev) > std::log2(1.001)) {
-            logqPrev = logq;
-            logq = logqBFV(n, logqPrev);
+        while (std::fabs(logq - logq_prev) > std::log2(1.001)) {
+            logq_prev = logq;
+            logq = logq_bfv(n, logq_prev);
         }
 
         // this code updates n and q to account for the discrete size of CRT
-        // moduli = dcrtBits
+        // moduli = dcrt_bits
 
-        int32_t k = static_cast<int32_t>(std::ceil(std::ceil(logq) / dcrtBits));
+        int32_t k = static_cast<int32_t>(std::ceil(std::ceil(logq) / dcrt_bits));
 
-        double logqCeil = k * dcrtBits;
-        logqPrev = logqCeil;
+        double logq_ceil = k * dcrt_bits;
+        logq_prev = logq_ceil;
 
-        while (nRLWE(logqCeil) > n) {
+        while (n_rlwe(logq_ceil) > n) {
             n = 2 * n;
-            logq = logqBFV(n, logqPrev);
-            k = static_cast<int32_t>(std::ceil(std::ceil(logq) / dcrtBits));
-            logqCeil = k * dcrtBits;
-            logqPrev = logqCeil;
+            logq = logq_bfv(n, logq_prev);
+            k = static_cast<int32_t>(std::ceil(std::ceil(logq) / dcrt_bits));
+            logq_ceil = k * dcrt_bits;
+            logq_prev = logq_ceil;
         }
-    } else if ((multiplicativeDepth && (evalAddCount || keySwitchCount)) || (evalAddCount && keySwitchCount)) {
+    } else if ((multiplicative_depth && (eval_add_count || key_switch_count)) || (eval_add_count && key_switch_count)) {
         // throw an exception if at least 2 variables are not zero
-        std::string errMsg("multiplicativeDepth, evalAddCount and keySwitchCount are incorrectly set to [ ");
-        errMsg += std::to_string(multiplicativeDepth) + ", ";
-        errMsg += std::to_string(evalAddCount) + ", ";
-        errMsg += std::to_string(keySwitchCount) + " ]. Only one of them can be non-zero.";
+        std::string err_msg("multiplicativeDepth, evalAddCount and keySwitchCount are incorrectly set to [ ");
+        err_msg += std::to_string(multiplicative_depth) + ", ";
+        err_msg += std::to_string(eval_add_count) + ", ";
+        err_msg += std::to_string(key_switch_count) + " ]. Only one of them can be non-zero.";
 
-        OPENFHE_THROW(errMsg);
+        CIPHER_THROW(err_msg);
     }
 
-    if ((n > nCustom) && (nCustom != 0))
-        OPENFHE_THROW("Ring dimension " + std::to_string(nCustom) +
+    if ((n > n_custom) && (n_custom != 0))
+        CIPHER_THROW("Ring dimension " + std::to_string(n_custom) +
                       " specified by the user does not meet the "
                       "security requirement. Please increase it to " +
                       std::to_string(n) + ".");
 
-    const size_t numInitialModuli = static_cast<size_t>(std::ceil(std::ceil(logq) / dcrtBits));
-    if (numInitialModuli < 1)
-        OPENFHE_THROW("numInitialModuli must be greater than 0.");
-    const size_t sizeQ = multipartyMode == NOISE_FLOODING_MULTIPARTY ?
-                                 numInitialModuli + NoiseFlooding::NUM_MODULI_MULTIPARTY :
-                                 numInitialModuli;
+    const size_t num_initial_moduli = static_cast<size_t>(std::ceil(std::ceil(logq) / dcrt_bits));
+    if (num_initial_moduli < 1)
+        CIPHER_THROW("numInitialModuli must be greater than 0.");
+    const size_t size_q = multiparty_mode == NOISE_FLOODING_MULTIPARTY ?
+                                 num_initial_moduli + NoiseFlooding::NUM_MODULI_MULTIPARTY :
+                                 num_initial_moduli;
 
-    std::vector<NativeInteger> moduliQ(sizeQ);
-    std::vector<NativeInteger> rootsQ(sizeQ);
+    std::vector<NativeInteger> moduli_q(size_q);
+    std::vector<NativeInteger> roots_q(size_q);
 
     // makes sure the first integer is less than 2^60-1
-    moduliQ[0] = LastPrime<NativeInteger>(dcrtBits, 2 * n);
-    rootsQ[0] = RootOfUnity<NativeInteger>(2 * n, moduliQ[0]);
-    NativeInteger lastModulus = moduliQ[0];
+    moduli_q[0] = last_prime<NativeInteger>(dcrt_bits, 2 * n);
+    roots_q[0] = root_of_unity<NativeInteger>(2 * n, moduli_q[0]);
+    NativeInteger last_modulus = moduli_q[0];
 
-    if (multipartyMode == NOISE_FLOODING_MULTIPARTY) {
-        moduliQ[1] = LastPrime<NativeInteger>(NoiseFlooding::MULTIPARTY_MOD_SIZE, 2 * n);
-        if (moduliQ[1] == lastModulus) {
-            moduliQ[1] = PreviousPrime<NativeInteger>(moduliQ[1], 2 * n);
-            lastModulus = moduliQ[1];
+    if (multiparty_mode == NOISE_FLOODING_MULTIPARTY) {
+        moduli_q[1] = last_prime<NativeInteger>(NoiseFlooding::MULTIPARTY_MOD_SIZE, 2 * n);
+        if (moduli_q[1] == last_modulus) {
+            moduli_q[1] = previous_prime<NativeInteger>(moduli_q[1], 2 * n);
+            last_modulus = moduli_q[1];
         }
-        rootsQ[1] = RootOfUnity<NativeInteger>(2 * n, moduliQ[1]);
+        roots_q[1] = root_of_unity<NativeInteger>(2 * n, moduli_q[1]);
 
         for (size_t i = 2; i < 1 + NoiseFlooding::NUM_MODULI_MULTIPARTY; i++) {
-            moduliQ[i] = PreviousPrime<NativeInteger>(moduliQ[i - 1], 2 * n);
-            rootsQ[i] = RootOfUnity<NativeInteger>(2 * n, moduliQ[i]);
-            if (lastModulus != moduliQ[0])
-                lastModulus = moduliQ[i];
+            moduli_q[i] = previous_prime<NativeInteger>(moduli_q[i - 1], 2 * n);
+            roots_q[i] = root_of_unity<NativeInteger>(2 * n, moduli_q[i]);
+            if (last_modulus != moduli_q[0])
+                last_modulus = moduli_q[i];
         }
     }
 
-    size_t index = 1 + (sizeQ - numInitialModuli);
-    if (index < sizeQ) {
-        moduliQ[index] = PreviousPrime<NativeInteger>(lastModulus, 2 * n);
-        rootsQ[index] = RootOfUnity<NativeInteger>(2 * n, moduliQ[index]);
-        for (size_t i = index + 1; i < sizeQ; i++) {
-            moduliQ[i] = PreviousPrime<NativeInteger>(moduliQ[i - 1], 2 * n);
-            rootsQ[i] = RootOfUnity<NativeInteger>(2 * n, moduliQ[i]);
+    size_t index = 1 + (size_q - num_initial_moduli);
+    if (index < size_q) {
+        moduli_q[index] = previous_prime<NativeInteger>(last_modulus, 2 * n);
+        roots_q[index] = root_of_unity<NativeInteger>(2 * n, moduli_q[index]);
+        for (size_t i = index + 1; i < size_q; i++) {
+            moduli_q[i] = previous_prime<NativeInteger>(moduli_q[i - 1], 2 * n);
+            roots_q[i] = root_of_unity<NativeInteger>(2 * n, moduli_q[i]);
         }
     }
 
-    auto params = std::make_shared<ILDCRTParams<BigInteger>>(2 * n, moduliQ, rootsQ);
+    auto params = std::make_shared<RnsParams<BigInteger>>(2 * n, moduli_q, roots_q);
 
-    ChineseRemainderTransformFTT<NativeVector>().PreCompute(rootsQ, 2 * n, moduliQ);
+    ChineseRemainderTransformFtt<NativeVector>().pre_compute(roots_q, 2 * n, moduli_q);
 
-    cryptoParamsBFVRNS->SetElementParams(params);
+    crypto_params_bfvrns->set_element_params(params);
 
-    const EncodingParams encodingParams = cryptoParamsBFVRNS->GetEncodingParams();
-    if (encodingParams->GetBatchSize() > n)
-        OPENFHE_THROW("The batch size cannot be larger than the ring dimension.");
+    const EncodingParams encoding_params = crypto_params_bfvrns->get_encoding_params();
+    if (encoding_params->get_batch_size() > n)
+        CIPHER_THROW("The batch size cannot be larger than the ring dimension.");
 
-    if (encodingParams->GetBatchSize() & (encodingParams->GetBatchSize() - 1))
-        OPENFHE_THROW("The batch size can only be set to zero (for full packing) or a power of two.");
+    if (encoding_params->get_batch_size() & (encoding_params->get_batch_size() - 1))
+        CIPHER_THROW("The batch size can only be set to zero (for full packing) or a power of two.");
 
-    // if no batch size was specified, we set batchSize = n by default (for full
+    // if no batch size was specified, we set batch_size = n by default (for full
     // packing)
-    if (encodingParams->GetBatchSize() == 0) {
-        uint32_t batchSize = n;
-        EncodingParams encodingParamsNew(
-                std::make_shared<EncodingParamsImpl>(encodingParams->GetPlaintextModulus(), batchSize));
-        cryptoParamsBFVRNS->SetEncodingParams(encodingParamsNew);
+    if (encoding_params->get_batch_size() == 0) {
+        uint32_t batch_size = n;
+        EncodingParams encoding_params_new(
+                std::make_shared<EncodingParamsImpl>(encoding_params->get_plaintext_modulus(), batch_size));
+        crypto_params_bfvrns->set_encoding_params(encoding_params_new);
     }
 
-    uint32_t numPartQ = ComputeNumLargeDigits(numDigits, sizeQ - 1);
+    uint32_t num_part_q = compute_num_large_digits(num_digits, size_q - 1);
 
-    cryptoParamsBFVRNS->PrecomputeCRTTables(ksTech, scalTech, encTech, multTech, numPartQ, auxBits, 0);
+    crypto_params_bfvrns->precompute_crt_tables(ks_tech, scal_tech, enc_tech, mult_tech, num_part_q, aux_bits, 0);
 
-    // Validate the ring dimension found using estimated logQ(P) against actual logQ(P)
-    if (stdLevel != HEStd_NotSet) {
-        uint32_t logActualQ = 0;
-        if (ksTech == HYBRID) {
-            logActualQ = cryptoParamsBFVRNS->GetParamsQP()->GetModulus().GetMSB();
+    // Validate the ring dimension found using estimated log_q(P) against actual log_q(P)
+    if (std_level != HEStd_NotSet) {
+        uint32_t log_actual_q = 0;
+        if (ks_tech == HYBRID) {
+            log_actual_q = crypto_params_bfvrns->get_params_qp()->get_modulus().get_msb();
         } else {
-            logActualQ = cryptoParamsBFVRNS->GetElementParams()->GetModulus().GetMSB();
+            log_actual_q = crypto_params_bfvrns->get_element_params()->get_modulus().get_msb();
         }
 
-        uint32_t nActual = StdLatticeParm::FindRingDim(distType, stdLevel, logActualQ);
-        if (n < nActual) {
-            std::string errMsg("The ring dimension found using estimated logQ(P) [");
-            errMsg += std::to_string(n) + "] does not meet security requirements. ";
-            errMsg += "Report this problem to OpenFHE developers and set the ring dimension manually to ";
-            errMsg += std::to_string(nActual) + ".";
+        uint32_t n_actual = StdLatticeParm::find_ring_dim(dist_type, std_level, log_actual_q);
+        if (n < n_actual) {
+            std::string err_msg("The ring dimension found using estimated logQ(P) [");
+            err_msg += std::to_string(n) + "] does not meet security requirements. ";
+            err_msg += "Report this problem to OpenFHE developers and set the ring dimension manually to ";
+            err_msg += std::to_string(n_actual) + ".";
 
-            OPENFHE_THROW(errMsg);
+            CIPHER_THROW(err_msg);
         }
     }
 
     return true;
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher

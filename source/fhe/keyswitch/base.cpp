@@ -39,16 +39,16 @@
 #include "cipher/fhe/key/eval_key.h"
 #include "cipher/ring/backend.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 template <typename Element>
-Ciphertext<Element> KeySwitchBase<Element>::KeySwitch(ConstCiphertext<Element> ciphertext,
-                                                      const EvalKey<Element> evalKey) const {
-    Ciphertext<Element> result = ciphertext->Clone();
-    KeySwitchInPlace(result, evalKey);
+Ciphertext<Element> KeySwitchBase<Element>::key_switch(ConstCiphertext<Element> ciphertext,
+                                                      const EvalKey<Element> eval_key) const {
+    Ciphertext<Element> result = ciphertext->clone();
+    key_switch_in_place(result, eval_key);
     return result;
 }
 
-template class KeySwitchBase<DCRTPoly>;
+template class KeySwitchBase<RnsPoly>;
 
-}  // namespace lbcrypto
+}  // namespace cipher

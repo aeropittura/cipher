@@ -38,14 +38,14 @@
 #include <functional>
 #include <vector>
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * Method for calculating the intermediate Hermite trigonometric interpolation
  * coefficients for an input function. These coefficents can be input into
- * EvalPoly over ciphertexts encrypting exp(2*Pi*x) to evaluate the function.
+ * eval_poly over ciphertexts encrypting exp(2*Pi*x) to evaluate the function.
  * The coefficients are divided by 2 to account for the fact that the real part
- * of the output of EvalPoly needs to be taken in order to get the Hermite
+ * of the output of eval_poly needs to be taken in order to get the Hermite
  * Trigonometric Interpolation result.
  *
  *
@@ -57,9 +57,9 @@ namespace lbcrypto {
  */
 
 // TODO: templatize this
-std::vector<std::complex<double>> GetHermiteTrigCoefficients(std::function<int64_t(int64_t)> func, uint32_t p,
+std::vector<std::complex<double>> get_hermite_trig_coefficients(std::function<int64_t(int64_t)> func, uint32_t p,
                                                              size_t order, double scale);
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_MATH_HERMITE_H_

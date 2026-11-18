@@ -47,11 +47,11 @@ Example for CKKS bootstrapping
 #include "cipher/cipher.h"
 
 using namespace std;
-using namespace lbcrypto;
+using namespace cipher;
 
-void BootstrapExample(SecretKeyDist secretKeyDist, uint32_t n, uint32_t slots, uint32_t levelsRemaining);
+void bootstrap_example(SecretKeyDist secret_key_dist, uint32_t n, uint32_t slots, uint32_t levels_remaining);
 // same example with verbose console output removed
-void BootstrapExampleClean(SecretKeyDist secretKeyDist, uint32_t n, uint32_t slots, uint32_t levelsRemaining);
+void bootstrap_example_clean(SecretKeyDist secret_key_dist, uint32_t n, uint32_t slots, uint32_t levels_remaining);
 
 int main(int argc, char* argv[]) {
     // MODE - secret key distribution
@@ -59,24 +59,24 @@ int main(int argc, char* argv[]) {
     // OPTIMIZED - uniform ternary secrets
 
     // low-security examples
-    // BootstrapExample(SPARSE_TERNARY, 1<<12, 1<<11, 10);
-    // BootstrapExample(SPARSE_TERNARY, 1<<12, 1<<10, 10);
-    BootstrapExample(UNIFORM_TERNARY, 1 << 12, 1 << 11, 10);
-    // BootstrapExample(UNIFORM_TERNARY, 1<<12, 1<<10, 10);
+    // bootstrap_example(SPARSE_TERNARY, 1<<12, 1<<11, 10);
+    // bootstrap_example(SPARSE_TERNARY, 1<<12, 1<<10, 10);
+    bootstrap_example(UNIFORM_TERNARY, 1 << 12, 1 << 11, 10);
+    // bootstrap_example(UNIFORM_TERNARY, 1<<12, 1<<10, 10);
 
-    // BootstrapExample(SPARSE_TERNARY, 1<<17, 1<<16, 10);
-    // BootstrapExample(SPARSE_TERNARY, 1<<17, 1<<15, 10);
-    // BootstrapExample(UNIFORM_TERNARY, 1<<17, 1<<16, 10);
-    // BootstrapExample(UNIFORM_TERNARY, 1<<17, 1<<15, 10);
+    // bootstrap_example(SPARSE_TERNARY, 1<<17, 1<<16, 10);
+    // bootstrap_example(SPARSE_TERNARY, 1<<17, 1<<15, 10);
+    // bootstrap_example(UNIFORM_TERNARY, 1<<17, 1<<16, 10);
+    // bootstrap_example(UNIFORM_TERNARY, 1<<17, 1<<15, 10);
 
     return 0;
 }
 
-void BootstrapExample(SecretKeyDist secretKeyDist, uint32_t n, uint32_t slots, uint32_t levelsRemaining) {
+void bootstrap_example(SecretKeyDist secret_key_dist, uint32_t n, uint32_t slots, uint32_t levels_remaining) {
     TimeVar t;
-    double timeKeyGen(0.0);
-    double timePrecomp(0.0);
-    double timeBootstrap(0.0);
+    double time_key_gen(0.0);
+    double time_precomp(0.0);
+    double time_bootstrap(0.0);
 
     // giant step for baby-step-giant-step algorithm in linear transforms for encoding and decoding, respectively
     // Choose this a power of 2 preferably, otherwise an exact divisor of the number of elements in the sum
@@ -85,80 +85,80 @@ void BootstrapExample(SecretKeyDist secretKeyDist, uint32_t n, uint32_t slots, u
     // budget in levels for FFT for encoding and decoding, respectively
     // Choose a number smaller than ceil(log2(slots))
 
-    std::vector<uint32_t> levelBudget1 = {4, 4};
-    std::vector<uint32_t> levelBudget2 = {2, 4};
-    std::vector<uint32_t> levelBudget3 = {3, 2};
-    std::vector<uint32_t> levelBudget4 = {1, 1};
-    std::vector<uint32_t> levelBudget5 = {1, 2};
-    std::vector<uint32_t> levelBudget6 = {3, 1};
+    std::vector<uint32_t> level_budget1 = {4, 4};
+    std::vector<uint32_t> level_budget2 = {2, 4};
+    std::vector<uint32_t> level_budget3 = {3, 2};
+    std::vector<uint32_t> level_budget4 = {1, 1};
+    std::vector<uint32_t> level_budget5 = {1, 2};
+    std::vector<uint32_t> level_budget6 = {3, 1};
 
-#if NATIVEINT == 128
-    ScalingTechnique rescaleTech = FIXEDMANUAL;
-    uint32_t dcrtBits = 78;
-    uint32_t firstMod = 89; /*firstMod*/
+#if CIPHER_NATIVE_INT == 128
+    ScalingTechnique rescale_tech = FIXEDMANUAL;
+    uint32_t dcrt_bits = 78;
+    uint32_t first_mod = 89; /*first_mod*/
 #else
-    ScalingTechnique rescaleTech = FLEXIBLEAUTO;
-    uint32_t dcrtBits = 59;
-    uint32_t firstMod = 60; /*firstMod*/
+    ScalingTechnique rescale_tech = FLEXIBLEAUTO;
+    uint32_t dcrt_bits = 59;
+    uint32_t first_mod = 60; /*first_mod*/
 #endif
 
     // computes how many levels are needed for
-    uint32_t depth = levelsRemaining + FHECKKSRNS::GetBootstrapDepth(9, levelBudget1, secretKeyDist);
+    uint32_t depth = levels_remaining + CkksRnsFhe::get_bootstrap_depth(9, level_budget1, secret_key_dist);
 
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(depth);
-    parameters.SetScalingModSize(dcrtBits);
-    parameters.SetScalingTechnique(rescaleTech);
-    parameters.SetRingDim(n);
-    parameters.SetSecretKeyDist(secretKeyDist);
-    parameters.SetNumLargeDigits(3);
-    parameters.SetSecurityLevel(HEStd_NotSet);
-    parameters.SetKeySwitchTechnique(HYBRID);
-    parameters.SetFirstModSize(firstMod);
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_multiplicative_depth(depth);
+    parameters.set_scaling_mod_size(dcrt_bits);
+    parameters.set_scaling_technique(rescale_tech);
+    parameters.set_ring_dim(n);
+    parameters.set_secret_key_dist(secret_key_dist);
+    parameters.set_num_large_digits(3);
+    parameters.set_security_level(HEStd_NotSet);
+    parameters.set_key_switch_technique(HYBRID);
+    parameters.set_first_mod_size(first_mod);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
 
 #if 0
-    CryptoContext<DCRTPoly> cc =
-        CryptoContextFactory<DCRTPoly>::genCryptoContextCKKS(
+    CryptoContext<RnsPoly> cc =
+        ContextFactory<RnsPoly>::genCryptoContextCKKS(
                depth,
-               dcrtBits,
+               dcrt_bits,
                slots,
                HEStd_NotSet,
-               n, /*ringDimension*/
-               rescaleTech,
+               n, /*ring_dimension_value*/
+               rescale_tech,
                HYBRID,
-               3, /*numLargeDigits*/
-               2, /*maxRelinSkDeg*/
-    #if NATIVEINT == 128
-               89, /*firstMod*/
+               3, /*num_large_digits*/
+               2, /*max_relin_sk_deg*/
+    #if CIPHER_NATIVE_INT == 128
+               89, /*first_mod*/
     #else
-               60, /*firstMod*/
+               60, /*first_mod*/
     #endif
                0,
                mode);
 #endif
 
     // Turn on features
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
-    cc->Enable(FHE);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
+    cc->enable(FHE);
 
-    const shared_ptr<CryptoParametersCKKSRNS> cryptoParams =
-            std::dynamic_pointer_cast<CryptoParametersCKKSRNS>(cc->GetCryptoParameters());
+    const shared_ptr<CkksRnsCryptoParams> crypto_params =
+            std::dynamic_pointer_cast<CkksRnsCryptoParams>(cc->get_crypto_parameters());
 
-    std::cerr << "SecretKeyDist: " << secretKeyDist << std::endl;
+    std::cerr << "SecretKeyDist: " << secret_key_dist << std::endl;
 
-    std::cout << "p = " << cryptoParams->GetPlaintextModulus() << std::endl;
-    std::cout << "n = " << cryptoParams->GetElementParams()->GetCyclotomicOrder() / 2 << std::endl;
+    std::cout << "p = " << crypto_params->get_plaintext_modulus() << std::endl;
+    std::cout << "n = " << crypto_params->get_element_params()->get_cyclotomic_order() / 2 << std::endl;
     std::cout << "# slots = " << slots << std::endl;
-    std::cout << "log2 q = " << cryptoParams->GetElementParams()->GetModulus().GetMSB() << std::endl;
-    std::cout << "log2 q*p = " << cryptoParams->GetParamsQP()->GetModulus().GetMSB() << std::endl;
+    std::cout << "log2 q = " << crypto_params->get_element_params()->get_modulus().get_msb() << std::endl;
+    std::cout << "log2 q*p = " << crypto_params->get_params_qp()->get_modulus().get_msb() << std::endl;
 
     std::cout << "dim1 = " << dim1 << std::endl;
-    std::cout << "level budget = " << levelBudget1 << std::endl;
+    std::cout << "level budget = " << level_budget1 << std::endl;
 
     TIC(t);
 
@@ -169,12 +169,12 @@ void BootstrapExample(SecretKeyDist secretKeyDist, uint32_t n, uint32_t slots, u
 
     // precomputations for bootstrapping
 
-    cc->EvalBootstrapSetup(levelBudget1, dim1, slotsvec[0]);
-    cc->EvalBootstrapSetup(levelBudget2, dim1, slotsvec[1]);
-    cc->EvalBootstrapSetup(levelBudget3, dim1, slotsvec[2]);
-    cc->EvalBootstrapSetup(levelBudget4, dim1, slotsvec[3]);
-    cc->EvalBootstrapSetup(levelBudget5, dim1, slotsvec[4]);
-    cc->EvalBootstrapSetup(levelBudget6, dim1, slotsvec[5]);
+    cc->eval_bootstrap_setup(level_budget1, dim1, slotsvec[0]);
+    cc->eval_bootstrap_setup(level_budget2, dim1, slotsvec[1]);
+    cc->eval_bootstrap_setup(level_budget3, dim1, slotsvec[2]);
+    cc->eval_bootstrap_setup(level_budget4, dim1, slotsvec[3]);
+    cc->eval_bootstrap_setup(level_budget5, dim1, slotsvec[4]);
+    cc->eval_bootstrap_setup(level_budget6, dim1, slotsvec[5]);
 
     // std::cout << "gEnc = " << cc->GetGiantStepEnc() << std::endl;
     // std::cout << "# rot Enc = " << cc->GetNumRotationsEnc() << std::endl;
@@ -185,166 +185,166 @@ void BootstrapExample(SecretKeyDist secretKeyDist, uint32_t n, uint32_t slots, u
     // std::cout << "gDecRem = " << cc->GetGiantStepRemDec() << std::endl;
     // std::cout << "W rot DecRem = " << cc->GetNumRotationsRemDec() << std::endl;
 
-    timePrecomp = TOC(t);
+    time_precomp = TOC(t);
 
-    std::cout << "\nLinear transform precomputation time: " << timePrecomp / 1000.0 << " s" << std::endl;
+    std::cout << "\nLinear transform precomputation time: " << time_precomp / 1000.0 << " s" << std::endl;
 
-    auto keyPair = cc->KeyGen();
-    cc->EvalMultKeyGen(keyPair.secretKey);
+    auto key_pair = cc->key_gen();
+    cc->eval_mult_key_gen(key_pair.secret_key);
 
     // generation of all keys needed for bootstrapping
 
     for (size_t i = 0; i < 6; ++i) {
         TIC(t);
-        cc->EvalBootstrapKeyGen(keyPair.secretKey, slotsvec[i]);
-        timeKeyGen = TOC(t);
-        std::cout << "\nAutomorphism key generation time: " << timeKeyGen / 1000.0 << " s" << std::endl;
+        cc->eval_bootstrap_key_gen(key_pair.secret_key, slotsvec[i]);
+        time_key_gen = TOC(t);
+        std::cout << "\nAutomorphism key generation time: " << time_key_gen / 1000.0 << " s" << std::endl;
         std::vector<std::complex<double>> a(
                 {0.111111, 0.222222, 0.333333, 0.444444, 0.555555, 0.666666, 0.777777, 0.888888});
 
-        size_t encodedLength = a.size();
+        size_t encoded_length = a.size();
 
         auto input(Fill(a, slotsvec[i]));
-        Plaintext plaintext = cc->MakeCKKSPackedPlaintext(input, 1, depth - 1, nullptr, slotsvec[i]);
-        auto ciphertext = cc->Encrypt(keyPair.publicKey, plaintext);
+        Plaintext plaintext = cc->make_ckks_packed_plaintext(input, 1, depth - 1, nullptr, slotsvec[i]);
+        auto ciphertext = cc->encrypt(key_pair.public_key, plaintext);
 
-        std::cerr << "ciphertext number of slots: " << ciphertext->GetSlots() << std::endl;
+        std::cerr << "ciphertext number of slots: " << ciphertext->get_slots() << std::endl;
 
-        std::cerr << "\nNumber of levels before bootstrapping: " << ciphertext->GetElements()[0].GetNumOfElements() - 1
+        std::cerr << "\nNumber of levels before bootstrapping: " << ciphertext->get_elements()[0].get_num_of_elements() - 1
                   << std::endl;
 
         TIC(t);
-        auto ciphertextAfter = cc->EvalBootstrap(ciphertext);
-        timeBootstrap = TOC(t);
-        std::cout << "\nBootstrapping time: " << timeBootstrap / 1000.0 << " s" << std::endl;
+        auto ciphertext_after = cc->eval_bootstrap(ciphertext);
+        time_bootstrap = TOC(t);
+        std::cout << "\nBootstrapping time: " << time_bootstrap / 1000.0 << " s" << std::endl;
         std::cerr << "\nNumber of levels consumed: "
-                  << depth - ciphertextAfter->GetElements()[0].GetNumOfElements() + ciphertextAfter->GetNoiseScaleDeg()
+                  << depth - ciphertext_after->get_elements()[0].get_num_of_elements() + ciphertext_after->get_noise_scale_deg()
                   << std::endl;
         std::cerr << "\nNumber of levels remaining: "
-                  << ciphertextAfter->GetElements()[0].GetNumOfElements() - ciphertextAfter->GetNoiseScaleDeg()
+                  << ciphertext_after->get_elements()[0].get_num_of_elements() - ciphertext_after->get_noise_scale_deg()
                   << std::endl;
 
         Plaintext result;
-        std::cerr << "ciphertextAfter level        : " << ciphertextAfter->GetLevel() << std::endl;
-        std::cerr << "ciphertextAfter noiseScaleDeg: " << ciphertextAfter->GetNoiseScaleDeg() << std::endl;
-        std::cerr << "ciphertextAfter    sf        : " << ciphertextAfter->GetScalingFactor() << std::endl;
-        cc->Decrypt(keyPair.secretKey, ciphertextAfter, &result);
-        std::cerr << "encodedLength: " << encodedLength << std::endl;
+        std::cerr << "ciphertextAfter level        : " << ciphertext_after->get_level() << std::endl;
+        std::cerr << "ciphertextAfter noiseScaleDeg: " << ciphertext_after->get_noise_scale_deg() << std::endl;
+        std::cerr << "ciphertextAfter    sf        : " << ciphertext_after->get_scaling_factor() << std::endl;
+        cc->decrypt(key_pair.secret_key, ciphertext_after, &result);
+        std::cerr << "encodedLength: " << encoded_length << std::endl;
 
-        result->SetLength(encodedLength);
-        plaintext->SetLength(encodedLength);
+        result->set_length(encoded_length);
+        plaintext->set_length(encoded_length);
 
         std::cout << "\nEncrypted text before bootstrapping \n\t" << plaintext << std::endl;
 
         std::cout << "\nEncrypted text after bootstrapping \n\t" << result << std::endl;
 
         double error = 0;
-        for (size_t i = 0; i < encodedLength; i++) {
+        for (size_t i = 0; i < encoded_length; i++) {
             error = error +
-                    std::fabs((result->GetCKKSPackedValue()[i].real() - plaintext->GetCKKSPackedValue()[i].real()) /
-                              plaintext->GetCKKSPackedValue()[i].real());
+                    std::fabs((result->get_ckks_packed_value()[i].real() - plaintext->get_ckks_packed_value()[i].real()) /
+                              plaintext->get_ckks_packed_value()[i].real());
         }
 
-        std::cout << "\nAverage error: " << error / static_cast<double>(encodedLength) << std::endl;
-        std::cout << "\nAverage error - in bits: " << std::log2(error / static_cast<double>(encodedLength))
+        std::cout << "\nAverage error: " << error / static_cast<double>(encoded_length) << std::endl;
+        std::cout << "\nAverage error - in bits: " << std::log2(error / static_cast<double>(encoded_length))
                   << std::endl;
     }
 }
 
-void BootstrapExampleClean(SecretKeyDist secretKeyDist, uint32_t n, uint32_t slots, uint32_t levelsRemaining) {
+void bootstrap_example_clean(SecretKeyDist secret_key_dist, uint32_t n, uint32_t slots, uint32_t levels_remaining) {
     // giant step for baby-step-giant-step algorithm in linear transforms for encoding and decoding, respectively
     // Choose this a power of 2 preferably, otherwise an exact divisor of the number of elements in the sum
     std::vector<uint32_t> dim1 = {0, 0};
 
     // budget in levels for FFT for encoding and decoding, respectively
     // Choose a number smaller than ceil(log2(slots))
-    std::vector<uint32_t> levelBudget = {4, 4};
+    std::vector<uint32_t> level_budget = {4, 4};
 
-#if NATIVEINT == 128
-    ScalingTechnique rescaleTech = FIXEDMANUAL;
-    uint32_t dcrtBits = 78;
-    uint32_t firstMod = 89; /*firstMod*/
+#if CIPHER_NATIVE_INT == 128
+    ScalingTechnique rescale_tech = FIXEDMANUAL;
+    uint32_t dcrt_bits = 78;
+    uint32_t first_mod = 89; /*first_mod*/
 #else
-    ScalingTechnique rescaleTech = FLEXIBLEAUTO;
-    uint32_t dcrtBits = 59;
-    uint32_t firstMod = 60; /*firstMod*/
+    ScalingTechnique rescale_tech = FLEXIBLEAUTO;
+    uint32_t dcrt_bits = 59;
+    uint32_t first_mod = 60; /*first_mod*/
 #endif
 
     // computes how many levels are needed for
-    uint32_t depth = levelsRemaining + FHECKKSRNS::GetBootstrapDepth(9, levelBudget, secretKeyDist);
+    uint32_t depth = levels_remaining + CkksRnsFhe::get_bootstrap_depth(9, level_budget, secret_key_dist);
 
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(depth);
-    parameters.SetScalingModSize(dcrtBits);
-    parameters.SetScalingTechnique(rescaleTech);
-    parameters.SetRingDim(n);
-    parameters.SetSecretKeyDist(secretKeyDist);
-    parameters.SetNumLargeDigits(3);
-    parameters.SetSecurityLevel(HEStd_NotSet);
-    parameters.SetKeySwitchTechnique(HYBRID);
-    parameters.SetFirstModSize(firstMod);
+    ContextParams<CkksRnsContext> parameters;
+    parameters.set_multiplicative_depth(depth);
+    parameters.set_scaling_mod_size(dcrt_bits);
+    parameters.set_scaling_technique(rescale_tech);
+    parameters.set_ring_dim(n);
+    parameters.set_secret_key_dist(secret_key_dist);
+    parameters.set_num_large_digits(3);
+    parameters.set_security_level(HEStd_NotSet);
+    parameters.set_key_switch_technique(HYBRID);
+    parameters.set_first_mod_size(first_mod);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
 
 #if 0
-    CryptoContext<DCRTPoly> cc =
-        CryptoContextFactory<DCRTPoly>::genCryptoContextCKKS(
+    CryptoContext<RnsPoly> cc =
+        ContextFactory<RnsPoly>::genCryptoContextCKKS(
                depth,
-               dcrtBits,
+               dcrt_bits,
                slots,
                HEStd_NotSet,
-               n, /*ringDimension*/
-               rescaleTech,
+               n, /*ring_dimension_value*/
+               rescale_tech,
                HYBRID,
-               3, /*numLargeDigits*/
-               2, /*maxRelinSkDeg*/
-    #if NATIVEINT == 128
-               89, /*firstMod*/
+               3, /*num_large_digits*/
+               2, /*max_relin_sk_deg*/
+    #if CIPHER_NATIVE_INT == 128
+               89, /*first_mod*/
     #else
-               60, /*firstMod*/
+               60, /*first_mod*/
     #endif
                0,
                mode);
 #endif
 
     // Turn on features
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
-    cc->Enable(FHE);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
+    cc->enable(FHE);
 
     // precomputations for bootstrapping
-    cc->EvalBootstrapSetup(levelBudget, dim1, slots);
+    cc->eval_bootstrap_setup(level_budget, dim1, slots);
 
     // keypair is generated
-    auto keyPair = cc->KeyGen();
+    auto key_pair = cc->key_gen();
 
     // generation of evaluation keys
-    cc->EvalBootstrapKeyGen(keyPair.secretKey, slots);
+    cc->eval_bootstrap_key_gen(key_pair.secret_key, slots);
 
-    cc->EvalMultKeyGen(keyPair.secretKey);
+    cc->eval_mult_key_gen(key_pair.secret_key);
 
     std::vector<std::complex<double>> a(
             {0.111111, 0.222222, 0.333333, 0.444444, 0.555555, 0.666666, 0.777777, 0.888888});
 
-    size_t encodedLength = a.size();
+    size_t encoded_length = a.size();
 
     auto input(Fill(a, slots));
 
-    Plaintext plaintext1 = cc->MakeCKKSPackedPlaintext(input, 1, depth - 1, nullptr, slots);
+    Plaintext plaintext1 = cc->make_ckks_packed_plaintext(input, 1, depth - 1, nullptr, slots);
 
-    auto ciphertext1 = cc->Encrypt(keyPair.publicKey, plaintext1);
+    auto ciphertext1 = cc->encrypt(key_pair.public_key, plaintext1);
 
     // bootstrapping operation
-    auto ciphertextAfter = cc->EvalBootstrap(ciphertext1);
+    auto ciphertext_after = cc->eval_bootstrap(ciphertext1);
 
     Plaintext result;
 
-    cc->Decrypt(keyPair.secretKey, ciphertextAfter, &result);
+    cc->decrypt(key_pair.secret_key, ciphertext_after, &result);
 
-    result->SetLength(encodedLength);
-    plaintext1->SetLength(encodedLength);
+    result->set_length(encoded_length);
+    plaintext1->set_length(encoded_length);
 
     std::cout << "\nEncrypted text before bootstrapping \n\t" << plaintext1 << std::endl;
 

@@ -49,42 +49,42 @@ BGV implementation. See https://eprint.iacr.org/2021/204 for details.
 #include "cipher/fhe/bgv/pke.h"
 #include "cipher/fhe/bgv/pre.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-void SchemeBGVRNS::Enable(PKESchemeFeature feature) {
+void BgvRnsScheme::enable(PkeSchemeFeature feature) {
     switch (feature) {
         case PKE:
-            if (m_PKE == nullptr)
-                m_PKE = std::make_shared<PKEBGVRNS>();
+            if (pke_ == nullptr)
+                pke_ = std::make_shared<BgvRnsPke>();
             break;
         case KEYSWITCH:
-            // m_KeySwitch must be initialized later by calling SetKeySwitchingTechnique() with the value of key switching technique from cryptoparams
+            // key_switch_ must be initialized later by calling set_key_switching_technique() with the value of key switching technique from cryptoparams
             break;
         case PRE:
-            if (m_PRE == nullptr)
-                m_PRE = std::make_shared<PREBGVRNS>();
+            if (pre_ == nullptr)
+                pre_ = std::make_shared<BgvRnsPre>();
             break;
         case LEVELEDSHE:
-            if (m_LeveledSHE == nullptr)
-                m_LeveledSHE = std::make_shared<LeveledSHEBGVRNS>();
+            if (leveled_she_ == nullptr)
+                leveled_she_ = std::make_shared<BgvRnsLeveledShe>();
             break;
         case MULTIPARTY:
-            if (m_Multiparty == nullptr)
-                m_Multiparty = std::make_shared<MultipartyBGVRNS>();
+            if (multiparty_ == nullptr)
+                multiparty_ = std::make_shared<BgvRnsMultiparty>();
             break;
         case ADVANCEDSHE:
-            if (m_AdvancedSHE == nullptr)
-                m_AdvancedSHE = std::make_shared<AdvancedSHEBGVRNS>();
+            if (advanced_she_ == nullptr)
+                advanced_she_ = std::make_shared<BgvRnsAdvancedShe>();
             break;
         case FHE:
-            if (m_FHE == nullptr)
-                m_FHE = std::make_shared<FHEBGVRNS>();
+            if (fhe_ == nullptr)
+                fhe_ = std::make_shared<BgvRnsFhe>();
             break;
         default:
             std::stringstream ss;
             ss << feature;
-            OPENFHE_THROW(std::string("This feature [") + ss.str() + "] is not supported for BGVRNS scheme");
+            CIPHER_THROW(std::string("This feature [") + ss.str() + "] is not supported for BGVRNS scheme");
     }
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher

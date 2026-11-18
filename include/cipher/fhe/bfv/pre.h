@@ -37,17 +37,17 @@
 #include "cipher/fhe/rns/pre.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief BFV instantiation of the proxy re-encryption component; it inherits the RNS implementation without changes.
  */
-class PREBFVRNS : public PRERNS {
+class BfvRnsPre : public RnsPre {
   public:
-    virtual ~PREBFVRNS() {}
+    virtual ~BfvRnsPre() {}
 
     /////////////////////////////////////
     // SERIALIZATION
@@ -55,18 +55,18 @@ class PREBFVRNS : public PRERNS {
 
     template <class Archive>
     void save(Archive& ar) const {
-        ar(cereal::base_class<PRERNS>(this));
+        ar(cereal::base_class<RnsPre>(this));
     }
 
     template <class Archive>
     void load(Archive& ar) {
-        ar(cereal::base_class<PRERNS>(this));
+        ar(cereal::base_class<RnsPre>(this));
     }
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "PREBFVRNS";
     }
 };
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_BFV_PRE_H_

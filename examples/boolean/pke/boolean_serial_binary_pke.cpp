@@ -38,7 +38,7 @@
 
 #include "cipher/boolean/context_ser.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 // path where files will be written to
 const std::string DATAFOLDER = "data";
@@ -46,36 +46,36 @@ const std::string DATAFOLDER = "data";
 int main() {
     // Generating the crypto context
 
-    auto cc1 = BinFHEContext();
+    auto cc1 = BooleanContext();
 
-    cc1.GenerateBinFHEContext(TOY);
+    cc1.generate_boolean_context(TOY);
 
     std::cout << "Generating keys." << std::endl;
 
     // Generating the secret key
-    auto sk1 = cc1.KeyGen();
+    auto sk1 = cc1.key_gen();
 
     // Generate the bootstrapping keys and public key
-    cc1.BTKeyGen(sk1, PUB_ENCRYPT);
+    cc1.bt_key_gen(sk1, PUB_ENCRYPT);
 
-    auto params = cc1.GetParams()->GetLWEParams();
+    auto params = cc1.get_params()->get_lwe_params();
 
-    std::cout << "Q: " << params->GetQ() << std::endl;
-    std::cout << "N: " << params->GetN() << std::endl;
-    std::cout << "q: " << params->Getq() << std::endl;
-    std::cout << "n: " << params->Getn() << std::endl;
+    std::cout << "Q: " << params->get_Q() << std::endl;
+    std::cout << "N: " << params->get_N() << std::endl;
+    std::cout << "q: " << params->get_q() << std::endl;
+    std::cout << "n: " << params->get_n() << std::endl;
 
     std::cout << "Done generating all keys." << std::endl;
 
-    auto pk1 = cc1.GetPublicKey();
+    auto pk1 = cc1.get_public_key();
     // Encryption for a ciphertext that will be serialized
-    auto ct1 = cc1.Encrypt(pk1, 1);
+    auto ct1 = cc1.encrypt(pk1, 1);
 
     // CODE FOR SERIALIZATION
 
     // Serializing key-independent crypto context
 
-    if (!Serial::SerializeToFile(DATAFOLDER + "/cryptoContext.txt", cc1, SerType::BINARY)) {
+    if (!serialization::serialize_to_file(DATAFOLDER + "/cryptoContext.txt", cc1, SerType::BINARY)) {
         std::cerr << "Error serializing the cryptocontext" << std::endl;
         return 1;
     }
@@ -83,7 +83,7 @@ int main() {
 
     // Serializing refreshing and key switching keys (needed for bootstrapping)
 
-    if (!Serial::SerializeToFile(DATAFOLDER + "/btKey.txt", cc1.GetBTKey(), SerType::BINARY)) {
+    if (!serialization::serialize_to_file(DATAFOLDER + "/btKey.txt", cc1.get_bt_key(), SerType::BINARY)) {
         std::cerr << "Error serializing the bootstrapping keys" << std::endl;
         return 1;
     }
@@ -91,7 +91,7 @@ int main() {
 
     // Serializing secret key
 
-    if (!Serial::SerializeToFile(DATAFOLDER + "/sk1.txt", sk1, SerType::BINARY)) {
+    if (!serialization::serialize_to_file(DATAFOLDER + "/sk1.txt", sk1, SerType::BINARY)) {
         std::cerr << "Error serializing sk1" << std::endl;
         return 1;
     }
@@ -99,7 +99,7 @@ int main() {
 
     // Serializing public key
 
-    if (!Serial::SerializeToFile(DATAFOLDER + "/pk1.txt", pk1, SerType::BINARY)) {
+    if (!serialization::serialize_to_file(DATAFOLDER + "/pk1.txt", pk1, SerType::BINARY)) {
         std::cerr << "Error serializing pk1" << std::endl;
         return 1;
     }
@@ -107,7 +107,7 @@ int main() {
 
     // Serializing a ciphertext
 
-    if (!Serial::SerializeToFile(DATAFOLDER + "/ct1.txt", ct1, SerType::BINARY)) {
+    if (!serialization::serialize_to_file(DATAFOLDER + "/ct1.txt", ct1, SerType::BINARY)) {
         std::cerr << "Error serializing ct1" << std::endl;
         return 1;
     }
@@ -117,8 +117,8 @@ int main() {
 
     // Deserializing the cryptocontext
 
-    BinFHEContext cc;
-    if (Serial::DeserializeFromFile(DATAFOLDER + "/cryptoContext.txt", cc, SerType::BINARY) == false) {
+    BooleanContext cc;
+    if (serialization::deserialize_from_file(DATAFOLDER + "/cryptoContext.txt", cc, SerType::BINARY) == false) {
         std::cerr << "Could not deserialize the cryptocontext" << std::endl;
         return 1;
     }
@@ -126,27 +126,27 @@ int main() {
 
     // deserializing the refreshing and switching keys (for bootstrapping)
 
-    RingGSWBTKey btKey;
-    if (Serial::DeserializeFromFile(DATAFOLDER + "/btKey.txt", btKey, SerType::BINARY) == false) {
+    RingGswBtKey bt_key;
+    if (serialization::deserialize_from_file(DATAFOLDER + "/btKey.txt", bt_key, SerType::BINARY) == false) {
         std::cerr << "Could not deserialize the bootstrapping keys" << std::endl;
         return 1;
     }
     std::cout << "The bootstrapping keys have been deserialized." << std::endl;
 
     // Loading the keys in the cryptocontext
-    cc.BTKeyLoad(btKey);
+    cc.bt_key_load(bt_key);
 
     // Deserializing the secret key
 
-    LWEPrivateKey sk;
-    if (Serial::DeserializeFromFile(DATAFOLDER + "/sk1.txt", sk, SerType::BINARY) == false) {
+    LwePrivateKey sk;
+    if (serialization::deserialize_from_file(DATAFOLDER + "/sk1.txt", sk, SerType::BINARY) == false) {
         std::cerr << "Could not deserialize the secret key" << std::endl;
         return 1;
     }
     std::cout << "The secret key has been deserialized." << std::endl;
 
-    LWEPublicKey pk;
-    if (Serial::DeserializeFromFile(DATAFOLDER + "/pk1.txt", pk, SerType::BINARY) == false) {
+    LwePublicKey pk;
+    if (serialization::deserialize_from_file(DATAFOLDER + "/pk1.txt", pk, SerType::BINARY) == false) {
         std::cerr << "Could not deserialize the public key" << std::endl;
         return 1;
     }
@@ -154,8 +154,8 @@ int main() {
 
     // Deserializing a previously serialized ciphertext
 
-    LWECiphertext ct;
-    if (Serial::DeserializeFromFile(DATAFOLDER + "/ct1.txt", ct, SerType::BINARY) == false) {
+    LweCiphertext ct;
+    if (serialization::deserialize_from_file(DATAFOLDER + "/ct1.txt", ct, SerType::BINARY) == false) {
         std::cerr << "Could not deserialize the ciphertext" << std::endl;
         return 1;
     }
@@ -163,17 +163,17 @@ int main() {
 
     // OPERATIONS WITH DESERIALIZED KEYS AND CIPHERTEXTS
 
-    auto ct2 = cc.Encrypt(pk, 1);
+    auto ct2 = cc.encrypt(pk, 1);
 
     std::cout << "Running the computation" << std::endl;
 
-    auto ctResult = cc.EvalBinGate(AND, ct, ct2);
+    auto ct_result = cc.eval_bin_gate(AND, ct, ct2);
 
     std::cout << "The computation has completed" << std::endl;
 
-    LWEPlaintext result;
+    LwePlaintext result;
 
-    cc.Decrypt(sk, ctResult, &result);
+    cc.decrypt(sk, ct_result, &result);
 
     std::cout << "result of 1 AND 1 = " << result << std::endl;
 

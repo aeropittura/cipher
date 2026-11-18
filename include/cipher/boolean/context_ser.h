@@ -40,16 +40,16 @@
 #include "cipher/util/serial.h"
 
 // Registers types needed for serialization
-CEREAL_REGISTER_TYPE(lbcrypto::LWECryptoParams);
-CEREAL_REGISTER_TYPE(lbcrypto::LWECiphertextImpl);
-CEREAL_REGISTER_TYPE(lbcrypto::LWEPrivateKeyImpl);
-CEREAL_REGISTER_TYPE(lbcrypto::LWEPublicKeyImpl);
-CEREAL_REGISTER_TYPE(lbcrypto::LWESwitchingKeyImpl);
-CEREAL_REGISTER_TYPE(lbcrypto::RLWECiphertextImpl);
-CEREAL_REGISTER_TYPE(lbcrypto::RingGSWCryptoParams);
-CEREAL_REGISTER_TYPE(lbcrypto::RingGSWEvalKeyImpl);
-CEREAL_REGISTER_TYPE(lbcrypto::RingGSWACCKeyImpl);
-CEREAL_REGISTER_TYPE(lbcrypto::BinFHECryptoParams);
-CEREAL_REGISTER_TYPE(lbcrypto::BinFHEContext);
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::LweCryptoParams, "lbcrypto::LWECryptoParams");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::LweCiphertextImpl, "lbcrypto::LWECiphertextImpl");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::LwePrivateKeyImpl, "lbcrypto::LWEPrivateKeyImpl");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::LwePublicKeyImpl, "lbcrypto::LWEPublicKeyImpl");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::LweSwitchingKeyImpl, "lbcrypto::LWESwitchingKeyImpl");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::RlweCiphertextImpl, "lbcrypto::RLWECiphertextImpl");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::RingGswCryptoParams, "lbcrypto::RingGSWCryptoParams");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::RingGswEvalKeyImpl, "lbcrypto::RingGSWEvalKeyImpl");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::RingGswAccKeyImpl, "lbcrypto::RingGSWACCKeyImpl");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::BooleanCryptoParams, "lbcrypto::BinFHECryptoParams");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::BooleanContext, "lbcrypto::BinFHEContext");
 
 #endif  // CIPHER_BOOLEAN_CONTEXT_SER_H_

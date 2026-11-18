@@ -48,7 +48,7 @@
 // TODO: when the parms are polymorphic, reduce the tuple of methods to a
 // single one
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @class PlaintextFactory
@@ -62,21 +62,21 @@ class PlaintextFactory {
     /**
      * @brief Creates an empty plaintext of the given encoding type.
      * @param encoding the encoding type
-     * @param vp element parameters of the polynomial (Poly, NativePoly or DCRTPoly parameters)
+     * @param vp element parameters of the polynomial (Poly, NativePoly or RnsPoly parameters)
      * @param ep encoding parameters
-     * @param schemeID scheme the plaintext is created for (used by the coefficient-packed encoding)
+     * @param scheme_id scheme the plaintext is created for (used by the coefficient-packed encoding)
      * @param cdt CKKS data type (used by the CKKS packed encoding)
      * @return the plaintext
      */
     template <typename T, typename std::enable_if<std::is_same<T, Poly::Params>::value ||
                                                           std::is_same<T, NativePoly::Params>::value ||
-                                                          std::is_same<T, DCRTPoly::Params>::value,
+                                                          std::is_same<T, RnsPoly::Params>::value,
                                                   bool>::type = true>
-    static Plaintext MakePlaintext(PlaintextEncodings encoding, std::shared_ptr<T> vp, EncodingParams ep,
-                                   SCHEME schemeID = SCHEME::INVALID_SCHEME, CKKSDataType cdt = REAL) {
+    static Plaintext make_plaintext(PlaintextEncodings encoding, std::shared_ptr<T> vp, EncodingParams ep,
+                                   SCHEME scheme_id = SCHEME::INVALID_SCHEME, CkksDataType cdt = REAL) {
         switch (encoding) {
             case COEF_PACKED_ENCODING:
-                return std::make_shared<CoefPackedEncoding>(vp, ep, schemeID);
+                return std::make_shared<CoefPackedEncoding>(vp, ep, scheme_id);
             case PACKED_ENCODING:
                 return std::make_shared<PackedEncoding>(vp, ep);
             case STRING_ENCODING:
@@ -84,93 +84,93 @@ class PlaintextFactory {
             case CKKS_PACKED_ENCODING:
                 return std::make_shared<CKKSPackedEncoding>(vp, ep, cdt);
             default:
-                OPENFHE_THROW("Unknown plaintext encoding type in MakePlaintext");
+                CIPHER_THROW("Unknown plaintext encoding type in MakePlaintext");
         }
     }
 
     /**
      * @brief Creates and encodes a plaintext from an integer vector (packed or coefficient-packed encoding). The
-     * vector may hold at most ringDim values (ringDim/2 for CKKS).
+     * vector may hold at most ring_dim values (ring_dim/2 for CKKS).
      * @param value the integer values to encode
      * @param encoding the encoding type
-     * @param vp element parameters of the polynomial (Poly, NativePoly or DCRTPoly parameters)
+     * @param vp element parameters of the polynomial (Poly, NativePoly or RnsPoly parameters)
      * @param ep encoding parameters
-     * @param schemeID scheme the plaintext is created for
-     * @param noiseScaleDeg noise scale degree of the plaintext (BGV)
+     * @param scheme_id scheme the plaintext is created for
+     * @param noise_scale_deg noise scale degree of the plaintext (BGV)
      * @param level level of the plaintext
-     * @param scalingFactor integer scaling factor of the plaintext (BGV)
+     * @param scaling_factor integer scaling factor of the plaintext (BGV)
      * @return the encoded plaintext
      */
     template <typename T, typename std::enable_if<std::is_same<T, Poly::Params>::value ||
                                                           std::is_same<T, NativePoly::Params>::value ||
-                                                          std::is_same<T, DCRTPoly::Params>::value,
+                                                          std::is_same<T, RnsPoly::Params>::value,
                                                   bool>::type = true>
-    static Plaintext MakePlaintext(const std::vector<int64_t>& value, PlaintextEncodings encoding,
-                                   std::shared_ptr<T> vp, EncodingParams ep, SCHEME schemeID = SCHEME::INVALID_SCHEME,
-                                   size_t noiseScaleDeg = 1, uint32_t level = 0, NativeInteger scalingFactor = 1) {
+    static Plaintext make_plaintext(const std::vector<int64_t>& value, PlaintextEncodings encoding,
+                                   std::shared_ptr<T> vp, EncodingParams ep, SCHEME scheme_id = SCHEME::INVALID_SCHEME,
+                                   size_t noise_scale_deg = 1, uint32_t level = 0, NativeInteger scaling_factor = 1) {
         // Check if plaintext has got enough slots for data (value)
-        uint32_t ringDim = vp->GetRingDimension();
-        size_t valueSize = value.size();
-        if (isCKKS(schemeID) && valueSize > ringDim / 2) {
-            OPENFHE_THROW("The size [" + std::to_string(valueSize) +
+        uint32_t ring_dim = vp->get_ring_dimension();
+        size_t value_size = value.size();
+        if (is_ckks(scheme_id) && value_size > ring_dim / 2) {
+            CIPHER_THROW("The size [" + std::to_string(value_size) +
                           "] of the vector with values should not be greater than ringDim/2 [" +
-                          std::to_string(ringDim / 2) + "] if the scheme is CKKS");
-        } else if (valueSize > ringDim) {
-            OPENFHE_THROW("The size [" + std::to_string(valueSize) +
-                          "] of the vector with values should not be greater than ringDim [" + std::to_string(ringDim) +
+                          std::to_string(ring_dim / 2) + "] if the scheme is CKKS");
+        } else if (value_size > ring_dim) {
+            CIPHER_THROW("The size [" + std::to_string(value_size) +
+                          "] of the vector with values should not be greater than ringDim [" + std::to_string(ring_dim) +
                           "] if the scheme is NOT CKKS");
         }
-        Plaintext pt = MakePlaintext(encoding, vp, ep, schemeID);
-        pt->SetIntVectorValue(value);
-        pt->SetNoiseScaleDeg(noiseScaleDeg);
-        pt->SetLevel(level);
-        pt->SetScalingFactorInt(scalingFactor);
-        pt->Encode();
+        Plaintext pt = make_plaintext(encoding, vp, ep, scheme_id);
+        pt->set_int_vector_value(value);
+        pt->set_noise_scale_deg(noise_scale_deg);
+        pt->set_level(level);
+        pt->set_scaling_factor_int(scaling_factor);
+        pt->encode();
         return pt;
     }
 
     /**
-     * @brief Creates and encodes a plaintext from a string (string encoding). The string may hold at most ringDim
-     * characters (ringDim/2 for CKKS).
+     * @brief Creates and encodes a plaintext from a string (string encoding). The string may hold at most ring_dim
+     * characters (ring_dim/2 for CKKS).
      * @param value the string to encode
      * @param encoding the encoding type
-     * @param vp element parameters of the polynomial (Poly, NativePoly or DCRTPoly parameters)
+     * @param vp element parameters of the polynomial (Poly, NativePoly or RnsPoly parameters)
      * @param ep encoding parameters
-     * @param schemeID scheme the plaintext is created for
-     * @param noiseScaleDeg noise scale degree of the plaintext (BGV)
+     * @param scheme_id scheme the plaintext is created for
+     * @param noise_scale_deg noise scale degree of the plaintext (BGV)
      * @param level level of the plaintext
-     * @param scalingFactor integer scaling factor of the plaintext (BGV)
+     * @param scaling_factor integer scaling factor of the plaintext (BGV)
      * @return the encoded plaintext
      */
     template <typename T, typename std::enable_if<std::is_same<T, Poly::Params>::value ||
                                                           std::is_same<T, NativePoly::Params>::value ||
-                                                          std::is_same<T, DCRTPoly::Params>::value,
+                                                          std::is_same<T, RnsPoly::Params>::value,
                                                   bool>::type = true>
-    static Plaintext MakePlaintext(const std::string& value, PlaintextEncodings encoding, std::shared_ptr<T> vp,
-                                   EncodingParams ep, SCHEME schemeID = SCHEME::INVALID_SCHEME,
-                                   size_t noiseScaleDeg = 1, uint32_t level = 0, NativeInteger scalingFactor = 1) {
+    static Plaintext make_plaintext(const std::string& value, PlaintextEncodings encoding, std::shared_ptr<T> vp,
+                                   EncodingParams ep, SCHEME scheme_id = SCHEME::INVALID_SCHEME,
+                                   size_t noise_scale_deg = 1, uint32_t level = 0, NativeInteger scaling_factor = 1) {
         // Check if plaintext has got enough slots for data (value)
-        uint32_t ringDim = vp->GetRingDimension();
-        size_t valueSize = value.size();
-        if (isCKKS(schemeID) && valueSize > ringDim / 2) {
-            OPENFHE_THROW("The size [" + std::to_string(valueSize) +
+        uint32_t ring_dim = vp->get_ring_dimension();
+        size_t value_size = value.size();
+        if (is_ckks(scheme_id) && value_size > ring_dim / 2) {
+            CIPHER_THROW("The size [" + std::to_string(value_size) +
                           "] of the vector with values should not be greater than ringDim/2 [" +
-                          std::to_string(ringDim / 2) + "] if the scheme is CKKS");
-        } else if (valueSize > ringDim) {
-            OPENFHE_THROW("The size [" + std::to_string(valueSize) +
-                          "] of the vector with values should not be greater than ringDim [" + std::to_string(ringDim) +
+                          std::to_string(ring_dim / 2) + "] if the scheme is CKKS");
+        } else if (value_size > ring_dim) {
+            CIPHER_THROW("The size [" + std::to_string(value_size) +
+                          "] of the vector with values should not be greater than ringDim [" + std::to_string(ring_dim) +
                           "] if the scheme is NOT CKKS");
         }
-        Plaintext pt = MakePlaintext(encoding, vp, ep, schemeID);
-        pt->SetStringValue(value);
-        pt->SetNoiseScaleDeg(noiseScaleDeg);
-        pt->SetLevel(level);
-        pt->SetScalingFactorInt(scalingFactor);
-        pt->Encode();
+        Plaintext pt = make_plaintext(encoding, vp, ep, scheme_id);
+        pt->set_string_value(value);
+        pt->set_noise_scale_deg(noise_scale_deg);
+        pt->set_level(level);
+        pt->set_scaling_factor_int(scaling_factor);
+        pt->encode();
         return pt;
     }
 };
 
-} /* namespace lbcrypto */
+} /* namespace cipher */
 
 #endif  // CIPHER_FHE_ENCODING_PLAINTEXT_FACTORY_H_

@@ -38,17 +38,17 @@
 #include "cipher/fhe/base/fhe.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Abstract base class for derived HE algorithms
  */
-class FHERNS : public FHEBase<DCRTPoly> {
+class RnsFhe : public BaseFhe<RnsPoly> {
   public:
-    virtual ~FHERNS() = default;
+    virtual ~RnsFhe() = default;
 
     /////////////////////////////////////
     // SERIALIZATION
@@ -56,19 +56,19 @@ class FHERNS : public FHEBase<DCRTPoly> {
 
     template <class Archive>
     void save(Archive& ar) const {
-        ar(cereal::base_class<FHEBase<DCRTPoly>>(this));
+        ar(cereal::base_class<BaseFhe<RnsPoly>>(this));
     }
 
     template <class Archive>
     void load(Archive& ar) {
-        ar(cereal::base_class<FHEBase<DCRTPoly>>(this));
+        ar(cereal::base_class<BaseFhe<RnsPoly>>(this));
     }
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "FHERNS";
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_RNS_FHE_H_

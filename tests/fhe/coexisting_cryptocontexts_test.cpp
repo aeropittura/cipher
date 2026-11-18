@@ -29,7 +29,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //==================================================================================
 /***
- * Very qiuck unittest to verify that ringDim for the first cryptocontext is not overriden by
+ * Very qiuck unittest to verify that ring_dim for the first cryptocontext is not overriden by
  * creation of another cryptocontext. This test's code should be as close to a regular user project
  * as possible
  */
@@ -40,77 +40,77 @@
 #include "include/gtest/gtest.h"
 #include "cipher/cipher.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 class UTGENERAL_CRYPTOCONTEXTS : public ::testing::Test {
   protected:
     virtual void SetUp() {
-        OpenFHEParallelControls.UnitTestStart();
+        cipher_parallel_controls.unit_test_start();
     }
 
     virtual void TearDown() {
-        CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
-        OpenFHEParallelControls.UnitTestStop();
+        ContextFactory<RnsPoly>::release_all_contexts();
+        cipher_parallel_controls.unit_test_stop();
     }
 };
 
 TEST_F(UTGENERAL_CRYPTOCONTEXTS, coexisting_ckks_cryptocontexts) {
     // Setup crypto context 1
-    CCParams<CryptoContextCKKSRNS> parameters1;
-    parameters1.SetMultiplicativeDepth(2);
-    parameters1.SetScalingModSize(40);
-    parameters1.SetRingDim(4096 * 4);
-    parameters1.SetBatchSize(32);
+    ContextParams<CkksRnsContext> parameters1;
+    parameters1.set_multiplicative_depth(2);
+    parameters1.set_scaling_mod_size(40);
+    parameters1.set_ring_dim(4096 * 4);
+    parameters1.set_batch_size(32);
 
-    CryptoContext<lbcrypto::DCRTPoly> cc1 = GenCryptoContext(parameters1);
-    cc1->Enable(PKE);
-    cc1->Enable(KEYSWITCH);
-    cc1->Enable(LEVELEDSHE);
-    lbcrypto::KeyPair<lbcrypto::DCRTPoly> key1 = cc1->KeyGen();
+    CryptoContext<cipher::RnsPoly> cc1 = make_crypto_context(parameters1);
+    cc1->enable(PKE);
+    cc1->enable(KEYSWITCH);
+    cc1->enable(LEVELEDSHE);
+    cipher::KeyPair<cipher::RnsPoly> key1 = cc1->key_gen();
 
     // Setup crypto context 2 for testing (not used)
-    CCParams<CryptoContextCKKSRNS> parameters2;
-    parameters2.SetMultiplicativeDepth(1);
-    parameters2.SetScalingModSize(30);
-    parameters2.SetRingDim(16);
-    parameters2.SetBatchSize(4);
-    parameters2.SetSecurityLevel(HEStd_NotSet);
+    ContextParams<CkksRnsContext> parameters2;
+    parameters2.set_multiplicative_depth(1);
+    parameters2.set_scaling_mod_size(30);
+    parameters2.set_ring_dim(16);
+    parameters2.set_batch_size(4);
+    parameters2.set_security_level(HEStd_NotSet);
 
-    CryptoContext<lbcrypto::DCRTPoly> cc2 = GenCryptoContext(parameters2);
-    cc2->Enable(PKE);
-    cc2->Enable(KEYSWITCH);
-    cc2->Enable(LEVELEDSHE);
-    lbcrypto::KeyPair<lbcrypto::DCRTPoly> key2 = cc2->KeyGen();
+    CryptoContext<cipher::RnsPoly> cc2 = make_crypto_context(parameters2);
+    cc2->enable(PKE);
+    cc2->enable(KEYSWITCH);
+    cc2->enable(LEVELEDSHE);
+    cipher::KeyPair<cipher::RnsPoly> key2 = cc2->key_gen();
 
     // Setup crypto context 3 for testing (not used)
-    CCParams<CryptoContextCKKSRNS> parameters3;
-    parameters3.SetMultiplicativeDepth(2);
-    parameters3.SetScalingModSize(50);
-    parameters3.SetRingDim(2048);
-    parameters3.SetDigitSize(3);
-    parameters3.SetBatchSize(16);
-    parameters3.SetSecurityLevel(HEStd_NotSet);
-    parameters3.SetKeySwitchTechnique(BV);
-    parameters3.SetScalingTechnique(FIXEDMANUAL);
+    ContextParams<CkksRnsContext> parameters3;
+    parameters3.set_multiplicative_depth(2);
+    parameters3.set_scaling_mod_size(50);
+    parameters3.set_ring_dim(2048);
+    parameters3.set_digit_size(3);
+    parameters3.set_batch_size(16);
+    parameters3.set_security_level(HEStd_NotSet);
+    parameters3.set_key_switch_technique(BV);
+    parameters3.set_scaling_technique(FIXEDMANUAL);
 
-    CryptoContext<lbcrypto::DCRTPoly> cc3 = GenCryptoContext(parameters3);
-    cc3->Enable(PKE);
-    cc3->Enable(KEYSWITCH);
-    cc3->Enable(LEVELEDSHE);
-    lbcrypto::KeyPair<lbcrypto::DCRTPoly> key3 = cc3->KeyGen();
+    CryptoContext<cipher::RnsPoly> cc3 = make_crypto_context(parameters3);
+    cc3->enable(PKE);
+    cc3->enable(KEYSWITCH);
+    cc3->enable(LEVELEDSHE);
+    cipher::KeyPair<cipher::RnsPoly> key3 = cc3->key_gen();
 
     // Encrypt
     std::vector<double> values = {1.0, 1.1, 1.2};
     // const size_t dataSize = values.size();
-    Plaintext ptxt = cc1->MakeCKKSPackedPlaintext(values);
-    auto ciphertext = cc1->Encrypt(ptxt, key1.publicKey);
+    Plaintext ptxt = cc1->make_ckks_packed_plaintext(values);
+    auto ciphertext = cc1->encrypt(ptxt, key1.public_key);
 
     // Decrypt
     Plaintext results;
-    cc1->Decrypt(ciphertext, key1.secretKey, &results);
-    results->SetLength(ptxt->GetLength());
+    cc1->decrypt(ciphertext, key1.secret_key, &results);
+    results->set_length(ptxt->get_length());
 
     constexpr double epsilon = 0.0000001;
-    EXPECT_TRUE(checkEquality(values, results->GetRealPackedValue(), epsilon))
+    EXPECT_TRUE(check_equality(values, results->get_real_packed_value(), epsilon))
             << "static data for the first cryptocontext may be overriden";
 }

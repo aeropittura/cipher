@@ -35,21 +35,21 @@
 #include "cipher/fhe/context.h"
 #include "cipher/fhe/ckks/crypto_params.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 template <>
-void CiphertextImpl<DCRTPoly>::SetLevel(size_t level) {
-    m_level = level;
+void CiphertextImpl<RnsPoly>::set_level(size_t level) {
+    level_ = level;
 
-    // check if the multiplication depth value is sufficient in SetLevel() as it always gets called
-    const auto cryptoParams = std::dynamic_pointer_cast<CryptoParametersCKKSRNS>(
-            CryptoObject<DCRTPoly>::GetCryptoContext()->GetCryptoParameters());
-    // the multDepth check applies only to CKKS, when cryptoParams is of type CryptoParametersCKKSRNS.
-    if (cryptoParams) {
-        uint32_t limbNum = m_elements[0].GetNumOfElements();
-        if (limbNum < GetNoiseScaleDeg()) {
-            uint32_t multDepth = cryptoParams->GetMultiplicativeDepth();
-            OPENFHE_THROW("The current multiplicative depth [" + std::to_string(multDepth) +
+    // check if the multiplication depth value is sufficient in set_level() as it always gets called
+    const auto crypto_params = std::dynamic_pointer_cast<CkksRnsCryptoParams>(
+            CryptoObject<RnsPoly>::get_crypto_context()->get_crypto_parameters());
+    // the mult_depth_value check applies only to CKKS, when crypto_params is of type CkksRnsCryptoParams.
+    if (crypto_params) {
+        uint32_t limb_num = elements_[0].get_num_of_elements();
+        if (limb_num < get_noise_scale_deg()) {
+            uint32_t mult_depth_value = crypto_params->get_multiplicative_depth();
+            CIPHER_THROW("The current multiplicative depth [" + std::to_string(mult_depth_value) +
                           "] is insufficient; increase it.");
         }
     }
@@ -57,6 +57,6 @@ void CiphertextImpl<DCRTPoly>::SetLevel(size_t level) {
 
 template class CiphertextImpl<Poly>;
 template class CiphertextImpl<NativePoly>;
-template class CiphertextImpl<DCRTPoly>;
+template class CiphertextImpl<RnsPoly>;
 
-}  // namespace lbcrypto
+}  // namespace cipher

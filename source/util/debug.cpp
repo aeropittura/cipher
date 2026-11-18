@@ -42,7 +42,7 @@
 
 #include "time.h"
 
-double currentDateTime() {
+double current_date_time() {
     std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
 
     time_t tnow = std::chrono::system_clock::to_time_t(now);

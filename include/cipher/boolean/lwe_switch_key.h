@@ -42,135 +42,135 @@
 #include "cipher/math/backend.h"
 #include "cipher/util/serializable.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Class that stores the LWE scheme switching key
  */
-class LWESwitchingKeyImpl : public Serializable {
+class LweSwitchingKeyImpl : public Serializable {
   public:
-    LWESwitchingKeyImpl() = default;
+    LweSwitchingKeyImpl() = default;
 
     /**
      * Constructs a key-switching key from its components
      *
      * Both components are indexed [i][j - 1][k], where i is the position in the source (dimension-N) secret
-     * key skN, j in [1, baseKS) is the value of a base-baseKS digit and k is the digit position. The pair
-     * (keyA[i][j - 1][k], keyB[i][j - 1][k]) is an LWE encryption of skN[i] * j * baseKS^k under the target
-     * (dimension-n) secret key s modulo qKS, i.e. keyB = <keyA, s> + e + skN[i] * j * baseKS^k. For digit
+     * key sk_n, j in [1, base_ks) is the value of a base-base_ks digit and k is the digit position. The pair
+     * (key_a[i][j - 1][k], key_b[i][j - 1][k]) is an LWE encryption of sk_n[i] * j * base_ks^k under the target
+     * (dimension-n) secret key s modulo q_ks, i.e. key_b = <key_a, s> + e + sk_n[i] * j * base_ks^k. For digit
      * values j at or above the extent of the top digit position the innermost vectors have one entry fewer,
      * since that position is never read during key switching.
      *
-     * @param keyA the vectors "a" of the key-switching LWE encryptions
-     * @param keyB the integers "b" of the key-switching LWE encryptions
+     * @param key_a the vectors "a" of the key-switching LWE encryptions
+     * @param key_b the integers "b" of the key-switching LWE encryptions
      */
-    LWESwitchingKeyImpl(const std::vector<std::vector<std::vector<NativeVector>>>& keyA,
-                        const std::vector<std::vector<std::vector<NativeInteger>>>& keyB)
-        : m_keyA(keyA), m_keyB(keyB) {}
+    LweSwitchingKeyImpl(const std::vector<std::vector<std::vector<NativeVector>>>& key_a,
+                        const std::vector<std::vector<std::vector<NativeInteger>>>& key_b)
+        : key_a_(key_a), key_b_(key_b) {}
 
     /**
      * Constructs a key-switching key from its components, moving them
      *
      * Both components are indexed [i][j - 1][k], where i is the position in the source (dimension-N) secret
-     * key skN, j in [1, baseKS) is the value of a base-baseKS digit and k is the digit position. The pair
-     * (keyA[i][j - 1][k], keyB[i][j - 1][k]) is an LWE encryption of skN[i] * j * baseKS^k under the target
-     * (dimension-n) secret key s modulo qKS, i.e. keyB = <keyA, s> + e + skN[i] * j * baseKS^k. For digit
+     * key sk_n, j in [1, base_ks) is the value of a base-base_ks digit and k is the digit position. The pair
+     * (key_a[i][j - 1][k], key_b[i][j - 1][k]) is an LWE encryption of sk_n[i] * j * base_ks^k under the target
+     * (dimension-n) secret key s modulo q_ks, i.e. key_b = <key_a, s> + e + sk_n[i] * j * base_ks^k. For digit
      * values j at or above the extent of the top digit position the innermost vectors have one entry fewer,
      * since that position is never read during key switching.
      *
-     * @param keyA the vectors "a" of the key-switching LWE encryptions
-     * @param keyB the integers "b" of the key-switching LWE encryptions
+     * @param key_a the vectors "a" of the key-switching LWE encryptions
+     * @param key_b the integers "b" of the key-switching LWE encryptions
      */
-    LWESwitchingKeyImpl(std::vector<std::vector<std::vector<NativeVector>>>&& keyA,
-                        std::vector<std::vector<std::vector<NativeInteger>>>&& keyB) noexcept
-        : m_keyA(std::move(keyA)), m_keyB(std::move(keyB)) {}
+    LweSwitchingKeyImpl(std::vector<std::vector<std::vector<NativeVector>>>&& key_a,
+                        std::vector<std::vector<std::vector<NativeInteger>>>&& key_b) noexcept
+        : key_a_(std::move(key_a)), key_b_(std::move(key_b)) {}
 
-    LWESwitchingKeyImpl(const LWESwitchingKeyImpl& rhs) : m_keyA(rhs.m_keyA), m_keyB(rhs.m_keyB) {}
+    LweSwitchingKeyImpl(const LweSwitchingKeyImpl& rhs) : key_a_(rhs.key_a_), key_b_(rhs.key_b_) {}
 
-    LWESwitchingKeyImpl(LWESwitchingKeyImpl&& rhs) noexcept
-        : m_keyA(std::move(rhs.m_keyA)), m_keyB(std::move(rhs.m_keyB)) {}
+    LweSwitchingKeyImpl(LweSwitchingKeyImpl&& rhs) noexcept
+        : key_a_(std::move(rhs.key_a_)), key_b_(std::move(rhs.key_b_)) {}
 
-    LWESwitchingKeyImpl& operator=(const LWESwitchingKeyImpl& rhs) {
-        m_keyA = rhs.m_keyA;
-        m_keyB = rhs.m_keyB;
+    LweSwitchingKeyImpl& operator=(const LweSwitchingKeyImpl& rhs) {
+        key_a_ = rhs.key_a_;
+        key_b_ = rhs.key_b_;
         return *this;
     }
 
-    LWESwitchingKeyImpl& operator=(LWESwitchingKeyImpl&& rhs) noexcept {
-        m_keyA = std::move(rhs.m_keyA);
-        m_keyB = std::move(rhs.m_keyB);
+    LweSwitchingKeyImpl& operator=(LweSwitchingKeyImpl&& rhs) noexcept {
+        key_a_ = std::move(rhs.key_a_);
+        key_b_ = std::move(rhs.key_b_);
         return *this;
     }
 
-    const std::vector<std::vector<std::vector<NativeVector>>>& GetElementsA() const {
-        return m_keyA;
+    const std::vector<std::vector<std::vector<NativeVector>>>& get_elements_a() const {
+        return key_a_;
     }
 
-    const std::vector<std::vector<std::vector<NativeInteger>>>& GetElementsB() const {
-        return m_keyB;
+    const std::vector<std::vector<std::vector<NativeInteger>>>& get_elements_b() const {
+        return key_b_;
     }
 
-    void SetElementsA(const std::vector<std::vector<std::vector<NativeVector>>>& keyA) {
-        m_keyA = keyA;
+    void set_elements_a(const std::vector<std::vector<std::vector<NativeVector>>>& key_a) {
+        key_a_ = key_a;
     }
 
-    void SetElementsB(const std::vector<std::vector<std::vector<NativeInteger>>>& keyB) {
-        m_keyB = keyB;
+    void set_elements_b(const std::vector<std::vector<std::vector<NativeInteger>>>& key_b) {
+        key_b_ = key_b;
     }
 
-    void SetElementsA(std::vector<std::vector<std::vector<NativeVector>>>&& keyA) noexcept {
-        m_keyA = std::move(keyA);
+    void set_elements_a(std::vector<std::vector<std::vector<NativeVector>>>&& key_a) noexcept {
+        key_a_ = std::move(key_a);
     }
 
-    void SetElementsB(std::vector<std::vector<std::vector<NativeInteger>>>&& keyB) noexcept {
-        m_keyB = std::move(keyB);
+    void set_elements_b(std::vector<std::vector<std::vector<NativeInteger>>>&& key_b) noexcept {
+        key_b_ = std::move(key_b);
     }
 
     /**
      * @param other the key-switching key to compare with
      * @return true if both keys have the same "a" vectors and "b" integers
      */
-    bool operator==(const LWESwitchingKeyImpl& other) const {
-        return (m_keyA == other.m_keyA && m_keyB == other.m_keyB);
+    bool operator==(const LweSwitchingKeyImpl& other) const {
+        return (key_a_ == other.key_a_ && key_b_ == other.key_b_);
     }
 
     /**
      * @param other the key-switching key to compare with
      * @return true if the keys differ
      */
-    bool operator!=(const LWESwitchingKeyImpl& other) const {
+    bool operator!=(const LweSwitchingKeyImpl& other) const {
         return !(*this == other);
     }
 
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
-        ar(::cereal::make_nvp("a", m_keyA));
-        ar(::cereal::make_nvp("b", m_keyB));
+        ar(::cereal::make_nvp("a", key_a_));
+        ar(::cereal::make_nvp("b", key_b_));
     }
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
-        ar(::cereal::make_nvp("a", m_keyA));
-        ar(::cereal::make_nvp("b", m_keyB));
+        ar(::cereal::make_nvp("a", key_a_));
+        ar(::cereal::make_nvp("b", key_b_));
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "LWESwitchingKey";
     }
 
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 
   private:
-    std::vector<std::vector<std::vector<NativeVector>>> m_keyA;   ///< vectors "a", indexed [i][j - 1][k]
-    std::vector<std::vector<std::vector<NativeInteger>>> m_keyB;  ///< integers "b", indexed [i][j - 1][k]
+    std::vector<std::vector<std::vector<NativeVector>>> key_a_;   ///< vectors "a", indexed [i][j - 1][k]
+    std::vector<std::vector<std::vector<NativeInteger>>> key_b_;  ///< integers "b", indexed [i][j - 1][k]
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_BOOLEAN_LWE_SWITCH_KEY_H_

@@ -51,7 +51,7 @@
 #include "cipher/fhe/encoding/plaintext_fwd.h"
 #include "cipher/fhe/config/scheme_id.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @class PlaintextImpl
@@ -69,28 +69,28 @@ class PlaintextImpl {
      */
     enum PtxtPolyType { IsPoly, IsDCRTPoly, IsNativePoly };
 
-    bool isEncoded{false};          ///< whether the values have been encoded into the polynomial
-    PtxtPolyType typeFlag;          ///< which of the three polynomial members is in use
-    EncodingParams encodingParams;  ///< encoding parameters (plaintext modulus, batch size, ...)
+    bool is_encoded_{false};          ///< whether the values have been encoded into the polynomial
+    PtxtPolyType type_flag;          ///< which of the three polynomial members is in use
+    EncodingParams encoding_params;  ///< encoding parameters (plaintext modulus, batch size, ...)
 
-    Poly encodedVector;              ///< encoded polynomial (multiprecision)
-    NativePoly encodedNativeVector;  ///< encoded polynomial (native integers)
-    DCRTPoly encodedVectorDCRT;      ///< encoded polynomial (RNS/CRT representation)
+    Poly encoded_vector;              ///< encoded polynomial (multiprecision)
+    NativePoly encoded_native_vector;  ///< encoded polynomial (native integers)
+    RnsPoly encoded_vector_dcrt;      ///< encoded polynomial (RNS/CRT representation)
 
-    PlaintextEncodings ptxtEncoding{INVALID_ENCODING};  ///< encoding type
-    SCHEME schemeID{SCHEME::INVALID_SCHEME};            ///< scheme the plaintext was created for
-    CKKSDataType ckksDataType{REAL};                    ///< CKKS data type (real or complex slots)
-    double scalingFactor{1.0};                          ///< CKKS scaling factor
-    NativeInteger scalingFactorInt{1};                  ///< BGV scaling factor
+    PlaintextEncodings ptxt_encoding{INVALID_ENCODING};  ///< encoding type
+    SCHEME scheme_id{SCHEME::INVALID_SCHEME};            ///< scheme the plaintext was created for
+    CkksDataType ckks_data_type{REAL};                    ///< CKKS data type (real or complex slots)
+    double scaling_factor{1.0};                          ///< CKKS scaling factor
+    NativeInteger scaling_factor_int{1};                  ///< BGV scaling factor
     size_t level{0};                                    ///< level (number of dropped RNS limbs) of the plaintext
-    size_t noiseScaleDeg{1};                            ///< noise scale degree (power of the scaling factor)
+    size_t noise_scale_deg{1};                            ///< noise scale degree (power of the scaling factor)
     uint32_t slots{0};                                  ///< number of slots (CKKS)
 
     /**
-     * @brief PrintValue() is called by operator<<
+     * @brief print_value() is called by operator<<
      * @param out stream to print to
      */
-    virtual void PrintValue(std::ostream& out) const = 0;
+    virtual void print_value(std::ostream& out) const = 0;
 
     /**
      * Method to compare two plaintext to test for equivalence.
@@ -99,7 +99,7 @@ class PlaintextImpl {
      * @param other - the other plaintext to compare to.
      * @return whether the two plaintext are equivalent.
      */
-    virtual bool CompareTo(const PlaintextImpl& other) const = 0;
+    virtual bool compare_to(const PlaintextImpl& other) const = 0;
 
   public:
     /**
@@ -108,15 +108,15 @@ class PlaintextImpl {
      * @param vp element parameters of the polynomial
      * @param ep encoding parameters
      * @param encoding encoding type
-     * @param schemeTag scheme the plaintext is created for
+     * @param scheme_tag scheme the plaintext is created for
      */
     PlaintextImpl(const std::shared_ptr<Poly::Params>& vp, EncodingParams ep, PlaintextEncodings encoding,
-                  SCHEME schemeTag = SCHEME::INVALID_SCHEME)
-        : typeFlag(IsPoly),
-          encodingParams(std::move(ep)),
-          encodedVector(vp, Format::COEFFICIENT),
-          ptxtEncoding(encoding),
-          schemeID(schemeTag) {}
+                  SCHEME scheme_tag = SCHEME::INVALID_SCHEME)
+        : type_flag(IsPoly),
+          encoding_params(std::move(ep)),
+          encoded_vector(vp, Format::COEFFICIENT),
+          ptxt_encoding(encoding),
+          scheme_id(scheme_tag) {}
 
     /**
      * Constructs an empty plaintext encoded into a native polynomial (NativePoly) in COEFFICIENT format.
@@ -124,34 +124,34 @@ class PlaintextImpl {
      * @param vp element parameters of the polynomial
      * @param ep encoding parameters
      * @param encoding encoding type
-     * @param schemeTag scheme the plaintext is created for
+     * @param scheme_tag scheme the plaintext is created for
      */
     PlaintextImpl(const std::shared_ptr<NativePoly::Params>& vp, EncodingParams ep, PlaintextEncodings encoding,
-                  SCHEME schemeTag = SCHEME::INVALID_SCHEME)
-        : typeFlag(IsNativePoly),
-          encodingParams(std::move(ep)),
-          encodedNativeVector(vp, Format::COEFFICIENT),
-          ptxtEncoding(encoding),
-          schemeID(schemeTag) {}
+                  SCHEME scheme_tag = SCHEME::INVALID_SCHEME)
+        : type_flag(IsNativePoly),
+          encoding_params(std::move(ep)),
+          encoded_native_vector(vp, Format::COEFFICIENT),
+          ptxt_encoding(encoding),
+          scheme_id(scheme_tag) {}
 
     /**
-     * Constructs an empty plaintext encoded into an RNS polynomial (DCRTPoly) in COEFFICIENT format; the
+     * Constructs an empty plaintext encoded into an RNS polynomial (RnsPoly) in COEFFICIENT format; the
      * multiprecision polynomial is initialized as well because the coefficient-packed encoding uses it.
      *
      * @param vp element parameters of the polynomial
      * @param ep encoding parameters
      * @param encoding encoding type
-     * @param schemeTag scheme the plaintext is created for
+     * @param scheme_tag scheme the plaintext is created for
      */
-    // TODO: eliminate use of encodedVector in coefpackedencoding to remove encodedVector init here
-    PlaintextImpl(const std::shared_ptr<DCRTPoly::Params>& vp, EncodingParams ep, PlaintextEncodings encoding,
-                  SCHEME schemeTag = SCHEME::INVALID_SCHEME)
-        : typeFlag(IsDCRTPoly),
-          encodingParams(std::move(ep)),
-          encodedVector(vp, Format::COEFFICIENT),
-          encodedVectorDCRT(vp, Format::COEFFICIENT),
-          ptxtEncoding(encoding),
-          schemeID(schemeTag) {}
+    // TODO: eliminate use of encoded_vector in coefpackedencoding to remove encoded_vector init here
+    PlaintextImpl(const std::shared_ptr<RnsPoly::Params>& vp, EncodingParams ep, PlaintextEncodings encoding,
+                  SCHEME scheme_tag = SCHEME::INVALID_SCHEME)
+        : type_flag(IsDCRTPoly),
+          encoding_params(std::move(ep)),
+          encoded_vector(vp, Format::COEFFICIENT),
+          encoded_vector_dcrt(vp, Format::COEFFICIENT),
+          ptxt_encoding(encoding),
+          scheme_id(scheme_tag) {}
 
     PlaintextImpl(const PlaintextImpl& rhs) = default;
 
@@ -160,108 +160,108 @@ class PlaintextImpl {
     virtual ~PlaintextImpl() = default;
 
     /**
-     * GetEncodingType
+     * get_encoding_type
      * @return Encoding type used by this plaintext
      */
-    PlaintextEncodings GetEncodingType() const {
-        return ptxtEncoding;
+    PlaintextEncodings get_encoding_type() const {
+        return ptxt_encoding;
     }
 
     /**
      * Get the scaling factor of the plaintext for CKKS-based plaintexts.
      * @return the scaling factor
      */
-    double GetScalingFactor() const {
-        return scalingFactor;
+    double get_scaling_factor() const {
+        return scaling_factor;
     }
 
     /**
      * Set the scaling factor of the plaintext for CKKS-based plaintexts.
      * @param sf the scaling factor
      */
-    void SetScalingFactor(double sf) {
-        scalingFactor = sf;
+    void set_scaling_factor(double sf) {
+        scaling_factor = sf;
     }
 
     /**
      * Get the scaling factor of the plaintext for BGV-based plaintexts.
      * @return the integer scaling factor
      */
-    NativeInteger GetScalingFactorInt() const {
-        return scalingFactorInt;
+    NativeInteger get_scaling_factor_int() const {
+        return scaling_factor_int;
     }
 
     /**
      * Set the scaling factor of the plaintext for BGV-based plaintexts.
      * @param sf the integer scaling factor
      */
-    void SetScalingFactorInt(NativeInteger sf) {
-        scalingFactorInt = sf;
+    void set_scaling_factor_int(NativeInteger sf) {
+        scaling_factor_int = sf;
     }
 
     /**
      * Get the scheme ID the plaintext was created for.
      * @return the scheme ID
      */
-    SCHEME GetSchemeID() const {
-        return schemeID;
+    SCHEME get_scheme_id() const {
+        return scheme_id;
     }
 
     /**
-     * IsEncoded
+     * is_encoded
      * @return true when encoding is done
      */
-    bool IsEncoded() const {
-        return isEncoded;
+    bool is_encoded() const {
+        return is_encoded_;
     }
 
     /**
-     * GetEncodingParams
+     * get_encoding_params
      * @return Encoding params used with this plaintext
      */
-    EncodingParams GetEncodingParams() const {
-        return encodingParams;
+    EncodingParams get_encoding_params() const {
+        return encoding_params;
     }
 
     /**
-     * GetCKKSDataType
+     * get_ckks_data_type
      * @return CKKS data type with this plaintext
      */
-    CKKSDataType GetCKKSDataType() const {
-        return ckksDataType;
+    CkksDataType get_ckks_data_type() const {
+        return ckks_data_type;
     }
 
     /**
-     * SetCKKSDataType
+     * set_ckks_data_type
      * @param cdt CKKS data type to be used with this plaintext
      */
-    void SetCKKSDataType(CKKSDataType cdt) {
-        ckksDataType = cdt;
+    void set_ckks_data_type(CkksDataType cdt) {
+        ckks_data_type = cdt;
     }
 
     /**
      * Encode the plaintext into a polynomial
      * @return true on success
      */
-    virtual bool Encode() = 0;
+    virtual bool encode() = 0;
 
     /**
      * @brief Decode the polynomial into the plaintext
      * @return true on success
      */
-    virtual bool Decode() = 0;
+    virtual bool decode() = 0;
 
     /**
      * @brief Decode the polynomial into the plaintext for CKKS, i.e., divide by the scaling factor of the
      * ciphertext the plaintext was decrypted from (only implemented by CKKSPackedEncoding).
      * @param depth noise scale degree of the decrypted ciphertext
-     * @param scalingFactor scaling factor of the decrypted ciphertext
-     * @param scalTech scaling technique of the scheme (selects the fixed or the level-specific scaling factor)
-     * @param executionMode EXEC_NOISE_ESTIMATION to decode only the noise estimate, EXEC_EVALUATION otherwise
+     * @param scaling_factor scaling factor of the decrypted ciphertext
+     * @param scal_tech scaling technique of the scheme (selects the fixed or the level-specific scaling factor)
+     * @param execution_mode EXEC_NOISE_ESTIMATION to decode only the noise estimate, EXEC_EVALUATION otherwise
      * @return true on success
      */
-    virtual bool Decode(size_t depth, double scalingFactor, ScalingTechnique scalTech, ExecutionMode executionMode) {
-        OPENFHE_THROW("Not implemented");
+    virtual bool decode(size_t depth, double scaling_factor, ScalingTechnique scal_tech, ExecutionMode execution_mode) {
+        CIPHER_THROW("Not implemented");
     }
 
     /**
@@ -269,8 +269,8 @@ class PlaintextImpl {
      * modulus the number to encode MUST be greater than this value
      * @return floor(-p/2)
      */
-    int64_t LowBound() const {
-        uint64_t ptm = GetEncodingParams()->GetPlaintextModulus();
+    int64_t low_bound() const {
+        uint64_t ptm = get_encoding_params()->get_plaintext_modulus();
         return -static_cast<int64_t>((ptm >> 1) + (ptm & 0x1));
     }
 
@@ -279,60 +279,60 @@ class PlaintextImpl {
      * modulus the number to encode MUST be less than or equal to this value
      * @return floor(p/2)
      */
-    int64_t HighBound() const {
-        return GetEncodingParams()->GetPlaintextModulus() >> 1;
+    int64_t high_bound() const {
+        return get_encoding_params()->get_plaintext_modulus() >> 1;
     }
 
     /**
-     * SetFormat - allows format to be changed for PlaintextImpl evaluations
+     * set_format - allows format to be changed for PlaintextImpl evaluations
      *
      * @param fmt the format (COEFFICIENT or EVALUATION) to switch the encoded element to
      */
-    void SetFormat(Format fmt) {
-        if (typeFlag == IsPoly)
-            encodedVector.SetFormat(fmt);
-        else if (typeFlag == IsNativePoly)
-            encodedNativeVector.SetFormat(fmt);
+    void set_format(Format fmt) {
+        if (type_flag == IsPoly)
+            encoded_vector.set_format(fmt);
+        else if (type_flag == IsNativePoly)
+            encoded_native_vector.set_format(fmt);
         else
-            encodedVectorDCRT.SetFormat(fmt);
+            encoded_vector_dcrt.set_format(fmt);
     }
 
     /**
-     * GetElement
+     * get_element
      * @return the Polynomial that the element was encoded into
      */
     template <typename Element>
-    Element& GetElement() {
-        OPENFHE_THROW("Not implemented");
+    Element& get_element() {
+        CIPHER_THROW("Not implemented");
     }
 
     /**
-     * GetElement
+     * get_element
      * @return the Polynomial that the element was encoded into
      */
     template <typename Element>
-    const Element& GetElement() const {
-        OPENFHE_THROW("Not implemented");
+    const Element& get_element() const {
+        CIPHER_THROW("Not implemented");
     }
 
     /**
-     * GetElementRingDimension
+     * get_element_ring_dimension
      * @return ring dimension on the underlying element
      */
-    uint32_t GetElementRingDimension() const {
-        return typeFlag == IsPoly ? encodedVector.GetRingDimension() :
-                                    (typeFlag == IsNativePoly ? encodedNativeVector.GetRingDimension() :
-                                                                encodedVectorDCRT.GetRingDimension());
+    uint32_t get_element_ring_dimension() const {
+        return type_flag == IsPoly ? encoded_vector.get_ring_dimension() :
+                                    (type_flag == IsNativePoly ? encoded_native_vector.get_ring_dimension() :
+                                                                encoded_vector_dcrt.get_ring_dimension());
     }
 
     /**
-     * GetElementModulus
+     * get_element_modulus
      * @return modulus on the underlying element
      */
-    BigInteger GetElementModulus() const {
-        return typeFlag == IsPoly ? encodedVector.GetModulus() :
-                                    (typeFlag == IsNativePoly ? BigInteger(encodedNativeVector.GetModulus()) :
-                                                                encodedVectorDCRT.GetModulus());
+    BigInteger get_element_modulus() const {
+        return type_flag == IsPoly ? encoded_vector.get_modulus() :
+                                    (type_flag == IsNativePoly ? BigInteger(encoded_native_vector.get_modulus()) :
+                                                                encoded_vector_dcrt.get_modulus());
     }
 
     /**
@@ -340,15 +340,15 @@ class PlaintextImpl {
      *
      * @return the length of the plaintext in terms of the number of elements.
      */
-    virtual size_t GetLength() const = 0;
+    virtual size_t get_length() const = 0;
 
     /**
      * resize the plaintext; only works for plaintexts that support a resizable
      * vector (coefpacked)
-     * @param newSize the new number of elements
+     * @param new_size the new number of elements
      */
-    virtual void SetLength(size_t newSize) {
-        OPENFHE_THROW("resize not supported");
+    virtual void set_length(size_t new_size) {
+        CIPHER_THROW("resize not supported");
     }
 
     /**
@@ -356,8 +356,8 @@ class PlaintextImpl {
      *
      * @return the degree of the scaling factor of the plaintext
      */
-    size_t GetNoiseScaleDeg() const {
-        return noiseScaleDeg;
+    size_t get_noise_scale_deg() const {
+        return noise_scale_deg;
     }
 
     /**
@@ -365,8 +365,8 @@ class PlaintextImpl {
      *
      * @param d the degree of the scaling factor
      */
-    void SetNoiseScaleDeg(size_t d) {
-        noiseScaleDeg = d;
+    void set_noise_scale_deg(size_t d) {
+        noise_scale_deg = d;
     }
 
     /**
@@ -374,7 +374,7 @@ class PlaintextImpl {
      *
      * @return the level of the plaintext
      */
-    size_t GetLevel() const {
+    size_t get_level() const {
         return level;
     }
 
@@ -383,7 +383,7 @@ class PlaintextImpl {
      *
      * @param l the level
      */
-    void SetLevel(size_t l) {
+    void set_level(size_t l) {
         level = l;
     }
 
@@ -392,7 +392,7 @@ class PlaintextImpl {
      *
      * @return the number of slots of the plaintext
      */
-    uint32_t GetSlots() const {
+    uint32_t get_slots() const {
         return slots;
     }
 
@@ -401,7 +401,7 @@ class PlaintextImpl {
      *
      * @param l the number of slots
      */
-    void SetSlots(uint32_t l) {
+    void set_slots(uint32_t l) {
         slots = l;
     }
 
@@ -410,8 +410,8 @@ class PlaintextImpl {
      *
      * @return log2 of the estimated error
      */
-    virtual double GetLogError() const {
-        OPENFHE_THROW("no estimate of noise available for the current scheme");
+    virtual double get_log_error() const {
+        CIPHER_THROW("no estimate of noise available for the current scheme");
     }
 
     /**
@@ -419,8 +419,8 @@ class PlaintextImpl {
      *
      * @return log2 of the estimated precision
      */
-    virtual double GetLogPrecision() const {
-        OPENFHE_THROW("no estimate of precision available for the current scheme");
+    virtual double get_log_precision() const {
+        CIPHER_THROW("no estimate of precision available for the current scheme");
     }
 
     /**
@@ -428,52 +428,52 @@ class PlaintextImpl {
      *
      * @return the string
      */
-    virtual const std::string& GetStringValue() const {
-        OPENFHE_THROW("not a string");
+    virtual const std::string& get_string_value() const {
+        CIPHER_THROW("not a string");
     }
     /**
      * Get the decoded integer vector (coefficient-packed encoding only; throws otherwise).
      *
      * @return the integer vector
      */
-    virtual const std::vector<int64_t>& GetCoefPackedValue() const {
-        OPENFHE_THROW("not a packed coefficient vector");
+    virtual const std::vector<int64_t>& get_coef_packed_value() const {
+        CIPHER_THROW("not a packed coefficient vector");
     }
     /**
      * Get the decoded integer vector (packed encoding only; throws otherwise).
      *
      * @return the integer vector
      */
-    virtual const std::vector<int64_t>& GetPackedValue() const {
-        OPENFHE_THROW("not a packed vector");
+    virtual const std::vector<int64_t>& get_packed_value() const {
+        CIPHER_THROW("not a packed vector");
     }
     /**
      * Get the decoded complex vector (CKKS packed encoding only; throws otherwise).
      *
      * @return the complex vector
      */
-    virtual const std::vector<std::complex<double>>& GetCKKSPackedValue() const {
-        OPENFHE_THROW("not a packed vector of complex numbers");
+    virtual const std::vector<std::complex<double>>& get_ckks_packed_value() const {
+        CIPHER_THROW("not a packed vector of complex numbers");
     }
     /**
      * Get the real parts of the decoded complex vector (CKKS packed encoding only; throws otherwise).
      *
      * @return the real vector
      */
-    virtual std::vector<double> GetRealPackedValue() const {
-        OPENFHE_THROW("not a packed vector of real numbers");
+    virtual std::vector<double> get_real_packed_value() const {
+        CIPHER_THROW("not a packed vector of real numbers");
     }
     /**
      * Set the string to encode (string encoding only; throws otherwise).
      */
-    virtual void SetStringValue(const std::string&) {
-        OPENFHE_THROW("does not support a string");
+    virtual void set_string_value(const std::string&) {
+        CIPHER_THROW("does not support a string");
     }
     /**
      * Set the integer vector to encode (packed and coefficient-packed encodings only; throws otherwise).
      */
-    virtual void SetIntVectorValue(const std::vector<int64_t>&) {
-        OPENFHE_THROW("does not support an int vector");
+    virtual void set_int_vector_value(const std::vector<int64_t>&) {
+        CIPHER_THROW("does not support an int vector");
     }
 
     /**
@@ -484,7 +484,7 @@ class PlaintextImpl {
      * @return whether the two plaintext are the same.
      */
     bool operator==(const PlaintextImpl& other) const {
-        return CompareTo(other);
+        return compare_to(other);
     }
 
     /**
@@ -498,13 +498,13 @@ class PlaintextImpl {
     }
 
     /**
-     * @brief operator<< for ostream integration - calls PrintValue()
+     * @brief operator<< for ostream integration - calls print_value()
      * @param out the output stream
      * @param item the plaintext to print
      * @return the output stream
      */
     friend std::ostream& operator<<(std::ostream& out, const PlaintextImpl& item) {
-        item.PrintValue(out);
+        item.print_value(out);
         return out;
     }
     /**
@@ -516,16 +516,16 @@ class PlaintextImpl {
     friend std::ostream& operator<<(std::ostream& out, const Plaintext& item) {
         if (item)
             return out << *item;  // Call the non-pointer version
-        OPENFHE_THROW("Cannot de-reference nullptr for printing");
+        CIPHER_THROW("Cannot de-reference nullptr for printing");
     }
 
     /**
-     * @brief GetFormattedValues() is similar to PrintValue() and requires a precision as an argument
+     * @brief get_formatted_values() is similar to print_value() and requires a precision as an argument
      * @param precision number of decimal digits of precision to print
      * @return string with all values
      */
-    virtual std::string GetFormattedValues(int64_t precision) const {
-        OPENFHE_THROW("not implemented");
+    virtual std::string get_formatted_values(int64_t precision) const {
+        CIPHER_THROW("not implemented");
     }
 };
 
@@ -552,59 +552,59 @@ inline bool operator!=(const Plaintext& p1, const Plaintext& p2) {
 }
 
 /**
- * GetElement
+ * get_element
  * @return the Polynomial that the element was encoded into
  */
 template <>
-inline const Poly& PlaintextImpl::GetElement<Poly>() const {
-    return encodedVector;
+inline const Poly& PlaintextImpl::get_element<Poly>() const {
+    return encoded_vector;
 }
 
 /**
- * GetElement
+ * get_element
  * @return the Polynomial that the element was encoded into
  */
 template <>
-inline Poly& PlaintextImpl::GetElement<Poly>() {
-    return encodedVector;
+inline Poly& PlaintextImpl::get_element<Poly>() {
+    return encoded_vector;
 }
 
 /**
- * GetElement
+ * get_element
  * @return the NativePolynomial that the element was encoded into
  */
 template <>
-inline const NativePoly& PlaintextImpl::GetElement<NativePoly>() const {
-    return encodedNativeVector;
+inline const NativePoly& PlaintextImpl::get_element<NativePoly>() const {
+    return encoded_native_vector;
 }
 
 /**
- * GetElement
+ * get_element
  * @return the NativePolynomial that the element was encoded into
  */
 template <>
-inline NativePoly& PlaintextImpl::GetElement<NativePoly>() {
-    return encodedNativeVector;
+inline NativePoly& PlaintextImpl::get_element<NativePoly>() {
+    return encoded_native_vector;
 }
 
 /**
- * GetElement
+ * get_element
  * @return the DCRTPolynomial that the element was encoded into
  */
 template <>
-inline const DCRTPoly& PlaintextImpl::GetElement<DCRTPoly>() const {
-    return encodedVectorDCRT;
+inline const RnsPoly& PlaintextImpl::get_element<RnsPoly>() const {
+    return encoded_vector_dcrt;
 }
 
 /**
- * GetElement
+ * get_element
  * @return the DCRTPolynomial that the element was encoded into
  */
 template <>
-inline DCRTPoly& PlaintextImpl::GetElement<DCRTPoly>() {
-    return encodedVectorDCRT;
+inline RnsPoly& PlaintextImpl::get_element<RnsPoly>() {
+    return encoded_vector_dcrt;
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_ENCODING_PLAINTEXT_H_

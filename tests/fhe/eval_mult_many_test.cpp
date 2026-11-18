@@ -42,146 +42,146 @@
 #include "cipher/fhe/bfv/context_gen.h"
 #include "cipher/util/debug.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 class UTGENERAL_EVAL_MULT_MANY : public ::testing::Test {
   protected:
     virtual void SetUp() {
-        OpenFHEParallelControls.UnitTestStart();
+        cipher_parallel_controls.unit_test_start();
     }
 
     virtual void TearDown() {
-        OpenFHEParallelControls.UnitTestStop();
+        cipher_parallel_controls.unit_test_stop();
     }
 
   public:
 };
 
-static CryptoContext<DCRTPoly> MakeBFVrnsDCRTPolyCC() {
-    CCParams<CryptoContextBFVRNS> parameters;
-    parameters.SetPlaintextModulus(256);
-    parameters.SetStandardDeviation(4);
-    parameters.SetMultiplicativeDepth(3);
-    parameters.SetMaxRelinSkDeg(4);
-    parameters.SetScalingModSize(60);
+static CryptoContext<RnsPoly> make_bfv_rns_rns_poly_cc() {
+    ContextParams<BfvRnsContext> parameters;
+    parameters.set_plaintext_modulus(256);
+    parameters.set_standard_deviation(4);
+    parameters.set_multiplicative_depth(3);
+    parameters.set_max_relin_sk_deg(4);
+    parameters.set_scaling_mod_size(60);
 
-    CryptoContext<DCRTPoly> cryptoContext = GenCryptoContext(parameters);
-    cryptoContext->Enable(PKE);
-    cryptoContext->Enable(KEYSWITCH);
-    cryptoContext->Enable(LEVELEDSHE);
-    cryptoContext->Enable(ADVANCEDSHE);
+    CryptoContext<RnsPoly> crypto_context = make_crypto_context(parameters);
+    crypto_context->enable(PKE);
+    crypto_context->enable(KEYSWITCH);
+    crypto_context->enable(LEVELEDSHE);
+    crypto_context->enable(ADVANCEDSHE);
 
-    return cryptoContext;
+    return crypto_context;
 }
 
 template <typename Element>
-static void RunEvalMultManyTest(CryptoContext<Element> cc, std::string msg);
+static void run_eval_mult_many_test(CryptoContext<Element> cc, std::string msg);
 
-// Tests EvalMult w/o keyswitching and EvalMultMany for BFVrns in the
+// Tests eval_mult w/o keyswitching and eval_mult_many for BFVrns in the
 // UNIFORM_TERNARY mode
 TEST(UTGENERAL_EVAL_MULT_MANY, Poly_BFVrns_Eval_Mult_Many_Operations) {
-    RunEvalMultManyTest(MakeBFVrnsDCRTPolyCC(), "BFVrns");
+    run_eval_mult_many_test(make_bfv_rns_rns_poly_cc(), "BFVrns");
 }
 
 template <typename Element>
-static void RunEvalMultManyTest(CryptoContext<Element> cryptoContext, std::string msg) {
-    OPENFHE_DEBUG_FLAG(false);
+static void run_eval_mult_many_test(CryptoContext<Element> crypto_context, std::string msg) {
+    CIPHER_DEBUG_FLAG(false);
     ////////////////////////////////////////////////////////////
     // Perform the key generation operation.
     ////////////////////////////////////////////////////////////
-    OPENFHE_DEBUG("In RunEvalMultManyTest " << msg);
-    auto keyPair = cryptoContext->KeyGen();
-    OPENFHE_DEBUG("keygen");
-    ASSERT_TRUE(keyPair.good()) << "Key generation failed!";
-    OPENFHE_DEBUG("EvalMultKeysGen");
+    CIPHER_DEBUG("In RunEvalMultManyTest " << msg);
+    auto key_pair = crypto_context->key_gen();
+    CIPHER_DEBUG("keygen");
+    ASSERT_TRUE(key_pair.good()) << "Key generation failed!";
+    CIPHER_DEBUG("EvalMultKeysGen");
     // Create evaluation key vector to be used in keyswitching
 
-    cryptoContext->EvalMultKeysGen(keyPair.secretKey);
+    crypto_context->eval_mult_keys_gen(key_pair.secret_key);
 
     ////////////////////////////////////////////////////////////
     // Plaintext
     ////////////////////////////////////////////////////////////
 
-    std::vector<int64_t> vectorOfInts1 = {5, 4, 3, 2, 1, 0, 5, 4, 3, 2, 1, 0};
-    std::vector<int64_t> vectorOfInts2 = {2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    std::vector<int64_t> vectorOfInts3 = {3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    std::vector<int64_t> vectorOfInts4 = {4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    std::vector<int64_t> vector_of_ints1 = {5, 4, 3, 2, 1, 0, 5, 4, 3, 2, 1, 0};
+    std::vector<int64_t> vector_of_ints2 = {2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    std::vector<int64_t> vector_of_ints3 = {3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    std::vector<int64_t> vector_of_ints4 = {4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-    std::vector<int64_t> vectorOfInts5 = {10, 8, 6, 4, 2, 0, 10, 8, 6, 4, 2, 0};
-    std::vector<int64_t> vectorOfInts6 = {30, 24, 18, 12, 6, 0, 30, 24, 18, 12, 6, 0};
-    std::vector<int64_t> vectorOfInts7 = {120, 96, 72, 48, 24, 0, 120, 96, 72, 48, 24, 0};
+    std::vector<int64_t> vector_of_ints5 = {10, 8, 6, 4, 2, 0, 10, 8, 6, 4, 2, 0};
+    std::vector<int64_t> vector_of_ints6 = {30, 24, 18, 12, 6, 0, 30, 24, 18, 12, 6, 0};
+    std::vector<int64_t> vector_of_ints7 = {120, 96, 72, 48, 24, 0, 120, 96, 72, 48, 24, 0};
 
-    OPENFHE_DEBUG("MakeCoefPackedPlaintext");
-    Plaintext plaintext1 = cryptoContext->MakeCoefPackedPlaintext(vectorOfInts1);
-    Plaintext plaintext2 = cryptoContext->MakeCoefPackedPlaintext(vectorOfInts2);
-    Plaintext plaintext3 = cryptoContext->MakeCoefPackedPlaintext(vectorOfInts3);
-    Plaintext plaintext4 = cryptoContext->MakeCoefPackedPlaintext(vectorOfInts4);
+    CIPHER_DEBUG("MakeCoefPackedPlaintext");
+    Plaintext plaintext1 = crypto_context->make_coef_packed_plaintext(vector_of_ints1);
+    Plaintext plaintext2 = crypto_context->make_coef_packed_plaintext(vector_of_ints2);
+    Plaintext plaintext3 = crypto_context->make_coef_packed_plaintext(vector_of_ints3);
+    Plaintext plaintext4 = crypto_context->make_coef_packed_plaintext(vector_of_ints4);
 
-    Plaintext plaintextResult1 = cryptoContext->MakeCoefPackedPlaintext(vectorOfInts5);
-    Plaintext plaintextResult2 = cryptoContext->MakeCoefPackedPlaintext(vectorOfInts6);
-    Plaintext plaintextResult3 = cryptoContext->MakeCoefPackedPlaintext(vectorOfInts7);
+    Plaintext plaintext_result1 = crypto_context->make_coef_packed_plaintext(vector_of_ints5);
+    Plaintext plaintext_result2 = crypto_context->make_coef_packed_plaintext(vector_of_ints6);
+    Plaintext plaintext_result3 = crypto_context->make_coef_packed_plaintext(vector_of_ints7);
 
     ////////////////////////////////////////////////////////////
     // Encryption
     ////////////////////////////////////////////////////////////
-    OPENFHE_DEBUG("Encryption");
-    auto ciphertext1 = cryptoContext->Encrypt(keyPair.publicKey, plaintext1);
-    auto ciphertext2 = cryptoContext->Encrypt(keyPair.publicKey, plaintext2);
-    auto ciphertext3 = cryptoContext->Encrypt(keyPair.publicKey, plaintext3);
-    auto ciphertext4 = cryptoContext->Encrypt(keyPair.publicKey, plaintext4);
+    CIPHER_DEBUG("Encryption");
+    auto ciphertext1 = crypto_context->encrypt(key_pair.public_key, plaintext1);
+    auto ciphertext2 = crypto_context->encrypt(key_pair.public_key, plaintext2);
+    auto ciphertext3 = crypto_context->encrypt(key_pair.public_key, plaintext3);
+    auto ciphertext4 = crypto_context->encrypt(key_pair.public_key, plaintext4);
 
     ////////////////////////////////////////////////////////////
-    // EvalMult Operation
+    // eval_mult Operation
     ////////////////////////////////////////////////////////////
-    OPENFHE_DEBUG("EvalMults");
+    CIPHER_DEBUG("EvalMults");
     // Perform consecutive multiplications and do a keyswtiching at the end.
-    auto ciphertextMul12 = cryptoContext->EvalMultNoRelin(ciphertext1, ciphertext2);
-    auto ciphertextMul123 = cryptoContext->EvalMultNoRelin(ciphertextMul12, ciphertext3);
-    auto ciphertextMul1234 = cryptoContext->EvalMultAndRelinearize(ciphertextMul123, ciphertext4);
+    auto ciphertext_mul12 = crypto_context->eval_mult_no_relin(ciphertext1, ciphertext2);
+    auto ciphertext_mul123 = crypto_context->eval_mult_no_relin(ciphertext_mul12, ciphertext3);
+    auto ciphertext_mul1234 = crypto_context->eval_mult_and_relinearize(ciphertext_mul123, ciphertext4);
 
     ////////////////////////////////////////////////////////////
     // Decryption of multiplicative results with and without keyswtiching (depends
     // on the level)
     ////////////////////////////////////////////////////////////
 
-    Plaintext plaintextMul1;
-    Plaintext plaintextMul2;
-    Plaintext plaintextMul3;
-    OPENFHE_DEBUG("DECRYPTIO");
-    cryptoContext->Decrypt(keyPair.secretKey, ciphertextMul12, &plaintextMul1);
-    cryptoContext->Decrypt(keyPair.secretKey, ciphertextMul123, &plaintextMul2);
-    cryptoContext->Decrypt(keyPair.secretKey, ciphertextMul1234, &plaintextMul3);
+    Plaintext plaintext_mul1;
+    Plaintext plaintext_mul2;
+    Plaintext plaintext_mul3;
+    CIPHER_DEBUG("DECRYPTIO");
+    crypto_context->decrypt(key_pair.secret_key, ciphertext_mul12, &plaintext_mul1);
+    crypto_context->decrypt(key_pair.secret_key, ciphertext_mul123, &plaintext_mul2);
+    crypto_context->decrypt(key_pair.secret_key, ciphertext_mul1234, &plaintext_mul3);
 
     ////////////////////////////////////////////////////////////
-    // Prepare EvalMultMany
+    // Prepare eval_mult_many
     ////////////////////////////////////////////////////////////
 
-    std::vector<Ciphertext<Element>> cipherTextList;
+    std::vector<Ciphertext<Element>> cipher_text_list;
 
-    cipherTextList.push_back(ciphertext1);
-    cipherTextList.push_back(ciphertext2);
-    cipherTextList.push_back(ciphertext3);
-    cipherTextList.push_back(ciphertext4);
-
-    ////////////////////////////////////////////////////////////
-    // Compute EvalMultMany
-    ////////////////////////////////////////////////////////////
-
-    auto ciphertextMul12345 = cryptoContext->EvalMultMany(cipherTextList);
+    cipher_text_list.push_back(ciphertext1);
+    cipher_text_list.push_back(ciphertext2);
+    cipher_text_list.push_back(ciphertext3);
+    cipher_text_list.push_back(ciphertext4);
 
     ////////////////////////////////////////////////////////////
-    // Decrypt EvalMultMany
+    // Compute eval_mult_many
     ////////////////////////////////////////////////////////////
 
-    Plaintext plaintextMulMany;
-    cryptoContext->Decrypt(keyPair.secretKey, ciphertextMul12345, &plaintextMulMany);
+    auto ciphertext_mul12345 = crypto_context->eval_mult_many(cipher_text_list);
 
-    plaintextResult1->SetLength(plaintextMul1->GetLength());
-    plaintextResult2->SetLength(plaintextMul2->GetLength());
-    plaintextResult3->SetLength(plaintextMul3->GetLength());
+    ////////////////////////////////////////////////////////////
+    // Decrypt eval_mult_many
+    ////////////////////////////////////////////////////////////
 
-    EXPECT_EQ(*plaintextMul1, *plaintextResult1) << msg << ".EvalMult gives incorrect results.\n";
-    EXPECT_EQ(*plaintextMul2, *plaintextResult2) << msg << ".EvalMult gives incorrect results.\n";
-    EXPECT_EQ(*plaintextMul3, *plaintextResult3) << msg << ".EvalMultAndRelinearize gives incorrect results.\n";
-    EXPECT_EQ(*plaintextMulMany, *plaintextResult3) << msg << ".EvalMultMany gives incorrect results.\n";
+    Plaintext plaintext_mul_many;
+    crypto_context->decrypt(key_pair.secret_key, ciphertext_mul12345, &plaintext_mul_many);
+
+    plaintext_result1->set_length(plaintext_mul1->get_length());
+    plaintext_result2->set_length(plaintext_mul2->get_length());
+    plaintext_result3->set_length(plaintext_mul3->get_length());
+
+    EXPECT_EQ(*plaintext_mul1, *plaintext_result1) << msg << ".EvalMult gives incorrect results.\n";
+    EXPECT_EQ(*plaintext_mul2, *plaintext_result2) << msg << ".EvalMult gives incorrect results.\n";
+    EXPECT_EQ(*plaintext_mul3, *plaintext_result3) << msg << ".EvalMultAndRelinearize gives incorrect results.\n";
+    EXPECT_EQ(*plaintext_mul_many, *plaintext_result3) << msg << ".EvalMultMany gives incorrect results.\n";
 }

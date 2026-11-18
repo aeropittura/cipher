@@ -39,14 +39,14 @@
 #include "cipher/fhe/ckks/scheme.h"
 #include "cipher/util/serial.h"
 
-CEREAL_REGISTER_TYPE(lbcrypto::CryptoParametersCKKSRNS);
-CEREAL_REGISTER_TYPE(lbcrypto::SchemeCKKSRNS);
-CEREAL_REGISTER_TYPE(lbcrypto::CKKSBootstrapPrecom);
-CEREAL_REGISTER_TYPE(lbcrypto::FHECKKSRNS);
-CEREAL_REGISTER_TYPE(lbcrypto::SWITCHCKKSRNS);
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::CkksRnsCryptoParams, "lbcrypto::CryptoParametersCKKSRNS");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::CkksRnsScheme, "lbcrypto::SchemeCKKSRNS");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::CkksBootstrapPrecomputation, "lbcrypto::CKKSBootstrapPrecom");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::CkksRnsFhe, "lbcrypto::FHECKKSRNS");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::CkksRnsSchemeSwitching, "lbcrypto::SWITCHCKKSRNS");
 
-CEREAL_REGISTER_POLYMORPHIC_RELATION(lbcrypto::CryptoParametersRNS, lbcrypto::CryptoParametersCKKSRNS);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(lbcrypto::FHERNS, lbcrypto::FHECKKSRNS);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(lbcrypto::FHERNS, lbcrypto::SWITCHCKKSRNS);
+CEREAL_REGISTER_POLYMORPHIC_RELATION(cipher::RnsCryptoParams, cipher::CkksRnsCryptoParams);
+CEREAL_REGISTER_POLYMORPHIC_RELATION(cipher::RnsFhe, cipher::CkksRnsFhe);
+CEREAL_REGISTER_POLYMORPHIC_RELATION(cipher::RnsFhe, cipher::CkksRnsSchemeSwitching);
 
 #endif  // CIPHER_FHE_CKKS_SER_H_

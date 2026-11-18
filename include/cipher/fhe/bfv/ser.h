@@ -39,11 +39,11 @@
 #include "cipher/fhe/bfv/scheme.h"
 #include "cipher/util/serial.h"
 
-CEREAL_REGISTER_TYPE(lbcrypto::CryptoParametersBFVRNS);
-CEREAL_REGISTER_TYPE(lbcrypto::SchemeBFVRNS);
-CEREAL_REGISTER_TYPE(lbcrypto::FHEBFVRNS);
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::BfvRnsCryptoParams, "lbcrypto::CryptoParametersBFVRNS");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::BfvRnsScheme, "lbcrypto::SchemeBFVRNS");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::BfvRnsFhe, "lbcrypto::FHEBFVRNS");
 
-CEREAL_REGISTER_POLYMORPHIC_RELATION(lbcrypto::CryptoParametersRNS, lbcrypto::CryptoParametersBFVRNS);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(lbcrypto::FHERNS, lbcrypto::FHEBFVRNS);
+CEREAL_REGISTER_POLYMORPHIC_RELATION(cipher::RnsCryptoParams, cipher::BfvRnsCryptoParams);
+CEREAL_REGISTER_POLYMORPHIC_RELATION(cipher::RnsFhe, cipher::BfvRnsFhe);
 
 #endif  // CIPHER_FHE_BFV_SER_H_

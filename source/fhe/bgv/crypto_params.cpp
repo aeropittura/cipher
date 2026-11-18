@@ -40,128 +40,128 @@ BGV implementation. See https://eprint.iacr.org/2021/204 for details.
 #include <cstdint>
 #include <vector>
 
-namespace lbcrypto {
+namespace cipher {
 
 // Precomputation of CRT tables encryption, decryption, and  homomorphic
 // multiplication
-void CryptoParametersBGVRNS::PrecomputeCRTTables(KeySwitchTechnique ksTech, ScalingTechnique scalTech,
-                                                 EncryptionTechnique encTech, MultiplicationTechnique multTech,
-                                                 uint32_t numPartQ, uint32_t auxBits, uint32_t extraBits) {
-    CryptoParametersRNS::PrecomputeCRTTables(ksTech, scalTech, encTech, multTech, numPartQ, auxBits, extraBits);
+void BgvRnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, ScalingTechnique scal_tech,
+                                                 EncryptionTechnique enc_tech, MultiplicationTechnique mult_tech,
+                                                 uint32_t num_part_q, uint32_t aux_bits, uint32_t extra_bits) {
+    RnsCryptoParams::precompute_crt_tables(ks_tech, scal_tech, enc_tech, mult_tech, num_part_q, aux_bits, extra_bits);
 
-    size_t sizeQ = GetElementParams()->GetParams().size();
+    size_t size_q = get_element_params()->get_params().size();
 
-    std::vector<NativeInteger> moduliQ(sizeQ);
-    std::vector<NativeInteger> rootsQ(sizeQ);
+    std::vector<NativeInteger> moduli_q(size_q);
+    std::vector<NativeInteger> roots_q(size_q);
 
-    for (size_t i = 0; i < sizeQ; i++) {
-        moduliQ[i] = GetElementParams()->GetParams()[i]->GetModulus();
-        rootsQ[i] = GetElementParams()->GetParams()[i]->GetRootOfUnity();
+    for (size_t i = 0; i < size_q; i++) {
+        moduli_q[i] = get_element_params()->get_params()[i]->get_modulus();
+        roots_q[i] = get_element_params()->get_params()[i]->get_root_of_unity();
     }
 
-    NativeInteger t(GetPlaintextModulus());
+    NativeInteger t(get_plaintext_modulus());
 
-    if (m_ksTechnique == HYBRID) {
-        size_t sizeP = GetParamsP()->GetParams().size();
-        std::vector<NativeInteger> moduliP(sizeP);
-        for (size_t j = 0; j < sizeP; j++) {
-            moduliP[j] = GetParamsP()->GetParams()[j]->GetModulus();
+    if (ks_technique_ == HYBRID) {
+        size_t size_p = get_params_p()->get_params().size();
+        std::vector<NativeInteger> moduli_p(size_p);
+        for (size_t j = 0; j < size_p; j++) {
+            moduli_p[j] = get_params_p()->get_params()[j]->get_modulus();
         }
 
         // Pre-compute values [t^{-1}]_{q_i}, precomputations for  [t]_{q_i}
-        m_tInvModq.resize(sizeQ);
-        m_tInvModqPrecon.resize(sizeQ);
-        for (uint32_t i = 0; i < sizeQ; i++) {
-            m_tInvModq[i] = t.ModInverse(moduliQ[i]);
-            m_tInvModqPrecon[i] = m_tInvModq[i].PrepModMulConst(moduliQ[i]);
+        t_inv_modq_.resize(size_q);
+        t_inv_modq_precon_.resize(size_q);
+        for (uint32_t i = 0; i < size_q; i++) {
+            t_inv_modq_[i] = t.mod_inverse(moduli_q[i]);
+            t_inv_modq_precon_[i] = t_inv_modq_[i].prep_mod_mul_const(moduli_q[i]);
         }
 
         // Pre-compute values [t^{-1}]_{p_i}, precomputations for [t]_{q_i}
-        m_tInvModp.resize(sizeP);
-        m_tInvModpPrecon.resize(sizeP);
-        for (uint32_t j = 0; j < sizeP; j++) {
-            m_tInvModp[j] = t.ModInverse(moduliP[j]);
-            m_tInvModpPrecon[j] = m_tInvModp[j].PrepModMulConst(moduliP[j]);
+        t_inv_modp_.resize(size_p);
+        t_inv_modp_precon_.resize(size_p);
+        for (uint32_t j = 0; j < size_p; j++) {
+            t_inv_modp_[j] = t.mod_inverse(moduli_p[j]);
+            t_inv_modp_precon_[j] = t_inv_modp_[j].prep_mod_mul_const(moduli_p[j]);
         }
     }
 
-    m_negtInvModq.resize(sizeQ);
-    m_negtInvModqPrecon.resize(sizeQ);
-    m_tModqPrecon.resize(sizeQ);
-    m_qlInvModq.resize(sizeQ);
-    m_qlInvModqPrecon.resize(sizeQ);
-    for (uint32_t i = 0; i < sizeQ; i++) {
-        m_negtInvModq[i] = moduliQ[i] - t.ModInverse(moduliQ[i]);
-        m_negtInvModqPrecon[i] = m_negtInvModq[i].PrepModMulConst(moduliQ[i]);
-        NativeInteger tModQi = t.Mod(moduliQ[i]);
-        m_tModqPrecon[i] = tModQi.PrepModMulConst(moduliQ[i]);
-        m_qlInvModq[i].resize(i);
-        m_qlInvModqPrecon[i].resize(i);
+    negt_inv_modq_.resize(size_q);
+    negt_inv_modq_precon_.resize(size_q);
+    t_modq_precon_.resize(size_q);
+    ql_inv_modq_.resize(size_q);
+    ql_inv_modq_precon_.resize(size_q);
+    for (uint32_t i = 0; i < size_q; i++) {
+        negt_inv_modq_[i] = moduli_q[i] - t.mod_inverse(moduli_q[i]);
+        negt_inv_modq_precon_[i] = negt_inv_modq_[i].prep_mod_mul_const(moduli_q[i]);
+        NativeInteger t_mod_qi = t.mod(moduli_q[i]);
+        t_modq_precon_[i] = t_mod_qi.prep_mod_mul_const(moduli_q[i]);
+        ql_inv_modq_[i].resize(i);
+        ql_inv_modq_precon_[i].resize(i);
         for (uint32_t j = 0; j < i; ++j) {
-            m_qlInvModq[i][j] = moduliQ[i].ModInverse(moduliQ[j]);
-            m_qlInvModqPrecon[i][j] = m_qlInvModq[i][j].PrepModMulConst(moduliQ[j]);
+            ql_inv_modq_[i][j] = moduli_q[i].mod_inverse(moduli_q[j]);
+            ql_inv_modq_precon_[i][j] = ql_inv_modq_[i][j].prep_mod_mul_const(moduli_q[j]);
         }
     }
 
-    if (m_scalTechnique == FLEXIBLEAUTO || m_scalTechnique == FLEXIBLEAUTOEXT) {
-        m_scalingFactorsInt.resize(sizeQ);
-        m_scalingFactorsInt[0] = moduliQ[sizeQ - 1] % t;
-        uint32_t isFlexibleAutoExt = (m_scalTechnique == FLEXIBLEAUTOEXT) ? 1 : 0;
-        if (isFlexibleAutoExt) {
-            m_scalingFactorsInt[1] = moduliQ[sizeQ - 2] % t;
+    if (scal_technique_ == FLEXIBLEAUTO || scal_technique_ == FLEXIBLEAUTOEXT) {
+        scaling_factors_int_.resize(size_q);
+        scaling_factors_int_[0] = moduli_q[size_q - 1] % t;
+        uint32_t is_flexible_auto_ext = (scal_technique_ == FLEXIBLEAUTOEXT) ? 1 : 0;
+        if (is_flexible_auto_ext) {
+            scaling_factors_int_[1] = moduli_q[size_q - 2] % t;
         }
-        for (uint32_t k = 1 + isFlexibleAutoExt; k < sizeQ - isFlexibleAutoExt; k++) {
-            NativeInteger prevSF = m_scalingFactorsInt[k - 1];
-            NativeInteger qInv = moduliQ[sizeQ - k].ModInverse(t);
-            m_scalingFactorsInt[k] = prevSF.ModMul(prevSF, t).ModMul(qInv, t);
+        for (uint32_t k = 1 + is_flexible_auto_ext; k < size_q - is_flexible_auto_ext; k++) {
+            NativeInteger prev_sf = scaling_factors_int_[k - 1];
+            NativeInteger q_inv = moduli_q[size_q - k].mod_inverse(t);
+            scaling_factors_int_[k] = prev_sf.mod_mul(prev_sf, t).mod_mul(q_inv, t);
         }
 
-        m_scalingFactorsIntBig.resize(sizeQ - 1);
+        scaling_factors_int_big_.resize(size_q - 1);
 
-        if (m_scalingFactorsIntBig.size() > 0) {
-            if (m_scalTechnique == FLEXIBLEAUTO) {
-                m_scalingFactorsIntBig[0] = m_scalingFactorsInt[0].ModMul(m_scalingFactorsInt[0], t);
+        if (scaling_factors_int_big_.size() > 0) {
+            if (scal_technique_ == FLEXIBLEAUTO) {
+                scaling_factors_int_big_[0] = scaling_factors_int_[0].mod_mul(scaling_factors_int_[0], t);
             } else {
-                m_scalingFactorsIntBig[0] = m_scalingFactorsInt[0].ModMul(m_scalingFactorsInt[1], t);
+                scaling_factors_int_big_[0] = scaling_factors_int_[0].mod_mul(scaling_factors_int_[1], t);
             }
-            for (uint32_t k = 1; k < sizeQ - 1; k++) {
-                m_scalingFactorsIntBig[k] = m_scalingFactorsInt[k].ModMul(m_scalingFactorsInt[k], t);
+            for (uint32_t k = 1; k < size_q - 1; k++) {
+                scaling_factors_int_big_[k] = scaling_factors_int_[k].mod_mul(scaling_factors_int_[k], t);
             }
         }
 
         // Moduli mod t
-        m_qModt.resize(sizeQ);
-        for (uint32_t i = 0; i < sizeQ; i++) {
-            m_qModt[i] = moduliQ[i].Mod(t);
+        q_modt_.resize(size_q);
+        for (uint32_t i = 0; i < size_q; i++) {
+            q_modt_[i] = moduli_q[i].mod(t);
         }
     }
 
-    if (m_ksTechnique == HYBRID) {
-        const auto BarrettBase128Bit(BigInteger(1).LShiftEq(128));
-        m_modqBarrettMu.resize(sizeQ);
-        for (uint32_t i = 0; i < sizeQ; i++) {
-            m_modqBarrettMu[i] = (BarrettBase128Bit / BigInteger(moduliQ[i])).ConvertToInt<DoubleNativeInt>();
+    if (ks_technique_ == HYBRID) {
+        const auto barrett_base128_bit(BigInteger(1).l_shift_eq(128));
+        modq_barrett_mu_.resize(size_q);
+        for (uint32_t i = 0; i < size_q; i++) {
+            modq_barrett_mu_[i] = (barrett_base128_bit / BigInteger(moduli_q[i])).convert_to_int<DoubleNativeInt>();
         }
     }
 }
 
-uint64_t CryptoParametersBGVRNS::FindAuxPrimeStep() const {
-    size_t n = GetElementParams()->GetRingDimension();
-    uint32_t plaintextModulus = GetPlaintextModulus();
-    uint32_t cyclOrder = 2 * n;
+uint64_t BgvRnsCryptoParams::find_aux_prime_step() const {
+    size_t n = get_element_params()->get_ring_dimension();
+    uint32_t plaintext_modulus = get_plaintext_modulus();
+    uint32_t cycl_order = 2 * n;
     uint32_t pow2ptm = 1;
 
     // The largest power of 2 dividing ptm
-    // Check whether it is larger than cyclOrder or not
-    while (plaintextModulus % 2 == 0) {
-        plaintextModulus >>= 1;
+    // Check whether it is larger than cycl_order or not
+    while (plaintext_modulus % 2 == 0) {
+        plaintext_modulus >>= 1;
         pow2ptm <<= 1;
     }
 
-    if (pow2ptm < cyclOrder)
-        pow2ptm = cyclOrder;
+    if (pow2ptm < cycl_order)
+        pow2ptm = cycl_order;
 
-    return static_cast<uint64_t>(pow2ptm) * plaintextModulus;
+    return static_cast<uint64_t>(pow2ptm) * plaintext_modulus;
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher

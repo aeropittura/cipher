@@ -41,7 +41,7 @@
 #include <string>
 #include <vector>
 
-namespace lbcrypto {
+namespace cipher {
 
 #define RIGHT_ROT(x, n) ((x >> (n % (sizeof(x) * 8)) | (x << ((sizeof(x) * 8) - (n % (sizeof(x) * 8))))))
 
@@ -77,23 +77,23 @@ void HashUtil::SHA256(std::string message, std::vector<int64_t>& digest) {
     uint32_t h_256[8] = {0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
                          0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19};
 
-    uint64_t m_len = message.size() * 8;
+    uint64_t len_ = message.size() * 8;
     uint16_t pad_len = 1;
-    while ((m_len + pad_len) % 512 != 448) {
+    while ((len_ + pad_len) % 512 != 448) {
         pad_len++;
     }
     message.push_back(static_cast<char>(0x80));
     for (int a = 0; a < (pad_len) / 8 - 1; a++) {
         message.push_back(0);
     }
-    message.push_back((uint8_t)((m_len & 0xff00000000000000) >> 56));
-    message.push_back((uint8_t)((m_len & 0x00ff000000000000) >> 48));
-    message.push_back((uint8_t)((m_len & 0x0000ff0000000000) >> 40));
-    message.push_back((uint8_t)((m_len & 0x000000ff00000000) >> 32));
-    message.push_back((uint8_t)((m_len & 0x00000000ff000000) >> 24));
-    message.push_back((uint8_t)((m_len & 0x0000000000ff0000) >> 16));
-    message.push_back((uint8_t)((m_len & 0x000000000000ff00) >> 8));
-    message.push_back((uint8_t)(m_len & 0x00000000000000ff));
+    message.push_back((uint8_t)((len_ & 0xff00000000000000) >> 56));
+    message.push_back((uint8_t)((len_ & 0x00ff000000000000) >> 48));
+    message.push_back((uint8_t)((len_ & 0x0000ff0000000000) >> 40));
+    message.push_back((uint8_t)((len_ & 0x000000ff00000000) >> 32));
+    message.push_back((uint8_t)((len_ & 0x00000000ff000000) >> 24));
+    message.push_back((uint8_t)((len_ & 0x0000000000ff0000) >> 16));
+    message.push_back((uint8_t)((len_ & 0x000000000000ff00) >> 8));
+    message.push_back((uint8_t)(len_ & 0x00000000000000ff));
 
     for (size_t n = 0; n < (message.size() * 8) / 512; n++) {
         uint32_t w[64];
@@ -158,13 +158,13 @@ void HashUtil::SHA256(std::string message, std::vector<int64_t>& digest) {
     return;
 }
 
-std::string HashUtil::HashString(std::string message) {
+std::string HashUtil::hash_string(std::string message) {
     uint32_t h_256[8] = {0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
                          0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19};
 
-    uint64_t m_len = message.size() * 8;
+    uint64_t len_ = message.size() * 8;
     uint16_t pad_len = 1;
-    while ((m_len + pad_len) % 512 != 448) {
+    while ((len_ + pad_len) % 512 != 448) {
         pad_len++;
     }
 
@@ -172,14 +172,14 @@ std::string HashUtil::HashString(std::string message) {
     for (int a = 0; a < (pad_len) / 8 - 1; a++) {
         message += static_cast<char>(0);
     }
-    message += static_cast<char>((m_len & 0xff00000000000000) >> 56);
-    message += static_cast<char>((m_len & 0x00ff000000000000) >> 48);
-    message += static_cast<char>((m_len & 0x0000ff0000000000) >> 40);
-    message += static_cast<char>((m_len & 0x000000ff00000000) >> 32);
-    message += static_cast<char>((m_len & 0x00000000ff000000) >> 24);
-    message += static_cast<char>((m_len & 0x0000000000ff0000) >> 16);
-    message += static_cast<char>((m_len & 0x000000000000ff00) >> 8);
-    message += static_cast<char>(m_len & 0x00000000000000ff);
+    message += static_cast<char>((len_ & 0xff00000000000000) >> 56);
+    message += static_cast<char>((len_ & 0x00ff000000000000) >> 48);
+    message += static_cast<char>((len_ & 0x0000ff0000000000) >> 40);
+    message += static_cast<char>((len_ & 0x000000ff00000000) >> 32);
+    message += static_cast<char>((len_ & 0x00000000ff000000) >> 24);
+    message += static_cast<char>((len_ & 0x0000000000ff0000) >> 16);
+    message += static_cast<char>((len_ & 0x000000000000ff00) >> 8);
+    message += static_cast<char>(len_ & 0x00000000000000ff);
 
     for (size_t n = 0; n < (message.size() * 8) / 512; n++) {
         uint32_t w[64];
@@ -244,18 +244,18 @@ std::string HashUtil::HashString(std::string message) {
 }
 
 #if 0
-lbcrypto::BytePlaintextEncoding HashUtil::SHA512(
-    lbcrypto::BytePlaintextEncoding message) {
+cipher::BytePlaintextEncoding HashUtil::SHA512(
+    cipher::BytePlaintextEncoding message) {
   uint64_t h_512[8] = {0x6a09e667f3bcc908, 0xbb67ae8584caa73b,
                        0x3c6ef372fe94f82b, 0xa54ff53a5f1d36f1,
                        0x510e527fade682d1, 0x9b05688c2b3e6c1f,
                        0x1f83d9abfb41bd6b, 0x5be0cd19137e2179};
 
-  uint128_t m_len = message.size() * 8;
+  uint128_t len_ = message.size() * 8;
   uint64_t m_len_first = message.size() / (0x2000000000000000);
   uint64_t m_len_second = message.size() * 8;
   uint16_t pad_len = 1;
-  while ((m_len + pad_len) % 1024 != 896) {
+  while ((len_ + pad_len) % 1024 != 896) {
     pad_len++;
   }
   message.push_back(128);
@@ -344,7 +344,7 @@ lbcrypto::BytePlaintextEncoding HashUtil::SHA512(
     h_512[7] += h;
   }
 
-  lbcrypto::BytePlaintextEncoding digest;
+  cipher::BytePlaintextEncoding digest;
   for (int i = 0; i < 8; i++) {
     digest.push_back((uint8_t)((h_512[i] & 0xff00000000000000) >> 56));
     digest.push_back((uint8_t)((h_512[i] & 0x00ff000000000000) >> 48));
@@ -360,4 +360,4 @@ lbcrypto::BytePlaintextEncoding HashUtil::SHA512(
 }
 #endif
 
-}  // namespace lbcrypto
+}  // namespace cipher

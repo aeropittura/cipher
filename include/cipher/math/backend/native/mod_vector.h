@@ -56,7 +56,7 @@
  * @namespace intnat
  * The namespace of intnat
  */
-namespace intnat {
+namespace native_int {
 
 template <typename IntType>
 class NativeVectorT;
@@ -71,14 +71,14 @@ using NativeVector32 = NativeVectorT<NativeInteger32>;
  * @brief The class for representing vectors of native integers.
  */
 template <class IntegerType>
-class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<IntegerType>, IntegerType>,
-                            public lbcrypto::Serializable {
+class NativeVectorT final : public cipher::BigVectorInterface<NativeVectorT<IntegerType>, IntegerType>,
+                            public cipher::Serializable {
   private:
-    IntegerType m_modulus{0};
-    std::vector<IntegerType> m_data{};
+    IntegerType modulus_{0};
+    std::vector<IntegerType> data_{};
 
-    bool IndexCheck(size_t length) const {
-        return length < m_data.size();
+    bool index_check(size_t length) const {
+        return length < data_.size();
     }
 
   public:
@@ -94,7 +94,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param modulus is the modulus of the vector.
      * @return the one-entry vector.
      */
-    static constexpr NativeVectorT Single(const IntegerType& val, const IntegerType& modulus) noexcept {
+    static constexpr NativeVectorT single(const IntegerType& val, const IntegerType& modulus) noexcept {
         return NativeVectorT(1, modulus, val);
     }
 
@@ -104,7 +104,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param length is the length of the native vector, in terms of the number of
      * entries.
      */
-    explicit constexpr NativeVectorT(uint32_t length) noexcept : m_data(length) {}
+    explicit constexpr NativeVectorT(uint32_t length) noexcept : data_(length) {}
 
     /**
      * Basic constructor for specifying the length of the vector and the modulus.
@@ -114,7 +114,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param modulus is the modulus of the ring.
      */
     constexpr NativeVectorT(uint32_t length, const IntegerType& modulus) noexcept
-        : m_modulus{modulus}, m_data(length) {}
+        : modulus_{modulus}, data_(length) {}
 
     /**
      * Constructor for specifying the length, the modulus, and one value for every entry.
@@ -125,18 +125,18 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param val is the value assigned to every entry, reduced modulo modulus.
      */
     constexpr NativeVectorT(uint32_t length, const IntegerType& modulus, const IntegerType& val) noexcept
-        : m_modulus{modulus}, m_data(length, val.Mod(modulus)) {}
+        : modulus_{modulus}, data_(length, val.mod(modulus)) {}
 
     /**
      * Basic constructor for copying a vector
      *
      * @param v is the native vector to be copied.
      */
-    constexpr NativeVectorT(const NativeVectorT& v) noexcept : m_modulus{v.m_modulus}, m_data{v.m_data} {}
+    constexpr NativeVectorT(const NativeVectorT& v) noexcept : modulus_{v.modulus_}, data_{v.data_} {}
 
     /**
      * Constructor from a vector under a different modulus: the values of v switched to the
-     * new modulus, equivalent to a copy followed by SwitchModulus(modulus) but fused into
+     * new modulus, equivalent to a copy followed by switch_modulus(modulus) but fused into
      * one pass over the data.
      *
      * @param v is the source vector.
@@ -150,7 +150,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param v is the native vector to be moved.
      */
     constexpr NativeVectorT(NativeVectorT&& v) noexcept
-        : m_modulus{std::move(v.m_modulus)}, m_data{std::move(v.m_data)} {}
+        : modulus_{std::move(v.modulus_)}, data_{std::move(v.data_)} {}
 
     /**
      * Basic constructor for specifying the length of the vector
@@ -182,14 +182,14 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @return Assigned NativeVectorT.
      */
     NativeVectorT& operator=(const NativeVectorT& rhs) noexcept {
-        m_modulus = rhs.m_modulus;
-        if (m_data.size() >= rhs.m_data.size()) {
-            std::copy(rhs.m_data.begin(), rhs.m_data.end(), m_data.begin());
-            if (m_data.size() > rhs.m_data.size())
-                m_data.resize(rhs.m_data.size());
+        modulus_ = rhs.modulus_;
+        if (data_.size() >= rhs.data_.size()) {
+            std::copy(rhs.data_.begin(), rhs.data_.end(), data_.begin());
+            if (data_.size() > rhs.data_.size())
+                data_.resize(rhs.data_.size());
             return *this;
         }
-        m_data = rhs.m_data;
+        data_ = rhs.data_;
         return *this;
     }
 
@@ -200,8 +200,8 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @return moved NativeVectorT object
      */
     NativeVectorT& operator=(NativeVectorT&& rhs) noexcept {
-        m_modulus = std::move(rhs.m_modulus);
-        m_data = std::move(rhs.m_data);
+        modulus_ = std::move(rhs.modulus_);
+        data_ = std::move(rhs.data_);
         return *this;
     }
 
@@ -230,8 +230,8 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @return Assigned NativeVectorT.
      */
     constexpr NativeVectorT& operator=(uint64_t val) {
-        std::fill(m_data.begin(), m_data.end(), 0);
-        m_data.at(0) = val;
+        std::fill(data_.begin(), data_.end(), 0);
+        data_.at(0) = val;
         return *this;
     }
 
@@ -243,9 +243,9 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @return is the reference to the value at the index.
      */
     IntegerType& at(size_t i) {
-        if (!NativeVectorT::IndexCheck(i))
-            OPENFHE_THROW("NativeVectorT index out of range");
-        return m_data[i];
+        if (!NativeVectorT::index_check(i))
+            CIPHER_THROW("NativeVectorT index out of range");
+        return data_[i];
     }
 
     /**
@@ -254,9 +254,9 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @return is the value at the index; throws if i is out of range.
      */
     const IntegerType& at(size_t i) const {
-        if (!NativeVectorT::IndexCheck(i))
-            OPENFHE_THROW("NativeVectorT index out of range");
-        return m_data[i];
+        if (!NativeVectorT::index_check(i))
+            CIPHER_THROW("NativeVectorT index out of range");
+        return data_[i];
     }
 
     /**
@@ -265,7 +265,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @return is the value at the index; no range check is performed.
      */
     IntegerType& operator[](size_t idx) {
-        return m_data[idx];
+        return data_[idx];
     }
 
     /**
@@ -274,7 +274,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @return is the value at the index; no range check is performed.
      */
     const IntegerType& operator[](size_t idx) const {
-        return m_data[idx];
+        return data_[idx];
     }
 
     /**
@@ -282,11 +282,11 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      *
      * @param value is the modulus value to set.
      */
-    void SetModulus(const IntegerType& value) {
-        constexpr uint32_t maxBits{MaxModulusBits<typename IntegerType::Integer>::value};
-        if (value.GetMSB() > maxBits)
-            OPENFHE_THROW("Modulus too large for requested IntegerType");
-        m_modulus.m_value = value.m_value;
+    void set_modulus(const IntegerType& value) {
+        constexpr uint32_t max_bits_value{MaxModulusBits<typename IntegerType::Integer>::value};
+        if (value.get_msb() > max_bits_value)
+            CIPHER_THROW("Modulus too large for requested IntegerType");
+        modulus_.value_ = value.value_;
     }
 
     /**
@@ -294,23 +294,23 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      *
      * @param value is the modulus value to set.
      */
-    void SwitchModulus(const IntegerType& value);
+    void switch_modulus(const IntegerType& value);
 
     /**
      * Sets the vector modulus and reduces every entry modulo the new modulus as a non-negative
-     * integer, without the centered (signed) adjustment performed by SwitchModulus.
+     * integer, without the centered (signed) adjustment performed by switch_modulus.
      *
      * @param value is the modulus value to set.
      */
-    void LazySwitchModulus(const IntegerType& value);
+    void lazy_switch_modulus(const IntegerType& value);
 
     /**
      * Gets the vector modulus.
      *
      * @return the vector modulus.
      */
-    const IntegerType& GetModulus() const {
-        return m_modulus;
+    const IntegerType& get_modulus() const {
+        return modulus_;
     }
 
     /**
@@ -318,8 +318,8 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      *
      * @return vector length.
      */
-    size_t GetLength() const {
-        return m_data.size();
+    size_t get_length() const {
+        return data_.size();
     }
 
     // MODULAR ARITHMETIC OPERATIONS
@@ -330,7 +330,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param modulus is the modulus to perform on the current vector entries.
      * @return is the result after the modulus operation on current vector.
      */
-    NativeVectorT Mod(const IntegerType& modulus) const;
+    NativeVectorT mod(const IntegerType& modulus) const;
 
     /**
      * Vector Modulus operator. In-place variant.
@@ -338,7 +338,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param modulus is the modulus to perform on the current vector entries.
      * @return is the result after the modulus operation on current vector.
      */
-    NativeVectorT& ModEq(const IntegerType& modulus);
+    NativeVectorT& mod_eq(const IntegerType& modulus);
 
     /**
      * Scalar modulus addition.
@@ -348,7 +348,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param b is the scalar to add at all locations.
      * @return is the result of the modulus addition operation.
      */
-    NativeVectorT ModAdd(const IntegerType& b) const;
+    NativeVectorT mod_add(const IntegerType& b) const;
 
     /**
      * Scalar modulus addition. In-place variant.
@@ -358,7 +358,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param b is the scalar to add at all locations.
      * @return is the result of the modulus addition operation.
      */
-    NativeVectorT& ModAddEq(const IntegerType& b);
+    NativeVectorT& mod_add_eq(const IntegerType& b);
 
     /**
      * Scalar modulus addition at a particular index.
@@ -367,7 +367,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param b is the scalar to add.
      * @return is the result of the modulus addition operation.
      */
-    NativeVectorT ModAddAtIndex(size_t i, const IntegerType& b) const;
+    NativeVectorT mod_add_at_index(size_t i, const IntegerType& b) const;
 
     /**
      * Scalar modulus addition at a particular index. In-place variant.
@@ -376,7 +376,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param b is the scalar to add.
      * @return is the result of the modulus addition operation.
      */
-    NativeVectorT& ModAddAtIndexEq(size_t i, const IntegerType& b);
+    NativeVectorT& mod_add_at_index_eq(size_t i, const IntegerType& b);
 
     /**
      * vector modulus addition.
@@ -384,7 +384,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param b is the vector to add at all locations.
      * @return is the result of the modulus addition operation.
      */
-    NativeVectorT ModAdd(const NativeVectorT& b) const;
+    NativeVectorT mod_add(const NativeVectorT& b) const;
 
     /**
      * vector modulus addition. In-place variant.
@@ -392,21 +392,21 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param b is the vector to add at all locations.
      * @return is the result of the modulus addition operation.
      */
-    NativeVectorT& ModAddEq(const NativeVectorT& b);
+    NativeVectorT& mod_add_eq(const NativeVectorT& b);
 
     /**
      * vector modulus addition. In-place variant that skips the length and modulus
-     * compatibility check of ModAddEq; b must have the same length and modulus, and the
-     * entries of both vectors must be reduced (ModAddFast per entry).
+     * compatibility check of mod_add_eq; b must have the same length and modulus, and the
+     * entries of both vectors must be reduced (mod_add_fast per entry).
      *
      * @param b is the vector to add at all locations.
      * @return is the result of the modulus addition operation.
      */
-    NativeVectorT& ModAddNoCheckEq(const NativeVectorT& b) {
-        size_t size{m_data.size()};
-        auto mv{m_modulus};
+    NativeVectorT& mod_add_no_check_eq(const NativeVectorT& b) {
+        size_t size{data_.size()};
+        auto mv{modulus_};
         for (size_t i = 0; i < size; ++i)
-            m_data[i].ModAddFastEq(b[i], mv);
+            data_[i].mod_add_fast_eq(b[i], mv);
         return *this;
     }
 
@@ -417,7 +417,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param b is the scalar to subtract from all locations.
      * @return is the result of the modulus subtraction operation.
      */
-    NativeVectorT ModSub(const IntegerType& b) const;
+    NativeVectorT mod_sub(const IntegerType& b) const;
 
     /**
      * Scalar modulus subtraction. In-place variant.
@@ -426,7 +426,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param b is the scalar to subtract from all locations.
      * @return is the result of the modulus subtraction operation.
      */
-    NativeVectorT& ModSubEq(const IntegerType& b);
+    NativeVectorT& mod_sub_eq(const IntegerType& b);
 
     /**
      * Vector Modulus subtraction.
@@ -434,7 +434,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param b is the vector to subtract.
      * @return is the result of the modulus subtraction operation.
      */
-    NativeVectorT ModSub(const NativeVectorT& b) const;
+    NativeVectorT mod_sub(const NativeVectorT& b) const;
 
     /**
      * Vector Modulus subtraction. In-place variant.
@@ -442,7 +442,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param b is the vector to subtract.
      * @return is the result of the modulus subtraction operation.
      */
-    NativeVectorT& ModSubEq(const NativeVectorT& b);
+    NativeVectorT& mod_sub_eq(const NativeVectorT& b);
 
     /**
      * Scalar modular multiplication.
@@ -451,7 +451,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param b is the scalar to multiply at all locations.
      * @return is the result of the modulus multiplication operation.
      */
-    NativeVectorT ModMul(const IntegerType& b) const;
+    NativeVectorT mod_mul(const IntegerType& b) const;
 
     /**
      * Scalar modular multiplication. In-place variant.
@@ -460,7 +460,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param b is the scalar to multiply at all locations.
      * @return is the result of the modulus multiplication operation.
      */
-    NativeVectorT& ModMulEq(const IntegerType& b);
+    NativeVectorT& mod_mul_eq(const IntegerType& b);
 
     /**
      * Vector modulus multiplication.
@@ -468,7 +468,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param b is the vector to multiply.
      * @return is the result of the modulus multiplication operation.
      */
-    NativeVectorT ModMul(const NativeVectorT& b) const;
+    NativeVectorT mod_mul(const NativeVectorT& b) const;
 
     /**
      * Vector modulus multiplication. In-place variant.
@@ -476,23 +476,23 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param b is the vector to multiply.
      * @return is the result of the modulus multiplication operation.
      */
-    NativeVectorT& ModMulEq(const NativeVectorT& b);
+    NativeVectorT& mod_mul_eq(const NativeVectorT& b);
 
     /**
      * Vector modulus multiplication. In-place variant that skips the length and modulus
-     * compatibility check of ModMulEq; b must have the same length and modulus, and the
+     * compatibility check of mod_mul_eq; b must have the same length and modulus, and the
      * entries of both vectors must be reduced (Barrett kernel with hoisted constants).
      *
      * @param b is the vector to multiply.
      * @return is the result of the modulus multiplication operation.
      */
-    NativeVectorT& ModMulNoCheckEq(const NativeVectorT& b);
+    NativeVectorT& mod_mul_no_check_eq(const NativeVectorT& b);
 
     /**
      * Fused multiply-accumulate: *this += V * I (mod the vector modulus), without
      * size/modulus validation. Operand contract: the values of *this must be reduced;
      * the values of V need NOT be reduced (the Shoup multiplication is exact for any
-     * unreduced multiplicand, which ApproxSwitchCRTBasis relies on for its cross-basis
+     * unreduced multiplicand, which approx_switch_crt_basis relies on for its cross-basis
      * accumulation); I is reduced internally. Alternative backends implementing this
      * interface must honor the unreduced-V tolerance.
      *
@@ -500,7 +500,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param I is the scalar multiplier.
      * @return *this after the accumulation.
      */
-    NativeVectorT& MultAccEqNoCheck(const NativeVectorT& V, const IntegerType& I);
+    NativeVectorT& mult_acc_eq_no_check(const NativeVectorT& V, const IntegerType& I);
 
     /**
      * Fused multiply-accumulate: *this += a * b (mod the vector modulus), without
@@ -512,14 +512,14 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param b is the vector of second operands.
      * @return *this after the accumulation.
      */
-    NativeVectorT& MultAccEqNoCheck(const NativeVectorT& a, const NativeVectorT& b);
+    NativeVectorT& mult_acc_eq_no_check(const NativeVectorT& a, const NativeVectorT& b);
 
     /**
      * Reduces every element modulo the vector's own modulus.
      *
      * @return is the reduced vector.
      */
-    NativeVectorT& ModReduceEq();
+    NativeVectorT& mod_reduce_eq();
 
     /**
      * Vector multiplication without applying the modulus operation.
@@ -527,7 +527,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param b is the vector to multiply.
      * @return is the result of the multiplication operation.
      */
-    NativeVectorT MultWithOutMod(const NativeVectorT& b) const;
+    NativeVectorT mult_with_out_mod(const NativeVectorT& b) const;
 
     /**
      * Scalar modulus exponentiation.
@@ -536,7 +536,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @return a new vector which is the result of the modulus exponentiation
      * operation.
      */
-    NativeVectorT ModExp(const IntegerType& b) const;
+    NativeVectorT mod_exp(const IntegerType& b) const;
 
     /**
      * Scalar modulus exponentiation. In-place variant.
@@ -545,19 +545,19 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @return the resulting vector (same object) after the modulus exponentiation
      * operation.
      */
-    NativeVectorT& ModExpEq(const IntegerType& b);
+    NativeVectorT& mod_exp_eq(const IntegerType& b);
 
     /**
      * Modulus inverse.
      *
      * @return a new vector which is the result of the modulus inverse operation.
      */
-    NativeVectorT ModInverse() const {
-        size_t size{m_data.size()};
-        auto mv{m_modulus};
+    NativeVectorT mod_inverse() const {
+        size_t size{data_.size()};
+        auto mv{modulus_};
         NativeVectorT ans(size, mv);
         for (size_t i{0}; i < size; ++i)
-            ans[i] = m_data[i].ModInverse(mv);
+            ans[i] = data_[i].mod_inverse(mv);
         return ans;
     }
 
@@ -566,11 +566,11 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      *
      * @return the resulting vector (same object) after the modulus inverse operation.
      */
-    NativeVectorT& ModInverseEq() {
-        size_t size{m_data.size()};
-        auto mv{m_modulus};
+    NativeVectorT& mod_inverse_eq() {
+        size_t size{data_.size()};
+        auto mv{modulus_};
         for (size_t i{0}; i < size; ++i)
-            m_data[i] = m_data[i].ModInverse(mv);
+            data_[i] = data_[i].mod_inverse(mv);
         return *this;
     }
 
@@ -580,7 +580,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @return a new vector which is the return value of the modulus by 2, also
      * the least significant bit.
      */
-    NativeVectorT ModByTwo() const;
+    NativeVectorT mod_by_two() const;
 
     /**
      * Perform a modulus by 2 operation.  Returns the least significant bit.
@@ -589,7 +589,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @return the resulting vector (same object) holding the modulus by 2, also
      * the least significant bit.
      */
-    NativeVectorT& ModByTwoEq();
+    NativeVectorT& mod_by_two_eq();
 
     /**
      * Multiply and Rounding operation on a BigInteger x. Returns [x*p/q] where []
@@ -599,7 +599,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param q is the denominator to be divided.
      * @return the result of multiply and round.
      */
-    NativeVectorT MultiplyAndRound(const IntegerType& p, const IntegerType& q) const;
+    NativeVectorT multiply_and_round(const IntegerType& p, const IntegerType& q) const;
 
     /**
      * Multiply and Rounding operation on a BigInteger x. Returns [x*p/q] where []
@@ -609,7 +609,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param q is the denominator to be divided.
      * @return the result of multiply and round.
      */
-    NativeVectorT& MultiplyAndRoundEq(const IntegerType& p, const IntegerType& q);
+    NativeVectorT& multiply_and_round_eq(const IntegerType& p, const IntegerType& q);
 
     /**
      * Divide and Rounding operation on a BigInteger x. Returns [x/q] where [] is
@@ -618,7 +618,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param q is the denominator to be divided.
      * @return the result of divide and round.
      */
-    NativeVectorT DivideAndRound(const IntegerType& q) const;
+    NativeVectorT divide_and_round(const IntegerType& q) const;
 
     /**
      * Divide and Rounding operation on a BigInteger x. Returns [x/q] where [] is
@@ -627,7 +627,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param q is the denominator to be divided.
      * @return the result of divide and round.
      */
-    NativeVectorT& DivideAndRoundEq(const IntegerType& q);
+    NativeVectorT& divide_and_round_eq(const IntegerType& q);
 
     // OTHER FUNCTIONS
 
@@ -648,20 +648,20 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @return is the digit at a specific index for all entries for a given number
      * base
      */
-    NativeVectorT GetDigitAtIndexForBase(uint32_t index, uint32_t base) const;
+    NativeVectorT get_digit_at_index_for_base(uint32_t index, uint32_t base) const;
 
     /**
-     * Decomposes every entry into all of its base-2^digitLen digits at once. Digits are
-     * balanced, i.e. in [-2^(digitLen-1), 2^(digitLen-1)) of the centered representative
+     * Decomposes every entry into all of its base-2^digit_len digits at once. Digits are
+     * balanced, i.e. in [-2^(digit_len-1), 2^(digit_len-1)) of the centered representative
      * and returned mod q, which halves the digit bound of BV key switching; the top digit
      * absorbs the remaining quotient so that the digits reconstruct the value exactly
      * (mod q). Falls back to plain unsigned digit windows when the bias does not fit the
-     * native word (ceil(qBits/digitLen)*digitLen + 1 > MaxBits).
+     * native word (ceil(q_bits/digit_len)*digit_len + 1 > max_bits).
      *
-     * @param digitLen is the bit width of one digit.
+     * @param digit_len is the bit width of one digit.
      * @return one vector per digit position, least significant first.
      */
-    std::vector<NativeVectorT> BaseDecompose(uint32_t digitLen) const;
+    std::vector<NativeVectorT> base_decompose(uint32_t digit_len) const;
 
     // STRINGS & STREAMS
 
@@ -673,66 +673,66 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @return std ostream object which captures the vector values.
      */
     friend std::ostream& operator<<(std::ostream& os, const NativeVectorT& ptr_obj) {
-        auto len = ptr_obj.m_data.size();
+        auto len = ptr_obj.data_.size();
         os << "[";
         for (uint32_t i = 0; i < len; i++) {
-            os << ptr_obj.m_data[i];
+            os << ptr_obj.data_[i];
             os << ((i == (len - 1)) ? "]" : " ");
         }
-        os << " modulus: " << ptr_obj.m_modulus;
+        os << " modulus: " << ptr_obj.modulus_;
         return os;
     }
 
     template <class Archive>
     std::enable_if_t<!cereal::traits::is_text_archive<Archive>::value, void> save(Archive& ar,
                                                                                   std::uint32_t const version) const {
-        ::cereal::size_type size = m_data.size();
+        ::cereal::size_type size = data_.size();
         ar(size);
         if (size > 0) {
-            ar(::cereal::binary_data(m_data.data(), size * sizeof(IntegerType)));
+            ar(::cereal::binary_data(data_.data(), size * sizeof(IntegerType)));
         }
-        ar(m_modulus);
+        ar(modulus_);
     }
 
     template <class Archive>
     std::enable_if_t<cereal::traits::is_text_archive<Archive>::value, void> save(Archive& ar,
                                                                                  std::uint32_t const version) const {
-        ar(::cereal::make_nvp("v", m_data));
-        ar(::cereal::make_nvp("m", m_modulus));
+        ar(::cereal::make_nvp("v", data_));
+        ar(::cereal::make_nvp("m", modulus_));
     }
 
     template <class Archive>
     std::enable_if_t<!cereal::traits::is_text_archive<Archive>::value, void> load(Archive& ar,
                                                                                   std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
         ::cereal::size_type size;
         ar(size);
-        m_data.resize(size);
+        data_.resize(size);
         if (size > 0) {
-            ar(::cereal::binary_data(m_data.data(), size * sizeof(IntegerType)));
+            ar(::cereal::binary_data(data_.data(), size * sizeof(IntegerType)));
         }
-        ar(m_modulus);
+        ar(modulus_);
     }
 
     template <class Archive>
     std::enable_if_t<cereal::traits::is_text_archive<Archive>::value, void> load(Archive& ar,
                                                                                  std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        if (version > serialized_version()) {
+            CIPHER_THROW("serialized object version " + std::to_string(version) +
                           " is from a later version of the library");
         }
-        ar(::cereal::make_nvp("v", m_data));
-        ar(::cereal::make_nvp("m", m_modulus));
+        ar(::cereal::make_nvp("v", data_));
+        ar(::cereal::make_nvp("m", modulus_));
     }
 
-    std::string SerializedObjectName() const override {
+    std::string serialized_object_name() const override {
         return "NativeVectorT";
     }
 
-    static uint32_t SerializedVersion() {
+    static uint32_t serialized_version() {
         return 1;
     }
 
@@ -740,7 +740,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
     /**
      * Generalized-Barrett multiply loop with the reduction constants hoisted out of the
      * loop. Uses the same shift structure and validity domain (operands < modulus) as
-     * NativeIntegerT::ModMulFast(b, modulus, mu); falls back to the per-element path when
+     * NativeIntegerT::mod_mul_fast(b, modulus, mu); falls back to the per-element path when
      * no double-width integer type is available.
      *
      * In-place variant: a is both the array of first operands and the destination.
@@ -750,7 +750,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param size is the number of elements.
      * @param modulus is the modulus to perform operations with.
      */
-    static void BarrettModMulLoop(IntegerType* a, const IntegerType* b, size_t size, const IntegerType& modulus);
+    static void barrett_mod_mul_loop(IntegerType* a, const IntegerType* b, size_t size, const IntegerType& modulus);
 
     /**
      * Generalized-Barrett multiply loop writing to a separate destination; see the
@@ -762,16 +762,16 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param size is the number of elements.
      * @param modulus is the modulus to perform operations with.
      */
-    static void BarrettModMulLoop(IntegerType* dst, const IntegerType* a, const IntegerType* b, size_t size,
+    static void barrett_mod_mul_loop(IntegerType* dst, const IntegerType* a, const IntegerType* b, size_t size,
                                   const IntegerType& modulus);
 
     /**
-     * General-shrink loop shared by SwitchModulus, ModEq and the copy-with-switch ctor:
+     * General-shrink loop shared by switch_modulus, mod_eq and the copy-with-switch ctor:
      * reduces every element modulo nv and applies the centered correction, whose subtrahend
-     * only takes the values {diffR, 0}.
+     * only takes the values {diff_r, 0}.
      *
      * The reduction uses a reciprocal computed once for the whole loop instead of a divide
-     * per element. Note this is NOT the ComputeMu/ModMu Barrett used elsewhere: that one is
+     * per element. Note this is NOT the compute_mu/mod_mu Barrett used elsewhere: that one is
      * scaled to the modulus (valid only for inputs below 2^(2*MSB(nv)+3)), whereas this one
      * is scaled to the word width, so it is valid for any input the vector can hold. That
      * matters because callers do not agree on a bound: the arbitrary-cyclotomic transform
@@ -783,13 +783,13 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param ov is the old modulus, only used for the centered correction.
      * @param nv is the modulus to reduce by.
      */
-    static void GeneralShrinkLoop(IntegerType* dst, const IntegerType* src, size_t size, BasicInt ov, BasicInt nv);
+    static void general_shrink_loop(IntegerType* dst, const IntegerType* src, size_t size, BasicInt ov, BasicInt nv);
 
     /**
      * Fused multiply-accumulate loop: acc += a * b (mod modulus), with the same Barrett
-     * kernel and dispatch as BarrettModMulLoop and the modular addition fused into the
+     * kernel and dispatch as barrett_mod_mul_loop and the modular addition fused into the
      * same pass. Validity domain: ALL of acc, a, and b must hold reduced values — unlike
-     * the scalar MultAccEqNoCheck, the Barrett kernel has no tolerance for unreduced
+     * the scalar mult_acc_eq_no_check, the Barrett kernel has no tolerance for unreduced
      * multiplicands.
      *
      * @param acc is the accumulator array.
@@ -798,7 +798,7 @@ class NativeVectorT final : public lbcrypto::BigVectorInterface<NativeVectorT<In
      * @param size is the number of elements.
      * @param modulus is the modulus to perform operations with.
      */
-    static void BarrettMultAccLoop(IntegerType* acc, const IntegerType* a, const IntegerType* b, size_t size,
+    static void barrett_mult_acc_loop(IntegerType* acc, const IntegerType* a, const IntegerType* b, size_t size,
                                    const IntegerType& modulus);
 };
 
@@ -809,21 +809,21 @@ namespace cereal {
 //! Serialization for vector of NativeInteger
 
 template <class Archive, class A>
-inline void CEREAL_SAVE_FUNCTION_NAME(Archive& ar, std::vector<intnat::NativeIntegerT<uint64_t>, A> const& vec) {
+inline void CEREAL_SAVE_FUNCTION_NAME(Archive& ar, std::vector<native_int::NativeIntegerT<uint64_t>, A> const& vec) {
     ar(make_size_tag(static_cast<cereal::size_type>(vec.size())));  // number of elements
     for (const auto& v : vec) {
-        ar(v.ConvertToInt());
+        ar(v.convert_to_int());
     }
 }
 
-#if defined(HAVE_INT128)
+#if defined(CIPHER_HAVE_INT128)
 template <class Archive, class A>
-inline void CEREAL_SAVE_FUNCTION_NAME(Archive& ar, std::vector<intnat::NativeIntegerT<uint128_t>, A> const& vec) {
+inline void CEREAL_SAVE_FUNCTION_NAME(Archive& ar, std::vector<native_int::NativeIntegerT<uint128_t>, A> const& vec) {
     ar(make_size_tag(static_cast<cereal::size_type>(vec.size())));  // number of elements
     constexpr uint128_t mask = (static_cast<uint128_t>(1) << 64) - 1;
     for (const auto& v : vec) {
         uint64_t vec[2];
-        uint128_t v128 = v.ConvertToInt();
+        uint128_t v128 = v.convert_to_int();
         vec[0] = v128 & mask;  // least significant word
         vec[1] = v128 >> 64;   // most significant word
         ar(vec);
@@ -834,7 +834,7 @@ inline void CEREAL_SAVE_FUNCTION_NAME(Archive& ar, std::vector<intnat::NativeInt
 //! Deserialization for vector of NativeInteger
 
 template <class Archive, class A>
-inline void CEREAL_LOAD_FUNCTION_NAME(Archive& ar, std::vector<intnat::NativeIntegerT<uint64_t>, A>& vec) {
+inline void CEREAL_LOAD_FUNCTION_NAME(Archive& ar, std::vector<native_int::NativeIntegerT<uint64_t>, A>& vec) {
     cereal::size_type size;
     ar(make_size_tag(size));
     vec.resize(static_cast<size_t>(size));
@@ -845,9 +845,9 @@ inline void CEREAL_LOAD_FUNCTION_NAME(Archive& ar, std::vector<intnat::NativeInt
     }
 }
 
-#if defined(HAVE_INT128)
+#if defined(CIPHER_HAVE_INT128)
 template <class Archive, class A>
-inline void CEREAL_LOAD_FUNCTION_NAME(Archive& ar, std::vector<intnat::NativeIntegerT<uint128_t>, A>& vec) {
+inline void CEREAL_LOAD_FUNCTION_NAME(Archive& ar, std::vector<native_int::NativeIntegerT<uint128_t>, A>& vec) {
     cereal::size_type size;
     ar(make_size_tag(size));
     vec.resize(static_cast<size_t>(size));

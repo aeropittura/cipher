@@ -37,51 +37,51 @@
 #include "cipher/fhe/rns/pke.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief BGV implementation of encryption and decryption in the RNS representation. Decryption modulus
  * switches the ciphertext down to a single tower before reducing modulo the plaintext modulus.
  */
-class PKEBGVRNS : public PKERNS {
-    using ParmType = typename DCRTPoly::Params;
-    using IntType = typename DCRTPoly::Integer;
-    using DugType = typename DCRTPoly::DugType;
-    using DggType = typename DCRTPoly::DggType;
-    using TugType = typename DCRTPoly::TugType;
+class BgvRnsPke : public RnsPke {
+    using ParmType = typename RnsPoly::Params;
+    using IntType = typename RnsPoly::Integer;
+    using DugType = typename RnsPoly::DugType;
+    using DggType = typename RnsPoly::DggType;
+    using TugType = typename RnsPoly::TugType;
 
   public:
-    virtual ~PKEBGVRNS() {}
+    virtual ~BgvRnsPke() {}
 
     /**
      * Method for decrypting plaintext using LBC
      *
      * @param ciphertext ciphertext to be decrypted.
-     * @param privateKey private key used for decryption.
+     * @param private_key private key used for decryption.
      * @param plaintext the plaintext output.
      * @return the decoding result.
      */
-    DecryptResult Decrypt(ConstCiphertext<DCRTPoly> ciphertext, const PrivateKey<DCRTPoly> privateKey,
+    DecryptResult decrypt(ConstCiphertext<RnsPoly> ciphertext, const PrivateKey<RnsPoly> private_key,
                           NativePoly* plaintext) const override;
 
     /**
      * Method for decrypting plaintext using LBC
      *
      * @param ciphertext ciphertext to be decrypted.
-     * @param privateKey private key used for decryption.
+     * @param private_key private key used for decryption.
      * @param plaintext the plaintext output.
      * @return the decoding result.
      */
-    DecryptResult Decrypt(ConstCiphertext<DCRTPoly> ciphertext, const PrivateKey<DCRTPoly> privateKey,
+    DecryptResult decrypt(ConstCiphertext<RnsPoly> ciphertext, const PrivateKey<RnsPoly> private_key,
                           Poly* plaintext) const override {
-        std::string errMsg =
+        std::string err_msg =
                 "PKEBGVRNS: Decryption to Poly from DCRTPoly is not supported as it "
                 "may "
                 "lead to incorrect results.";
-        OPENFHE_THROW(errMsg);
+        CIPHER_THROW(err_msg);
     }
 
     /////////////////////////////////////
@@ -90,18 +90,18 @@ class PKEBGVRNS : public PKERNS {
 
     template <class Archive>
     void save(Archive& ar) const {
-        ar(cereal::base_class<PKERNS>(this));
+        ar(cereal::base_class<RnsPke>(this));
     }
 
     template <class Archive>
     void load(Archive& ar) {
-        ar(cereal::base_class<PKERNS>(this));
+        ar(cereal::base_class<RnsPke>(this));
     }
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "PKEBGVRNS";
     }
 };
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_BGV_PKE_H_

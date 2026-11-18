@@ -48,165 +48,165 @@
 #include "cipher/fhe/key/public_key.h"
 #include "cipher/fhe/ckks/crypto_params.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-EvalKey<DCRTPoly> KeySwitchHYBRID::KeySwitchGenInternal(const PrivateKey<DCRTPoly> oldKey,
-                                                        const PrivateKey<DCRTPoly> newKey) const {
-    return KeySwitchHYBRID::KeySwitchGenInternal(oldKey, newKey, nullptr);
+EvalKey<RnsPoly> KeySwitchHybrid::key_switch_gen_internal(const PrivateKey<RnsPoly> old_key,
+                                                        const PrivateKey<RnsPoly> new_key) const {
+    return KeySwitchHybrid::key_switch_gen_internal(old_key, new_key, nullptr);
 }
 
-EvalKey<DCRTPoly> KeySwitchHYBRID::KeySwitchGenInternal(const PrivateKey<DCRTPoly> oldKey,
-                                                        const PrivateKey<DCRTPoly> newKey,
-                                                        const EvalKey<DCRTPoly> ekPrev) const {
-    const auto cryptoParams = std::dynamic_pointer_cast<CryptoParametersRNS>(newKey->GetCryptoParameters());
-    const auto& paramsQ = cryptoParams->GetElementParams();
-    const auto& paramsQP = cryptoParams->GetParamsQP();
-    const auto& pparamsQP = paramsQP->GetParams();
+EvalKey<RnsPoly> KeySwitchHybrid::key_switch_gen_internal(const PrivateKey<RnsPoly> old_key,
+                                                        const PrivateKey<RnsPoly> new_key,
+                                                        const EvalKey<RnsPoly> ek_prev) const {
+    const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(new_key->get_crypto_parameters());
+    const auto& params_q = crypto_params->get_element_params();
+    const auto& params_qp = crypto_params->get_params_qp();
+    const auto& pparams_qp = params_qp->get_params();
 
-    // skNew is currently in basis Q. This extends it to basis QP.
+    // sk_new is currently in basis Q. This extends it to basis QP.
 
-    DCRTPoly sNewExt(paramsQP, Format::EVALUATION, false);
-    const auto& sNew = newKey->GetPrivateElement();
+    RnsPoly s_new_ext(params_qp, Format::EVALUATION, false);
+    const auto& s_new = new_key->get_private_element();
 
-    auto sNew0 = sNew.GetElementAtIndex(0);
-    sNew0.SetFormat(Format::COEFFICIENT);
+    auto s_new0 = s_new.get_element_at_index(0);
+    s_new0.set_format(Format::COEFFICIENT);
 
-    const uint32_t sizeQ = paramsQ->GetParams().size();
-    const uint32_t sizeQP = paramsQP->GetParams().size();
+    const uint32_t size_q = params_q->get_params().size();
+    const uint32_t size_qp = params_qp->get_params().size();
 
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(sizeQP))
-    for (uint32_t i = 0; i < sizeQP; ++i) {
-        if (i < sizeQ) {
-            auto tmp = sNew.GetElementAtIndex(i);
-            tmp.SetFormat(Format::EVALUATION);
-            sNewExt.SetElementAtIndex(i, std::move(tmp));
+#pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(size_qp))
+    for (uint32_t i = 0; i < size_qp; ++i) {
+        if (i < size_q) {
+            auto tmp = s_new.get_element_at_index(i);
+            tmp.set_format(Format::EVALUATION);
+            s_new_ext.set_element_at_index(i, std::move(tmp));
         } else {
-            NativePoly tmp(pparamsQP[i], Format::COEFFICIENT);
-            tmp.SetValues(NativeVector(sNew0.GetValues(), pparamsQP[i]->GetModulus()), Format::COEFFICIENT);
-            tmp.SetFormat(Format::EVALUATION);
-            sNewExt.SetElementAtIndex(i, std::move(tmp));
+            NativePoly tmp(pparams_qp[i], Format::COEFFICIENT);
+            tmp.set_values(NativeVector(s_new0.get_values(), pparams_qp[i]->get_modulus()), Format::COEFFICIENT);
+            tmp.set_format(Format::EVALUATION);
+            s_new_ext.set_element_at_index(i, std::move(tmp));
         }
     }
 
-    const auto ns = cryptoParams->GetNoiseScale();
+    const auto ns = crypto_params->get_noise_scale();
 
-    const uint32_t numPerPartQ = cryptoParams->GetNumPerPartQ();
-    const uint32_t numPartQ = cryptoParams->GetNumPartQ();
-    std::vector<DCRTPoly> av(numPartQ);
-    std::vector<DCRTPoly> bv(numPartQ);
+    const uint32_t num_per_part_q = crypto_params->get_num_per_part_q();
+    const uint32_t num_part_q = crypto_params->get_num_part_q();
+    std::vector<RnsPoly> av(num_part_q);
+    std::vector<RnsPoly> bv(num_part_q);
 
     DugType dug;
-    auto dgg = cryptoParams->GetDiscreteGaussianGenerator();
+    auto dgg = crypto_params->get_discrete_gaussian_generator();
 
-    const auto& sOld = oldKey->GetPrivateElement();
-    const auto& PModq = cryptoParams->GetPModq();
+    const auto& s_old = old_key->get_private_element();
+    const auto& p_modq = crypto_params->get_p_modq();
 
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(numPartQ)) private(dug, dgg)
-    for (uint32_t part = 0; part < numPartQ; ++part) {
-        auto a = (ekPrev == nullptr) ? DCRTPoly(dug, paramsQP, Format::EVALUATION) :  // single-key HE
-                                       ekPrev->GetAVector()[part];                    // threshold HE
-        DCRTPoly e(dgg, paramsQP, Format::EVALUATION);
-        DCRTPoly b(paramsQP, Format::EVALUATION, false);
+#pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(num_part_q)) private(dug, dgg)
+    for (uint32_t part = 0; part < num_part_q; ++part) {
+        auto a = (ek_prev == nullptr) ? RnsPoly(dug, params_qp, Format::EVALUATION) :  // single-key HE
+                                       ek_prev->get_a_vector()[part];                    // threshold HE
+        RnsPoly e(dgg, params_qp, Format::EVALUATION);
+        RnsPoly b(params_qp, Format::EVALUATION, false);
 
-        const uint32_t startPartIdx = numPerPartQ * part;
-        const uint32_t endPartIdx = (sizeQ > (startPartIdx + numPerPartQ)) ? (startPartIdx + numPerPartQ) : sizeQ;
+        const uint32_t start_part_idx = num_per_part_q * part;
+        const uint32_t end_part_idx = (size_q > (start_part_idx + num_per_part_q)) ? (start_part_idx + num_per_part_q) : size_q;
 
-        for (uint32_t i = 0; i < sizeQP; ++i) {
-            const auto& ai = a.GetElementAtIndex(i);
-            const auto& ei = e.GetElementAtIndex(i);
-            const auto& sni = sNewExt.GetElementAtIndex(i);
+        for (uint32_t i = 0; i < size_qp; ++i) {
+            const auto& ai = a.get_element_at_index(i);
+            const auto& ei = e.get_element_at_index(i);
+            const auto& sni = s_new_ext.get_element_at_index(i);
 
-            if (i < startPartIdx || i >= endPartIdx) {
-                b.SetElementAtIndex(i, (-ai * sni) + (ns * ei));
+            if (i < start_part_idx || i >= end_part_idx) {
+                b.set_element_at_index(i, (-ai * sni) + (ns * ei));
             } else {
-                const auto& soi = sOld.GetElementAtIndex(i);
-                b.SetElementAtIndex(i, (-ai * sni) + (ns * ei) + (PModq[i] * soi));
+                const auto& soi = s_old.get_element_at_index(i);
+                b.set_element_at_index(i, (-ai * sni) + (ns * ei) + (p_modq[i] * soi));
             }
         }
         av[part] = std::move(a);
         bv[part] = std::move(b);
     }
 
-    EvalKeyRelin<DCRTPoly> ek(std::make_shared<EvalKeyRelinImpl<DCRTPoly>>(newKey->GetCryptoContext()));
-    ek->SetAVector(std::move(av));
-    ek->SetBVector(std::move(bv));
-    ek->SetKeyTag(newKey->GetKeyTag());
+    EvalKeyRelin<RnsPoly> ek(std::make_shared<EvalKeyRelinImpl<RnsPoly>>(new_key->get_crypto_context()));
+    ek->set_a_vector(std::move(av));
+    ek->set_b_vector(std::move(bv));
+    ek->set_key_tag(new_key->get_key_tag());
     return ek;
 }
 
-EvalKey<DCRTPoly> KeySwitchHYBRID::KeySwitchGenInternal(const PrivateKey<DCRTPoly> oldKey,
-                                                        const PublicKey<DCRTPoly> newKey) const {
-    const auto cryptoParams = std::dynamic_pointer_cast<CryptoParametersRNS>(newKey->GetCryptoParameters());
-    const auto& paramsQ = cryptoParams->GetElementParams();
-    const auto& paramsQP = cryptoParams->GetParamsQP();
+EvalKey<RnsPoly> KeySwitchHybrid::key_switch_gen_internal(const PrivateKey<RnsPoly> old_key,
+                                                        const PublicKey<RnsPoly> new_key) const {
+    const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(new_key->get_crypto_parameters());
+    const auto& params_q = crypto_params->get_element_params();
+    const auto& params_qp = crypto_params->get_params_qp();
 
-    const uint32_t sizeQ = paramsQ->GetParams().size();
-    const uint32_t sizeQP = paramsQP->GetParams().size();
+    const uint32_t size_q = params_q->get_params().size();
+    const uint32_t size_qp = params_qp->get_params().size();
 
-    const auto ns = cryptoParams->GetNoiseScale();
+    const auto ns = crypto_params->get_noise_scale();
 
-    const uint32_t numPerPartQ = cryptoParams->GetNumPerPartQ();
-    const uint32_t numPartQ = cryptoParams->GetNumPartQ();
-    std::vector<DCRTPoly> av(numPartQ);
-    std::vector<DCRTPoly> bv(numPartQ);
+    const uint32_t num_per_part_q = crypto_params->get_num_per_part_q();
+    const uint32_t num_part_q = crypto_params->get_num_part_q();
+    std::vector<RnsPoly> av(num_part_q);
+    std::vector<RnsPoly> bv(num_part_q);
 
     TugType tug;
-    auto dgg = cryptoParams->GetDiscreteGaussianGenerator();
+    auto dgg = crypto_params->get_discrete_gaussian_generator();
 
-    const auto& sOld = oldKey->GetPrivateElement();
-    const auto& newp0 = newKey->GetPublicElements().at(0);
-    const auto& newp1 = newKey->GetPublicElements().at(1);
-    const auto& PModq = cryptoParams->GetPModq();
+    const auto& s_old = old_key->get_private_element();
+    const auto& newp0 = new_key->get_public_elements().at(0);
+    const auto& newp1 = new_key->get_public_elements().at(1);
+    const auto& p_modq = crypto_params->get_p_modq();
 
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(numPartQ)) private(dgg, tug)
-    for (uint32_t part = 0; part < numPartQ; ++part) {
-        auto u = (cryptoParams->GetSecretKeyDist() == GAUSSIAN) ? DCRTPoly(dgg, paramsQP, Format::EVALUATION) :
-                                                                  DCRTPoly(tug, paramsQP, Format::EVALUATION);
-        DCRTPoly e0(dgg, paramsQP, Format::EVALUATION);
-        DCRTPoly e1(dgg, paramsQP, Format::EVALUATION);
-        DCRTPoly a(paramsQP, Format::EVALUATION, false);
-        DCRTPoly b(paramsQP, Format::EVALUATION, false);
+#pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(num_part_q)) private(dgg, tug)
+    for (uint32_t part = 0; part < num_part_q; ++part) {
+        auto u = (crypto_params->get_secret_key_dist() == GAUSSIAN) ? RnsPoly(dgg, params_qp, Format::EVALUATION) :
+                                                                  RnsPoly(tug, params_qp, Format::EVALUATION);
+        RnsPoly e0(dgg, params_qp, Format::EVALUATION);
+        RnsPoly e1(dgg, params_qp, Format::EVALUATION);
+        RnsPoly a(params_qp, Format::EVALUATION, false);
+        RnsPoly b(params_qp, Format::EVALUATION, false);
 
         // starting and ending position of current part
-        const uint32_t startPartIdx = numPerPartQ * part;
-        const uint32_t endPartIdx = (sizeQ > startPartIdx + numPerPartQ) ? (startPartIdx + numPerPartQ) : sizeQ;
+        const uint32_t start_part_idx = num_per_part_q * part;
+        const uint32_t end_part_idx = (size_q > start_part_idx + num_per_part_q) ? (start_part_idx + num_per_part_q) : size_q;
 
-        for (uint32_t i = 0; i < sizeQP; ++i) {
-            const auto& ui = u.GetElementAtIndex(i);
+        for (uint32_t i = 0; i < size_qp; ++i) {
+            const auto& ui = u.get_element_at_index(i);
 
-            const auto& e0i = e0.GetElementAtIndex(i);
-            const auto& e1i = e1.GetElementAtIndex(i);
+            const auto& e0i = e0.get_element_at_index(i);
+            const auto& e1i = e1.get_element_at_index(i);
 
-            const auto& newp0i = newp0.GetElementAtIndex(i);
-            const auto& newp1i = newp1.GetElementAtIndex(i);
+            const auto& newp0i = newp0.get_element_at_index(i);
+            const auto& newp1i = newp1.get_element_at_index(i);
 
-            a.SetElementAtIndex(i, newp1i * ui + ns * e1i);
+            a.set_element_at_index(i, newp1i * ui + ns * e1i);
 
-            if (i < startPartIdx || i >= endPartIdx) {
-                b.SetElementAtIndex(i, (newp0i * ui) + (ns * e0i));
+            if (i < start_part_idx || i >= end_part_idx) {
+                b.set_element_at_index(i, (newp0i * ui) + (ns * e0i));
             } else {
-                const auto& soi = sOld.GetElementAtIndex(i);
-                b.SetElementAtIndex(i, (newp0i * ui) + (ns * e0i) + (PModq[i] * soi));
+                const auto& soi = s_old.get_element_at_index(i);
+                b.set_element_at_index(i, (newp0i * ui) + (ns * e0i) + (p_modq[i] * soi));
             }
         }
         av[part] = std::move(a);
         bv[part] = std::move(b);
     }
 
-    EvalKeyRelin<DCRTPoly> ek = std::make_shared<EvalKeyRelinImpl<DCRTPoly>>(newKey->GetCryptoContext());
-    ek->SetAVector(std::move(av));
-    ek->SetBVector(std::move(bv));
-    ek->SetKeyTag(newKey->GetKeyTag());
+    EvalKeyRelin<RnsPoly> ek = std::make_shared<EvalKeyRelinImpl<RnsPoly>>(new_key->get_crypto_context());
+    ek->set_a_vector(std::move(av));
+    ek->set_b_vector(std::move(bv));
+    ek->set_key_tag(new_key->get_key_tag());
     return ek;
 }
 
-void KeySwitchHYBRID::KeySwitchInPlace(Ciphertext<DCRTPoly>& ciphertext, const EvalKey<DCRTPoly> ek) const {
-    auto& cv = ciphertext->GetElements();
-    auto ba = KeySwitchCore(cv.back(), ek);
-    cv[0].SetFormat(Format::EVALUATION);
+void KeySwitchHybrid::key_switch_in_place(Ciphertext<RnsPoly>& ciphertext, const EvalKey<RnsPoly> ek) const {
+    auto& cv = ciphertext->get_elements();
+    auto ba = key_switch_core(cv.back(), ek);
+    cv[0].set_format(Format::EVALUATION);
     cv[0] += ba[0];
     if (cv.size() > 2) {
-        cv[1].SetFormat(Format::EVALUATION);
+        cv[1].set_format(Format::EVALUATION);
         cv[1] += ba[1];
     } else {
         cv[1] = ba[1];
@@ -214,210 +214,210 @@ void KeySwitchHYBRID::KeySwitchInPlace(Ciphertext<DCRTPoly>& ciphertext, const E
     cv.resize(2);
 }
 
-Ciphertext<DCRTPoly> KeySwitchHYBRID::KeySwitchExt(ConstCiphertext<DCRTPoly> ciphertext, bool addFirst) const {
-    const auto cryptoParams = std::dynamic_pointer_cast<CryptoParametersCKKSRNS>(ciphertext->GetCryptoParameters());
+Ciphertext<RnsPoly> KeySwitchHybrid::key_switch_ext(ConstCiphertext<RnsPoly> ciphertext, bool add_first) const {
+    const auto crypto_params = std::dynamic_pointer_cast<CkksRnsCryptoParams>(ciphertext->get_crypto_parameters());
 
-    const auto& cv = ciphertext->GetElements();
-    const auto& PModq = cryptoParams->GetPModq();
+    const auto& cv = ciphertext->get_elements();
+    const auto& p_modq = crypto_params->get_p_modq();
 
-    const auto paramsP = cryptoParams->GetParamsP();
-    const auto paramsQl = cv[0].GetParams();
-    const auto paramsQlP = cv[0].GetExtendedCRTBasis(paramsP);
+    const auto params_p = crypto_params->get_params_p();
+    const auto params_ql = cv[0].get_params();
+    const auto params_ql_p = cv[0].get_extended_crt_basis(params_p);
 
-    const uint32_t sizeCv = cv.size();
-    const uint32_t sizeQl = paramsQl->GetParams().size();
-    std::vector<DCRTPoly> elements(sizeCv);
+    const uint32_t size_cv = cv.size();
+    const uint32_t size_ql = params_ql->get_params().size();
+    std::vector<RnsPoly> elements(size_cv);
 
-    for (uint32_t k = 0; k < sizeCv; ++k) {
-        elements[k] = DCRTPoly(paramsQlP, Format::EVALUATION, true);
-        if ((addFirst) || (k > 0)) {
-            auto cMult = cv[k].TimesNoCheck(PModq);
-            for (uint32_t i = 0; i < sizeQl; ++i) {
-                elements[k].SetElementAtIndex(i, std::move(cMult.GetElementAtIndex(i)));
+    for (uint32_t k = 0; k < size_cv; ++k) {
+        elements[k] = RnsPoly(params_ql_p, Format::EVALUATION, true);
+        if ((add_first) || (k > 0)) {
+            auto c_mult = cv[k].times_no_check(p_modq);
+            for (uint32_t i = 0; i < size_ql; ++i) {
+                elements[k].set_element_at_index(i, std::move(c_mult.get_element_at_index(i)));
             }
         }
     }
 
-    auto result = ciphertext->CloneEmpty();
-    result->SetElements(std::move(elements));
+    auto result = ciphertext->clone_empty();
+    result->set_elements(std::move(elements));
     return result;
 }
 
-Ciphertext<DCRTPoly> KeySwitchHYBRID::KeySwitchDown(ConstCiphertext<DCRTPoly> ciphertext) const {
-    const auto& cv = ciphertext->GetElements();
-    const auto paramsQlP = cv[0].GetParams();
+Ciphertext<RnsPoly> KeySwitchHybrid::key_switch_down(ConstCiphertext<RnsPoly> ciphertext) const {
+    const auto& cv = ciphertext->get_elements();
+    const auto params_ql_p = cv[0].get_params();
 
-    const auto cryptoParams = std::dynamic_pointer_cast<CryptoParametersCKKSRNS>(ciphertext->GetCryptoParameters());
-    const auto paramsP = cryptoParams->GetParamsP();
+    const auto crypto_params = std::dynamic_pointer_cast<CkksRnsCryptoParams>(ciphertext->get_crypto_parameters());
+    const auto params_p = crypto_params->get_params_p();
 
-    const uint32_t sizeQl = paramsQlP->GetParams().size() - paramsP->GetParams().size();
-    const auto paramsQl = cryptoParams->GetParamsQlHybrid(sizeQl);
+    const uint32_t size_ql = params_ql_p->get_params().size() - params_p->get_params().size();
+    const auto params_ql = crypto_params->get_params_ql_hybrid(size_ql);
 
-    const PlaintextModulus t = (cryptoParams->GetNoiseScale() == 1) ? 0 : cryptoParams->GetPlaintextModulus();
+    const PlaintextModulus t = (crypto_params->get_noise_scale() == 1) ? 0 : crypto_params->get_plaintext_modulus();
 
-    std::vector<DCRTPoly> elements;
+    std::vector<RnsPoly> elements;
     elements.reserve(2);
-    elements.emplace_back(cv[0].ApproxModDown(paramsQl, cryptoParams->GetParamsP(), cryptoParams->GetPInvModq(),
-                                              cryptoParams->GetPInvModqPrecon(), cryptoParams->GetPHatInvModp(),
-                                              cryptoParams->GetPHatInvModpPrecon(), cryptoParams->GetPHatModq(),
-                                              cryptoParams->GetModqBarrettMu(), cryptoParams->GettInvModp(),
-                                              cryptoParams->GettInvModpPrecon(), t, cryptoParams->GettModqPrecon()));
-    elements.emplace_back(cv[1].ApproxModDown(paramsQl, cryptoParams->GetParamsP(), cryptoParams->GetPInvModq(),
-                                              cryptoParams->GetPInvModqPrecon(), cryptoParams->GetPHatInvModp(),
-                                              cryptoParams->GetPHatInvModpPrecon(), cryptoParams->GetPHatModq(),
-                                              cryptoParams->GetModqBarrettMu(), cryptoParams->GettInvModp(),
-                                              cryptoParams->GettInvModpPrecon(), t, cryptoParams->GettModqPrecon()));
+    elements.emplace_back(cv[0].approx_mod_down(params_ql, crypto_params->get_params_p(), crypto_params->get_p_inv_modq(),
+                                              crypto_params->get_p_inv_modq_precon(), crypto_params->get_p_hat_inv_modp(),
+                                              crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
+                                              crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
+                                              crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon()));
+    elements.emplace_back(cv[1].approx_mod_down(params_ql, crypto_params->get_params_p(), crypto_params->get_p_inv_modq(),
+                                              crypto_params->get_p_inv_modq_precon(), crypto_params->get_p_hat_inv_modp(),
+                                              crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
+                                              crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
+                                              crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon()));
 
-    auto result = ciphertext->CloneEmpty();
-    result->SetElements(std::move(elements));
+    auto result = ciphertext->clone_empty();
+    result->set_elements(std::move(elements));
     return result;
 }
 
-DCRTPoly KeySwitchHYBRID::KeySwitchDownFirstElement(ConstCiphertext<DCRTPoly> ciphertext) const {
-    const auto& cv = ciphertext->GetElements()[0];
-    const auto paramsQlP = cv.GetParams();
+RnsPoly KeySwitchHybrid::key_switch_down_first_element(ConstCiphertext<RnsPoly> ciphertext) const {
+    const auto& cv = ciphertext->get_elements()[0];
+    const auto params_ql_p = cv.get_params();
 
-    const auto cryptoParams = std::dynamic_pointer_cast<CryptoParametersCKKSRNS>(ciphertext->GetCryptoParameters());
-    const auto paramsP = cryptoParams->GetParamsP();
+    const auto crypto_params = std::dynamic_pointer_cast<CkksRnsCryptoParams>(ciphertext->get_crypto_parameters());
+    const auto params_p = crypto_params->get_params_p();
 
-    const uint32_t sizeQl = paramsQlP->GetParams().size() - paramsP->GetParams().size();
-    const auto paramsQl = cryptoParams->GetParamsQlHybrid(sizeQl);
+    const uint32_t size_ql = params_ql_p->get_params().size() - params_p->get_params().size();
+    const auto params_ql = crypto_params->get_params_ql_hybrid(size_ql);
 
-    const PlaintextModulus t = (cryptoParams->GetNoiseScale() == 1) ? 0 : cryptoParams->GetPlaintextModulus();
+    const PlaintextModulus t = (crypto_params->get_noise_scale() == 1) ? 0 : crypto_params->get_plaintext_modulus();
 
-    return cv.ApproxModDown(paramsQl, cryptoParams->GetParamsP(), cryptoParams->GetPInvModq(),
-                            cryptoParams->GetPInvModqPrecon(), cryptoParams->GetPHatInvModp(),
-                            cryptoParams->GetPHatInvModpPrecon(), cryptoParams->GetPHatModq(),
-                            cryptoParams->GetModqBarrettMu(), cryptoParams->GettInvModp(),
-                            cryptoParams->GettInvModpPrecon(), t, cryptoParams->GettModqPrecon());
+    return cv.approx_mod_down(params_ql, crypto_params->get_params_p(), crypto_params->get_p_inv_modq(),
+                            crypto_params->get_p_inv_modq_precon(), crypto_params->get_p_hat_inv_modp(),
+                            crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
+                            crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
+                            crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon());
 }
 
-std::vector<DCRTPoly> KeySwitchHYBRID::KeySwitchCore(const DCRTPoly& a, const EvalKey<DCRTPoly> evalKey) const {
-    return EvalFastKeySwitchCore(EvalKeySwitchPrecomputeCore(a, evalKey->GetCryptoParameters()), evalKey,
-                                 a.GetParams());
+std::vector<RnsPoly> KeySwitchHybrid::key_switch_core(const RnsPoly& a, const EvalKey<RnsPoly> eval_key) const {
+    return eval_fast_key_switch_core(eval_key_switch_precompute_core(a, eval_key->get_crypto_parameters()), eval_key,
+                                 a.get_params());
 }
 
-std::shared_ptr<std::vector<DCRTPoly>> KeySwitchHYBRID::EvalKeySwitchPrecomputeCore(
-        const DCRTPoly& c, std::shared_ptr<CryptoParametersBase<DCRTPoly>> cryptoParamsBase) const {
-    const auto cryptoParams = std::dynamic_pointer_cast<CryptoParametersRNS>(cryptoParamsBase);
+std::shared_ptr<std::vector<RnsPoly>> KeySwitchHybrid::eval_key_switch_precompute_core(
+        const RnsPoly& c, std::shared_ptr<BaseCryptoParams<RnsPoly>> crypto_params_base) const {
+    const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(crypto_params_base);
 
-    const auto paramsQl = c.GetParams();
-    const auto paramsP = cryptoParams->GetParamsP();
-    const auto paramsQlP = c.GetExtendedCRTBasis(paramsP);
+    const auto params_ql = c.get_params();
+    const auto params_p = crypto_params->get_params_p();
+    const auto params_ql_p = c.get_extended_crt_basis(params_p);
 
-    const uint32_t sizeQl = paramsQl->GetParams().size();
-    const uint32_t sizeP = paramsP->GetParams().size();
-    const uint32_t sizeQlP = sizeQl + sizeP;
-    const uint32_t ringDim = paramsQl->GetRingDimension();
-    const uint32_t alpha = cryptoParams->GetNumPerPartQ();
+    const uint32_t size_ql = params_ql->get_params().size();
+    const uint32_t size_p = params_p->get_params().size();
+    const uint32_t size_ql_p = size_ql + size_p;
+    const uint32_t ring_dim = params_ql->get_ring_dimension();
+    const uint32_t alpha = crypto_params->get_num_per_part_q();
     // The number of digits of the current ciphertext
-    uint32_t numPartQl = std::ceil(static_cast<double>(sizeQl) / alpha);
-    if (numPartQl > cryptoParams->GetNumberOfQPartitions())
-        numPartQl = cryptoParams->GetNumberOfQPartitions();
+    uint32_t num_part_ql = std::ceil(static_cast<double>(size_ql) / alpha);
+    if (num_part_ql > crypto_params->get_number_of_q_partitions())
+        num_part_ql = crypto_params->get_number_of_q_partitions();
 
-    auto result = std::make_shared<std::vector<DCRTPoly>>(numPartQl);
+    auto result = std::make_shared<std::vector<RnsPoly>>(num_part_ql);
 
     // Digit decomposition
     // Zero-padding and split
-    for (uint32_t part = 0; part < numPartQl; ++part) {
-        DCRTPoly partsCt;
-        if (part == numPartQl - 1) {
-            const auto& paramsPartQ = cryptoParams->GetParamsPartQ(part);
+    for (uint32_t part = 0; part < num_part_ql; ++part) {
+        RnsPoly parts_ct;
+        if (part == num_part_ql - 1) {
+            const auto& params_part_q = crypto_params->get_params_part_q(part);
 
-            uint32_t sizePartQl = sizeQl - alpha * part;
-            std::vector<NativeInteger> moduli(sizePartQl);
-            std::vector<NativeInteger> roots(sizePartQl);
-            for (uint32_t i = 0; i < sizePartQl; ++i) {
-                moduli[i] = paramsPartQ->GetParams()[i]->GetModulus();
-                roots[i] = paramsPartQ->GetParams()[i]->GetRootOfUnity();
+            uint32_t size_part_ql = size_ql - alpha * part;
+            std::vector<NativeInteger> moduli(size_part_ql);
+            std::vector<NativeInteger> roots(size_part_ql);
+            for (uint32_t i = 0; i < size_part_ql; ++i) {
+                moduli[i] = params_part_q->get_params()[i]->get_modulus();
+                roots[i] = params_part_q->get_params()[i]->get_root_of_unity();
             }
-            auto&& params = std::make_shared<ParmType>(paramsPartQ->GetCyclotomicOrder(), moduli, roots);
-            partsCt = DCRTPoly(params, Format::EVALUATION, false);
+            auto&& params = std::make_shared<ParmType>(params_part_q->get_cyclotomic_order(), moduli, roots);
+            parts_ct = RnsPoly(params, Format::EVALUATION, false);
         } else {
-            partsCt = DCRTPoly(cryptoParams->GetParamsPartQ(part), Format::EVALUATION, false);
+            parts_ct = RnsPoly(crypto_params->get_params_part_q(part), Format::EVALUATION, false);
         }
 
-        const uint32_t sizePartQl = partsCt.GetNumOfElements();
-        const uint32_t startPartIdx = alpha * part;
-        for (uint32_t i = 0, idx = startPartIdx; i < sizePartQl; ++i, ++idx)
-            partsCt.SetElementAtIndex(i, c.GetElementAtIndex(idx));
+        const uint32_t size_part_ql = parts_ct.get_num_of_elements();
+        const uint32_t start_part_idx = alpha * part;
+        for (uint32_t i = 0, idx = start_part_idx; i < size_part_ql; ++i, ++idx)
+            parts_ct.set_element_at_index(i, c.get_element_at_index(idx));
 
-        const uint32_t threads = DCRTPoly::ApproxSwitchCRTBasisThreads(ringDim, sizePartQl, sizeQlP - sizePartQl);
-        partsCt.SetFormat(Format::COEFFICIENT, threads);
-        auto partsCtCompl = partsCt.ApproxSwitchCRTBasis(cryptoParams->GetParamsPartQ(part),
-                                                         cryptoParams->GetParamsComplPartQ(sizeQl - 1, part),
-                                                         cryptoParams->GetPartQlHatInvModq(part, sizePartQl - 1),
-                                                         cryptoParams->GetPartQlHatInvModqPrecon(part, sizePartQl - 1),
-                                                         cryptoParams->GetPartQlHatModp(sizeQl - 1, part),
-                                                         cryptoParams->GetmodComplPartqBarrettMu(sizeQl - 1, part));
-        partsCtCompl.SetFormat(Format::EVALUATION, threads);
+        const uint32_t threads = RnsPoly::approx_switch_crt_basis_threads(ring_dim, size_part_ql, size_ql_p - size_part_ql);
+        parts_ct.set_format(Format::COEFFICIENT, threads);
+        auto parts_ct_compl = parts_ct.approx_switch_crt_basis(crypto_params->get_params_part_q(part),
+                                                         crypto_params->get_params_compl_part_q(size_ql - 1, part),
+                                                         crypto_params->get_part_ql_hat_inv_modq(part, size_part_ql - 1),
+                                                         crypto_params->get_part_ql_hat_inv_modq_precon(part, size_part_ql - 1),
+                                                         crypto_params->get_part_ql_hat_modp(size_ql - 1, part),
+                                                         crypto_params->get_mod_compl_partq_barrett_mu(size_ql - 1, part));
+        parts_ct_compl.set_format(Format::EVALUATION, threads);
 
-        (*result)[part] = DCRTPoly(paramsQlP, Format::EVALUATION, false);
+        (*result)[part] = RnsPoly(params_ql_p, Format::EVALUATION, false);
 
-        const uint32_t endPartIdx = startPartIdx + sizePartQl;
-        for (uint32_t i = 0; i < startPartIdx; ++i)
-            (*result)[part].SetElementAtIndex(i, std::move(partsCtCompl.GetElementAtIndex(i)));
-        for (uint32_t i = startPartIdx; i < endPartIdx; ++i)
-            (*result)[part].SetElementAtIndex(i, c.GetElementAtIndex(i));
-        for (uint32_t i = endPartIdx; i < sizeQlP; ++i)
-            (*result)[part].SetElementAtIndex(i, std::move(partsCtCompl.GetElementAtIndex(i - sizePartQl)));
+        const uint32_t end_part_idx = start_part_idx + size_part_ql;
+        for (uint32_t i = 0; i < start_part_idx; ++i)
+            (*result)[part].set_element_at_index(i, std::move(parts_ct_compl.get_element_at_index(i)));
+        for (uint32_t i = start_part_idx; i < end_part_idx; ++i)
+            (*result)[part].set_element_at_index(i, c.get_element_at_index(i));
+        for (uint32_t i = end_part_idx; i < size_ql_p; ++i)
+            (*result)[part].set_element_at_index(i, std::move(parts_ct_compl.get_element_at_index(i - size_part_ql)));
     }
     return result;
 }
 
-std::vector<DCRTPoly> KeySwitchHYBRID::EvalFastKeySwitchCore(const std::shared_ptr<std::vector<DCRTPoly>> digits,
-                                                             const EvalKey<DCRTPoly> evalKey,
-                                                             const std::shared_ptr<ParmType> paramsQl) const {
-    const auto cryptoParams = std::dynamic_pointer_cast<CryptoParametersRNS>(evalKey->GetCryptoParameters());
+std::vector<RnsPoly> KeySwitchHybrid::eval_fast_key_switch_core(const std::shared_ptr<std::vector<RnsPoly>> digits,
+                                                             const EvalKey<RnsPoly> eval_key,
+                                                             const std::shared_ptr<ParmType> params_ql) const {
+    const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(eval_key->get_crypto_parameters());
 
-    const PlaintextModulus t = (cryptoParams->GetNoiseScale() == 1) ? 0 : cryptoParams->GetPlaintextModulus();
+    const PlaintextModulus t = (crypto_params->get_noise_scale() == 1) ? 0 : crypto_params->get_plaintext_modulus();
 
-    auto result = EvalFastKeySwitchCoreExt(digits, evalKey, paramsQl);
-    result[0] = result[0].ApproxModDown(paramsQl, cryptoParams->GetParamsP(), cryptoParams->GetPInvModq(),
-                                        cryptoParams->GetPInvModqPrecon(), cryptoParams->GetPHatInvModp(),
-                                        cryptoParams->GetPHatInvModpPrecon(), cryptoParams->GetPHatModq(),
-                                        cryptoParams->GetModqBarrettMu(), cryptoParams->GettInvModp(),
-                                        cryptoParams->GettInvModpPrecon(), t, cryptoParams->GettModqPrecon());
-    result[1] = result[1].ApproxModDown(paramsQl, cryptoParams->GetParamsP(), cryptoParams->GetPInvModq(),
-                                        cryptoParams->GetPInvModqPrecon(), cryptoParams->GetPHatInvModp(),
-                                        cryptoParams->GetPHatInvModpPrecon(), cryptoParams->GetPHatModq(),
-                                        cryptoParams->GetModqBarrettMu(), cryptoParams->GettInvModp(),
-                                        cryptoParams->GettInvModpPrecon(), t, cryptoParams->GettModqPrecon());
+    auto result = eval_fast_key_switch_core_ext(digits, eval_key, params_ql);
+    result[0] = result[0].approx_mod_down(params_ql, crypto_params->get_params_p(), crypto_params->get_p_inv_modq(),
+                                        crypto_params->get_p_inv_modq_precon(), crypto_params->get_p_hat_inv_modp(),
+                                        crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
+                                        crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
+                                        crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon());
+    result[1] = result[1].approx_mod_down(params_ql, crypto_params->get_params_p(), crypto_params->get_p_inv_modq(),
+                                        crypto_params->get_p_inv_modq_precon(), crypto_params->get_p_hat_inv_modp(),
+                                        crypto_params->get_p_hat_inv_modp_precon(), crypto_params->get_p_hat_modq(),
+                                        crypto_params->get_modq_barrett_mu(), crypto_params->get_t_inv_modp(),
+                                        crypto_params->get_t_inv_modp_precon(), t, crypto_params->get_t_modq_precon());
     return result;
 }
 
-std::vector<DCRTPoly> KeySwitchHYBRID::EvalFastKeySwitchCoreExt(const std::shared_ptr<std::vector<DCRTPoly>> digits,
-                                                                const EvalKey<DCRTPoly> evalKey,
-                                                                const std::shared_ptr<ParmType> paramsQl) const {
-    const auto paramsQlP = (*digits)[0].GetParams();
-    const uint32_t sizeQlP = paramsQlP->GetParams().size();
+std::vector<RnsPoly> KeySwitchHybrid::eval_fast_key_switch_core_ext(const std::shared_ptr<std::vector<RnsPoly>> digits,
+                                                                const EvalKey<RnsPoly> eval_key,
+                                                                const std::shared_ptr<ParmType> params_ql) const {
+    const auto params_ql_p = (*digits)[0].get_params();
+    const uint32_t size_ql_p = params_ql_p->get_params().size();
 
     const uint32_t limit = digits->size();
-    const uint32_t sizeQl = paramsQl->GetParams().size();
-    auto&& cryptoParams = std::dynamic_pointer_cast<CryptoParametersRNS>(evalKey->GetCryptoParameters());
-    const uint32_t delta = cryptoParams->GetElementParams()->GetParams().size() - sizeQl;
+    const uint32_t size_ql = params_ql->get_params().size();
+    auto&& crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(eval_key->get_crypto_parameters());
+    const uint32_t delta = crypto_params->get_element_params()->get_params().size() - size_ql;
 
-    const auto& av = evalKey->GetAVector();
-    const auto& bv = evalKey->GetBVector();
+    const auto& av = eval_key->get_a_vector();
+    const auto& bv = eval_key->get_b_vector();
 
-    std::vector<DCRTPoly> result;
+    std::vector<RnsPoly> result;
     result.reserve(2);
-    result.emplace_back(paramsQlP, Format::EVALUATION, true);
-    result.emplace_back(paramsQlP, Format::EVALUATION, true);
+    result.emplace_back(params_ql_p, Format::EVALUATION, true);
+    result.emplace_back(params_ql_p, Format::EVALUATION, true);
 
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(sizeQlP))
-    for (uint32_t i = 0; i < sizeQlP; ++i) {
-        const auto idx = (i >= sizeQl) ? i + delta : i;
-        auto& r0 = result[0].GetAllElements()[i];
-        auto& r1 = result[1].GetAllElements()[i];
+#pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(size_ql_p))
+    for (uint32_t i = 0; i < size_ql_p; ++i) {
+        const auto idx = (i >= size_ql) ? i + delta : i;
+        auto& r0 = result[0].get_all_elements()[i];
+        auto& r1 = result[1].get_all_elements()[i];
         for (uint32_t j = 0; j < limit; ++j) {
-            const auto& cji = (*digits)[j].GetElementAtIndex(i);
-            r0.MultAccEqNoCheck(cji, bv[j].GetElementAtIndex(idx));
-            r1.MultAccEqNoCheck(cji, av[j].GetElementAtIndex(idx));
+            const auto& cji = (*digits)[j].get_element_at_index(i);
+            r0.mult_acc_eq_no_check(cji, bv[j].get_element_at_index(idx));
+            r1.mult_acc_eq_no_check(cji, av[j].get_element_at_index(idx));
         }
     }
 
     return result;
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher

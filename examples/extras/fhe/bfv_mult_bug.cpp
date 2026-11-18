@@ -40,132 +40,132 @@
 
 #include "cipher/cipher.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
-void EvalNoiseBFV(PrivateKey<DCRTPoly> privateKey, ConstCiphertext<DCRTPoly> ciphertext, Plaintext ptxt, uint32_t ptm,
-                  double& noise, double& logQ);
+void eval_noise_bfv(PrivateKey<RnsPoly> private_key, ConstCiphertext<RnsPoly> ciphertext, Plaintext ptxt, uint32_t ptm,
+                  double& noise, double& log_q);
 
 int main() {
-    CCParams<CryptoContextBFVRNS> parameters;
+    ContextParams<BfvRnsContext> parameters;
     uint64_t ptm = 786433;
-    parameters.SetPlaintextModulus(ptm);
-    parameters.SetMultiplicationTechnique(HPSPOVERQ);  // BEHZ, HPS, HPSPOVERQ, HPSPOVERQLEVELED
-    parameters.SetMultiplicativeDepth(67);             // 50, 100, 150
+    parameters.set_plaintext_modulus(ptm);
+    parameters.set_multiplication_technique(HPSPOVERQ);  // BEHZ, HPS, HPSPOVERQ, HPSPOVERQLEVELED
+    parameters.set_multiplicative_depth(67);             // 50, 100, 150
 
     // For speed
-    parameters.SetSecurityLevel(SecurityLevel::HEStd_NotSet);
-    parameters.SetRingDim(1024);
+    parameters.set_security_level(SecurityLevel::HEStd_NotSet);
+    parameters.set_ring_dim(1024);
 
-    CryptoContext<DCRTPoly> cryptoContext = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> crypto_context = make_crypto_context(parameters);
     // Enable features that you wish to use
-    cryptoContext->Enable(PKE);
-    cryptoContext->Enable(KEYSWITCH);
-    cryptoContext->Enable(LEVELEDSHE);
+    crypto_context->enable(PKE);
+    crypto_context->enable(KEYSWITCH);
+    crypto_context->enable(LEVELEDSHE);
 
     // Initialize Public Key Containers
-    KeyPair<DCRTPoly> keyPair;
+    KeyPair<RnsPoly> key_pair;
 
     // Generate a public/private key pair
-    keyPair = cryptoContext->KeyGen();
+    key_pair = crypto_context->key_gen();
 
     // Generate the relinearization key
-    cryptoContext->EvalMultKeyGen(keyPair.secretKey);
+    crypto_context->eval_mult_key_gen(key_pair.secret_key);
 
     // First plaintext vector is encoded
-    std::vector<int64_t> vectorOfInts1 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
-    Plaintext plaintext1 = cryptoContext->MakePackedPlaintext(vectorOfInts1);
+    std::vector<int64_t> vector_of_ints1 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+    Plaintext plaintext1 = crypto_context->make_packed_plaintext(vector_of_ints1);
     // Second plaintext vector is encoded
-    std::vector<int64_t> vectorOfInts2 = {3, 2, 1, 4, 5, 6, 7, 8, 9, 10, 11, 12};
-    Plaintext plaintext2 = cryptoContext->MakePackedPlaintext(vectorOfInts2);
+    std::vector<int64_t> vector_of_ints2 = {3, 2, 1, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+    Plaintext plaintext2 = crypto_context->make_packed_plaintext(vector_of_ints2);
 
     // The encoded vectors are encrypted
-    auto ciphertext1 = cryptoContext->Encrypt(keyPair.publicKey, plaintext1);
-    auto ciphertext2 = cryptoContext->Encrypt(keyPair.publicKey, plaintext2);
+    auto ciphertext1 = crypto_context->encrypt(key_pair.public_key, plaintext1);
+    auto ciphertext2 = crypto_context->encrypt(key_pair.public_key, plaintext2);
 
     // Homomorphic multiplications
-    auto ciphertextMul12 = cryptoContext->EvalMult(ciphertext1, ciphertext2);
+    auto ciphertext_mul12 = crypto_context->eval_mult(ciphertext1, ciphertext2);
 
     // Decrypt the result of multiplications
-    Plaintext plaintextMultResult;
-    cryptoContext->Decrypt(keyPair.secretKey, ciphertextMul12, &plaintextMultResult);
-    plaintextMultResult->SetLength(vectorOfInts1.size());
-    std::vector<int64_t> decvec = plaintextMultResult->GetPackedValue();
-    Plaintext dRes = cryptoContext->MakePackedPlaintext(decvec);
+    Plaintext plaintext_mult_result;
+    crypto_context->decrypt(key_pair.secret_key, ciphertext_mul12, &plaintext_mult_result);
+    plaintext_mult_result->set_length(vector_of_ints1.size());
+    std::vector<int64_t> decvec = plaintext_mult_result->get_packed_value();
+    Plaintext d_res = crypto_context->make_packed_plaintext(decvec);
 
     // Decrypt the result of 1 and 2
-    Plaintext plaintext1Result;
-    cryptoContext->Decrypt(keyPair.secretKey, ciphertext1, &plaintext1Result);
-    plaintext1Result->SetLength(vectorOfInts1.size());
-    std::vector<int64_t> decvec1 = plaintext1Result->GetPackedValue();
-    Plaintext dRes1 = cryptoContext->MakePackedPlaintext(decvec1);
+    Plaintext plaintext1_result;
+    crypto_context->decrypt(key_pair.secret_key, ciphertext1, &plaintext1_result);
+    plaintext1_result->set_length(vector_of_ints1.size());
+    std::vector<int64_t> decvec1 = plaintext1_result->get_packed_value();
+    Plaintext d_res1 = crypto_context->make_packed_plaintext(decvec1);
 
     std::cout << "Plaintext #1: " << plaintext1 << std::endl;
     std::cout << "Plaintext #2: " << plaintext2 << std::endl;
 
     // Output results
     std::cout << "\nResults of homomorphic computations" << std::endl;
-    std::cout << "#1:      " << plaintext1Result << std::endl;
-    std::cout << "#1 * #2: " << plaintextMultResult << std::endl;
+    std::cout << "#1:      " << plaintext1_result << std::endl;
+    std::cout << "#1 * #2: " << plaintext_mult_result << std::endl;
 
-    double noise = 0, logQ = 0;
-    EvalNoiseBFV(keyPair.secretKey, ciphertextMul12, dRes, ptm, noise, logQ);
-    EvalNoiseBFV(keyPair.secretKey, ciphertext1, dRes1, ptm, noise, logQ);
+    double noise = 0, log_q = 0;
+    eval_noise_bfv(key_pair.secret_key, ciphertext_mul12, d_res, ptm, noise, log_q);
+    eval_noise_bfv(key_pair.secret_key, ciphertext1, d_res1, ptm, noise, log_q);
     return 0;
 }
 
-void EvalNoiseBFV(PrivateKey<DCRTPoly> privateKey, ConstCiphertext<DCRTPoly> ciphertext, Plaintext ptxt, uint32_t ptm,
-                  double& noise, double& logQ) {
-    const auto cryptoParams = std::static_pointer_cast<CryptoParametersBFVRNS>(privateKey->GetCryptoParameters());
+void eval_noise_bfv(PrivateKey<RnsPoly> private_key, ConstCiphertext<RnsPoly> ciphertext, Plaintext ptxt, uint32_t ptm,
+                  double& noise, double& log_q) {
+    const auto crypto_params = std::static_pointer_cast<BfvRnsCryptoParams>(private_key->get_crypto_parameters());
 
-    const std::vector<DCRTPoly>& cv = ciphertext->GetElements();
-    DCRTPoly s = privateKey->GetPrivateElement();
+    const std::vector<RnsPoly>& cv = ciphertext->get_elements();
+    RnsPoly s = private_key->get_private_element();
 
-    size_t sizeQl = cv[0].GetParams()->GetParams().size();
-    size_t sizeQs = s.GetParams()->GetParams().size();
+    size_t size_ql = cv[0].get_params()->get_params().size();
+    size_t size_qs = s.get_params()->get_params().size();
 
-    size_t diffQl = sizeQs - sizeQl;
+    size_t diff_ql = size_qs - size_ql;
 
     auto scopy(s);
-    scopy.DropLastElements(diffQl);
+    scopy.drop_last_elements(diff_ql);
 
-    DCRTPoly sPower(scopy);
+    RnsPoly s_power(scopy);
 
-    DCRTPoly b = cv[0];
-    b.SetFormat(Format::EVALUATION);
+    RnsPoly b = cv[0];
+    b.set_format(Format::EVALUATION);
 
-    DCRTPoly ci;
+    RnsPoly ci;
     for (size_t i = 1; i < cv.size(); i++) {
         ci = cv[i];
-        ci.SetFormat(Format::EVALUATION);
+        ci.set_format(Format::EVALUATION);
 
-        b += sPower * ci;
-        sPower *= scopy;
+        b += s_power * ci;
+        s_power *= scopy;
     }
 
-    const auto encParams = cryptoParams->GetElementParams();
-    NativeInteger NegQModt = cryptoParams->GetNegQModt();
-    NativeInteger NegQModtPrecon = cryptoParams->GetNegQModtPrecon();
-    const NativeInteger t = cryptoParams->GetPlaintextModulus();
-    std::vector<NativeInteger> tInvModq = cryptoParams->GettInvModq();
+    const auto enc_params = crypto_params->get_element_params();
+    NativeInteger neg_q_modt = crypto_params->get_neg_q_modt();
+    NativeInteger neg_q_modt_precon = crypto_params->get_neg_q_modt_precon();
+    const NativeInteger t = crypto_params->get_plaintext_modulus();
+    std::vector<NativeInteger> t_inv_modq = crypto_params->get_t_inv_modq();
 
-    DCRTPoly plain = ptxt->GetElement<DCRTPoly>();
-    plain.SetFormat(Format::COEFFICIENT);
-    plain.TimesQovert(encParams, tInvModq, t, NegQModt, NegQModtPrecon);
-    plain.SetFormat(Format::EVALUATION);
-    DCRTPoly res;
+    RnsPoly plain = ptxt->get_element<RnsPoly>();
+    plain.set_format(Format::COEFFICIENT);
+    plain.times_qovert(enc_params, t_inv_modq, t, neg_q_modt, neg_q_modt_precon);
+    plain.set_format(Format::EVALUATION);
+    RnsPoly res;
     res = b - plain;
 
     // Converts back to coefficient representation
-    res.SetFormat(Format::COEFFICIENT);
-    size_t sizeQ = cryptoParams->GetElementParams()->GetParams().size();
-    noise = (std::log2(res.Norm()));
+    res.set_format(Format::COEFFICIENT);
+    size_t size_q = crypto_params->get_element_params()->get_params().size();
+    noise = (std::log2(res.norm()));
 
-    logQ = 0;
-    for (uint32_t i = 0; i < sizeQ; i++) {
-        double logqi = std::log2(cryptoParams->GetElementParams()->GetParams()[i]->GetModulus().ConvertToInt());
-        logQ += logqi;
+    log_q = 0;
+    for (uint32_t i = 0; i < size_q; i++) {
+        double logqi = std::log2(crypto_params->get_element_params()->get_params()[i]->get_modulus().convert_to_int());
+        log_q += logqi;
     }
 
-    std::cout << "logQ: " << logQ << std::endl;
+    std::cout << "logQ: " << log_q << std::endl;
     std::cout << "noise: " << noise << std::endl;
 }

@@ -41,7 +41,7 @@
    unless PROFILE is defined in the file before all includes,'
    in which case TIC/TOC will still work and PROFILELOG() can be
    used for logging results to the diagnostic output channel, and
-   OPENFHE_DEBUG() will remain silent. dbg_flag does not get used by PROFILELOG()
+   CIPHER_DEBUG() will remain silent. dbg_flag does not get used by PROFILELOG()
  */
 
 #include <time.h>
@@ -55,38 +55,38 @@
 #if !defined(NDEBUG)
 
     // note that for the following dbg_flag needs to be defined in some scope using
-    // OPENFHE_DEBUG_FLAG
-    #define OPENFHE_DEBUG_FLAG(x) bool dbg_flag = x;
+    // CIPHER_DEBUG_FLAG
+    #define CIPHER_DEBUG_FLAG(x) bool dbg_flag = x;
 
     // debugging macro prints value of x on cerr
-    #define OPENFHE_DEBUG(x)                              \
+    #define CIPHER_DEBUG(x)                              \
         do {                                              \
             if (dbg_flag) {                               \
-                OPENFHE_DIAGNOSTIC_ERR << x << std::endl; \
+                CIPHER_DIAGNOSTIC_ERR << x << std::endl; \
             }                                             \
         } while (0)
 
     // debugging macro prints typography of x and value of x on cerr
-    #define OPENFHE_DEBUGEXP(x)                                        \
+    #define CIPHER_DEBUGEXP(x)                                        \
         do {                                                           \
             if (dbg_flag) {                                            \
-                OPENFHE_DIAGNOSTIC_ERR << #x << ":" << x << std::endl; \
+                CIPHER_DIAGNOSTIC_ERR << #x << ":" << x << std::endl; \
             }                                                          \
         } while (0)
 
     // debugging macro prints value of x and location in codex on cerr
-    #define OPENFHE_DEBUGWHERE(x)                                                                             \
+    #define CIPHER_DEBUGWHERE(x)                                                                             \
         do {                                                                                                  \
             if (dbg_flag) {                                                                                   \
-                OPENFHE_DIAGNOSTIC_ERR << __FILE__ << ":" << __LINE__ << ": " << #x << ":" << x << std::endl; \
+                CIPHER_DIAGNOSTIC_ERR << __FILE__ << ":" << __LINE__ << ": " << #x << ":" << x << std::endl; \
             }                                                                                                 \
         } while (0)
 
     // debugging macro prints location in codex on cerr
-    #define OPENFHE_DEBUGHERE()                                                             \
+    #define CIPHER_DEBUGHERE()                                                             \
         do {                                                                                \
             if (dbg_flag) {                                                                 \
-                OPENFHE_DIAGNOSTIC_ERR << __FILE__ << ":" << __LINE__ << ": " << std::endl; \
+                CIPHER_DIAGNOSTIC_ERR << __FILE__ << ":" << __LINE__ << ": " << std::endl; \
             }                                                                               \
         } while (0)
 
@@ -95,7 +95,7 @@
         #define PROFILELOG(x)                                 \
             do {                                              \
                 if (true) {                                   \
-                    OPENFHE_DIAGNOSTIC_OUT << x << std::endl; \
+                    CIPHER_DIAGNOSTIC_OUT << x << std::endl; \
                 }                                             \
             } while (0)
 
@@ -103,7 +103,7 @@
         #define PROFILELOGEXP(x)                                           \
             do {                                                           \
                 if (true) {                                                \
-                    OPENFHE_DIAGNOSTIC_OUT << #x << ":" << x << std::endl; \
+                    CIPHER_DIAGNOSTIC_OUT << #x << ":" << x << std::endl; \
                 }                                                          \
             } while (0)
 
@@ -111,7 +111,7 @@
         #define PROFILELOGWHERE(x)                                                                         \
             do {                                                                                           \
                 if (true) {                                                                                \
-                    OPENFHE_DIAGNOSTIC_OUT << #x << ":" << x << " at " << __FILE__ << " line " << __LINE__ \
+                    CIPHER_DIAGNOSTIC_OUT << #x << ":" << x << " at " << __FILE__ << " line " << __LINE__ \
                                            << std::endl;                                                   \
                 }                                                                                          \
             } while (0)
@@ -123,10 +123,10 @@
 
     #endif  // PROFILE
 
-    #define TIC(t)    t = ::lbcrypto::timeNow()
-    #define TOC_NS(t) ::lbcrypto::duration_ns(::lbcrypto::timeNow() - t)
-    #define TOC_US(t) ::lbcrypto::duration_us(::lbcrypto::timeNow() - t)
-    #define TOC_MS(t) ::lbcrypto::duration_ms(::lbcrypto::timeNow() - t)
+    #define TIC(t)    t = ::cipher::time_now()
+    #define TOC_NS(t) ::cipher::duration_ns(::cipher::time_now() - t)
+    #define TOC_US(t) ::cipher::duration_us(::cipher::time_now() - t)
+    #define TOC_MS(t) ::cipher::duration_ms(::cipher::time_now() - t)
     #define TOC(t)    TOC_MS(t)
 
 #else  // NDEBUG
@@ -138,17 +138,17 @@
 
         // these are turned off functions
 
-        #define OPENFHE_DEBUG_FLAG(x)
-        #define OPENFHE_DEBUG(x)
-        #define OPENFHE_DEBUGEXP(x)
-        #define OPENFHE_DEBUGWHERE(x)
-        #define OPENFHE_DEBUGHERE()
+        #define CIPHER_DEBUG_FLAG(x)
+        #define CIPHER_DEBUG(x)
+        #define CIPHER_DEBUGEXP(x)
+        #define CIPHER_DEBUGWHERE(x)
+        #define CIPHER_DEBUGHERE()
 
         #define PROFILELOG(x)
         #define PROFILELOGEXP(x)
         #define PROFILELOGWHERE(x)
 
-        #define TIC(t)    t = ::lbcrypto::timeNow()
+        #define TIC(t)    t = ::cipher::time_now()
         #define TOC(t)    std::chrono::steady_clock::duration::zero().count()
         #define TOC_NS(t) std::chrono::steady_clock::duration::zero().count()
         #define TOC_US(t) std::chrono::steady_clock::duration::zero().count()
@@ -157,16 +157,16 @@
     #else  // PROFILE
         // if PROFILE is turned on, then TIC TOC still work and
 
-        #define OPENFHE_DEBUG_FLAG(x)
-        #define OPENFHE_DEBUG(x)
-        #define OPENFHE_DEBUGEXP(x)
-        #define OPENFHE_DEBUGWHERE(x)
-        #define OPENFHE_DEBUGHERE()
+        #define CIPHER_DEBUG_FLAG(x)
+        #define CIPHER_DEBUG(x)
+        #define CIPHER_DEBUGEXP(x)
+        #define CIPHER_DEBUGWHERE(x)
+        #define CIPHER_DEBUGHERE()
 
         #define PROFILELOG(x)                                 \
             do {                                              \
                 if (true) {                                   \
-                    OPENFHE_DIAGNOSTIC_ERR << x << std::endl; \
+                    CIPHER_DIAGNOSTIC_ERR << x << std::endl; \
                 }                                             \
             } while (0)
 
@@ -174,7 +174,7 @@
         #define PROFILELOGEXP(x)                                           \
             do {                                                           \
                 if (true) {                                                \
-                    OPENFHE_DIAGNOSTIC_OUT << #x << ":" << x << std::endl; \
+                    CIPHER_DIAGNOSTIC_OUT << #x << ":" << x << std::endl; \
                 }                                                          \
             } while (0)
 
@@ -182,15 +182,15 @@
         #define PROFILELOGWHERE(x)                                                                         \
             do {                                                                                           \
                 if (true) {                                                                                \
-                    OPENFHE_DIAGNOSTIC_OUT << #x << ":" << x << " at " << __FILE__ << " line " << __LINE__ \
+                    CIPHER_DIAGNOSTIC_OUT << #x << ":" << x << " at " << __FILE__ << " line " << __LINE__ \
                                            << std::endl;                                                   \
                 }                                                                                          \
             } while (0)
 
-        #define TIC(t)    t = ::lbcrypto::timeNow()
-        #define TOC_NS(t) ::lbcrypto::duration_ns(::lbcrypto::timeNow() - t)
-        #define TOC_US(t) ::lbcrypto::duration_us(::lbcrypto::timeNow() - t)
-        #define TOC_MS(t) ::lbcrypto::duration_ms(::lbcrypto::timeNow() - t)
+        #define TIC(t)    t = ::cipher::time_now()
+        #define TOC_NS(t) ::cipher::duration_ns(::cipher::time_now() - t)
+        #define TOC_US(t) ::cipher::duration_us(::cipher::time_now() - t)
+        #define TOC_MS(t) ::cipher::duration_ms(::cipher::time_now() - t)
         #define TOC(t)    TOC_MS(t)
 
     #endif  // PROFILE
@@ -200,13 +200,13 @@
 /** time point type used by the TIC/TOC timing macros */
 typedef std::chrono::high_resolution_clock::time_point TimeVar;
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Returns the current time point of the high-resolution clock; used by TIC().
  * @return the current time point
  */
-inline TimeVar timeNow() {
+inline TimeVar time_now() {
     return std::chrono::high_resolution_clock::now();
 }
 
@@ -240,13 +240,13 @@ inline auto duration_ms(const Duration& d) {
     return std::chrono::duration_cast<std::chrono::milliseconds>(d).count();
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 /**
  * @brief Returns the wall-clock time elapsed since local midnight.
  * @return milliseconds since local midnight, with sub-millisecond fraction
  */
-double currentDateTime();
+double current_date_time();
 
 /**
  * @brief Calls func(args...) and measures how long the call takes.
@@ -255,10 +255,10 @@ double currentDateTime();
  * @return the elapsed time in whole milliseconds
  */
 template <typename F, typename... Args>
-double funcTime(F func, Args&&... args) {
-    TimeVar t1 = lbcrypto::timeNow();
+double func_time(F func, Args&&... args) {
+    TimeVar t1 = cipher::time_now();
     func(std::forward<Args>(args)...);
-    return lbcrypto::duration_ms(lbcrypto::timeNow() - t1);
+    return cipher::duration_ms(cipher::time_now() - t1);
 }
 
 #endif  // CIPHER_UTIL_DEBUG_H_

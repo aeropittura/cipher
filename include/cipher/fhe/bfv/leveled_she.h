@@ -41,21 +41,21 @@
 #include "cipher/fhe/rns/leveled_she.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief BFV implementation of the leveled SHE operations in the RNS representation. Ciphertext-ciphertext
  * multiplication is implemented with the HPS, BEHZ, HPSPOVERQ and HPSPOVERQLEVELED RNS techniques, and the
  * mutable operations are not supported since BFV performs no automatic rescaling.
  */
-class LeveledSHEBFVRNS : public LeveledSHERNS {
+class BfvRnsLeveledShe : public RnsLeveledShe {
   public:
-    virtual ~LeveledSHEBFVRNS() = default;
+    virtual ~BfvRnsLeveledShe() = default;
 
-    using LeveledSHERNS::EvalAddInPlace;
+    using RnsLeveledShe::eval_add_in_place;
 
     /**
      * Virtual function to define the interface for in-place homomorphic addition of
@@ -64,9 +64,9 @@ class LeveledSHEBFVRNS : public LeveledSHERNS {
      * @param ciphertext the input/output ciphertext.
      * @param plaintext the input plaintext.
      */
-    void EvalAddInPlace(Ciphertext<DCRTPoly>& ciphertext, ConstPlaintext& plaintext) const override;
+    void eval_add_in_place(Ciphertext<RnsPoly>& ciphertext, ConstPlaintext& plaintext) const override;
 
-    using LeveledSHERNS::EvalSubInPlace;
+    using RnsLeveledShe::eval_sub_in_place;
 
     /**
      * Virtual function to define the interface for in-place homomorphic subtraction of
@@ -75,13 +75,13 @@ class LeveledSHEBFVRNS : public LeveledSHERNS {
      * @param ciphertext the input/output ciphertext.
      * @param plaintext the input plaintext.
      */
-    void EvalSubInPlace(Ciphertext<DCRTPoly>& ciphertext, ConstPlaintext& plaintext) const override;
+    void eval_sub_in_place(Ciphertext<RnsPoly>& ciphertext, ConstPlaintext& plaintext) const override;
 
-    using LeveledSHERNS::EvalMult;
-    using LeveledSHERNS::EvalMultInPlace;
+    using RnsLeveledShe::eval_mult;
+    using RnsLeveledShe::eval_mult_in_place;
 
-    using LeveledSHERNS::EvalSquare;
-    using LeveledSHERNS::EvalSquareInPlace;
+    using RnsLeveledShe::eval_square;
+    using RnsLeveledShe::eval_square_in_place;
 
     /**
      * Virtual function to define the interface for multiplicative homomorphic
@@ -91,8 +91,8 @@ class LeveledSHEBFVRNS : public LeveledSHERNS {
      * @param ciphertext2 the input ciphertext.
      * @return the new ciphertext.
      */
-    Ciphertext<DCRTPoly> EvalMult(ConstCiphertext<DCRTPoly>& ciphertext1,
-                                  ConstCiphertext<DCRTPoly>& ciphertext2) const override;
+    Ciphertext<RnsPoly> eval_mult(ConstCiphertext<RnsPoly>& ciphertext1,
+                                  ConstCiphertext<RnsPoly>& ciphertext2) const override;
 
     /**
      * Homomorphic squaring of a ciphertext without relinearization, using the configured multiplication
@@ -101,46 +101,46 @@ class LeveledSHEBFVRNS : public LeveledSHERNS {
      * @param ciphertext the input ciphertext.
      * @return the new ciphertext with noise scale degree increased by 1.
      */
-    Ciphertext<DCRTPoly> EvalSquare(ConstCiphertext<DCRTPoly>& ciphertext) const override;
+    Ciphertext<RnsPoly> eval_square(ConstCiphertext<RnsPoly>& ciphertext) const override;
 
     /**
      * Homomorphic multiplication of two ciphertexts followed by relinearization with the given key.
      *
      * @param ciphertext1 first input ciphertext.
      * @param ciphertext2 second input ciphertext.
-     * @param evalKey the relinearization key.
+     * @param eval_key the relinearization key.
      * @return the new ciphertext with two polynomials.
      */
-    Ciphertext<DCRTPoly> EvalMult(ConstCiphertext<DCRTPoly>& ciphertext1, ConstCiphertext<DCRTPoly>& ciphertext2,
-                                  const EvalKey<DCRTPoly> evalKey) const override;
+    Ciphertext<RnsPoly> eval_mult(ConstCiphertext<RnsPoly>& ciphertext1, ConstCiphertext<RnsPoly>& ciphertext2,
+                                  const EvalKey<RnsPoly> eval_key) const override;
 
     /**
      * In-place homomorphic multiplication of two ciphertexts followed by relinearization with the given key.
      *
      * @param ciphertext1 first input/output ciphertext.
      * @param ciphertext2 second input ciphertext.
-     * @param evalKey the relinearization key.
+     * @param eval_key the relinearization key.
      */
-    void EvalMultInPlace(Ciphertext<DCRTPoly>& ciphertext1, ConstCiphertext<DCRTPoly>& ciphertext2,
-                         const EvalKey<DCRTPoly> evalKey) const override;
+    void eval_mult_in_place(Ciphertext<RnsPoly>& ciphertext1, ConstCiphertext<RnsPoly>& ciphertext2,
+                         const EvalKey<RnsPoly> eval_key) const override;
 
     /**
      * Homomorphic squaring of a ciphertext followed by relinearization with the given key.
      *
      * @param ciphertext the input ciphertext.
-     * @param evalKey the relinearization key.
+     * @param eval_key the relinearization key.
      * @return the new ciphertext with two polynomials.
      */
-    Ciphertext<DCRTPoly> EvalSquare(ConstCiphertext<DCRTPoly>& ciphertext,
-                                    const EvalKey<DCRTPoly> evalKey) const override;
+    Ciphertext<RnsPoly> eval_square(ConstCiphertext<RnsPoly>& ciphertext,
+                                    const EvalKey<RnsPoly> eval_key) const override;
 
     /**
      * In-place homomorphic squaring of a ciphertext followed by relinearization with the given key.
      *
      * @param ciphertext1 the input/output ciphertext.
-     * @param evalKey the relinearization key.
+     * @param eval_key the relinearization key.
      */
-    void EvalSquareInPlace(Ciphertext<DCRTPoly>& ciphertext1, const EvalKey<DCRTPoly> evalKey) const override;
+    void eval_square_in_place(Ciphertext<RnsPoly>& ciphertext1, const EvalKey<RnsPoly> eval_key) const override;
 
     /**
      * Multiplies all polynomials of the ciphertext by an integer scalar and increases the noise scale degree
@@ -149,9 +149,9 @@ class LeveledSHEBFVRNS : public LeveledSHERNS {
      * @param ciphertext the input/output ciphertext.
      * @param scalar the integer to multiply by.
      */
-    void EvalMultCoreInPlace(Ciphertext<DCRTPoly>& ciphertext, NativeInteger scalar) const;
+    void eval_mult_core_in_place(Ciphertext<RnsPoly>& ciphertext, NativeInteger scalar) const;
 
-    // We do not need to support LeveledSHEBFVRNS::Eval*Mutable(InPlace) as no automated adjustment of ciphertexts is
+    // We do not need to support BfvRnsLeveledShe::Eval*Mutable(InPlace) as no automated adjustment of ciphertexts is
     // typically done in BFV. These functions throw an exception if called
     /**
      * Not supported in BFV (throws).
@@ -160,18 +160,18 @@ class LeveledSHEBFVRNS : public LeveledSHERNS {
      * @param ciphertext2 second input ciphertext.
      * @return never returns.
      */
-    Ciphertext<DCRTPoly> EvalMultMutable(Ciphertext<DCRTPoly>& ciphertext1,
-                                         Ciphertext<DCRTPoly>& ciphertext2) const override;
+    Ciphertext<RnsPoly> eval_mult_mutable(Ciphertext<RnsPoly>& ciphertext1,
+                                         Ciphertext<RnsPoly>& ciphertext2) const override;
     /**
      * Not supported in BFV (throws).
      *
      * @param ciphertext1 first input ciphertext.
      * @param ciphertext2 second input ciphertext.
-     * @param evalKey the relinearization key.
+     * @param eval_key the relinearization key.
      * @return never returns.
      */
-    Ciphertext<DCRTPoly> EvalMultMutable(Ciphertext<DCRTPoly>& ciphertext1, Ciphertext<DCRTPoly>& ciphertext2,
-                                         const EvalKey<DCRTPoly> evalKey) const override;
+    Ciphertext<RnsPoly> eval_mult_mutable(Ciphertext<RnsPoly>& ciphertext1, Ciphertext<RnsPoly>& ciphertext2,
+                                         const EvalKey<RnsPoly> eval_key) const override;
     /**
      * Not supported in BFV (throws).
      *
@@ -179,23 +179,23 @@ class LeveledSHEBFVRNS : public LeveledSHERNS {
      * @param plaintext the input plaintext.
      * @return never returns.
      */
-    Ciphertext<DCRTPoly> EvalMultMutable(Ciphertext<DCRTPoly>& ciphertext, Plaintext& plaintext) const override;
+    Ciphertext<RnsPoly> eval_mult_mutable(Ciphertext<RnsPoly>& ciphertext, Plaintext& plaintext) const override;
     /**
      * Not supported in BFV (throws).
      *
      * @param ciphertext1 first input/output ciphertext.
      * @param ciphertext2 second input ciphertext.
-     * @param evalKey the relinearization key.
+     * @param eval_key the relinearization key.
      */
-    void EvalMultMutableInPlace(Ciphertext<DCRTPoly>& ciphertext1, Ciphertext<DCRTPoly>& ciphertext2,
-                                const EvalKey<DCRTPoly> evalKey) const override;
+    void eval_mult_mutable_in_place(Ciphertext<RnsPoly>& ciphertext1, Ciphertext<RnsPoly>& ciphertext2,
+                                const EvalKey<RnsPoly> eval_key) const override;
     /**
      * Not supported in BFV (throws).
      *
      * @param ciphertext the input/output ciphertext.
      * @param plaintext the input plaintext.
      */
-    void EvalMultMutableInPlace(Ciphertext<DCRTPoly>& ciphertext, Plaintext& plaintext) const override;
+    void eval_mult_mutable_in_place(Ciphertext<RnsPoly>& ciphertext, Plaintext& plaintext) const override;
 
     /**
      * Not supported in BFV (throws).
@@ -204,8 +204,8 @@ class LeveledSHEBFVRNS : public LeveledSHERNS {
      * @param ciphertext2 second input ciphertext.
      * @return never returns.
      */
-    Ciphertext<DCRTPoly> EvalAddMutable(Ciphertext<DCRTPoly>& ciphertext1,
-                                        Ciphertext<DCRTPoly>& ciphertext2) const override;
+    Ciphertext<RnsPoly> eval_add_mutable(Ciphertext<RnsPoly>& ciphertext1,
+                                        Ciphertext<RnsPoly>& ciphertext2) const override;
     /**
      * Not supported in BFV (throws).
      *
@@ -213,21 +213,21 @@ class LeveledSHEBFVRNS : public LeveledSHERNS {
      * @param plaintext the input plaintext.
      * @return never returns.
      */
-    Ciphertext<DCRTPoly> EvalAddMutable(Ciphertext<DCRTPoly>& ciphertext, Plaintext& plaintext) const override;
+    Ciphertext<RnsPoly> eval_add_mutable(Ciphertext<RnsPoly>& ciphertext, Plaintext& plaintext) const override;
     /**
      * Not supported in BFV (throws).
      *
      * @param ciphertext1 first input/output ciphertext.
      * @param ciphertext2 second input ciphertext.
      */
-    void EvalAddMutableInPlace(Ciphertext<DCRTPoly>& ciphertext1, Ciphertext<DCRTPoly>& ciphertext2) const override;
+    void eval_add_mutable_in_place(Ciphertext<RnsPoly>& ciphertext1, Ciphertext<RnsPoly>& ciphertext2) const override;
     /**
      * Not supported in BFV (throws).
      *
      * @param ciphertext the input/output ciphertext.
      * @param plaintext the input plaintext.
      */
-    void EvalAddMutableInPlace(Ciphertext<DCRTPoly>& ciphertext, Plaintext& plaintext) const override;
+    void eval_add_mutable_in_place(Ciphertext<RnsPoly>& ciphertext, Plaintext& plaintext) const override;
 
     /**
      * Not supported in BFV (throws).
@@ -236,8 +236,8 @@ class LeveledSHEBFVRNS : public LeveledSHERNS {
      * @param ciphertext2 second input ciphertext.
      * @return never returns.
      */
-    Ciphertext<DCRTPoly> EvalSubMutable(Ciphertext<DCRTPoly>& ciphertext1,
-                                        Ciphertext<DCRTPoly>& ciphertext2) const override;
+    Ciphertext<RnsPoly> eval_sub_mutable(Ciphertext<RnsPoly>& ciphertext1,
+                                        Ciphertext<RnsPoly>& ciphertext2) const override;
     /**
      * Not supported in BFV (throws).
      *
@@ -245,21 +245,21 @@ class LeveledSHEBFVRNS : public LeveledSHERNS {
      * @param plaintext the input plaintext.
      * @return never returns.
      */
-    Ciphertext<DCRTPoly> EvalSubMutable(Ciphertext<DCRTPoly>& ciphertext, Plaintext& plaintext) const override;
+    Ciphertext<RnsPoly> eval_sub_mutable(Ciphertext<RnsPoly>& ciphertext, Plaintext& plaintext) const override;
     /**
      * Not supported in BFV (throws).
      *
      * @param ciphertext1 first input/output ciphertext.
      * @param ciphertext2 second input ciphertext.
      */
-    void EvalSubMutableInPlace(Ciphertext<DCRTPoly>& ciphertext1, Ciphertext<DCRTPoly>& ciphertext2) const override;
+    void eval_sub_mutable_in_place(Ciphertext<RnsPoly>& ciphertext1, Ciphertext<RnsPoly>& ciphertext2) const override;
     /**
      * Not supported in BFV (throws).
      *
      * @param ciphertext the input/output ciphertext.
      * @param plaintext the input plaintext.
      */
-    void EvalSubMutableInPlace(Ciphertext<DCRTPoly>& ciphertext, Plaintext& plaintext) const override;
+    void eval_sub_mutable_in_place(Ciphertext<RnsPoly>& ciphertext, Plaintext& plaintext) const override;
 
     /////////////////////////////////////
     // AUTOMORPHISM
@@ -272,11 +272,11 @@ class LeveledSHEBFVRNS : public LeveledSHERNS {
      *
      * @param ciphertext the input ciphertext.
      * @param i automorphism index.
-     * @param evalKeyMap reference to the map of evaluation keys generated by EvalAutomorphismKeyGen.
+     * @param eval_key_map reference to the map of evaluation keys generated by eval_automorphism_key_gen.
      * @return the resulting ciphertext.
      */
-    Ciphertext<DCRTPoly> EvalAutomorphism(ConstCiphertext<DCRTPoly>& ciphertext, uint32_t i,
-                                          const std::map<uint32_t, EvalKey<DCRTPoly>>& evalKeyMap,
+    Ciphertext<RnsPoly> eval_automorphism(ConstCiphertext<RnsPoly>& ciphertext, uint32_t i,
+                                          const std::map<uint32_t, EvalKey<RnsPoly>>& eval_key_map,
                                           CALLER_INFO_ARGS_HDR) const override;
 
     /**
@@ -288,11 +288,11 @@ class LeveledSHEBFVRNS : public LeveledSHERNS {
      * @param index the index of the rotation. Positive indices correspond to left rotations and negative
      * indices correspond to right rotations.
      * @param m is the cyclotomic order.
-     * @param digits the digit decomposition created by EvalFastRotationPrecompute at the precomputation step.
+     * @param digits the digit decomposition created by eval_fast_rotation_precompute at the precomputation step.
      * @return the rotated ciphertext.
      */
-    Ciphertext<DCRTPoly> EvalFastRotation(ConstCiphertext<DCRTPoly>& ciphertext, const uint32_t index, const uint32_t m,
-                                          const std::shared_ptr<std::vector<DCRTPoly>> digits) const override;
+    Ciphertext<RnsPoly> eval_fast_rotation(ConstCiphertext<RnsPoly>& ciphertext, const uint32_t index, const uint32_t m,
+                                          const std::shared_ptr<std::vector<RnsPoly>> digits) const override;
 
     /**
      * Precomputation step of hoisted rotations: the digit decomposition of the second ciphertext polynomial.
@@ -302,8 +302,8 @@ class LeveledSHEBFVRNS : public LeveledSHERNS {
      * @param ciphertext the input ciphertext on which to do the precomputation (digit decomposition).
      * @return the digit decomposition of the ciphertext.
      */
-    std::shared_ptr<std::vector<DCRTPoly>> EvalFastRotationPrecompute(
-            ConstCiphertext<DCRTPoly>& ciphertext) const override;
+    std::shared_ptr<std::vector<RnsPoly>> eval_fast_rotation_precompute(
+            ConstCiphertext<RnsPoly>& ciphertext) const override;
 
     /**
      * Finds the automorphism index corresponding to a rotation index for a power-of-two cyclotomic order.
@@ -312,19 +312,19 @@ class LeveledSHEBFVRNS : public LeveledSHERNS {
      * @param m the cyclotomic order.
      * @return the automorphism index.
      */
-    uint32_t FindAutomorphismIndex(uint32_t index, uint32_t m) const override;
+    uint32_t find_automorphism_index(uint32_t index, uint32_t m) const override;
 
     /**
      * Compresses a BFV ciphertext by dropping towers (with the exact RNS rescaling by the dropped moduli) until
-     * only towersLeft towers remain. Only supported for HPSPOVERQ and HPSPOVERQLEVELED with STANDARD encryption.
+     * only towers_left towers remain. Only supported for HPSPOVERQ and HPSPOVERQLEVELED with STANDARD encryption.
      *
      * @param ciphertext the input ciphertext.
-     * @param towersLeft the number of RNS towers to keep.
-     * @param noiseScaleDeg unused in BFV (kept for a uniform interface).
+     * @param towers_left the number of RNS towers to keep.
+     * @param noise_scale_deg unused in BFV (kept for a uniform interface).
      * @return the compressed ciphertext.
      */
-    Ciphertext<DCRTPoly> Compress(ConstCiphertext<DCRTPoly>& ciphertext, size_t towersLeft,
-                                  size_t noiseScaleDeg) const override;
+    Ciphertext<RnsPoly> compress(ConstCiphertext<RnsPoly>& ciphertext, size_t towers_left,
+                                  size_t noise_scale_deg) const override;
 
     /////////////////////////////////////
     // SERIALIZATION
@@ -332,15 +332,15 @@ class LeveledSHEBFVRNS : public LeveledSHERNS {
 
     template <class Archive>
     void save(Archive& ar) const {
-        ar(cereal::base_class<LeveledSHERNS>(this));
+        ar(cereal::base_class<RnsLeveledShe>(this));
     }
 
     template <class Archive>
     void load(Archive& ar) {
-        ar(cereal::base_class<LeveledSHERNS>(this));
+        ar(cereal::base_class<RnsLeveledShe>(this));
     }
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "LeveledSHEBFVRNS";
     }
 
@@ -351,10 +351,10 @@ class LeveledSHEBFVRNS : public LeveledSHERNS {
      * ciphertext, the polynomial is scaled down to Q_l before key switching and the result is expanded back to Q.
      *
      * @param ciphertext the input/output ciphertext with two or three polynomials.
-     * @param evalKey the key switching (relinearization) key.
+     * @param eval_key the key switching (relinearization) key.
      */
-    void RelinearizeCore(Ciphertext<DCRTPoly>& ciphertext, const EvalKey<DCRTPoly> evalKey) const;
+    void relinearize_core(Ciphertext<RnsPoly>& ciphertext, const EvalKey<RnsPoly> eval_key) const;
 };
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_BFV_LEVELED_SHE_H_

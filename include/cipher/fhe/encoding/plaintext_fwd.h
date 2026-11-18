@@ -37,7 +37,7 @@
 
 #include <memory>
 
-namespace lbcrypto {
+namespace cipher {
 
 class PlaintextImpl;
 
@@ -49,6 +49,6 @@ using ConstPlaintext = const std::shared_ptr<const PlaintextImpl>;
 /// shared pointer to a read-only plaintext (used for stored precomputations)
 using ReadOnlyPlaintext = std::shared_ptr<const PlaintextImpl>;
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_ENCODING_PLAINTEXT_FWD_H_

@@ -37,10 +37,10 @@
 #include "cipher/util/exception.h"
 #include "cipher/util/inttypes.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 static void regthrow(const std::string& msg) {
-    OPENFHE_THROW(msg);
+    CIPHER_THROW(msg);
 }
 
 static void parthrow(const std::string& msg) {
@@ -52,10 +52,10 @@ static void parthrow(const std::string& msg) {
             if (i == 7)
                 regthrow("inside throw");
         } catch (...) {
-            e.CaptureException();
+            e.capture_exception();
         }
     }
-    e.Rethrow();
+    e.rethrow();
 }
 
 static void runthrow(const std::string& msg) {
@@ -63,19 +63,19 @@ static void runthrow(const std::string& msg) {
     ThreadException e;
 #pragma omp parallel for
     for (int i = 0; i < 10; i++) {
-        e.Run([=] {
+        e.run([=] {
             if (i == 7)
                 regthrow("inside throw");
         });
     }
-    e.Rethrow();
+    e.rethrow();
 }
 
 // instantiate various test for common_set_format()
 TEST(UTException, openfhe_exception) {
-    ASSERT_THROW(regthrow("outside throw"), OpenFHEException);
+    ASSERT_THROW(regthrow("outside throw"), CipherException);
 
-    ASSERT_THROW(parthrow("inside throw"), OpenFHEException);
+    ASSERT_THROW(parthrow("inside throw"), CipherException);
 
-    ASSERT_THROW(runthrow("using lambda inside throw"), OpenFHEException);
+    ASSERT_THROW(runthrow("using lambda inside throw"), CipherException);
 }

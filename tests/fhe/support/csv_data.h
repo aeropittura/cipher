@@ -35,16 +35,16 @@
 #include <vector>
 
 /**
- * createDataFileName() builds the name of the test data file. It should have the same name as sourceFileName, but
+ * create_data_file_name() builds the name of the test data file. It should have the same name as source_file_name, but
  * the extension is "csv".
- * @param sourceFileName is the source file name
+ * @param source_file_name is the source file name
  * @return test data file name
  */
-std::string createDataFileName(const std::string& sourceFileName);
-std::string createDataFileName(const char* sourceFileName);
+std::string create_data_file_name(const std::string& source_file_name);
+std::string create_data_file_name(const char* source_file_name);
 
 std::vector<std::string> tokenize(const std::string& str, const char delim);
 
-std::vector<std::vector<std::string>> readDataFile(const std::string& dataFileName);
+std::vector<std::vector<std::string>> read_data_file(const std::string& data_file_name);
 
 #endif  // CIPHER_TESTS_FHE_SUPPORT_CSV_DATA_H_

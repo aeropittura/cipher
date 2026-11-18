@@ -31,6 +31,6 @@
 #include "cipher/fhe/key/private_key.h"
 
 // the code below is from privatekey-impl.cpp
-namespace lbcrypto {
-template class PrivateKeyImpl<DCRTPoly>;
-}  // namespace lbcrypto
+namespace cipher {
+template class PrivateKeyImpl<RnsPoly>;
+}  // namespace cipher

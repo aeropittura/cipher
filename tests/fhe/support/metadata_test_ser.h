@@ -34,7 +34,7 @@
 #include "fhe/support/metadata_test.h"
 #include "cipher/util/serial.h"
 
-CEREAL_REGISTER_TYPE(lbcrypto::MetadataTest);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(lbcrypto::Metadata, lbcrypto::MetadataTest);
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::MetadataTest, "lbcrypto::MetadataTest");
+CEREAL_REGISTER_POLYMORPHIC_RELATION(cipher::Metadata, cipher::MetadataTest);
 
 #endif  // CIPHER_TESTS_FHE_SUPPORT_METADATA_TEST_SER_H_

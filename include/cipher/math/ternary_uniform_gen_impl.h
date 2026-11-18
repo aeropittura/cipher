@@ -45,28 +45,28 @@
 #include "cipher/math/ternary_uniform_gen.h"
 #include "cipher/util/inttypes.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 template <typename VecType>
-std::uniform_int_distribution<int32_t> TernaryUniformGeneratorImpl<VecType>::m_distribution =
+std::uniform_int_distribution<int32_t> TernaryUniformGeneratorImpl<VecType>::distribution_ =
         std::uniform_int_distribution<int32_t>(-1, 1);
 
 template <typename VecType>
-typename VecType::Integer TernaryUniformGeneratorImpl<VecType>::GenerateInteger(
+typename VecType::Integer TernaryUniformGeneratorImpl<VecType>::generate_integer(
         const typename VecType::Integer& modulus) const {
-    auto rn = m_distribution(PseudoRandomNumberGenerator::GetPRNG());
+    auto rn = distribution_(PseudoRandomNumberGenerator::get_prng());
     return rn >= 0 ? typename VecType::Integer(rn) : modulus - typename VecType::Integer(1);
 }
 
 template <typename VecType>
-VecType TernaryUniformGeneratorImpl<VecType>::GenerateVector(uint32_t size, const typename VecType::Integer& modulus,
+VecType TernaryUniformGeneratorImpl<VecType>::generate_vector(uint32_t size, const typename VecType::Integer& modulus,
                                                              uint32_t h) const {
     if (h == 0) {
         // regular ternary distribution
         VecType v(size, modulus, modulus - typename VecType::Integer(1));
-        auto& prng = PseudoRandomNumberGenerator::GetPRNG();
+        auto& prng = PseudoRandomNumberGenerator::get_prng();
         for (uint32_t i = 0; i < size; ++i) {
-            if (auto rn = m_distribution(prng); rn >= 0)
+            if (auto rn = distribution_(prng); rn >= 0)
                 v[i] = typename VecType::Integer(rn);
         }
         return v;
@@ -77,42 +77,42 @@ VecType TernaryUniformGeneratorImpl<VecType>::GenerateVector(uint32_t size, cons
 
     VecType v(size, modulus);
 
-    auto distrHWT = std::uniform_int_distribution<int32_t>(0, size - 1);
-    auto& prng = PseudoRandomNumberGenerator::GetPRNG();
+    auto distr_hwt = std::uniform_int_distribution<int32_t>(0, size - 1);
+    auto& prng = PseudoRandomNumberGenerator::get_prng();
     BinaryUniformGeneratorImpl<VecType> bug;
-    uint32_t counterPlus = 0;
+    uint32_t counter_plus = 0;
 
-    // makes sure the +1's and -1's are roughly evenly distributed: counterPlus within one of h / 2
+    // makes sure the +1's and -1's are roughly evenly distributed: counter_plus within one of h / 2
     do {
         // initializes all values
-        counterPlus = 0;
+        counter_plus = 0;
         for (uint32_t k = 0; k < size; ++k)
             v[k] = typename VecType::Integer(0);
 
         uint32_t i = 0;
         while (i < h) {
             // random index in the vector
-            auto randomIndex = distrHWT(prng);
-            if (v[randomIndex] == typename VecType::Integer(0)) {
-                if (bug.GenerateInteger() == typename VecType::Integer(0)) {
-                    v[randomIndex] = modulus - typename VecType::Integer(1);
+            auto random_index = distr_hwt(prng);
+            if (v[random_index] == typename VecType::Integer(0)) {
+                if (bug.generate_integer() == typename VecType::Integer(0)) {
+                    v[random_index] = modulus - typename VecType::Integer(1);
                 } else {
-                    v[randomIndex] = typename VecType::Integer(1);
-                    ++counterPlus;
+                    v[random_index] = typename VecType::Integer(1);
+                    ++counter_plus;
                 }
                 ++i;
             }
         }
-    } while ((counterPlus + 1 < h / 2) || (counterPlus > h / 2 + 1));
+    } while ((counter_plus + 1 < h / 2) || (counter_plus > h / 2 + 1));
     return v;
 }
 
 template <typename VecType>
-std::vector<int32_t> TernaryUniformGeneratorImpl<VecType>::GenerateIntVector(uint32_t size, uint32_t h) const {
+std::vector<int32_t> TernaryUniformGeneratorImpl<VecType>::generate_int_vector(uint32_t size, uint32_t h) const {
     if (h == 0) {
         std::vector<int32_t> v(size);
         for (uint32_t i = 0; i < size; ++i)
-            v[i] = m_distribution(PseudoRandomNumberGenerator::GetPRNG());
+            v[i] = distribution_(PseudoRandomNumberGenerator::get_prng());
         return v;
     }
 
@@ -121,35 +121,35 @@ std::vector<int32_t> TernaryUniformGeneratorImpl<VecType>::GenerateIntVector(uin
 
     std::vector<int32_t> v(size);
 
-    auto distrHWT = std::uniform_int_distribution<int32_t>(0, size - 1);
+    auto distr_hwt = std::uniform_int_distribution<int32_t>(0, size - 1);
     BinaryUniformGeneratorImpl<VecType> bug;
-    uint32_t counterPlus = 0;
+    uint32_t counter_plus = 0;
 
-    // makes sure the +1's and -1's are roughly evenly distributed: counterPlus within one of h / 2
+    // makes sure the +1's and -1's are roughly evenly distributed: counter_plus within one of h / 2
     do {
         // initializes all values
-        counterPlus = 0;
+        counter_plus = 0;
         for (uint32_t k = 0; k < size; ++k)
             v[k] = 0;
 
         uint32_t i = 0;
         while (i < h) {
             // random index in the vector
-            auto randomIndex = distrHWT(PseudoRandomNumberGenerator::GetPRNG());
-            if (v[randomIndex] == 0) {
-                if (bug.GenerateInteger() == typename VecType::Integer(0)) {
-                    v[randomIndex] = -1;
+            auto random_index = distr_hwt(PseudoRandomNumberGenerator::get_prng());
+            if (v[random_index] == 0) {
+                if (bug.generate_integer() == typename VecType::Integer(0)) {
+                    v[random_index] = -1;
                 } else {
-                    v[randomIndex] = 1;
-                    ++counterPlus;
+                    v[random_index] = 1;
+                    ++counter_plus;
                 }
                 ++i;
             }
         }
-    } while ((counterPlus + 1 < h / 2) || (counterPlus > h / 2 + 1));
+    } while ((counter_plus + 1 < h / 2) || (counter_plus > h / 2 + 1));
     return v;
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_MATH_TERNARY_UNIFORM_GEN_IMPL_H_

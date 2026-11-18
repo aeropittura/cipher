@@ -31,6 +31,6 @@
 #include "cipher/fhe/base/param_gen.h"
 
 // the code below is from base-parametergeneration-impl.cpp
-namespace lbcrypto {
-template class ParameterGenerationBase<DCRTPoly>;
-}  // namespace lbcrypto
+namespace cipher {
+template class BaseParamGen<RnsPoly>;
+}  // namespace cipher

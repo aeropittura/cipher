@@ -53,7 +53,7 @@
 #include "cipher/util/exception.h"
 #include "cipher/util/inttypes.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * Generates a uniformly random integer in [0, modulus) by drawing 32-bit chunks from the
@@ -69,15 +69,15 @@ static IntType RNG(const IntType& modulus) {
     constexpr uint32_t chunk_width{std::numeric_limits<uint32_t>::digits};
     static std::uniform_int_distribution<uint32_t> distribution(chunk_min, chunk_max);
 
-    uint32_t chunksPerValue{(modulus.GetMSB() - 1) / chunk_width};
-    uint32_t shiftChunk{chunksPerValue * chunk_width};
-    std::uniform_int_distribution<uint32_t>::param_type bound(chunk_min, (modulus >> shiftChunk).ConvertToInt());
+    uint32_t chunks_per_value{(modulus.get_msb() - 1) / chunk_width};
+    uint32_t shift_chunk{chunks_per_value * chunk_width};
+    std::uniform_int_distribution<uint32_t>::param_type bound(chunk_min, (modulus >> shift_chunk).convert_to_int());
 
     while (true) {
         IntType result{};
-        for (uint32_t i{0}, shift{0}; i < chunksPerValue; ++i, shift += chunk_width)
-            result += IntType{distribution(PseudoRandomNumberGenerator::GetPRNG())} << shift;
-        result += IntType{distribution(PseudoRandomNumberGenerator::GetPRNG(), bound)} << shiftChunk;
+        for (uint32_t i{0}, shift{0}; i < chunks_per_value; ++i, shift += chunk_width)
+            result += IntType{distribution(PseudoRandomNumberGenerator::get_prng())} << shift;
+        result += IntType{distribution(PseudoRandomNumberGenerator::get_prng(), bound)} << shift_chunk;
         if (result < modulus)
             return result;
     }
@@ -92,41 +92,41 @@ static IntType RNG(const IntType& modulus) {
  * @return true if p is composite, false if p is likely prime
  */
 template <typename IntType>
-static bool WitnessFunction(const IntType& a, const IntType& d, uint32_t s, const IntType& p) {
-    IntType mod = a.ModExp(d, p);
-    bool prevMod = false;
+static bool witness_function(const IntType& a, const IntType& d, uint32_t s, const IntType& p) {
+    IntType mod_value = a.mod_exp(d, p);
+    bool prev_mod = false;
     for (uint32_t i = 0; i < s; ++i) {
-        prevMod = (mod != IntType(1) && mod != p - IntType(1));
-        mod.ModMulFastEq(mod, p);
-        if (mod == IntType(1) && prevMod)
+        prev_mod = (mod_value != IntType(1) && mod_value != p - IntType(1));
+        mod_value.mod_mul_fast_eq(mod_value, p);
+        if (mod_value == IntType(1) && prev_mod)
             return true;
     }
-    return (mod != IntType(1));
+    return (mod_value != IntType(1));
 }
 
 /**
- * A helper function to RootOfUnity function. This finds a generator of the multiplicative
+ * A helper function to root_of_unity function. This finds a generator of the multiplicative
  * group of a given prime q by random trials against the prime factors of q-1.
  *
  * @param q a prime
  * @return a generator of Z_q^*
  */
 template <typename IntType>
-static IntType FindGenerator(const IntType& q) {
+static IntType find_generator(const IntType& q) {
     IntType qm1(q - IntType(1));
     IntType qm2(q - IntType(2));
-    std::set<IntType> primeFactors;
-    PrimeFactorize<IntType>(qm1, primeFactors);
+    std::set<IntType> prime_factors;
+    prime_factorize<IntType>(qm1, prime_factors);
     uint32_t cnt;
     IntType gen;
     do {
         cnt = 0;
         gen = RNG(qm2) + IntType(1);
-        for (auto it = primeFactors.begin(); it != primeFactors.end(); ++it, ++cnt) {
-            if (gen.ModExp(qm1 / (*it), q) == IntType(1))
+        for (auto it = prime_factors.begin(); it != prime_factors.end(); ++it, ++cnt) {
+            if (gen.mod_exp(qm1 / (*it), q) == IntType(1))
                 break;
         }
-    } while (cnt != primeFactors.size());
+    } while (cnt != prime_factors.size());
     return gen;
 }
 
@@ -136,11 +136,11 @@ static IntType FindGenerator(const IntType& q) {
  generator of q
  */
 template <typename IntType>
-IntType FindGeneratorCyclic(const IntType& q) {
-    IntType phi_q(GetTotient(q.ConvertToInt()));
-    IntType phi_q_m1(GetTotient(q.ConvertToInt()));
-    std::set<IntType> primeFactors;
-    PrimeFactorize<IntType>(phi_q, primeFactors);
+IntType find_generator_cyclic(const IntType& q) {
+    IntType phi_q(get_totient(q.convert_to_int()));
+    IntType phi_q_m1(get_totient(q.convert_to_int()));
+    std::set<IntType> prime_factors;
+    prime_factorize<IntType>(phi_q, prime_factors);
     uint32_t cnt;
     IntType gen;
     do {
@@ -148,15 +148,15 @@ IntType FindGeneratorCyclic(const IntType& q) {
         gen = RNG(phi_q_m1) + IntType(1);  // gen is random in [1, phi(q)]
 
         // Generator must lie in the group!
-        if (GreatestCommonDivisor<IntType>(gen, q) != IntType(1))
+        if (greatest_common_divisor<IntType>(gen, q) != IntType(1))
             continue;
 
         // Order of a generator cannot divide any co-factor
-        for (auto it = primeFactors.begin(); it != primeFactors.end(); ++it, ++cnt) {
-            if (gen.ModExp(phi_q / (*it), q) == IntType(1))
+        for (auto it = prime_factors.begin(); it != prime_factors.end(); ++it, ++cnt) {
+            if (gen.mod_exp(phi_q / (*it), q) == IntType(1))
                 break;
         }
-    } while (cnt != primeFactors.size());
+    } while (cnt != prime_factors.size());
     return gen;
 }
 
@@ -166,16 +166,16 @@ IntType FindGeneratorCyclic(const IntType& q) {
  generator g and modulus q Output: returns true if g is a generator for q
  */
 template <typename IntType>
-bool IsGenerator(const IntType& g, const IntType& q) {
-    IntType qm1(GetTotient(q.ConvertToInt()));
-    std::set<IntType> primeFactors;
-    PrimeFactorize<IntType>(qm1, primeFactors);
+bool is_generator(const IntType& g, const IntType& q) {
+    IntType qm1(get_totient(q.convert_to_int()));
+    std::set<IntType> prime_factors;
+    prime_factorize<IntType>(qm1, prime_factors);
     uint32_t cnt = 0;
-    for (auto it = primeFactors.begin(); it != primeFactors.end(); ++it, ++cnt) {
-        if (g.ModExp(qm1 / (*it), q) == IntType(1))
+    for (auto it = prime_factors.begin(); it != prime_factors.end(); ++it, ++cnt) {
+        if (g.mod_exp(qm1 / (*it), q) == IntType(1))
             break;
     }
-    return cnt == primeFactors.size();
+    return cnt == prime_factors.size();
 }
 
 /*
@@ -187,28 +187,28 @@ bool IsGenerator(const IntType& g, const IntType& q) {
  output:  root of unity (in format of BigInteger)
  */
 template <typename IntType>
-IntType RootOfUnity(uint32_t m, const IntType& modulo) {
+IntType root_of_unity(uint32_t m, const IntType& modulo) {
     IntType M(m);
-    if ((modulo - IntType(1)).Mod(M) != IntType(0)) {
-        std::string errMsg =
+    if ((modulo - IntType(1)).mod(M) != IntType(0)) {
+        std::string err_msg =
                 "Please provide a primeModulus(q) and a cyclotomic number(m) "
                 "satisfying the condition: (q-1)/m is an integer. The values of "
                 "primeModulus = " +
-                modulo.ToString() + " and m = " + std::to_string(m) + " do not satisfy this condition";
-        OPENFHE_THROW(errMsg);
+                modulo.to_string() + " and m = " + std::to_string(m) + " do not satisfy this condition";
+        CIPHER_THROW(err_msg);
     }
 
-    IntType gen = FindGenerator(modulo);
-    IntType result = gen.ModExp((modulo - IntType(1)).DividedBy(M), modulo);
+    IntType gen = find_generator(modulo);
+    IntType result = gen.mod_exp((modulo - IntType(1)).divided_by(M), modulo);
     if (result == IntType(1))
-        result = RootOfUnity(m, modulo);
+        result = root_of_unity(m, modulo);
 
     /*
      * At this point, result contains a primitive root of unity. However,
      * we want to return the minimum root of unity, to avoid different
      * crypto contexts having different roots of unity for the same
      * cyclotomic order and moduli. Therefore, we are going to cycle over
-     * all primitive roots of unity and select the smallest one (minRU).
+     * all primitive roots of unity and select the smallest one (min_ru).
      *
      * To cycle over all primitive roots of unity, we raise the root of
      * unity in result to all the powers that are co-prime to the
@@ -218,44 +218,44 @@ IntType RootOfUnity(uint32_t m, const IntType& modulo) {
      *
      */
 
-    IntType mu(modulo.ComputeMu());
+    IntType mu(modulo.compute_mu());
     IntType x(1);
-    x.ModMulEq(result, modulo, mu);
+    x.mod_mul_eq(result, modulo, mu);
 
-    std::vector<IntType> coprimes = GetTotientList<IntType>(m);
-    IntType minRU(x);
-    IntType curPowIdx(1);
+    std::vector<IntType> coprimes = get_totient_list<IntType>(m);
+    IntType min_ru(x);
+    IntType cur_pow_idx(1);
     for (size_t i = 0; i < coprimes.size(); ++i) {
-        auto nextPowIdx = coprimes[i];
-        IntType diffPow(nextPowIdx - curPowIdx);
-        for (IntType j(0); j < diffPow; j += IntType(1))
-            x.ModMulEq(result, modulo, mu);
-        if (x < minRU && x != IntType(1))
-            minRU = x;
-        curPowIdx = nextPowIdx;
+        auto next_pow_idx = coprimes[i];
+        IntType diff_pow(next_pow_idx - cur_pow_idx);
+        for (IntType j(0); j < diff_pow; j += IntType(1))
+            x.mod_mul_eq(result, modulo, mu);
+        if (x < min_ru && x != IntType(1))
+            min_ru = x;
+        cur_pow_idx = next_pow_idx;
     }
-    return minRU;
+    return min_ru;
 }
 
 template <typename IntType>
-std::vector<IntType> RootsOfUnity(uint32_t m, const std::vector<IntType>& moduli) {
-    std::vector<IntType> rootsOfUnity(moduli.size());
+std::vector<IntType> roots_of_unity(uint32_t m, const std::vector<IntType>& moduli) {
+    std::vector<IntType> roots_of_unity_value(moduli.size());
     for (size_t i = 0; i < moduli.size(); ++i)
-        rootsOfUnity[i] = RootOfUnity(m, moduli[i]);
-    return rootsOfUnity;
+        roots_of_unity_value[i] = root_of_unity(m, moduli[i]);
+    return roots_of_unity_value;
 }
 
 template <typename IntType>
-IntType GreatestCommonDivisor(const IntType& a, const IntType& b) {
+IntType greatest_common_divisor(const IntType& a, const IntType& b) {
     static const IntType ZERO(0);
-    auto m_a(a);
-    auto m_b(b);
-    while (m_b != ZERO) {
-        auto tmp(m_b);
-        m_b = m_a % m_b;
-        m_a = tmp;
+    auto a_(a);
+    auto b_(b);
+    while (b_ != ZERO) {
+        auto tmp(b_);
+        b_ = a_ % b_;
+        a_ = tmp;
     }
-    return m_a;
+    return a_;
 }
 
 /*
@@ -265,7 +265,7 @@ IntType GreatestCommonDivisor(const IntType& a, const IntType& b) {
  false if p is not prime
  */
 template <typename IntType>
-bool MillerRabinPrimalityTest(const IntType& p, const uint32_t niter) {
+bool miller_rabin_primality_test(const IntType& p, const uint32_t niter) {
     static const IntType ZERO(0);
     static const IntType TWO(2);
     static const IntType THREE(3);
@@ -273,18 +273,18 @@ bool MillerRabinPrimalityTest(const IntType& p, const uint32_t niter) {
 
     if (p == TWO || p == THREE || p == FIVE)
         return true;
-    if (p < TWO || (p.Mod(TWO) == ZERO))
+    if (p < TWO || (p.mod(TWO) == ZERO))
         return false;
 
     IntType d(p - IntType(1));
     uint32_t s(0);
-    while (d.Mod(TWO) == ZERO) {
-        // d.DividedByEq(TWO);
-        d.RShiftEq(1);
+    while (d.mod(TWO) == ZERO) {
+        // d.divided_by_eq(TWO);
+        d.r_shift_eq(1);
         ++s;
     }
     for (uint32_t i = 0; i < niter; ++i) {
-        if (WitnessFunction(RNG(p - THREE).ModAdd(TWO, p), d, s, p))
+        if (witness_function(RNG(p - THREE).mod_add(TWO, p), d, s, p))
             return false;
     }
     return true;
@@ -296,19 +296,19 @@ bool MillerRabinPrimalityTest(const IntType& p, const uint32_t niter) {
  Output: a factor of n.
  */
 template <typename IntType>
-const IntType PollardRhoFactorization(const IntType& n) {
-    if (n.Mod(IntType(2)) == IntType(0))
+const IntType pollard_rho_factorization(const IntType& n) {
+    if (n.mod(IntType(2)) == IntType(0))
         return IntType(2);
     IntType divisor(1);
     IntType c(RNG(n));
     IntType x(RNG(n));
     IntType xx(x);
-    IntType mu(n.ComputeMu());
+    IntType mu(n.compute_mu());
     do {
-        x = x.ModMul(x, n, mu).ModAdd(c, n, mu);
-        xx = xx.ModMul(xx, n, mu).ModAdd(c, n, mu);
-        xx = xx.ModMul(xx, n, mu).ModAdd(c, n, mu);
-        divisor = GreatestCommonDivisor((x > xx) ? x - xx : xx - x, n);
+        x = x.mod_mul(x, n, mu).mod_add(c, n, mu);
+        xx = xx.mod_mul(xx, n, mu).mod_add(c, n, mu);
+        xx = xx.mod_mul(xx, n, mu).mod_add(c, n, mu);
+        divisor = greatest_common_divisor((x > xx) ? x - xx : xx - x, n);
     } while (divisor == IntType(1));
     return divisor;
 }
@@ -316,105 +316,105 @@ const IntType PollardRhoFactorization(const IntType& n) {
 /*
  Recursively factorizes and find the distinct primefactors of a number
  Input: n is the number to be prime factorized,
- primeFactors is a set of prime factors of n.
+ prime_factors is a set of prime factors of n.
  */
 template <typename IntType>
-void PrimeFactorize(IntType n, std::set<IntType>& primeFactors) {
+void prime_factorize(IntType n, std::set<IntType>& prime_factors) {
     if (n == IntType(0) || n == IntType(1))
         return;
-    if (MillerRabinPrimalityTest(n)) {
-        primeFactors.insert(n);
+    if (miller_rabin_primality_test(n)) {
+        prime_factors.insert(n);
         return;
     }
 
-    IntType divisor(PollardRhoFactorization(n));
-    PrimeFactorize(divisor, primeFactors);
-    PrimeFactorize(n / divisor, primeFactors);
+    IntType divisor(pollard_rho_factorization(n));
+    prime_factorize(divisor, prime_factors);
+    prime_factorize(n / divisor, prime_factors);
 }
 
 template <typename IntType>
-IntType FirstPrime(uint32_t nBits, uint64_t m) {
+IntType first_prime(uint32_t n_bits, uint64_t m) {
     if constexpr (std::is_same_v<IntType, NativeInteger>) {
-        if (nBits > MAX_MODULUS_SIZE)
-            OPENFHE_THROW("Requested bit length " + std::to_string(nBits) + " exceeds maximum allowed length " +
+        if (n_bits > MAX_MODULUS_SIZE)
+            CIPHER_THROW("Requested bit length " + std::to_string(n_bits) + " exceeds maximum allowed length " +
                           std::to_string(MAX_MODULUS_SIZE));
     }
 
     IntType M(m);
-    IntType q(IntType(1) << nBits);
-    IntType r(q.Mod(M));
-    IntType qNew(q + IntType(1) - r);
+    IntType q(IntType(1) << n_bits);
+    IntType r(q.mod(M));
+    IntType q_new(q + IntType(1) - r);
     if (r > IntType(0))
-        qNew += M;
-    while (!MillerRabinPrimalityTest(qNew)) {
-        if ((qNew += M) < q)
-            OPENFHE_THROW("Overflow growing candidate");
+        q_new += M;
+    while (!miller_rabin_primality_test(q_new)) {
+        if ((q_new += M) < q)
+            CIPHER_THROW("Overflow growing candidate");
     }
-    return qNew;
+    return q_new;
 }
 
 template <typename IntType>
-IntType LastPrime(uint32_t nBits, uint64_t m) {
+IntType last_prime(uint32_t n_bits, uint64_t m) {
     if constexpr (std::is_same_v<IntType, NativeInteger>) {
-        if (nBits > MAX_MODULUS_SIZE)
-            OPENFHE_THROW("Requested bit length " + std::to_string(nBits) + " exceeds maximum allowed length " +
+        if (n_bits > MAX_MODULUS_SIZE)
+            CIPHER_THROW("Requested bit length " + std::to_string(n_bits) + " exceeds maximum allowed length " +
                           std::to_string(MAX_MODULUS_SIZE));
     }
 
     IntType M(m);
-    IntType q(IntType(1) << nBits);
-    IntType r(q.Mod(M));
-    IntType qNew(q + IntType(1) - r);
+    IntType q(IntType(1) << n_bits);
+    IntType r(q.mod(M));
+    IntType q_new(q + IntType(1) - r);
     if (r < IntType(2))
-        qNew -= M;
-    while (!MillerRabinPrimalityTest(qNew)) {
-        if ((qNew -= M) > q)
-            OPENFHE_THROW("overflow shrinking candidate");
+        q_new -= M;
+    while (!miller_rabin_primality_test(q_new)) {
+        if ((q_new -= M) > q)
+            CIPHER_THROW("overflow shrinking candidate");
     }
 
-    if (qNew.GetMSB() != nBits)
-        OPENFHE_THROW("Requested " + std::to_string(nBits) + " bits, but returned " + std::to_string(qNew.GetMSB()) +
+    if (q_new.get_msb() != n_bits)
+        CIPHER_THROW("Requested " + std::to_string(n_bits) + " bits, but returned " + std::to_string(q_new.get_msb()) +
                       ". Please adjust parameters.");
 
-    return qNew;
+    return q_new;
 }
 
 template <typename IntType>
-IntType NextPrime(const IntType& q, uint64_t m) {
-    IntType M(m), qNew(q + M);
-    while (!MillerRabinPrimalityTest(qNew)) {
-        if ((qNew += M) < q)
-            OPENFHE_THROW("Overflow growing candidate");
+IntType next_prime(const IntType& q, uint64_t m) {
+    IntType M(m), q_new(q + M);
+    while (!miller_rabin_primality_test(q_new)) {
+        if ((q_new += M) < q)
+            CIPHER_THROW("Overflow growing candidate");
     }
-    return qNew;
+    return q_new;
 }
 
 template <typename IntType>
-IntType PreviousPrime(const IntType& q, uint64_t m) {
+IntType previous_prime(const IntType& q, uint64_t m) {
     IntType M(m);
     if (q <= M)
-        OPENFHE_THROW("Overflow shrinking candidate");
-    IntType qNew(q - M);
-    while (!MillerRabinPrimalityTest(qNew)) {
-        if ((qNew -= M) > q)
-            OPENFHE_THROW("Overflow shrinking candidate");
+        CIPHER_THROW("Overflow shrinking candidate");
+    IntType q_new(q - M);
+    while (!miller_rabin_primality_test(q_new)) {
+        if ((q_new -= M) > q)
+            CIPHER_THROW("Overflow shrinking candidate");
     }
-    return qNew;
+    return q_new;
 }
 
 template <typename IntType>
-IntType NextPowerOfTwo(IntType n) {
-    uint32_t result = GetMSB(n - 1);
+IntType next_power_of_two(IntType n) {
+    uint32_t result = get_msb(n - 1);
     return result;
 }
 
 /*Naive Loop to find coprimes to n*/
 template <typename IntType>
-std::vector<IntType> GetTotientList(const IntType& n) {
+std::vector<IntType> get_totient_list(const IntType& n) {
     std::vector<IntType> result;
     static const IntType one(1);
     for (IntType i = one; i < n; i = i + one) {
-        if (GreatestCommonDivisor(i, n) == one)
+        if (greatest_common_divisor(i, n) == one)
             result.push_back(i);
     }
     return result;
@@ -422,51 +422,51 @@ std::vector<IntType> GetTotientList(const IntType& n) {
 
 /* Calculate the remainder from polynomial division */
 template <typename IntVector>
-IntVector PolyMod(const IntVector& dividend, const IntVector& divisor, const typename IntVector::Integer& modulus) {
-    auto mu(modulus.ComputeMu());
-    uint32_t divisorLength(divisor.GetLength());
-    uint32_t dividendLength(dividend.GetLength());
-    uint32_t runs(dividendLength - divisorLength + 1);
-    IntVector runningDividend(dividend);
+IntVector poly_mod(const IntVector& dividend, const IntVector& divisor, const typename IntVector::Integer& modulus) {
+    auto mu(modulus.compute_mu());
+    uint32_t divisor_length(divisor.get_length());
+    uint32_t dividend_length(dividend.get_length());
+    uint32_t runs(dividend_length - divisor_length + 1);
+    IntVector running_dividend_value(dividend);
     for (uint32_t i = 0; i < runs; ++i) {
         // get the highest degree coeff
-        auto divConst(runningDividend[dividendLength - 1]);
-        uint32_t divisorPtr(divisorLength - 1);
-        for (uint32_t j = 0; j < dividendLength - i - 1; j++) {
-            auto& rdtmp1 = runningDividend[dividendLength - 1 - j];
-            rdtmp1 = runningDividend[dividendLength - 2 - j];
-            if (divisorPtr > j)
-                rdtmp1.ModSubEq(divisor[divisorPtr - 1 - j] * divConst, modulus, mu);
+        auto div_const(running_dividend_value[dividend_length - 1]);
+        uint32_t divisor_ptr(divisor_length - 1);
+        for (uint32_t j = 0; j < dividend_length - i - 1; j++) {
+            auto& rdtmp1 = running_dividend_value[dividend_length - 1 - j];
+            rdtmp1 = running_dividend_value[dividend_length - 2 - j];
+            if (divisor_ptr > j)
+                rdtmp1.mod_sub_eq(divisor[divisor_ptr - 1 - j] * div_const, modulus, mu);
         }
     }
 
-    IntVector result(divisorLength - 1, modulus);
-    for (uint32_t i = 0, j = runs; i < divisorLength - 1; ++i, ++j)
-        result[i] = runningDividend[j];
+    IntVector result(divisor_length - 1, modulus);
+    for (uint32_t i = 0, j = runs; i < divisor_length - 1; ++i, ++j)
+        result[i] = running_dividend_value[j];
     return result;
 }
 
 template <typename IntVector>
-IntVector PolynomialMultiplication(const IntVector& a, const IntVector& b) {
-    uint32_t degreeA(a.GetLength());
-    uint32_t degreeB(b.GetLength());
-    uint32_t degreeResultant(degreeA + degreeB - 1);
-    const auto& modulus = a.GetModulus();
-    IntVector result(degreeResultant, modulus);
-    for (uint32_t i = 0; i < degreeA; i++) {
-        for (uint32_t j = 0; j < degreeB; j++) {
-            result[i + j].ModAddEq(a[i] * b[j], modulus);
+IntVector polynomial_multiplication(const IntVector& a, const IntVector& b) {
+    uint32_t degree_a(a.get_length());
+    uint32_t degree_b(b.get_length());
+    uint32_t degree_resultant(degree_a + degree_b - 1);
+    const auto& modulus = a.get_modulus();
+    IntVector result(degree_resultant, modulus);
+    for (uint32_t i = 0; i < degree_a; i++) {
+        for (uint32_t j = 0; j < degree_b; j++) {
+            result[i + j].mod_add_eq(a[i] * b[j], modulus);
         }
     }
     return result;
 }
 
 template <typename IntVector>
-IntVector GetCyclotomicPolynomial(uint32_t m, const typename IntVector::Integer& modulus) {
-    auto intCP = GetCyclotomicPolynomialRecursive(m);
-    IntVector result(intCP.size(), modulus);
-    for (uint32_t i = 0; i < intCP.size(); i++) {
-        auto val = intCP[i];
+IntVector get_cyclotomic_polynomial(uint32_t m, const typename IntVector::Integer& modulus) {
+    auto int_cp = get_cyclotomic_polynomial_recursive(m);
+    IntVector result(int_cp.size(), modulus);
+    for (uint32_t i = 0; i < int_cp.size(); i++) {
+        auto val = int_cp[i];
         if (val > -1) {
             result[i] = typename IntVector::Integer(val);
         } else {
@@ -477,48 +477,48 @@ IntVector GetCyclotomicPolynomial(uint32_t m, const typename IntVector::Integer&
 }
 
 template <typename IntVector>
-typename IntVector::Integer SyntheticRemainder(const IntVector& dividend, const typename IntVector::Integer& a,
+typename IntVector::Integer synthetic_remainder(const IntVector& dividend, const typename IntVector::Integer& a,
                                                const typename IntVector::Integer& modulus) {
-    auto mu = modulus.ComputeMu();
-    auto val = dividend[dividend.GetLength() - 1];
-    for (int i = dividend.GetLength() - 2; i >= 0; --i)
-        val = (dividend[i] + a * val).Mod(modulus, mu);
+    auto mu = modulus.compute_mu();
+    auto val = dividend[dividend.get_length() - 1];
+    for (int i = dividend.get_length() - 2; i >= 0; --i)
+        val = (dividend[i] + a * val).mod(modulus, mu);
     return val;
 }
 
 template <typename IntVector>
-IntVector SyntheticPolyRemainder(const IntVector& dividend, const IntVector& aList,
+IntVector synthetic_poly_remainder(const IntVector& dividend, const IntVector& a_list,
                                  const typename IntVector::Integer& modulus) {
-    IntVector result(aList.GetLength(), modulus);
-    for (uint32_t i = 0; i < aList.GetLength(); ++i)
-        result[i] = SyntheticRemainder(dividend, aList[i], modulus);
+    IntVector result(a_list.get_length(), modulus);
+    for (uint32_t i = 0; i < a_list.get_length(); ++i)
+        result[i] = synthetic_remainder(dividend, a_list[i], modulus);
     return result;
 }
 
 template <typename IntVector>
-IntVector PolynomialPower(const IntVector& input, uint32_t power) {
-    uint32_t finalDegree = (input.GetLength() - 1) * power;
-    IntVector finalPoly(finalDegree + 1, input.GetModulus());
-    for (uint32_t i = 0; i < input.GetLength(); ++i)
-        finalPoly[i * power] = input[i];
-    return finalPoly;
+IntVector polynomial_power(const IntVector& input, uint32_t power) {
+    uint32_t final_degree = (input.get_length() - 1) * power;
+    IntVector final_poly(final_degree + 1, input.get_modulus());
+    for (uint32_t i = 0; i < input.get_length(); ++i)
+        final_poly[i * power] = input[i];
+    return final_poly;
 }
 
 template <typename IntVector>
-IntVector SyntheticPolynomialDivision(const IntVector& dividend, const typename IntVector::Integer& a,
+IntVector synthetic_polynomial_division(const IntVector& dividend, const typename IntVector::Integer& a,
                                       const typename IntVector::Integer& modulus) {
-    auto mu(modulus.ComputeMu());
-    uint32_t n(dividend.GetLength() - 1);
+    auto mu(modulus.compute_mu());
+    uint32_t n(dividend.get_length() - 1);
     IntVector result(n, modulus);
     result[n - 1] = dividend[n];
     auto val(dividend[n]);
     for (int i = n - 1; i > 0; i--) {
-        val = (val * a + dividend[i]).Mod(modulus, mu);
+        val = (val * a + dividend[i]).mod(modulus, mu);
         result[i - 1] = val;
     }
     return result;
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_MATH_NUMBER_THEORY_IMPL_H_

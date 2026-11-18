@@ -48,14 +48,14 @@
 // this is the implementation of matrixes of things that are in core
 // and that need template specializations
 
-namespace lbcrypto {
+namespace cipher {
 
 #define MODEQ_FOR_TYPE(T)                             \
     template <>                                       \
-    Matrix<T>& Matrix<T>::ModEq(const T& element) {   \
+    Matrix<T>& Matrix<T>::mod_eq(const T& element) {   \
         for (size_t row = 0; row < rows; ++row) {     \
             for (size_t col = 0; col < cols; ++col) { \
-                data[row][col].ModEq(element);        \
+                data[row][col].mod_eq(element);        \
             }                                         \
         }                                             \
         return *this;                                 \
@@ -66,10 +66,10 @@ MODEQ_FOR_TYPE(BigInteger)
 
 #define MODSUBEQ_FOR_TYPE(T)                                               \
     template <>                                                            \
-    Matrix<T>& Matrix<T>::ModSubEq(Matrix<T> const& b, const T& element) { \
+    Matrix<T>& Matrix<T>::mod_sub_eq(Matrix<T> const& b, const T& element) { \
         for (size_t row = 0; row < rows; ++row) {                          \
             for (size_t col = 0; col < cols; ++col) {                      \
-                data[row][col].ModSubEq(b.data[row][col], element);        \
+                data[row][col].mod_sub_eq(b.data[row][col], element);        \
             }                                                              \
         }                                                                  \
         return *this;                                                      \
@@ -84,12 +84,12 @@ MODSUBEQ_FOR_TYPE(BigInteger)
 // coefficients because it is formed by discrete gaussians e and s; this implies
 // int32_t can be used This algorithm can be further improved - see the
 // Darmstadt paper section 4.4
-Matrix<double> Cholesky(const Matrix<int32_t>& input) {
+Matrix<double> cholesky(const Matrix<int32_t>& input) {
     //  http://eprint.iacr.org/2013/297.pdf
-    if (input.GetRows() != input.GetCols()) {
-        OPENFHE_THROW("not square");
+    if (input.get_rows() != input.get_cols()) {
+        CIPHER_THROW("not square");
     }
-    size_t rows = input.GetRows();
+    size_t rows = input.get_rows();
     Matrix<double> result([]() { return 0; }, rows, rows);
 
     for (size_t i = 0; i < rows; ++i) {
@@ -119,14 +119,14 @@ Matrix<double> Cholesky(const Matrix<int32_t>& input) {
     return result;
 }
 
-void Cholesky(const Matrix<int32_t>& input, Matrix<double>& result) {
+void cholesky(const Matrix<int32_t>& input, Matrix<double>& result) {
     //  http://eprint.iacr.org/2013/297.pdf
-    if (input.GetRows() != input.GetCols()) {
-        OPENFHE_THROW("not square");
+    if (input.get_rows() != input.get_cols()) {
+        CIPHER_THROW("not square");
     }
-    size_t rows = input.GetRows();
-    if (result.GetRows() != rows || result.GetCols() != rows) {
-        OPENFHE_THROW("result must have the dimensions of input");
+    size_t rows = input.get_rows();
+    if (result.get_rows() != rows || result.get_cols() != rows) {
+        CIPHER_THROW("result must have the dimensions of input");
     }
 
     for (size_t i = 0; i < rows; ++i) {
@@ -156,29 +156,29 @@ void Cholesky(const Matrix<int32_t>& input, Matrix<double>& result) {
 }
 
 //  Convert from Z_q to (-q/2, q/2]
-Matrix<int32_t> ConvertToInt32(const Matrix<BigInteger>& input, const BigInteger& modulus) {
-    size_t rows = input.GetRows();
-    size_t cols = input.GetCols();
+Matrix<int32_t> convert_to_int32(const Matrix<BigInteger>& input, const BigInteger& modulus) {
+    size_t rows = input.get_rows();
+    size_t cols = input.get_cols();
     Matrix<int32_t> result([]() { return 0; }, rows, cols);
     const CenteredToInt32Converter converter(modulus);
     for (size_t i = 0; i < rows; ++i) {
-        const auto& inputRow = input.GetData()[i];
+        const auto& input_row = input.get_data()[i];
         for (size_t j = 0; j < cols; ++j) {
-            result(i, j) = converter.Convert(inputRow[j]);
+            result(i, j) = converter.convert(input_row[j]);
         }
     }
     return result;
 }
 
-Matrix<int32_t> ConvertToInt32(const Matrix<BigVector>& input, const BigInteger& modulus) {
-    size_t rows = input.GetRows();
-    size_t cols = input.GetCols();
+Matrix<int32_t> convert_to_int32(const Matrix<BigVector>& input, const BigInteger& modulus) {
+    size_t rows = input.get_rows();
+    size_t cols = input.get_cols();
     Matrix<int32_t> result([]() { return 0; }, rows, cols);
     const CenteredToInt32Converter converter(modulus);
     for (size_t i = 0; i < rows; ++i) {
-        const auto& inputRow = input.GetData()[i];
+        const auto& input_row = input.get_data()[i];
         for (size_t j = 0; j < cols; ++j) {
-            result(i, j) = converter.Convert(inputRow[j][0]);
+            result(i, j) = converter.convert(input_row[j][0]);
         }
     }
     return result;
@@ -188,6 +188,6 @@ template class Matrix<double>;
 template class Matrix<int>;
 template class Matrix<int64_t>;
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif

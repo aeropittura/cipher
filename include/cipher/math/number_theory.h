@@ -57,10 +57,10 @@
 #include "cipher/util/inttypes.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * Finds roots of unity for given input.  Assumes the the input is a power of
@@ -72,7 +72,7 @@ namespace lbcrypto {
  * @return a root of unity.
  */
 template <typename IntType>
-IntType RootOfUnity(uint32_t m, const IntType& modulo);
+IntType root_of_unity(uint32_t m, const IntType& modulo);
 
 /**
  * Finds roots of unity for given input.  Assumes the the input cyclotomicorder
@@ -84,7 +84,7 @@ IntType RootOfUnity(uint32_t m, const IntType& modulo);
  * @returns a vector of roots of unity corresponding to each modulus.
  */
 template <typename IntType>
-std::vector<IntType> RootsOfUnity(uint32_t m, const std::vector<IntType>& moduli);
+std::vector<IntType> roots_of_unity(uint32_t m, const std::vector<IntType>& moduli);
 
 /**
  * Reverses the bit order of a byte using a precomputed table.
@@ -114,7 +114,7 @@ inline static unsigned char reverse_byte(unsigned char x) {
     return table[x];
 }
 
-/// right shift applied by ReverseBits() after byte-wise reversal, indexed by msb mod 8, to
+/// right shift applied by reverse_bits() after byte-wise reversal, indexed by msb mod 8, to
 /// discard the unused high bits of the last partial byte
 static int shift_trick[] = {0, 7, 6, 5, 4, 3, 2, 1};
 
@@ -127,7 +127,7 @@ static int shift_trick[] = {0, 7, 6, 5, 4, 3, 2, 1};
  *
  * @return an unsigned integer that represents the reversed bits.
  */
-inline uint32_t ReverseBits(uint32_t num, uint32_t msb) {
+inline uint32_t reverse_bits(uint32_t num, uint32_t msb) {
     uint32_t msbb = (msb >> 3) + (msb & 0x7 ? 1 : 0);
     switch (msbb) {
         case 1:
@@ -148,7 +148,7 @@ inline uint32_t ReverseBits(uint32_t num, uint32_t msb) {
             // ERROR
             break;
     }
-    OPENFHE_THROW("msbb value not handled:" + std::to_string(msbb));
+    CIPHER_THROW("msbb value not handled:" + std::to_string(msbb));
 }
 
 /**
@@ -161,7 +161,7 @@ inline uint32_t ReverseBits(uint32_t num, uint32_t msb) {
 template <typename T,
           std::enable_if_t<std::is_integral_v<T> || std::is_same_v<T, int128_t> || std::is_same_v<T, uint128_t>, bool> =
                   true>
-inline constexpr uint32_t GetMSB(T x) {
+inline constexpr uint32_t get_msb(T x) {
     if constexpr (sizeof(T) <= 8) {
         if (x == 0)
             return 0;
@@ -175,14 +175,14 @@ inline constexpr uint32_t GetMSB(T x) {
         return 64 - static_cast<uint32_t>(__builtin_clzll(static_cast<uint64_t>(x)));
 #endif
     }
-#if defined(HAVE_INT128)
+#if defined(CIPHER_HAVE_INT128)
     else if constexpr (sizeof(T) == 16) {
         auto hi{static_cast<uint64_t>(uint128_t(x) >> 64)};
-        return hi ? 64 + GetMSB(hi) : GetMSB(static_cast<uint64_t>(uint128_t(x)));
+        return hi ? 64 + get_msb(hi) : get_msb(static_cast<uint64_t>(uint128_t(x)));
     }
 #endif
     else {
-        OPENFHE_THROW("Unsupported int type (GetMSB() supports 32-, 64- and 128-bit integers only)");
+        CIPHER_THROW("Unsupported int type (GetMSB() supports 32-, 64- and 128-bit integers only)");
         return 0;
     }
 }
@@ -194,8 +194,8 @@ inline constexpr uint32_t GetMSB(T x) {
  *
  * @return the index of the MSB bit location.
  */
-inline constexpr uint32_t GetMSB64(uint64_t x) {
-    return GetMSB(x);
+inline constexpr uint32_t get_msb64(uint64_t x) {
+    return get_msb(x);
 }
 
 /**
@@ -211,14 +211,14 @@ inline constexpr uint32_t GetMSB64(uint64_t x) {
 template <typename T,
           std::enable_if_t<std::is_integral_v<T> || std::is_same_v<T, int128_t> || std::is_same_v<T, uint128_t>, bool> =
                   true>
-inline constexpr uint32_t GetDigitCount(T x, uint64_t base) {
+inline constexpr uint32_t get_digit_count(T x, uint64_t base) {
     if (base < 2)
-        OPENFHE_THROW("GetDigitCount() requires a base of at least 2");
+        CIPHER_THROW("GetDigitCount() requires a base of at least 2");
     if (x < 2)
         return 0;
     if ((base & (base - 1)) == 0) {
-        const uint32_t bits{GetMSB(base) - 1};
-        return (GetMSB(x - 1) + bits - 1) / bits;
+        const uint32_t bits{get_msb(base) - 1};
+        return (get_msb(x - 1) + bits - 1) / bits;
     }
     uint32_t count{0};
     for (T v{static_cast<T>(x - 1)}; v > 0; v = static_cast<T>(v / base))
@@ -237,18 +237,18 @@ inline constexpr uint32_t GetDigitCount(T x, uint64_t base) {
  * @return the vector of k digits
  */
 template <typename IntType>
-std::shared_ptr<std::vector<int64_t>> GetDigits(const IntType& u, uint64_t base, uint32_t k) {
+std::shared_ptr<std::vector<int64_t>> get_digits(const IntType& u, uint64_t base, uint32_t k) {
     auto u_vec = std::make_shared<std::vector<int64_t>>(k);
 
-    size_t baseDigits = GetMSB(base) - 1;
+    size_t base_digits = get_msb(base) - 1;
 
     // if (!(base & (base - 1)))
     IntType uu = u;
-    IntType uTemp;
+    IntType u_temp;
     for (size_t i = 0; i < k; i++) {  // ****************4/1/2018 This loop is correct.
-        uTemp = uu >> baseDigits;
-        (*u_vec)[i] = (uu - (uTemp << baseDigits)).ConvertToInt();
-        uu = uTemp;
+        u_temp = uu >> base_digits;
+        (*u_vec)[i] = (uu - (u_temp << base_digits)).convert_to_int();
+        uu = u_temp;
     }
     return u_vec;
 }
@@ -262,7 +262,7 @@ std::shared_ptr<std::vector<int64_t>> GetDigits(const IntType& u, uint64_t base,
  * @return the greatest common divisor.
  */
 template <typename IntType>
-IntType GreatestCommonDivisor(const IntType& a, const IntType& b);
+IntType greatest_common_divisor(const IntType& a, const IntType& b);
 
 /**
  * Perform the MillerRabin primality test on an IntType.
@@ -279,7 +279,7 @@ IntType GreatestCommonDivisor(const IntType& a, const IntType& b);
  * non-primality is found.
  */
 template <typename IntType>
-bool MillerRabinPrimalityTest(const IntType& p, const uint32_t niter = 100);
+bool miller_rabin_primality_test(const IntType& p, const uint32_t niter = 100);
 
 /**
  * Perform the PollardRho factorization of a IntType.
@@ -289,37 +289,37 @@ bool MillerRabinPrimalityTest(const IntType& p, const uint32_t niter = 100);
  * @return a factor of n, and IntType::ONE if no other factor is found.
  */
 template <typename IntType>
-const IntType PollardRhoFactorization(const IntType& n);
+const IntType pollard_rho_factorization(const IntType& n);
 
 /**
  * Recursively factorizes to find the distinct primefactors of a number.
  * @param n the value to factorize.
- * @param primeFactors set of factors found [must begin cleared]
+ * @param prime_factors set of factors found [must begin cleared]
  */
 template <typename IntType>
-void PrimeFactorize(IntType n, std::set<IntType>& primeFactors);
+void prime_factorize(IntType n, std::set<IntType>& prime_factors);
 
 /**
- * Finds the first prime q that satisfies q = 1 mod m with at least (nBits + 1) bits.
+ * Finds the first prime q that satisfies q = 1 mod m with at least (n_bits + 1) bits.
  *
- * @param nBits the bit parameter.
+ * @param n_bits the bit parameter.
  * @param m the ring parameter (cyclotomic order).
  *
  * @return the first prime modulus.
  */
 template <typename IntType>
-IntType FirstPrime(uint32_t nBits, uint64_t m);
+IntType first_prime(uint32_t n_bits, uint64_t m);
 
 /**
- * Finds the max prime q that satisfies q = 1 mod m with at most nBits bits.
+ * Finds the max prime q that satisfies q = 1 mod m with at most n_bits bits.
  *
- * @param nBits the bit parameter.
+ * @param n_bits the bit parameter.
  * @param m the ring parameter (cyclotomic order).
  *
  * @return the last prime modulus
  */
 template <typename IntType>
-IntType LastPrime(uint32_t nBits, uint64_t m);
+IntType last_prime(uint32_t n_bits, uint64_t m);
 
 /**
  * Finds the next prime that satisfies q = 1 mod m
@@ -331,7 +331,7 @@ IntType LastPrime(uint32_t nBits, uint64_t m);
  * @return the next prime modulus.
  */
 template <typename IntType>
-IntType NextPrime(const IntType& q, uint64_t m);
+IntType next_prime(const IntType& q, uint64_t m);
 
 /**
  * Finds the previous prime that satisfies q = 1 mod m
@@ -343,7 +343,7 @@ IntType NextPrime(const IntType& q, uint64_t m);
  * @return the previous prime modulus.
  */
 template <typename IntType>
-IntType PreviousPrime(const IntType& q, uint64_t m);
+IntType previous_prime(const IntType& q, uint64_t m);
 
 /**
  * Multiplicative inverse for primitive unsigned integer data types
@@ -353,7 +353,7 @@ IntType PreviousPrime(const IntType& q, uint64_t m);
  *
  * @return the multiplicative inverse
  */
-uint32_t ModInverse(uint32_t a, uint32_t b);
+uint32_t mod_inverse(uint32_t a, uint32_t b);
 
 /**
  * Returns the exponent k such that 2^k is the smallest power of 2 that is
@@ -363,7 +363,7 @@ uint32_t ModInverse(uint32_t a, uint32_t b);
  * @return the exponent k of the next power of 2 that is greater than or equal to n.
  */
 template <typename IntType>
-IntType NextPowerOfTwo(IntType n);
+IntType next_power_of_two(IntType n);
 
 /**
  * Returns the totient value phi of a number n.
@@ -372,7 +372,7 @@ IntType NextPowerOfTwo(IntType n);
  * @return phi of n which is the number of integers m coprime to n such that 1 <= m <=
  * n.
  */
-uint64_t GetTotient(const uint64_t n);
+uint64_t get_totient(const uint64_t n);
 
 /**
  * Returns the list of coprimes to number n in ascending order.
@@ -381,7 +381,7 @@ uint64_t GetTotient(const uint64_t n);
  * @return vector of mi's such that 1 <= mi <= n and gcd(mi,n)==1.
  */
 template <typename IntType>
-std::vector<IntType> GetTotientList(const IntType& n);
+std::vector<IntType> get_totient_list(const IntType& n);
 
 /**
  * Returns the polynomial modulus.
@@ -395,7 +395,7 @@ std::vector<IntType> GetTotientList(const IntType& n);
  * (divisor,modulus).
  */
 template <typename IntVector>
-IntVector PolyMod(const IntVector& dividend, const IntVector& divisor, const typename IntVector::Integer& modulus);
+IntVector poly_mod(const IntVector& dividend, const IntVector& divisor, const typename IntVector::Integer& modulus);
 
 /**
  * Returns the polynomial multiplication of the input operands.
@@ -407,17 +407,17 @@ IntVector PolyMod(const IntVector& dividend, const IntVector& divisor, const typ
  * ci%modulus.
  */
 template <typename IntVector>
-IntVector PolynomialMultiplication(const IntVector& a, const IntVector& b);
+IntVector polynomial_multiplication(const IntVector& a, const IntVector& b);
 
 /**
  * Returns the m-th cyclotomic polynomial.
- * Added as a wrapper to GetCyclotomicPolynomialRecursive
+ * Added as a wrapper to get_cyclotomic_polynomial_recursive
  * @param m the input cyclotomic order.
  * @param modulus is the working modulus.
  * @return resultant m-th cyclotomic polynomial with coefficients in modulus.
  */
 template <typename IntVector>
-IntVector GetCyclotomicPolynomial(uint32_t m, const typename IntVector::Integer& modulus);
+IntVector get_cyclotomic_polynomial(uint32_t m, const typename IntVector::Integer& modulus);
 
 /**
  * Returns the m-th cyclotomic polynomial.
@@ -425,7 +425,7 @@ IntVector GetCyclotomicPolynomial(uint32_t m, const typename IntVector::Integer&
  * @param m the input cyclotomic order.
  * @return resultant m-th cyclotomic polynomial.
  */
-std::vector<int> GetCyclotomicPolynomialRecursive(uint32_t m);
+std::vector<int> get_cyclotomic_polynomial_recursive(uint32_t m);
 
 /**
  * Returns the remainder after polynomial division of dividend with divisor =
@@ -437,20 +437,20 @@ std::vector<int> GetCyclotomicPolynomialRecursive(uint32_t m);
  * @return remainder after division with x-a.
  */
 template <typename IntVector>
-typename IntVector::Integer SyntheticRemainder(const IntVector& dividend, const typename IntVector::Integer& a,
+typename IntVector::Integer synthetic_remainder(const IntVector& dividend, const typename IntVector::Integer& a,
                                                const typename IntVector::Integer& modulus);
 
 /**
  * Returns the remainder vector after polynomial division of dividend with
- * divisor = x-aList[i]. Uses synthetic division algorithm.
+ * divisor = x-a_list[i]. Uses synthetic division algorithm.
  * @param dividend is the input polynomial dividend in lower to higher
  * coefficient form.
- * @param aList is the integer vector for divisor[x-aList[i]].
+ * @param a_list is the integer vector for divisor[x-a_list[i]].
  * @param modulus is the working modulus.
- * @return remainder vector after division with x-aList[i].
+ * @return remainder vector after division with x-a_list[i].
  */
 template <typename IntVector>
-IntVector SyntheticPolyRemainder(const IntVector& dividend, const IntVector& aList,
+IntVector synthetic_poly_remainder(const IntVector& dividend, const IntVector& a_list,
                                  const typename IntVector::Integer& modulus);
 
 /**
@@ -461,7 +461,7 @@ IntVector SyntheticPolyRemainder(const IntVector& dividend, const IntVector& aLi
  * @return exponentiated polynomial.
  */
 template <typename IntVector>
-IntVector PolynomialPower(const IntVector& input, uint32_t power);
+IntVector polynomial_power(const IntVector& input, uint32_t power);
 
 /**
  * Returns the quotient after polynomial division of dividend with divisor =
@@ -473,7 +473,7 @@ IntVector PolynomialPower(const IntVector& input, uint32_t power);
  * @return quotient after division with x-a.
  */
 template <typename IntVector>
-IntVector SyntheticPolynomialDivision(const IntVector& dividend, const typename IntVector::Integer& a,
+IntVector synthetic_polynomial_division(const IntVector& dividend, const typename IntVector::Integer& a,
                                       const typename IntVector::Integer& modulus);
 
 /**
@@ -485,7 +485,7 @@ IntVector SyntheticPolynomialDivision(const IntVector& dividend, const typename 
  * @return true if g is a generator
  */
 template <typename IntType>
-bool IsGenerator(const IntType& g, const IntType& q);
+bool is_generator(const IntType& g, const IntType& q);
 
 /**
  * Finds a generator for any cyclic group with modulus q (non-prime moduli are
@@ -495,7 +495,7 @@ bool IsGenerator(const IntType& g, const IntType& q);
  * @return a generator of the cyclic group
  */
 template <typename IntType>
-IntType FindGeneratorCyclic(const IntType& q);
+IntType find_generator_cyclic(const IntType& q);
 
 /**
  * Find an automorphism index for a power-of-two cyclotomic order
@@ -503,18 +503,18 @@ IntType FindGeneratorCyclic(const IntType& q);
  * @param m is the cyclotomic order
  * @return the automorphism index
  */
-uint32_t FindAutomorphismIndex2n(int32_t i, uint32_t m);
+uint32_t find_automorphism_index2n(int32_t i, uint32_t m);
 
 /**
  * Find an automorphism index for a power-of-two cyclotomic order in the CKKS (complex
  * slot) layout, where the slots form one cycle generated by 5 and no conjugation is
  * involved: rotation by i maps to the index 5^i mod m (5^-i for a negative i).
- * @see FindAutomorphismIndex2n()
+ * @see find_automorphism_index2n()
  * @param i is the rotation index; 0 returns 1 and m-1 returns m-1 (the conjugation index)
  * @param m is the cyclotomic order, which must be a power of two
  * @return the automorphism index
  */
-uint32_t FindAutomorphismIndex2nComplex(int32_t i, uint32_t m);
+uint32_t find_automorphism_index2n_complex(int32_t i, uint32_t m);
 
 /**
  * Find an automorphism index for cyclic groups
@@ -523,7 +523,7 @@ uint32_t FindAutomorphismIndex2nComplex(int32_t i, uint32_t m);
  * @param g is the generator
  * @return the automorphism index
  */
-uint32_t FindAutomorphismIndexCyclic(int32_t i, uint32_t m, uint32_t g);
+uint32_t find_automorphism_index_cyclic(int32_t i, uint32_t m, uint32_t g);
 
 /**
  * Precompute a bit reversal map for a specific automorphism
@@ -531,8 +531,8 @@ uint32_t FindAutomorphismIndexCyclic(int32_t i, uint32_t m, uint32_t g);
  * @param k automorphism index
  * @param precomp the vector where the precomputed table is stored
  */
-void PrecomputeAutoMap(uint32_t n, uint32_t k, std::vector<uint32_t>* precomp);
+void precompute_auto_map(uint32_t n, uint32_t k, std::vector<uint32_t>* precomp);
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_MATH_NUMBER_THEORY_H_

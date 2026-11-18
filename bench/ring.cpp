@@ -46,297 +46,297 @@
 #include "cipher/ring/backend.h"
 #include "cipher/math/discrete_uniform_gen.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 std::vector<uint32_t> os({16, 1024, 2048, 4096, 8192, 16384, 32768});
 
 template <typename E>
-static E makeElement(std::shared_ptr<lbcrypto::ILParamsImpl<typename E::Integer>> params) {
+static E make_element(std::shared_ptr<cipher::PolyParamsImpl<typename E::Integer>> params) {
     typename E::DugType dug;
     return E(dug, params);
 }
 
 template <typename E>
-static E makeElement(std::shared_ptr<lbcrypto::ILDCRTParams<typename E::Integer>> params) {
+static E make_element(std::shared_ptr<cipher::RnsParams<typename E::Integer>> params) {
     typename E::DugType dug;
     return E(dug, params);
 }
 
 template <typename P>
-static void GenerateParms(std::map<uint32_t, std::shared_ptr<P>>& parmArray) {
+static void generate_parms(std::map<uint32_t, std::shared_ptr<P>>& parm_array) {
     for (auto o : os)
-        parmArray[o] = std::make_shared<P>(o);
+        parm_array[o] = std::make_shared<P>(o);
 }
 
 template <typename P>
-static void GenerateDCRTParms(std::map<uint32_t, std::shared_ptr<P>>& parmArray) {
+static void generate_dcrt_parms(std::map<uint32_t, std::shared_ptr<P>>& parm_array) {
     for (auto o : os)
-        parmArray[o] = std::make_shared<P>(o);
+        parm_array[o] = std::make_shared<P>(o);
 }
 
 template <typename P, typename E>
-static void GeneratePolys(std::map<uint32_t, std::shared_ptr<P>>& parmArray,
-                          std::map<uint32_t, std::vector<E>>& polyArray) {
-    for (auto& pair : parmArray) {
+static void generate_polys(std::map<uint32_t, std::shared_ptr<P>>& parm_array,
+                          std::map<uint32_t, std::vector<E>>& poly_array) {
+    for (auto& pair : parm_array) {
         for (int i = 0; i < 16; i++)
-            polyArray[pair.first].push_back(makeElement<E>(parmArray[pair.first]));
+            poly_array[pair.first].push_back(make_element<E>(parm_array[pair.first]));
     }
 }
 
-std::map<uint32_t, std::shared_ptr<ILNativeParams>> Nativeparms;
-std::map<uint32_t, std::vector<NativePoly>> Nativepolys;
+std::map<uint32_t, std::shared_ptr<NativePolyParams>> nativeparms;
+std::map<uint32_t, std::vector<NativePoly>> nativepolys;
 
-#ifdef WITH_BE2
-std::map<uint32_t, std::shared_ptr<M2Params>> BE2parms;
-std::map<uint32_t, std::shared_ptr<M2DCRTParams>> BE2dcrtparms;
-std::map<uint32_t, std::vector<M2Poly>> BE2polys;
-std::map<uint32_t, std::vector<M2DCRTPoly>> BE2DCRTpolys;
+#ifdef CIPHER_WITH_BE2
+std::map<uint32_t, std::shared_ptr<M2Params>> be2parms;
+std::map<uint32_t, std::shared_ptr<M2RnsParams>> be2dcrtparms;
+std::map<uint32_t, std::vector<M2Poly>> be2polys;
+std::map<uint32_t, std::vector<M2RnsPoly>> be2_dcrt_polys;
 #endif
 
-#ifdef WITH_BE4
-std::map<uint32_t, std::shared_ptr<M4Params>> BE4parms;
-std::map<uint32_t, std::shared_ptr<M4DCRTParams>> BE4dcrtparms;
-std::map<uint32_t, std::vector<M4Poly>> BE4polys;
-std::map<uint32_t, std::vector<M4DCRTPoly>> BE4DCRTpolys;
+#ifdef CIPHER_WITH_BE4
+std::map<uint32_t, std::shared_ptr<M4Params>> be4parms;
+std::map<uint32_t, std::shared_ptr<M4RnsParams>> be4dcrtparms;
+std::map<uint32_t, std::vector<M4Poly>> be4polys;
+std::map<uint32_t, std::vector<M4RnsPoly>> be4_dcrt_polys;
 #endif
 
-#ifdef WITH_NTL
+#ifdef CIPHER_WITH_NTL
 std::map<uint32_t, std::shared_ptr<M6Params>> BE6parms;
-std::map<uint32_t, std::shared_ptr<M6DCRTParams>> BE6dcrtparms;
+std::map<uint32_t, std::shared_ptr<M6RnsParams>> BE6dcrtparms;
 std::map<uint32_t, std::vector<M6Poly>> BE6polys;
-std::map<uint32_t, std::vector<M6DCRTPoly>> BE6DCRTpolys;
+std::map<uint32_t, std::vector<M6RnsPoly>> BE6DCRTpolys;
 #endif
 
 class Setup {
   public:
     Setup() {
-        GenerateParms<ILNativeParams>(Nativeparms);
-        GeneratePolys<ILNativeParams, NativePoly>(Nativeparms, Nativepolys);
+        generate_parms<NativePolyParams>(nativeparms);
+        generate_polys<NativePolyParams, NativePoly>(nativeparms, nativepolys);
 
-#ifdef WITH_BE2
-        GenerateParms<M2Params>(BE2parms);
-        GenerateDCRTParms<M2DCRTParams>(BE2dcrtparms);
-        GeneratePolys<M2Params, M2Poly>(BE2parms, BE2polys);
-        GeneratePolys<M2DCRTParams, M2DCRTPoly>(BE2dcrtparms, BE2DCRTpolys);
+#ifdef CIPHER_WITH_BE2
+        generate_parms<M2Params>(be2parms);
+        generate_dcrt_parms<M2RnsParams>(be2dcrtparms);
+        generate_polys<M2Params, M2Poly>(be2parms, be2polys);
+        generate_polys<M2RnsParams, M2RnsPoly>(be2dcrtparms, be2_dcrt_polys);
 #endif
 
-#ifdef WITH_BE4
-        GenerateParms<M4Params>(BE4parms);
-        GenerateDCRTParms<M4DCRTParams>(BE4dcrtparms);
-        GeneratePolys<M4Params, M4Poly>(BE4parms, BE4polys);
-        GeneratePolys<M4DCRTParams, M4DCRTPoly>(BE4dcrtparms, BE4DCRTpolys);
+#ifdef CIPHER_WITH_BE4
+        generate_parms<M4Params>(be4parms);
+        generate_dcrt_parms<M4RnsParams>(be4dcrtparms);
+        generate_polys<M4Params, M4Poly>(be4parms, be4polys);
+        generate_polys<M4RnsParams, M4RnsPoly>(be4dcrtparms, be4_dcrt_polys);
 #endif
 
-#ifdef WITH_NTL
-        GenerateParms<M6Params>(BE6parms);
-        GenerateDCRTParms<M6DCRTParams>(BE6dcrtparms);
-        GeneratePolys<M6Params, M6Poly>(BE6parms, BE6polys);
-        GeneratePolys<M6DCRTParams, M6DCRTPoly>(BE6dcrtparms, BE6DCRTpolys);
+#ifdef CIPHER_WITH_NTL
+        generate_parms<M6Params>(BE6parms);
+        generate_dcrt_parms<M6RnsParams>(BE6dcrtparms);
+        generate_polys<M6Params, M6Poly>(BE6parms, BE6polys);
+        generate_polys<M6RnsParams, M6RnsPoly>(BE6dcrtparms, BE6DCRTpolys);
 #endif
     }
 
     template <typename P>
-    std::shared_ptr<P> GetParm(uint32_t o);
+    std::shared_ptr<P> get_parm(uint32_t o);
 
     template <typename E>
-    const E& GetPoly(uint32_t o, int p);
-} TestParameters;
+    const E& get_poly(uint32_t o, int p);
+} test_parameters;
 
 template <>
-std::shared_ptr<ILNativeParams> Setup::GetParm(uint32_t o) {
-    return Nativeparms[o];
+std::shared_ptr<NativePolyParams> Setup::get_parm(uint32_t o) {
+    return nativeparms[o];
 }
 template <>
-const NativePoly& Setup::GetPoly(uint32_t o, int p) {
-    return Nativepolys[o][p];
+const NativePoly& Setup::get_poly(uint32_t o, int p) {
+    return nativepolys[o][p];
 }
 
-#ifdef WITH_BE2
+#ifdef CIPHER_WITH_BE2
 template <>
-std::shared_ptr<M2Params> Setup::GetParm(uint32_t o) {
-    return BE2parms[o];
+std::shared_ptr<M2Params> Setup::get_parm(uint32_t o) {
+    return be2parms[o];
 }
 template <>
-const M2Poly& Setup::GetPoly(uint32_t o, int p) {
-    return BE2polys[o][p];
+const M2Poly& Setup::get_poly(uint32_t o, int p) {
+    return be2polys[o][p];
 }
 template <>
-std::shared_ptr<M2DCRTParams> Setup::GetParm(uint32_t o) {
-    return BE2dcrtparms[o];
+std::shared_ptr<M2RnsParams> Setup::get_parm(uint32_t o) {
+    return be2dcrtparms[o];
 }
 template <>
-const M2DCRTPoly& Setup::GetPoly(uint32_t o, int p) {
-    return BE2DCRTpolys[o][p];
+const M2RnsPoly& Setup::get_poly(uint32_t o, int p) {
+    return be2_dcrt_polys[o][p];
 }
 #endif
 
-#ifdef WITH_BE4
+#ifdef CIPHER_WITH_BE4
 template <>
-std::shared_ptr<M4Params> Setup::GetParm(uint32_t o) {
-    return BE4parms[o];
+std::shared_ptr<M4Params> Setup::get_parm(uint32_t o) {
+    return be4parms[o];
 }
 template <>
-const M4Poly& Setup::GetPoly(uint32_t o, int p) {
-    return BE4polys[o][p];
+const M4Poly& Setup::get_poly(uint32_t o, int p) {
+    return be4polys[o][p];
 }
 template <>
-std::shared_ptr<M4DCRTParams> Setup::GetParm(uint32_t o) {
-    return BE4dcrtparms[o];
+std::shared_ptr<M4RnsParams> Setup::get_parm(uint32_t o) {
+    return be4dcrtparms[o];
 }
 template <>
-const M4DCRTPoly& Setup::GetPoly(uint32_t o, int p) {
-    return BE4DCRTpolys[o][p];
+const M4RnsPoly& Setup::get_poly(uint32_t o, int p) {
+    return be4_dcrt_polys[o][p];
 }
 #endif
 
-#ifdef WITH_NTL
+#ifdef CIPHER_WITH_NTL
 template <>
-std::shared_ptr<M6Params> Setup::GetParm(uint32_t o) {
+std::shared_ptr<M6Params> Setup::get_parm(uint32_t o) {
     return BE6parms[o];
 }
 template <>
-const M6Poly& Setup::GetPoly(uint32_t o, int p) {
+const M6Poly& Setup::get_poly(uint32_t o, int p) {
     return BE6polys[o][p];
 }
 template <>
-std::shared_ptr<M6DCRTParams> Setup::GetParm(uint32_t o) {
+std::shared_ptr<M6RnsParams> Setup::get_parm(uint32_t o) {
     return BE6dcrtparms[o];
 }
 template <>
-const M6DCRTPoly& Setup::GetPoly(uint32_t o, int p) {
+const M6RnsPoly& Setup::get_poly(uint32_t o, int p) {
     return BE6DCRTpolys[o][p];
 }
 #endif
 
 template <typename E>
-static void make_LATTICE_empty(std::shared_ptr<typename E::Params> params) {
+static void make_lattice_empty(std::shared_ptr<typename E::Params> params) {
     E v1(params);
 }
 
 template <typename E>
-void BM_LATTICE_empty(benchmark::State& state) {
+void bm_lattice_empty(benchmark::State& state) {
     while (state.KeepRunning()) {
-        make_LATTICE_empty<E>(TestParameters.GetParm<typename E::Params>(state.range(0)));
+        make_lattice_empty<E>(test_parameters.get_parm<typename E::Params>(state.range(0)));
     }
 }
 
 template <typename E>
-static void make_LATTICE_vector(benchmark::State& state, std::shared_ptr<typename E::Params> params) {
-    E elem = makeElement<E>(params);
+static void make_lattice_vector(benchmark::State& state, std::shared_ptr<typename E::Params> params) {
+    E elem = make_element<E>(params);
 }
 
 template <typename E>
-void BM_LATTICE_makevector(benchmark::State& state) {
+void bm_lattice_makevector(benchmark::State& state) {
     while (state.KeepRunning()) {
-        make_LATTICE_vector<E>(state, TestParameters.GetParm<typename E::Params>(state.range(0)));
+        make_lattice_vector<E>(state, test_parameters.get_parm<typename E::Params>(state.range(0)));
     }
 }
 
 template <typename E>
-static void add_LATTICE(const E& a, const E& b) {
+static void add_lattice(const E& a, const E& b) {
     E c1;
     benchmark::DoNotOptimize(c1 = a + b);
 }
 
 template <typename E>
-static void BM_add_LATTICE(benchmark::State& state) {
+static void bm_add_lattice(benchmark::State& state) {
     E a;
     E b;
 
     if (state.thread_index() == 0) {
-        a = TestParameters.GetPoly<E>(state.range(0), 0);
-        b = TestParameters.GetPoly<E>(state.range(0), 1);
+        a = test_parameters.get_poly<E>(state.range(0), 0);
+        b = test_parameters.get_poly<E>(state.range(0), 1);
     }
 
     while (state.KeepRunning()) {
-        add_LATTICE<E>(a, b);
+        add_lattice<E>(a, b);
     }
 }
 
 template <typename E>
-static void addeq_LATTICE(E& a, const E& b) {
+static void addeq_lattice(E& a, const E& b) {
     benchmark::DoNotOptimize(a += b);
 }
 
 template <typename E>
-static void BM_addeq_LATTICE(benchmark::State& state) {
+static void bm_addeq_lattice(benchmark::State& state) {
     E a;
     E b;
 
     if (state.thread_index() == 0) {
-        b = TestParameters.GetPoly<E>(state.range(0), 1);
-        a = TestParameters.GetPoly<E>(state.range(0), 0);
+        b = test_parameters.get_poly<E>(state.range(0), 1);
+        a = test_parameters.get_poly<E>(state.range(0), 0);
     }
 
     while (state.KeepRunning()) {
-        addeq_LATTICE<E>(a, b);
+        addeq_lattice<E>(a, b);
     }
 }
 
 template <class E>
-static void mult_LATTICE(const E& a, const E& b) {
+static void mult_lattice(const E& a, const E& b) {
     E c1;
     benchmark::DoNotOptimize(c1 = a * b);
 }
 
 template <class E>
-static void BM_mult_LATTICE(benchmark::State& state) {
+static void bm_mult_lattice(benchmark::State& state) {
     E a, b;
 
     if (state.thread_index() == 0) {
-        a = TestParameters.GetPoly<E>(state.range(0), 0);
-        b = TestParameters.GetPoly<E>(state.range(0), 1);
+        a = test_parameters.get_poly<E>(state.range(0), 0);
+        b = test_parameters.get_poly<E>(state.range(0), 1);
     }
 
     while (state.KeepRunning()) {
-        mult_LATTICE<E>(a, b);
+        mult_lattice<E>(a, b);
     }
 }
 
 template <class E>
-static void multeq_LATTICE(E& a, const E& b) {
+static void multeq_lattice(E& a, const E& b) {
     benchmark::DoNotOptimize(a *= b);
 }
 
 template <class E>
-static void BM_multeq_LATTICE(benchmark::State& state) {
+static void bm_multeq_lattice(benchmark::State& state) {
     E a, b;
 
     if (state.thread_index() == 0) {
-        b = TestParameters.GetPoly<E>(state.range(0), 1);
-        a = TestParameters.GetPoly<E>(state.range(0), 0);
+        b = test_parameters.get_poly<E>(state.range(0), 1);
+        a = test_parameters.get_poly<E>(state.range(0), 0);
     }
 
     while (state.KeepRunning()) {
-        multeq_LATTICE<E>(a, b);
-    }
-}
-
-template <class E>
-static void switchformat_LATTICE(benchmark::State& state, std::shared_ptr<typename E::Params> params) {
-    E a = TestParameters.GetPoly<E>(state.range(0), 0);
-    a.SwitchFormat();
-}
-
-template <class E>
-static void BM_switchformat_LATTICE(benchmark::State& state) {
-    while (state.KeepRunning()) {
-        switchformat_LATTICE<E>(state, TestParameters.GetParm<typename E::Params>(state.range(0)));
+        multeq_lattice<E>(a, b);
     }
 }
 
 template <class E>
-static void doubleswitchformat_LATTICE(benchmark::State& state, std::shared_ptr<typename E::Params> params) {
-    E a = TestParameters.GetPoly<E>(state.range(0), 0);
-
-    a.SwitchFormat();
-    a.SwitchFormat();
+static void switchformat_lattice(benchmark::State& state, std::shared_ptr<typename E::Params> params) {
+    E a = test_parameters.get_poly<E>(state.range(0), 0);
+    a.switch_format();
 }
 
 template <class E>
-static void BM_doubleswitchformat_LATTICE(benchmark::State& state) {
+static void bm_switchformat_lattice(benchmark::State& state) {
     while (state.KeepRunning()) {
-        doubleswitchformat_LATTICE<E>(state, TestParameters.GetParm<typename E::Params>(state.range(0)));
+        switchformat_lattice<E>(state, test_parameters.get_parm<typename E::Params>(state.range(0)));
+    }
+}
+
+template <class E>
+static void doubleswitchformat_lattice(benchmark::State& state, std::shared_ptr<typename E::Params> params) {
+    E a = test_parameters.get_poly<E>(state.range(0), 0);
+
+    a.switch_format();
+    a.switch_format();
+}
+
+template <class E>
+static void bm_doubleswitchformat_lattice(benchmark::State& state) {
+    while (state.KeepRunning()) {
+        doubleswitchformat_lattice<E>(state, test_parameters.get_parm<typename E::Params>(state.range(0)));
     }
 }
 
@@ -349,73 +349,73 @@ static void BM_doubleswitchformat_LATTICE(benchmark::State& state) {
     BENCHMARK_TEMPLATE(X, Y)->Unit(benchmark::kMicrosecond)->ArgName("parm_16384")->Arg(16384); \
     BENCHMARK_TEMPLATE(X, Y)->Unit(benchmark::kMicrosecond)->ArgName("parm_32768")->Arg(32768);
 
-DO_POLY_BENCHMARK(BM_LATTICE_empty, NativePoly)
-DO_POLY_BENCHMARK(BM_LATTICE_makevector, NativePoly)
-DO_POLY_BENCHMARK(BM_add_LATTICE, NativePoly)
-DO_POLY_BENCHMARK(BM_addeq_LATTICE, NativePoly)
-DO_POLY_BENCHMARK(BM_mult_LATTICE, NativePoly)
-DO_POLY_BENCHMARK(BM_multeq_LATTICE, NativePoly)
-DO_POLY_BENCHMARK(BM_switchformat_LATTICE, NativePoly)
-DO_POLY_BENCHMARK(BM_doubleswitchformat_LATTICE, NativePoly)
+DO_POLY_BENCHMARK(bm_lattice_empty, NativePoly)
+DO_POLY_BENCHMARK(bm_lattice_makevector, NativePoly)
+DO_POLY_BENCHMARK(bm_add_lattice, NativePoly)
+DO_POLY_BENCHMARK(bm_addeq_lattice, NativePoly)
+DO_POLY_BENCHMARK(bm_mult_lattice, NativePoly)
+DO_POLY_BENCHMARK(bm_multeq_lattice, NativePoly)
+DO_POLY_BENCHMARK(bm_switchformat_lattice, NativePoly)
+DO_POLY_BENCHMARK(bm_doubleswitchformat_lattice, NativePoly)
 
-#ifdef WITH_BE2
-DO_POLY_BENCHMARK(BM_LATTICE_empty, M2Poly)
-DO_POLY_BENCHMARK(BM_LATTICE_makevector, M2Poly)
-DO_POLY_BENCHMARK(BM_add_LATTICE, M2Poly)
-DO_POLY_BENCHMARK(BM_addeq_LATTICE, M2Poly)
-DO_POLY_BENCHMARK(BM_mult_LATTICE, M2Poly)
-DO_POLY_BENCHMARK(BM_multeq_LATTICE, M2Poly)
-DO_POLY_BENCHMARK(BM_switchformat_LATTICE, M2Poly)
-DO_POLY_BENCHMARK(BM_doubleswitchformat_LATTICE, M2Poly)
+#ifdef CIPHER_WITH_BE2
+DO_POLY_BENCHMARK(bm_lattice_empty, M2Poly)
+DO_POLY_BENCHMARK(bm_lattice_makevector, M2Poly)
+DO_POLY_BENCHMARK(bm_add_lattice, M2Poly)
+DO_POLY_BENCHMARK(bm_addeq_lattice, M2Poly)
+DO_POLY_BENCHMARK(bm_mult_lattice, M2Poly)
+DO_POLY_BENCHMARK(bm_multeq_lattice, M2Poly)
+DO_POLY_BENCHMARK(bm_switchformat_lattice, M2Poly)
+DO_POLY_BENCHMARK(bm_doubleswitchformat_lattice, M2Poly)
 
-DO_POLY_BENCHMARK(BM_LATTICE_empty, M2DCRTPoly)
-DO_POLY_BENCHMARK(BM_LATTICE_makevector, M2DCRTPoly)
-DO_POLY_BENCHMARK(BM_add_LATTICE, M2DCRTPoly)
-DO_POLY_BENCHMARK(BM_addeq_LATTICE, M2DCRTPoly)
-DO_POLY_BENCHMARK(BM_mult_LATTICE, M2DCRTPoly)
-DO_POLY_BENCHMARK(BM_multeq_LATTICE, M2DCRTPoly)
-DO_POLY_BENCHMARK(BM_switchformat_LATTICE, M2DCRTPoly)
-DO_POLY_BENCHMARK(BM_doubleswitchformat_LATTICE, M2DCRTPoly)
+DO_POLY_BENCHMARK(bm_lattice_empty, M2RnsPoly)
+DO_POLY_BENCHMARK(bm_lattice_makevector, M2RnsPoly)
+DO_POLY_BENCHMARK(bm_add_lattice, M2RnsPoly)
+DO_POLY_BENCHMARK(bm_addeq_lattice, M2RnsPoly)
+DO_POLY_BENCHMARK(bm_mult_lattice, M2RnsPoly)
+DO_POLY_BENCHMARK(bm_multeq_lattice, M2RnsPoly)
+DO_POLY_BENCHMARK(bm_switchformat_lattice, M2RnsPoly)
+DO_POLY_BENCHMARK(bm_doubleswitchformat_lattice, M2RnsPoly)
 #endif
 
-#ifdef WITH_BE4
-DO_POLY_BENCHMARK(BM_LATTICE_empty, M4Poly)
-DO_POLY_BENCHMARK(BM_LATTICE_makevector, M4Poly)
-DO_POLY_BENCHMARK(BM_add_LATTICE, M4Poly)
-DO_POLY_BENCHMARK(BM_addeq_LATTICE, M4Poly)
-DO_POLY_BENCHMARK(BM_mult_LATTICE, M4Poly)
-DO_POLY_BENCHMARK(BM_multeq_LATTICE, M4Poly)
-DO_POLY_BENCHMARK(BM_switchformat_LATTICE, M4Poly)
-DO_POLY_BENCHMARK(BM_doubleswitchformat_LATTICE, M4Poly)
+#ifdef CIPHER_WITH_BE4
+DO_POLY_BENCHMARK(bm_lattice_empty, M4Poly)
+DO_POLY_BENCHMARK(bm_lattice_makevector, M4Poly)
+DO_POLY_BENCHMARK(bm_add_lattice, M4Poly)
+DO_POLY_BENCHMARK(bm_addeq_lattice, M4Poly)
+DO_POLY_BENCHMARK(bm_mult_lattice, M4Poly)
+DO_POLY_BENCHMARK(bm_multeq_lattice, M4Poly)
+DO_POLY_BENCHMARK(bm_switchformat_lattice, M4Poly)
+DO_POLY_BENCHMARK(bm_doubleswitchformat_lattice, M4Poly)
 
-DO_POLY_BENCHMARK(BM_LATTICE_empty, M4DCRTPoly)
-DO_POLY_BENCHMARK(BM_LATTICE_makevector, M4DCRTPoly)
-DO_POLY_BENCHMARK(BM_add_LATTICE, M4DCRTPoly)
-DO_POLY_BENCHMARK(BM_addeq_LATTICE, M4DCRTPoly)
-DO_POLY_BENCHMARK(BM_mult_LATTICE, M4DCRTPoly)
-DO_POLY_BENCHMARK(BM_multeq_LATTICE, M4DCRTPoly)
-DO_POLY_BENCHMARK(BM_switchformat_LATTICE, M4DCRTPoly)
-DO_POLY_BENCHMARK(BM_doubleswitchformat_LATTICE, M4DCRTPoly)
+DO_POLY_BENCHMARK(bm_lattice_empty, M4RnsPoly)
+DO_POLY_BENCHMARK(bm_lattice_makevector, M4RnsPoly)
+DO_POLY_BENCHMARK(bm_add_lattice, M4RnsPoly)
+DO_POLY_BENCHMARK(bm_addeq_lattice, M4RnsPoly)
+DO_POLY_BENCHMARK(bm_mult_lattice, M4RnsPoly)
+DO_POLY_BENCHMARK(bm_multeq_lattice, M4RnsPoly)
+DO_POLY_BENCHMARK(bm_switchformat_lattice, M4RnsPoly)
+DO_POLY_BENCHMARK(bm_doubleswitchformat_lattice, M4RnsPoly)
 #endif
 
-#ifdef WITH_NTL
-DO_POLY_BENCHMARK(BM_LATTICE_empty, M6Poly)
-DO_POLY_BENCHMARK(BM_LATTICE_makevector, M6Poly)
-DO_POLY_BENCHMARK(BM_add_LATTICE, M6Poly)
-DO_POLY_BENCHMARK(BM_addeq_LATTICE, M6Poly)
-DO_POLY_BENCHMARK(BM_mult_LATTICE, M6Poly)
-DO_POLY_BENCHMARK(BM_multeq_LATTICE, M6Poly)
-DO_POLY_BENCHMARK(BM_switchformat_LATTICE, M6Poly)
-DO_POLY_BENCHMARK(BM_doubleswitchformat_LATTICE, M6Poly)
+#ifdef CIPHER_WITH_NTL
+DO_POLY_BENCHMARK(bm_lattice_empty, M6Poly)
+DO_POLY_BENCHMARK(bm_lattice_makevector, M6Poly)
+DO_POLY_BENCHMARK(bm_add_lattice, M6Poly)
+DO_POLY_BENCHMARK(bm_addeq_lattice, M6Poly)
+DO_POLY_BENCHMARK(bm_mult_lattice, M6Poly)
+DO_POLY_BENCHMARK(bm_multeq_lattice, M6Poly)
+DO_POLY_BENCHMARK(bm_switchformat_lattice, M6Poly)
+DO_POLY_BENCHMARK(bm_doubleswitchformat_lattice, M6Poly)
 
-DO_POLY_BENCHMARK(BM_LATTICE_empty, M6DCRTPoly)
-DO_POLY_BENCHMARK(BM_LATTICE_makevector, M6DCRTPoly)
-DO_POLY_BENCHMARK(BM_add_LATTICE, M6DCRTPoly)
-DO_POLY_BENCHMARK(BM_addeq_LATTICE, M6DCRTPoly)
-DO_POLY_BENCHMARK(BM_mult_LATTICE, M6DCRTPoly)
-DO_POLY_BENCHMARK(BM_multeq_LATTICE, M6DCRTPoly)
-DO_POLY_BENCHMARK(BM_switchformat_LATTICE, M6DCRTPoly)
-DO_POLY_BENCHMARK(BM_doubleswitchformat_LATTICE, M6DCRTPoly)
+DO_POLY_BENCHMARK(bm_lattice_empty, M6RnsPoly)
+DO_POLY_BENCHMARK(bm_lattice_makevector, M6RnsPoly)
+DO_POLY_BENCHMARK(bm_add_lattice, M6RnsPoly)
+DO_POLY_BENCHMARK(bm_addeq_lattice, M6RnsPoly)
+DO_POLY_BENCHMARK(bm_mult_lattice, M6RnsPoly)
+DO_POLY_BENCHMARK(bm_multeq_lattice, M6RnsPoly)
+DO_POLY_BENCHMARK(bm_switchformat_lattice, M6RnsPoly)
+DO_POLY_BENCHMARK(bm_doubleswitchformat_lattice, M6RnsPoly)
 #endif
 
 // execute the benchmarks

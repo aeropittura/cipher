@@ -42,33 +42,33 @@
 
 #include "cipher/fhe/config/params.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-class CryptoContextBGVRNS;
+class BgvRnsContext;
 
-// every CCParams class should include the following forward declaration as there is
-// no general CCParams class template. This way we may create scheme specific classes
+// every ContextParams class should include the following forward declaration as there is
+// no general ContextParams class template. This way we may create scheme specific classes
 // derived from Params or have them completely independent.
 template <typename T>
-class CCParams;
+class ContextParams;
 //====================================================================================================================
 template <>
 /**
  * @brief Parameters for generating a BGV crypto context. Initializes the BGV defaults and disables the
  * setters that do not apply to BGV (they throw when called).
  */
-class CCParams<CryptoContextBGVRNS> : public Params {
+class ContextParams<BgvRnsContext> : public Params {
   public:
-    CCParams() : Params(BGVRNS_SCHEME) {}
+    ContextParams() : Params(BGVRNS_SCHEME) {}
     /**
      * Constructor from string values; to be used by unit tests only.
      *
-     * @param vals vector with override values in the order given by Params::getAllParamsDataMembers().
+     * @param vals vector with override values in the order given by Params::get_all_params_data_members().
      */
-    explicit CCParams(const std::vector<std::string>& vals) : Params(vals) {}
-    CCParams(const CCParams& obj) = default;
-    CCParams(CCParams&& obj) = default;
-    ~CCParams() = default;
+    explicit ContextParams(const std::vector<std::string>& vals) : Params(vals) {}
+    ContextParams(const ContextParams& obj) = default;
+    ContextParams(ContextParams&& obj) = default;
+    ~ContextParams() = default;
 
     //================================================================================================================
     // DISABLE FUNCTIONS that are not applicable to BGVRNS
@@ -76,86 +76,86 @@ class CCParams<CryptoContextBGVRNS> : public Params {
     /**
      * Not applicable to BGVRNS (throws).
      *
-     * @param encryptionTechnique0 ignored.
+     * @param encryption_technique0 ignored.
      */
-    void SetEncryptionTechnique(EncryptionTechnique encryptionTechnique0) override {
+    void set_encryption_technique(EncryptionTechnique encryption_technique0) override {
         DISABLED_FOR_BGVRNS;
     }
     /**
      * Not applicable to BGVRNS (throws).
      *
-     * @param multiplicationTechnique0 ignored.
+     * @param multiplication_technique0 ignored.
      */
-    void SetMultiplicationTechnique(MultiplicationTechnique multiplicationTechnique0) override {
+    void set_multiplication_technique(MultiplicationTechnique multiplication_technique0) override {
         DISABLED_FOR_BGVRNS;
     }
     /**
      * Not applicable to BGVRNS (throws).
      *
-     * @param executionMode0 ignored.
+     * @param execution_mode0 ignored.
      */
-    void SetExecutionMode(ExecutionMode executionMode0) override {
+    void set_execution_mode(ExecutionMode execution_mode0) override {
         DISABLED_FOR_BGVRNS;
     }
     /**
      * Not applicable to BGVRNS (throws).
      *
-     * @param decryptionNoiseMode0 ignored.
+     * @param decryption_noise_mode0 ignored.
      */
-    void SetDecryptionNoiseMode(DecryptionNoiseMode decryptionNoiseMode0) override {
+    void set_decryption_noise_mode(DecryptionNoiseMode decryption_noise_mode0) override {
         DISABLED_FOR_BGVRNS;
     }
     /**
      * Not applicable to BGVRNS (throws).
      *
-     * @param noiseEstimate0 ignored.
+     * @param noise_estimate0 ignored.
      */
-    void SetNoiseEstimate(double noiseEstimate0) override {
+    void set_noise_estimate(double noise_estimate0) override {
         DISABLED_FOR_BGVRNS;
     }
     /**
      * Not applicable to BGVRNS (throws).
      *
-     * @param desiredPrecision0 ignored.
+     * @param desired_precision0 ignored.
      */
-    void SetDesiredPrecision(double desiredPrecision0) override {
+    void set_desired_precision(double desired_precision0) override {
         DISABLED_FOR_BGVRNS;
     }
     /**
      * Not applicable to BGVRNS (throws).
      *
-     * @param interactiveBootCompressionLevel0 ignored.
+     * @param interactive_boot_compression_level0 ignored.
      */
-    void SetInteractiveBootCompressionLevel(CompressionLevel interactiveBootCompressionLevel0) override {
+    void set_interactive_boot_compression_level(CompressionLevel interactive_boot_compression_level0) override {
         DISABLED_FOR_BGVRNS;
     }
     /**
      * Not applicable to BGVRNS (throws).
      *
-     * @param compositeDegree0 ignored.
+     * @param composite_degree0 ignored.
      */
-    void SetCompositeDegree(uint32_t compositeDegree0) override {
+    void set_composite_degree(uint32_t composite_degree0) override {
         DISABLED_FOR_BGVRNS;
     }
     /**
      * Not applicable to BGVRNS (throws).
      *
-     * @param registerWordSize0 ignored.
+     * @param register_word_size0 ignored.
      */
-    void SetRegisterWordSize(uint32_t registerWordSize0) override {
+    void set_register_word_size(uint32_t register_word_size0) override {
         DISABLED_FOR_BGVRNS;
     }
     /**
      * Not applicable to BGVRNS (throws).
      *
-     * @param ckksDataType0 ignored.
+     * @param ckks_data_type0 ignored.
      */
-    void SetCKKSDataType(CKKSDataType ckksDataType0) override {
+    void set_ckks_data_type(CkksDataType ckks_data_type0) override {
         DISABLED_FOR_BGVRNS;
     }
 };
 //====================================================================================================================
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_BGV_CONTEXT_PARAMS_H_

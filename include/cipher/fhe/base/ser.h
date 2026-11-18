@@ -39,19 +39,19 @@
 #include "cipher/ring/backend.h"
 #include "cipher/util/serial.h"
 
-extern template class lbcrypto::CryptoParametersBase<lbcrypto::DCRTPoly>;
-extern template class lbcrypto::CryptoParametersRLWE<lbcrypto::DCRTPoly>;
-extern template class lbcrypto::SchemeBase<lbcrypto::DCRTPoly>;
-extern template class lbcrypto::FHEBase<lbcrypto::DCRTPoly>;
+extern template class cipher::BaseCryptoParams<cipher::RnsPoly>;
+extern template class cipher::RlweCryptoParams<cipher::RnsPoly>;
+extern template class cipher::SchemeBase<cipher::RnsPoly>;
+extern template class cipher::BaseFhe<cipher::RnsPoly>;
 
-CEREAL_REGISTER_TYPE(lbcrypto::Serializable);
-CEREAL_REGISTER_TYPE(lbcrypto::CryptoParametersBase<lbcrypto::DCRTPoly>);
-CEREAL_REGISTER_TYPE(lbcrypto::CryptoParametersRLWE<lbcrypto::DCRTPoly>);
-CEREAL_REGISTER_TYPE(lbcrypto::SchemeBase<lbcrypto::DCRTPoly>);
-CEREAL_REGISTER_TYPE(lbcrypto::FHEBase<lbcrypto::DCRTPoly>);
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::Serializable, "lbcrypto::Serializable");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::BaseCryptoParams<cipher::RnsPoly>, "lbcrypto::CryptoParametersBase<lbcrypto::DCRTPoly>");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::RlweCryptoParams<cipher::RnsPoly>, "lbcrypto::CryptoParametersRLWE<lbcrypto::DCRTPoly>");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::SchemeBase<cipher::RnsPoly>, "lbcrypto::SchemeBase<lbcrypto::DCRTPoly>");
+CEREAL_REGISTER_TYPE_WITH_NAME(cipher::BaseFhe<cipher::RnsPoly>, "lbcrypto::FHEBase<lbcrypto::DCRTPoly>");
 
-CEREAL_REGISTER_POLYMORPHIC_RELATION(lbcrypto::CryptoParametersBase<lbcrypto::DCRTPoly>,
-                                     lbcrypto::CryptoParametersRLWE<lbcrypto::DCRTPoly>);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(lbcrypto::Serializable, lbcrypto::CryptoParametersBase<lbcrypto::DCRTPoly>);
+CEREAL_REGISTER_POLYMORPHIC_RELATION(cipher::BaseCryptoParams<cipher::RnsPoly>,
+                                     cipher::RlweCryptoParams<cipher::RnsPoly>);
+CEREAL_REGISTER_POLYMORPHIC_RELATION(cipher::Serializable, cipher::BaseCryptoParams<cipher::RnsPoly>);
 
 #endif  // CIPHER_FHE_BASE_SER_H_

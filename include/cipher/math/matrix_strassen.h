@@ -47,7 +47,7 @@
 #include "cipher/util/exception.h"
 #include "cipher/util/parallel.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Dense matrix of Element values whose product uses Strassen's recursive algorithm
@@ -70,17 +70,17 @@ class MatrixStrassen {  // TODO : public Serializable {
     /**
      * Constructor that initializes matrix values using a zero allocator
      *
-     * @param allocZero lambda function for zero initialization.
+     * @param alloc_zero lambda function for zero initialization.
      * @param rows number of rows.
      * @param cols number of columns.
      */
-    MatrixStrassen(alloc_func allocZero, size_t rows, size_t cols)
-        : data(), rows(rows), cols(cols), allocZero(allocZero) {
+    MatrixStrassen(alloc_func alloc_zero, size_t rows, size_t cols)
+        : data(), rows(rows), cols(cols), alloc_zero(alloc_zero) {
         data.resize(rows);
         for (auto row = data.begin(); row != data.end(); ++row) {
             row->reserve(cols);
             for (size_t col = 0; col < cols; ++col) {
-                row->push_back(allocZero());
+                row->push_back(alloc_zero());
             }
         }
     }
@@ -89,22 +89,22 @@ class MatrixStrassen {  // TODO : public Serializable {
      * Constructor that initializes matrix values using a distribution generation
      * allocator
      *
-     * @param allocZero lambda function for zero initialization (used for
+     * @param alloc_zero lambda function for zero initialization (used for
      * initializing derived matrix objects)
      * @param rows number of rows.
      * @param cols number of columns.
-     * @param allocGen lambda function for initialization using a distribution
+     * @param alloc_gen lambda function for initialization using a distribution
      * generator.
      */
-    MatrixStrassen(alloc_func allocZero, size_t rows, size_t cols, alloc_func allocGen);
+    MatrixStrassen(alloc_func alloc_zero, size_t rows, size_t cols, alloc_func alloc_gen);
 
     /**
-     * Constructor of an empty matrix; SetSize must be called on this matrix to
+     * Constructor of an empty matrix; set_size must be called on this matrix to
      * use it Basically this exists to support deserializing
      *
-     * @param allocZero lambda function for zero initialization.
+     * @param alloc_zero lambda function for zero initialization.
      */
-    explicit MatrixStrassen(alloc_func allocZero) : data(), rows(0), cols(0), allocZero(allocZero) {}
+    explicit MatrixStrassen(alloc_func alloc_zero) : data(), rows(0), cols(0), alloc_zero(alloc_zero) {}
 
     /**
      * Set the size of an empty matrix and fill it with zero elements; throws if the matrix is
@@ -113,9 +113,9 @@ class MatrixStrassen {  // TODO : public Serializable {
      * @param rows number of rows
      * @param cols number of columns
      */
-    void SetSize(size_t rows, size_t cols) {
+    void set_size(size_t rows, size_t cols) {
         if (this->rows != 0 || this->cols != 0) {
-            OPENFHE_THROW("You cannot SetSize on a non-empty matrix");
+            CIPHER_THROW("You cannot SetSize on a non-empty matrix");
         }
 
         this->rows = rows;
@@ -125,7 +125,7 @@ class MatrixStrassen {  // TODO : public Serializable {
         for (auto row = data.begin(); row != data.end(); ++row) {
             row->reserve(cols);
             for (size_t col = 0; col < cols; ++col) {
-                row->push_back(allocZero());
+                row->push_back(alloc_zero());
             }
         }
     }
@@ -136,8 +136,8 @@ class MatrixStrassen {  // TODO : public Serializable {
      * @param other the matrix object to be copied
      */
     MatrixStrassen(const MatrixStrassen<Element>& other)
-        : data(), rows(other.rows), cols(other.cols), allocZero(other.allocZero) {
-        deepCopyData(other.data);
+        : data(), rows(other.rows), cols(other.cols), alloc_zero(other.alloc_zero) {
+        deep_copy_data(other.data);
     }
 
     /**
@@ -153,7 +153,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      *
      * @return the resulting matrix
      */
-    inline MatrixStrassen<Element>& Ones();
+    inline MatrixStrassen<Element>& ones();
 
     /**
      * Fill matrix using the same element
@@ -169,7 +169,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      *
      * @return the resulting matrix
      */
-    inline MatrixStrassen<Element>& Identity();
+    inline MatrixStrassen<Element>& identity();
 
     /**
      * Sets the first row to be powers of the base
@@ -177,14 +177,14 @@ class MatrixStrassen {  // TODO : public Serializable {
      * @param base is the base the digits of the matrix are represented in
      * @return the resulting matrix
      */
-    inline MatrixStrassen<Element> GadgetVector(int32_t base = 2) const;
+    inline MatrixStrassen<Element> gadget_vector(int32_t base = 2) const;
 
     /**
      * Computes the infinity norm
      *
      * @return the norm in double format
      */
-    inline double Norm() const;
+    inline double norm() const;
 
     /**
      * Operator for matrix multiplication
@@ -193,7 +193,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      * @return the result of multiplication
      */
     inline MatrixStrassen<Element> operator*(MatrixStrassen<Element> const& other) const {
-        return Mult(other);
+        return mult(other);
     }
 
     /**
@@ -202,9 +202,9 @@ class MatrixStrassen {  // TODO : public Serializable {
      * @param other the multiplier element
      * @return the result of multiplication
      */
-    inline MatrixStrassen<Element> ScalarMult(Element const& other) const {
+    inline MatrixStrassen<Element> scalar_mult(Element const& other) const {
         MatrixStrassen<Element> result(*this);
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(result.cols))
+#pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(result.cols))
         for (int32_t col = 0; col < result.cols; ++col) {
             for (int32_t row = 0; row < result.rows; ++row) {
                 *result.data[row][col] = *result.data[row][col] * other;
@@ -220,7 +220,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      * @return the result of multiplication
      */
     inline MatrixStrassen<Element> operator*(Element const& other) const {
-        return ScalarMult(other);
+        return scalar_mult(other);
     }
 
     /**
@@ -229,7 +229,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      * @param other the matrix object to compare to
      * @return the boolean result
      */
-    inline bool Equal(MatrixStrassen<Element> const& other) const {
+    inline bool equal_impl(MatrixStrassen<Element> const& other) const {
         if (rows != other.rows || cols != other.cols) {
             return false;
         }
@@ -251,7 +251,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      * @return the boolean result
      */
     inline bool operator==(MatrixStrassen<Element> const& other) const {
-        return Equal(other);
+        return equal_impl(other);
     }
 
     /**
@@ -261,7 +261,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      * @return the boolean result
      */
     inline bool operator!=(MatrixStrassen<Element> const& other) const {
-        return !Equal(other);
+        return !equal_impl(other);
     }
 
     /**
@@ -269,7 +269,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      *
      * @return the data as vector of vectors
      */
-    const data_t& GetData() const {
+    const data_t& get_data() const {
         return data;
     }
 
@@ -278,7 +278,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      *
      * @return the number of rows
      */
-    size_t GetRows() const {
+    size_t get_rows() const {
         return rows;
     }
 
@@ -287,7 +287,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      *
      * @return the number of columns
      */
-    size_t GetCols() const {
+    size_t get_cols() const {
         return cols;
     }
 
@@ -296,18 +296,18 @@ class MatrixStrassen {  // TODO : public Serializable {
      *
      * @return the lambda function corresponding to the element zero allocator
      */
-    alloc_func GetAllocator() const {
-        return allocZero;
+    alloc_func get_allocator() const {
+        return alloc_zero;
     }
 
     /**
      * Sets the evaluation or coefficient representation for all ring elements
-     * that support the SetFormat method
+     * that support the set_format method
      *
      * @param format the enum value corresponding to coefficient or evaluation
      * representation
      */
-    void SetFormat(Format format);
+    void set_format(Format format);
 
     /**
      * MatrixStrassen addition
@@ -315,12 +315,12 @@ class MatrixStrassen {  // TODO : public Serializable {
      * @param other the matrix to be added
      * @return the resulting matrix
      */
-    inline MatrixStrassen<Element> Add(MatrixStrassen<Element> const& other) const {
+    inline MatrixStrassen<Element> add(MatrixStrassen<Element> const& other) const {
         if (rows != other.rows || cols != other.cols) {
-            OPENFHE_THROW("Addition operands have incompatible dimensions");
+            CIPHER_THROW("Addition operands have incompatible dimensions");
         }
         MatrixStrassen<Element> result(*this);
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(cols))
+#pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(cols))
         for (int32_t j = 0; j < cols; ++j) {
             for (int32_t i = 0; i < rows; ++i) {
                 *result.data[i][j] += *other.data[i][j];
@@ -337,7 +337,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      * @return the resulting matrix
      */
     inline MatrixStrassen<Element> operator+(MatrixStrassen<Element> const& other) const {
-        return this->Add(other);
+        return this->add(other);
     }
 
     /**
@@ -354,12 +354,12 @@ class MatrixStrassen {  // TODO : public Serializable {
      * @param other the matrix to be subtracted
      * @return the resulting matrix
      */
-    inline MatrixStrassen<Element> Sub(MatrixStrassen<Element> const& other) const {
+    inline MatrixStrassen<Element> sub(MatrixStrassen<Element> const& other) const {
         if (rows != other.rows || cols != other.cols) {
-            OPENFHE_THROW("Subtraction operands have incompatible dimensions");
+            CIPHER_THROW("Subtraction operands have incompatible dimensions");
         }
-        MatrixStrassen<Element> result(allocZero, rows, other.cols);
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(cols))
+        MatrixStrassen<Element> result(alloc_zero, rows, other.cols);
+#pragma omp parallel for num_threads(cipher_parallel_controls.get_thread_limit(cols))
         for (int32_t j = 0; j < cols; ++j) {
             for (int32_t i = 0; i < rows; ++i) {
                 *result.data[i][j] = *data[i][j] - *other.data[i][j];
@@ -376,7 +376,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      * @return the resulting matrix
      */
     inline MatrixStrassen<Element> operator-(MatrixStrassen<Element> const& other) const {
-        return this->Sub(other);
+        return this->sub(other);
     }
 
     /**
@@ -392,7 +392,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      *
      * @return the resulting matrix
      */
-    inline MatrixStrassen<Element> Transpose() const;
+    inline MatrixStrassen<Element> transposed() const;
 
     // YSP The signature of this method needs to be changed in the future
     /**
@@ -401,7 +401,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      *
      * @param result where the result is stored
      */
-    inline void Determinant(Element* result) const;
+    inline void determinant(Element* result) const;
 
     /**
      * Cofactor matrix - the matrix of determinants of the minors A_{ij}
@@ -409,7 +409,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      *
      * @return the cofactor matrix for the given matrix
      */
-    inline MatrixStrassen<Element> CofactorMatrixStrassen() const;
+    inline MatrixStrassen<Element> cofactor_matrix_strassen() const;
 
     /**
      * Add rows to bottom of the matrix
@@ -417,7 +417,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      * @param other the matrix to be added to the bottom of current matrix
      * @return the resulting matrix
      */
-    inline MatrixStrassen<Element>& VStack(MatrixStrassen<Element> const& other);
+    inline MatrixStrassen<Element>& v_stack(MatrixStrassen<Element> const& other);
 
     /**
      * Add columns the right of the matrix
@@ -425,7 +425,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      * @param other the matrix to be added to the right of current matrix
      * @return the resulting matrix
      */
-    inline MatrixStrassen<Element>& HStack(MatrixStrassen<Element> const& other);
+    inline MatrixStrassen<Element>& h_stack(MatrixStrassen<Element> const& other);
 
     /**
      * MatrixStrassen indexing operator - writeable instance of the element
@@ -455,10 +455,10 @@ class MatrixStrassen {  // TODO : public Serializable {
      * @param row row index
      * @return the row at the index
      */
-    inline MatrixStrassen<Element> ExtractRow(size_t row) const {
-        MatrixStrassen<Element> result(this->allocZero, 1, this->cols);
+    inline MatrixStrassen<Element> extract_row(size_t row) const {
+        MatrixStrassen<Element> result(this->alloc_zero, 1, this->cols);
         int i = 0;
-        for (auto elem = this->GetData()[row].begin(); elem != this->GetData()[row].end(); ++elem) {
+        for (auto elem = this->get_data()[row].begin(); elem != this->get_data()[row].end(); ++elem) {
             result(0, i) = **elem;
             i++;
         }
@@ -470,7 +470,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      * Call switch format for each (ring) element
      *
      */
-    inline void SwitchFormat();
+    inline void switch_format();
 
     /**
      * MatrixStrassen multiplication
@@ -480,7 +480,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      * @param pad number of padding rows and columns; -1 computes the padding needed for nrec levels
      * @return the result of multiplication
      */
-    MatrixStrassen<Element> Mult(const MatrixStrassen<Element>& other, int nrec = 0, int pad = -1) const;
+    MatrixStrassen<Element> mult(const MatrixStrassen<Element>& other, int nrec = 0, int pad_value = -1) const;
 
     /**
      * Multiply the matrix by a vector whose elements are all 1's.  This causes
@@ -489,7 +489,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      *
      * @return the rows x 1 matrix of row sums
      */
-    MatrixStrassen<Element> MultByUnityVector() const;
+    MatrixStrassen<Element> mult_by_unity_vector() const;
 
     /**
      * Multiply the matrix by a vector of random 1's and 0's, which is the same as
@@ -499,7 +499,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      * @param ranvec the 0/1 vector of length cols selecting the columns to add
      * @return the rows x 1 matrix of selected row sums
      */
-    MatrixStrassen<Element> MultByRandomVector(std::vector<int> ranvec) const;
+    MatrixStrassen<Element> mult_by_random_vector(std::vector<int> ranvec) const;
 
   private:
     struct MatDescriptor {
@@ -519,50 +519,50 @@ class MatrixStrassen {  // TODO : public Serializable {
     mutable int rowpad = 0;
     size_t cols;
     mutable int colpad = 0;
-    alloc_func allocZero;
+    alloc_func alloc_zero;
     mutable char* pattern = nullptr;
-    mutable int numAdd = 0;
-    mutable int numMult = 0;
-    mutable int numSub = 0;
+    mutable int num_add = 0;
+    mutable int num_mult = 0;
+    mutable int num_sub = 0;
     mutable MatDescriptor desc;
-    mutable Element zeroUniquePtr = allocZero();
+    mutable Element zero_unique_ptr = alloc_zero();
     mutable int NUM_THREADS = 1;
 
-    void multiplyInternalCAPS(it_lineardata_t A, it_lineardata_t B, it_lineardata_t C, MatDescriptor desc,
+    void multiply_internal_caps(it_lineardata_t A, it_lineardata_t B, it_lineardata_t C, MatDescriptor desc,
                               it_lineardata_t work) const;
-    void strassenDFSCAPS(it_lineardata_t A, it_lineardata_t B, it_lineardata_t C, MatDescriptor desc,
-                         it_lineardata_t workPassThrough) const;
-    void block_multiplyCAPS(it_lineardata_t A, it_lineardata_t B, it_lineardata_t C, MatDescriptor d,
-                            it_lineardata_t workPassThrough) const;
-    void LinearizeDataCAPS(lineardata_t* lineardataPtr) const;
-    void UnlinearizeDataCAPS(lineardata_t* lineardataPtr) const;
-    int getRank() const;
-    void verifyDescriptor(MatDescriptor desc);
-    long long numEntriesPerProc(MatDescriptor desc) const;  // NOLINT
+    void strassen_dfscaps(it_lineardata_t A, it_lineardata_t B, it_lineardata_t C, MatDescriptor desc,
+                         it_lineardata_t work_pass_through) const;
+    void block_multiply_caps(it_lineardata_t A, it_lineardata_t B, it_lineardata_t C, MatDescriptor d,
+                            it_lineardata_t work_pass_through) const;
+    void linearize_data_caps(lineardata_t* lineardata_ptr) const;
+    void unlinearize_data_caps(lineardata_t* lineardata_ptr) const;
+    int get_rank() const;
+    void verify_descriptor(MatDescriptor desc);
+    long long num_entries_per_proc(MatDescriptor desc) const;  // NOLINT
     // deep copy of data - used for copy constructor
-    void deepCopyData(data_t const& src);
-    void getData(const data_t& Adata, const data_t& Bdata, const data_t& Cdata, int row, int inner, int col) const;
+    void deep_copy_data(data_t const& src);
+    void get_data_impl(const data_t& adata, const data_t& bdata, const data_t& cdata, int row, int inner, int col) const;
 
-    void smartSubtractionCAPS(it_lineardata_t result, it_lineardata_t A, it_lineardata_t B) const;
-    void smartAdditionCAPS(it_lineardata_t result, it_lineardata_t A, it_lineardata_t B) const;
-    void addMatricesCAPS(int numEntries, it_lineardata_t C, it_lineardata_t A, it_lineardata_t B) const;
-    void addSubMatricesCAPS(int numEntries, it_lineardata_t T1, it_lineardata_t S11, it_lineardata_t S12,
+    void smart_subtraction_caps(it_lineardata_t result, it_lineardata_t A, it_lineardata_t B) const;
+    void smart_addition_caps(it_lineardata_t result, it_lineardata_t A, it_lineardata_t B) const;
+    void add_matrices_caps(int num_entries, it_lineardata_t C, it_lineardata_t A, it_lineardata_t B) const;
+    void add_sub_matrices_caps(int num_entries, it_lineardata_t T1, it_lineardata_t S11, it_lineardata_t S12,
                             it_lineardata_t T2, it_lineardata_t S21, it_lineardata_t S22) const;
-    void subMatricesCAPS(int numEntries, it_lineardata_t C, it_lineardata_t A, it_lineardata_t B) const;
-    void tripleAddMatricesCAPS(int numEntries, it_lineardata_t T1, it_lineardata_t S11, it_lineardata_t S12,
+    void sub_matrices_caps(int num_entries, it_lineardata_t C, it_lineardata_t A, it_lineardata_t B) const;
+    void triple_add_matrices_caps(int num_entries, it_lineardata_t T1, it_lineardata_t S11, it_lineardata_t S12,
                                it_lineardata_t T2, it_lineardata_t S21, it_lineardata_t S22, it_lineardata_t T3,
                                it_lineardata_t S31, it_lineardata_t S32) const;
-    void tripleSubMatricesCAPS(int numEntries, it_lineardata_t T1, it_lineardata_t S11, it_lineardata_t S12,
+    void triple_sub_matrices_caps(int num_entries, it_lineardata_t T1, it_lineardata_t S11, it_lineardata_t S12,
                                it_lineardata_t T2, it_lineardata_t S21, it_lineardata_t S22, it_lineardata_t T3,
                                it_lineardata_t S31, it_lineardata_t S32) const;
 
-    void distributeFrom1ProcCAPS(MatDescriptor desc, it_lineardata_t O, it_lineardata_t I) const;
-    void collectTo1ProcCAPS(MatDescriptor desc, it_lineardata_t O, it_lineardata_t I) const;
-    void sendBlockCAPS(int rank, int target, it_lineardata_t O, int bs, int source, it_lineardata_t I, int ldi) const;
-    void receiveBlockCAPS(int rank, int target, it_lineardata_t O, int bs, int source, it_lineardata_t I,
+    void distribute_from1_proc_caps(MatDescriptor desc, it_lineardata_t O, it_lineardata_t I) const;
+    void collect_to1_proc_caps(MatDescriptor desc, it_lineardata_t O, it_lineardata_t I) const;
+    void send_block_caps(int rank, int target, it_lineardata_t O, int bs, int source, it_lineardata_t I, int ldi) const;
+    void receive_block_caps(int rank, int target, it_lineardata_t O, int bs, int source, it_lineardata_t I,
                           int ldo) const;
-    void distributeFrom1ProcRecCAPS(MatDescriptor desc, it_lineardata_t O, it_lineardata_t I, int ldi) const;
-    void collectTo1ProcRecCAPS(MatDescriptor desc, it_lineardata_t O, it_lineardata_t I, int ldo) const;
+    void distribute_from1_proc_rec_caps(MatDescriptor desc, it_lineardata_t O, it_lineardata_t I, int ldi) const;
+    void collect_to1_proc_rec_caps(MatDescriptor desc, it_lineardata_t O, it_lineardata_t I, int ldo) const;
 };
 
 /**
@@ -574,27 +574,27 @@ class MatrixStrassen {  // TODO : public Serializable {
  */
 template <class Element>
 inline MatrixStrassen<Element> operator*(Element const& e, MatrixStrassen<Element> const& M) {
-    return M.ScalarMult(e);
+    return M.scalar_mult(e);
 }
 
 /**
  * Generates a matrix of rotations. See pages 7-8 of
  * https://eprint.iacr.org/2013/297
  *
- * @param inMat the matrix of power-of-2 cyclotomic ring elements to be rotated
+ * @param in_mat the matrix of power-of-2 cyclotomic ring elements to be rotated
  * @return the resulting matrix of big binary integers
  */
-inline MatrixStrassen<BigInteger> Rotate(MatrixStrassen<Poly> const& inMat);
+inline MatrixStrassen<BigInteger> Rotate(MatrixStrassen<Poly> const& in_mat);
 
 /**
  *  Each element becomes a square matrix with columns of that element's
  *  rotations in coefficient form. See pages 7-8 of
  * https://eprint.iacr.org/2013/297
  *
- * @param inMat the matrix of power-of-2 cyclotomic ring elements to be rotated
+ * @param in_mat the matrix of power-of-2 cyclotomic ring elements to be rotated
  * @return the resulting matrix of big binary vectors
  */
-inline MatrixStrassen<BigVector> RotateVecResult(MatrixStrassen<Poly> const& inMat);
+inline MatrixStrassen<BigVector> rotate_vec_result(MatrixStrassen<Poly> const& in_mat);
 
 /**
  *  Stream output operator
@@ -617,7 +617,7 @@ inline std::ostream& operator<<(std::ostream& os, const MatrixStrassen<Element>&
  * computed
  * @return the resulting matrix of floating-point numbers
  */
-inline MatrixStrassen<double> Cholesky(const MatrixStrassen<int32_t>& input);
+inline MatrixStrassen<double> cholesky(const MatrixStrassen<int32_t>& input);
 
 /**
  * Convert a matrix of integers from BigInteger to int32_t
@@ -626,9 +626,9 @@ inline MatrixStrassen<double> Cholesky(const MatrixStrassen<int32_t>& input);
  * @param input the input matrix
  * @param modulus the ring modulus
  * @return the resulting matrix of int32_t
- * @throws OpenFHEException if a centered value cannot be represented as int32_t
+ * @throws CipherException if a centered value cannot be represented as int32_t
  */
-inline MatrixStrassen<int32_t> ConvertToInt32(const MatrixStrassen<BigInteger>& input, const BigInteger& modulus);
+inline MatrixStrassen<int32_t> convert_to_int32(const MatrixStrassen<BigInteger>& input, const BigInteger& modulus);
 
 /**
  * Convert a matrix of BigVector to int32_t
@@ -637,9 +637,9 @@ inline MatrixStrassen<int32_t> ConvertToInt32(const MatrixStrassen<BigInteger>& 
  * @param input the input matrix
  * @param modulus the ring modulus
  * @return the resulting matrix of int32_t
- * @throws OpenFHEException if a centered value cannot be represented as int32_t
+ * @throws CipherException if a centered value cannot be represented as int32_t
  */
-inline MatrixStrassen<int32_t> ConvertToInt32(const MatrixStrassen<BigVector>& input, const BigInteger& modulus);
+inline MatrixStrassen<int32_t> convert_to_int32(const MatrixStrassen<BigVector>& input, const BigInteger& modulus);
 
 /**
  * Split a vector of int32_t into a vector of ring elements with ring dimension
@@ -650,8 +650,8 @@ inline MatrixStrassen<int32_t> ConvertToInt32(const MatrixStrassen<BigVector>& i
  * @param params Poly element params
  * @return the resulting matrix of Poly
  */
-inline MatrixStrassen<Poly> SplitInt32IntoPolyElements(MatrixStrassen<int32_t> const& other, size_t n,
-                                                       const std::shared_ptr<ILParams> params);
+inline MatrixStrassen<Poly> split_int32_into_poly_elements(MatrixStrassen<int32_t> const& other, size_t n,
+                                                       const std::shared_ptr<PolyParams> params);
 
 /**
  * Another method for splitting a vector of int32_t into a vector of ring
@@ -662,8 +662,8 @@ inline MatrixStrassen<Poly> SplitInt32IntoPolyElements(MatrixStrassen<int32_t> c
  * @param params Poly element params
  * @return the resulting matrix of Poly
  */
-inline MatrixStrassen<Poly> SplitInt32AltIntoPolyElements(MatrixStrassen<int32_t> const& other, size_t n,
-                                                          const std::shared_ptr<ILParams> params);
-}  // namespace lbcrypto
+inline MatrixStrassen<Poly> split_int32_alt_into_poly_elements(MatrixStrassen<int32_t> const& other, size_t n,
+                                                          const std::shared_ptr<PolyParams> params);
+}  // namespace cipher
 
 #endif  // CIPHER_MATH_MATRIX_STRASSEN_H_

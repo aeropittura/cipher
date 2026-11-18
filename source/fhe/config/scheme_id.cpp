@@ -39,9 +39,9 @@
 #include "cipher/fhe/config/scheme_id.h"
 #include "cipher/util/exception.h"
 
-namespace lbcrypto {
+namespace cipher {
 
-SCHEME convertToSCHEME(const std::string& str) {
+SCHEME convert_to_scheme(const std::string& str) {
     if (str == "CKKSRNS_SCHEME")
         return CKKSRNS_SCHEME;
     else if (str == "BFVRNS_SCHEME")
@@ -49,12 +49,12 @@ SCHEME convertToSCHEME(const std::string& str) {
     else if (str == "BGVRNS_SCHEME")
         return BGVRNS_SCHEME;
 
-    std::string errMsg(std::string("Unknown schemeId ") + str);
-    OPENFHE_THROW(errMsg);
+    std::string err_msg(std::string("Unknown schemeId ") + str);
+    CIPHER_THROW(err_msg);
 }
 
-std::string convertToString(SCHEME schemeId) noexcept {
-    switch (schemeId) {
+std::string convert_to_string_impl(SCHEME scheme_id_value) noexcept {
+    switch (scheme_id_value) {
         case CKKSRNS_SCHEME:
             return "CKKSRNS_SCHEME";
         case BFVRNS_SCHEME:
@@ -62,12 +62,12 @@ std::string convertToString(SCHEME schemeId) noexcept {
         case BGVRNS_SCHEME:
             return "BGVRNS_SCHEME";
         default:
-            return "INVALID_SCHEME[" + std::to_string(schemeId) + "]";
+            return "INVALID_SCHEME[" + std::to_string(scheme_id_value) + "]";
     }
 }
 
-std::ostream& operator<<(std::ostream& os, SCHEME schemeId) {
-    switch (schemeId) {
+std::ostream& operator<<(std::ostream& os, SCHEME scheme_id_value) {
+    switch (scheme_id_value) {
         case CKKSRNS_SCHEME:
             os << "CKKSRNS";
             break;
@@ -78,11 +78,11 @@ std::ostream& operator<<(std::ostream& os, SCHEME schemeId) {
             os << "BGVRNS";
             break;
         default:
-            std::string errMsg(std::string("Unknown schemeId ") + std::to_string(schemeId));
-            OPENFHE_THROW(errMsg);
+            std::string err_msg(std::string("Unknown schemeId ") + std::to_string(scheme_id_value));
+            CIPHER_THROW(err_msg);
     }
 
     return os;
 }
 
-}  // namespace lbcrypto
+}  // namespace cipher

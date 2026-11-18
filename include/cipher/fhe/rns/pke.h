@@ -40,64 +40,64 @@
 #include "cipher/fhe/base/pke.h"
 
 /**
- * @namespace lbcrypto
- * The namespace of lbcrypto
+ * @namespace cipher
+ * The namespace of cipher
  */
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Abstract interface for encryption algorithm
  */
-class PKERNS : public PKEBase<DCRTPoly> {
-    using ParmType = typename DCRTPoly::Params;
-    using IntType = typename DCRTPoly::Integer;
-    using DugType = typename DCRTPoly::DugType;
-    using DggType = typename DCRTPoly::DggType;
-    using TugType = typename DCRTPoly::TugType;
+class RnsPke : public BasePke<RnsPoly> {
+    using ParmType = typename RnsPoly::Params;
+    using IntType = typename RnsPoly::Integer;
+    using DugType = typename RnsPoly::DugType;
+    using DggType = typename RnsPoly::DggType;
+    using TugType = typename RnsPoly::TugType;
 
   public:
-    virtual ~PKERNS() = default;
+    virtual ~RnsPke() = default;
 
     /**
      * Method for encrypting plaintext using LBC
      *
      * @param plaintext copy of the plaintext element. NOTE a copy is passed!
      * That is NOT an error!
-     * @param publicKey public key used for encryption.
+     * @param public_key public key used for encryption.
      * @return ciphertext which results from encryption.
      */
-    Ciphertext<DCRTPoly> Encrypt(DCRTPoly plaintext, const PublicKey<DCRTPoly> publicKey) const override;
+    Ciphertext<RnsPoly> encrypt(RnsPoly plaintext, const PublicKey<RnsPoly> public_key) const override;
 
     /**
      * Method for encrypting plaintext using LBC
      *
      * @param plaintext copy of the plaintext input. NOTE a copy is passed! That
      * is NOT an error!
-     * @param privateKey private key used for encryption.
+     * @param private_key private key used for encryption.
      * @return ciphertext which results from encryption.
      */
-    Ciphertext<DCRTPoly> Encrypt(DCRTPoly plaintext, const PrivateKey<DCRTPoly> privateKey) const override;
+    Ciphertext<RnsPoly> encrypt(RnsPoly plaintext, const PrivateKey<RnsPoly> private_key) const override;
 
     /**
      * Method for decrypting plaintext using LBC
      *
      * @param ciphertext ciphertext to be decrypted.
-     * @param privateKey private key used for decryption.
+     * @param private_key private key used for decryption.
      * @param plaintext the plaintext output.
      * @return the decoding result.
      */
-    DecryptResult Decrypt(ConstCiphertext<DCRTPoly> ciphertext, const PrivateKey<DCRTPoly> privateKey,
+    DecryptResult decrypt(ConstCiphertext<RnsPoly> ciphertext, const PrivateKey<RnsPoly> private_key,
                           NativePoly* plaintext) const override;
 
     /**
      * Method for decrypting plaintext using LBC
      *
      * @param ciphertext ciphertext to be decrypted.
-     * @param privateKey private key used for decryption.
+     * @param private_key private key used for decryption.
      * @param plaintext the plaintext output.
      * @return the decoding result.
      */
-    DecryptResult Decrypt(ConstCiphertext<DCRTPoly> ciphertext, const PrivateKey<DCRTPoly> privateKey,
+    DecryptResult decrypt(ConstCiphertext<RnsPoly> ciphertext, const PrivateKey<RnsPoly> private_key,
                           Poly* plaintext) const override;
 
     /////////////////////////////////////
@@ -108,12 +108,12 @@ class PKERNS : public PKEBase<DCRTPoly> {
      * Generates a secret-key encryption of zero, i.e., the pair (a*s + ns*e, -a) for a uniformly random a and a
      * Gaussian error e, where ns is the noise scale of the scheme.
      *
-     * @param privateKey the secret key.
+     * @param private_key the secret key.
      * @param params the element parameters of the ciphertext; if fewer towers than the key has are requested,
      * only the needed towers of the key are used. nullptr selects the full modulus chain.
      * @return the two ciphertext polynomials.
      */
-    std::shared_ptr<std::vector<DCRTPoly>> EncryptZeroCore(const PrivateKey<DCRTPoly> privateKey,
+    std::shared_ptr<std::vector<RnsPoly>> encrypt_zero_core(const PrivateKey<RnsPoly> private_key,
                                                            const std::shared_ptr<ParmType> params) const override;
 
     /**
@@ -121,12 +121,12 @@ class PKERNS : public PKEBase<DCRTPoly> {
      * ephemeral key v drawn from the secret key distribution and Gaussian errors e0, e1, where ns is the noise
      * scale of the scheme.
      *
-     * @param publicKey the public key (p0, p1).
+     * @param public_key the public key (p0, p1).
      * @param params the element parameters of the ciphertext; if fewer towers than the key has are requested,
      * only the needed towers of the public key are used. nullptr selects the full modulus chain.
      * @return the two ciphertext polynomials.
      */
-    std::shared_ptr<std::vector<DCRTPoly>> EncryptZeroCore(const PublicKey<DCRTPoly> publicKey,
+    std::shared_ptr<std::vector<RnsPoly>> encrypt_zero_core(const PublicKey<RnsPoly> public_key,
                                                            const std::shared_ptr<ParmType> params) const override;
 
     /**
@@ -134,10 +134,10 @@ class PKERNS : public PKEBase<DCRTPoly> {
      * towers of the secret key that the ciphertext still has.
      *
      * @param cv the ciphertext polynomials.
-     * @param privateKey the secret key.
+     * @param private_key the secret key.
      * @return the noisy scaled plaintext polynomial.
      */
-    DCRTPoly DecryptCore(const std::vector<DCRTPoly>& cv, const PrivateKey<DCRTPoly> privateKey) const override;
+    RnsPoly decrypt_core(const std::vector<RnsPoly>& cv, const PrivateKey<RnsPoly> private_key) const override;
 
     /////////////////////////////////////
     // SERIALIZATION
@@ -145,19 +145,19 @@ class PKERNS : public PKEBase<DCRTPoly> {
 
     template <class Archive>
     void save(Archive& ar) const {
-        ar(cereal::base_class<PKEBase<DCRTPoly>>(this));
+        ar(cereal::base_class<BasePke<RnsPoly>>(this));
     }
 
     template <class Archive>
     void load(Archive& ar) {
-        ar(cereal::base_class<PKEBase<DCRTPoly>>(this));
+        ar(cereal::base_class<BasePke<RnsPoly>>(this));
     }
 
-    std::string SerializedObjectName() const {
+    std::string serialized_object_name() const {
         return "PKERNS";
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_FHE_RNS_PKE_H_

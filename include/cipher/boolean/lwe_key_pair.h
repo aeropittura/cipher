@@ -44,15 +44,15 @@
 #include "cipher/math/backend.h"
 #include "cipher/util/serializable.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Class that stores the LWE scheme secret key, public key pair; ((A, b), s)
  */
-class LWEKeyPairImpl {
+class LweKeyPairImpl {
   public:
-    LWEPublicKey publicKey{nullptr};   ///< the public key (A, v) with v = A s + e
-    LWEPrivateKey secretKey{nullptr};  ///< the secret key s the public key was generated from
+    LwePublicKey public_key{nullptr};   ///< the public key (A, v) with v = A s + e
+    LwePrivateKey secret_key{nullptr};  ///< the secret key s the public key was generated from
 
     /**
      * Constructs a key pair from a public key and the matching secret key
@@ -60,7 +60,7 @@ class LWEKeyPairImpl {
      * @param Av the public key (A, v)
      * @param s the secret key s that (A, v) was generated from
      */
-    LWEKeyPairImpl(const LWEPublicKey& Av, const LWEPrivateKey& s) : publicKey(Av), secretKey(s) {}
+    LweKeyPairImpl(const LwePublicKey& av_value, const LwePrivateKey& s) : public_key(av_value), secret_key(s) {}
 
     /**
      * Constructs a key pair from a public key and the matching secret key, moving both pointers
@@ -68,16 +68,16 @@ class LWEKeyPairImpl {
      * @param Av the public key (A, v)
      * @param s the secret key s that (A, v) was generated from
      */
-    LWEKeyPairImpl(LWEPublicKey&& Av, LWEPrivateKey&& s) noexcept : publicKey(std::move(Av)), secretKey(std::move(s)) {}
+    LweKeyPairImpl(LwePublicKey&& av_value, LwePrivateKey&& s) noexcept : public_key(std::move(av_value)), secret_key(std::move(s)) {}
 
     /**
      * @return true if both the public key and the secret key are set (non-null)
      */
     bool good() {
-        return publicKey && secretKey;
+        return public_key && secret_key;
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_BOOLEAN_LWE_KEY_PAIR_H_

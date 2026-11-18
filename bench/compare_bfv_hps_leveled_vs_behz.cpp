@@ -31,7 +31,7 @@
 
 /*
  * Compares the performance of BFV HPSPOVERQLEVELED with BFV BEHZ
- * using EvalMultMany operation.
+ * using eval_mult_many operation.
  */
 
 #define PROFILE
@@ -49,14 +49,14 @@
 #include "cipher/fhe/context_gen.h"
 #include "cipher/fhe/bfv/context_gen.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 uint32_t mult_depth = 3;
 static std::vector<uint32_t> ptm_args{2, 65537};
 static std::vector<uint32_t> dcrtbit_args{30, 60};
 static std::vector<uint32_t> logn_args{12, 14};
 
-static void MultBFVArguments(benchmark::internal::Benchmark* b) {
+static void mult_bfv_arguments(benchmark::internal::Benchmark* b) {
     for (uint32_t ptm : ptm_args) {
         for (uint32_t dcrtbit : dcrtbit_args) {
             b->ArgNames({"ptm", "dcrtbit"})->Args({ptm, dcrtbit})->MinTime(10.0);
@@ -64,7 +64,7 @@ static void MultBFVArguments(benchmark::internal::Benchmark* b) {
     }
 }
 
-static void DecBFVArguments(benchmark::internal::Benchmark* b) {
+static void dec_bfv_arguments(benchmark::internal::Benchmark* b) {
     for (uint32_t ptm : ptm_args) {
         for (uint32_t dcrtbit : dcrtbit_args) {
             for (uint32_t logn : logn_args) {
@@ -78,186 +78,186 @@ static void DecBFVArguments(benchmark::internal::Benchmark* b) {
  * Context setup utility methods
  */
 
-CryptoContext<DCRTPoly> GenerateBFVrnsContext(uint32_t ptm, uint32_t dcrtBits) {
-    CCParams<CryptoContextBFVRNS> parameters;
-    parameters.SetPlaintextModulus(ptm);
-    parameters.SetMultiplicativeDepth(mult_depth);
-    parameters.SetScalingModSize(dcrtBits);
-    parameters.SetMultiplicationTechnique(HPSPOVERQLEVELED);
+CryptoContext<RnsPoly> generate_bfv_rns_context(uint32_t ptm, uint32_t dcrt_bits) {
+    ContextParams<BfvRnsContext> parameters;
+    parameters.set_plaintext_modulus(ptm);
+    parameters.set_multiplicative_depth(mult_depth);
+    parameters.set_scaling_mod_size(dcrt_bits);
+    parameters.set_multiplication_technique(HPSPOVERQLEVELED);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
-
-    return cc;
-}
-
-CryptoContext<DCRTPoly> GenerateBEHZContext(uint32_t ptm, uint32_t dcrtBits) {
-    CCParams<CryptoContextBFVRNS> parameters;
-    parameters.SetPlaintextModulus(ptm);
-    parameters.SetMultiplicativeDepth(mult_depth);
-    parameters.SetScalingModSize(dcrtBits);
-    parameters.SetMultiplicationTechnique(BEHZ);
-
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
 
     return cc;
 }
 
-CryptoContext<DCRTPoly> GenerateFlatBFVrnsContext(uint32_t ptm, uint32_t dcrtBits, uint32_t n) {
-    CCParams<CryptoContextBFVRNS> parameters;
-    parameters.SetPlaintextModulus(ptm);
-    parameters.SetMaxRelinSkDeg(0);
-    parameters.SetScalingModSize(dcrtBits);
-    parameters.SetRingDim(n);
-    parameters.SetMultiplicationTechnique(HPSPOVERQLEVELED);
+CryptoContext<RnsPoly> generate_behz_context(uint32_t ptm, uint32_t dcrt_bits) {
+    ContextParams<BfvRnsContext> parameters;
+    parameters.set_plaintext_modulus(ptm);
+    parameters.set_multiplicative_depth(mult_depth);
+    parameters.set_scaling_mod_size(dcrt_bits);
+    parameters.set_multiplication_technique(BEHZ);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
+
     return cc;
 }
 
-CryptoContext<DCRTPoly> GenerateFlatBEHZContext(uint32_t ptm, uint32_t dcrtBits, uint32_t n) {
-    CCParams<CryptoContextBFVRNS> parameters;
-    parameters.SetPlaintextModulus(ptm);
-    parameters.SetMaxRelinSkDeg(0);
-    parameters.SetScalingModSize(dcrtBits);
-    parameters.SetRingDim(n);
-    parameters.SetMultiplicationTechnique(BEHZ);
+CryptoContext<RnsPoly> generate_flat_bfv_rns_context(uint32_t ptm, uint32_t dcrt_bits, uint32_t n) {
+    ContextParams<BfvRnsContext> parameters;
+    parameters.set_plaintext_modulus(ptm);
+    parameters.set_max_relin_sk_deg(0);
+    parameters.set_scaling_mod_size(dcrt_bits);
+    parameters.set_ring_dim(n);
+    parameters.set_multiplication_technique(HPSPOVERQLEVELED);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    return cc;
+}
+
+CryptoContext<RnsPoly> generate_flat_behz_context(uint32_t ptm, uint32_t dcrt_bits, uint32_t n) {
+    ContextParams<BfvRnsContext> parameters;
+    parameters.set_plaintext_modulus(ptm);
+    parameters.set_max_relin_sk_deg(0);
+    parameters.set_scaling_mod_size(dcrt_bits);
+    parameters.set_ring_dim(n);
+    parameters.set_multiplication_technique(BEHZ);
+
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
     return cc;
 }
 
 /*
  * benchmarks
  */
-void BFVrns_EvalMultMany(benchmark::State& state) {
-    CryptoContext<DCRTPoly> cc = GenerateBFVrnsContext(state.range(0), state.range(1));
+void bfv_rns_eval_mult_many(benchmark::State& state) {
+    CryptoContext<RnsPoly> cc = generate_bfv_rns_context(state.range(0), state.range(1));
 
-    // KeyGen
-    KeyPair<DCRTPoly> keyPair = cc->KeyGen();
-    cc->EvalMultKeyGen(keyPair.secretKey);
+    // key_gen
+    KeyPair<RnsPoly> key_pair = cc->key_gen();
+    cc->eval_mult_key_gen(key_pair.secret_key);
 
-    std::vector<int64_t> vectorOfInts = {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    std::vector<int64_t> vector_of_ints = {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
     Plaintext plaintext;
     if (state.range(0) == 2)
-        plaintext = cc->MakeCoefPackedPlaintext(vectorOfInts);
+        plaintext = cc->make_coef_packed_plaintext(vector_of_ints);
     else
-        plaintext = cc->MakePackedPlaintext(vectorOfInts);
+        plaintext = cc->make_packed_plaintext(vector_of_ints);
 
-    std::vector<Ciphertext<DCRTPoly>> ciphertexts;
+    std::vector<Ciphertext<RnsPoly>> ciphertexts;
     for (int i = 0; i < (1 << mult_depth); i++)
-        ciphertexts.push_back(cc->Encrypt(keyPair.publicKey, plaintext));
+        ciphertexts.push_back(cc->encrypt(key_pair.public_key, plaintext));
 
-    Ciphertext<DCRTPoly> ciphertextMult;
+    Ciphertext<RnsPoly> ciphertext_mult;
     while (state.KeepRunning()) {
-        ciphertextMult = cc->EvalMultMany(ciphertexts);
+        ciphertext_mult = cc->eval_mult_many(ciphertexts);
     }
 
-    Plaintext plaintextDec;
-    cc->Decrypt(keyPair.secretKey, ciphertextMult, &plaintextDec);
-    plaintextDec->SetLength(plaintext->GetLength());
+    Plaintext plaintext_dec;
+    cc->decrypt(key_pair.secret_key, ciphertext_mult, &plaintext_dec);
+    plaintext_dec->set_length(plaintext->get_length());
 
-    if (plaintext != plaintextDec) {
+    if (plaintext != plaintext_dec) {
         std::cout << "Original plaintext: " << plaintext << std::endl;
-        std::cout << "Evaluated plaintext: " << plaintextDec << std::endl;
+        std::cout << "Evaluated plaintext: " << plaintext_dec << std::endl;
     }
 }
 
-BENCHMARK(BFVrns_EvalMultMany)->Unit(benchmark::kMicrosecond)->Apply(MultBFVArguments);
+BENCHMARK(bfv_rns_eval_mult_many)->Unit(benchmark::kMicrosecond)->Apply(mult_bfv_arguments);
 
-void BEHZ_EvalMultMany(benchmark::State& state) {
-    CryptoContext<DCRTPoly> cc = GenerateBEHZContext(state.range(0), state.range(1));
+void behz_eval_mult_many(benchmark::State& state) {
+    CryptoContext<RnsPoly> cc = generate_behz_context(state.range(0), state.range(1));
 
-    // KeyGen
-    KeyPair<DCRTPoly> keyPair = cc->KeyGen();
-    cc->EvalMultKeyGen(keyPair.secretKey);
+    // key_gen
+    KeyPair<RnsPoly> key_pair = cc->key_gen();
+    cc->eval_mult_key_gen(key_pair.secret_key);
 
-    std::vector<int64_t> vectorOfInts = {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    std::vector<int64_t> vector_of_ints = {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     Plaintext plaintext;
     if (state.range(0) == 2)
-        plaintext = cc->MakeCoefPackedPlaintext(vectorOfInts);
+        plaintext = cc->make_coef_packed_plaintext(vector_of_ints);
     else
-        plaintext = cc->MakePackedPlaintext(vectorOfInts);
+        plaintext = cc->make_packed_plaintext(vector_of_ints);
 
-    std::vector<Ciphertext<DCRTPoly>> ciphertexts;
+    std::vector<Ciphertext<RnsPoly>> ciphertexts;
     for (int i = 0; i < (1 << mult_depth); i++)
-        ciphertexts.push_back(cc->Encrypt(keyPair.publicKey, plaintext));
+        ciphertexts.push_back(cc->encrypt(key_pair.public_key, plaintext));
 
-    Ciphertext<DCRTPoly> ciphertextMult;
+    Ciphertext<RnsPoly> ciphertext_mult;
     while (state.KeepRunning()) {
-        ciphertextMult = cc->EvalMultMany(ciphertexts);
+        ciphertext_mult = cc->eval_mult_many(ciphertexts);
     }
 
-    Plaintext plaintextDec;
-    cc->Decrypt(keyPair.secretKey, ciphertextMult, &plaintextDec);
-    plaintextDec->SetLength(plaintext->GetLength());
+    Plaintext plaintext_dec;
+    cc->decrypt(key_pair.secret_key, ciphertext_mult, &plaintext_dec);
+    plaintext_dec->set_length(plaintext->get_length());
 
-    if (plaintext != plaintextDec) {
+    if (plaintext != plaintext_dec) {
         std::cout << "Original plaintext: " << plaintext << std::endl;
-        std::cout << "Evaluated plaintext: " << plaintextDec << std::endl;
+        std::cout << "Evaluated plaintext: " << plaintext_dec << std::endl;
     }
 }
 
-BENCHMARK(BEHZ_EvalMultMany)->Unit(benchmark::kMicrosecond)->Apply(MultBFVArguments);
+BENCHMARK(behz_eval_mult_many)->Unit(benchmark::kMicrosecond)->Apply(mult_bfv_arguments);
 
-void BFVrns_Decrypt(benchmark::State& state) {
-    CryptoContext<DCRTPoly> cryptoContext =
-            GenerateFlatBFVrnsContext(state.range(0), state.range(1), 1 << state.range(2));
+void bfv_rns_decrypt(benchmark::State& state) {
+    CryptoContext<RnsPoly> crypto_context =
+            generate_flat_bfv_rns_context(state.range(0), state.range(1), 1 << state.range(2));
 
-    KeyPair<DCRTPoly> keyPair = cryptoContext->KeyGen();
+    KeyPair<RnsPoly> key_pair = crypto_context->key_gen();
 
-    std::vector<int64_t> vectorOfInts1 = {1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0};
+    std::vector<int64_t> vector_of_ints1 = {1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0};
     Plaintext plaintext1;
     if (state.range(0) == 2)
-        plaintext1 = cryptoContext->MakeCoefPackedPlaintext(vectorOfInts1);
+        plaintext1 = crypto_context->make_coef_packed_plaintext(vector_of_ints1);
     else
-        plaintext1 = cryptoContext->MakePackedPlaintext(vectorOfInts1);
+        plaintext1 = crypto_context->make_packed_plaintext(vector_of_ints1);
 
-    auto ciphertext1 = cryptoContext->Encrypt(keyPair.publicKey, plaintext1);
-    Plaintext plaintextDec1;
+    auto ciphertext1 = crypto_context->encrypt(key_pair.public_key, plaintext1);
+    Plaintext plaintext_dec1;
 
     while (state.KeepRunning()) {
-        cryptoContext->Decrypt(keyPair.secretKey, ciphertext1, &plaintextDec1);
+        crypto_context->decrypt(key_pair.secret_key, ciphertext1, &plaintext_dec1);
     }
 }
 
-BENCHMARK(BFVrns_Decrypt)->Unit(benchmark::kMicrosecond)->Apply(DecBFVArguments);
+BENCHMARK(bfv_rns_decrypt)->Unit(benchmark::kMicrosecond)->Apply(dec_bfv_arguments);
 
-void BEHZ_Decrypt(benchmark::State& state) {
-    CryptoContext<DCRTPoly> cryptoContext =
-            GenerateFlatBEHZContext(state.range(0), state.range(1), 1 << state.range(2));
+void behz_decrypt(benchmark::State& state) {
+    CryptoContext<RnsPoly> crypto_context =
+            generate_flat_behz_context(state.range(0), state.range(1), 1 << state.range(2));
 
-    KeyPair<DCRTPoly> keyPair = cryptoContext->KeyGen();
+    KeyPair<RnsPoly> key_pair = crypto_context->key_gen();
 
-    std::vector<int64_t> vectorOfInts1 = {1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0};
+    std::vector<int64_t> vector_of_ints1 = {1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0};
     Plaintext plaintext1;
     if (state.range(0) == 2)
-        plaintext1 = cryptoContext->MakeCoefPackedPlaintext(vectorOfInts1);
+        plaintext1 = crypto_context->make_coef_packed_plaintext(vector_of_ints1);
     else
-        plaintext1 = cryptoContext->MakePackedPlaintext(vectorOfInts1);
+        plaintext1 = crypto_context->make_packed_plaintext(vector_of_ints1);
 
-    auto ciphertext1 = cryptoContext->Encrypt(keyPair.publicKey, plaintext1);
-    Plaintext plaintextDec1;
+    auto ciphertext1 = crypto_context->encrypt(key_pair.public_key, plaintext1);
+    Plaintext plaintext_dec1;
 
     while (state.KeepRunning()) {
-        cryptoContext->Decrypt(keyPair.secretKey, ciphertext1, &plaintextDec1);
+        crypto_context->decrypt(key_pair.secret_key, ciphertext1, &plaintext_dec1);
     }
 }
 
-BENCHMARK(BEHZ_Decrypt)->Unit(benchmark::kMicrosecond)->Apply(DecBFVArguments);
+BENCHMARK(behz_decrypt)->Unit(benchmark::kMicrosecond)->Apply(dec_bfv_arguments);
 
 BENCHMARK_MAIN();

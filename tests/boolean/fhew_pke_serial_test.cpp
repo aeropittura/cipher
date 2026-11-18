@@ -35,89 +35,89 @@
 #include "cipher/boolean/context_ser.h"
 #include "gtest/gtest.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 template <typename ST>
-void UnitTestFHEWPKESerial(const ST& sertype, BINFHE_PARAMSET secLevel, BINFHE_METHOD variant,
-                           const std::string& errMsg) {
-    const LWEPlaintext val(1);
-    auto cc1 = BinFHEContext();
-    cc1.GenerateBinFHEContext(secLevel, variant);
+void unit_test_fhewpke_serial(const ST& sertype, BINFHE_PARAMSET sec_level, BINFHE_METHOD variant,
+                           const std::string& err_msg) {
+    const LwePlaintext val(1);
+    auto cc1 = BooleanContext();
+    cc1.generate_boolean_context(sec_level, variant);
 
-    auto sk1 = cc1.KeyGen();
-    cc1.BTKeyGen(sk1, PUB_ENCRYPT);
+    auto sk1 = cc1.key_gen();
+    cc1.bt_key_gen(sk1, PUB_ENCRYPT);
 
-    LWEPublicKey pk1 = cc1.GetPublicKey();
+    LwePublicKey pk1 = cc1.get_public_key();
     // Encryption for a ciphertext that will be serialized
-    auto ct1 = cc1.Encrypt(pk1, val);
+    auto ct1 = cc1.encrypt(pk1, val);
 
-    BinFHEContext cc2;
+    BooleanContext cc2;
     {
         std::stringstream s;
-        Serial::Serialize(cc1, s, sertype);
-        Serial::Deserialize(cc2, s, sertype);
+        serialization::to_stream(cc1, s, sertype);
+        serialization::from_stream(cc2, s, sertype);
 
-        EXPECT_EQ(*cc2.GetParams(), *cc1.GetParams()) << errMsg << " Context mismatch";
+        EXPECT_EQ(*cc2.get_params(), *cc1.get_params()) << err_msg << " Context mismatch";
     }
 
-    RingGSWBTKey btKey;
+    RingGswBtKey bt_key;
     {
         std::stringstream s;
-        Serial::Serialize(cc1.GetBTKey(), s, sertype);
-        Serial::Deserialize(btKey, s, sertype);
+        serialization::to_stream(cc1.get_bt_key(), s, sertype);
+        serialization::from_stream(bt_key, s, sertype);
     }
 
     // Loading deserialized bootstrapping keys
-    cc2.BTKeyLoad(btKey);
+    cc2.bt_key_load(bt_key);
 
     // Check the keys after adding them to cc2, at whichever width each context holds them
-    EXPECT_EQ(cc1.HasInternal32RefreshKey(), cc2.HasInternal32RefreshKey()) << errMsg << " refresh key width";
-    EXPECT_EQ(cc1.HasInternal32SwitchKey(), cc2.HasInternal32SwitchKey()) << errMsg << " switching key width";
-#if NATIVEINT != 32
-    if (cc1.HasInternal32RefreshKey())
-        EXPECT_EQ(*(cc2.GetBTKey().BSkey32), *(cc1.GetBTKey().BSkey32)) << errMsg << " refresh key";
+    EXPECT_EQ(cc1.has_internal32_refresh_key(), cc2.has_internal32_refresh_key()) << err_msg << " refresh key width";
+    EXPECT_EQ(cc1.has_internal32_switch_key(), cc2.has_internal32_switch_key()) << err_msg << " switching key width";
+#if CIPHER_NATIVE_INT != 32
+    if (cc1.has_internal32_refresh_key())
+        EXPECT_EQ(*(cc2.get_bt_key().b_skey32), *(cc1.get_bt_key().b_skey32)) << err_msg << " refresh key";
     else
 #endif
-        EXPECT_EQ(*(cc2.GetRefreshKey()), *(cc1.GetRefreshKey())) << errMsg << " refresh key";
-#if NATIVEINT != 32
-    if (cc1.HasInternal32SwitchKey())
-        EXPECT_EQ(*(cc2.GetBTKey().KSkey32), *(cc1.GetBTKey().KSkey32)) << errMsg << " switching key";
+        EXPECT_EQ(*(cc2.get_refresh_key()), *(cc1.get_refresh_key())) << err_msg << " refresh key";
+#if CIPHER_NATIVE_INT != 32
+    if (cc1.has_internal32_switch_key())
+        EXPECT_EQ(*(cc2.get_bt_key().ks_key32), *(cc1.get_bt_key().ks_key32)) << err_msg << " switching key";
     else
 #endif
-        EXPECT_EQ(*(cc2.GetSwitchKey()), *(cc1.GetSwitchKey())) << errMsg << " switching key";
+        EXPECT_EQ(*(cc2.get_switch_key()), *(cc1.get_switch_key())) << err_msg << " switching key";
 
-    LWEPrivateKey sk2;
+    LwePrivateKey sk2;
     {
         std::stringstream s;
-        Serial::Serialize(sk1, s, sertype);
-        Serial::Deserialize(sk2, s, sertype);
+        serialization::to_stream(sk1, s, sertype);
+        serialization::from_stream(sk2, s, sertype);
 
-        EXPECT_EQ(*sk1, *sk2) << errMsg << " Secret key mismatch";
+        EXPECT_EQ(*sk1, *sk2) << err_msg << " Secret key mismatch";
     }
-    LWEPublicKey pk2;
+    LwePublicKey pk2;
     {
         std::stringstream s;
-        Serial::Serialize(pk1, s, sertype);
-        Serial::Deserialize(pk2, s, sertype);
+        serialization::to_stream(pk1, s, sertype);
+        serialization::from_stream(pk2, s, sertype);
 
-        EXPECT_EQ(*pk1, *pk2) << errMsg << " Secret key mismatch";
+        EXPECT_EQ(*pk1, *pk2) << err_msg << " Secret key mismatch";
     }
 
-    LWECiphertext ct2;
+    LweCiphertext ct2;
     {
         std::stringstream s;
-        Serial::Serialize(ct1, s, sertype);
-        Serial::Deserialize(ct2, s, sertype);
+        serialization::to_stream(ct1, s, sertype);
+        serialization::from_stream(ct2, s, sertype);
 
-        EXPECT_EQ(*ct1, *ct2) << errMsg << " Ciphertext mismatch";
+        EXPECT_EQ(*ct1, *ct2) << err_msg << " Ciphertext mismatch";
     }
 
-    auto ctNew = cc2.Encrypt(pk2, val);
-    auto ctResult = cc2.EvalBinGate(AND, ct2, ctNew);
-    LWEPlaintext result;
-    cc2.Decrypt(sk2, ctResult, &result);
+    auto ct_new = cc2.encrypt(pk2, val);
+    auto ct_result = cc2.eval_bin_gate(AND, ct2, ct_new);
+    LwePlaintext result;
+    cc2.decrypt(sk2, ct_result, &result);
 
-    EXPECT_EQ(val, result) << errMsg << "result = " << result << ", it is expected to be equal 1";
+    EXPECT_EQ(val, result) << err_msg << "result = " << result << ", it is expected to be equal 1";
 }
 
 // ---------------  TESTING SERIALIZATION METHODS OF FHEW ---------------
@@ -125,20 +125,20 @@ void UnitTestFHEWPKESerial(const ST& sertype, BINFHE_PARAMSET secLevel, BINFHE_M
 // They are left in this file for debugging purposes only.
 // TEST(UnitTestFHEWSerialAP, JSON) {
 //     std::string msg = "UnitTestFHEWSerialAP.JSON serialization test failed: ";
-//     UnitTestFHEWSerial(SerType::JSON, TOY, AP, SMALL_DIM, msg);
+//     unit_test_fhew_serial(SerType::JSON, TOY, AP, SMALL_DIM, msg);
 // }
 
 TEST(UnitTestFHEWPKESerialAP, BINARY) {
     std::string msg = "UnitTestFHEWSerialAP.BINARY serialization test failed: ";
-    UnitTestFHEWPKESerial(SerType::BINARY, TOY, AP, msg);
+    unit_test_fhewpke_serial(SerType::BINARY, TOY, AP, msg);
 }
 
 // TEST(UnitTestFHEWSerialGINX, JSON) {
 //     std::string msg = "UnitTestFHEWSerialGINX.JSON serialization test failed: ";
-//     UnitTestFHEWSerial(SerType::JSON, TOY, GINX, SMALL_DIM, msg);
+//     unit_test_fhew_serial(SerType::JSON, TOY, GINX, SMALL_DIM, msg);
 // }
 
 TEST(UnitTestFHEWPKESerialGINX, BINARY) {
     std::string msg = "UnitTestFHEWSerialGINX.BINARY serialization test failed: ";
-    UnitTestFHEWPKESerial(SerType::BINARY, TOY, GINX, msg);
+    unit_test_fhewpke_serial(SerType::BINARY, TOY, GINX, msg);
 }

@@ -31,7 +31,7 @@
 
 /*
  * Compares the performance of different multiplication methods in BFV
- * using EvalMultMany operation.
+ * using eval_mult_many operation.
  */
 
 #define PROFILE
@@ -49,7 +49,7 @@
 #include "cipher/fhe/context_gen.h"
 #include "cipher/fhe/bfv/context_gen.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 constexpr uint32_t RING_DIM = 16384;
 constexpr uint32_t MULT_DEPTH = 7;
@@ -59,9 +59,9 @@ constexpr KeySwitchTechnique KS_TECH = BV;
 
 static std::vector<MultiplicationTechnique> MULT_METHOD_ARGS = {BEHZ, HPS, HPSPOVERQ, HPSPOVERQLEVELED};
 
-static void MultBFVArguments(benchmark::internal::Benchmark* b) {
-    for (MultiplicationTechnique multMethod : MULT_METHOD_ARGS) {
-        b->ArgNames({"mult_method"})->Args({multMethod})->MinTime(10);
+static void mult_bfv_arguments(benchmark::internal::Benchmark* b) {
+    for (MultiplicationTechnique mult_method : MULT_METHOD_ARGS) {
+        b->ArgNames({"mult_method"})->Args({mult_method})->MinTime(10);
     }
 }
 
@@ -69,23 +69,23 @@ static void MultBFVArguments(benchmark::internal::Benchmark* b) {
  * Context setup utility methods
  */
 
-CryptoContext<DCRTPoly> GenerateBFVrnsContext(MultiplicationTechnique multMethod) {
-    CCParams<CryptoContextBFVRNS> parameters;
-    parameters.SetPlaintextModulus(PTM);
-    parameters.SetMultiplicativeDepth(MULT_DEPTH);
-    parameters.SetScalingModSize(DCRT_BITS);
-    parameters.SetKeySwitchTechnique(KS_TECH);
-    parameters.SetRingDim(RING_DIM);
-    parameters.SetMultiplicationTechnique(multMethod);
-    parameters.SetSecurityLevel(HEStd_128_classic);
-    parameters.SetMaxRelinSkDeg(2);
-    parameters.SetStandardDeviation(3.19);
+CryptoContext<RnsPoly> generate_bfv_rns_context(MultiplicationTechnique mult_method) {
+    ContextParams<BfvRnsContext> parameters;
+    parameters.set_plaintext_modulus(PTM);
+    parameters.set_multiplicative_depth(MULT_DEPTH);
+    parameters.set_scaling_mod_size(DCRT_BITS);
+    parameters.set_key_switch_technique(KS_TECH);
+    parameters.set_ring_dim(RING_DIM);
+    parameters.set_multiplication_technique(mult_method);
+    parameters.set_security_level(HEStd_128_classic);
+    parameters.set_max_relin_sk_deg(2);
+    parameters.set_standard_deviation(3.19);
 
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
+    CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
+    cc->enable(ADVANCEDSHE);
 
     return cc;
 }
@@ -93,38 +93,38 @@ CryptoContext<DCRTPoly> GenerateBFVrnsContext(MultiplicationTechnique multMethod
 /*
  * benchmarks
  */
-void BFVrns_EvalMult(benchmark::State& state) {
-    CryptoContext<DCRTPoly> cc = GenerateBFVrnsContext(MULT_METHOD_ARGS[state.range(0) - 1]);
+void bfv_rns_eval_mult(benchmark::State& state) {
+    CryptoContext<RnsPoly> cc = generate_bfv_rns_context(MULT_METHOD_ARGS[state.range(0) - 1]);
 
-    // KeyGen
-    KeyPair<DCRTPoly> keyPair = cc->KeyGen();
-    cc->EvalMultKeyGen(keyPair.secretKey);
+    // key_gen
+    KeyPair<RnsPoly> key_pair = cc->key_gen();
+    cc->eval_mult_key_gen(key_pair.secret_key);
 
-    std::vector<int64_t> vectorOfInts = {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    std::vector<int64_t> vector_of_ints = {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
     Plaintext plaintext;
-    plaintext = cc->MakeCoefPackedPlaintext(vectorOfInts);
+    plaintext = cc->make_coef_packed_plaintext(vector_of_ints);
 
-    std::vector<Ciphertext<DCRTPoly>> ciphertexts;
-    int treeSize = 1 << MULT_DEPTH;
+    std::vector<Ciphertext<RnsPoly>> ciphertexts;
+    int tree_size = 1 << MULT_DEPTH;
 
-    for (int i = 0; i < treeSize; i++)
-        ciphertexts.push_back(cc->Encrypt(keyPair.publicKey, plaintext));
+    for (int i = 0; i < tree_size; i++)
+        ciphertexts.push_back(cc->encrypt(key_pair.public_key, plaintext));
 
-    Ciphertext<DCRTPoly> ciphertextMult;
+    Ciphertext<RnsPoly> ciphertext_mult;
     while (state.KeepRunning()) {
-        ciphertextMult = cc->EvalMultMany(ciphertexts);
+        ciphertext_mult = cc->eval_mult_many(ciphertexts);
     }
 
-    Plaintext plaintextDec;
-    cc->Decrypt(keyPair.secretKey, ciphertextMult, &plaintextDec);
-    plaintextDec->SetLength(plaintext->GetLength());
+    Plaintext plaintext_dec;
+    cc->decrypt(key_pair.secret_key, ciphertext_mult, &plaintext_dec);
+    plaintext_dec->set_length(plaintext->get_length());
 
-    if (plaintext != plaintextDec) {
+    if (plaintext != plaintext_dec) {
         std::cout << "Original plaintext: " << plaintext << std::endl;
-        std::cout << "Evaluated plaintext: " << plaintextDec << std::endl;
+        std::cout << "Evaluated plaintext: " << plaintext_dec << std::endl;
     }
 }
-BENCHMARK(BFVrns_EvalMult)->Unit(benchmark::kMillisecond)->Apply(MultBFVArguments);
+BENCHMARK(bfv_rns_eval_mult)->Unit(benchmark::kMillisecond)->Apply(mult_bfv_arguments);
 
 BENCHMARK_MAIN();

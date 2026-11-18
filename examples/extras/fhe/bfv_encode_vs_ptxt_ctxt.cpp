@@ -43,85 +43,85 @@
 
 #include "cipher/cipher.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 int main() {
     // Sample Program: Step 1: Set CryptoContext
-    CCParams<CryptoContextBFVRNS> parameters;
-    parameters.SetPlaintextModulus(65537);
-    parameters.SetMultiplicativeDepth(5);
-    parameters.SetSecurityLevel(HEStd_NotSet);
-    parameters.SetMultiplicationTechnique(HPSPOVERQLEVELED);
-    parameters.SetKeySwitchTechnique(BV);
-    parameters.SetRingDim((1 << 14));
+    ContextParams<BfvRnsContext> parameters;
+    parameters.set_plaintext_modulus(65537);
+    parameters.set_multiplicative_depth(5);
+    parameters.set_security_level(HEStd_NotSet);
+    parameters.set_multiplication_technique(HPSPOVERQLEVELED);
+    parameters.set_key_switch_technique(BV);
+    parameters.set_ring_dim((1 << 14));
 
-    CryptoContext<DCRTPoly> cryptoContext = GenCryptoContext(parameters);
+    CryptoContext<RnsPoly> crypto_context = make_crypto_context(parameters);
 
-    std::cout << "Element parameters: \n" << *cryptoContext->GetElementParams() << "\n";
+    std::cout << "Element parameters: \n" << *crypto_context->get_element_params() << "\n";
 
-    uint32_t ringDim = cryptoContext->GetRingDimension();
-    std::cout << "BFVrns scheme is using ring dimension " << ringDim << std::endl << std::endl;
+    uint32_t ring_dim = crypto_context->get_ring_dimension();
+    std::cout << "BFVrns scheme is using ring dimension " << ring_dim << std::endl << std::endl;
 
     // Enable features that you wish to use
-    cryptoContext->Enable(PKE);
-    cryptoContext->Enable(KEYSWITCH);
-    cryptoContext->Enable(LEVELEDSHE);
+    crypto_context->enable(PKE);
+    crypto_context->enable(KEYSWITCH);
+    crypto_context->enable(LEVELEDSHE);
 
     // Sample Program: Step 2: Key Generation
 
     // Initialize Public Key Containers
-    KeyPair<DCRTPoly> keyPair;
+    KeyPair<RnsPoly> key_pair;
 
     // Generate a public/private key pair
-    keyPair = cryptoContext->KeyGen();
+    key_pair = crypto_context->key_gen();
 
     // Sample Program: Step 3: Encryption
     std::vector<int64_t> payload = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
     // Second plaintext vector is encoded
     std::vector<int64_t> payload2 = {3, 2, 1, 4, 5, 6, 7, 8, 9, 10, 11, 12};
-    Plaintext ptxt2 = cryptoContext->MakePackedPlaintext(payload2, 1, 3);
+    Plaintext ptxt2 = crypto_context->make_packed_plaintext(payload2, 1, 3);
 
     // Number of iterations for benchmarking
-    int numIterations = 1000;
+    int num_iterations = 1000;
 
     // Variables to store total times
     TimeVar t;
-    double totalEncodeTime = 0.0;
-    double totalMultTime = 0.0;
+    double total_encode_time = 0.0;
+    double total_mult_time = 0.0;
 
-    auto ctxtGT = cryptoContext->Encrypt(keyPair.publicKey, ptxt2);
+    auto ctxt_gt = crypto_context->encrypt(key_pair.public_key, ptxt2);
 
     // Benchmark loop
-    for (int i = 0; i < numIterations; ++i) {
+    for (int i = 0; i < num_iterations; ++i) {
         TIC(t);
-        Plaintext ptxt1 = cryptoContext->MakePackedPlaintext(payload, 1, 3);
-        totalEncodeTime += TOC_NS(t);
+        Plaintext ptxt1 = crypto_context->make_packed_plaintext(payload, 1, 3);
+        total_encode_time += TOC_NS(t);
 
-        auto ctxt2 = cryptoContext->Encrypt(keyPair.publicKey, ptxt2);
+        auto ctxt2 = crypto_context->encrypt(key_pair.public_key, ptxt2);
 
         TIC(t);
-        auto ctxtRes = cryptoContext->EvalMult(ctxt2, ptxt1);
-        totalMultTime += TOC_NS(t);
-        ctxtGT = ctxtRes;
+        auto ctxt_res = crypto_context->eval_mult(ctxt2, ptxt1);
+        total_mult_time += TOC_NS(t);
+        ctxt_gt = ctxt_res;
     }
 
     // Calculate and report average times
-    double avgEncodeTime = totalEncodeTime / numIterations / 1e6;
-    double avgMultTime = totalMultTime / numIterations / 1e6;
+    double avg_encode_time = total_encode_time / num_iterations / 1e6;
+    double avg_mult_time = total_mult_time / num_iterations / 1e6;
 
     // Average time to encode
-    std::cout << "encode took: " << avgEncodeTime << " ms" << std::endl;
+    std::cout << "encode took: " << avg_encode_time << " ms" << std::endl;
     // Average time to compute evalmult(ctxt, ptxt)
-    std::cout << "ptxt-ctxt took: " << avgMultTime << " ms" << std::endl;
+    std::cout << "ptxt-ctxt took: " << avg_mult_time << " ms" << std::endl;
 
-    Plaintext plaintextMult;
-    cryptoContext->Decrypt(keyPair.secretKey, ctxtGT, &plaintextMult);
+    Plaintext plaintext_mult;
+    crypto_context->decrypt(key_pair.secret_key, ctxt_gt, &plaintext_mult);
 
-    plaintextMult->SetLength(payload.size());
+    plaintext_mult->set_length(payload.size());
 
     // Output results
     std::cout << "\nResults of homomorphic computations" << std::endl;
-    std::cout << "plaintextMult: " << plaintextMult << std::endl;
+    std::cout << "plaintextMult: " << plaintext_mult << std::endl;
 
     return 0;
 }

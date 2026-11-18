@@ -45,12 +45,12 @@
 constexpr char DELIMITER = ',';
 constexpr char EXTENSION[] = ".csv";
 //===========================================================================================================
-std::string createDataFileName(const std::string& sourceFileName) {
-    size_t lastindex = sourceFileName.find_last_of(".");
-    return (sourceFileName.substr(0, lastindex) + EXTENSION);
+std::string create_data_file_name(const std::string& source_file_name) {
+    size_t lastindex = source_file_name.find_last_of(".");
+    return (source_file_name.substr(0, lastindex) + EXTENSION);
 }
-std::string createDataFileName(const char* sourceFileName) {
-    return createDataFileName(std::string(sourceFileName));
+std::string create_data_file_name(const char* source_file_name) {
+    return create_data_file_name(std::string(source_file_name));
 }
 //===========================================================================================================
 std::vector<std::string> tokenize(const std::string& str, const char delim) {
@@ -63,59 +63,59 @@ std::vector<std::string> tokenize(const std::string& str, const char delim) {
 }
 //===========================================================================================================
 /**
- * checkColumnNamesForCryptocontextParameters() gets the first table row with column names and checks
+ * check_column_names_for_cryptocontext_parameters() gets the first table row with column names and checks
  * if there are columns for all cryptocontext parameters. Throws an exception on error. The function is static in order
  * to limit access to it with this file.
  *
- * @param testData is the open file with test data
+ * @param test_data is the open file with test data
  */
-static void checkColumnNamesForCryptocontextParameters(std::ifstream& testData) {
+static void check_column_names_for_cryptocontext_parameters(std::ifstream& test_data) {
     std::string line;
-    std::getline(testData, line);
+    std::getline(test_data, line);
     // get all the columns first
     auto row = tokenize(line, DELIMITER);
     // skip the first 2 fields as they are for the test name
     auto start = row.begin() + 2;
-    std::vector<std::string> columnNames(start, start + lbcrypto::Params::getAllParamsDataMembers().size());
-    if (columnNames != lbcrypto::Params::getAllParamsDataMembers()) {
+    std::vector<std::string> column_names(start, start + cipher::Params::get_all_params_data_members().size());
+    if (column_names != cipher::Params::get_all_params_data_members()) {
         std::string s;
-        for (const auto& n : columnNames) {
+        for (const auto& n : column_names) {
             s += n + ',';
         }
-        std::string errMsg(
+        std::string err_msg(
                 std::string(
                         "Check the number and names of the columns for cryptoparameters as they do not match the expected: ") +
                 s);
-        OPENFHE_THROW(errMsg);
+        CIPHER_THROW(err_msg);
     }
 }
 //===========================================================================================================
-std::vector<std::vector<std::string>> readDataFile(const std::string& dataFileName) {
-    std::ifstream testData(dataFileName);
-    if (!testData.is_open()) {
-        OPENFHE_THROW("Cannot read file " + dataFileName);
+std::vector<std::vector<std::string>> read_data_file(const std::string& data_file_name) {
+    std::ifstream test_data(data_file_name);
+    if (!test_data.is_open()) {
+        CIPHER_THROW("Cannot read file " + data_file_name);
     }
 
     try {
-        checkColumnNamesForCryptocontextParameters(testData);
+        check_column_names_for_cryptocontext_parameters(test_data);
 
-        std::vector<std::vector<std::string>> fileRows;
-        for (std::string line; std::getline(testData, line);) {
+        std::vector<std::vector<std::string>> file_rows;
+        for (std::string line; std::getline(test_data, line);) {
             // skip all commented lines; they start with #
             if (line[0] != '#') {
                 auto row = tokenize(line, DELIMITER);
-                fileRows.push_back(std::move(row));
+                file_rows.push_back(std::move(row));
             }
         }
 
-        return fileRows;
+        return file_rows;
     } catch (std::exception& e) {
-        std::string errMsg(std::string("Exception for data file ") + dataFileName + ": " + e.what());
-        OPENFHE_THROW(errMsg);
+        std::string err_msg(std::string("Exception for data file ") + data_file_name + ": " + e.what());
+        CIPHER_THROW(err_msg);
     } catch (...) {
-        std::string errMsg(std::string("Unknown exception for data file ") + dataFileName + ": type " +
+        std::string err_msg(std::string("Unknown exception for data file ") + data_file_name + ": type " +
                            UNIT_TEST_EXCEPTION_TYPE_NAME);
-        OPENFHE_THROW(errMsg);
+        CIPHER_THROW(err_msg);
     }
 }
 //===========================================================================================================

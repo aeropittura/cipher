@@ -52,7 +52,7 @@
 #include "cipher/util/exception.h"
 #include "cipher/util/inttypes.h"
 
-namespace lbcrypto {
+namespace cipher {
 
 /**
  * @brief Interface (CRTP base) for single-modulus polynomial ring elements: a polynomial modulo X^n + 1 (or an
@@ -63,11 +63,11 @@ namespace lbcrypto {
  * @tparam ContainerType the polynomial template, used to name the native-integer variant PolyNative.
  */
 template <typename DerivedType, typename VecType, template <typename LVT> typename ContainerType>
-class PolyInterface : public ILElement<DerivedType, VecType> {
+class PolyInterface : public RingElement<DerivedType, VecType> {
   public:
     using Vector = VecType;
     using Integer = typename VecType::Integer;
-    using Params = ILParamsImpl<Integer>;
+    using Params = PolyParamsImpl<Integer>;
     using PolyNative = ContainerType<NativeVector>;
     using DggType = DiscreteGaussianGeneratorImpl<VecType>;
     using DugType = DiscreteUniformGeneratorImpl<VecType>;
@@ -84,16 +84,16 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      *
      * @return DerivedType&
      */
-    DerivedType& GetDerived() {
+    DerivedType& get_derived() {
         return static_cast<DerivedType&>(*this);
     }
 
     /**
-     * @brief Const version of GetDerived().
+     * @brief Const version of get_derived().
      *
      * @return const reference to this object as the derived type.
      */
-    const DerivedType& GetDerived() const {
+    const DerivedType& get_derived() const {
         return static_cast<DerivedType const&>(*this);
     }
 
@@ -104,7 +104,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @param format - EVALUATION or COEFFICIENT
      * @return a lambda that creates a zero-initialized element with the given parameters and format.
      */
-    inline static std::function<DerivedType()> Allocator(const std::shared_ptr<Params>& params, Format format) {
+    inline static std::function<DerivedType()> allocator(const std::shared_ptr<Params>& params, Format format) {
         return [=]() {
             return DerivedType(params, format, true);
         };
@@ -114,15 +114,15 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @brief Allocator for discrete Gaussian distribution.
      *
      * @param params Params instance that is is passed.
-     * @param resultFormat resultFormat for the polynomials generated.
+     * @param result_format result_format for the polynomials generated.
      * @param stddev standard deviation for the discrete gaussian generator.
      * @return a lambda that generates a discrete Gaussian element.
      */
-    inline static std::function<DerivedType()> MakeDiscreteGaussianCoefficientAllocator(
-            const std::shared_ptr<Params>& params, Format resultFormat, double stddev) {
+    inline static std::function<DerivedType()> make_discrete_gaussian_coefficient_allocator(
+            const std::shared_ptr<Params>& params, Format result_format, double stddev) {
         return [=]() {
             DggType dgg(stddev);
-            return DerivedType(dgg, params, resultFormat);
+            return DerivedType(dgg, params, result_format);
         };
     }
 
@@ -133,7 +133,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @param format format for the polynomials generated.
      * @return a lambda that generates a discrete uniform element.
      */
-    inline static std::function<DerivedType()> MakeDiscreteUniformAllocator(const std::shared_ptr<Params>& params,
+    inline static std::function<DerivedType()> make_discrete_uniform_allocator(const std::shared_ptr<Params>& params,
                                                                             Format format) {
         return [=]() {
             DugType dug;
@@ -151,7 +151,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @return the resulting element.
      */
     DerivedType& operator=(const std::vector<int32_t>& rhs) {
-        return this->GetDerived().operator=(rhs);
+        return this->get_derived().operator=(rhs);
     }
     /**
      * @brief Assigns signed coefficients reduced modulo the modulus (used for trapdoor sampling); missing trailing
@@ -161,7 +161,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @return the resulting element.
      */
     DerivedType& operator=(const std::vector<int64_t>& rhs) {
-        return this->GetDerived().operator=(rhs);
+        return this->get_derived().operator=(rhs);
     }
     DerivedType& operator=(std::initializer_list<uint64_t> rhs) override = 0;
     /**
@@ -171,7 +171,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @return the resulting element.
      */
     DerivedType& operator=(std::initializer_list<std::string> rhs) {
-        return this->GetDerived().operator=(rhs);
+        return this->get_derived().operator=(rhs);
     }
     /**
      * @brief Assigns the constant polynomial rhs: every entry is set to rhs and the format becomes EVALUATION.
@@ -180,39 +180,39 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @return the resulting element.
      */
     DerivedType& operator=(uint64_t rhs) {
-        return this->GetDerived().operator=(rhs);
+        return this->get_derived().operator=(rhs);
     }
 
     /**
      * @brief returns the element's ring dimension
      * @return returns the ring dimension of the element.
      */
-    uint32_t GetRingDimension() const {
-        return this->GetDerived().GetParams()->GetRingDimension();
+    uint32_t get_ring_dimension() const {
+        return this->get_derived().get_params()->get_ring_dimension();
     }
 
     /**
      * @brief returns the element's root of unity.
      * @return the element's root of unity.
      */
-    const Integer& GetRootOfUnity() const {
-        return this->GetDerived().GetParams()->GetRootOfUnity();
+    const Integer& get_root_of_unity() const {
+        return this->get_derived().get_params()->get_root_of_unity();
     }
 
     /**
      * @brief returns the element's modulus
      * @return returns the modulus of the element.
      */
-    const Integer& GetModulus() const final {
-        return this->GetDerived().GetParams()->GetModulus();
+    const Integer& get_modulus() const final {
+        return this->get_derived().get_params()->get_modulus();
     }
 
     /**
      * @brief returns the element's cyclotomic order
      * @return returns the cyclotomic order of the element.
      */
-    uint32_t GetCyclotomicOrder() const final {
-        return this->GetDerived().GetParams()->GetCyclotomicOrder();
+    uint32_t get_cyclotomic_order() const final {
+        return this->get_derived().get_params()->get_cyclotomic_order();
     }
 
     /**
@@ -221,10 +221,10 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      *
      * @return length of the component element
      */
-    uint32_t GetLength() const final {
-        //        if (this->GetDerived().IsEmpty())
-        //            OPENFHE_THROW("No values in PolyImpl");
-        return this->GetDerived().GetValues().GetLength();
+    uint32_t get_length() const final {
+        //        if (this->get_derived().is_empty())
+        //            CIPHER_THROW("No values in PolyImpl");
+        return this->get_derived().get_values().get_length();
     }
 
     /**
@@ -232,7 +232,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      *
      * @return the vector of values.
      */
-    const VecType& GetValues() const override = 0;
+    const VecType& get_values() const override = 0;
 
     /**
      * @brief Get interpolated value of elements at all tower index i.
@@ -255,7 +255,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @return interpolated value at index i.
      */
     Integer& operator[](uint32_t i) override {
-        return this->GetDerived()[i];
+        return this->get_derived()[i];
     }
 
     /**
@@ -264,7 +264,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @return the value at index i.
      */
     const Integer& operator[](uint32_t i) const override {
-        return this->GetDerived()[i];
+        return this->get_derived()[i];
     }
 
     /**
@@ -273,8 +273,8 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @param rhs is the element to add with.
      * @return is the result of the addition.
      */
-    DerivedType Plus(const DerivedType& rhs) const override {
-        return this->GetDerived().Plus(rhs);
+    DerivedType plus_impl(const DerivedType& rhs) const override {
+        return this->get_derived().plus_impl(rhs);
     }
 
     /**
@@ -283,7 +283,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @param element is the element to subtract.
      * @return is the result of the subtraction.
      */
-    DerivedType Minus(const DerivedType& element) const override = 0;
+    DerivedType minus_impl(const DerivedType& element) const override = 0;
 
     /**
      * @brief Performs a modular multiplication operation for Poly's in
@@ -302,7 +302,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @param element is the integer to add.
      * @return is the result of the addition operation.
      */
-    DerivedType Plus(const Integer& element) const override = 0;
+    DerivedType plus_impl(const Integer& element) const override = 0;
 
     /**
      * @brief Scalar subtraction - subtract an element to all entries.
@@ -310,7 +310,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @param element is the element to subtract entry-wise.
      * @return is the return value of the minus operation.
      */
-    DerivedType Minus(const Integer& element) const override = 0;
+    DerivedType minus_impl(const Integer& element) const override = 0;
 
     /**
      * @brief Scalar multiplication - multiply all entries.
@@ -328,7 +328,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      */
     DerivedType Times(NativeInteger::SignedNativeInt element) const override = 0;
 
-#if NATIVEINT != 64
+#if CIPHER_NATIVE_INT != 64
     /**
      * @brief Scalar multiplication - multiply by a signed integer
      *
@@ -338,7 +338,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @note this is need for 128-bit so that the 64-bit inputs can be used.
      */
     DerivedType Times(int64_t rhs) const {
-        return this->GetDerived().Times(rhs);
+        return this->get_derived().Times(rhs);
     }
 #endif
 
@@ -353,7 +353,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      *
      * @warning Will remove, this is only inplace because of BFV
      */
-    DerivedType MultiplyAndRound(const Integer& p, const Integer& q) const override = 0;
+    DerivedType multiply_and_round(const Integer& p, const Integer& q) const override = 0;
 
     /**
      * @brief Scalar division followed by rounding operation - operation on all
@@ -364,14 +364,14 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      *
      * @warning Will remove, this is only inplace because of BFV
      */
-    DerivedType DivideAndRound(const Integer& q) const override = 0;
+    DerivedType divide_and_round(const Integer& q) const override = 0;
 
     /**
      * @brief Performs a negation operation and returns the result.
      *
      * @return is the result of the negation.
      */
-    virtual DerivedType Negate() const = 0;
+    virtual DerivedType negate() const = 0;
 
     /**
      * @brief Unary minus on a element.
@@ -435,7 +435,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
     /**
      * @brief Adds "1" to every entry in every tower.
      */
-    void AddILElementOne() override = 0;
+    void add_il_element_one() override = 0;
 
     /**
      * @brief Permutes coefficients in a polynomial. Moves the ith index to the
@@ -444,7 +444,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @param i is the automorphism index (an odd integer) to apply.
      * @return is the result of the automorphism transform.
      */
-    DerivedType AutomorphismTransform(uint32_t i) const override = 0;
+    DerivedType automorphism_transform(uint32_t i) const override = 0;
 
     /**
      * @brief Performs an automorphism transform operation using precomputed bit
@@ -454,19 +454,19 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @param vec a vector with precomputed indices
      * @return is the result of the automorphism transform.
      */
-    DerivedType AutomorphismTransform(uint32_t i, const std::vector<uint32_t>& vec) const override = 0;
+    DerivedType automorphism_transform(uint32_t i, const std::vector<uint32_t>& vec) const override = 0;
 
     /**
      * @brief Transpose the ring element using the automorphism operation
      *
      * @return is the result of the transposition.
      */
-    inline DerivedType Transpose() const final {
-        if (this->GetDerived().GetFormat() == Format::COEFFICIENT) {
-            OPENFHE_THROW(
+    inline DerivedType transposed() const final {
+        if (this->get_derived().get_format() == Format::COEFFICIENT) {
+            CIPHER_THROW(
                     "PolyInterface element transposition is currently implemented only in the Evaluation representation.");
         }
-        return this->GetDerived().AutomorphismTransform(this->GetDerived().GetCyclotomicOrder() - 1);
+        return this->get_derived().automorphism_transform(this->get_derived().get_cyclotomic_order() - 1);
     }
 
     /**
@@ -474,7 +474,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      *
      * @return is the result of the multiplicative inverse.
      */
-    DerivedType MultiplicativeInverse() const override = 0;
+    DerivedType multiplicative_inverse() const override = 0;
 
     /**
      * @brief Perform a modulus by 2 operation.  Returns the least significant
@@ -482,7 +482,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      *
      * @return is the resulting value.
      */
-    DerivedType ModByTwo() const override = 0;
+    DerivedType mod_by_two() const override = 0;
 
     /**
      * @brief Modulus - perform a modulus operation. Does proper mapping of
@@ -491,32 +491,32 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @param modulus is the modulus to use.
      * @return is the return value of the modulus.
      */
-    DerivedType Mod(const Integer& modulus) const override = 0;
+    DerivedType mod(const Integer& modulus) const override = 0;
 
     /**
      * @brief Switch modulus and adjust the values
      *
      * @param modulus is the modulus to be set
-     * @param rootOfUnity is the corresponding root of unity for the modulus
-     * @param modulusArb is the modulus used for arbitrary cyclotomics CRT
-     * @param rootOfUnityArb is the corresponding root of unity for the modulus
+     * @param root_of_unity_value is the corresponding root of unity for the modulus
+     * @param modulus_arb is the modulus used for arbitrary cyclotomics CRT
+     * @param root_of_unity_arb is the corresponding root of unity for the modulus
      * ASSUMPTION: This method assumes that the caller provides the correct
-     * rootOfUnity for the modulus
+     * root_of_unity_value for the modulus
      */
-    void SwitchModulus(const Integer& modulus, const Integer& rootOfUnity, const Integer& modulusArb,
-                       const Integer& rootOfUnityArb) override = 0;
+    void switch_modulus(const Integer& modulus, const Integer& root_of_unity_value, const Integer& modulus_arb,
+                       const Integer& root_of_unity_arb) override = 0;
     /**
      * @brief Switch modulus without centering: every value is reduced modulo the new modulus as a non-negative
-     * integer (unlike SwitchModulus, which maps values above half the old modulus to negative representatives), and
+     * integer (unlike switch_modulus, which maps values above half the old modulus to negative representatives), and
      * the parameters are replaced.
      *
      * @param modulus is the modulus to be set
-     * @param rootOfUnity is the corresponding root of unity for the modulus
-     * @param modulusArb is the modulus used for arbitrary cyclotomics CRT
-     * @param rootOfUnityArb is the corresponding root of unity for the modulus
+     * @param root_of_unity_value is the corresponding root of unity for the modulus
+     * @param modulus_arb is the modulus used for arbitrary cyclotomics CRT
+     * @param root_of_unity_arb is the corresponding root of unity for the modulus
      */
-    virtual void LazySwitchModulus(const Integer& modulus, const Integer& rootOfUnity, const Integer& modulusArb,
-                                   const Integer& rootOfUnityArb) = 0;
+    virtual void lazy_switch_modulus(const Integer& modulus, const Integer& root_of_unity_value, const Integer& modulus_arb,
+                                   const Integer& root_of_unity_arb) = 0;
 
     /**
      * @brief Fused multiply-accumulate with a scalar: *this += V * I (mod the modulus), without parameter validation.
@@ -525,39 +525,39 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @param I the scalar factor.
      * @return the resulting element.
      */
-    virtual DerivedType& MultAccEqNoCheck(const DerivedType& V, const Integer& I) = 0;
+    virtual DerivedType& mult_acc_eq_no_check(const DerivedType& V, const Integer& I) = 0;
 
     /**
      * @brief Convert from Coefficient to CRT or vice versa; calls FFT and inverse FFT
      *
      * @param thread_limit not used by single-polynomial implementations; kept for interface compatibility with
-     * DCRTPoly, where it bounds the number of threads.
-     * @warning use @see SetFormat(format) instead
+     * RnsPoly, where it bounds the number of threads.
+     * @warning use @see set_format(format) instead
      */
-    void SwitchFormat(uint32_t thread_limit = 0) override = 0;
+    void switch_format(uint32_t thread_limit = 0) override = 0;
 
     /**
      * @brief Sets format to value without calling FFT. Only use if you know what you're doing.
      *
      * @param f the format to record.
      */
-    virtual void OverrideFormat(const Format f) = 0;
+    virtual void override_format(const Format f) = 0;
 
     /**
-     * @brief Make DCRTPoly Sparse. Sets every index of each tower not equal to
-     * zero mod the wFactor to zero.
+     * @brief Make RnsPoly Sparse. Sets every index of each tower not equal to
+     * zero mod the w_factor to zero.
      *
-     * @param wFactor ratio between the sparse and none-sparse values.
+     * @param w_factor ratio between the sparse and none-sparse values.
      *
      * @warning Only used by RingSwitching, which is no longer supported. Will be removed in future.
      */
-    void MakeSparse(uint32_t wFactor) override = 0;
+    void make_sparse(uint32_t w_factor) override = 0;
 
     /**
      * @brief Returns true if ALL the tower(s) are empty.
      * @return true if all towers are empty
      */
-    bool IsEmpty() const override = 0;
+    bool is_empty() const override = 0;
 
     /**
      * @brief Determines if inverse exists
@@ -565,7 +565,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @return is the Boolean representation of the existence of multiplicative
      * inverse.
      */
-    bool InverseExists() const override = 0;
+    bool inverse_exists() const override = 0;
 
     /**
      * @brief Returns the infinity norm, basically the largest value in the ring
@@ -573,7 +573,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      *
      * @return is the largest value in the ring element.
      */
-    double Norm() const override = 0;
+    double norm() const override = 0;
 
     /**
      * @brief Write the element as \f$ \sum\limits{i=0}^{\lfloor {\log q/base}
@@ -582,16 +582,16 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * {\log q/base} \rceil}} \f$; This is used as a subroutine in the
      * relinearization procedure.
      *
-     * @param baseBits is the number of bits in the base, i.e., \f$ base =
-     * 2^{baseBits} \f$.
-     * @param evalModeAnswer if true, the digits are returned in EVALUATION format; otherwise in COEFFICIENT format.
+     * @param base_bits is the number of bits in the base, i.e., \f$ base =
+     * 2^{base_bits} \f$.
+     * @param eval_mode_answer if true, the digits are returned in EVALUATION format; otherwise in COEFFICIENT format.
      * @return is the pointer where the base decomposition vector is stored
      *
      * @warning not efficient and  not fast, uses multiprecision arithmetic and
-     *          will be removed in future. Use @see DCRTPolyInterface::CRTDecompose instead.
+     *          will be removed in future. Use @see RnsPolyInterface::crt_decompose instead.
      */
 
-    std::vector<DerivedType> BaseDecompose(uint32_t baseBits, bool evalModeAnswer) const override = 0;
+    std::vector<DerivedType> base_decompose(uint32_t base_bits, bool eval_mode_answer) const override = 0;
 
     /**
      * @brief Generate a vector of PolyImpl's as \f$ \left\{x, {base}*x,
@@ -600,14 +600,14 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * used as a subroutine in the relinearization procedure to get powers of a
      * certain "base" for the secret key element.
      *
-     * @param baseBits is the number of bits in the base, i.e., \f$ base =
-     * 2^{baseBits} \f$.
+     * @param base_bits is the number of bits in the base, i.e., \f$ base =
+     * 2^{base_bits} \f$.
      * @return is the pointer where the base decomposition vector is stored
      *
      * @warning not efficient and  not fast, uses multiprecision arithmetic and
-     *          will be removed in future. Use @see DCRTPolyInterface::CRTDecompose instead.
+     *          will be removed in future. Use @see RnsPolyInterface::crt_decompose instead.
      */
-    std::vector<DerivedType> PowersOfBase(uint32_t baseBits) const override = 0;
+    std::vector<DerivedType> powers_of_base(uint32_t base_bits) const override = 0;
 
     /**
      * @brief Sets the values of the element.
@@ -615,23 +615,23 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @param values the vector of values to set.
      * @param format the format (COEFFICIENT or EVALUATION) of the values.
      */
-    virtual void SetValues(const VecType& values, Format format) = 0;
+    virtual void set_values(const VecType& values, Format format) = 0;
     /**
      * @brief Sets the values of the element by moving them in.
      *
      * @param values the vector of values to move in.
      * @param format the format (COEFFICIENT or EVALUATION) of the values.
      */
-    virtual void SetValues(VecType&& values, Format format) = 0;
+    virtual void set_values(VecType&& values, Format format) = 0;
 
     /**
      * @brief Sets all values of element to zero.
      */
-    virtual void SetValuesToZero() = 0;
+    virtual void set_values_to_zero() = 0;
     /**
      * @brief Sets all values of the element to modulus - 1.
      */
-    virtual void SetValuesToMax() = 0;
+    virtual void set_values_to_max() = 0;
 
     /**
      * @brief CRT interpolation is a no-op for a single-modulus polynomial; returns a
@@ -639,8 +639,8 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      *
      * @return a copy of this element.
      */
-    DerivedType CRTInterpolate() const {
-        return this->GetDerived();
+    DerivedType crt_interpolate() const {
+        return this->get_derived();
     }
 
     /**
@@ -650,7 +650,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @param ptm the plaintext modulus.
      * @return the native polynomial of the reduced coefficients, in this element's format.
      */
-    virtual PolyNative DecryptionCRTInterpolate(PlaintextModulus ptm) const = 0;
+    virtual PolyNative decryption_crt_interpolate(PlaintextModulus ptm) const = 0;
 
     /**
      * @brief If the values are small enough this is used for efficiency
@@ -659,15 +659,15 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      *
      * @warning This will be replaced with a non-member utility function.
      */
-    virtual PolyNative ToNativePoly() const = 0;
+    virtual PolyNative to_native_poly() const = 0;
 
     /**
      * @brief Makes a copy of this element.
      *
      * @return the copy.
      */
-    DerivedType Clone() const final {
-        return DerivedType(this->GetDerived());
+    DerivedType clone() const final {
+        return DerivedType(this->get_derived());
     }
 
     /**
@@ -675,7 +675,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      *
      * @return the empty element.
      */
-    DerivedType CloneEmpty() const final {
+    DerivedType clone_empty() const final {
         return DerivedType();
     }
 
@@ -684,8 +684,8 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      *
      * @return the new element.
      */
-    DerivedType CloneParametersOnly() const final {
-        return DerivedType(this->GetDerived().GetParams(), this->GetDerived().GetFormat());
+    DerivedType clone_parameters_only() const final {
+        return DerivedType(this->get_derived().get_params(), this->get_derived().get_format());
     }
 
     /**
@@ -695,8 +695,8 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @param format the format of the resulting element.
      * @return the sampled element.
      */
-    DerivedType CloneWithNoise(const DggType& dgg, Format format) const final {
-        return DerivedType(dgg, this->GetDerived().GetParams(), format);
+    DerivedType clone_with_noise(const DggType& dgg, Format format) const final {
+        return DerivedType(dgg, this->get_derived().get_params(), format);
     }
 
     /**
@@ -704,8 +704,8 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      *
      * @return the element type name.
      */
-    const std::string GetElementName() const {
-        return this->GetDerived().GetElementName();
+    const std::string get_element_name() const {
+        return this->get_derived().get_element_name();
     }
 
   protected:
@@ -716,7 +716,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @return a resulting concatenated output stream
      */
     friend inline std::ostream& operator<<(std::ostream& os, const DerivedType& vec) {
-        os << (vec.GetFormat() == Format::EVALUATION ? "EVAL: " : "COEF: ") << vec.GetValues();
+        os << (vec.get_format() == Format::EVALUATION ? "EVAL: " : "COEF: ") << vec.get_values();
         return os;
     }
 
@@ -727,7 +727,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @return the result of the addition operation.
      */
     friend inline DerivedType operator+(const DerivedType& a, const DerivedType& b) {
-        return a.Plus(b);
+        return a.plus_impl(b);
     }
     /**
      * @brief Element-integer addition operator.
@@ -736,7 +736,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @return the result of the addition operation.
      */
     friend inline DerivedType operator+(const DerivedType& a, const Integer& b) {
-        return a.Plus(b);
+        return a.plus_impl(b);
     }
 
     /**
@@ -746,7 +746,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @return the result of the addition operation.
      */
     friend inline DerivedType operator+(const Integer& a, const DerivedType& b) {
-        return b.Plus(a);
+        return b.plus_impl(a);
     }
 
     /**
@@ -756,7 +756,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @return the result of the subtraction operation.
      */
     friend inline DerivedType operator-(const DerivedType& a, const DerivedType& b) {
-        return a.Minus(b);
+        return a.minus_impl(b);
     }
 
     /**
@@ -766,7 +766,7 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
      * @return the result of the subtraction operation.
      */
     friend inline DerivedType operator-(const DerivedType& a, const Integer& b) {
-        return a.Minus(b);
+        return a.minus_impl(b);
     }
 
     /**
@@ -820,6 +820,6 @@ class PolyInterface : public ILElement<DerivedType, VecType> {
     }
 };
 
-}  // namespace lbcrypto
+}  // namespace cipher
 
 #endif  // CIPHER_RING_BACKEND_POLY_INTERFACE_H_

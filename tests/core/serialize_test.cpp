@@ -48,7 +48,7 @@
 #include "cipher/util/serial.h"
 #include "cipher/util/utilities.h"
 
-using namespace lbcrypto;
+using namespace cipher;
 
 template <typename T>
 void bigint(const std::string& msg) {
@@ -60,14 +60,14 @@ void bigint(const std::string& msg) {
         std::stringstream s;
         T deser;
 
-        Serial::Serialize(val, s, SerType::JSON);
-        Serial::Deserialize(deser, s, SerType::JSON);
+        serialization::to_stream(val, s, SerType::JSON);
+        serialization::from_stream(deser, s, SerType::JSON);
         EXPECT_EQ(val, deser) << msg << " " << siz << " integer json ser/deser fails";
 
         s.str("");
-        Serial::Serialize(val, s, SerType::BINARY);
+        serialization::to_stream(val, s, SerType::BINARY);
 
-        Serial::Deserialize(deser, s, SerType::BINARY);
+        serialization::from_stream(deser, s, SerType::BINARY);
         EXPECT_EQ(val, deser) << msg << " " << siz << " integer binary ser/deser fails";
     };
 
@@ -88,13 +88,13 @@ void hugeint(const std::string& msg) {
         std::stringstream s;
         T deser;
 
-        Serial::Serialize(val, s, SerType::JSON);
-        Serial::Deserialize(deser, s, SerType::JSON);
+        serialization::to_stream(val, s, SerType::JSON);
+        serialization::from_stream(deser, s, SerType::JSON);
         EXPECT_EQ(val, deser) << msg << " " << siz << " integer json ser/deser fails";
 
         s.str("");
-        Serial::Serialize(val, s, SerType::BINARY);
-        Serial::Deserialize(deser, s, SerType::BINARY);
+        serialization::to_stream(val, s, SerType::BINARY);
+        serialization::from_stream(deser, s, SerType::BINARY);
         EXPECT_EQ(val, deser) << msg << " " << siz << " integer binary ser/deser fails";
     };
 
@@ -107,22 +107,22 @@ TEST(UTSer, hugeint) {
 
 template <typename V>
 void vector_of_bigint(const std::string& msg) {
-    OPENFHE_DEBUG_FLAG(false);
+    CIPHER_DEBUG_FLAG(false);
     const int vecsize = 100;
 
-    OPENFHE_DEBUG("step 0");
-    typename V::Integer mod((uint64_t)1 << 40);
+    CIPHER_DEBUG("step 0");
+    typename V::Integer mod_value((uint64_t)1 << 40);
 
-    OPENFHE_DEBUG("step 1");
-    V testvec(vecsize, mod);
-    OPENFHE_DEBUG("step 2");
+    CIPHER_DEBUG("step 1");
+    V testvec(vecsize, mod_value);
+    CIPHER_DEBUG("step 2");
     DiscreteUniformGeneratorImpl<V> dug;
-    OPENFHE_DEBUG("step 3");
-    dug.SetModulus(mod);
+    CIPHER_DEBUG("step 3");
+    dug.set_modulus(mod_value);
     typename V::Integer ranval;
 
     for (int i = 0; i < vecsize; i++) {
-        ranval = dug.GenerateInteger();
+        ranval = dug.generate_integer();
         testvec.at(i) = ranval;
     }
 
@@ -130,13 +130,13 @@ void vector_of_bigint(const std::string& msg) {
         std::stringstream s;
         V deser;
 
-        Serial::Serialize(val, s, SerType::JSON);
-        Serial::Deserialize(deser, s, SerType::JSON);
+        serialization::to_stream(val, s, SerType::JSON);
+        serialization::from_stream(deser, s, SerType::JSON);
         EXPECT_EQ(val, deser) << msg << " vector json ser/deser fails";
 
         s.str("");
-        Serial::Serialize(val, s, SerType::BINARY);
-        Serial::Deserialize(deser, s, SerType::BINARY);
+        serialization::to_stream(val, s, SerType::BINARY);
+        serialization::from_stream(deser, s, SerType::BINARY);
         EXPECT_EQ(val, deser) << msg << " vector binary ser/deser fails";
     };
 
@@ -151,13 +151,13 @@ void ilparams_test(const std::string& msg) {
         std::stringstream s;
         decltype(p) deser;
 
-        Serial::Serialize(val, s, SerType::JSON);
-        Serial::Deserialize(deser, s, SerType::JSON);
+        serialization::to_stream(val, s, SerType::JSON);
+        serialization::from_stream(deser, s, SerType::JSON);
         EXPECT_EQ(*val, *deser) << msg << " json ser/deser fails";
 
         s.str("");
-        Serial::Serialize(val, s, SerType::BINARY);
-        Serial::Deserialize(deser, s, SerType::BINARY);
+        serialization::to_stream(val, s, SerType::BINARY);
+        serialization::from_stream(deser, s, SerType::BINARY);
         EXPECT_EQ(*val, *deser) << msg << " binary ser/deser fails";
     };
 
@@ -170,19 +170,19 @@ TEST(UTSer, ilparams_test) {
 
 template <typename Element>
 void ildcrtparams_test(const std::string& msg) {
-    auto p = std::make_shared<ILDCRTParams<typename Element::Integer>>(1024, 5, 30);
+    auto p = std::make_shared<RnsParams<typename Element::Integer>>(1024, 5, 30);
 
     auto sfunc = [&msg](decltype(p) val) {
         std::stringstream s;
         decltype(p) deser;
 
-        Serial::Serialize(val, s, SerType::JSON);
-        Serial::Deserialize(deser, s, SerType::JSON);
+        serialization::to_stream(val, s, SerType::JSON);
+        serialization::from_stream(deser, s, SerType::JSON);
         EXPECT_EQ(*val, *deser) << msg << " json ser/deser fails";
 
         s.str("");
-        Serial::Serialize(val, s, SerType::BINARY);
-        Serial::Deserialize(deser, s, SerType::BINARY);
+        serialization::to_stream(val, s, SerType::BINARY);
+        serialization::from_stream(deser, s, SerType::BINARY);
         EXPECT_EQ(*val, *deser) << msg << " binary ser/deser fails";
     };
 
@@ -203,13 +203,13 @@ void ilvector_test(const std::string& msg) {
         std::stringstream s;
         Element deser;
 
-        Serial::Serialize(val, s, SerType::JSON);
-        Serial::Deserialize(deser, s, SerType::JSON);
+        serialization::to_stream(val, s, SerType::JSON);
+        serialization::from_stream(deser, s, SerType::JSON);
         EXPECT_EQ(val, deser) << msg << " vector json ser/deser fails";
 
         s.str("");
-        Serial::Serialize(val, s, SerType::BINARY);
-        Serial::Deserialize(deser, s, SerType::BINARY);
+        serialization::to_stream(val, s, SerType::BINARY);
+        serialization::from_stream(deser, s, SerType::BINARY);
         EXPECT_EQ(val, deser) << msg << " vector binary ser/deser fails";
     };
 
@@ -222,7 +222,7 @@ TEST(UTSer, ilvector_test) {
 
 template <typename Element>
 void ildcrtpoly_test(const std::string& msg) {
-    auto p = std::make_shared<ILDCRTParams<typename Element::Integer>>(1024, 5, 30);
+    auto p = std::make_shared<RnsParams<typename Element::Integer>>(1024, 5, 30);
     typename Element::DugType dug;
     Element vec(dug, p);
 
@@ -230,13 +230,13 @@ void ildcrtpoly_test(const std::string& msg) {
         std::stringstream s;
         Element deser;
 
-        Serial::Serialize(val, s, SerType::JSON);
-        Serial::Deserialize(deser, s, SerType::JSON);
+        serialization::to_stream(val, s, SerType::JSON);
+        serialization::from_stream(deser, s, SerType::JSON);
         EXPECT_EQ(val, deser) << msg << " vector json ser/deser fails";
 
         s.str("");
-        Serial::Serialize(val, s, SerType::BINARY);
-        Serial::Deserialize(deser, s, SerType::BINARY);
+        serialization::to_stream(val, s, SerType::BINARY);
+        serialization::from_stream(deser, s, SerType::BINARY);
         EXPECT_EQ(val, deser) << msg << " vector binary ser/deser fails";
     };
 
@@ -250,54 +250,54 @@ TEST(UTSer, ildcrtpoly_test) {
 ////////////////////////////////////////////////////////////
 template <typename V>
 void serialize_matrix_bigint(const std::string& msg) {
-    OPENFHE_DEBUG_FLAG(false);
+    CIPHER_DEBUG_FLAG(false);
     // dimensions of matrix.
     const int nrows = 4;
     const int ncols = 8;
 
-    OPENFHE_DEBUG("step 0");
-    const typename V::Integer mod((uint64_t)1 << 40);
+    CIPHER_DEBUG("step 0");
+    const typename V::Integer mod_value((uint64_t)1 << 40);
 
-    OPENFHE_DEBUG("step 1");
-    Matrix<typename V::Integer> testmat(V::Integer::Allocator, nrows, ncols);
+    CIPHER_DEBUG("step 1");
+    Matrix<typename V::Integer> testmat(V::Integer::allocator, nrows, ncols);
 
-    OPENFHE_DEBUG("step 2");
+    CIPHER_DEBUG("step 2");
     DiscreteUniformGeneratorImpl<V> dug;
 
-    OPENFHE_DEBUG("step 3");
-    dug.SetModulus(mod);
+    CIPHER_DEBUG("step 3");
+    dug.set_modulus(mod_value);
     typename V::Integer ranval;
 
     // load up the matix with random values
     for (size_t i = 0; i < nrows; i++) {
         for (size_t j = 0; j < ncols; j++) {
-            ranval = dug.GenerateInteger();
+            ranval = dug.generate_integer();
             testmat(i, j) = ranval;
         }
     }
 
-    OPENFHE_DEBUG("step 4");
+    CIPHER_DEBUG("step 4");
     // serialize the Matrix
 
     std::stringstream ss;
-    Serial::Serialize(testmat, ss, SerType::BINARY);
+    serialization::to_stream(testmat, ss, SerType::BINARY);
 
 #if !defined(NDEBUG)
     if (dbg_flag) {
-        std::cout << Serial::SerializeToString(testmat) << std::endl;
+        std::cout << serialization::serialize_to_string(testmat) << std::endl;
     }
 #endif
-    OPENFHE_DEBUG("step 5");
+    CIPHER_DEBUG("step 5");
 
     // empty matrix
-    Matrix<typename V::Integer> newmat(V::Integer::Allocator, 0, 0);
+    Matrix<typename V::Integer> newmat(V::Integer::allocator, 0, 0);
 
-    Serial::Deserialize(newmat, ss, SerType::BINARY);
+    serialization::from_stream(newmat, ss, SerType::BINARY);
 
-    OPENFHE_DEBUG("step 9");
+    CIPHER_DEBUG("step 9");
     EXPECT_EQ(testmat, newmat) << msg << " Mismatch after ser/deser";
-    OPENFHE_DEBUGEXP(testmat);
-    OPENFHE_DEBUGEXP(newmat);
+    CIPHER_DEBUGEXP(testmat);
+    CIPHER_DEBUGEXP(newmat);
 }
 
 TEST(UTSer, serialize_matrix_bigint) {
