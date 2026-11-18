@@ -1,32 +1,32 @@
-Welcome to OpenFHE's documentation!
+Welcome to Cipher's documentation!
 ====================================
 
-OpenFHE
+Cipher
 --------
 
 Fully Homomorphic Encryption (FHE) is a powerful cryptographic primitive that enables performing computations over encrypted data without having access to the secret key.
-OpenFHE is an open-source FHE library that includes efficient implementations of all common FHE schemes:
+Cipher is an open-source FHE library that includes efficient implementations of all common FHE schemes:
   - Brakerski/Fan-Vercauteren (BFV) scheme for integer arithmetic
   - Brakerski-Gentry-Vaikuntanathan (BGV) scheme for integer arithmetic
   - Cheon-Kim-Kim-Song (CKKS) scheme for real-number arithmetic (includes approximate bootstrapping)
   - Ducas-Micciancio (DM/FHEW), Chillotti-Gama-Georgieva-Izabachene (CGGI/TFHE), and Lee-Micciancio-Kim-Choi-Deryabin-Eom-Yoo (LMKCDEY) schemes for evaluating Boolean circuits and arbitrary functions over larger plaintext spaces using lookup tables
 
-OpenFHE also supports hybrid vectorized schemes, with the goal of enabling the FHEW/TFHE-like functional bootstrapping capability for schemes such as CKKS and BFV. In particular, OpenFHE supports
+Cipher also supports hybrid vectorized schemes, with the goal of enabling the FHEW/TFHE-like functional bootstrapping capability for schemes such as CKKS and BFV. In particular, Cipher supports
   - Switching between CKKS and FHEW/TFHE to evaluate non-smooth functions, e.g., comparison, using (scalar) FHEW/TFHE functional bootstrapping
   - Switching between RLWE (a scheme equivalent to the coefficient-encoded additive BFV scheme) and CKKS to evaluate arbitrary lookup tables over vectors of integers, e.g., modular reduction, comparison or S-box, using vectorized functional bootstrapping implemented in CKKS
 
-OpenFHE also includes the following multiparty extensions of FHE:
+Cipher also includes the following multiparty extensions of FHE:
   - Threshold FHE for BGV, BFV, and CKKS schemes
   - Interactive bootstrapping for Threshold CKKS
   - Proxy Re-Encryption for BGV, BFV, and CKKS schemes
 
-OpenFHE supports any GNU C++ compiler version 9 or above and clang C++ compiler version 10 or above.
+Cipher supports any GNU C++ compiler version 9 or above and clang C++ compiler version 10 or above.
 
 A major focus is on the usability of the schemes. For instance, all HE schemes with packing use the same common API, and are implemented using runtime polymorphism.
 
-OpenFHE implements efficient Residue Number System (RNS) algorithms to achieve high performance.
+Cipher implements efficient Residue Number System (RNS) algorithms to achieve high performance.
 
-.. note:: For a quick introduction to OpenFHE, visit our :ref:`quickstart <quickstart>` page.
+.. note:: For a quick introduction to Cipher, visit our :ref:`quickstart <quickstart>` page.
 
 .. toctree::
    :maxdepth: 2
@@ -64,7 +64,7 @@ OpenFHE implements efficient Residue Number System (RNS) algorithms to achieve h
 Components
 -------------
 
-OpenFHE is a cross-platform C++17 library supporting Linux, Windows, and macOS. The supported compilers are g++ v9 or later and clang++ v10 or later.
+Cipher is a cross-platform C++17 library supporting Linux, Windows, and macOS. The supported compilers are g++ v9 or later and clang++ v10 or later.
 
 The library also includes unit tests and sample application demos.
 
@@ -75,7 +75,7 @@ The library is based on modular architecture with the following layers:
 * Crypto layer containing efficient implementations of FHE schemes.
 * Encoding layer supporting multiple plaintext encodings for cryptographic schemes.
 
-OpenFHE Extensions
+Cipher Extensions
 -------------------
 
 - `Intel HEXL Acceleration <https://github.com/openfheorg/openfhe-hexl>`_
@@ -83,12 +83,12 @@ OpenFHE Extensions
 License
 -----------
 
-OpenFHE is available under the BSD 2-clause license.
+Cipher is available under the BSD 2-clause license (see LICENSE and NOTICE.md).
 
 Additional Resources
 ----------------------
 
-`OpenFHE/PALISADE Webinars <https://www.youtube.com/channel/UC1qByOsQina1rpZ8AGl5TZw>`_
+`Cipher/PALISADE Webinars <https://www.youtube.com/channel/UC1qByOsQina1rpZ8AGl5TZw>`_
 
 .. toctree::
    :caption: Appendix

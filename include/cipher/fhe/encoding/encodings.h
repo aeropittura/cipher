@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  all supported encodings of plaintext objects in OpenFHE
+  all supported encodings of plaintext objects in Cipher
  */
 
 #ifndef CIPHER_FHE_ENCODING_ENCODINGS_H_

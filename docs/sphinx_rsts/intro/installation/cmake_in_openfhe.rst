@@ -1,14 +1,14 @@
 .. _cmake_in_openfhe:
 
-CMAKE in OpenFHE
+CMAKE in Cipher
 =================
 
-OpenFHE uses CMake to create the Makefiles that build and install the OpenFHE Library. This page describes how CMake is used in OpenFHE, and how contributors should use CMake when adding new files or new components.
+Cipher uses CMake to create the Makefiles that build and install the Cipher Library. This page describes how CMake is used in Cipher, and how contributors should use CMake when adding new files or new components.
 
-Using OpenFHE's CMake system
+Using Cipher's CMake system
 -----------------------------
 
-The first step in using CMake is deciding where the build should be performed. This is the "build tree". The "source tree" is where the OpenFHE source is located. These should be different directories! The build tree can be in a subdirectory of the source directory (such as "build") or in some other place.
+The first step in using CMake is deciding where the build should be performed. This is the "build tree". The "source tree" is where the Cipher source is located. These should be different directories! The build tree can be in a subdirectory of the source directory (such as "build") or in some other place.
 
 The project is described in files named ``CMakeLists.txt``.
 
@@ -27,13 +27,13 @@ CMake does not usually have to be rerun. A ``make`` will rerun CMake if it detec
 Required Compilers
 ^^^^^^^^^^^^^^^^^^^^^
 
-OpenFHE supports any GNU C++ compiler version 9 or above and clang C++ compiler version 10 or above.
+Cipher supports any GNU C++ compiler version 9 or above and clang C++ compiler version 10 or above.
 
 A warning is issued if an older version of the compiler is found. The build may run but such compilers are unsupported.
 
 Required Packages
 ^^^^^^^^^^^^^^^^^^^^^
-OpenFHE requires that certain packages and applications be available on the system. CMake searches for these packages and may either stop if a required package is missing, or disable functionality.
+Cipher requires that certain packages and applications be available on the system. CMake searches for these packages and may either stop if a required package is missing, or disable functionality.
 
 These packages are as follows:
 
@@ -49,7 +49,7 @@ Optional Packages
 Command Line Options
 ^^^^^^^^^^^^^^^^^^^^^
 There are a large number of CMake command line options. Most important for our purposes here is the -D option,
-which allows variables to be set, cached, and used in constructing the Makefile and making OpenFHE.
+which allows variables to be set, cached, and used in constructing the Makefile and making Cipher.
 
 Combining multiple CMake flags
 **********************************
@@ -62,22 +62,22 @@ Different flags can be combined together. For example, to configure cmake with N
 
 Important CMake Flags Used
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-We point out a number of the standard CMake variables that can be set using -D from the CMake command line, which may be of use to OpenFHE users. To set one of these variables, use -D*VARIABLE_NAME*=*VALUE* on the command line.
+We point out a number of the standard CMake variables that can be set using -D from the CMake command line, which may be of use to Cipher users. To set one of these variables, use -D*VARIABLE_NAME*=*VALUE* on the command line.
 
  ========================= ============================ =============================================================================================================================================================================================================================================================================================================================================================================================================================================
   *VARIABLE_NAME*           Definition                   Notes
  ========================= ============================ =============================================================================================================================================================================================================================================================================================================================================================================================================================================
-  CMAKE_INSTALL_PREFIX      Base directory for installs  Base directory for installation of OpenFHE. What goes where underneath it is decided by CMAKE_INSTALL_INCLUDEDIR, CMAKE_INSTALL_LIBDIR and CMAKE_INSTALL_BINDIR below. OpenFHE is also exported as a CMake package so that applications can locate it with find_package(OpenFHE); those package files are installed next to the libraries
-  CMAKE_INSTALL_INCLUDEDIR  Header directory name        Directory for header files, taken relative to CMAKE_INSTALL_PREFIX unless given as an absolute path. Defaults to include. OpenFHE places its own headers in an openfhe subdirectory of it, so by default they end up in ${CMAKE_INSTALL_PREFIX}/include/openfhe
-  CMAKE_INSTALL_LIBDIR      Library directory name       Directory for the libraries and the exported CMake package files, taken relative to CMAKE_INSTALL_PREFIX unless given as an absolute path. Defaults to lib, which is the layout OpenFHE has always installed; distribution packagers can set it to lib64 or lib/<arch-triplet>. OpenFHE seeds this default before including GNUInstallDirs, so the lib64 or multiarch value GNUInstallDirs would otherwise derive is used only when asked for
-  CMAKE_INSTALL_BINDIR      Runtime directory name       Directory for runtime binaries, taken relative to CMAKE_INSTALL_PREFIX unless given as an absolute path. Defaults to bin. This is where the DLLs are installed on Windows, with the import libraries going to CMAKE_INSTALL_LIBDIR; on Unix-like systems OpenFHE installs nothing here. Applications can read the location as OpenFHE_BINDIR from OpenFHEConfig.cmake
-  CMAKE_BUILD_TYPE          Debug, Release               Default is to build OpenFHE for release, with no debug information; developers may want to specify -DCMAKE_BUILD_TYPE=Debug
+  CMAKE_INSTALL_PREFIX      Base directory for installs  Base directory for installation of Cipher. What goes where underneath it is decided by CMAKE_INSTALL_INCLUDEDIR, CMAKE_INSTALL_LIBDIR and CMAKE_INSTALL_BINDIR below. Cipher is also exported as a CMake package so that applications can locate it with find_package(Cipher); those package files are installed next to the libraries
+  CMAKE_INSTALL_INCLUDEDIR  Header directory name        Directory for header files, taken relative to CMAKE_INSTALL_PREFIX unless given as an absolute path. Defaults to include. Cipher places its own headers in an openfhe subdirectory of it, so by default they end up in ${CMAKE_INSTALL_PREFIX}/include/openfhe
+  CMAKE_INSTALL_LIBDIR      Library directory name       Directory for the libraries and the exported CMake package files, taken relative to CMAKE_INSTALL_PREFIX unless given as an absolute path. Defaults to lib, which is the layout Cipher has always installed; distribution packagers can set it to lib64 or lib/<arch-triplet>. Cipher seeds this default before including GNUInstallDirs, so the lib64 or multiarch value GNUInstallDirs would otherwise derive is used only when asked for
+  CMAKE_INSTALL_BINDIR      Runtime directory name       Directory for runtime binaries, taken relative to CMAKE_INSTALL_PREFIX unless given as an absolute path. Defaults to bin. This is where the DLLs are installed on Windows, with the import libraries going to CMAKE_INSTALL_LIBDIR; on Unix-like systems Cipher installs nothing here. Applications can read the location as OpenFHE_BINDIR from OpenFHEConfig.cmake
+  CMAKE_BUILD_TYPE          Debug, Release               Default is to build Cipher for release, with no debug information; developers may want to specify -DCMAKE_BUILD_TYPE=Debug
  ========================= ============================ =============================================================================================================================================================================================================================================================================================================================================================================================================================================
 
 
-Flags for OpenFHE Builds
+Flags for Cipher Builds
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The OpenFHE build has a number of options to control
+The Cipher build has a number of options to control
 what is built and what features are included/excluded.
 
 Each of the options is enabled by saying ``-DOPTION_NAME=ON`` and is disabled by saying ``-DOPTION_NAME=OFF``
@@ -109,28 +109,28 @@ The table below shows the current list of options, definition for the option, an
 
 .. note:: More Options will be added as development progresses
 
-The default math backend for the OpenFHE build is Backend 4 (dynamically-sized big integers). This default can be changed on the CMake command line by setting the MATHBACKEND variable. For example, to select backend 6 (high performance fixed integers based on the GMP and NTL libraries), use ``-DMATHBACKEND=6`` on the CMake command line.
+The default math backend for the Cipher build is Backend 4 (dynamically-sized big integers). This default can be changed on the CMake command line by setting the MATHBACKEND variable. For example, to select backend 6 (high performance fixed integers based on the GMP and NTL libraries), use ``-DMATHBACKEND=6`` on the CMake command line.
 
 Detecting Local Environments
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-OpenFHE detects most of the capabilities of the target machine. It uses the machine's capabilities and the values of the user options to create header files that are used to control the build. These files are placed in the src subdirectory of the CMake build tree, and are included in the OpenFHE install.
+Cipher detects most of the capabilities of the target machine. It uses the machine's capabilities and the values of the user options to create header files that are used to control the build. These files are placed in the src subdirectory of the CMake build tree, and are included in the Cipher install.
 
 ``src/core/config_core.h`` is used to control the build of the core component, and any library code that depends on it. Future developments will expand this to other components.
 
 Third-Party Components
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-OpenFHE uses some third-party components from Google for testing and benchmarking, and it uses a third-party serialization library called CEREAL. These libraries are git submodules under OpenFHE and are fully integrated into the build.
+Cipher uses some third-party components from Google for testing and benchmarking, and it uses a third-party serialization library called CEREAL. These libraries are git submodules under Cipher and are fully integrated into the build.
 
 Turn on NTL/GMP (Only for Advanced Users)
 *********************************************
 
-By default OpenFHE builds without external dependencies. If you wish to use the ``NTL/GMP`` implementation of ``BigInteger/BigVector``, you can [install GMP and NTL manually](Instructions-for-installing-GMP-and-NTL) and run cmake with ``-DWITH_NTL=ON``. The complete command is
+By default Cipher builds without external dependencies. If you wish to use the ``NTL/GMP`` implementation of ``BigInteger/BigVector``, you can [install GMP and NTL manually](Instructions-for-installing-GMP-and-NTL) and run cmake with ``-DWITH_NTL=ON``. The complete command is
 
 ::
 
     cmake -DWITH_NTL=ON ..
 
-We have tested OpenFHE with ``GMP 6.1.2`` and ``6.2.1``, and ``NTL 10.5.0`` and ``11.4.4``.
+We have tested Cipher with ``GMP 6.1.2`` and ``6.2.1``, and ``NTL 10.5.0`` and ``11.4.4``.
 
 .. note:: A regular binary install (using tools like ``apt-get``) will not work
    Special compilation flags need to be passed. See :ref:`Instructions for installing GMP and NTL <gmp_ntl_install>`
@@ -139,7 +139,7 @@ We have tested OpenFHE with ``GMP 6.1.2`` and ``6.2.1``, and ``NTL 10.5.0`` and 
 
 .. note:: The performance w/o and w `NTL` is almost the same for all schemes/operations
 
-   - `NTL` is used only for multiprecision integer arithmetic. The latter only when ``MATHBACKEND`` is set to ``6``.
+   - `NTL` is used only for multiprecision integer arithmetic. The latter only when ``CIPHER_MATH_BACKEND`` is set to ``6``.
    - Most crypto operations are executed using native arithmetic (employing RNS procedures) and do not use higher-precision capabilities.
 
 Turn on tcmalloc
@@ -151,11 +151,11 @@ If you wish to use tcmalloc, you can add ``-DWITH_TCM=ON`` to the cmake command.
 
     cmake -DWITH_TCM=ON ..
 
-tcmalloc can improve performance in the multi-threaded mode (when OMP_NUM_THREADS>1). It provides efficient thread-caching block allocation for all OpenFHE objects.
+tcmalloc can improve performance in the multi-threaded mode (when OMP_NUM_THREADS>1). It provides efficient thread-caching block allocation for all Cipher objects.
 
 .. note:: ``tcmalloc`` only works in Linux and macOS, and is not currently supported in ``MinGW``.
 
-Tcmalloc should be installed after running cmake and right before running make for OpenFHE. To build tcmalloc, run
+Tcmalloc should be installed after running cmake and right before running make for Cipher. To build tcmalloc, run
 
 ::
 
@@ -169,7 +169,7 @@ To remove tcmalloc, run
 
 Location of Build Products
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-- The Makefile created by CMake creates all OpenFHE build products inside the build subdirectory.
+- The Makefile created by CMake creates all Cipher build products inside the build subdirectory.
 
 - The actual libraries are placed in the subdirectory lib.
 
@@ -179,65 +179,65 @@ Location of Build Products
 
 - Benchmarks are placed in bin/benchmark.
 
-- Examples (of basic OpenFHE features) are placed in bin/examples, and additional examples (more complicated and research-oriented examples) are placed in bin/extras. Note demos are built as part of each sub-component of the library (core, pke, trapdoor, etc.)
+- Examples (of basic Cipher features) are placed in bin/examples, and additional examples (more complicated and research-oriented examples) are placed in bin/extras. Note demos are built as part of each sub-component of the library (core, pke, trapdoor, etc.)
 
 - Documentation (built in the build directory under ``<BUILD_LOCATION>/docs/doxygen/`` for DOXYGEN builds, and ``<BUILD_LOCATION>/docs/sphinx`` for Sphinx builds)
 
-Installing OpenFHE on your system for use by applications external to the OpenFHE source tree
+Installing Cipher on your system for use by applications external to the Cipher source tree
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Running `make install` will install all libraries and header files in the directories designated by ``CMAKE_INSTALL_PREFIX``. Demos, unittests, benchmarks, examples and extras are not installed.
 
-Building applications with an installed OpenFHE library
+Building applications with an installed Cipher library
 ************************************************************
-A user can create a CMake environment for their own OpenFHE application development.
-Simply copy the file CMakeLists.User.txt from the OpenFHE source tree to
+A user can create a CMake environment for their own Cipher application development.
+Simply copy the file CMakeLists.User.txt from the Cipher source tree to
 CMakeLists.txt in your source tree, and add your CMake directives for your own programs to
 the end of the file.
 
 
-This file imports the OpenFHE package that was built and installed by the OpenFHE build.
+This file imports the Cipher package that was built and installed by the Cipher build.
 
 Cross Compiling with CMake [experimental feature]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Cross compiling OpenFHE for other target environments is an experimental feature. Cross-compilation for new targets should require the following steps:
+Cross compiling Cipher for other target environments is an experimental feature. Cross-compilation for new targets should require the following steps:
 
 1. Obtain and configure  a cross-compiler for your target environment (or use the appropriate command line arguments to your compiler to initiate cross compilation).
 2. Specify that CMake should use the cross-compiler.
 3. Proceed with the CMake/make process.
 
 .. note:: third-party libgmp and NTL libraries will probably need to be built manually for cross compilation using their internal build sequence, and that they may not be supported on the target platform at all.
-   Configuring  OpenFHE with -DWITH_NTL=ON will circumvent this issue.
+   Configuring  Cipher with -DWITH_NTL=ON will circumvent this issue.
 
-Documentation for extending OpenFHE CMake Files
+Documentation for extending Cipher CMake Files
 ----------------------------------------------------------
 
-CMake Files for OpenFHE Components
+CMake Files for Cipher Components
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Each component of the library (core, pke, trapdoor, etc.) has its own CMakeLists.txt file. Each of these files is included by the main OpenFHE CMakeLists.txt file. The structure of all of these component CMakeList.txt files is identical:
+Each component of the library (core, pke, trapdoor, etc.) has its own CMakeLists.txt file. Each of these files is included by the main Cipher CMakeLists.txt file. The structure of all of these component CMakeList.txt files is identical:
 
 1. Determine the files that are built into the component library
 2. Set include directories to build the component library
-3. Set the version number from the OpenFHE version number
+3. Set the version number from the Cipher version number
 4. Add rules to build the objects in the component library
 5. Add rules to build and install the component library, dynamic as well as static
 6. If unit tests are included in the build, add rules to build unit tests
 7. Add rules to build all the source files in the demo directory into demos
 8. Add targets to build "all" of various pieces of the component
 
-Adding a new file to OpenFHE
+Adding a new file to Cipher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 A new file can simply be added to the directory tree, and CMake will add it to the build.
 
-Adding a new component to OpenFHE
+Adding a new component to Cipher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-When adding a new component to OpenFHE
+When adding a new component to Cipher
 
 1. Observe the structure discussed above when making your new CMakeLists.txt for the component
 2. Be sure to include the component in the main CMakeLists.txt file at the root of the source tree
 3. Be sure to update the "all" targets to include targets from the new component
 
-Documentation of make targets created by OpenFHE CMake system
+Documentation of make targets created by Cipher CMake system
 --------------------------------------------------------------
 
 When ``make`` is run without any target specified, it builds:
@@ -248,7 +248,7 @@ When ``make`` is run without any target specified, it builds:
 - benchmarks (if ``BUILD_BENCHMARKS=ON``),
 - and extras (if ``BUILD_EXTRAS=ON``).
 
-.. note:: OpenFHE also provides more granular control over which components of OpenFHE are built.
+.. note:: Cipher also provides more granular control over which components of Cipher are built.
 
 We discuss these options below. Each of these commands can be used instead of ``make`` in the main build instructions.
 

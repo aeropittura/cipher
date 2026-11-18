@@ -73,7 +73,7 @@ struct cc_ser_enabled<std::shared_ptr<CryptoContextImpl<Element>>> : std::true_t
 namespace serialization {
 /**
  * Deserialize for a CryptoContext (that is, a shared pointer to a
- * CryptoContextImpl OpenFHE doesn't want multiple copies of the same crypto
+ * CryptoContextImpl Cipher doesn't want multiple copies of the same crypto
  * context floating around, and it enforces that here
  *
  * The unnamed third argument selects JSON serialization.
@@ -142,7 +142,7 @@ template bool CryptoContextImpl<RnsPoly>::deserialize_eval_automorphism_key<SerT
 namespace serialization {
 /**
  * Deserialize for a CryptoContext (that is, a shared pointer to a
- * CryptoContextImpl OpenFHE doesn't want multiple copies of the same crypto
+ * CryptoContextImpl Cipher doesn't want multiple copies of the same crypto
  * context floating around, and it enforces that here
  *
  * The unnamed third argument selects BINARY serialization.

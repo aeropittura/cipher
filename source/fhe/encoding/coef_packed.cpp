@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  Represents and defines packing integers of plaintext objects into polynomial coefficients in OpenFHE
+  Represents and defines packing integers of plaintext objects into polynomial coefficients in Cipher
  */
 
 #include "cipher/fhe/encoding/coef_packed.h"

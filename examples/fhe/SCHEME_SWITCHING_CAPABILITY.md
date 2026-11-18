@@ -1,7 +1,7 @@
-OpenFHE Lattice Cryptography Library - Scheme switching between CKKS and FHEW experimental capability
+Cipher Lattice Cryptography Library - Scheme switching between CKKS and FHEW experimental capability
 =====================================================================================================
 
-[License Information](../../../LICENSE)
+[License Information](../../LICENSE)
 
 Document Description
 ====================
@@ -11,13 +11,13 @@ operations.
 Example Description
 ====================
 
-The example for this code is located in [scheme-switching.cpp](scheme-switching.cpp). The file gives examples on how to run:
-- `EvalCKKStoFHEW`, which converts a CKKS ciphertext to FHEW ciphertexts;
-- `EvalFHEWtoCKKS`, which converts FHEW ciphertexts to a CKKS ciphertext;
+The example for this code is located in [scheme-switching.cpp](scheme_switching.cpp). The file gives examples on how to run:
+- `eval_ckks_to_fhew`, which converts a CKKS ciphertext to FHEW ciphertexts;
+- `eval_fhew_to_ckks`, which converts FHEW ciphertexts to a CKKS ciphertext;
 - how to combine the two with intermediate operations, for example the floor function or a polynomial;
-- `EvalCompareSchemeSwitching `, which returns the result of the comparison between two CKKS ciphertexts via transformation to FHEW ciphertexts
+- `eval_compare_scheme_switching `, which returns the result of the comparison between two CKKS ciphertexts via transformation to FHEW ciphertexts
 and comparison;
-- `EvalMinSchemeSwitching`, `EvalMinSchemeSwitchingAlt` and `EvalMaxSchemeSwitching`, `EvalMaxSchemeSwitchingAlt` respectively, which return
+- `eval_min_scheme_switching`, `eval_min_scheme_switching_alt` and `eval_max_scheme_switching`, `eval_max_scheme_switching_alt` respectively, which return
 the min and argmin, respectively max and argmax, of a vector of reals packed inside a CKKS ciphertext, via iterated scheme switching.
 
 
@@ -32,8 +32,8 @@ linear transform which can be precomputed), modulus switching, key switching, LW
 The features that need to be enabled are PKE, KEYSWITCH, LEVELEDSHE and SCHEMESWITCH.
 
 The user has to generate a CKKS cryptocontext and keys with the desired parameters, as well as to set up the FHEW cryptocontext and
-private key through `EvalCKKStoFHEWSetup` and the automorphism keys and key switch hints through `EvalCKKStoFHEWKeyGen`. The setup is
-completed by calling `EvalCKKStoFHEWPrecompute` which takes as argument the scale with which to multiply the decoding matrix, which
+private key through `eval_ckks_to_fhew_setup` and the automorphism keys and key switch hints through `eval_ckks_to_fhew_key_gen`. The setup is
+completed by calling `eval_ckks_to_fhew_precompute` which takes as argument the scale with which to multiply the decoding matrix, which
 in most cases should be chosen by the user to be 1 / p, where p is the desired FHEW plaintext modulus; internally, the scale will be
 transformed to Q / (scFactor * p), where Q is the CKKS ciphertext modulus on level 0, scFactor is the CKKS scaling factor for that level.
 If the scale is left to be the default value of 1, the implicit FHEW plaintext modulus will be Q / scFactor, and the user should take this
@@ -41,7 +41,7 @@ into account. Finally, the user can also divide separately the messages by p, an
 to an internal scaling only by Q / scFactor) and recover the initial message in FHEW. The value of p should be approximately 10 - 12 bits
 smaller than Q to allow for better accuracy with the sin(x) ~ x approximation of mod x.
 
-After the setup and precomputation, the user should call `EvalCKKStoFHEW`. The number of slots to be converted is specified by the user,
+After the setup and precomputation, the user should call `eval_ckks_to_fhew`. The number of slots to be converted is specified by the user,
 otherwise it defaults to the number of slots specified in the CKKS scheme. Note that FHEW plaintexts are integers, so the messages from
 CKKS will be rounded (and are expected to fit in the FHEW plaintext modulus).
 
@@ -55,11 +55,11 @@ The features that need to be enabled are PKE, KEYSWITCH, LEVELEDSHE, ADVANCEDSHE
 
 The user has to generate a CKKS cryptocontext and keys with the desired parameters, as well as a FHEW cryptocontext and private key.
 The setup also includes precomputing the necessary automorphism keys and CKKS encryption of the FHEW secret key, as well as other
-information for switching from FHEW to CKKS, through `EvalFHEWtoCKKSSetup` and `EvalFHEWtoCKKSKeyGen`.
+information for switching from FHEW to CKKS, through `eval_fhew_to_ckks_setup` and `eval_fhew_to_ckks_key_gen`.
 
-The conversion between FHEW to CKKS is called via `EvalFHEWtoCKKS`, where the user has to specify the number of ciphertexts to
+The conversion between FHEW to CKKS is called via `eval_fhew_to_ckks`, where the user has to specify the number of ciphertexts to
 convert into a single CKKS ciphertext, the FHEW plaintext modulus (by default 4), and if the output is not binary, the range for
-postprocessing the CKKS ciphertext after the Chebyshev polynomial evaluation. The example `SwitchFHEWtoCKKS()` illustrates this aspect.
+postprocessing the CKKS ciphertext after the Chebyshev polynomial evaluation. The example `switch_fhew_to_ckks()` illustrates this aspect.
 
 Importantly, for correct CKKS decryption, the messages have to be much smaller than the FHEW plaintext modulus used when encrypting in
 FHEW. The reason for this is that the modular reduction approximation implemented works well around zero, so m/p should be very small.
@@ -71,37 +71,37 @@ message space is large.
 With the previous two modules in place, we can also work with CKKS ciphertexts, convert them to FHEW, perform operations on them, and
 then convert the result back to CKKS.
 
-The user has to generate a CKKS cryptocontext and keys with the desired parameters, then call `EvalSchemeSwitchingSetup` and
-`EvalSchemeSwitchingKeyGen`, which combine the setups for both conversions, then the precomputation for the CKKS to FHEW conversion
-`EvalCKKStoFHEWPrecompute` as above or `EvalCompareSwitchPrecompute`, and the `BTKeyGen` for the desired intermediate FHEW computations.
+The user has to generate a CKKS cryptocontext and keys with the desired parameters, then call `eval_scheme_switching_setup` and
+`eval_scheme_switching_key_gen`, which combine the setups for both conversions, then the precomputation for the CKKS to FHEW conversion
+`eval_ckks_to_fhew_precompute` as above or `eval_compare_switch_precompute`, and the `bt_key_gen` for the desired intermediate FHEW computations.
 
-After calling `EvalCKKStoFHEW`, the user then applies the desired functions on the FHEW ciphertexts. In the example
-`FloorViaSchemeSwitching()` the function is generalized floor/shifted truncation, in the example `ComparisonViaSchemeSwitching()`
-the function is comparison between two vectors, and in the example `FuncViaSchemeSwitching()` the function is specified and computed
-through `GenerateLUTviaFunction`.
+After calling `eval_ckks_to_fhew`, the user then applies the desired functions on the FHEW ciphertexts. In the example
+`floor_via_scheme_switching()` the function is generalized floor/shifted truncation, in the example `comparison_via_scheme_switching()`
+the function is comparison between two vectors, and in the example `func_via_scheme_switching()` the function is specified and computed
+through `generate_lut_via_function`.
 
-Finally, `EvalFHEWtoCKKS` should be called to switch back to CKKS, where the plaintext modulus of the output of the above function should
+Finally, `eval_fhew_to_ckks` should be called to switch back to CKKS, where the plaintext modulus of the output of the above function should
 be specified (e.g., 4 for the output of comparison).
 
 Recall that FHEW supports integers, while CKKS encodes real values. Therefore, a rounding is done during the conversion. For instance, to
 correctly compare numbers that are very close to each other, the user has to scale the inputs with the desired precision. The example
-`ComparisonViaSchemeSwitching()` shows how to do this via `EvalCompareSwitchPrecompute`.
+`comparison_via_scheme_switching()` shows how to do this via `eval_compare_switch_precompute`.
 
 Currently, the code does not support an arbitrary function to be applied to the intermediate FHEW ciphertexts if they have to be converted
-back to CKKS. The reason is that (1) the current implementation of `GenerateLUTviaFunction` works only for the small decryption ciphertext
-modulus q = 2048, which allows a plaintext modulus of at most p = 8 (`GetMaxPlaintextSpace()`) and (2) the current implementation of light
+back to CKKS. The reason is that (1) the current implementation of `generate_lut_via_function` works only for the small decryption ciphertext
+modulus q = 2048, which allows a plaintext modulus of at most p = 8 (`get_max_plaintext_space()`) and (2) the current implementation of light
 bootstrapping to convert FHEW ciphertexts to a CKKS ciphertext approximates correctly the modular function only arround zero, which requires
-the messagee m << p. Instead of specifying directly the larger plaintext modulus in `EvalFHEWtoCKKS`, which is required to postprocess
+the messagee m << p. Instead of specifying directly the larger plaintext modulus in `eval_fhew_to_ckks`, which is required to postprocess
 the ciphertext obtained after the Chebyshev evaluation, one can supply the plaintext modulus as 4, which returns a ciphertext
 encrypting $y=sin(2pi*x/p)$. Then, one can apply $arcsin(y)*p/(2pi)$. However, this also does not cover the whole initial message space,
-since arcsin has codomain $[-pi/2, pi/2]$. This issue is exemplified in the example `FloorViaSchemeSwitching()`.
+since arcsin has codomain $[-pi/2, pi/2]$. This issue is exemplified in the example `floor_via_scheme_switching()`.
 
 **FHEW->CKKS->operation->FHEW**
-This functionality is the mirror of the above. The user should call `EvalSchemeSwitchingSetup`, `EvalSchemeSwitchingKeyGen`,
-`EvalCKKStoFHEWPrecompute`, and generate the keys which are required for the intermediate CKKS computations. After calling `EvalFHEWtoCKKS`,
-the user can then apply the desired functions on the CKKS ciphertext. In the example `PolyViaSchemeSwitching`, this intermediate function
-involves rotations, multiplications and additions. Finally, `EvalCKKStoFHEW` should be called to switch back to FHEW (where the plaintext
-modulus to be used in decryption was used to compute the scale in `EvalCKKStoFHEWPrecompute`).
+This functionality is the mirror of the above. The user should call `eval_scheme_switching_setup`, `eval_scheme_switching_key_gen`,
+`eval_ckks_to_fhew_precompute`, and generate the keys which are required for the intermediate CKKS computations. After calling `eval_fhew_to_ckks`,
+the user can then apply the desired functions on the CKKS ciphertext. In the example `poly_via_scheme_switching`, this intermediate function
+involves rotations, multiplications and additions. Finally, `eval_ckks_to_fhew` should be called to switch back to FHEW (where the plaintext
+modulus to be used in decryption was used to compute the scale in `eval_ckks_to_fhew_precompute`).
 
 **Iterated scheme switching: min/argmin and max/argmax**
 We also support repeated scheme switching between CKKS and FHEW with intermediate computations in each scheme. One such example is
@@ -113,22 +113,22 @@ Second, using multiplication in CKKS, only half of the slots are selected to upd
 corresponding to a negative difference for min and the ones corresponding to a positive difference for max), and the process repeats
 until reaching a vector of length of one.
 
-We provide two instantiation of the above intuition, `EvalMinSchemeSwitching` which performs more operations in CKKS and is exemplified
-in `ArgminViaSchemeSwitching()`, and `EvalMinSchemeSwitchingAlt` which performs more operations in FHEW and is exemplified in
-`ArgminViaSchemeSwitchingAlt()`.
+We provide two instantiation of the above intuition, `eval_min_scheme_switching` which performs more operations in CKKS and is exemplified
+in `argmin_via_scheme_switching()`, and `eval_min_scheme_switching_alt` which performs more operations in FHEW and is exemplified in
+`argmin_via_scheme_switching_alt()`.
 
 For a good precision of the output, we require a large scaling factor and large first modsize in CKKS, as well as large ciphertext
 modulus and plaintext modulus in FHEW. Note that because CKKS is an approximate scheme, performing more operations in CKKS can lead
 to a decrease in precision.
 
-The user should call `EvalSchemeSwitchingSetup`, then `EvalSchemeSwitchingKeyGen`, specifying whether the argmin/argmax should have a
-one-hot encoding or not, as well as if the alternative computation method mentioned above should be used, then `EvalCompareSwitchPrecompute`
+The user should call `eval_scheme_switching_setup`, then `eval_scheme_switching_key_gen`, specifying whether the argmin/argmax should have a
+one-hot encoding or not, as well as if the alternative computation method mentioned above should be used, then `eval_compare_switch_precompute`
 specifying if an additional scaling if desired. As mentioned above, the user can manually scale the inputs to [-0.5, 0.5], (such that
 the difference of values is between [-1, 1]) in which case the precomputation does not need to have any scaling, and this is
-exemplified in `ArgminViaSchemeSwitchingUnit()` and `ArgminViaSchemeSwitchingUnitAlt()`.
+exemplified in `argmin_via_scheme_switching_unit()` and `ArgminViaSchemeSwitchingUnitAlt()`.
 
-Finally, the user should call `EvalMinSchemeSwitching` or `EvalMinSchemeSwitchingAlt` to obtain the minimum value and the argmin, and
-respectively, `EvalMaxSchemeSwitching` or `EvalMaxSchemeSwitchingAlt` to obtain the maximum value and the argmax.
+Finally, the user should call `eval_min_scheme_switching` or `eval_min_scheme_switching_alt` to obtain the minimum value and the argmin, and
+respectively, `eval_max_scheme_switching` or `eval_max_scheme_switching_alt` to obtain the maximum value and the argmax.
 
 **Current limitations**
 - Scheme switching is currently supported only for CKKS and FHEW/TFHE.
@@ -138,7 +138,7 @@ outputs with respect to the FHEW plaintext space are supported.
 - Computing the min/max via scheme switching is only implemented for vectors of size a power of two.
 - Large memory consumption for large number of slots (because the linear transform in scheme switching requires a large number of keys with maximum number of levels)
 - Only GINX with uniform ternary secrets is currently supported for scheme switching.
-- MULTIPARTY is not currently supported for scheme switching. The multiparty key generation in OpenFHE introduces more noise than the single-key
+- MULTIPARTY is not currently supported for scheme switching. The multiparty key generation in Cipher introduces more noise than the single-key
 version, which is not accounted for by the scheme switching parameters. If multiparty-computation techniques are used to generate a joint key with
 the same properties as the single key, then the scheme switching results should be correct.
 
@@ -146,5 +146,5 @@ the same properties as the single key, then the scheme switching results should 
 Additional example demonstrating serialization
 ================================================
 
-The code for this example is located in [scheme-switching-serial.cpp](scheme-switching-serial.cpp). The file provides a simple setup for real number serialization before progressing into the next logical step - serialization and communication between 2 separate entities.
-All generated files containing serialized data are stored in the DATAFOLDER directory, which is defined in [scheme-switching-serial.cpp](scheme-switching-serial.cpp). If you want to rename any of those files, you can do so in [src/pke/unittest/utils/schemeswitching-data-serializer.h](../unittest/utils/schemeswitching-data-serializer.h).
+The code for this example is located in [scheme-switching-serial.cpp](scheme_switching_serial.cpp). The file provides a simple setup for real number serialization before progressing into the next logical step - serialization and communication between 2 separate entities.
+All generated files containing serialized data are stored in the DATAFOLDER directory, which is defined in [scheme-switching-serial.cpp](scheme_switching_serial.cpp). If you want to rename any of those files, you can do so in [src/pke/unittest/utils/schemeswitching-data-serializer.h](../../tests/fhe/support/scheme_switching_data.h).

@@ -16,4 +16,4 @@ File Listings
 
 `Version (version.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/version.h>`_
 
-- Get the current `OpenFHE` version by parsing the `CMAKE` version
+- Get the current `Cipher` version by parsing the `CMAKE` version

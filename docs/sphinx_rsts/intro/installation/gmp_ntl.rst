@@ -3,7 +3,7 @@
 Instructions for installing GMP and NTL
 =======================================
 
-This section describes how to install GMP and NTL onto your system, and how to use them in OpenFHE. Install ``autoconf`` if it is not already present:
+This section describes how to install GMP and NTL onto your system, and how to use them in Cipher. Install ``autoconf`` if it is not already present:
 .. topic:: on Linux
 
 ::
@@ -27,7 +27,7 @@ This section describes how to install GMP and NTL onto your system, and how to u
 
 The standard binary install using tools like ``apt-get`` will not work, and manual installation of GMP and NTL from the source code is needed. The steps are detailed below.
 
-Installing GMP and NTL for OpenFHE:
+Installing GMP and NTL for Cipher:
 
 1. First, download gmp-6.1.2.tar.lz from https://ftp.gnu.org/gnu/gmp/
 

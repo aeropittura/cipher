@@ -14,9 +14,9 @@ Lattice HAL Introduction
 .. mermaid::
 
   graph BT
-      a[DCRTPolyInterface] --> |Inherited by|b[DCRTPoly - HAL Default];
+      a[RnsPolyInterface] --> |Inherited by|b[RnsPoly - HAL Default];
 
-This hardware abstraction layer allows OpenFHE to use a variety of hardware-integrated backends while still allowing for high performance. As of March 31st 2022, we have the:
+This hardware abstraction layer allows Cipher to use a variety of hardware-integrated backends while still allowing for high performance. As of March 31st 2022, we have the:
 
 - default backend
 
@@ -27,14 +27,14 @@ This hardware abstraction layer allows OpenFHE to use a variety of hardware-inte
 File Listing
 ---------------
 
-`DCRTPolyInterface (dcrtpoly-interface.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/hal/dcrtpoly-interface.h>`_
+`RnsPolyInterface (dcrtpoly-interface.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/hal/dcrtpoly-interface.h>`_
 
--  Base class for ``DCRTPoly``
+-  Base class for ``RnsPoly``
 
-`DCRTPoly Interface Aliases (lat-backend-default.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/hal/default/lat-backend-default.h>`_
+`RnsPoly Interface Aliases (lat-backend-default.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/hal/default/lat-backend-default.h>`_
 
 -  Defines aliases for the lattice default backend
 
 `Integer Lattice Double CRT Params (ildcrtparams.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/ildcrtparams.h>`_
 
--  Inherits from ``DCRTPolyInterface`` and provides a public-facing interface used downstream by the various schemes.
+-  Inherits from ``RnsPolyInterface`` and provides a public-facing interface used downstream by the various schemes.

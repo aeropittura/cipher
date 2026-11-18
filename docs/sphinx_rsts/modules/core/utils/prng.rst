@@ -9,7 +9,7 @@ Pseudorandom Number Generator (PRNG)
 Implemented PRNG hash function
 -------------------------------
 
-- The default cryptographic hash function in OpenFHE is based off of `Blake2b <https://blake2.net>`_, which allows fast hashing.
+- The default cryptographic hash function in Cipher is based off of `Blake2b <https://blake2.net>`_, which allows fast hashing.
 
 .. _for_existing_example:
 
@@ -39,7 +39,7 @@ Building and testing an external PRNG engine (existing example)
      ::
         cmake .. -DCMAKE_INSTALL_PREFIX=/custom/install/location
 
-     and after that you run the remaining commands:
+     and after that you run_fn the remaining commands:
      ::
         make
         make install
@@ -56,14 +56,14 @@ Building and testing an external PRNG engine (existing example)
 
    * If your provide the absolute path to the external PRNG as an argument to the example, then InitPRNGEngine() will use that path to initialize PRNG with the custom engine.
 
-     For example: if you install **libPRNGengine.so** to the default location (/usr/local), then you will run:
+     For example: if you install **libPRNGengine.so** to the default location (/usr/local), then you will run_fn:
      ::
         ./build/bin/examples/core/external-prng /usr/local/lib/libPRNGengine.so
 
      which should produce:
      ::
         ==== Using external PRNG
-        InitPRNGEngine: using external PRNG
+        init_prng_engine: using external PRNG
 
 .. note:: If PseudoRandomNumberGenerator::InitPRNGEngine() initializes PRNG with a custom engine, it always notifies the user by producing a trace **"InitPRNGEngine: using external PRNG"**. There is no trace for the built-in PRNG engine. InitPRNGEngine() always throws an exception if it fails.
 
@@ -71,7 +71,7 @@ Building and testing an external PRNG engine (existing example)
 Creating custom external PRNG engine using the existing example
 ----------------------------------------------------------------
 
-You can create your own PRNG engine and use it with OpenFHE by following the steps below:
+You can create your own PRNG engine and use it with Cipher by following the steps below:
 
 1. Create a separate repo for your own engine and copy everything from `the example of external PRNG <https://github.com/openfheorg/openfhe-prng-blake2>`_ to the new repo.
 
@@ -91,6 +91,6 @@ You can create your own PRNG engine and use it with OpenFHE by following the ste
 
    * **only two public member functions** should be in the new class: a trivial **constructor with 2 input parameters** (seed array and counter) and **operator()** providing similar functionality as Blake2Engine does, which is generating numbers.
 
-   * create extern "C" function **createEngineInstance()** returning a dynamically allocated object of the new class. OpenFHE finds this function by name using dlsym(), so you may not change the name.
+   * create extern "C" function **createEngineInstance()** returning a dynamically allocated object of the new class. Cipher finds this function by name using dlsym(), so you may not change the name.
 
 5. Follow `the instructions above <#for_existing_example>`_ to build and test your new PRNG.

@@ -17,8 +17,8 @@
    ]
 
    # Setup the `breathe` extension
-   breathe_projects = { "OpenFHE": "./doxyoutput/xml" }
-   breathe_default_project = "OpenFHE"
+   breathe_projects = { "Cipher": "./doxyoutput/xml" }
+   breathe_default_project = "Cipher"
 
    # Setup the `exhale` extension
    import textwrap
@@ -69,7 +69,7 @@
        ############################################################################
        "containmentFolder":     "./api",
        "rootFileName":          "library_root.rst",
-       "rootFileTitle":         "OpenFHE Library API",
+       "rootFileTitle":         "Cipher Library API",
        "doxygenStripFromPath":  f"{__exhale_base}",
        "customSpecificationsMapping": utils.makeCustomSpecificationsMapping(
            specificationsForKind),
@@ -84,7 +84,7 @@
            # not for yours.
            PREDEFINED += NAMESPACE_BEGIN(arbitrary)="namespace arbitrary {"
            PREDEFINED += NAMESPACE_END(arbitrary)="}"
-           PREDEFINED += WITH_NTL
+           PREDEFINED += CIPHER_WITH_NTL
            EXTRACT_ANON_NSPACES = NO
            EXTRACT_LOCAL_CLASSES = NO
            EXTRACT_LOCAL_METHODS = NO
@@ -93,11 +93,11 @@
            EXCLUDE_SYMBOLS += *::@*
            EXCLUDE_SYMBOLS += *@*
            EXCLUDE_SYMBOLS += *::*@*
-           EXCLUDE_SYMBOLS += lbcrypto::@*
-           EXCLUDE_SYMBOLS += lbcrypto::*@*
+           EXCLUDE_SYMBOLS += cipher::@*
+           EXCLUDE_SYMBOLS += cipher::*@*
            EXCLUDE_SYMBOLS += std
            EXCLUDE_SYMBOLS += std::*
-           # WITH_NTL keeps OpenFHE's NTL namespace extensions visible to Doxygen.
+           # CIPHER_WITH_NTL keeps the NTL backend's namespace extensions visible to Doxygen.
 
            WARN_IF_UNDOCUMENTED = NO
            WARNINGS = NO
@@ -116,16 +116,16 @@
        # Main library page layout example configuration.                          #
        ############################################################################
        "afterTitleDescription": textwrap.dedent(u'''
-           Welcome to the user-facing documentation for OpenFHE.
+           Welcome to the user-facing documentation for Cipher.
 
            .. tip::
 
-               OpenFHE is a large library so we recommend using the sidebar to navigate around across the
+               Cipher is a large library so we recommend using the sidebar to navigate around across the
                ``namespaces``, ``classes``, ``structs``, ``enums``, ``functions``, ``variables``, ``defines`` and the ``typedefs``.
 
                We also recommend using the search functionality
        '''),
-       "fullApiSubSectionTitle": "OpenFHE Documentation",
+       "fullApiSubSectionTitle": "Cipher Documentation",
        ############################################################################
        # Individual page layout example configuration.                            #
        ############################################################################

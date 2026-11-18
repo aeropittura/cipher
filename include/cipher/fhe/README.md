@@ -2,11 +2,11 @@
 
 [ciphertext.h](ciphertext.h)
 
-- for the representation of ciphertext in OpenFHE
+- for the representation of ciphertext in Cipher
 
 - provides `CiphertextImpl` which is used to contain encrypted text
 
-[ciphertext-ser.h](ciphertext-ser.h)
+[ciphertext-ser.h](ciphertext_ser.h)
 
 - exposes serialization methods for ciphertexts to [USCiLab - cereal](https://github.com/USCiLab/cereal)
 
@@ -50,31 +50,31 @@
     - Halevi-Polyakov-Shoup P over Q (HPSPOVERQ)
     - Halevi-Polyakov-Shoup P over Q Leveled Multiplication (HPSPOVERQLEVELED)
 
-[cryptocontextfactory.h](cryptocontextfactory.h)
+[cryptocontextfactory.h](context_factory.h)
 
 - Generates new `CryptoContexts` from user parameters
 
-[cryptocontext.h](cryptocontext.h)
+[cryptocontext.h](context.h)
 
-- defines `CryptoContextImpl`, which is used to access the OpenFHE library
+- defines `CryptoContextImpl`, which is used to access the Cipher library
 
-- all OpenFHE objects are created "within" a `CryptoContext` which acts like an object "manager".
+- all Cipher objects are created "within" a `CryptoContext` which acts like an object "manager".
 Objects can only be used in the context they were created in
 
 
-[cryptocontext-ser.h](cryptocontext-ser.h)
+[cryptocontext-ser.h](context_ser.h)
 
 - exposes serialization methods for `CryptoContext` to [USCiLab - cereal](https://github.com/USCiLab/cereal)
 
 - must be included any time we need `CryptoContext` serialization
 
-[cryptoobject.h](cryptoobject.h)
+[cryptoobject.h](crypto_object.h)
 
 - comprises a `context`, and `keytag`:
   - `context`: `CryptoContext` this object belongs to
   - `keytag`: tag that is used to find the evaluation key needed for various operations
 
-[gen-cryptocontext.h](gen-cryptocontext.h)
+[gen-cryptocontext.h](context_gen.h)
 
 - Constructs `CryptoContext` based on the provided set of parameters
 
@@ -86,12 +86,12 @@ Objects can only be used in the context they were created in
 
 - metadata container and helper function definition
 
-[metadata-ser.h](metadata-ser.h)
+[metadata-ser.h](metadata_ser.h)
 
 - exposes serialization methods for `Metadata` to [USCiLab - cereal](https://github.com/USCiLab/cereal)
 
 - must be included any time we need `Metadata` serialization
 
-[openfhe.h](openfhe.h)
+[openfhe.h](../cipher.h)
 
 - top level for ease of import

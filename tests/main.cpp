@@ -77,7 +77,7 @@ class MinimalistPrinter : public EmptyTestEventListener {
 
   public:
     void OnTestProgramStart(const ::testing::UnitTest& unit_test) {
-        cout << lead << "OpenFHE Version " << library_version() << endl;
+        cout << lead << "Cipher Version " << library_version() << endl;
         cout << lead << "Date " << testing::internal::FormatEpochTimeInMillisAsIso8601(unit_test.start_timestamp())
              << endl;
     }
@@ -245,7 +245,7 @@ int main(int argc, char** argv) {
         delete listeners.Release(listeners.default_result_printer());
         listeners.Append(new MinimalistPrinter);
     } else {
-        cout << "OpenFHE Version: " << library_version() << endl;
+        cout << "Cipher Version: " << library_version() << endl;
         cout << "Default Backend: " << get_math_backend_parameters() << endl;
     }
 

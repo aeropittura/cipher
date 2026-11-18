@@ -1,7 +1,7 @@
 Getting Started
 ====================================
 
-Welcome to the OpenFHE webpage!
+Welcome to the Cipher webpage!
 
 .. note:: If you're looking to get up to speed quickly, visit our :ref:`quickstart <quickstart>` page.
 

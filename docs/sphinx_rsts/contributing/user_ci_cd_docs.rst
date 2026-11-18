@@ -1,10 +1,10 @@
-OpenFHE CI/CD Users Guide
+Cipher CI/CD Users Guide
 =========================
 
 Introduction
 ------------
 
-This documentation describes OpenFHE workflows on GitHub.
+This documentation describes Cipher workflows on GitHub.
 
 Repository: https://github.com/openfheorg/openfhe-development
 
@@ -16,7 +16,7 @@ Repository: https://github.com/openfheorg/openfhe-development
    │       ├── manual.yml                <-- Runs on-demand with parameters, uses generic_workflow
    │       ├── pull-request.yml          <-- Runs when a pull-request to main is created, uses generic_workflow
 
-OpenFHE Workflows
+Cipher Workflows
 -----------------
 
 A workflow is a configurable automated process made up of one or more jobs. Workflow files use YAML syntax,
@@ -30,22 +30,22 @@ Features
 
 -  Custom Github Actions (generic_workflow_builder)
 -  Workflows are separated into three YAML files (main.yml manual.yml pull-request.yml)
--  Manual pipeline that can be run with custom parameters
+-  Manual pipeline that can be run_fn with custom parameters
 -  Build and deploy docs to Github pages only on main branch
--  Jobs can run in parallel
+-  Jobs can run_fn in parallel
 -  The benchmark outputs are exported as artifacts
 -  Runs on a self-hosted runners
 -  All jobs build unittests, benchmarks and extras
--  All jobs run unittests
+-  All jobs run_fn unittests
 -  If the job name includes _tcm, _debug, _ntl, etc., then the job runs with that option (those options)
 
 
-.. warning: We need to add multiple runners to support concurrent jobs (one self-hosted runner can only run one job at a time)
+.. warning: We need to add multiple runners to support concurrent jobs (one self-hosted runner can only run_fn one job at a time)
 
 Pull request Workflow
 ---------------------
 
-This workflow will run whenever a pull request is created against the main branch. The pull request will run
+This workflow will run_fn whenever a pull request is created against the main branch. The pull request will run_fn
 the default job as well as all build jobs.
 
 The test configurations for all job are shown in the table below:
@@ -112,8 +112,8 @@ The test configurations for all job are shown in the table below:
 Manual User Workflow
 --------------------
 
-The manual pipeline is a workflow that can be run with custom parameters and allows to select jobs to run.
-To run manual workflow:
+The manual pipeline is a workflow that can be run_fn with custom parameters and allows to select jobs to run_fn.
+To run_fn manual workflow:
 
 1. Go to the openfhe-development repository at this URL:
    https://github.com/openfheorg/openfhe-development
@@ -130,14 +130,14 @@ To run manual workflow:
    :alt: run_manual_workflow_step3
 
 
-4. Click on the Run Manually workflow
+4. Click on the run Manually workflow
 
-5. When the Run Manually workflow is selected, you will see a Run
+5. When the run Manually workflow is selected, you will see a run
    Workflow button on the right side of the screen. When you click on
-   the Run Workflow button, a dialog window with inputs will be opened.
+   the run Workflow button, a dialog window with inputs will be opened.
 
 .. figure:: ci_cd_assets/run_manual_workflow_step5.png
    :alt: run_manual_workflow_step5
 
-6. Select or check the relevant options and click Run workflow green
+6. Select or check the relevant options and click run workflow green
    button on the lower section of the dialog

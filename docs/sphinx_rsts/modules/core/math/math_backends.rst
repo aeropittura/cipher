@@ -15,12 +15,12 @@ Design
 .. note:: All implementations for Big/Native Integer/Vector are based on
    ``integer.h (integer.h)``
 
--  By selecting a particular ``MATHBACKEND``, we are choosing a default
+-  By selecting a particular ``CIPHER_MATH_BACKEND``, we are choosing a default
    implementation for:
 
    -  ``BigInteger``
    -  ``BigVector``
-   -  ``Poly`` and ``ciphertext modulus`` used in ``DCRTPoly``
+   -  ``Poly`` and ``ciphertext modulus`` used in ``RnsPoly``
 
 -  For native arithmetic, ``NativeInteger`` and ``NativeVector`` is
    available.
@@ -58,7 +58,7 @@ MATHBACKEND 2
       ``integral_dtype`` and MUST be ``uint32_t``; using other types is
       an open work item
 
-MATHBACKEND 4
+CIPHER_MATH_BACKEND 4
 ~~~~~~~~~~~~~
 
 -  No Explicit max size of ``BigInteger``
@@ -85,30 +85,30 @@ Modular Multiplication
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 We use the following naming conventions:
 
--  ``ModMul(b, mod)``
+-  ``mod_mul(b, mod_value)``
 
    -  Naive modular multiplication that uses % operator for modular
       reduction
    -  usually slow.
 
--  ``ModMul(b, mod, mu)``
+-  ``mod_mul(b, mod_value, mu)``
 
    -  Barrett modular multiplication. ``mu`` for Barrett modulo can be
-      precomputed by ``mod.ComputeMu()``.
+      precomputed by ``mod_value.compute_mu()``.
 
--  ``ModMulFast(b, mod)``
+-  ``mod_mul_fast(b, mod_value)``
 
    -  Naive modular multiplication w/ operands < mod
 
--  ``ModMulFast(b, mod, mu)``
+-  ``mod_mul_fast(b, mod_value, mu)``
 
    -  Barrett modular multiplication w/ operands < mod
 
--  ``ModMulFastConst(b, mod, bPrecomp)``
+-  ``mod_mul_fast_const(b, mod_value, bPrecomp)``
 
    -  modular multiplication using precomputed information on b, w/
-      operands < mod.
-   -  ``bPrecomp`` can be precomputed by ``b.PrepModMulConst(mod)``.
+      operands < mod_value.
+   -  ``bPrecomp`` can be precomputed by ``b.prep_mod_mul_const(mod_value)``.
    -  This method is currently implemented only for NativeInteger class.
    -  The fastest method.
 
@@ -118,11 +118,11 @@ Other Modular Operations
 +----------+-----------------+---------------------+---------------------+-------------------------+------------------------------------+
 | Variant  | Naive           | Barrett             | Fast Naive          | Fast Barrett            | Fast Const                         |
 +==========+=================+=====================+=====================+=========================+====================================+
-| Mod      | Mod(mod)        | Mod(mod, mu)        | -                   | -                       | -                                  |
+| mod      | mod(mod_value)        | mod(mod_value, mu)        | -                   | -                       | -                                  |
 +----------+-----------------+---------------------+---------------------+-------------------------+------------------------------------+
-| ModAdd   | ModAdd(b, mod)  | ModAdd(b, mod, mu)  | ModAddFast(b, mod)  | -                       | -                                  |
+| mod_add   | mod_add(b, mod_value)  | mod_add(b, mod_value, mu)  | mod_add_fast(b, mod_value)  | -                       | -                                  |
 +----------+-----------------+---------------------+---------------------+-------------------------+------------------------------------+
-| ModSub   | ModSub(b, mod)  | ModSub(b, mod, mu)  | ModSubFast(b, mod)  | -                       | -                                  |
+| mod_sub   | mod_sub(b, mod_value)  | mod_sub(b, mod_value, mu)  | mod_sub_fast(b, mod_value)  | -                       | -                                  |
 +----------+-----------------+---------------------+---------------------+-------------------------+------------------------------------+
-| ModMul   | ModMul(b, mod)  | ModMul(b, mod, mu)  | ModMulFast(b, mod)  | ModMulFast(b, mod, mu)  | ModMulFastConst(b, mod, bPrecomp)  |
+| mod_mul   | mod_mul(b, mod_value)  | mod_mul(b, mod_value, mu)  | mod_mul_fast(b, mod_value)  | mod_mul_fast(b, mod_value, mu)  | mod_mul_fast_const(b, mod_value, bPrecomp)  |
 +----------+-----------------+---------------------+---------------------+-------------------------+------------------------------------+

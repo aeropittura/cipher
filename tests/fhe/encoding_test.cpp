@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  This code exercises the encoding libraries of the OpenFHE lattice encryption library.
+  This code exercises the encoding libraries of the Cipher lattice encryption library.
 */
 
 #include <cmath>

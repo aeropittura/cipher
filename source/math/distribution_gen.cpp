@@ -61,7 +61,7 @@ void PseudoRandomNumberGenerator::init_prng_engine(const std::string& lib_path) 
         return;
 
     if (lib_path.empty()) {
-        // use the default OpenFHE PRNG that comes with the library
+        // use the default Cipher PRNG that comes with the library
         gen_prng_engine = default_prng::createEngineInstance;
         if (!gen_prng_engine)
             CIPHER_THROW("Cannot find symbol: default_prng::createEngineInstance");
@@ -87,7 +87,7 @@ void PseudoRandomNumberGenerator::init_prng_engine(const std::string& lib_path) 
         }
         CIPHER_DIAGNOSTIC_ERR << __FUNCTION__ << ": using external PRNG" << std::endl;
 #else
-        CIPHER_THROW("OpenFHE may use an external PRNG library linked with g++ on Linux only");
+        CIPHER_THROW("Cipher may use an external PRNG library linked with g++ on Linux only");
 #endif
     }
 }

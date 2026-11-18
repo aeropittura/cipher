@@ -14,7 +14,7 @@ Hardware Abstraction Layer
 The Lattice Layer
 -----------------
 
-The files in this directory are to support lattice-layer operations in OpenFHE. The layer is used to represent polynomial rings andsupport operations over those polynomial rings.
+The files in this directory are to support lattice-layer operations in Cipher. The layer is used to represent polynomial rings andsupport operations over those polynomial rings.
 
 - A polynomial ring is defined as :math:`R_q = \frac{Z_q[X]}{f(X)}`, with f(X) a mononic irreducable polynomial of degree n, and q an integer modulus.
 
@@ -27,17 +27,17 @@ This lattice layer is a middle layer in the library. The lattice layer supports 
 Polynomial representations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The three main data classes in this layer are ``Poly``, ``NativePoly`` and ``DCRTPoly``.
+The three main data classes in this layer are ``Poly``, ``NativePoly`` and ``RnsPoly``.
 
 -  A ``Poly`` is a single-CRT representation using BigInteger types as coefficients, and supporting a large modulus q.
 
 -  A ``NativePoly`` is a single-CRT representation using NativeInteger types, which limites the size of the coefficients and the modulus q to 64 bits.
 
--  A ``DCRTPoly`` is a double-CRT representation. In practice, this means that Poly uses a single large modulus q, while DCRTPoly uses multiple smaller moduli. Hence, Poly runs slower than DCRTPoly because DCRTPoly operations can be easier to fit into the native bitwidths of commodity processors.
+-  A ``RnsPoly`` is a double-CRT representation. In practice, this means that Poly uses a single large modulus q, while DCRTPoly uses multiple smaller moduli. Hence, Poly runs slower than DCRTPoly because DCRTPoly operations can be easier to fit into the native bitwidths of commodity processors.
 
-- ``Poly``, ``NativePoly`` and ``DCRTPoly`` all implement the interface ``ILElement``. Any new ring polynomial classes should be built to conform to this interface.
+- ``Poly``, ``NativePoly`` and ``RnsPoly`` all implement the interface ``RingElement``. Any new ring polynomial classes should be built to conform to this interface.
 
-The classes ``ILParams`` and ``ILDCRTParams`` contain parameters for the ring element representations. The following parameters are available for:
+The classes ``PolyParams`` and ``RnsParams`` contain parameters for the ring element representations. The following parameters are available for:
 
 - ``Poly`` and ``NativePoly``:
 
@@ -45,7 +45,7 @@ The classes ``ILParams`` and ``ILDCRTParams`` contain parameters for the ring el
   - modulus
   - root of unity
 
-- ``DCRTPoly``:
+- ``RnsPoly``:
 
   - order
   - double-CRT width
@@ -56,7 +56,7 @@ Polynomial Ring Formats
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The coefficients of the polynomial ring, in their initial form, are just coefficients. Translated into one of ``Poly`` or
-``DCRTPoly``, can be simply seen as vector's representing polynomial ring elements.
+``RnsPoly``, can be simply seen as vector's representing polynomial ring elements.
 
 
 .. note:: We internally represent polynomial ring elements as being either in ``COEFFICIENT`` or ``EVALUATION`` format. It is generally computationally less expensive to carry on all operations in the evaluation form
@@ -87,8 +87,8 @@ The interactions can be summarized as:
 .. mermaid::
 
    flowchart BT
-       A[ElemParams <br> - base class </br>] --> B[ILParamsImpl <br> - Ideal Lattice Params </br>];
-       B[ILParamsImpl <br> - Ideal Lattice Params </br>] --> C[ILDCRTParams <br> - Ideal Lattice Double-CRT Params</br>]
+       A[ElementParams <br> - base class </br>] --> B[PolyParamsImpl <br> - Ideal Lattice Params </br>];
+       B[PolyParamsImpl <br> - Ideal Lattice Params </br>] --> C[RnsParams <br> - Ideal Lattice Double-CRT Params</br>]
 
 
 `Lattice Element Parameters (elemparams.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/elemparams.h>`_
@@ -108,7 +108,7 @@ The interactions can be summarized as:
 
 `Element Parameter Factory (elemparamfactory.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/elemparamfactory.h>`_
 
-- Creates `ElemParams``
+- Creates `ElementParams``
 
 Element Classes
 ^^^^^^^^^^^^^^^^^^
@@ -116,8 +116,8 @@ Element Classes
 .. mermaid::
 
    flowchart BT
-       A[ILElement<br> - Ideal Lattice Elements </br>] --> B[PolyImpl <br> - elements from ideal lattices using a single-CRT representation </br>];
-       A[ILElement<br> - Ideal Lattice Elements </br>] --> C[DCRTPolyImpl <br> - elements from ideal lattices using a double-CRT representation</br>]
+       A[RingElement<br> - Ideal Lattice Elements </br>] --> B[PolyImpl <br> - elements from ideal lattices using a single_value-CRT representation </br>];
+       A[RingElement<br> - Ideal Lattice Elements </br>] --> C[RnsPolyImpl <br> - elements from ideal lattices using a double-CRT representation</br>]
 
 `Integer Lattice Elements (ilelement.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/ilelement.h>`_
 
@@ -167,7 +167,7 @@ Misc.
 
 -  Header for the standard values for Lattice Parms, as determined by `Homomorphic Encryption Org <homomorphicencryption.org>`__
 
--  Given (distribution type, security level), we can get a ``maxQ`` for a given ring dimension, or get a ring dimension given some ``maxQ``
+-  Given (distribution type, security level), we can get a ``max_q`` for a given ring dimension, or get a ring dimension given some ``max_q``
 
 `Hal Lattice Backend Switcher (lat-hal.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/lat-hal.h>`_
 

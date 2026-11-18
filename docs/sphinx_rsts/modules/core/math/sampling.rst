@@ -1,7 +1,7 @@
-Sampling in OpenFHE
+Sampling in Cipher
 ===================
 
-OpenFHE library offers various methods for sampling from discrete
+Cipher library offers various methods for sampling from discrete
 Gaussian distribution. The methods are implemented in both
 `DiscreteGaussianGenerator <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/math/discretegaussiangenerator.h>`__ and
 `DiscreteGaussianGeneratorGeneric <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/math/discretegaussiangeneratorgeneric.h>`__
@@ -27,7 +27,7 @@ inversion method.
    center and distribution parameter without any precomputations.
    However, it has high rejection rate and is vulnerable to timing
    attacks. It is currently not used by any cryptographic protocols in
-   OpenFHE.
+   Cipher.
 
 -  **Karney’s Method:** Karney’s method is defined as Algorithm D in the
    paper `Sampling exactly from the normal
@@ -113,9 +113,9 @@ Rejection Sampling
    :linenos:
 
    /*Create the generator object, std is not important as we choose it arbitrarily during sampling*/
-   DiscreteGaussianGenerator dggRejection;
+   DiscreteGaussianGenerator dgg_rejection;
    /*First parameter is the mean, second one is the distribution parameter and third one is the ring dimension.*/
-   int64_t number = dggRejection.GenerateInteger(0,4,1024);
+   int64_t number = dgg_rejection.generate_integer(0,4,1024);
 
 Karney’s Method
 ~~~~~~~~~~~~~~~
@@ -136,8 +136,8 @@ Peikert’s Inversion Method (As defined in DiscreteGaussianGenerator)
 
    /*Create the generator object, the parameter is the distribution parameter*/
    DiscreteGaussianGenerator dggPeikert(4);
-   /*This will create a single number*/
-   int64_t number = dggPeikert.GenerateInt();
+   /*This will create a single_value number*/
+   int64_t number = dggPeikert.generate_int();
 
 Peikert’s Inversion Method (As defined in DiscreteGaussianGeneratorGeneric)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -174,8 +174,8 @@ Knuth-Yao’s Method (As defined in DiscreteGaussianGeneratorGeneric)
    /*Create the sampler object*/
    BaseSampler ky_sampler(mean,std,bg,KNUTH_YAO);
 
-   /*Generate Integer */
-   int64_t number = ky_sampler.GenerateInteger();
+   /*generate Integer */
+   int64_t number = ky_sampler.generate_integer();
 
 Generic Sampler
 ~~~~~~~~~~~~~~~
@@ -196,7 +196,7 @@ Generic Sampler
    BaseSampler **peikert_samplers;
    for(int i=0;i<CENTER_COUNT;i++){
        double center = ((double)i/(double)CENTER_COUNT);
-       peikert_samplers[i]=new BaseSampler((double)center,stdBase,bg,PEIKERT);
+       peikert_samplers[i]=new BaseSampler((double)center,std_base,bg,PEIKERT);
    }
 
    /*Create the sampler object*/

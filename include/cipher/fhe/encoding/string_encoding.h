@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  Represents and defines string-encoded plaintext objects in OpenFHE
+  Represents and defines string-encoded plaintext objects in Cipher
  */
 
 #ifndef CIPHER_FHE_ENCODING_STRING_ENCODING_H_

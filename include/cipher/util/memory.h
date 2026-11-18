@@ -73,7 +73,7 @@ void secure_memset(volatile void* mem, uint8_t c, size_t len);
 
 /**
  * @brief alloc_trim() returns free (unused) heap memory to the operating system.
- *        It is the companion to OpenFHE's retain-by-default malloc tuning: call it at a quiescent point after a large
+ *        It is the companion to Cipher's retain-by-default malloc tuning: call it at a quiescent point after a large
  *        transient-footprint operation (e.g., eval_bootstrap) to reclaim peak scratch memory.
  *
  *        This is a performance/RSS utility, NOT a security primitive: it does not erase data. Use

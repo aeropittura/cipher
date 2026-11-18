@@ -40,24 +40,24 @@ the homomorphic computation is performed. This is because CKKS noise
 growth depends on the input message as soon as the computation
 involves a multiplication.
 
-# Noise Flooding and Static Estimation in OpenFHE
-OpenFHE enables the user to do the following for static estimation, i.e.
+# Noise Flooding and Static Estimation in Cipher
+Cipher enables the user to do the following for static estimation, i.e.
 determining a good bound for $\mathsf{ct}.t$.
 1. It first runs the computation on a fresh secret key-public key
 pair, independent of the user's key pair, and a message determined
 by the user. Here, the user can use the actual message or a
 message picked from a suitable set of messages (representing
 real data the homomorphic computation is supposed to be computed on).
-2. OpenFHE estimates the error in the computation by measuring
+2. Cipher estimates the error in the computation by measuring
 the noise/precision-loss in the imaginary slots of the decrypted
 plaintext. [Costache et al.](https://eprint.iacr.org/2022/162) argue that this method accurately estimates noise growth in
 FHE according to their heuristics and experiments. It also
 has long been used in PALISADE. Note, this means that
-OpenFHE only supports real number arithmetic in CKKS.
+Cipher only supports real number arithmetic in CKKS.
 The parameter $\mathsf{ct}.t$ is now set according to this estimate.
 We call this step the
 $\mathsf{EXEC}\textunderscore\mathsf{NOISE}\textunderscore\mathsf{ESTIMATION}$ execution mode.
-3. Finally, OpenFHE runs the actual computation, with the
+3. Finally, Cipher runs the actual computation, with the
 users ciphertexts under her secret key, and applies
 noise flooding with discrete gaussian noise with
 standard deviation $\sigma = \sqrt{12\tau}2^{s/2}\mathsf{ct}.t$.
@@ -65,7 +65,7 @@ We call this mode $\mathsf{EXEC}\textunderscore\mathsf{EVALUATION}$.
 
 The code for this procedure is in
   src/examples/pke/ckks-noise-flooding.cpp
-in OpenFHE.
+in Cipher.
 For leveled computations, the code allows for the user to run the
 static estimation using 64-bit CKKS and the actual computation in 128-bit CKKS.
 

@@ -1,7 +1,7 @@
-OpenFHE Lattice Cryptography Library - Arbitrary Smooth Function Evaluation
+Cipher Lattice Cryptography Library - Arbitrary Smooth Function Evaluation
 ============================================================================
 
-[License Information](../../../LICENSE)
+[License Information](../../LICENSE)
 
 Document Description
 ===================
@@ -11,7 +11,7 @@ Note that Chebyshev evaluation only works with real inputs (or complex inputs wi
 Example Description
 ==========================
 
-The example for this code is located in [function-evaluation.cpp](function-evaluation.cpp). The file gives examples on how to run `EvalLogistic`, the logistic function $\frac{1}{1 + e^{-x}},$ and an arbitrary function using `EvalChebyshevFunction`. We use the square root function in our example for `EvalChebyshevFunction`.
+The example for this code is located in [function-evaluation.cpp](function_evaluation.cpp). The file gives examples on how to run `eval_logistic`, the logistic function $\frac{1}{1 + e^{-x}},$ and an arbitrary function using `eval_chebyshev_function`. We use the square root function in our example for `eval_chebyshev_function`.
 
 Input Parameters
 ==========================

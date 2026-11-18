@@ -16,7 +16,7 @@ Core Math Documentation
 Math Backends
 ---------------
 
-OpenFHE supports a number of mathematical backends for various usecases.
+Cipher supports a number of mathematical backends for various usecases.
 For more information refer to :doc:`math_backends`
 
 Inheritance Diagram
@@ -95,7 +95,7 @@ File Listings
 
 -  Matrix Strassen Operations
 
-`Number Theory Functions (nbtheory.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/math/nbtheory.h>`_
+`number_value Theory Functions (nbtheory.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/math/nbtheory.h>`_
 
 -  Number theory utilities
 -  Check if two numbers are coprime

@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: ${{ matrix.os }} / ${{ matrix.compiler }} / ${{ matrix.config }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-24.04, compiler: gcc,   config: default, cmake: "" }
+          - { os: ubuntu-24.04, compiler: clang, config: default, cmake: "" }
+          - { os: ubuntu-24.04, compiler: gcc,   config: backend2, cmake: "-DCIPHER_MATH_BACKEND=2 -DCIPHER_WITH_BE4=ON" }
+          - { os: ubuntu-24.04, compiler: gcc,   config: native128, cmake: "-DCIPHER_NATIVE_SIZE=128" }
+          - { os: ubuntu-24.04, compiler: gcc,   config: static-debug, cmake: "-DCIPHER_BUILD_STATIC=ON -DCIPHER_BUILD_SHARED=OFF -DCMAKE_BUILD_TYPE=Debug" }
+          - { os: macos-15,     compiler: clang, config: default, cmake: "-DCIPHER_WITH_OPENMP=OFF" }
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: false
+
+      - name: Fetch submodules
+        run: git submodule update --init --depth 1 extern/cereal extern/google-test extern/google-benchmark
+
+      - name: Install tools (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ninja-build libomp-dev
+
+      - name: Install tools (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ninja
+
+      - name: Select compiler
+        run: |
+          if [ "${{ matrix.compiler }}" = clang ]; then
+            echo "CC=clang" >> "$GITHUB_ENV"; echo "CXX=clang++" >> "$GITHUB_ENV"
+          else
+            echo "CC=gcc" >> "$GITHUB_ENV"; echo "CXX=g++" >> "$GITHUB_ENV"
+          fi
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCIPHER_GIT_SUBMODULES=OFF -DCIPHER_BUILD_EXTRAS=ON ${{ matrix.cmake }}
+
+      - name: Build
+        run: cmake --build build -j 4
+
+      - name: Unit tests
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Install and build the standalone template
+        run: |
+          cmake --install build --prefix "$PWD/install"
+          printf '#include "cipher/cipher.h"\nint main() { return library_version().empty(); }\n' > examples/standalone/demo.cpp
+          echo 'add_executable(demo demo.cpp)' >> examples/standalone/CMakeLists.txt
+          echo 'target_link_libraries(demo PRIVATE ${CIPHER_LIB})' >> examples/standalone/CMakeLists.txt
+          static=OFF; case "${{ matrix.cmake }}" in *BUILD_SHARED=OFF*) static=ON;; esac
+          cmake -S examples/standalone -B build-standalone -G Ninja -DCMAKE_PREFIX_PATH="$PWD/install" -DUSE_STATIC=$static
+          cmake --build build-standalone
+          ./build-standalone/demo

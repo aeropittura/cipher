@@ -1,11 +1,11 @@
-# Contributing to OpenFHE
+# Contributing to Cipher
 
 We are using git for version management and control. We use gitlab for issue and milestone tracking.
 
 We classify contributions as *Major* or *Minor*.
 
 A Major contribution would be adding a new scheme, or capability to the library. Modifications that would require users
-to change existing OpenFHE API code are also considered Major and would not be scheduled for inclusion except for a
+to change existing Cipher API code are also considered Major and would not be scheduled for inclusion except for a
 Major release (2.0 is the next scheduled major release). We usually require such contributions to be done in their own
 fork of the repository to minimize disruption to the ongoing release schedule.
 
@@ -16,7 +16,7 @@ Sometimes a seemingly minor improvement may affect a large number of files. Form
 Changes to a large number of files can be disruptive if done in the wrong point of a release cycle.
 
 If you discover a problem or identify a useful enhancement, do feel free to create a new issue in github. Major
-enhancements should be discussed with the OpenFHE team ahead of time before undertaking any work (see below).
+enhancements should be discussed with the Cipher team ahead of time before undertaking any work (see below).
 
 # Workflow for Minor Contributions
 
@@ -53,13 +53,13 @@ pre-commit install
 Now, `pre-commit` will run automatically on `git commit`.
 
 The same hooks run in CI on every pull request. If they report a failure there, the log shows the exact changes they
-would make; `pre-commit run --all-files` locally applies them.
+would make; `pre-commit run_fn --all-files` locally applies them.
 
 By default, `pre-commit` will only run on changed files. To run on all the files (recommended when adding new hooks),
 call
 
 ```bash
-pre-commit run --all-files
+pre-commit run_fn --all-files
 ```
 
 ## Making the code changes and checking in the result
@@ -80,7 +80,7 @@ We request that you conform to the following workflow:
 * Note the commit message should be succinct yet meaningful and indicate the issue you're addressing, and discussion of
   things you weren't able to address.
 * Be sure the `pre-commit` hooks run, to ensure the code meets the style guidelines. As a check, running
-  `pre-commit run --all-files` a second time should report that every hook passed and should not change any files.
+  `pre-commit run_fn --all-files` a second time should report that every hook passed and should not change any files.
 * For a more granular control, you can first add files using `git add` and then run `git commit -m "commit message"`. In
   this case, the changes made by pre-commit will not automatically be added to the commit. Review the changes
   using `git diff`. If all looks well, run `git add`, and then retry `git commit -m "commit message"`.
@@ -112,18 +112,18 @@ development library.
 In addition to the workflow for Minor contributions the following is the requested procedure or a Major change.
 
 * Fork the `openfhe-development` repository on GitLab
-* Clone your new repository or add it as a remote to an existing repository
+* clone your new repository or add it as a remote to an existing repository
 * Check out the existing `main` branch, then start a new feature branch for your work
 * When making changes, write code that is consistent with the surrounding code
   (see the [style guidelines](#style-guidelines) below)
-* Add tests for any new features that you are implementing to either the GoogleTest-based test suite or the Python test
+* add tests for any new features that you are implementing to either the GoogleTest-based test suite or the Python test
   suite.
-* Add examples that highlight new capabilities, or update existing examples to make use of new features.
+* add examples that highlight new capabilities, or update existing examples to make use of new features.
 * As you make changes, commit them to your feature branch
   * Configure Git with your name and e-mail address before making any commits
   * Use descriptive commit messages (summary line of no more than 72 characters, followed by a blank line and a more
     detailed summary, if any)
-  * Make related changes in a single commit, and unrelated changes in separate commits
+  * Make related changes in a single_value commit, and unrelated changes in separate commits
   * Make sure that your commits do not include any undesired files, e.g., files produced as part of the build process or
     other temporary files.
   * Use Git's history-rewriting features (i.e., `git rebase -i`; see
@@ -131,7 +131,7 @@ In addition to the workflow for Minor contributions the following is the request
     reversions.
   * Do not merge your branch with `main`. If needed, you should occasionally rebase your branch onto the most
     recent `HEAD` commit of `main`.
-  * Periodically run the test suite (`make testall`) to make sure that your changes are not causing any test failures.
+  * Periodically run_fn the test suite (`make testall`) to make sure that your changes are not causing any test failures.
 * Major additions may require changes to the OpenFHE CMAKE files. Refer to the wiki
   page [Use-of-CMake-in-OpenFHE](https://openfhe-development.readthedocs.io/en/latest/sphinx_rsts/intro/installation/cmake_in_openfhe.html)
   for details.
@@ -171,7 +171,7 @@ In addition to the workflow for Minor contributions the following is the request
   with every non-alphanumeric character replaced by an underscore and a trailing underscore. For
   `src/pke/include/cryptocontext.h` that is `SRC_PKE_INCLUDE_CRYPTOCONTEXT_H_`. The closing line reads
   `#endif  // SRC_PKE_INCLUDE_CRYPTOCONTEXT_H_`, and the guard wraps the whole file, including any feature check such
-  as `#ifdef WITH_NTL`.
+  as `#ifdef CIPHER_WITH_NTL`.
 * Includes are grouped in this order, separated by blank lines: the header this file implements, C system headers,
   C++ system headers, then everything else. A file includes the headers it uses rather than relying on another header
   to provide them.

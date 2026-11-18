@@ -121,7 +121,7 @@ void bootstrap_example(uint32_t num_slots) {
     /* We give the user the option of configuring values for an optimization algorithm in bootstrapping.
      * Here, we specify the giant step for the baby-step-giant-step algorithm in linear transforms
      * for encoding and decoding, respectively. Either choose this to be a power of 2
-     * or an exact divisor of the number of slots. Setting it to have the default value of {0, 0} allows OpenFHE to choose
+     * or an exact divisor of the number of slots. Setting it to have the default value of {0, 0} allows Cipher to choose
      * the values automatically.
      */
     std::vector<uint32_t> bsgs_dim = {0, 0};

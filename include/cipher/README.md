@@ -8,16 +8,16 @@ flowchart BT
 
 Contains the underlying primitives that are used in both `pke` and `binfhe`.
 
-## [Lattice](lattice)
+## [Lattice](ring)
 
-- Contains files that support lattice/polynomial-layer operations in OpenFHE. This layer is used to represent polynomial rings and support operations over those rings.
+- Contains files that support lattice/polynomial-layer operations in Cipher. This layer is used to represent polynomial rings and support operations over those rings.
 
 - As can be seen above, this is the "middle" layer between higher-level lattice cryptography elements, and the lower level math operations.
 
 
 ## [Math](math)
 
-Contains various files describing the mathematical functionality supported in OpenFHE. For example:
+Contains various files describing the mathematical functionality supported in Cipher. For example:
 
 - modular arithmeric
 - sampling functions
@@ -25,7 +25,7 @@ Contains various files describing the mathematical functionality supported in Op
 In addition, the hardware abstraction layer (HAL) is defined here.
 
 
-## [Utils](utils)
+## [Utils](util)
 
 Contains various utilities:
 

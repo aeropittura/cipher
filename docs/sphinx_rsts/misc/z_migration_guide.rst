@@ -1,4 +1,4 @@
-How To Migrate A User Project From Palisade To OpenFHE
+How To Migrate A User Project From Palisade To Cipher
 ======================================================
 
 This migration guide describes how to migrate user projects from Palisade to OpenFHE. The guide uses `src/pke/examples/simple-integers.cpp <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/simple-integers.cpp>`_ as an example.
@@ -7,7 +7,7 @@ Before making any changes to `simple-integers.cpp`:
 
 - Install OpenFHE (see instructions `here <https://openfhe-development.readthedocs.io/en/latest/sphinx_rsts/intro/installation/installation.html>`_)
 
-- Change the ``CMakeLists.txt`` for your project: replace all instances of **Palisade** and **PALISADE** with **OpenFHE**
+- Change the ``CMakeLists.txt`` for your project: replace all instances of **Palisade** and **PALISADE** with **Cipher**
 
 Code changes (in `src/pke/examples/simple-integers.cpp`):
 
@@ -18,10 +18,10 @@ For this example, we changed two of them:
 ::
 
     // declare the parameter object
-    CCParams<CryptoContextBFVRNS> parameters;
+    ContextParams<BfvRnsContext> parameters;
     // set the desired parameter values
-    parameters.SetPlaintextModulus(65537);
-    parameters.SetMultiplicativeDepth(2);
+    parameters.set_plaintext_modulus(65537);
+    parameters.set_multiplicative_depth(2);
 
 All parameter values can be seen by simply printing the parameter object:
 
@@ -31,26 +31,26 @@ All parameter values can be seen by simply printing the parameter object:
     std::cout << parameters << std::endl;
 
     And you get something similar to this line:
-    scheme: BFVRNS; ptModulus: 65537; digitSize: 0; standardDeviation: 3.19; secretKeyDist: UNIFORM_TERNARY; maxRelinSkDeg: 2; ksTech: BV; scalTech: NORESCALE; batchSize: 0; firstModSize: 60; numLargeDigits: 0; multiplicativeDepth:2; scalingModSize: 60; securityLevel: HEStd_128_classic; ringDim: 0; evalAddCount: 0; keySwitchCount: 0; encryptionTechnique: STANDARD; multiplicationTechnique: HPSPOVERQLEVELED; multiHopModSize: 0; PREMode: INDCPA; multipartyMode: FIXED_NOISE_MULTIPARTY; executionMode: EXEC_EVALUATION; decryptionNoiseMode: FIXED_NOISE_DECRYPT; noiseEstimate: 0; desiredPrecision: 0; statisticalSecurity: 30; numAdversarialQueries: 1
+    scheme: BFVRNS; pt_modulus: 65537; digit_size: 0; standard_deviation: 3.19; secret_key_dist: UNIFORM_TERNARY; max_relin_sk_deg: 2; ks_tech: BV; scal_tech: NORESCALE; batch_size: 0; first_mod_size_value: 60; num_large_digits: 0; multiplicative_depth:2; scaling_mod_size: 60; security_level: HEStd_128_classic; ring_dim: 0; eval_add_count: 0; key_switch_count: 0; encryption_technique: STANDARD; multiplication_technique: HPSPOVERQLEVELED; multiHopModSize: 0; pre_mode: INDCPA; multiparty_mode: FIXED_NOISE_MULTIPARTY; execution_mode: EXEC_EVALUATION; decryption_noise_mode: FIXED_NOISE_DECRYPT; noise_estimate: 0; desired_precision: 0; statistical_security: 30; num_adversarial_queries: 1
 
 
 The parameter object is created using a template and for BFV it should be
 
 ::
 
-    CCParams<CryptoContextBFVRNS> parameters;
+    ContextParams<BfvRnsContext> parameters;
 
 2. All other changes are mostly cosmetic as some types and functions were renamed:
 
-- ``KeyPair<DCRTPoly>`` instead of ``LPKeyPair<DCRTPoly>``
-- ``EvalRotateKeyGen()`` instead of ``EvalAtIndexKeyGen()``
-- ``EvalRotate()`` instead of ``EvalAtIndex()``
-- ``GetScheme()`` instead of ``GetEncryptionAlgorithm()``
-- ``GetNoiseScaleDeg()`` instead of ``GetDepth()``
+- ``KeyPair<RnsPoly>`` instead of ``LPKeyPair<RnsPoly>``
+- ``eval_rotate_key_gen()`` instead of ``eval_at_index_key_gen()``
+- ``eval_rotate()`` instead of ``eval_at_index()``
+- ``get_scheme()`` instead of ``GetEncryptionAlgorithm()``
+- ``get_noise_scale_deg()`` instead of ``GetDepth()``
 
 After you make all the changes mentioned above, you can link and run the example.
 
-Palisade-OpenFHE type mappings and new parameter types
+Palisade-Cipher type mappings and new parameter types
 ----------------------------------------------------------
 
 .. list-table::

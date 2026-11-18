@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  framework for exceptions in OpenFHE
+  framework for exceptions in Cipher
  */
 
 #ifndef CIPHER_UTIL_EXCEPTION_H_
@@ -118,7 +118,7 @@ class ThreadException {
 // e.rethrow();
 
 /**
- * @brief Exception type thrown by OpenFHE, normally through the CIPHER_THROW macro. Records the error
+ * @brief Exception type thrown by Cipher, normally through the CIPHER_THROW macro. Records the error
  * description together with the throw site (file, function, line) and the call stack at construction; what()
  * returns "file:l.line:function(): description".
  */

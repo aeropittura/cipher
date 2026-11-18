@@ -1,4 +1,4 @@
-OpenFHE Style Guide
+Cipher Style Guide
 ========================
 
 
@@ -20,7 +20,7 @@ General Style Guidelines
 C++
 ---
 
-OpenFHE coding style is based on the official `Google C++ Coding Style Guide <https://google.github.io/styleguide/cppguide.html/>`_.
+Cipher coding style is based on the official `Google C++ Coding Style Guide <https://google.github.io/styleguide/cppguide.html/>`_.
 
 We explicitly note:
 
@@ -44,7 +44,7 @@ We explicitly note:
    ``src/pke/include/cryptocontext.h`` that is
    ``SRC_PKE_INCLUDE_CRYPTOCONTEXT_H_``. The closing line reads
    ``#endif  // SRC_PKE_INCLUDE_CRYPTOCONTEXT_H_``, and the guard wraps the
-   whole file, including any feature check such as ``#ifdef WITH_NTL``.
+   whole file, including any feature check such as ``#ifdef CIPHER_WITH_NTL``.
 
 -  Includes are grouped in this order, separated by blank lines: the header this
    file implements, C system headers, C++ system headers, then everything else.
@@ -57,9 +57,9 @@ We explicitly note:
 Design Principles
 ^^^^^^^^^^^^^^^^^^
 
-- ``cout`` should never be used for exception handling and should never be used in committed code in the core OpenFHE library.
+- ``cout`` should never be used for exception handling and should never be used in committed code in the core Cipher library.
 
-- ``std::logic_error`` is the standard exception for all exceptions not caught by the OpenFHE exception handling subsystem (which has not yet been universally implemented in the library at this time).
+- ``std::logic_error`` is the standard exception for all exceptions not caught by the Cipher exception handling subsystem (which has not yet been universally implemented in the library at this time).
 
 - Code may make use of most C++11 features. The minimum required compiler versions are listed in the main README.md file.
 
@@ -72,7 +72,7 @@ Design Principles
   header files only within ``.cpp`` files rather than other header files to
   avoid unnecessary increases in compilation time. Boost should not be added
   to the public interface unless its existence and use is optional. This keeps
-  the number of dependencies low for users of OpenFHE. In these cases,
+  the number of dependencies low for users of Cipher. In these cases,
   ``OpenFHE_API_NO_BOOST`` should be used to conditionally remove Boost dependencies
 
 Naming Conventions
@@ -100,7 +100,7 @@ Naming Conventions
 Additional Resources
 ^^^^^^^^^^^^^^^^^^^^^
 
--  While OpenFHE does not specifically follow these rules, the following
+-  While Cipher does not specifically follow these rules, the following
    style guides are useful references for possible style choices and the
    rationales behind them.
 
@@ -116,6 +116,6 @@ Python
 -  Style generally follows `PEP8 <https://www.python.org/dev/peps/pep-0008/>`_
 -  Code in ``.py`` and ``.pyx`` files needs to be written to work with
    Python 3
--  The minimum Python version that OpenFHE supports is Python 3.4, so
+-  The minimum Python version that Cipher supports is Python 3.4, so
    code should only use features added in Python 3.4 or earlier
 -  Code in the Python examples should be written for Python 3

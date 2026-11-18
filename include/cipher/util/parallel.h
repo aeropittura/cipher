@@ -45,7 +45,7 @@
 namespace cipher {
 
 /**
- * @brief Runtime control of the number of OpenMP threads OpenFHE uses. Holds the thread count reported by the
+ * @brief Runtime control of the number of OpenMP threads Cipher uses. Holds the thread count reported by the
  * system at construction (machine threads) and a current thread limit in [1, machine threads] that the library's
  * parallel regions consult through get_thread_limit(). Without the CIPHER_PARALLEL build option every query returns 1 and
  * the setters are no-ops. A single global instance, cipher_parallel_controls, is used throughout the library.

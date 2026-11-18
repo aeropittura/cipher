@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  Operations for the representation of ciphertext in OpenFHE
+  Operations for the representation of ciphertext in Cipher
  */
 
 #ifndef CIPHER_FHE_CIPHERTEXT_H_
@@ -52,7 +52,7 @@ namespace cipher {
 /**
  * @brief CiphertextImpl
  *
- * The CiphertextImpl object is used to contain encrypted text in the OpenFHE
+ * The CiphertextImpl object is used to contain encrypted text in the Cipher
  * library
  *
  * @tparam Element a ring element.

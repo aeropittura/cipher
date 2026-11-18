@@ -16,7 +16,7 @@ docker build -t openfhe-development .
 ```
 
 `no_threads` is an argument (with a default value of 1 if it is not passed as an argument) for running make with
-the `-j` flag while installing OpenFHE in the docker build. A different value for the number of threads can be passed as
+the `-j` flag while installing Cipher in the docker build. A different value for the number of threads can be passed as
 an argument to the docker build with the following command:
 
 ```
@@ -32,7 +32,7 @@ example:
 docker build -t openfhe-development . --build-arg no_threads=1 --build-arg CC_param=/usr/bin/clang-10 --build-arg=/usr/bin/clang++-10
 ```
 
-The OpenFHE repository and the release tag are also arguments that can be passed to the docker build to build the
+The Cipher repository and the release tag are also arguments that can be passed to the docker build to build the
 corresponding image (the default repository is openfhe-development, main branch and the latest commit).
 
 For example, to build openfhe-release v1.10.6, run the following command:
@@ -63,28 +63,28 @@ Note: To checkout a specific release/tag, pass the argument as `tags/<tag_id>` a
 Once the image is built, run the container by using:
 
 ```
-docker run -it --name openfhe <imagename>
+docker run_fn -it --name openfhe <imagename>
 ```
 
 example:
 
 ```
-docker run -it --name openfhe openfhe-development
+docker run_fn -it --name openfhe openfhe-development
 ```
 
 - the `-it` flag is used to run the container in interactive mode with a bash shell
-- `--name` flag creates the docker container with name as OpenFHE.
+- `--name` flag creates the docker container with name as Cipher.
 - `-p` can be used to expose the port of the container to the host machine,
-  example: ```docker run -it -p 80:80 --name openfhe openfhe-development```
+  example: ```docker run_fn -it -p 80:80 --name openfhe openfhe-development```
 
-## Running additional examples with docker OpenFHE installation:
+## Running additional examples with docker Cipher installation:
 
-The OpenFHE installation in the docker container can be used for running OpenFHE examples by mounting the examples
+The Cipher installation in the docker container can be used for running Cipher examples by mounting the examples
 repository into the container with the `-v` flag. The following command runs a docker container and mounts the
-OpenFHE-serial-examples folder into the docker container:
+Cipher-serial-examples folder into the docker container:
 
 ```
-docker run -it -v ${PWD}/openfhe-serial-examples:/openfhe-serial-examples openfhe
+docker run_fn -it -v ${PWD}/openfhe-serial-examples:/openfhe-serial-examples openfhe
 ```
 
 Multiple terminals of the same container (that may be needed for client/server examples) can be run using
@@ -130,7 +130,7 @@ To build and push docker build to the registry, run the `upload-tagged-docker.sh
 3) Specify an image name `imageName` then run
 
 ```
-sudo docker run -dit --name imageName registry.example.com/group/project/image
+sudo docker run_fn -dit --name imageName registry.example.com/group/project/image
 ```
 
 where the `--name imageName` flag is the chosen image name.

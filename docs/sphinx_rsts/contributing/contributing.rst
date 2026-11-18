@@ -1,4 +1,4 @@
-Contributing to OpenFHE
+Contributing to Cipher
 ====================================
 
 .. toctree::

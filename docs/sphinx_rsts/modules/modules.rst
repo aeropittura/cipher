@@ -1,4 +1,4 @@
-OpenFHE Modules
+Cipher Modules
 =================================================
 
 Understanding the various Modules

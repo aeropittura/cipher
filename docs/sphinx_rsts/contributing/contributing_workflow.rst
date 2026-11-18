@@ -1,4 +1,4 @@
-Contributing to OpenFHE
+Contributing to Cipher
 =======================
 
 We are using git for version management and control. We use github for
@@ -35,7 +35,7 @@ We classify contributions as *Major* or *Minor*.
 .. note::
    If you discover a problem or identify a useful enhancement, do feel free
    to create a new issue in github. Major enhancements should be discussed
-   with the OpenFHE team ahead of time before undertaking any work (see
+   with the Cipher team ahead of time before undertaking any work (see
    below).
 
 Workflow for Minor Contributions
@@ -84,7 +84,7 @@ Setup
 Now, ``pre-commit`` will run automatically on ``git commit``.
 
 The same hooks run in CI on every pull request. If they report a failure there,
-the log shows the exact changes they would make; ``pre-commit run --all-files``
+the log shows the exact changes they would make; ``pre-commit run_fn --all-files``
 locally applies them.
 
 By default, ``pre-commit`` will only run on changed files. To run on all
@@ -121,14 +121,14 @@ We request that you conform to the following workflow:
      indicate the issue you’re addressing, and discussion of things you
      weren’t able to address.
   -  Be sure the ``pre-commit`` hooks run, to ensure the code meets the
-     style guidelines. As a check, running ``pre-commit run --all-files``
+     style guidelines. As a check, running ``pre-commit run_fn --all-files``
      a second time should report that every hook passed and should not
      change any files.
   -  For a more granular control, you can first add files using
-     ``git add`` and then run ``git commit -m "commit message"``. In this
+     ``git add`` and then run_fn ``git commit -m "commit message"``. In this
      case, the changes made by pre-commit will not automatically be added
      to the commit. Review the changes using ``git diff``. If all looks
-     well, run ``git add``, and then retry
+     well, run_fn ``git add``, and then retry
      ``git commit -m "commit message"``.
 
 6.  Push your local commit to the server in your branch:
@@ -156,20 +156,20 @@ We request that you conform to the following workflow:
 12. When your merge request is accepted, your changes will be merged
     into main and your branch will be deleted.
 
-  -  All additions to the released versions of OpenFHE are subject to approval
+  -  All additions to the released versions of Cipher are subject to approval
      by the OpenFHE governance team as outlined in the :ref:`OpenFHE Governance
      document. <governance>`
 
 Workflow for Major Contributions
 ----------------------------------
 
-If you plan major modifications of OpenFHE, please consult with the
+If you plan major modifications of Cipher, please consult with the
 OpenFHE team first by contacting us at contact@openfhe.org to plan your
 modifications so that they can be implemented efficiently and in a way
-that doesn’t conflict with any other planned future development. OpenFHE
+that doesn’t conflict with any other planned future development. Cipher
 is a work in progress, and major release revisions can deprecate large
 amounts of existing code. This way you can make sure your additions will
-be consistent with the planned release schedule of OpenFHE. It will also
+be consistent with the planned release schedule of Cipher. It will also
 ensure that you base your changes on the most recent version of the
 development library.
 
@@ -215,9 +215,9 @@ requested procedure or a Major change.
    -  Periodically run the test suite (``make testall``) to make sure
       that your changes are not causing any test failures.
 
--  Major additions may require changes to the OpenFHE CMAKE files. Refer
+-  Major additions may require changes to the Cipher CMAKE files. Refer
    to the
-   :ref:`Use-of-CMake-in-OpenFHE <cmake_in_openfhe>`
+   :ref:`Use-of-CMake-in-Cipher <cmake_in_openfhe>`
    page for details.
 
 -  Submit a Pull Request on GitLab. Check the results of the continuous-
@@ -227,7 +227,7 @@ requested procedure or a Major change.
    `matplotlib <http://matplotlib.org/devel/gitwash/development_workflow.html>`_
    `scipy <https://docs.scipy.org/doc/numpy-1.15.0/dev/gitwash/development_workflow.html>`_
 
--  OpenFHE is licensed under a `BSD
+-  Cipher is licensed under a `BSD
    license <https://github.com/openfheorg/openfhe-development/blob/main/LICENSE>`__
    which allows others to freely modify the code, and if your Pull
    Request is accepted, then that code will be release under this
@@ -235,8 +235,8 @@ requested procedure or a Major change.
    the contributors. If you have made a significant contribution, please
    add your name to the ``AUTHORS.md`` file.
 
--  All additions to the released versions of OpenFHE are subject to
-   approval by the OpenFHE governance team as outlined in the :ref:`OpenFHE
+-  All additions to the released versions of Cipher are subject to
+   approval by the Cipher governance team as outlined in the :ref:`Cipher
    Governance document. <governance>`
 
 Acknowlegement

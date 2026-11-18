@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  Pluggable diagnostic output for OpenFHE. CIPHER_DIAGNOSTIC_ERR / CIPHER_DIAGNOSTIC_OUT
+  Pluggable diagnostic output for Cipher. CIPHER_DIAGNOSTIC_ERR / CIPHER_DIAGNOSTIC_OUT
   yield std::ostream& and support normal stream operators and manipulators.
   By default they write to std::cerr / std::cout; the setters below redirect
   them at runtime.
@@ -49,19 +49,19 @@ namespace cipher {
 
 // Redirect the channels at runtime and return the stream that was previously
 // installed, so a caller can restore it afterwards. The referenced stream must
-// outlive any subsequent OpenFHE diagnostic. Intended to be called once during
+// outlive any subsequent Cipher diagnostic. Intended to be called once during
 // initialization; concurrent use with library diagnostics is the
 // caller's responsibility.
 /**
  * @brief Redirects the diagnostic error channel (CIPHER_DIAGNOSTIC_ERR, std::cerr by default) to another
- * stream. The stream must outlive any later OpenFHE diagnostic; call once during initialization.
+ * stream. The stream must outlive any later Cipher diagnostic; call once during initialization.
  * @param os stream to install
  * @return the stream that was previously installed, so the caller can restore it
  */
 std::ostream& set_cipher_err_stream(std::ostream& os);
 /**
  * @brief Redirects the diagnostic output channel (CIPHER_DIAGNOSTIC_OUT, std::cout by default) to another
- * stream. The stream must outlive any later OpenFHE diagnostic; call once during initialization.
+ * stream. The stream must outlive any later Cipher diagnostic; call once during initialization.
  * @param os stream to install
  * @return the stream that was previously installed, so the caller can restore it
  */

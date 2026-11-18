@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  Represents and defines plaintext objects in OpenFHE
+  Represents and defines plaintext objects in Cipher
  */
 
 #ifndef CIPHER_FHE_ENCODING_PLAINTEXT_H_
@@ -55,7 +55,7 @@ namespace cipher {
 
 /**
  * @class PlaintextImpl
- * @brief This class represents plaintext in the OpenFHE library.
+ * @brief This class represents plaintext in the Cipher library.
  *
  * PlaintextImpl is primarily intended to be
  * used as a container and in conjunction with specific encodings which inherit

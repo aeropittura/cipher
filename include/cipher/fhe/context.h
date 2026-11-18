@@ -73,12 +73,12 @@ namespace cipher {
 
 /**
  * @class CryptoContextImpl
- * @brief A class to simplify access to OpenFHE's PKE functionality.
+ * @brief A class to simplify access to Cipher's PKE functionality.
  *
  * Functionality is accessed by creating an instance of CryptoContextImpl.
  * Various objects are "created" in the instance, but they can only be used with the context in which they were created.
  *
- * OpenFHE methods are accessed through CryptoContextImpl methods. Guards are implemented to make certain that
+ * Cipher methods are accessed through CryptoContextImpl methods. Guards are implemented to make certain that
  * only valid objects that have been created in the context are used
  *
  * Contexts are created using make_crypto_context(), and can be serialized and recovered from serialization
@@ -1983,7 +1983,7 @@ class CryptoContextImpl : public Serializable {
     //------------------------------------------------------------------------------
 
     /**
-     * @brief Creates a relinearization key (for s^2) that can be used with the OpenFHE eval_mult operator
+     * @brief Creates a relinearization key (for s^2) that can be used with the Cipher eval_mult operator
      *
      * @param key secret key
      * @note the new evaluation key is stored in cryptocontext
@@ -1991,7 +1991,7 @@ class CryptoContextImpl : public Serializable {
     void eval_mult_key_gen(const PrivateKey<Element>& key);
 
     /**
-     * @brief Creates a vector evalmult keys that can be used with the OpenFHE eval_mult operator
+     * @brief Creates a vector evalmult keys that can be used with the Cipher eval_mult operator
      * @param key secret key
      *
      * @note 1st key (for s^2) is used for multiplication of ciphertexts of depth 1,
@@ -3228,16 +3228,16 @@ class CryptoContextImpl : public Serializable {
     }
 
     /**
-     * @brief Produces an Eval Key that OpenFHE can use for Proxy Re-Encryption
+     * @brief Produces an Eval Key that Cipher can use for Proxy Re-Encryption
      *
      * @param original_private_key original secret key
      * @param new_private_key new secret key
      * @return new evaluation key
-     * @attention This functionality has been completely removed from OpenFHE
+     * @attention This functionality has been completely removed from Cipher
      */
     EvalKey<Element> re_key_gen(const PrivateKey<Element> original_private_key,
                               const PrivateKey<Element> new_private_key) const
-            __attribute__((deprecated("functionality removed from OpenFHE")));
+            __attribute__((deprecated("functionality removed from Cipher")));
 
     /**
      * @brief Re-encrypts a ciphertext using a re-encryption key for Proxy Re-Encryption.
@@ -4408,7 +4408,7 @@ class CryptoContextImpl : public Serializable {
         set_ks_technique_in_scheme();
 
         // NOTE: a pointer to this object will be wrapped in a shared_ptr, and is a
-        // "CryptoContext". OpenFHE relies on the notion that identical
+        // "CryptoContext". Cipher relies on the notion that identical
         // CryptoContextImpls are not duplicated in memory Once we deserialize this
         // object, we must check to see if there is a matching object for this
         // object that's already existing in memory if it DOES exist, use it. If it

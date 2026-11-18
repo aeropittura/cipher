@@ -32,7 +32,7 @@
 /**
  * DISCLAIMER: IMPORTANT NOTICE ABOUT FILE MODIFICATIONS
  *
- * This file is used in OpenFHE's built-in PRNG and ANY EXTERNAL PRNG.
+ * This file is used in Cipher's built-in PRNG and ANY EXTERNAL PRNG.
  * The file is critical to the functionality and the security of the library.
  *
  * Modifications should only be performed by personnel who understand the potential impacts.
@@ -55,7 +55,7 @@
 //    for any engine class derived from the PRNG class there must be a C function named "createEngineInstance"
 //    returning a dynamically allocated object of that derived class (see how it is done in blake2engine.h)
 /**
- * @brief Abstract base class for the PRNG engines used by OpenFHE, both the built-in Blake2Engine and any
+ * @brief Abstract base class for the PRNG engines used by Cipher, both the built-in Blake2Engine and any
  * external engine. It satisfies the UniformRandomBitGenerator requirements of the C++11 distributions.
  * Every derived engine must be accompanied by a C function named "createEngineInstance" returning a dynamically
  * allocated object of that class.
@@ -63,7 +63,7 @@
 class PRNG {
   public:
     /**
-     * the type of the generated samples; all C++11 distributions used in OpenFHE work with uint32_t by default.
+     * the type of the generated samples; all C++11 distributions used in Cipher work with uint32_t by default.
      * A different data type can be specified if needed for a particular architecture
      */
     using result_type = uint32_t;

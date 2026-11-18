@@ -1,14 +1,14 @@
 Building User Applications
 ##########################
 
-How might you integrate OpenFHE into your projects?
+How might you integrate Cipher into your projects?
 
 
-OpenFHE provides a sample CMake file for building your own C++ project that links to the OpenFHE library.
+Cipher provides a sample CMake file for building your own C++ project that links to the Cipher library.
 
-The high-level instructions for building projects that use OpenFHE are as follows:
+The high-level instructions for building projects that use Cipher are as follows:
 
-1. Build and install OpenFHE using "make install". This will copy the OpenFHE library files and header files to the directory chosen for installation.
+1. Build and install Cipher using "make install". This will copy the Cipher library files and header files to the directory chosen for installation.
 
 2. Create the folder for your project on your system.
 
@@ -37,7 +37,7 @@ The high-level instructions for building projects that use OpenFHE are as follow
 
     cmake ..
 
-If OpenFHE is installed in a different location than the default one or you have different versions of OpenFHE installed, then you should specify the path to the desired location by running cmake with an option::
+If Cipher is installed in a different location than the default one or you have different versions of Cipher installed, then you should specify the path to the desired location by running cmake with an option::
 
     cmake .. -DCMAKE_PREFIX_PATH=/openfhe/location/path
 

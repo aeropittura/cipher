@@ -1,173 +1,115 @@
-# cipher
+# Cipher
 
-A distribution of [openfheorg/openfhe-development](https://github.com/openfheorg/openfhe-development), maintained under the
-`aeropittura/cipher` repository name. Original licenses, copyright notices,
-and implementation credits remain intact.
+Cipher is a C++17 library for lattice-based fully homomorphic encryption (FHE): computing on
+encrypted data without access to the secret key. It is derived from
+[OpenFHE](https://github.com/openfheorg/openfhe-development) and keeps its algorithms. The source
+tree, build system and API naming have been reorganized. See [NOTICE.md](NOTICE.md) for
+attribution and [PROVENANCE.md](PROVENANCE.md) for how the history was imported.
 
-This repository imports upstream history with the importer identity in Git's
-author and committer fields. Original identities and source commit IDs are
-recorded in commit trailers. Commit counts and timestamps match upstream;
-they describe upstream history, not development activity by the importer.
-Repository presentation and this disclosure are introduced in the first imported
-commit. See [PROVENANCE.md](PROVENANCE.md).
+## Schemes
 
-## Upstream documentation
+| Module | Header | What it provides |
+|---|---|---|
+| `Cipher::fhe` | `cipher/cipher.h` | BFV and BGV (exact integer arithmetic), CKKS (approximate real/complex arithmetic, bootstrapping), threshold FHE, proxy re-encryption, CKKS ⇄ FHEW scheme switching, functional bootstrapping |
+| `Cipher::boolean` | `cipher/boolean/context.h` | FHEW/DM, CGGI/TFHE and LMKCDEY bootstrapping for Boolean gates and small-integer lookup tables |
+| `Cipher::core` | `cipher/core.h` | Big-integer backends, number theory, NTT, polynomial rings (RNS), Gaussian sampling |
 
-OpenFHE - Open-Source Fully Homomorphic Encryption Library
-=====================================
+## Quick start
 
-Fully Homomorphic Encryption (FHE) is a powerful cryptographic primitive that enables performing computations over encrypted data without having access to the secret key.
-OpenFHE is an open-source FHE library that includes efficient implementations of all common FHE schemes:
-  * Brakerski/Fan-Vercauteren (BFV) scheme for integer arithmetic
-  * Brakerski-Gentry-Vaikuntanathan (BGV) scheme for integer arithmetic
-  * Cheon-Kim-Kim-Song (CKKS) scheme for real-number arithmetic (includes approximate bootstrapping)
-  * Ducas-Micciancio (DM/FHEW), Chillotti-Gama-Georgieva-Izabachene (CGGI/TFHE), and Lee-Micciancio-Kim-Choi-Deryabin-Eom-Yoo (LMKCDEY) schemes for evaluating Boolean circuits and arbitrary functions over larger plaintext spaces using lookup tables
+```cpp
+#include "cipher/cipher.h"
+using namespace cipher;
 
-OpenFHE also supports hybrid vectorized schemes, with the goal of enabling the FHEW/TFHE-like functional bootstrapping capability for schemes such as CKKS and BFV. In particular, OpenFHE supports
-  * Switching between CKKS and FHEW/TFHE to evaluate non-smooth functions, e.g., comparison, using (scalar) FHEW/TFHE functional bootstrapping
-  * Switching between RLWE (a scheme equivalent to the coefficient-encoded additive BFV scheme) and CKKS to evaluate arbitrary lookup tables over vectors of integers, e.g., modular reduction, comparison or S-box, using vectorized functional bootstrapping implemented in CKKS
+int main() {
+    ContextParams<BfvRnsContext> params;
+    params.set_plaintext_modulus(65537);
+    params.set_multiplicative_depth(2);
 
-OpenFHE also supports partial schemes, called schemelets, such as RLWE which is equivalent to the coefficient-encoded additive BFV scheme. In OpenFHE, the RLWE schemelet is the starting point for the vectorized functional bootstrapping capability, which allows the evaluation of arbitrary lookup tables over vectors of integers, e.g., modular reduction, comparison or Sbox, using CKKS in an intermediate step.
+    CryptoContext<RnsPoly> cc = make_crypto_context(params);
+    cc->enable(PKE);
+    cc->enable(KEYSWITCH);
+    cc->enable(LEVELEDSHE);
 
-OpenFHE also includes the following multiparty extensions of FHE:
-  * Threshold FHE for BGV, BFV, and CKKS schemes
-  * Interactive bootstrapping for Threshold CKKS
-  * Proxy Re-Encryption for BGV, BFV, and CKKS schemes
+    KeyPair<RnsPoly> keys = cc->key_gen();
+    cc->eval_mult_key_gen(keys.secret_key);
 
-OpenFHE supports any GNU C++ compiler version 9 or above and clang C++ compiler version 10 or above. To achieve the best runtime performance, we recommend following the
-guidelines outlined in [building OpenFHE for best performance](docs/static_docs/Best_Performance.md).
+    auto a = cc->encrypt(keys.public_key, cc->make_packed_plaintext({1, 2, 3, 4}));
+    auto b = cc->encrypt(keys.public_key, cc->make_packed_plaintext({5, 6, 7, 8}));
+    auto product = cc->eval_mult(a, b);
 
-## Links and Resources
-
- * [OpenFHE documentation](https://openfhe-development.readthedocs.io/en/latest/)
- * [Design paper for OpenFHE](https://eprint.iacr.org/2022/915)
- * [OpenFHE website](https://openfhe.org)
- * [Community forum for OpenFHE](https://openfhe.discourse.group/)
- * [OpenFHE Release Notes](docs/static_docs/Release_Notes.md)
- * [Quickstart](https://openfhe-development.readthedocs.io/en/latest/sphinx_rsts/intro/quickstart.html)
- * [BSD 2-Clause License](LICENSE)
- * [Contributing to OpenFHE](https://openfhe-development.readthedocs.io/en/latest/sphinx_rsts/contributing/contributing.html)
- * [OpenFHE Governance](https://openfhe-development.readthedocs.io/en/latest/sphinx_rsts/misc/governance.html)
- * [Openfhe-development Github Issues](https://github.com/openfheorg/openfhe-development/issues)
- * To report security vulnerabilities, please email us at contact@openfhe.org
-
-
-## Installation
-
-Refer to our General Installation Information: [readthedocs](https://openfhe-development.readthedocs.io/en/latest/sphinx_rsts/intro/installation/installation.html) for more information
-
-Or refer to the following for your specific operating system:
-
-- [Linux](https://openfhe-development.readthedocs.io/en/latest/sphinx_rsts/intro/installation/linux.html)
-
-- [MacOS](https://openfhe-development.readthedocs.io/en/latest/sphinx_rsts/intro/installation/macos.html)
-
-- [Windows](https://openfhe-development.readthedocs.io/en/latest/sphinx_rsts/intro/installation/windows.html)
-
-
-## Code Examples
-
-To get familiar with the main API of OpenFHE, we recommend looking at the code of the following examples:
-   1. FHE for arithmetic over integers (BFV):
-       1. [Simple Code Example](src/pke/examples/simple-integers.cpp)
-       2. [Simple Code Example with Serialization](src/pke/examples/simple-integers-serial.cpp)
-   1. FHE for arithmetic over integers (BGV):
-       1. [Simple Code Example](src/pke/examples/simple-integers-bgvrns.cpp)
-       2. [Simple Code Example with Serialization](src/pke/examples/simple-integers-serial-bgvrns.cpp)
-   1. FHE for arithmetic over real numbers (CKKS):
-       1. [Simple Code Example](src/pke/examples/simple-real-numbers.cpp)
-       2. [Advanced Code Example](src/pke/examples/advanced-real-numbers.cpp)
-       2. [Advanced Code Example for High-Precision CKKS](src/pke/examples/advanced-real-numbers-128.cpp)
-       2. [Arbitrary Smooth Function Evaluation](src/pke/examples/function-evaluation.cpp)
-       3. [Simple CKKS Bootstrapping Example](src/pke/examples/simple-ckks-bootstrapping.cpp)
-       4. [Advanced CKKS Bootstrapping Example](src/pke/examples/advanced-ckks-bootstrapping.cpp)
-       5. [Double-Precision (Iterative) Bootstrapping Example](src/pke/examples/iterative-ckks-bootstrapping.cpp)
-       6. [Basic CKKS Arithmetic in the CKKS Composite Scaling Mode](src/pke/examples/simple-real-numbers-composite-scaling.cpp)
-       7. [Fourier-Extension Functional Bootstrapping](src/pke/examples/FE-functional-bootstrapping-ckks.cpp)
-   1. FHE for arithmetic over complex numbers (CKKS):
-       1. [Leveled and Boostrapping Code Examples](src/pke/examples/simple-complex-numbers.cpp)
-   1. FHE for Boolean circuits and larger plaintext spaces (FHEW/TFHE):
-       1. [Simple Code Example with Symmetric Encryption](src/binfhe/examples/boolean.cpp)
-       2. [Simple Code Example with PKE](src/binfhe/examples/pke/boolean-pke.cpp)
-       2. [Evaluation of Multi-Input Gates](src/binfhe/examples/boolean-multi-input.cpp)
-       2. [Code with JSON serialization](src/binfhe/examples/boolean-serial-json.cpp)
-       3. [Code with Binary Serialization](src/binfhe/examples/boolean-serial-binary.cpp)
-       4. [Large-Precision Comparison](src/binfhe/examples/eval-sign.cpp)
-       4. [Small-Precison Arbitrary Function Evaluation](src/binfhe/examples/eval-function.cpp)
-   1. Scheme Switching:
-       1. [Examples with Scheme Switching between CKKS and FHEW/TFHE](src/pke/examples/scheme-switching.cpp)
-   1. Functional Bootstrapping over integers (RLWE and CKKS):
-       1. [Examples with Functional Bootstrapping using CKKS for lookup table evaluation, sign extraction and multivalue bootstrapping](src/pke/examples/functional-bootstrapping-ckks.cpp)
-   1. Threshold FHE:
-       1. [Code Example for BGV, BFV, and CKKS](src/pke/examples/threshold-fhe.cpp)
-       1. [2-party Interactive Bootstrapping Examples](src/pke/examples/interactive-bootstrapping.cpp)
-       1. [Simple n-party Interactive Bootstrapping Example](src/pke/examples/tckks-interactive-mp-bootstrapping.cpp)
-       1. [n-party Interactive Bootstrapping after Chebyshev Approximation](src/pke/examples/tckks-interactive-mp-bootstrapping-Chebyshev.cpp)
-       1. [Code Example for BFV with 5 parties](src/pke/examples/threshold-fhe-5p.cpp)
-
-## Main API
-
-- [PKE CryptoContext API (BGV/BFV/CKKS)](https://openfhe-development.readthedocs.io/en/latest/api/classlbcrypto_1_1CryptoContextImpl.html)
-- [Description of CryptoContext Parameters for BGV, BFV, and CKKS](src/pke/examples#description-of-the-cryptocontext-parameters-and-their-restrictions)
-
-- [BinFHE Context API (FHEW/TFHE)](https://openfhe-development.readthedocs.io/en/latest/api/classlbcrypto_1_1BinFHEContext.html)
-
-## Code of Conduct
-
-In the interest of fostering an open and welcoming environment, we as contributors and maintainers pledge to making
-participation in our project and our community a harassment-free experience for everyone, regardless of age, body size,
-disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education,
-socio-economic status, nationality, personal appearance, race, religion, or sexual identity and orientation.
-
-
-OpenFHE is a community-driven open source project developed by a diverse group of
-[contributors](https://openfhe-development.readthedocs.io/en/latest/sphinx_rsts/misc/contributors.html). The OpenFHE leadership has made a strong commitment to creating an open,
-inclusive, and positive community. Please read our
-[Code of Conduct](https://openfhe-development.readthedocs.io/en/latest/sphinx_rsts/misc/code_of_conduct.html?highlight=code%20of%20) for guidance on how to interact with others in a way that
-makes our community thrive.
-
-## Call for Contributions
-
-We welcome all contributions including but not limited to:
-
-- [reporting issues](https://github.com/openfheorg/openfhe-development/issues)
-- addressing [bugs](https://github.com/openfheorg/openfhe-development/issues) big or small. We label issues to help you filter them to your skill level.
-- documentation changes
-- talks and seminars using OpenFHE
-
-## How to Cite OpenFHE
-
-To cite OpenFHE in academic papers, please use the following BibTeX entry (updated version)
-
-```
-@misc{OpenFHE,
-      author = {Ahmad Al Badawi and Andreea Alexandru and Jack Bates and Flavio Bergamaschi and David Bruce Cousins and Saroja Erabelli and Nicholas Genise and Shai Halevi and Hamish Hunt and Andrey Kim and Yongwoo Lee and Zeyu Liu and Daniele Micciancio and Carlo Pascoe and Yuriy Polyakov and Ian Quah and Saraswathy R.V. and Kurt Rohloff and Jonathan Saylor and Dmitriy Suponitsky and Matthew Triplett and Vinod Vaikuntanathan and Vincent Zucca},
-      title = {{OpenFHE}: Open-Source Fully Homomorphic Encryption Library},
-      howpublished = {Cryptology ePrint Archive, Paper 2022/915},
-      year = {2022},
-      note = {\url{https://eprint.iacr.org/2022/915}},
-      url = {https://eprint.iacr.org/2022/915}
-}
-```
-or, alternatively (original WAHC@CCS'22 version),
-```
-@inproceedings{10.1145/3560827.3563379,
-      author = {Al Badawi, Ahmad and Bates, Jack and Bergamaschi, Flavio and Cousins, David Bruce and Erabelli, Saroja and Genise, Nicholas and Halevi, Shai and Hunt, Hamish and Kim, Andrey and Lee, Yongwoo and Liu, Zeyu and Micciancio, Daniele and Quah, Ian and Polyakov, Yuriy and R.V., Saraswathy and Rohloff, Kurt and Saylor, Jonathan and Suponitsky, Dmitriy and Triplett, Matthew and Vaikuntanathan, Vinod and Zucca, Vincent},
-      title = {OpenFHE: Open-Source Fully Homomorphic Encryption Library},
-      year = {2022},
-      publisher = {Association for Computing Machinery},
-      address = {New York, NY, USA},
-      url = {https://doi.org/10.1145/3560827.3563379},
-      doi = {10.1145/3560827.3563379},
-      booktitle = {Proceedings of the 10th Workshop on Encrypted Computing \& Applied Homomorphic Cryptography},
-      pages = {53-63},
-      numpages = {11},
-      location = {Los Angeles, CA, USA},
-      series = {WAHC'22}
+    Plaintext result;
+    cc->decrypt(keys.secret_key, product, &result);
+    result->set_length(4);
+    std::cout << result << std::endl;  // (5, 12, 21, 32, ... )
 }
 ```
 
-## Acknowledgments ##
+## Building
 
-* Distribution Statement "A" (Approved for Public Release, Distribution Unlimited). This work is supported in part by DARPA through HR0011-21-9-0003 and HR0011-20-9-0102. The views, opinions, and/or findings expressed are those of the author(s) and should not be interpreted as representing the official views or policies of the Department of Defense or the U.S. Government.
-* This research was funded, in part, by the Advanced Research Projects Agency for Health (ARPA-H). The views and conclusions contained in this document are those of the authors and should not be interpreted as representing the oﬃcial policies, either expressed or implied, of the U.S. Government.
+Requirements: CMake ≥ 3.16, a C++17 compiler (GCC ≥ 9 or Clang ≥ 10), and optionally OpenMP
+(`libomp` on macOS).
+
+```sh
+git submodule update --init extern/cereal extern/google-test extern/google-benchmark
+cmake -S . -B build -G Ninja            # add -DCIPHER_WITH_OPENMP=OFF if OpenMP is unavailable
+cmake --build build
+ctest --test-dir build                  # or: cmake --build build --target check
+cmake --install build                   # installs under CMAKE_INSTALL_PREFIX
+```
+
+Commonly used options (all listed in [cmake/CipherOptions.cmake](cmake/CipherOptions.cmake)):
+
+| Option | Default | Meaning |
+|---|---|---|
+| `CIPHER_BUILD_SHARED` / `CIPHER_BUILD_STATIC` | `ON` / `OFF` | Library flavors to build |
+| `CIPHER_BUILD_TESTS`, `CIPHER_BUILD_EXAMPLES`, `CIPHER_BUILD_BENCHMARKS` | `ON` | In-tree programs |
+| `CIPHER_WITH_OPENMP` | `ON` | Multithreading with OpenMP |
+| `CIPHER_MATH_BACKEND` | `4` | Default big-integer backend: 2 (fixed), 4 (dynamic), 6 (NTL) |
+| `CIPHER_NATIVE_SIZE` | `64` | Native integer width: 32, 64 or 128 |
+| `CIPHER_WITH_NATIVEOPT` | `OFF` | Optimize for the build machine |
+
+## Using an installed Cipher
+
+```cmake
+find_package(Cipher CONFIG REQUIRED)
+target_link_libraries(my_app PRIVATE Cipher::fhe)   # Cipher::fhe_static for static builds
+```
+
+A complete template is in [examples/standalone/CMakeLists.txt](examples/standalone/CMakeLists.txt).
+
+## Repository layout
+
+```
+include/cipher/   public headers: math/, ring/, util/, fhe/{bfv,bgv,ckks,base,rns,...}, boolean/
+source/           implementation, mirroring include/cipher/
+tests/            GoogleTest suites (core, fhe, boolean)
+examples/         example programs; examples/extras/ holds experimental ones
+bench/            google-benchmark programs
+cmake/            build-system modules and package configuration
+extern/           third-party submodules (cereal, googletest, google-benchmark, gperftools)
+docs/             Sphinx documentation sources
+tools/            maintenance scripts
+```
+
+## Naming conventions
+
+Types are `PascalCase` (`RnsPoly`, `CkksRnsScheme`), functions and variables are `snake_case`
+(`eval_mult`, `get_ring_dimension`), and data members end with an underscore (`params_`). Where
+the case of a single letter carries mathematical meaning it is kept (`get_N()` is the ring
+dimension, `get_n()` the LWE dimension). Macros and build options use the `CIPHER_` prefix.
+
+## Serialization compatibility
+
+Serialized contexts, keys and ciphertexts use the same on-disk format and type names as OpenFHE
+1.6.1, so files written by either library can be read by the other (binary and JSON).
+
+## Documentation
+
+- Examples: [examples/fhe/README.md](examples/fhe/README.md) and the programs next to it
+- Best performance: [docs/static_docs/Best_Performance.md](docs/static_docs/Best_Performance.md)
+- Design paper of the underlying library: <https://eprint.iacr.org/2022/915>
+
+## License
+
+BSD 2-Clause; see [LICENSE](LICENSE). The original copyright notices are retained in every
+source file.

@@ -35,7 +35,7 @@ Visual Studio Code
 General Configuration
 ^^^^^^^^^^^^^^^^^^^^^
 
-This section includes setting snippets to include in the to work with OpenFHE in a friendly manor. In addition we have some recommended extensions for developers to use:
+This section includes setting snippets to include in the to work with Cipher in a friendly manor. In addition we have some recommended extensions for developers to use:
 
 - [Clang-Format]
 - [GitLens]
@@ -60,10 +60,10 @@ Code uses inotify to monitor file changes, use the following to tell Code to ign
 
 .. _editor-vs-openfhe-path:
 
-Setup OpenFHE Install Path
+Setup Cipher Install Path
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If developing external to the OpenFHE repository the following are great to add to the local `.vscode/settings.json`. This is normally intended for users or working with independent example repositories.
+If developing external to the Cipher repository the following are great to add to the local `.vscode/settings.json`. This is normally intended for users or working with independent example repositories.
 
 ::
 
@@ -83,7 +83,7 @@ If developing external to the OpenFHE repository the following are great to add 
 Markdown
 ^^^^^^^^
 
-OpenFHE uses markdown documents inside the repository to document details about the code. To get the most from code use the extension [Markdown All in One].
+Cipher uses markdown documents inside the repository to document details about the code. To get the most from code use the extension [Markdown All in One].
 
 .. _editor-vs-code-formatting:
 
@@ -138,7 +138,7 @@ You can use code for git diffs, merges, and rebasing (rebasing works best with t
 Setup Debugger
 --------------
 
-To set up the debugger for examples that uses OpenFHE, the examples need to be compiled with cmake with the debug mode ON. This is done by using the command:
+To set up the debugger for examples that uses Cipher, the examples need to be compiled with cmake with the debug mode ON. This is done by using the command:
 
 .. code-block:: bash
 
@@ -167,7 +167,7 @@ A sample configuration looks as below for a target 'example':
                 "MIMode": "gdb",
                 "setupCommands": [
                     {
-                        "description": "Enable pretty-printing for gdb",
+                        "description": "enable pretty-printing for gdb",
                         "text": "-enable-pretty-printing",
                         "ignoreFailures": true
                     }
@@ -205,7 +205,7 @@ In case of examples with multiple targets (such as a client and server), we can 
                 "MIMode": "gdb",
                 "setupCommands": [
                     {
-                        "description": "Enable pretty-printing for gdb",
+                        "description": "enable pretty-printing for gdb",
                         "text": "-enable-pretty-printing",
                         "ignoreFailures": true
                     }
@@ -224,7 +224,7 @@ In case of examples with multiple targets (such as a client and server), we can 
                 "MIMode": "gdb",
                 "setupCommands": [
                     {
-                        "description": "Enable pretty-printing for gdb",
+                        "description": "enable pretty-printing for gdb",
                         "text": "-enable-pretty-printing",
                         "ignoreFailures": true
                     }
@@ -287,5 +287,5 @@ Eclipse
 CMAKE
 ^^^^^^^^^^^^
 
-Developers that wish to use Eclipse for building OpenFHE can use the shell script ``configure/setup-eclipse-cmake.sh``.
+Developers that wish to use Eclipse for building Cipher can use the shell script ``configure/setup-eclipse-cmake.sh``.
 This script should be run in the users build tree. All command line arguments are passed to CMake. The shell configures the build tree so that it can be imported into Eclipse, and built directly from Eclipse.

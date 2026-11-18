@@ -2,11 +2,11 @@
 
 ```mermaid
 graph BT
-      a[DCRTPolyInterface] --> |Inherited by|b[DCRTPoly - HAL Default];
+      a[RnsPolyInterface] --> |Inherited by|b[RnsPoly - HAL Default];
 ```
 
-This hardware abstraction layer allows OpenFHE to use a variety of device backends while still allowing for high performance. As of March 31st 2022, we have the default backend, and the [Intel HEXL](https://github.com/intel/hexl) backend.
+This hardware abstraction layer allows Cipher to use a variety of device backends while still allowing for high performance. The tree currently ships the default backend in `standard/`.
 
 ## Note:
 
-Follow the convention set by the [hexl](hexl) implementation to extend the supported backends.
+Follow the convention set by the `standard/` implementation (selected in `backend_select.h`) to extend the supported backends.

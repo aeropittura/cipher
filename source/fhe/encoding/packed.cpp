@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  Represents and defines plaintext encodings in OpenFHE with bit packing capabilities
+  Represents and defines plaintext encodings in Cipher with bit packing capabilities
  */
 
 #include "cipher/fhe/encoding/packed.h"

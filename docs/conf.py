@@ -50,8 +50,8 @@ extensions = [
 ]
 
 # Setup the `breathe` extension
-breathe_projects = { "OpenFHE": "./doxyoutput/xml" }
-breathe_default_project = "OpenFHE"
+breathe_projects = { "Cipher": "./doxyoutput/xml" }
+breathe_default_project = "Cipher"
 
 # Setup the `exhale` extension
 import textwrap
@@ -94,7 +94,7 @@ exhale_args = {
     ############################################################################
     "containmentFolder":     "./api",
     "rootFileName":          "library_root.rst",
-    "rootFileTitle":         "OpenFHE Library API",
+    "rootFileTitle":         "Cipher Library API",
     "doxygenStripFromPath":  f"{__exhale_base}",
     "customSpecificationsMapping": utils.makeCustomSpecificationsMapping(
         specificationsForKind),
@@ -125,7 +125,7 @@ exhale_args = {
         EXCLUDE_SYMBOLS += lbcrypto::*@*
         EXCLUDE_SYMBOLS += std
         EXCLUDE_SYMBOLS += std::*
-        # WITH_NTL keeps OpenFHE's NTL namespace extensions visible to Doxygen.
+        # WITH_NTL keeps the NTL backend's namespace extensions visible to Doxygen.
 
         WARN_IF_UNDOCUMENTED = NO
         WARNINGS = NO
@@ -144,16 +144,16 @@ exhale_args = {
     # Main library page layout example configuration.                          #
     ############################################################################
     "afterTitleDescription": textwrap.dedent(u'''
-        Welcome to the user-facing documentation for OpenFHE.
+        Welcome to the user-facing documentation for Cipher.
 
         .. tip::
 
-            OpenFHE is a large library so we recommend using the sidebar to navigate around across the
+            Cipher is a large library so we recommend using the sidebar to navigate around across the
             ``namespaces``, ``classes``, ``structs``, ``enums``, ``functions``, ``variables``, ``defines`` and the ``typedefs``.
 
             We also recommend using the search functionality
     '''),
-    "fullApiSubSectionTitle": "OpenFHE Documentation",
+    "fullApiSubSectionTitle": "Cipher Documentation",
     ############################################################################
     # Individual page layout example configuration.                            #
     ############################################################################
@@ -194,9 +194,9 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'OpenFHE'
-copyright = u'2022, OpenFHE'
-author = u'OpenFHE Team'
+project = u'Cipher'
+copyright = u'2022, OpenFHE contributors; Cipher maintainers'
+author = u'Cipher maintainers (derived from OpenFHE)'
 
 
 def read_version_number(pth="../CMakeLists.txt"):
@@ -396,8 +396,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'OpenFHE.tex', u'OpenFHE Documentation',
-   u'OpenFHE Team', 'manual'),
+  (master_doc, 'Cipher.tex', u'Cipher Documentation',
+   u'Cipher maintainers', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

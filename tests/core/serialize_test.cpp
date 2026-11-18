@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  This code exercises serialization in CORE for the OpenFHE lattice encryption library
+  This code exercises serialization in CORE for the Cipher lattice encryption library
  */
 
 #include <cstdint>

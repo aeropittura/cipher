@@ -44,8 +44,8 @@
 
 namespace default_prng {
 /**
- * @brief Defines the PRNG engine (based on BLAKE2) used by OpenFHE. It can be used
- * as an example for adding other PRNG engines to OpenFHE.
+ * @brief Defines the PRNG engine (based on BLAKE2) used by Cipher. It can be used
+ * as an example for adding other PRNG engines to Cipher.
  */
 class Blake2Engine : public PRNG {
  public:

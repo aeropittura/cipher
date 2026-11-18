@@ -1,7 +1,7 @@
 Directory Structure
 ====================================
 
-The high-level structure of the OpenFHE library is as follows.
+The high-level structure of the Cipher library is as follows.
 
 Several of these directories may contain a README file with more specific information about the files in the directory.
 
@@ -23,7 +23,7 @@ The descriptions of library components are as follows:
 .. csv-table:: components
    :header: "Directory", "Description"
 
-   "benchmark","Code for benchmarking OpenFHE library components, using the Google Benchmark frameworks"
+   "benchmark","Code for benchmarking Cipher library components, using the Google Benchmark frameworks"
    "build","Binaries and build scripts (this folder is created by the user)"
    "doc","Documentation of library components."
    "docker","Docker file and documentation."

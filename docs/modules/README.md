@@ -1,4 +1,4 @@
-# OpenFHE Code Components
+# Cipher Code Components
 
 ```mermaid
 flowchart BT
@@ -22,10 +22,10 @@ flowchart BT
 
 ## Warning
 
-Although the OpenFHE team has provided various utility functions to make OpenFHE accessible to
+Although the Cipher team has provided various utility functions to make Cipher accessible to
 non-cryptographers, it is still necessary for the end-users to carefully consider how they are using the code. Improper
 use can result in leaked information.
-Use of OpenFHE in production environments should be reviewed by homomorphic encryption experts.
+Use of Cipher in production environments should be reviewed by homomorphic encryption experts.
 
-Additionally, see our [Security Considerations](../docs/static_docs/Security.md) for considerations that should be taken into account
+Additionally, see our [Security Considerations](../static_docs/Security.md) for considerations that should be taken into account
 in your work.

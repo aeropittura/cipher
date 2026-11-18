@@ -30,7 +30,7 @@
 //==================================================================================
 // This is a collection of helper functions for the enum definitions in constants-defs.h.
 // constatns.h was split because of a request to provide a better compatability with
-// the Rust wrapper for OpenFHE.
+// the Rust wrapper for Cipher.
 #ifndef CIPHER_FHE_CONSTANTS_H_
 #define CIPHER_FHE_CONSTANTS_H_
 

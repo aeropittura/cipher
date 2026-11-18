@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  OpenFHE version strings
+  Cipher version strings
  */
 
 #ifndef CIPHER_CORE_H_

@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  OpenFHE native base 64 utlities
+  Cipher native base 64 utlities
  */
 
 #ifndef CIPHER_UTIL_BASE64_H_

@@ -11,7 +11,7 @@ File Listings
 
 `Ciphertext (ciphertext.h) <https://github.com/openfheorg/openfhe-development/tree/main/src/pke/include/ciphertext.h>`__
 
--  for the representation of ciphertext in OpenFHE
+-  for the representation of ciphertext in Cipher
 
 -  provides ``CiphertextImpl`` which is used to contain encrypted text
 
@@ -32,10 +32,10 @@ File Listings
 
 `CryptoContext (cryptocontext.h) <https://github.com/openfheorg/openfhe-development/tree/main/src/pke/include/cryptocontext.h>`__
 
--  defines ``CryptoContextImpl``, which is used to access the OpenFHE
+-  defines ``CryptoContextImpl``, which is used to access the Cipher
    library
 
--  all OpenFHE objects are created “within” a ``CryptoContext`` which
+-  all Cipher objects are created “within” a ``CryptoContext`` which
    acts like an object “manager”. Objects can only be used in the
    context they were created in
 

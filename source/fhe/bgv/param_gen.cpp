@@ -639,7 +639,7 @@ bool BgvRnsParamGen::params_gen_bgvrns_internal(std::shared_ptr<BaseCryptoParams
         if (n < n_actual) {
             std::string err_msg("The ring dimension found using estimated logQ(P) [");
             err_msg += std::to_string(n) + "] does not meet security requirements. ";
-            err_msg += "Report this problem to OpenFHE developers and set the ring dimension manually to ";
+            err_msg += "Report this problem to Cipher developers and set the ring dimension manually to ";
             err_msg += std::to_string(n_actual) + ".";
 
             CIPHER_THROW(err_msg);

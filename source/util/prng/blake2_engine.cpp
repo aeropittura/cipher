@@ -65,7 +65,7 @@ extern "C" {
 // #define FIXED_SEED
 
 /**
- * @brief Blake2SeedGenerator generates the seed array for the Blake2 PRNG engine used by OpenFHE.
+ * @brief Blake2SeedGenerator generates the seed array for the Blake2 PRNG engine used by Cipher.
  *        This function should be declared as static to make it local to this source file.
  */
 static void Blake2SeedGenerator(Blake2Engine::blake2_seed_array_t& seed) {

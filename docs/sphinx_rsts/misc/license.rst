@@ -1,4 +1,4 @@
-OpenFHE License
+Cipher License
 ================
 
 BSD 2-Clause License

@@ -3,7 +3,7 @@
 Examples
 ====================================
 
-OpenFHE provides the following examples which should provide the reader with a basic understanding of how to use the
+Cipher provides the following examples which should provide the reader with a basic understanding of how to use the
 library for various purposes.
 
 
@@ -81,7 +81,7 @@ Core
 
 - `parallel.cpp <https://github.com/openfheorg/openfhe-development/blob/main/src/core/examples/parallel.cpp>`_:
 
-  - provides an example of parallelization in ``OpenFHE`` with `OpenMP <https://www.openmp.org/>`_
+  - provides an example of parallelization in ``Cipher`` with `OpenMP <https://www.openmp.org/>`_
 
 
 - `sampling <https://github.com/openfheorg/openfhe-development/blob/main/src/core/examples/sampling.cpp>`_:
@@ -158,7 +158,7 @@ Misc. Operations across Schemes
 
 -  `rotation.cpp <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/rotation.cpp>`__:
 
-   - demonstrates use of ``EvalRotate automorphism`` for different schemes
+   - demonstrates use of ``eval_rotate automorphism_value`` for different schemes
 
 
 - `linearsum-evaluation <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/linearwsum-evaluation.cpp>`_:
@@ -172,7 +172,7 @@ Misc. Operations across Schemes
 
 -  `pre-buffer.cpp <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/pre-buffer.cpp>`__:
 
-   - demonstrates use of OpenFHE for encryption, re-encryption and decryption of packed vector of binary data
+   - demonstrates use of Cipher for encryption, re-encryption and decryption of packed vector of binary data
 
 
 -  `threshold-fhe.cpp <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/threshold-fhe.cpp>`__:

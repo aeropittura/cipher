@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  Represents and defines integer lattice element objects in OpenFHE
+  Represents and defines integer lattice element objects in Cipher
  */
 
 #ifndef CIPHER_RING_ELEMENT_H_
@@ -53,7 +53,7 @@ namespace cipher {
  * @brief Interface for ideal lattices
  *
  * Every lattice must implement these pure virtuals in order to properly
- * interoperate with OpenFHE PKE. Element is the return type for all of these
+ * interoperate with Cipher PKE. Element is the return type for all of these
  * virtual functions. There is no constructor here in the base class; it
  * contains no data to construct.
  */

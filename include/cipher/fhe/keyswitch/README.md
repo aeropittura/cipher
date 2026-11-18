@@ -19,17 +19,17 @@ graph BT
     KeyRNS[Keyswitch: RNS] --> |Inherited by|KeyHybrid[Keyswitch: Hybrid];
 ```
 
-[Key-switch Base](keyswitch-base.h)
+[Key-switch Base](base.h)
 
 - Base class for key switching algorithms.
 
-[Key-switch RNS](keyswitch-rns.h)
+[Key-switch RNS](rns.h)
 
 - Abstract interface class for RNS variants of key switching algorithms
 
-[Key-switch BV](keyswitch-bv.h)
+[Key-switch BV](bv.h)
 
-- Inherits from [key-switch base](keyswitch-base.h)
+- Inherits from [key-switch base](base.h)
 -  Implements BV key switching method from [Fully Homomorphic Encryption from
     Ring-LWE and Security for Key Dependent Messages (BVScheme)](
     https://www.wisdom.weizmann.ac.il/~zvikab/localpapers/IdealHom.pdf
@@ -37,9 +37,9 @@ graph BT
 - See the Appendix of https://eprint.iacr.org/2021/204 for more detailed description.
 - Requires the computation of a quadratic number of NTTs.
 
-[Key-switch Hybrid](keyswitch-hybrid.h)
+[Key-switch Hybrid](hybrid.h)
 
-- Inherits from [key-switch base](keyswitch-base.h)
+- Inherits from [key-switch base](base.h)
 - Hybrid key switching method first introduced in https://eprint.iacr.org/2012/099.pdf
 - RNS version was introduced in https://eprint.iacr.org/2019/688.
 - See the Appendix of https://eprint.iacr.org/2021/204 for more detailed description.

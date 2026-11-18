@@ -860,7 +860,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
 
     // CONVERTING
 
-    // OpenFHE conversion methods
+    // Cipher conversion methods
     template <typename T = BasicInteger>
     T convert_to_int() const {
     #if defined(CIPHER_HAVE_INT128)
@@ -962,7 +962,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
 
     // STRINGS & STREAMS
 
-    // OpenFHE string conversion
+    // Cipher string conversion
     const std::string to_string() const;
 
     static const std::string integer_type_name() {

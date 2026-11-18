@@ -24,7 +24,7 @@ File Listings
 `Boolean FHE CryptoContext (binfhecontext.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/binfhe/include/binfhecontext.h>`_
 
 - CryptoContext for the boolean circuit FHE scheme.
-- A CryptoContext is the primary object through which we interact with the various ``OpenFHE`` capabilities
+- A CryptoContext is the primary object through which we interact with the various ``Cipher`` capabilities
 
 .. note:: various parameter ``enum`` are also provided
 - ``BINFHEPARAMSET`` that defines the security level and parameters

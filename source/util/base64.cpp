@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  OpenFHE native base 64 utlities
+  Cipher native base 64 utlities
  */
 
 #include "cipher/util/base64.h"

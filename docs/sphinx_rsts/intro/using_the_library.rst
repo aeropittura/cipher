@@ -1,11 +1,11 @@
 Using The Library
 ====================================
 
-OpenFHE consists of a number of library objects that can be linked into lattice cryptography applications.
+Cipher consists of a number of library objects that can be linked into lattice cryptography applications.
 
 The source files in the demo directories, particularly those in src/examples/pke, illustrate the use of the library.
 
-To use OpenFHE, you must
+To use Cipher, you must
 
 * select a scheme to use
 
@@ -39,7 +39,7 @@ In order to make this easier for the user, there are several CryptoContextFactor
 
 Streamlining and improving the process of parameter selection and CryptoContext generation is an area that is being actively worked.
 
-Anything done in OpenFHE is done through the CryptoContext. All operations are CryptoContext methods. The code only allows operations between objects that were created in the same context, and will generate an error if it finds that this is not the case.
+Anything done in Cipher is done through the CryptoContext. All operations are CryptoContext methods. The code only allows operations between objects that were created in the same context, and will generate an error if it finds that this is not the case.
 
 Saving to string or disk file
 -----------------------------
@@ -47,7 +47,7 @@ Saving to string or disk file
 Serialization and Deserialization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-An object created by a CryptoContext usually has a ``Serialize`` method that converts the object into a cereal object that can be saved to a string or to a disk file:
+An object created by a CryptoContext usually has a ``to_stream`` method that converts the object into a cereal object that can be saved to a string or to a disk file:
 
 * Serial::Serialize()
 

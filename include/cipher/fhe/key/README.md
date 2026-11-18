@@ -17,28 +17,28 @@ graph TD
     PubKey[Public Key] --> |container|KP[Key Pair]
 ```
 
-[All Key](allkey.h)
+[All Key](key.h)
 - Top-level `#include` for access to all capabilities
 
-[Eval Key](evalkey.h)
+[Eval Key](eval_key.h)
 - Inherits from the base [Key](key.h) class.
-- Serves as base class for [Eval Key Relin](evalkeyrelin.h)
+- Serves as base class for [Eval Key Relin](relin_key.h)
 
-[Eval Key Relin](evalkeyrelin.h)
+[Eval Key Relin](relin_key.h)
 - Get and set relinearization elements
-- Inherits from [Eval Key](evalkey.h)
+- Inherits from [Eval Key](eval_key.h)
 
 [Key](key.h)
 - Base Key class
 
 
-[Key Serialization](key-ser.h)
+[Key Serialization](key_ser.h)
 - Capabilities for serializing the keys using [Cereal](https://github.com/USCiLab/cereal)
 
-[Key Pair](keypair.h)
-- Container for the [private key](privatekey.h) and [public key](publickey.h)
+[Key Pair](key_pair.h)
+- Container for the [private key](private_key.h) and [public key](public_key.h)
 
-[Private Key](privatekey.h)
+[Private Key](private_key.h)
 
 
-[Public Key](publickey.h)
+[Public Key](public_key.h)

@@ -327,7 +327,7 @@ uint32_t myZZ::get_digit_at_index_for_base(uint32_t index, uint32_t base) const 
 }
 
 // returns the bit at the index into the binary format of the big integer,
-// note that msb is 1 like all other bit indicies in OpenFHE.
+// note that msb is 1 like all other bit indicies in Cipher.
 
 uint8_t myZZ::get_bit_at_index(uint32_t index) const {
     return (uint8_t)GetBitRangeAtIndex(index, 1);

@@ -210,7 +210,7 @@ bool run_demo_pre(void) {
     auto unpacked2 = pt_dec2->get_packed_value();
     bool good = true;
 
-    // note that OpenFHE assumes that plaintext is in the range of -p/2..p/2
+    // note that Cipher assumes that plaintext is in the range of -p/2..p/2
     // to recover 0...q simply add q if the unpacked value is negative
     for (unsigned int j = 0; j < pt->get_length(); j++) {
         if (unpacked1[j] < 0)

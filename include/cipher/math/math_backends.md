@@ -1,13 +1,13 @@
 # Math Backends
 
-- By selecting a particular `MATHBACKEND`, we are choosing a default implementation for:
+- By selecting a particular `CIPHER_MATH_BACKEND`, we are choosing a default implementation for:
     - `BigInteger`
     - `BigVector`
-    - `Poly` and `ciphertext modulus` used in `DCRTPoly`
+    - `Poly` and `ciphertext modulus` used in `RnsPoly`
 
 - For native arithmetic, `NativeInteger` and `NativeVector` is available.
 
-- All implementations for Big/Native Integer/Vector are based on [integer.h](integer.h).
+- All implementations for Big/Native Integer/Vector are based on [integer.h](backend/integer.h).
 
 ## Design
 
@@ -44,10 +44,10 @@ You can do either:
 
 ### MATHBACKEND 6
 
-- Integration of `NTL` library with `OpenFHE`
+- Integration of `NTL` library with `Cipher`
 - Only available when `NTL` or `GMP` is enabled using `CMAKE`
 
-This is an integration of the NTL library with OpenFHE, and is only available when NTL/GMP is enabled using CMAKE.
+This is an integration of the NTL library with Cipher, and is only available when NTL/GMP is enabled using CMAKE.
 
 # Supported Math Operations
 
@@ -55,22 +55,22 @@ This is an integration of the NTL library with OpenFHE, and is only available wh
 
 We use the following naming conventions:
 
-- `ModMul(b, mod)`
+- `mod_mul(b, mod_value)`
     - Naive modular multiplication that uses % operator for modular reduction
     - usually slow.
 
-- `ModMul(b, mod, mu)`
-    - Barrett modular multiplication. `mu` for Barrett modulo can be precomputed by `mod.ComputeMu()`.
+- `mod_mul(b, mod_value, mu)`
+    - Barrett modular multiplication. `mu` for Barrett modulo can be precomputed by `mod_value.compute_mu()`.
 
-- `ModMulFast(b, mod)`
+- `mod_mul_fast(b, mod_value)`
     - Naive modular multiplication w/ operands < mod
 
-- `ModMulFast(b, mod, mu)`
+- `mod_mul_fast(b, mod_value, mu)`
     - Barrett modular multiplication w/ operands < mod
 
-- `ModMulFastConst(b, mod, bPrecomp)`
+- `mod_mul_fast_const(b, mod_value, bPrecomp)`
     - modular multiplication using precomputed information on b, w/ operands < mod.
-    - `bPrecomp` can be precomputed by `b.PrepModMulConst(mod)`.
+    - `bPrecomp` can be precomputed by `b.prep_mod_mul_const(mod_value)`.
     - This method is currently implemented only for NativeInteger class.
     - The fastest method.
 

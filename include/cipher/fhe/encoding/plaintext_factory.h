@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  Manufactures plaintext objects in OpenFHE
+  Manufactures plaintext objects in Cipher
  */
 
 #ifndef CIPHER_FHE_ENCODING_PLAINTEXT_FACTORY_H_

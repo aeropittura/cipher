@@ -46,8 +46,8 @@
 namespace cipher {
 
 /**
- * @brief PseudoRandomNumberGenerator provides the PRNG capability to all random distribution generators in OpenFHE.
- * The security of Ring Learning With Errors (used for all crypto capabilities in OpenFHE) depends on
+ * @brief PseudoRandomNumberGenerator provides the PRNG capability to all random distribution generators in Cipher.
+ * The security of Ring Learning With Errors (used for all crypto capabilities in Cipher) depends on
  * the randomness of uniform, ternary, and Gaussian distributions, which derive their randomness from the PRNG.
  */
 
@@ -56,7 +56,7 @@ class PseudoRandomNumberGenerator {
     /**
      * @brief init_prng_engine() initializes the PRNG generator
      * @param lib_path a string with the absolute path to an external PRNG library ("/path/to/libprng.so").
-     *        If the string is empty, then the default (OpenFHE's built-in PRNG) library will be used.
+     *        If the string is empty, then the default (Cipher's built-in PRNG) library will be used.
      * @note this function should be called at the beginning of main() if an external library to be used and
      *       prints a trace in this case. There is no trace for the built-in PRNG
      */

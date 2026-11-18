@@ -47,7 +47,7 @@
 
 void usage() {
     std::cerr << "Usage: ./external-prng [absolute path to the external PRNG library]" << std::endl;
-    std::cerr << "       " << "If no absolute library path is provided, then the built-in OpenFHE's PRNG is used"
+    std::cerr << "       " << "If no absolute library path is provided, then the built-in Cipher's PRNG is used"
               << std::endl;
 }
 
@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
         std::cerr << "==== Using external PRNG" << std::endl;
         cipher::PseudoRandomNumberGenerator::init_prng_engine(arg);
     } else {
-        std::cerr << "==== Using OpenFHE's built-in PRNG" << std::endl;
+        std::cerr << "==== Using Cipher's built-in PRNG" << std::endl;
     }
 
     std::uniform_int_distribution<> dis(0, 10);

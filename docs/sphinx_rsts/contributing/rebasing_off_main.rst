@@ -21,7 +21,7 @@ As an example, suppose one is working on the branch ``issue-123``, and there hav
 
     git pull origin issue-123
 
-Make sure both of branches build properly before going any further.  Correct any bugs on the feature branch and commit that branch.  Also check the main branch and notify the OpenFHE team if there is an error in the main branch.
+Make sure both of branches build properly before going any further.  Correct any bugs on the feature branch and commit that branch.  Also check the main branch and notify the Cipher team if there is an error in the main branch.
 
 2) Run the following rebase operation: ``git rebase main issue-123``
 

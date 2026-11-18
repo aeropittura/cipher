@@ -1,15 +1,15 @@
 .. _governance:
 
-OpenFHE Governance
+Cipher Governance
 =========================================
 
-Policies and procedures governing the OpenFHE community
+Policies and procedures governing the Cipher community
 
 Revision History
 -----------------
 
 This is a living document and is expected to be updated in order to
-meet the changing needs as the OpenFHE organization evolves over
+meet the changing needs as the Cipher organization evolves over
 time.
 
 * Version 2.0 Adopted by Steering Team 3/21/21
@@ -23,31 +23,31 @@ NumFOCUS Affiliation
 ----------------------
 
 
-OpenFHE is a Sponsored Project of NumFOCUS, a 501(c)(3) nonprofit
-charity in the United States. NumFOCUS provides OpenFHE with fiscal,
+Cipher is a Sponsored Project of NumFOCUS, a 501(c)(3) nonprofit
+charity in the United States. NumFOCUS provides Cipher with fiscal,
 and administrative support to help ensure the health and
 sustainability of the project. Visit `NumFocus <http://numfocus.org/>`_.
 
-Donations to OpenFHE are managed by NumFOCUS. For donors in the
+Donations to Cipher are managed by NumFOCUS. For donors in the
 United States, your gift is tax-deductible to the extent provided by
 law. As with any donation, you should consult with your tax adviser
 about your particular tax situation.
 
-OpenFHE has a formal legal and fiscial relationship with DUALITY
+Cipher has a formal legal and fiscial relationship with DUALITY
 Technologies.
 
 Teams & Roles
 ---------------
 
-Here are defined the primary teams participating in OpenFHE
+Here are defined the primary teams participating in Cipher
 activities. Note, individuals are able to participate in multiple
 teams. The Steering team shall approve all changes in membership to
-all OpenFHE teams, and maintain a Google Doc listing team member's
+all Cipher teams, and maintain a Google Doc listing team member's
 names, contact info, and date of first inclusion into the team.
 
 * **Steering:** The Steering team is the governing body
-  over the entire OpenFHE organization. Members of the Steering
-  team have full rights over all OpenFHE repositories. Members
+  over the entire Cipher organization. Members of the Steering
+  team have full rights over all Cipher repositories. Members
   of the Steering team are the face of the project, and are
   responsible for officially interfacing with external communities,
   organizations, non-profits, and companies. The Steering team
@@ -103,7 +103,7 @@ names, contact info, and date of first inclusion into the team.
   number) have significant impact and must be approved by the Steering
   team.
 
-* **Stable-release:** The Stable-release team administers the OpenFHE
+* **Stable-release:** The Stable-release team administers the Cipher
   stable release repository and is responsible for the review and
   publication of new stable releases, as well as the physical
   migration of the candidate pre-release and associated documentation
@@ -136,7 +136,7 @@ names, contact info, and date of first inclusion into the team.
   the ability to commit/push source code and can handle merge/pull
   requests into the main branch of the repository with the following caveats:
 
-  * Merge/Pull requests from internal OpenFHE Maintatiners require the
+  * Merge/Pull requests from internal Cipher Maintatiners require the
     review of one other member of the Maintainer team (i.e. a Maintainer
     cannot Merge their own branches).
 
@@ -146,7 +146,7 @@ names, contact info, and date of first inclusion into the team.
 * **External contributors:** This group encompasses all others who are
   not on the Steering team, Pre-release, Release or Maintainers
   teams. This includes first-time contributors, collaborators, and
-  funders. They have no special rights within the OpenFHE
+  funders. They have no special rights within the Cipher
   organization itself. External contributors are strongly encouraged
   to discuss potential contributions with the Maintainers and/or
   Steering committee members before proceeding with any major
@@ -156,7 +156,7 @@ names, contact info, and date of first inclusion into the team.
 * **Emeritus status:** Steering team members that are inactive
   (commits, GitHub comments/issues/reviews, dev meetings and voting on
   polls) in the past six months will be asked if they want to become
-  Emeritus. Any member of a OpenFHE team can also request to become
+  Emeritus. Any member of a Cipher team can also request to become
   Emeritus if they wish to do so (e.g. taking a sabbatical or long
   vacation).  Emeritus Steering team members can still vote and resume
   active status anytime, the only difference is that Emeritus-Steering
@@ -190,13 +190,13 @@ Sub-teams have a charter that is either *dynamic* or *static*.
   committee. For example, a finance team may require a static charter.
 
 All sub-teams must adhere to the governance, policies, and procedures of
-OpenFHE at all times.
+Cipher at all times.
 
 Voting
 ----------------------
 
 This section presents descriptions and criteria for voting items in
-the OpenFHE community. The Steering team is the only team with voting
+the Cipher community. The Steering team is the only team with voting
 rights. Other teams may pass recommendations up to the Steering team
 for a vote.  The members of the Steering team may also call a vote on
 any topic. The restrictions on calling a vote are as follows:
@@ -230,9 +230,9 @@ are permitted. Sample voting topics are as follows (but are not limited to this 
   permanently modifying these lists of sample voting topics).
 * Adding/removing Steering team members Spending project funds
 * Adding/removing people with commit rights to GitLab repositories
-* Adding/removing moderators of OpenFHE online groups and forums
+* Adding/removing moderators of Cipher online groups and forums
 * Adding/removing people to private communication channels
-* Adding/removing people with rights to post as OpenFHE on social
+* Adding/removing people with rights to post as Cipher on social
 * media Establishing sub-committees and roles
 
 Votes can happen on the following topics with passing contingent on a majority.
@@ -253,7 +253,7 @@ Releases shall be numbered sequentially using the following triple numbering:
 
 ``Major.minor.patch``
 
-* Major release number must be incremented when the OpenFHE user API
+* Major release number must be incremented when the Cipher user API
   changes, requiring user code rewrite.
 
 * Minor release numbers must be incremented when a new capability is

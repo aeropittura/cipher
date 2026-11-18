@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  Defines an interface that any DCRT Polynomial implmentation must implement in order to work in OpenFHE.
+  Defines an interface that any DCRT Polynomial implmentation must implement in order to work in Cipher.
  */
 
 #ifndef CIPHER_RING_BACKEND_RNS_POLY_INTERFACE_H_

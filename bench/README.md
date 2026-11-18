@@ -6,16 +6,16 @@ OpenFHE uses the [Google microbenchmark support library](https://github.com/goog
 make allbenchmark
 ```
 
-To run the benchmark `benchmark-to-run` from the build folder for linux or macOS, run:
+To run the benchmark `benchmark-to-run_fn` from the build folder for linux or macOS, run:
 
 ```
-./bin/benchmark/benchmark-to-run
+./bin/benchmark/benchmark-to-run_fn
 ```
 
 For Windows run:
 
  ```
- bin/benchmark/benchmark-to-run.exe
+ bin/benchmark/benchmark-to-run_fn.exe
  ```
 
 By default each benchmark is run once and that single result is reported. However benchmarks are often noisy and a single result may not be representative of the overall behavior. For this reason it's possible to repeatedly rerun the benchmark.
@@ -38,7 +38,7 @@ export OMP_NUM_THREADS=1
 
 ## lib-benchmark
 
-[lib-benchmark](lib-benchmark.cpp) is the main OpenFHE library benchmark that contains performance tests for standard operations in the following schemes: BFVrns, CKKS, BGVrns. It also contains several performance tests for NTT and INTT transformations.
+[lib-benchmark](library.cpp) is the main Cipher library benchmark that contains performance tests for standard operations in the following schemes: BFVrns, CKKS, BGVrns. It also contains several performance tests for NTT and INTT transformations.
 
 An example output after running `lib-benchmark` is as follows:
 
@@ -54,16 +54,16 @@ NTTTransformInPlace1024        9.51 us         9.51 us        73678
 INTTTransformInPlace1024       10.4 us         10.4 us        67144
 NTTTransformInPlace4096        44.9 us         44.9 us        15595
 INTTTransformInPlace4096       48.3 us         48.3 us        14501
-BFVrns_KeyGen                  2349 us         2349 us          298
-BFVrns_MultKeyGen              3807 us         3807 us          183
-BFVrns_EvalAtIndexKeyGen       3909 us         3909 us          179
-BFVrns_Encryption              2258 us         2258 us          310
-BFVrns_Decryption               539 us          539 us         1300
-BFVrns_Add                     33.9 us         33.9 us        20603
-BFVrns_AddInPlace              24.0 us         24.0 us        29269
-BFVrns_MultNoRelin             7399 us         7398 us           95
-BFVrns_MultRelin               8593 us         8592 us           82
-BFVrns_EvalAtIndex             1035 us         1034 us          674
+bfv_rns_key_gen                  2349 us         2349 us          298
+bfv_rns_mult_key_gen              3807 us         3807 us          183
+bfv_rns_eval_at_index_key_gen       3909 us         3909 us          179
+bfv_rns_encryption              2258 us         2258 us          310
+bfv_rns_decryption               539 us          539 us         1300
+bfv_rns_add                     33.9 us         33.9 us        20603
+bfv_rns_add_in_place              24.0 us         24.0 us        29269
+bfv_rns_mult_no_relin             7399 us         7398 us           95
+bfv_rns_mult_relin               8593 us         8592 us           82
+bfv_rns_eval_at_index             1035 us         1034 us          674
 CKKS_KeyGen                    2320 us         2320 us          302
 CKKS_MultKeyGen                5931 us         5931 us          117
 CKKS_EvalAtIndexKeyGen         5846 us         5845 us          118
@@ -78,25 +78,25 @@ CKKS_RelinInPlace              2958 us         2958 us          236
 CKKS_Rescale                    546 us          546 us         1287
 CKKS_RescaleInPlace             534 us          534 us         1308
 CKKS_EvalAtIndex               2758 us         2758 us          252
-BGVrns_KeyGen                  2329 us         2329 us          300
-BGVrns_MultKeyGen              5926 us         5925 us          118
-BGVrns_EvalAtIndexKeyGen       5987 us         5987 us          117
-BGVrns_Encryption              2252 us         2252 us          311
-BGVrns_Decryption               398 us          398 us         1754
-BGVrns_Add                     44.6 us         44.6 us        15682
-BGVrns_AddInPlace              35.9 us         35.9 us        19671
-BGVrns_MultNoRelin              208 us          208 us         3356
-BGVrns_MultRelin               3205 us         3205 us          218
-BGVrns_Relin                   3091 us         3091 us          227
-BGVrns_RelinInPlace            3029 us         3029 us          231
-BGVrns_ModSwitch                549 us          549 us         1275
-BGVrns_ModSwitchInPlace         539 us          539 us         1298
-BGVrns_EvalAtIndex             2806 us         2805 us          249
+bgv_rns_key_gen                  2329 us         2329 us          300
+bgv_rns_mult_key_gen              5926 us         5925 us          118
+bgv_rns_eval_at_index_key_gen       5987 us         5987 us          117
+bgv_rns_encryption              2252 us         2252 us          311
+bgv_rns_decryption               398 us          398 us         1754
+bgv_rns_add                     44.6 us         44.6 us        15682
+bgv_rns_add_in_place              35.9 us         35.9 us        19671
+bgv_rns_mult_no_relin              208 us          208 us         3356
+bgv_rns_mult_relin               3205 us         3205 us          218
+bgv_rns_relin                   3091 us         3091 us          227
+bgv_rns_relin_in_place            3029 us         3029 us          231
+bgv_rns_mod_switch                549 us          549 us         1275
+bgv_rns_mod_switch_in_place         539 us          539 us         1298
+bgv_rns_eval_at_index             2806 us         2805 us          249
 ```
 
 ## poly-benchmark
 
-[poly-1k](poly-benchmark-1k.cpp), [poly-4k](poly-benchmark-4k.cpp), [poly-16k](poly-benchmark-16k.cpp), [poly-64k](poly-test-64k.cpp)
+[poly-1k](poly_benchmark_1k.cpp), [poly-4k](poly_benchmark_4k.cpp), [poly-16k](poly_benchmark_16k.cpp), [poly-64k](poly_benchmark_64k.cpp)
 contains performance tests for primitive polynomial operations with ring sizes 1k, 4k, 16k, 64k, respectively.
 
 The following operations are used to evaluate the performance: addition, Hadamard (component-wise) multiplication, NTT and INTT. These operations (especially NTT and iNTT) are the main bottleneck operations for all lattice cryptographic capabilities.
@@ -134,13 +134,13 @@ DCRT_intt/towers:8       84.9 us         84.9 us         8242
 ## other
 
 There are several other benchmarking tests:
-* [bfv-mult-method-benchmark](bfv-mult-method-benchmark.cpp) - Compares the performance of **BFV** multiplication methods for EvalMultMany
-* [binfhe-ap](binfhe-ap.cpp) - boolean functions performance tests for **FHEW** scheme with **AP** bootstrapping technique. Please see "Bootstrapping in FHEW-like Cryptosystems" for details on both bootstrapping techniques
-* [binfhe-ginx](binfhe-ginx.cpp) - boolean functions performance tests for **FHEW** scheme with **GINX** bootstrapping technique. Please see "Bootstrapping in FHEW-like Cryptosystems" for details on both bootstrapping techniques
-* [compare-bfv-hps-leveled-vs-behz](compare-bfv-hps-leveled-vs-behz.cpp) - performance comparison between **HPSPOVERQLEVELED** and **BEHZ** **BFV** variants for similar parameter sets
-* [compare-bfvrns-vs-bgvrns](compare-bfvrns-vs-bgvrns.cpp) - performance comparison between **BFVrns** and **BGVrns** schemes for similar parameter sets
-* [IntegerMath](IntegerMath.cpp) - performance tests for the big integer operations
-* [Lattice](Lattice.cpp) - performance tests for the Lattice operations.
-* [NbTheory](NbTheory.cpp) - performance tests of number theory functions
-* [Serialization](serialize-ckks.cpp) - performance tests of **CKKS** serialization
-* [VectorMath](VectorMath.cpp) - performance tests for the big vector operations
+* [bfv-mult-method-benchmark](bfv_mult_method_benchmark.cpp) - Compares the performance of **BFV** multiplication methods for EvalMultMany
+* [binfhe-ap](binfhe_ap.cpp) - boolean functions performance tests for **FHEW** scheme with **AP** bootstrapping technique. Please see "Bootstrapping in FHEW-like Cryptosystems" for details on both bootstrapping techniques
+* [binfhe-ginx](binfhe_ginx.cpp) - boolean functions performance tests for **FHEW** scheme with **GINX** bootstrapping technique. Please see "Bootstrapping in FHEW-like Cryptosystems" for details on both bootstrapping techniques
+* [compare-bfv-hps-leveled-vs-behz](compare_bfv_hps_leveled_vs_behz.cpp) - performance comparison between **HPSPOVERQLEVELED** and **BEHZ** **BFV** variants for similar parameter sets
+* [compare-bfvrns-vs-bgvrns](compare_bfvrns_vs_bgvrns.cpp) - performance comparison between **BFVrns** and **BGVrns** schemes for similar parameter sets
+* [IntegerMath](integer_math.cpp) - performance tests for the big integer operations
+* [Lattice](ring.cpp) - performance tests for the Lattice operations.
+* [NbTheory](number_theory.cpp) - performance tests of number theory functions
+* [Serialization](serialize_ckks.cpp) - performance tests of **CKKS** serialization
+* [VectorMath](vector_math.cpp) - performance tests for the big vector operations

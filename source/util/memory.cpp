@@ -55,7 +55,7 @@
 namespace cipher {
 
 #if defined(CIPHER_WITH_MALLOC_TUNING)
-// Tune the process allocator to retain freed memory for reuse. OpenFHE operations allocate and
+// Tune the process allocator to retain freed memory for reuse. Cipher operations allocate and
 // free many large (~0.5-30 MB) buffers; on allocators that return freed buffers to the OS right
 // away, re-faulting the pages on the next operation can dominate single-threaded runtime. Any
 // tuning below runs once, process-wide, at library load. NOTE: retained memory shows up as a
@@ -99,7 +99,7 @@ namespace {
 // policy the operator already set (so `numactl --membind=...` and container/cpuset policies win).
 //
 // NOTE: set_mempolicy() is process-wide, so this also applies to allocations made by the host
-// application, not just to OpenFHE's.
+// application, not just to Cipher's.
 namespace {
 using MemPolicyWord = unsigned long;  // NOLINT(runtime/int) -- kernel nodemask word
 

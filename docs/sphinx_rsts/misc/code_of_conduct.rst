@@ -1,4 +1,4 @@
-OpenFHE Project Code of Conduct
+Cipher Project Code of Conduct
 ================================
 
 Our Pledge

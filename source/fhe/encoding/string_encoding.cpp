@@ -30,7 +30,7 @@
 //==================================================================================
 
 /*
-  Represents and defines string-encoded plaintext objects in OpenFHE
+  Represents and defines string-encoded plaintext objects in Cipher
  */
 
 #include "cipher/fhe/encoding/string_encoding.h"

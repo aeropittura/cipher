@@ -1,11 +1,11 @@
-OpenFHE Lattice Cryptography Library - CKKS-based Functional Bootstrapping
+Cipher Lattice Cryptography Library - CKKS-based Functional Bootstrapping
 ==========================================================================
 
-[License Information](../../../LICENSE)
+[License Information](../../LICENSE)
 
 Document Description
 ====================
-This document describes the two flavors of CKKS-based functional bootstrapping in OpenFHE and what capabilities are
+This document describes the two flavors of CKKS-based functional bootstrapping in Cipher and what capabilities are
 currently supported for each of them:
 - the evaluation of arbitrary lookup tables (LUT) over integers, based on
 [Alexandru, Kim and Polyakov CRYPTO 2025](https://eprint.iacr.org/2024/1623.pdf) (section "Functionality" below);
@@ -17,15 +17,15 @@ Both are experimental functionalities.
 Example Description
 ====================
 
-The example file for the lookup table evaluation is located at [functional-bootstrapping-ckks.cpp](functional-bootstrapping-ckks.cpp). The file gives
+The example file for the lookup table evaluation is located at [functional-bootstrapping-ckks.cpp](functional_bootstrapping_ckks.cpp). The file gives
 examples on how to run:
-- `ArbitraryLUT`, which applies a function specified as an LUT over an input ciphertext, for various values of the input and output bit-sizes;
-- `MultiValueBootstrapping`, which applies different functions specified as LUTs over the same input ciphertext, reusing intermediate
+- `arbitrary_lut`, which applies a function specified as an LUT over an input ciphertext, for various values of the input and output bit-sizes;
+- `multi_value_bootstrapping`, which applies different functions specified as LUTs over the same input ciphertext, reusing intermediate
 computations; it also shows how to apply leveled computations after an LUT evaluation;
-- `MultiPrecisionSign`, which evaluates the sign of a large value using digit decomposition, for various sizes of the digits.
+- `multi_precision_sign`, which evaluates the sign of a large value using digit decomposition, for various sizes of the digits.
 
 The example file for the Fourier-extension functional bootstrapping is located at
-[FE-functional-bootstrapping-ckks.cpp](FE-functional-bootstrapping-ckks.cpp). It refreshes one CKKS ciphertext and evaluates
+[FE-functional-bootstrapping-ckks.cpp](FE_functional_bootstrapping_ckks.cpp). It refreshes one CKKS ciphertext and evaluates
 three functions on it (the exponential over [-2, 2], the sigmoid over [-8, 8] and the tanh approximation of GELU over [-8, 8]),
 sharing the function-independent part of the computation among them.
 
@@ -53,8 +53,8 @@ Note that the message is encoded in the coefficients in the RLWE scheme, but whe
 the slots of the CKKS ciphertexts. To be able to apply CKKS leveled computations, we need to homomorphically transform from
 the coefficient encoding to the slot encoding. When doing this via an FFT-like transform (instead of a linear transform), the
 slots will be bit reversed in the CKKS ciphertext. When intermediate computations involving rotations are done in CKKS (see more
-below), it is more efficient to apply bit reversal in the encoding and decoding of RLWE. The argument `bitReverse` in
-`SchemeletRLWEMP::EncryptCoeff` and `SchemeletRLWEMP::DecryptCoeff` has this role.
+below), it is more efficient to apply bit reversal in the encoding and decoding of RLWE. The argument `bit_reverse` in
+`SchemeletRlweMp::encrypt_coeff` and `SchemeletRlweMp::decrypt_coeff` has this role.
 
 **Functional Bootstrapping**
 The full functionality is described in [[AKP25]](https://eprint.iacr.org/2024/1623.pdf).
@@ -62,40 +62,40 @@ The full functionality is described in [[AKP25]](https://eprint.iacr.org/2024/16
 First, the plaintext input and output bit-sizes for the desired function are set, which determine the depth of the computation. The
 RLWE ciphertext modulus and CKKS scaling factor are also set in accordance to the desired precsion. Second, the trigonometric Hermite
 Interpolation coefficients are computed for the function to be evaluated, based on a desired order of the interpolation (currently
-supported orders are 1, 2, and 3). For non-Boolean functions or higher orders, this is done through `GetHermiteTrigCoefficients`, which
+supported orders are 1, 2, and 3). For non-Boolean functions or higher orders, this is done through `get_hermite_trig_coefficients`, which
 returns complex coefficients. For the first order and a Boolean function f, an optimized implementation is used, which requires the
 (real and integer) coefficients to be set as [f(1), f(0) - f(1)]. For numeric accuracy in CKKS, the coefficients should be scaled
 down such that their maximum magnitude is at most one. This scaling factor `scale` should be chosen to be an integer to incur a
 small noise increase.
 
 The desired number of levels that should remain after the function evaluation (for output precision) should be specified. Then, the
-setup for the computation is called by `EvalFBTSetup` and the necessary keys are generated by calling `EvalBootstrapKeyGen`.
+setup for the computation is called by `eval_fbt_setup` and the necessary keys are generated by calling `eval_bootstrap_key_gen`.
 
 The RLWE input ciphertext needs to be converted to a CKKS ciphertext in order to commence the functional bootstrapping. This is done
-by calling `SchemeletRLWEMP::ConvertRLWEToCKKS`. Then, `EvalFBT` is called to obtain a CKKS encrypting the coefficients of the function
-evaluation output. Finally, to return to the exact RLWE scheme, `SchemeletRLWEMP::ConvertCKKSToRLWE` should be called.
+by calling `SchemeletRlweMp::convert_rlwe_to_ckks`. Then, `eval_fbt` is called to obtain a CKKS encrypting the coefficients of the function
+evaluation output. Finally, to return to the exact RLWE scheme, `SchemeletRlweMp::convert_ckks_to_rlwe` should be called.
 
-Internally, `EvalFBT` performs the following steps: modulus raising, coefficient to slots transform (equivalent to homomorphic
+Internally, `eval_fbt` performs the following steps: modulus raising, coefficient to slots transform (equivalent to homomorphic
 encoding), complex exponential evaluation, computing powers of the complex exponential, power series evaluation of the
 Hermite coefficients, slots to coefficients transform (equivalent to homomorphic decoding) and necessary scalings.
 
 If one wants to apply an intermediate leveled computation on the CKKS slots, then the number of levels for this leveled computation
 needs to be specified. If this intermediate computation requires rotations, then in order to apply the rotations over the natural
 order in CKKS slots, the RLWE input needs to be bit reversed if multiple levels are used for encoding and decoding. Then
-`EvalFBTNoDecoding` should be called, the intermediate computation applied and finally, `EvalHomDecoding` should be called.
+`eval_fbt_no_decoding` should be called, the intermediate computation applied and finally, `eval_hom_decoding` should be called.
 
 The features that need to be enabled for CKKS functional bootstrapping are PKE, KEYSWITCH, LEVELEDSHE, ADVANCEDSHE and FHE.
 
 **Multi-Value Bootstrapping**
 
 When multiple functions need to be evaluated over the same input ciphertext, we can reuse the computations for functional
-bootstrapping up to (including) the powers of the complex exponential. This can be called by `EvalMVBPrecompute`. Using the
-ciphertexts obtained as such, one can then call `EvalMVB` once for every set of coefficients corresponding to a different
+bootstrapping up to (including) the powers of the complex exponential. This can be called by `eval_mvb_precompute`. Using the
+ciphertexts obtained as such, one can then call `eval_mvb` once for every set of coefficients corresponding to a different
 function. All these functions must be interpolated with the same shape (same plaintext modulus and `order`, which dictate
 the size of the coefficient vector; for degree less than 5, the sparsity of the coefficients should also be identical) as
-the coefficients passed to `EvalMVBPrecompute`, since those determine which powers of the complex exponential are precomputed.
+the coefficients passed to `eval_mvb_precompute`, since those determine which powers of the complex exponential are precomputed.
 As before, if intermediate CKKS leveled computations are required before converting back to RLWE, one
-should call `EvalMVBNoDecoding` and `EvalHomDecoding`.
+should call `eval_mvb_no_decoding` and `eval_hom_decoding`.
 
 **Chain computations and Sign**
 
@@ -156,7 +156,7 @@ of several smaller primes.
 - The current multiprecision sign evaluation implementation requires that the digit bit size divides the input bit size.
 - In the COMPOSITESCALING* modes, the first modulus has to be at least one bit larger than the scaling factor (whose bit
 length matches the RLWE ciphertext modulus), as required by the parameter generation for composite scaling.
-- The 128-bit build (`NATIVE_SIZE == 128`) is not supported; `EvalFBTSetup` rejects it.
+- The 128-bit build (`NATIVE_SIZE == 128`) is not supported; `eval_fbt_setup` rejects it.
 - MULTIPARTY is not supported.
 
 Fourier-Extension Functional Bootstrapping
@@ -174,7 +174,7 @@ the series both removes the overflows and applies f. The name refers to how the 
 message domain, which is half of the period of the series, and the approximation is free on the other half. Such a Fourier
 extension converges much faster than a plain Fourier expansion of a non-periodic function.
 
-Internally, `EvalFEFuncBootstrap` follows the SlotsToCoeffs-first variant of CKKS bootstrapping (see
+Internally, `eval_fe_func_bootstrap` follows the SlotsToCoeffs-first variant of CKKS bootstrapping (see
 [CKKS_BOOTSTRAPPING.md](CKKS_BOOTSTRAPPING.md)): SlotsToCoeffs transform, modulus raising, CoeffsToSlots transform, evaluation
 of the complex exponential (Chebyshev interpolation followed by double-angle iterations), and evaluation of the Fourier series
 over the powers of the complex exponential.
@@ -194,28 +194,28 @@ The coefficients are computed offline with the Python scripts in [fefbt-python](
 which take the target function f, the interval [-B, B] and the degree d, and print the coefficient vector as a C++
 declaration together with the precision it achieves. The example contains the coefficient vectors for its three functions.
 
-**OpenFHE functions**
+**Cipher functions**
 The features that need to be enabled are PKE, KEYSWITCH, LEVELEDSHE, ADVANCEDSHE and FHE. Then:
-- `FHECKKSRNS::GetFEFBTDepth` returns the multiplicative depth consumed by the FE functional bootstrapping for a given level
+- `CkksRnsFhe::get_fefbt_depth` returns the multiplicative depth consumed by the FE functional bootstrapping for a given level
 budget, coefficient vector and secret key distribution. The levels to be used after the bootstrapping should be added to it
 when setting the multiplicative depth of the crypto context.
-- `EvalFEFuncBootstrapSetup` performs the precomputations of the linear transforms for a given level budget and number of slots.
+- `eval_fe_func_bootstrap_setup` performs the precomputations of the linear transforms for a given level budget and number of slots.
 A level budget of {1, 1} uses a single linear transform for each of the SlotsToCoeffs and CoeffsToSlots steps.
-- `EvalBootstrapKeyGen` (together with `EvalMultKeyGen`) generates the keys, as for regular CKKS bootstrapping.
-- `EvalFEFuncBootstrap` refreshes a ciphertext and evaluates the function given by a coefficient vector.
+- `eval_bootstrap_key_gen` (together with `eval_mult_key_gen`) generates the keys, as for regular CKKS bootstrapping.
+- `eval_fe_func_bootstrap` refreshes a ciphertext and evaluates the function given by a coefficient vector.
 
 As the SlotsToCoeffs transform is performed first, the input ciphertext has to have enough levels left for it: in the example,
-the input is encoded at level `depth - (levelBudget[1] + 1)`. A ciphertext at a higher level is brought down to the required
+the input is encoded at level `depth - (level_budget[1] + 1)`. A ciphertext at a higher level is brought down to the required
 level automatically.
 
 When several functions need to be evaluated on the same input, the function-independent part of the computation (up to and
-including the powers of the complex exponential), which dominates the cost, can be shared. `EvalFEFuncBootstrapPrecompute`
-performs it and returns the powers, and `EvalFEFuncBootstrapWithPrecomp` evaluates the series of one function against them.
-The coefficient vector passed to `EvalFEFuncBootstrapPrecompute` determines which powers are computed, so it should be that of
-the longest series (of degree at least 5); the error message of `EvalFEFuncBootstrapWithPrecomp` reports the maximum degree
+including the powers of the complex exponential), which dominates the cost, can be shared. `eval_fe_func_bootstrap_precompute`
+performs it and returns the powers, and `eval_fe_func_bootstrap_with_precomp` evaluates the series of one function against them.
+The coefficient vector passed to `eval_fe_func_bootstrap_precompute` determines which powers are computed, so it should be that of
+the longest series (of degree at least 5); the error message of `eval_fe_func_bootstrap_with_precomp` reports the maximum degree
 if a longer series is passed.
 
-`EvalFEFuncBootstrapSetup`, `EvalBootstrapSetup` and `EvalFBTSetup` store their precomputations in the same entry for a given
+`eval_fe_func_bootstrap_setup`, `eval_bootstrap_setup` and `eval_fbt_setup` store their precomputations in the same entry for a given
 number of slots, so a crypto context holds the precomputations of only one of them for each number of slots.
 
 **Secret key distributions**
@@ -234,8 +234,8 @@ All scaling techniques (FIXEDMANUAL, FIXEDAUTO, FLEXIBLEAUTO, FLEXIBLEAUTOEXT, C
 COMPOSITESCALINGMANUAL) are supported, for both full and sparse packing.
 
 **Current limitations**
-- The first modulus has to be exactly one bit larger than the scaling factor (`FirstModSize = ScalingModSize + 1`), since the
-message is embedded into half of the period of the series; `EvalFEFuncBootstrap` and `EvalFEFuncBootstrapPrecompute`
+- The first modulus has to be exactly one bit larger than the scaling factor (`first_mod_size = ScalingModSize + 1`), since the
+message is embedded into half of the period of the series; `eval_fe_func_bootstrap` and `eval_fe_func_bootstrap_precompute`
 throw otherwise.
 - Only HYBRID key switching is supported.
 - There is no correction factor and no iterative (Meta-BTS) mode, and there is no automated selection of the number of
@@ -243,4 +243,4 @@ Fourier coefficients: the user needs to choose it (and the domain [-B, B]) so th
 below the desired precision, for example using the precision reported by the coefficient generator.
 - If the output is decrypted under CKKS, noise flooding should be applied in order to achieve $\textsf{IND}-\textsf{CPA}^{D}$
 security.
-- The 128-bit build (`NATIVE_SIZE == 128`) is not supported; `EvalFEFuncBootstrapSetup` rejects it.
+- The 128-bit build (`NATIVE_SIZE == 128`) is not supported; `eval_fe_func_bootstrap_setup` rejects it.

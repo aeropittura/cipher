@@ -1,13 +1,13 @@
-# Sampling in OpenFHE
+# Sampling in Cipher
 
-OpenFHE library offers various methods for sampling from discrete Gaussian distribution. The methods are implemented in both [DiscreteGaussianGenerator](./discretegaussiangenerator.h) and [DiscreteGaussianGeneratorGeneric](./discretegaussiangeneratorgeneric.h) classes, which have their specific uses. All of the samplers discussed have been tested in [GLITCH Discrete Gaussian Testing Suite](https://eprint.iacr.org/2017/438.pdf) and no problems/abnormalities have been found.
+Cipher library offers various methods for sampling from discrete Gaussian distribution. The methods are implemented in both [DiscreteGaussianGenerator](discrete_gaussian_gen.h) and [DiscreteGaussianGeneratorGeneric](discrete_gaussian_gen_generic.h) classes, which have their specific uses. All of the samplers discussed have been tested in [GLITCH Discrete Gaussian Testing Suite](https://eprint.iacr.org/2017/438.pdf) and no problems/abnormalities have been found.
 
 ## Samplers in DiscreteGaussianGenerator
 
-The class [DiscreteGaussianGenerator](./discretegaussiangenerator.h)  is the main class for homomorphic encryption and includes the implementations of rejection sampling, Karney's method and Peikert's inversion method.
+The class [DiscreteGaussianGenerator](discrete_gaussian_gen.h)  is the main class for homomorphic encryption and includes the implementations of rejection sampling, Karney's method and Peikert's inversion method.
 
 * __Rejection Sampling:__ Rejection sampling is defined in section 4.1 of the paper [Trapdoors for Hard Lattices and
-New Cryptographic Constructions](https://eprint.iacr.org/2007/432.pdf). It is used in the methods GenerateInteger(double mean, double stddev, size_t n, const IntType &modulus) and GenerateInteger(double mean, double stddev, size_t n). Rejection sampling can be used for any arbitrary center and distribution parameter without any precomputations. However, it has high rejection rate and is vulnerable to timing attacks. It is currently not used by any cryptographic protocols in OpenFHE.
+New Cryptographic Constructions](https://eprint.iacr.org/2007/432.pdf). It is used in the methods GenerateInteger(double mean, double stddev, size_t n, const IntType &modulus) and GenerateInteger(double mean, double stddev, size_t n). Rejection sampling can be used for any arbitrary center and distribution parameter without any precomputations. However, it has high rejection rate and is vulnerable to timing attacks. It is currently not used by any cryptographic protocols in Cipher.
 
 * __Karney's Method:__ Karney's method is defined as Algorithm D in the paper [Sampling exactly from the normal distribution](https://arxiv.org/pdf/1303.6257.pdf), which is an improved sampling method, based on rejection sampling. It is used in the method GenerateIntegerKarney. Like the rejection sampling, it can be used for arbitrary center and distribution parameter without any precomputations. It has a smaller rejection rate than the traditional sampling but it may still be prone to timing attacks.
 
@@ -17,9 +17,9 @@ Since DiscreteGaussianGenerator contains both rejection based & precomputation-b
 
 ## Samplers in DiscreteGaussianGeneratorGeneric
 
-The class [DiscreteGaussianGeneratorGeneric](./discretegaussiangeneratorgeneric.h) is the constant-time generic sampler developed by UCSD, and it contains the definitions for this new sampling method and base samplers required for it.
+The class [DiscreteGaussianGeneratorGeneric](discrete_gaussian_gen_generic.h) is the constant-time generic sampler developed by UCSD, and it contains the definitions for this new sampling method and base samplers required for it.
 
-* __Peikert's Inversion Method:__ Peikert's inversion method is the same one defined in [DiscreteGaussianGenerator](./discretegaussiangenerator.h), and it's used in base samplers only. It is called from a BaseSampler object created with "PEIKERT" parameter by invoking GenerateInteger method.
+* __Peikert's Inversion Method:__ Peikert's inversion method is the same one defined in [DiscreteGaussianGenerator](discrete_gaussian_gen.h), and it's used in base samplers only. It is called from a BaseSampler object created with "PEIKERT" parameter by invoking GenerateInteger method.
 
 * __Knuth-Yao Sampling:__ Knuth-Yao's method for sampling integers was summarized in section 5 of [Sampling from discrete Gaussians for lattice-based cryptography on a constrained device](https://link.springer.com/content/pdf/10.1007%2Fs00200-014-0218-3.pdf). It requires the calculation of probability matrix and then the Discrete Distribution Generating trees, which is handled in constructor. In order to use this method, it is required to call it from a BaseSampler object created with "KNUTH_YAO" parameter by invoking GenerateInteger method. Just like Peikert's inversion method, it is usable for single center, single deviation only while having a memory requirement proportional to distribution parameter.
 
@@ -31,9 +31,9 @@ The class [DiscreteGaussianGeneratorGeneric](./discretegaussiangeneratorgeneric.
 
 ```c++
 /*Create the generator object, std is not important as we choose it arbitrarily during sampling*/
-DiscreteGaussianGenerator dggRejection;
+DiscreteGaussianGenerator dgg_rejection;
 /*First parameter is the mean, second one is the distribution parameter and third one is the ring dimension.*/
-int64_t number = dggRejection.GenerateInteger(0,4,1024);
+int64_t number = dgg_rejection.generate_integer(0,4,1024);
 ```
 
 ### Karney's Method
@@ -42,7 +42,7 @@ int64_t number = dggRejection.GenerateInteger(0,4,1024);
 /*Create the generator object, std is not important as we choose it arbitrarily during sampling*/
 DiscreteGaussianGenerator dggKarney;
 /*First parameter is the mean, second one is the distribution parameter*/
-int64_t number = dggKarney.GenerateIntegerKarney(0,4);
+int64_t number = dggKarney.generate_integer_karney(0,4);
 ```
 
 ### Peikert's Inversion Method (As defined in DiscreteGaussianGenerator)
@@ -50,8 +50,8 @@ int64_t number = dggKarney.GenerateIntegerKarney(0,4);
 ```c++
 /*Create the generator object, the parameter is the distribution parameter*/
 DiscreteGaussianGenerator dggPeikert(4);
-/*This will create a single number*/
-int64_t number = dggPeikert.GenerateInt();
+/*This will create a single_value number*/
+int64_t number = dggPeikert.generate_int();
 ```
 
 ### Peikert's Inversion Method (As defined in DiscreteGaussianGeneratorGeneric)
@@ -67,8 +67,8 @@ double mean = 0;
 /*Create the sampler object*/
 BaseSampler peikert_sampler(mean,std,bg,PEIKERT);
 
-/*Generate Integer */
-int64_t number = peikert_sampler.GenerateInteger();
+/*generate Integer */
+int64_t number = peikert_sampler.generate_integer();
 ```
 
 ### Knuth-Yao's Method (As defined in DiscreteGaussianGeneratorGeneric)
@@ -84,8 +84,8 @@ double mean = 0;
 /*Create the sampler object*/
 BaseSampler ky_sampler(mean,std,bg,KNUTH_YAO);
 
-/*Generate Integer */
-int64_t number = ky_sampler.GenerateInteger();
+/*generate Integer */
+int64_t number = ky_sampler.generate_integer();
 ```
 
 ### Generic Sampler
@@ -96,7 +96,7 @@ int64_t number = ky_sampler.GenerateInteger();
 BitGenerator* bg = new BitGenerator();
 
 /*Distribution parameter of the base samplers, distribution parameter of the actual distribution, number of base samplers, mean of the actual distribution*/
-double stdBase = 34;
+double std_base = 34;
 double std = (1<<22);
 int CENTER_COUNT = 1024
 double mean = 0;
@@ -105,13 +105,13 @@ double mean = 0;
 BaseSampler **peikert_samplers;
 for(int i=0;i<CENTER_COUNT;i++){
 	double center = ((double)i/(double)CENTER_COUNT);
-	peikert_samplers[i]=new BaseSampler((double)center,stdBase,bg,PEIKERT);
+	peikert_samplers[i]=new BaseSampler((double)center,std_base,bg,PEIKERT);
 }
 
 /*Create the sampler object*/
 int base = std::log2(CENTER_COUNT);
-DiscreteGaussianGeneratorGeneric dggGeneric(peikert_samplers,stdBase,base,SMOOTHING_PARAMETER);
+DiscreteGaussianGeneratorGeneric dggGeneric(peikert_samplers,std_base,base,SMOOTHING_PARAMETER);
 
-/*Generate Integer */
-int64_t number = dggGeneric.GenerateInteger(mean,std);
+/*generate Integer */
+int64_t number = dggGeneric.generate_integer(mean,std);
 ```
