@@ -387,28 +387,28 @@ void poly_mult_square_matrix_caps(const std::string& msg) {
                                                         fast_uniform_il2n_alloc<Element>());
     MatrixStrassen<Element> I = MatrixStrassen<Element>(fast_il2n_alloc<Element>(), dimension, dimension).identity();
 
-    // EXPECT_EQ((A.mult(B))(0, 0), (A.MultiplyCAPS(B, 2))(0, 0)) << "CAPS matrix
+    // EXPECT_EQ((A.mult(B))(0, 0), (A.multiply_caps(B, 2))(0, 0)) << "CAPS matrix
     // multiplication of two Poly2Ns doesn't agree with Mult: A.mult(B),
-    // A.MultiplyCAPS(B,2) - failed.\n";
+    // A.multiply_caps(B,2) - failed.\n";
     EXPECT_EQ(A, A.mult(I, 2)) << msg << " CAPS matrix multiplication of two Poly2Ns: A = AI - failed.\n";
     EXPECT_EQ(A, I.mult(A, 2)) << msg << " Matrix multiplication of two Poly2Ns: A = IA - failed.\n";
 
     EXPECT_EQ((A.mult(B, 2)).transposed(), B.transposed().mult(A.transposed(), 2))
             << msg
             << " Matrix multiplication of two Poly2Ns: "
-               "(A.MultiplyCAPS(B,2)).Transpose(), "
-               "B.Transpose().MultiplyCAPS(A.Transpose(),2) - failed.\n";
+               "(A.multiply_caps(B,2)).transpose(), "
+               "B.transpose().multiply_caps(A.transpose(),2) - failed.\n";
 
     EXPECT_EQ(A.mult(B, 2).mult(C, 2), A.mult((B.mult(C, 2)), 2))
             << msg
             << " Matrix multiplication of two Poly2Ns: "
-               "A.MultiplyCAPS(B,2).MultiplyCAPS(C,2), "
-               "A.MultiplyCAPS((B.MultiplyCAPS(C,2)),2) - failed.\n";
+               "A.multiply_caps(B,2).multiply_caps(C,2), "
+               "A.multiply_caps((B.multiply_caps(C,2)),2) - failed.\n";
     EXPECT_EQ(A.mult(B, 2).mult(C, 2), (A.mult(B, 2)).mult(C, 2))
             << msg
             << " Matrix multiplication of two Poly2Ns: "
-               "A.MultiplyCAPS(B,2).MultiplyCAPS(C,2), "
-               "(A.MultiplyCAPS(B,2)).MultiplyCAPS(C,2) - failed.\n";
+               "A.multiply_caps(B,2).multiply_caps(C,2), "
+               "(A.multiply_caps(B,2)).multiply_caps(C,2) - failed.\n";
 }
 
 TEST(UTMatrix, Poly_mult_square_matrix_caps) {
@@ -462,9 +462,9 @@ TEST(UTMatrix, cholesky3x3) {
     auto cs = cholesky(ms);
     for (size_t i = 0; i < 3; ++i) {
         for (size_t j = 0; j < 3; ++j) {
-            EXPECT_LE(std::fabs(lower[i][j] - c(i, j)), 1e-12) << "Cholesky(input) at " << i << "," << j;
-            EXPECT_LE(std::fabs(lower[i][j] - c2(i, j)), 1e-12) << "Cholesky(input, result) at " << i << "," << j;
-            EXPECT_LE(std::fabs(lower[i][j] - cs(i, j)), 1e-12) << "Cholesky(MatrixStrassen) at " << i << "," << j;
+            EXPECT_LE(std::fabs(lower[i][j] - c(i, j)), 1e-12) << "cholesky(input) at " << i << "," << j;
+            EXPECT_LE(std::fabs(lower[i][j] - c2(i, j)), 1e-12) << "cholesky(input, result) at " << i << "," << j;
+            EXPECT_LE(std::fabs(lower[i][j] - cs(i, j)), 1e-12) << "cholesky(MatrixStrassen) at " << i << "," << j;
         }
     }
 
@@ -523,7 +523,7 @@ void rotate(const std::string& msg) {
 
     n.set_format(Format::COEFFICIENT);
     n(0, 0).at(2) = 1;
-    Matrix<typename Element::Integer> R = Rotate(n);
+    Matrix<typename Element::Integer> R = rotate_matrix(n);
     EXPECT_EQ(8U, R.get_rows()) << msg;
     EXPECT_EQ(16U, R.get_cols()) << msg;
     EXPECT_EQ(typename Element::Integer(1), R(0, 0)) << msg;
@@ -593,7 +593,7 @@ TEST(UTMatrix, determinant) {
 }
 
 // Checks the implementantation of cofactor matrix based on a 3x3 matrix
-TEST(UTMatrix, cofactorMatrix) {
+TEST(UTMatrix, cofactor_matrix) {
     Matrix<int32_t> m([]() { return 0; }, 3, 3);
     m(0, 0) = 1;
     m(0, 1) = 2;

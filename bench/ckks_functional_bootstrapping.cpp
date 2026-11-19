@@ -137,7 +137,7 @@ struct fbt_config {
             (t.p_input.convert_to_int<int64_t>() / 2), (t.p_input.convert_to_int<int64_t>() / 2) + 1, 0, 3, 16, 33, 64,
             (t.p_input.convert_to_int<int64_t>() - 1)};
     if (x.size() < t.num_slots)
-        x = Fill<int64_t>(x, t.num_slots);
+        x = fill_slots<int64_t>(x, t.num_slots);
 
     std::vector<int64_t> coeffint;
     std::vector<std::complex<double>> coeffcomp;
@@ -203,7 +203,7 @@ struct fbt_config {
             (t.p_input.convert_to_int<int64_t>() / 2), (t.p_input.convert_to_int<int64_t>() / 2) + 1, 0, 3, 16, 33, 64,
             (t.p_input.convert_to_int<int64_t>() - 1)};
     if (x.size() < t.num_slots)
-        x = Fill<int64_t>(x, t.num_slots);
+        x = fill_slots<int64_t>(x, t.num_slots);
 
     std::vector<int64_t> coeffint;
     std::vector<std::complex<double>> coeffcomp;
@@ -276,7 +276,7 @@ struct fbt_config {
             (t.p_input.convert_to_int<int64_t>() / 2), (t.p_input.convert_to_int<int64_t>() / 2) + 1, 0, 3, 16, 33, 64,
             (t.p_input.convert_to_int<int64_t>() - 1)};
     if (x.size() < t.num_slots)
-        x = Fill<int64_t>(x, t.num_slots);
+        x = fill_slots<int64_t>(x, t.num_slots);
 
     std::vector<int64_t> coeffint;
     std::vector<std::complex<double>> coeffcomp;
@@ -367,7 +367,7 @@ struct fbt_config {
             t.p_input.convert_to_int<int64_t>() / 2, t.p_input.convert_to_int<int64_t>() / 2 + 1, 0, 3, 16, 33, 64,
             t.p_input.convert_to_int<int64_t>() - 1};
     if (x.size() < t.num_slots)
-        x = Fill<int64_t>(x, t.num_slots);
+        x = fill_slots<int64_t>(x, t.num_slots);
 
     auto exact(x);
     std::transform(x.begin(), x.end(), exact.begin(),

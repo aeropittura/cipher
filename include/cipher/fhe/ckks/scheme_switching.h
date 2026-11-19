@@ -289,8 +289,8 @@ class CkksRnsSchemeSwitching : public RnsFhe {
 
     EvalKey<RnsPoly> conjugate_key_gen(const PrivateKey<RnsPoly> private_key) const;
 
-    Ciphertext<RnsPoly> Conjugate(ConstCiphertext<RnsPoly> ciphertext,
-                                  const std::map<uint32_t, EvalKey<RnsPoly>>& eval_keys) const;
+    Ciphertext<RnsPoly> eval_conjugate(ConstCiphertext<RnsPoly> ciphertext,
+                                       const std::map<uint32_t, EvalKey<RnsPoly>>& eval_keys) const;
 
 #if CIPHER_NATIVE_INT == 128
     /**

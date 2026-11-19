@@ -51,7 +51,7 @@ KeyPair<Element> BasePke<Element>::key_gen_internal(CryptoContext<Element> cc, b
     const auto element_params = crypto_params->get_element_params();
     const auto params_pk = crypto_params->get_params_pk();
     if (!params_pk)
-        CIPHER_THROW("PrecomputeCRTTables() must be called before using precomputed params.");
+        CIPHER_THROW("precompute_crt_tables() must be called before using precomputed params.");
 
     // Private Key Generation
 

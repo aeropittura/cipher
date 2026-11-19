@@ -49,7 +49,7 @@
 namespace cipher {
 
 template <typename Element>
-Matrix<typename Element::Integer> Rotate(Matrix<Element> const& in_mat) {
+Matrix<typename Element::Integer> rotate_matrix(Matrix<Element> const& in_mat) {
     Matrix<Element> mat(in_mat);
     mat.set_format(Format::COEFFICIENT);
     size_t n = mat(0, 0).get_length();

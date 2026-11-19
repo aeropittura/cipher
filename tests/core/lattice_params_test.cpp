@@ -60,9 +60,9 @@ class LatticeParamsTest : public ::testing::Test {
 TEST_F(LatticeParamsTest, edge_cases) {
     uint32_t max_q = StdLatticeParm::find_max_q(HEStd_ternary, HEStd_128_classic, 4096);
     uint32_t ring_dim = StdLatticeParm::find_ring_dim(HEStd_ternary, HEStd_128_classic, max_q);
-    EXPECT_EQ(ring_dim, (uint32_t)4096) << "Ring dimension is incorrect for an edge case of curQ = maxQ";
+    EXPECT_EQ(ring_dim, (uint32_t)4096) << "Ring dimension is incorrect for an edge case of curQ = max_q";
     ring_dim = StdLatticeParm::find_ring_dim(HEStd_ternary, HEStd_128_classic, max_q - 1);
-    EXPECT_EQ(ring_dim, (uint32_t)4096) << "Ring dimension is incorrect for an edge case of curQ = maxQ - 1";
+    EXPECT_EQ(ring_dim, (uint32_t)4096) << "Ring dimension is incorrect for an edge case of curQ = max_q - 1";
     ring_dim = StdLatticeParm::find_ring_dim(HEStd_ternary, HEStd_128_classic, max_q + 1);
-    EXPECT_EQ(ring_dim, (uint32_t)8192) << "Ring dimension is incorrect for an edge case of curQ = maxQ + 1";
+    EXPECT_EQ(ring_dim, (uint32_t)8192) << "Ring dimension is incorrect for an edge case of curQ = max_q + 1";
 }

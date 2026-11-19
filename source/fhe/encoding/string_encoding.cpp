@@ -72,7 +72,7 @@ bool StringEncoding::encode() {
         }
     }
 
-    if (this->type_flag == IsDCRTPoly) {
+    if (this->type_flag == IsRnsPoly) {
         this->encoded_vector_dcrt = this->encoded_vector;
         this->encoded_vector_dcrt.set_format(Format::EVALUATION);
     }

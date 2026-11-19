@@ -52,27 +52,27 @@ using namespace cipher;
 
 template <typename VecType>
 std::map<typename VecType::Integer, VecType>
-        ChineseRemainderTransformFTTNtl<VecType>::cyclo_order_inverse_table_by_modulus_;
+        ChineseRemainderTransformFttNtl<VecType>::cyclo_order_inverse_table_by_modulus_;
 
 template <typename VecType>
 std::map<typename VecType::Integer, VecType>
-        ChineseRemainderTransformFTTNtl<VecType>::cyclo_order_inverse_precon_table_by_modulus_;
+        ChineseRemainderTransformFttNtl<VecType>::cyclo_order_inverse_precon_table_by_modulus_;
 
 template <typename VecType>
 std::map<typename VecType::Integer, VecType>
-        ChineseRemainderTransformFTTNtl<VecType>::root_of_unity_reverse_table_by_modulus_;
+        ChineseRemainderTransformFttNtl<VecType>::root_of_unity_reverse_table_by_modulus_;
 
 template <typename VecType>
 std::map<typename VecType::Integer, VecType>
-        ChineseRemainderTransformFTTNtl<VecType>::root_of_unity_inverse_reverse_table_by_modulus_;
+        ChineseRemainderTransformFttNtl<VecType>::root_of_unity_inverse_reverse_table_by_modulus_;
 
 template <typename VecType>
 std::map<typename VecType::Integer, VecType>
-        ChineseRemainderTransformFTTNtl<VecType>::root_of_unity_precon_reverse_table_by_modulus_;
+        ChineseRemainderTransformFttNtl<VecType>::root_of_unity_precon_reverse_table_by_modulus_;
 
 template <typename VecType>
 std::map<typename VecType::Integer, VecType>
-        ChineseRemainderTransformFTTNtl<VecType>::root_of_unity_inverse_precon_reverse_table_by_modulus_;
+        ChineseRemainderTransformFttNtl<VecType>::root_of_unity_inverse_precon_reverse_table_by_modulus_;
 
 template <typename VecType>
 std::map<typename VecType::Integer, VecType> ChineseRemainderTransformArbNtl<VecType>::cyclotomic_poly_map_;
@@ -85,21 +85,21 @@ std::map<typename VecType::Integer, VecType> ChineseRemainderTransformArbNtl<Vec
 
 template <typename VecType>
 std::map<ModulusRoot<typename VecType::Integer>, VecType>
-        BluesteinFFTNtl<VecType>::root_of_unity_table_by_modulus_root_;
+        BluesteinFftNtl<VecType>::root_of_unity_table_by_modulus_root_;
 
 template <typename VecType>
 std::map<ModulusRoot<typename VecType::Integer>, VecType>
-        BluesteinFFTNtl<VecType>::root_of_unity_inverse_table_by_modulus_root_;
+        BluesteinFftNtl<VecType>::root_of_unity_inverse_table_by_modulus_root_;
 
 template <typename VecType>
-std::map<ModulusRoot<typename VecType::Integer>, VecType> BluesteinFFTNtl<VecType>::powers_table_by_modulus_root_;
+std::map<ModulusRoot<typename VecType::Integer>, VecType> BluesteinFftNtl<VecType>::powers_table_by_modulus_root_;
 
 template <typename VecType>
-std::map<ModulusRootPair<typename VecType::Integer>, VecType> BluesteinFFTNtl<VecType>::rb_table_by_modulus_root_pair_;
+std::map<ModulusRootPair<typename VecType::Integer>, VecType> BluesteinFftNtl<VecType>::rb_table_by_modulus_root_pair_;
 
 template <typename VecType>
 std::map<typename VecType::Integer, ModulusRoot<typename VecType::Integer>>
-        BluesteinFFTNtl<VecType>::default_ntt_modulus_root_;
+        BluesteinFftNtl<VecType>::default_ntt_modulus_root_;
 
 template <typename VecType>
 std::map<typename VecType::Integer, VecType>
@@ -549,7 +549,7 @@ void NumberTheoreticTransformNtl<VecType>::inverse_transform_from_bit_reverse(
 }
 
 template <typename VecType>
-void ChineseRemainderTransformFTTNtl<VecType>::forward_transform_to_bit_reverse_in_place(
+void ChineseRemainderTransformFttNtl<VecType>::forward_transform_to_bit_reverse_in_place(
         const IntType& root_of_unity_value, const uint32_t cyclo_order_value, VecType* element) {
     if (root_of_unity_value == IntType(1) || root_of_unity_value == IntType(0)) {
         return;
@@ -583,7 +583,7 @@ void ChineseRemainderTransformFTTNtl<VecType>::forward_transform_to_bit_reverse_
 }
 
 template <typename VecType>
-void ChineseRemainderTransformFTTNtl<VecType>::forward_transform_to_bit_reverse(const VecType& element,
+void ChineseRemainderTransformFttNtl<VecType>::forward_transform_to_bit_reverse(const VecType& element,
                                                                                 const IntType& root_of_unity_value,
                                                                                 const uint32_t cyclo_order_value,
                                                                                 VecType* result) {
@@ -622,7 +622,7 @@ void ChineseRemainderTransformFTTNtl<VecType>::forward_transform_to_bit_reverse(
 }
 
 template <typename VecType>
-void ChineseRemainderTransformFTTNtl<VecType>::inverse_transform_from_bit_reverse_in_place(
+void ChineseRemainderTransformFttNtl<VecType>::inverse_transform_from_bit_reverse_in_place(
         const IntType& root_of_unity_value, const uint32_t cyclo_order_value, VecType* element) {
     if (root_of_unity_value == IntType(1) || root_of_unity_value == IntType(0)) {
         return;
@@ -660,7 +660,7 @@ void ChineseRemainderTransformFTTNtl<VecType>::inverse_transform_from_bit_revers
 }
 
 template <typename VecType>
-void ChineseRemainderTransformFTTNtl<VecType>::inverse_transform_from_bit_reverse(const VecType& element,
+void ChineseRemainderTransformFttNtl<VecType>::inverse_transform_from_bit_reverse(const VecType& element,
                                                                                   const IntType& root_of_unity_value,
                                                                                   const uint32_t cyclo_order_value,
                                                                                   VecType* result) {
@@ -709,7 +709,7 @@ void ChineseRemainderTransformFTTNtl<VecType>::inverse_transform_from_bit_revers
 }
 
 template <typename VecType>
-void ChineseRemainderTransformFTTNtl<VecType>::pre_compute(const IntType& root_of_unity_value,
+void ChineseRemainderTransformFttNtl<VecType>::pre_compute(const IntType& root_of_unity_value,
                                                            const uint32_t cyclo_order_value, const IntType& modulus) {
     // Half of cyclo order
     uint32_t cyclo_order_hf = (cyclo_order_value >> 1);
@@ -770,7 +770,7 @@ void ChineseRemainderTransformFTTNtl<VecType>::pre_compute(const IntType& root_o
 }
 
 template <typename VecType>
-void ChineseRemainderTransformFTTNtl<VecType>::pre_compute(std::vector<IntType>& root_of_unity_value,
+void ChineseRemainderTransformFttNtl<VecType>::pre_compute(std::vector<IntType>& root_of_unity_value,
                                                            const uint32_t cyclo_order_value,
                                                            std::vector<IntType>& modulii_chain) {
     uint32_t num_of_root_u = root_of_unity_value.size();
@@ -788,7 +788,7 @@ void ChineseRemainderTransformFTTNtl<VecType>::pre_compute(std::vector<IntType>&
 }
 
 template <typename VecType>
-void ChineseRemainderTransformFTTNtl<VecType>::reset() {
+void ChineseRemainderTransformFttNtl<VecType>::reset() {
     cyclo_order_inverse_table_by_modulus_.clear();
     cyclo_order_inverse_precon_table_by_modulus_.clear();
     root_of_unity_reverse_table_by_modulus_.clear();
@@ -798,7 +798,7 @@ void ChineseRemainderTransformFTTNtl<VecType>::reset() {
 }
 
 template <typename VecType>
-void BluesteinFFTNtl<VecType>::pre_compute_default_ntt_modulus_root(uint32_t cyclo_order, const IntType& modulus) {
+void BluesteinFftNtl<VecType>::pre_compute_default_ntt_modulus_root(uint32_t cyclo_order, const IntType& modulus) {
     uint32_t ntt_dim = std::pow(2, std::ceil(std::log2(2 * cyclo_order - 1)));
     const auto ntt_modulus = last_prime<IntType>(std::log2(ntt_dim) + 2 * modulus.get_msb(), ntt_dim);
     const auto ntt_root = root_of_unity(ntt_dim, ntt_modulus);
@@ -809,7 +809,7 @@ void BluesteinFFTNtl<VecType>::pre_compute_default_ntt_modulus_root(uint32_t cyc
 }
 
 template <typename VecType>
-void BluesteinFFTNtl<VecType>::pre_compute_root_table_for_ntt(uint32_t cycloto_order,
+void BluesteinFftNtl<VecType>::pre_compute_root_table_for_ntt(uint32_t cycloto_order,
                                                               const ModulusRoot<IntType>& ntt_modulus_root) {
     uint32_t ntt_dim = std::pow(2, std::ceil(std::log2(2 * cycloto_order - 1)));
     const auto& ntt_modulus = ntt_modulus_root.first;
@@ -840,7 +840,7 @@ void BluesteinFFTNtl<VecType>::pre_compute_root_table_for_ntt(uint32_t cycloto_o
 }
 
 template <typename VecType>
-void BluesteinFFTNtl<VecType>::pre_compute_powers(uint32_t cyclo_order, const ModulusRoot<IntType>& modulus_root) {
+void BluesteinFftNtl<VecType>::pre_compute_powers(uint32_t cyclo_order, const ModulusRoot<IntType>& modulus_root) {
     const auto& modulus = modulus_root.first;
     const auto& root = modulus_root.second;
 
@@ -855,7 +855,7 @@ void BluesteinFFTNtl<VecType>::pre_compute_powers(uint32_t cyclo_order, const Mo
 }
 
 template <typename VecType>
-void BluesteinFFTNtl<VecType>::pre_compute_rb_table(uint32_t cyclo_order,
+void BluesteinFftNtl<VecType>::pre_compute_rb_table(uint32_t cyclo_order,
                                                     const ModulusRootPair<IntType>& modulus_root_pair) {
     const auto& modulus_root = modulus_root_pair.first;
     const auto& modulus = modulus_root.first;
@@ -887,7 +887,7 @@ void BluesteinFFTNtl<VecType>::pre_compute_rb_table(uint32_t cyclo_order,
 }
 
 template <typename VecType>
-VecType BluesteinFFTNtl<VecType>::forward_transform(const VecType& element, const IntType& root,
+VecType BluesteinFftNtl<VecType>::forward_transform(const VecType& element, const IntType& root,
                                                     const uint32_t cyclo_order) {
     const auto& modulus = element.get_modulus();
     const auto& ntt_modulus_root = default_ntt_modulus_root_[modulus];
@@ -896,7 +896,7 @@ VecType BluesteinFFTNtl<VecType>::forward_transform(const VecType& element, cons
 }
 
 template <typename VecType>
-VecType BluesteinFFTNtl<VecType>::forward_transform(const VecType& element, const IntType& root,
+VecType BluesteinFftNtl<VecType>::forward_transform(const VecType& element, const IntType& root,
                                                     const uint32_t cyclo_order,
                                                     const ModulusRoot<IntType>& ntt_modulus_root) {
     if (element.get_length() != cyclo_order) {
@@ -926,7 +926,7 @@ VecType BluesteinFFTNtl<VecType>::forward_transform(const VecType& element, cons
     auto RC = RA.mod_mul(RB);
     VecType rc(ntt_dim);
     NumberTheoreticTransformNtl<VecType>().inverse_transform_iterative(RC, root_table_inverse, &rc);
-    auto resize_rc = Resize(rc, cyclo_order - 1, 2 * (cyclo_order - 1));
+    auto resize_rc = resize_range(rc, cyclo_order - 1, 2 * (cyclo_order - 1));
     resize_rc.set_modulus(modulus);
     resize_rc.mod_eq(modulus);
     auto result = resize_rc.mod_mul(powers);
@@ -935,7 +935,7 @@ VecType BluesteinFFTNtl<VecType>::forward_transform(const VecType& element, cons
 }
 
 template <typename VecType>
-VecType BluesteinFFTNtl<VecType>::pad_zeros(const VecType& a, const uint32_t final_size) {
+VecType BluesteinFftNtl<VecType>::pad_zeros(const VecType& a, const uint32_t final_size) {
     uint32_t s = a.get_length();
     VecType result(final_size, a.get_modulus());
 
@@ -951,7 +951,7 @@ VecType BluesteinFFTNtl<VecType>::pad_zeros(const VecType& a, const uint32_t fin
 }
 
 template <typename VecType>
-VecType BluesteinFFTNtl<VecType>::Resize(const VecType& a, uint32_t lo, uint32_t hi) {
+VecType BluesteinFftNtl<VecType>::resize_range(const VecType& a, uint32_t lo, uint32_t hi) {
     VecType result(hi - lo + 1, a.get_modulus());
 
     for (uint32_t i = lo, j = 0; i <= hi; i++, j++) {
@@ -962,7 +962,7 @@ VecType BluesteinFFTNtl<VecType>::Resize(const VecType& a, uint32_t lo, uint32_t
 }
 
 template <typename VecType>
-void BluesteinFFTNtl<VecType>::reset() {
+void BluesteinFftNtl<VecType>::reset() {
     root_of_unity_table_by_modulus_root_.clear();
     root_of_unity_inverse_table_by_modulus_root_.clear();
     powers_table_by_modulus_root_.clear();
@@ -977,7 +977,7 @@ void ChineseRemainderTransformArbNtl<VecType>::set_cylotomic_polynomial(const Ve
 
 template <typename VecType>
 void ChineseRemainderTransformArbNtl<VecType>::pre_compute(const uint32_t cycloto_order, const IntType& modulus) {
-    BluesteinFFTNtl<VecType>().pre_compute_default_ntt_modulus_root(cycloto_order, modulus);
+    BluesteinFftNtl<VecType>().pre_compute_default_ntt_modulus_root(cycloto_order, modulus);
 }
 
 template <typename VecType>
@@ -986,7 +986,7 @@ void ChineseRemainderTransformArbNtl<VecType>::set_pre_computed_ntt_modulus(uint
                                                                             const IntType& ntt_modulus,
                                                                             const IntType& ntt_root) {
     const ModulusRoot<IntType> ntt_modulus_root = {ntt_modulus, ntt_root};
-    BluesteinFFTNtl<VecType>().pre_compute_root_table_for_ntt(cycloto_order, ntt_modulus_root);
+    BluesteinFftNtl<VecType>().pre_compute_root_table_for_ntt(cycloto_order, ntt_modulus_root);
 }
 
 template <typename VecType>
@@ -1033,7 +1033,7 @@ void ChineseRemainderTransformArbNtl<VecType>::set_pre_computed_ntt_division_mod
     // end of part0
     // part1
     const auto& rev_cpm = inverse_poly_mod(cyclotomic_poly_map_[modulus], modulus, power);
-    auto rev_cpm_padded = BluesteinFFTNtl<VecType>().pad_zeros(rev_cpm, ntt_dim);
+    auto rev_cpm_padded = BluesteinFftNtl<VecType>().pad_zeros(rev_cpm, ntt_dim);
     rev_cpm_padded.set_modulus(ntt_mod);
     // end of part1
 
@@ -1108,22 +1108,22 @@ VecType ChineseRemainderTransformArbNtl<VecType>::forward_transform(const VecTyp
 
 #pragma omp critical
     {
-        if (BluesteinFFTNtl<VecType>::root_of_unity_table_by_modulus_root_[ntt_modulus_root].get_length() == 0) {
-            BluesteinFFTNtl<VecType>().pre_compute_root_table_for_ntt(cyclo_order, ntt_modulus_root);
+        if (BluesteinFftNtl<VecType>::root_of_unity_table_by_modulus_root_[ntt_modulus_root].get_length() == 0) {
+            BluesteinFftNtl<VecType>().pre_compute_root_table_for_ntt(cyclo_order, ntt_modulus_root);
         }
 
-        if (BluesteinFFTNtl<VecType>::powers_table_by_modulus_root_[modulus_root].get_length() == 0) {
-            BluesteinFFTNtl<VecType>().pre_compute_powers(cyclo_order, modulus_root);
+        if (BluesteinFftNtl<VecType>::powers_table_by_modulus_root_[modulus_root].get_length() == 0) {
+            BluesteinFftNtl<VecType>().pre_compute_powers(cyclo_order, modulus_root);
         }
 
-        if (BluesteinFFTNtl<VecType>::rb_table_by_modulus_root_pair_[modulus_root_pair].get_length() == 0) {
-            BluesteinFFTNtl<VecType>().pre_compute_rb_table(cyclo_order, modulus_root_pair);
+        if (BluesteinFftNtl<VecType>::rb_table_by_modulus_root_pair_[modulus_root_pair].get_length() == 0) {
+            BluesteinFftNtl<VecType>().pre_compute_rb_table(cyclo_order, modulus_root_pair);
         }
     }
 
     VecType input_to_bluestein = pad(element, cyclo_order, true);
     auto output_bluestein =
-            BluesteinFFTNtl<VecType>().forward_transform(input_to_bluestein, root, cyclo_order, ntt_modulus_root);
+            BluesteinFftNtl<VecType>().forward_transform(input_to_bluestein, root, cyclo_order, ntt_modulus_root);
     VecType output = drop(output_bluestein, cyclo_order, true, ntt_modulus, ntt_root);
 
     return output;
@@ -1147,20 +1147,20 @@ VecType ChineseRemainderTransformArbNtl<VecType>::inverse_transform(const VecTyp
 
 #pragma omp critical
     {
-        if (BluesteinFFTNtl<VecType>::root_of_unity_table_by_modulus_root_[ntt_modulus_root].get_length() == 0) {
-            BluesteinFFTNtl<VecType>().pre_compute_root_table_for_ntt(cyclo_order, ntt_modulus_root);
+        if (BluesteinFftNtl<VecType>::root_of_unity_table_by_modulus_root_[ntt_modulus_root].get_length() == 0) {
+            BluesteinFftNtl<VecType>().pre_compute_root_table_for_ntt(cyclo_order, ntt_modulus_root);
         }
 
-        if (BluesteinFFTNtl<VecType>::powers_table_by_modulus_root_[modulus_root_inverse].get_length() == 0) {
-            BluesteinFFTNtl<VecType>().pre_compute_powers(cyclo_order, modulus_root_inverse);
+        if (BluesteinFftNtl<VecType>::powers_table_by_modulus_root_[modulus_root_inverse].get_length() == 0) {
+            BluesteinFftNtl<VecType>().pre_compute_powers(cyclo_order, modulus_root_inverse);
         }
 
-        if (BluesteinFFTNtl<VecType>::rb_table_by_modulus_root_pair_[modulus_root_pair].get_length() == 0) {
-            BluesteinFFTNtl<VecType>().pre_compute_rb_table(cyclo_order, modulus_root_pair);
+        if (BluesteinFftNtl<VecType>::rb_table_by_modulus_root_pair_[modulus_root_pair].get_length() == 0) {
+            BluesteinFftNtl<VecType>().pre_compute_rb_table(cyclo_order, modulus_root_pair);
         }
     }
     VecType input_to_bluestein = pad(element, cyclo_order, false);
-    auto output_bluestein = BluesteinFFTNtl<VecType>().forward_transform(input_to_bluestein, root_inverse, cyclo_order,
+    auto output_bluestein = BluesteinFftNtl<VecType>().forward_transform(input_to_bluestein, root_inverse, cyclo_order,
                                                                          ntt_modulus_root);
     auto cyclotomic_inverse((IntType(cyclo_order)).mod_inverse(modulus));
     output_bluestein = output_bluestein * cyclotomic_inverse;
@@ -1296,7 +1296,7 @@ void ChineseRemainderTransformArbNtl<VecType>::reset() {
     division_ntt_modulus_.clear();
     division_ntt_root_of_unity_.clear();
     ntt_division_dim_.clear();
-    BluesteinFFTNtl<VecType>().reset();
+    BluesteinFftNtl<VecType>().reset();
 }
 
 }  // namespace NTL

@@ -33,8 +33,8 @@
   matrix class implementations and type specific implementations
  */
 
-#ifndef LBCRYPTO_LIB_MATH_MATRIX_CPP
-#define LBCRYPTO_LIB_MATH_MATRIX_CPP
+#ifndef CIPHER_MATH_MATRIX_CPP
+#define CIPHER_MATH_MATRIX_CPP
 
 #include <cmath>
 #include <cstdint>

@@ -132,8 +132,8 @@ void simple_bootstrap_example() {
     parameters.set_multiplicative_depth(depth);
 
     // std::cout << "approx_bootstrap_depth = " << approx_bootstrap_depth << std::endl;
-    std::cout << "levelBudget[0] = " << level_budget[0] << std::endl;
-    std::cout << "levelBudget[1] = " << level_budget[1] << std::endl;
+    std::cout << "level_budget[0] = " << level_budget[0] << std::endl;
+    std::cout << "level_budget[1] = " << level_budget[1] << std::endl;
     std::cout << "secretKeyDist = " << secret_key_dist << std::endl;
     std::cout << "depth = " << depth << std::endl;
 
@@ -264,8 +264,8 @@ void simple_bootstrap_st_c_first_example() {
     parameters.set_multiplicative_depth(depth);
 
     // std::cout << "approx_bootstrap_depth = " << approx_bootstrap_depth << std::endl;
-    std::cout << "levelBudget[0] = " << level_budget[0] << std::endl;
-    std::cout << "levelBudget[1] = " << level_budget[1] << std::endl;
+    std::cout << "level_budget[0] = " << level_budget[0] << std::endl;
+    std::cout << "level_budget[1] = " << level_budget[1] << std::endl;
     std::cout << "secretKeyDist = " << secret_key_dist << std::endl;
     std::cout << "depth = " << depth << std::endl;
 

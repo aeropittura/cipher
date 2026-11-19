@@ -67,7 +67,7 @@ class UnitTestTrapdoor : public ::testing::Test {
 
 TEST(UTTrapdoor, randomized_round) {
     //  It compiles! ...
-    // RandomizeRound(0, 4.3, 1024);
+    // randomize_round(0, 4.3, 1024);
 }
 
 TEST(UTTrapdoor, sizes) {
@@ -502,8 +502,8 @@ TEST(UTTrapdoor, TrapDoorGaussSampTest) {
     CIPHER_DEBUG("uEst " << u_est);
     CIPHER_DEBUG("u " << u);
 
-    CIPHER_DEBUG("uEst.GetModulus() " << u_est.get_modulus());
-    CIPHER_DEBUG("u.GetModulus() " << u.get_modulus());
+    CIPHER_DEBUG("uEst.get_modulus() " << u_est.get_modulus());
+    CIPHER_DEBUG("u.get_modulus() " << u.get_modulus());
 
     u_est.switch_format();
     u.switch_format();

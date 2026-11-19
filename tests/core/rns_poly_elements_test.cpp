@@ -95,11 +95,11 @@ void dcrt_constructors(const std::string& msg) {
     {
         Element ilva(ildcrtparams);
 
-        EXPECT_EQ(Format::EVALUATION, ilva.get_format()) << msg << " Failure: ildcrtparams ctor ilva.GetFormat()";
-        EXPECT_EQ(modulus, ilva.get_modulus()) << msg << " Failure: ildcrtparams ctor ilva.GetModulus()";
-        EXPECT_EQ(m, ilva.get_cyclotomic_order()) << msg << " Failure: ildcrtparams ctor ilva.GetModulus()";
+        EXPECT_EQ(Format::EVALUATION, ilva.get_format()) << msg << " Failure: ildcrtparams ctor ilva.get_format()";
+        EXPECT_EQ(modulus, ilva.get_modulus()) << msg << " Failure: ildcrtparams ctor ilva.get_modulus()";
+        EXPECT_EQ(m, ilva.get_cyclotomic_order()) << msg << " Failure: ildcrtparams ctor ilva.get_modulus()";
         EXPECT_EQ(towersize, ilva.get_num_of_elements())
-                << msg << " Failure: ildcrtparams ctor ilva.GetNumOfElements()";
+                << msg << " Failure: ildcrtparams ctor ilva.get_num_of_elements()";
     }
 
     CIPHER_DEBUG("2");
@@ -107,10 +107,10 @@ void dcrt_constructors(const std::string& msg) {
         Element ilva(ilvector2n_vector);
 
         CIPHER_DEBUG("2.0");
-        EXPECT_EQ(Format::EVALUATION, ilva.get_format()) << msg << " Failure: ctor ilva.GetFormat()";
-        EXPECT_EQ(modulus, ilva.get_modulus()) << msg << " Failure: ctor ilva.GetModulus()";
-        EXPECT_EQ(m, ilva.get_cyclotomic_order()) << msg << " Failure: ctor ilva.GetCyclotomicOrder()";
-        EXPECT_EQ(towersize, ilva.get_num_of_elements()) << msg << " Failure: ctor ilva.GetNumOfElements()";
+        EXPECT_EQ(Format::EVALUATION, ilva.get_format()) << msg << " Failure: ctor ilva.get_format()";
+        EXPECT_EQ(modulus, ilva.get_modulus()) << msg << " Failure: ctor ilva.get_modulus()";
+        EXPECT_EQ(m, ilva.get_cyclotomic_order()) << msg << " Failure: ctor ilva.get_cyclotomic_order()";
+        EXPECT_EQ(towersize, ilva.get_num_of_elements()) << msg << " Failure: ctor ilva.get_num_of_elements()";
 
         CIPHER_DEBUG("2.1");
         std::vector<NativePoly> ilvector2n_vector_inconsistent(towersize);
@@ -126,7 +126,7 @@ void dcrt_constructors(const std::string& msg) {
             CIPHER_DEBUG(ii << " item " << ilvector2n_vector_inconsistent.at(ii).get_params().use_count());
         }
         EXPECT_THROW(test_rns_poly_constructor_negative(ilvector2n_vector_inconsistent), CipherException)
-                << msg << " Failure: ilvector2nVectorInconsistent";
+                << msg << " Failure: ilvector2n_vector_inconsistent";
     }
 
     CIPHER_DEBUG("4");
@@ -146,20 +146,20 @@ void dcrt_constructors(const std::string& msg) {
 
         for (uint32_t i = 0; i < 3; ++i) {
             EXPECT_EQ(ilva_vector[i].get_format(), ilva_copy_vector[i].get_format())
-                    << msg << " Failure: ctor ilvaCopyVector[" << i << "].GetFormat()";
+                    << msg << " Failure: ctor ilva_copy_vector[" << i << "].get_format()";
             EXPECT_EQ(ilva_vector[i].get_modulus(), ilva_copy_vector[i].get_modulus())
-                    << msg << " Failure: ctor ilvaCopyVector[" << i << "].GetModulus()";
+                    << msg << " Failure: ctor ilva_copy_vector[" << i << "].get_modulus()";
             EXPECT_EQ(ilva_vector[i].get_cyclotomic_order(), ilva_copy_vector[i].get_cyclotomic_order())
-                    << msg << " Failure: ctor ilvaCopyVector[" << i << "].GetCyclotomicOrder()";
+                    << msg << " Failure: ctor ilva_copy_vector[" << i << "].get_cyclotomic_order()";
             EXPECT_EQ(ilva_vector[i].get_num_of_elements(), ilva_copy_vector[i].get_num_of_elements())
-                    << msg << " Failure: ctor ilvaCopyVector[" << i << "].GetNumOfElements()";
+                    << msg << " Failure: ctor ilva_copy_vector[" << i << "].get_num_of_elements()";
             // to ensure that get_element_at_index is not called
             // on uninitialized RnsPoly objects.
             if (i == 0 || i == 1)
                 continue;
             for (uint32_t j = 0; j < towersize; ++j) {
                 EXPECT_EQ(ilva_vector[i].get_element_at_index(j), ilva_copy_vector[i].get_element_at_index(j))
-                        << msg << " Failure: ctor ilvaCopyVector[" << i << "].GetElementAtIndex(" << j << ")";
+                        << msg << " Failure: ctor ilva_copy_vector[" << i << "].get_element_at_index(" << j << ")";
             }
         }
     }
@@ -169,12 +169,12 @@ void dcrt_constructors(const std::string& msg) {
         CIPHER_DEBUG("ild mod " << ildcrtparams->get_modulus());
         Element ilva(dgg, ildcrtparams);
 
-        EXPECT_EQ(Format::EVALUATION, ilva.get_format()) << msg << " Failure: ctor(dgg, ldcrtparams) ilva.GetFormat()";
-        EXPECT_EQ(modulus, ilva.get_modulus()) << msg << " Failure: ctor(dgg, ildcrtparams) ilva.GetModulus()";
+        EXPECT_EQ(Format::EVALUATION, ilva.get_format()) << msg << " Failure: ctor(dgg, ldcrtparams) ilva.get_format()";
+        EXPECT_EQ(modulus, ilva.get_modulus()) << msg << " Failure: ctor(dgg, ildcrtparams) ilva.get_modulus()";
         EXPECT_EQ(m, ilva.get_cyclotomic_order())
-                << msg << " Failure: ctor(dgg, ildcrtparams) ilva.GetCyclotomicOrder()";
+                << msg << " Failure: ctor(dgg, ildcrtparams) ilva.get_cyclotomic_order()";
         EXPECT_EQ(towersize, ilva.get_num_of_elements())
-                << msg << " Failure: ctor(dgg, ildcrtparams) ilva.GetNumOfElements()";
+                << msg << " Failure: ctor(dgg, ildcrtparams) ilva.get_num_of_elements()";
     }
 
     CIPHER_DEBUG("6");
@@ -191,8 +191,8 @@ void dcrt_constructors(const std::string& msg) {
     }
 }
 
-TEST(UTDCRTPoly, DCRT_constructors) {
-    RUN_BIG_DCRTPOLYS(dcrt_constructors, "DCRT constructors");
+TEST(UTRnsPoly, DCRT_constructors) {
+    RUN_BIG_RNS_POLYS(dcrt_constructors, "DCRT constructors");
 }
 
 template <typename Element>
@@ -267,7 +267,7 @@ void dcrt_getters_and_ops(const std::string& msg) {
     {
         Element ilva_coeff(ildcrtparams, Format::COEFFICIENT, true);
         EXPECT_THROW(ilva_coeff.add_il_element_one(), CipherException)
-                << msg << " Failure: AddILElementOne format check";
+                << msg << " Failure: add_il_element_one format check";
     }
 
     {
@@ -292,7 +292,7 @@ void dcrt_getters_and_ops(const std::string& msg) {
         for (auto src : {Format::COEFFICIENT, Format::EVALUATION}) {
             for (auto dst : {Format::COEFFICIENT, Format::EVALUATION}) {
                 Element noise = Element(ildcrtparams, src, true).clone_with_noise(dgg, dst);
-                EXPECT_EQ(dst, noise.get_format()) << msg << " Failure: CloneWithNoise format";
+                EXPECT_EQ(dst, noise.get_format()) << msg << " Failure: clone_with_noise format";
                 noise.set_format(Format::COEFFICIENT);
                 for (uint32_t j = 0; j < noise.get_ring_dimension(); ++j) {
                     int64_t first = 0;
@@ -304,8 +304,8 @@ void dcrt_getters_and_ops(const std::string& msg) {
                             v -= q;
                         if (i == 0)
                             first = v;
-                        EXPECT_LE(std::abs(v), 64) << msg << " Failure: CloneWithNoise coefficient is not small";
-                        EXPECT_EQ(first, v) << msg << " Failure: CloneWithNoise towers disagree";
+                        EXPECT_LE(std::abs(v), 64) << msg << " Failure: clone_with_noise coefficient is not small";
+                        EXPECT_EQ(first, v) << msg << " Failure: clone_with_noise towers disagree";
                     }
                 }
             }
@@ -339,8 +339,8 @@ void dcrt_getters_and_ops(const std::string& msg) {
     }
 }
 
-TEST(UTDCRTPoly, DCRT_getters_and_ops) {
-    RUN_BIG_DCRTPOLYS(dcrt_getters_and_ops, "DCRT getters_and_ops");
+TEST(UTRnsPoly, DCRT_getters_and_ops) {
+    RUN_BIG_RNS_POLYS(dcrt_getters_and_ops, "DCRT getters_and_ops");
 }
 
 template <typename Element>
@@ -408,7 +408,7 @@ void dcrt_arithmetic_ops_element(const std::string& msg) {
             NativePoly ilv = ilva_copy.get_element_at_index(i);
             NativeVector expected(4, ilv.get_modulus());
             expected = {"4", "5", "5", "2"};
-            EXPECT_EQ(expected, ilv.get_values()) << msg << " Failure: Plus()";
+            EXPECT_EQ(expected, ilv.get_values()) << msg << " Failure: plus()";
         }
     }
 
@@ -473,7 +473,7 @@ void dcrt_arithmetic_ops_element(const std::string& msg) {
             NativePoly ilv = ilva_copy.get_element_at_index(i);
             NativeVector expected(4, ilv.get_modulus());
             expected = {"3", "5", "4", "3"};
-            EXPECT_EQ(expected, ilv.get_values()) << msg << " Failure: AddILElementOne";
+            EXPECT_EQ(expected, ilv.get_values()) << msg << " Failure: add_il_element_one";
         }
     }
 
@@ -486,29 +486,29 @@ void dcrt_arithmetic_ops_element(const std::string& msg) {
         NativePoly ilvect_inv2 = ilva_inv.get_element_at_index(2);
         NativeVector expected0(4, ilvect_inv0.get_modulus());
         expected0 = {"4177", "6265", "5569", "4177"};
-        EXPECT_EQ(expected0, ilvect_inv0.get_values()) << msg << " Failure: ilvectInv0 MultiplicativeInverse()";
+        EXPECT_EQ(expected0, ilvect_inv0.get_values()) << msg << " Failure: ilvect_inv0 multiplicative_inverse()";
         EXPECT_EQ(NativeInteger("8353"), ilvect_inv0.get_modulus())
-                << msg << " Failure: ilvectInv0 MultiplicativeInverse() modulus";
+                << msg << " Failure: ilvect_inv0 multiplicative_inverse() modulus";
         EXPECT_EQ(NativeInteger("8163"), ilvect_inv0.get_root_of_unity())
-                << msg << " Failure: ilvectInv0 MultiplicativeInverse() rootOfUnity";
+                << msg << " Failure: ilvect_inv0 multiplicative_inverse() rootOfUnity";
 
         NativeVector expected1(4, ilvect_inv1.get_modulus());
         expected1 = {"4185", "6277", "2790", "4185"};
-        EXPECT_EQ(expected1, ilvect_inv1.get_values()) << msg << " Failure: ilvectInv1 MultiplicativeInverse()";
+        EXPECT_EQ(expected1, ilvect_inv1.get_values()) << msg << " Failure: ilvect_inv1 multiplicative_inverse()";
         EXPECT_EQ(NativeInteger("8369"), ilvect_inv1.get_modulus())
-                << msg << " Failure: ilvectInv1 MultiplicativeInverse() modulus";
+                << msg << " Failure: ilvect_inv1 multiplicative_inverse() modulus";
         EXPECT_EQ(NativeInteger("6677"), ilvect_inv1.get_root_of_unity())
-                << msg << " Failure: ilvectInv1 MultiplicativeInverse() rootOfUnity";
+                << msg << " Failure: ilvect_inv1 multiplicative_inverse() rootOfUnity";
 
         NativeVector expected2(4, ilvect_inv2.get_modulus());
         expected2 = {"4257", "6385", "2838", "4257"};
-        EXPECT_EQ(expected2, ilvect_inv2.get_values()) << msg << " Failure: ilvectInv2 MultiplicativeInverse()";
+        EXPECT_EQ(expected2, ilvect_inv2.get_values()) << msg << " Failure: ilvect_inv2 multiplicative_inverse()";
         EXPECT_EQ(NativeInteger("8513"), ilvect_inv2.get_modulus())
-                << msg << " Failure: ilvectInv2 MultiplicativeInverse() modulus";
+                << msg << " Failure: ilvect_inv2 multiplicative_inverse() modulus";
         EXPECT_EQ(NativeInteger("156"), ilvect_inv2.get_root_of_unity())
-                << msg << " Failure: ilvectInv2 MultiplicativeInverse() rootOfUnity";
+                << msg << " Failure: ilvect_inv2 multiplicative_inverse() rootOfUnity";
         EXPECT_THROW(ilva1.multiplicative_inverse(), CipherException)
-                << msg << " Failure: throw MultiplicativeInverse()";
+                << msg << " Failure: throw multiplicative_inverse()";
     }
 
     // RnsPoly::make_sparse() Only used by RingSwitching, which is no longer supported
@@ -520,14 +520,14 @@ void dcrt_arithmetic_ops_element(const std::string& msg) {
         for (uint32_t i = 0; i < ilva_copy.get_num_of_elements(); ++i) {
             NativePoly ilv = ilva_copy.get_element_at_index(i);
 
-            EXPECT_EQ(NativeInteger(0), ilv.at(1)) << msg << " Failure MakeSparse() index 1";
-            EXPECT_EQ(NativeInteger(0), ilv.at(3)) << msg << " Failure MakeSparse() index 3";
+            EXPECT_EQ(NativeInteger(0), ilv.at(1)) << msg << " Failure make_sparse() index 1";
+            EXPECT_EQ(NativeInteger(0), ilv.at(3)) << msg << " Failure make_sparse() index 3";
         }
     }
 
     {
-        EXPECT_TRUE(ilva.inverse_exists()) << msg << " Failure: ilva.InverseExists()";
-        EXPECT_FALSE(ilva1.inverse_exists()) << msg << " Failure: ilva1.InverseExists()";
+        EXPECT_TRUE(ilva.inverse_exists()) << msg << " Failure: ilva.inverse_exists()";
+        EXPECT_FALSE(ilva1.inverse_exists()) << msg << " Failure: ilva1.inverse_exists()";
     }
 
     // this case is NOT used because switch_modulus is not really defined for an
@@ -593,33 +593,34 @@ void dcrt_arithmetic_ops_element(const std::string& msg) {
         // the copy's parameters record the new tower and composite modulus; the original's are untouched
         const auto& towers = ilva_copy.get_params()->get_params();
         EXPECT_EQ(modulus2.convert_to_int(), towers[0]->get_modulus().convert_to_int())
-                << msg << " Failure: SwitchModulusAtIndex tower parameters";
+                << msg << " Failure: switch_modulus_at_index tower parameters";
         typename Element::Integer composite(1);
         for (const auto& t : towers)
             composite *= typename Element::Integer(t->get_modulus().convert_to_int());
-        EXPECT_EQ(composite, ilva_copy.get_modulus()) << msg << " Failure: SwitchModulusAtIndex composite modulus";
-        EXPECT_EQ(original_modulus, ilva.get_modulus()) << msg << " Failure: SwitchModulusAtIndex changed the source";
+        EXPECT_EQ(composite, ilva_copy.get_modulus()) << msg << " Failure: switch_modulus_at_index composite modulus";
+        EXPECT_EQ(original_modulus, ilva.get_modulus())
+                << msg << " Failure: switch_modulus_at_index changed the source";
         EXPECT_EQ(original_tower0, ilva.get_params()->get_params()[0])
-                << msg << " Failure: SwitchModulusAtIndex changed the source's tower";
+                << msg << " Failure: switch_modulus_at_index changed the source's tower";
 
         for (uint32_t i = 0; i < ilva_copy.get_num_of_elements(); ++i) {
             NativePoly ilv = ilva_copy.get_element_at_index(i);
             NativeVector expected(4, ilv.get_modulus());
             expected = {"2", "4", "3", "2"};
-            EXPECT_EQ(expected, ilv.get_values()) << msg << " Failure: ilv.SwitchModulusAtIndex";
+            EXPECT_EQ(expected, ilv.get_values()) << msg << " Failure: ilv.switch_modulus_at_index";
 
             if (i == 0) {
                 EXPECT_EQ(modulus2.convert_to_int(), ilv.get_modulus().convert_to_int())
-                        << msg << " Failure: SwitchModulusAtIndex modulus";
+                        << msg << " Failure: switch_modulus_at_index modulus";
                 EXPECT_EQ(root_of_unity2.convert_to_int(), ilv.get_root_of_unity().convert_to_int())
-                        << msg << " Failure: SwitchModulusAtIndex rootOfUnity";
+                        << msg << " Failure: switch_modulus_at_index rootOfUnity";
             }
         }
     }
 }
 
-TEST(UTDCRTPoly, DCRT_arithmetic_ops_element) {
-    RUN_BIG_DCRTPOLYS(dcrt_arithmetic_ops_element, "DCRT_arithmetic_ops_element");
+TEST(UTRnsPoly, DCRT_arithmetic_ops_element) {
+    RUN_BIG_RNS_POLYS(dcrt_arithmetic_ops_element, "DCRT_arithmetic_ops_element");
 }
 
 template <typename Element>
@@ -644,7 +645,7 @@ void dcrt_mod_ops_on_two_elements(const std::string& msg) {
                 NativeInteger expected_result((op1.get_element_at_index(i).at(j) + op2.get_element_at_index(i).at(j))
                                                       .mod(ildcrtparams->get_params()[i]->get_modulus()));
                 EXPECT_EQ(actual_result, expected_result)
-                        << msg << " Failure: DCRTPoly + operation tower " << i << " index " << j;
+                        << msg << " Failure: RnsPoly + operation tower " << i << " index " << j;
             }
         }
     }
@@ -658,14 +659,14 @@ void dcrt_mod_ops_on_two_elements(const std::string& msg) {
                 NativeInteger expected_result((op1.get_element_at_index(i).at(j) * op2.get_element_at_index(i).at(j))
                                                       .mod(ildcrtparams->get_params()[i]->get_modulus()));
                 EXPECT_EQ(actual_result, expected_result)
-                        << msg << " Failure: DCRTPoly * operation tower " << i << " index " << j;
+                        << msg << " Failure: RnsPoly * operation tower " << i << " index " << j;
             }
         }
     }
 }
 
-TEST(UTDCRTPoly, DCRT_mod_ops_on_two_elements) {
-    RUN_BIG_DCRTPOLYS(dcrt_mod_ops_on_two_elements, "DCRT DCRT_mod_ops_on_two_elements");
+TEST(UTRnsPoly, DCRT_mod_ops_on_two_elements) {
+    RUN_BIG_RNS_POLYS(dcrt_mod_ops_on_two_elements, "DCRT DCRT_mod_ops_on_two_elements");
 }
 
 // only need to try this with one

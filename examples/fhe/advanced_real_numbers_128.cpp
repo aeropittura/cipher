@@ -312,7 +312,7 @@ void hybrid_key_switching_demo1() {
      *
      */
 
-    std::cout << "\n\n\n ===== HybridKeySwitchingDemo1 ============= " << std::endl;
+    std::cout << "\n\n\n ===== hybrid_key_switching_demo1 ============= " << std::endl;
 
     uint32_t batch_size = 8;
     ContextParams<CkksRnsContext> parameters;
@@ -463,7 +463,7 @@ void hybrid_key_switching_demo2() {
      *
      */
 
-    std::cout << "\n\n\n ===== HybridKeySwitchingDemo2 ============= " << std::endl;
+    std::cout << "\n\n\n ===== hybrid_key_switching_demo2 ============= " << std::endl;
 
     uint32_t batch_size = 8;
     ContextParams<CkksRnsContext> parameters;
@@ -604,7 +604,7 @@ void fast_rotations_demo1() {
      *
      */
 
-    std::cout << "\n\n\n ===== FastRotationsDemo1 ============= " << std::endl;
+    std::cout << "\n\n\n ===== fast_rotations_demo1 ============= " << std::endl;
 
     uint32_t batch_size = 8;
     ContextParams<CkksRnsContext> parameters;
@@ -694,7 +694,7 @@ void fast_rotations_demo2() {
      *
      */
 
-    std::cout << "\n\n\n ===== FastRotationsDemo2 ============= " << std::endl;
+    std::cout << "\n\n\n ===== fast_rotations_demo2 ============= " << std::endl;
 
     uint32_t batch_size = 8;
     ContextParams<CkksRnsContext> parameters;

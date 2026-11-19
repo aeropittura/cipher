@@ -131,10 +131,10 @@ vectors of coefficients for the quotient and rest. */
 template <typename VectorDataType>
 std::shared_ptr<LongDiv<VectorDataType>> long_division_poly(const std::vector<VectorDataType>& f,
                                                             const std::vector<VectorDataType>& g) {
-    auto n = Degree(f);
+    auto n = effective_degree(f);
     if (n != f.size() - 1)
         CIPHER_THROW("The dominant coefficient of the divident is zero");
-    auto k = Degree(g);
+    auto k = effective_degree(g);
     if (k != g.size() - 1)
         CIPHER_THROW("The dominant coefficient of the divisor is zero");
     if (n < k)
@@ -167,7 +167,7 @@ std::shared_ptr<LongDiv<VectorDataType>> long_division_poly(const std::vector<Ve
         // f-=d
         std::transform(r.begin(), r.end(), d.begin(), r.begin(), std::minus<VectorDataType>());
         if (r.size() > 1) {
-            n = Degree(r);
+            n = effective_degree(r);
             r.resize(n + 1);
         }
     }
@@ -189,10 +189,10 @@ the same format.*/
 template <typename VectorDataType>
 std::shared_ptr<LongDiv<VectorDataType>> long_division_chebyshev(const std::vector<VectorDataType>& f,
                                                                  const std::vector<VectorDataType>& g) {
-    auto n = Degree(f);
+    auto n = effective_degree(f);
     if (n != f.size() - 1)
         CIPHER_THROW("The dominant coefficient of the divident is zero");
-    auto k = Degree(g);
+    auto k = effective_degree(g);
     if (k != g.size() - 1)
         CIPHER_THROW("The dominant coefficient of the divisor is zero");
     if (n < k)
@@ -253,7 +253,7 @@ std::shared_ptr<LongDiv<VectorDataType>> long_division_chebyshev(const std::vect
         // f-=d
         std::transform(r.begin(), r.end(), d.begin(), r.begin(), std::minus<VectorDataType>());
         if (r.size() > 1) {
-            n = Degree(r);
+            n = effective_degree(r);
             r.resize(n + 1);
         }
     }
@@ -278,7 +278,7 @@ std::shared_ptr<LongDiv<VectorDataType>> long_division_chebyshev(const std::vect
         // f-=d
         std::transform(r.begin(), r.end(), d.begin(), r.begin(), std::minus<VectorDataType>());
         if (r.size() > 1) {
-            n = Degree(r);
+            n = effective_degree(r);
             r.resize(n + 1);
         }
     }
@@ -303,7 +303,7 @@ template std::shared_ptr<LongDiv<std::complex<double>>> long_division_chebyshev(
  */
 std::vector<uint32_t> compute_degrees_ps(uint32_t n) {
     if (n == 0)
-        CIPHER_THROW("ComputeDegreesPS: The degree is zero. There is no need to evaluate the polynomial.");
+        CIPHER_THROW("compute_degrees_ps: The degree is zero. There is no need to evaluate the polynomial.");
 
     // clang-format off
     constexpr uint32_t UPPER_BOUND_PS = 2204;
@@ -365,7 +365,7 @@ std::vector<std::complex<double>> extract_shifted_diagonal(const std::vector<std
 }
 
 template <typename VecDType>
-std::vector<VecDType> Rotate(const std::vector<VecDType>& a, int32_t index) {
+std::vector<VecDType> rotate_slots(const std::vector<VecDType>& a, int32_t index) {
     const int32_t slots = a.size();
     if (index < 0 || index > slots)
         index = reduce_rotation(index, slots);
@@ -377,8 +377,8 @@ std::vector<VecDType> Rotate(const std::vector<VecDType>& a, int32_t index) {
     result.insert(result.end(), a.begin(), a.begin() + index);
     return result;
 }
-template std::vector<std::complex<double>> Rotate(const std::vector<std::complex<double>>& a, int32_t index);
-template std::vector<int64_t> Rotate(const std::vector<int64_t>& a, int32_t index);
+template std::vector<std::complex<double>> rotate_slots(const std::vector<std::complex<double>>& a, int32_t index);
+template std::vector<int64_t> rotate_slots(const std::vector<int64_t>& a, int32_t index);
 
 template <typename VectorDataType>
 std::vector<VectorDataType> rotate_two_halves(const std::vector<VectorDataType>& a, int32_t index) {
@@ -414,19 +414,19 @@ uint32_t reduce_rotation(int32_t index, uint32_t slots) {
 }
 
 template <typename VecDType>
-std::vector<VecDType> Fill(const std::vector<VecDType>& a, uint32_t slots) {
+std::vector<VecDType> fill_slots(const std::vector<VecDType>& a, uint32_t slots) {
     const uint32_t used_slots = a.size();
     std::vector<VecDType> result(slots);
     for (uint32_t i = 0; i < slots; ++i)
         result[i] = a[i % used_slots];
     return result;
 }
-template std::vector<std::complex<double>> Fill(const std::vector<std::complex<double>>& a, uint32_t slots);
-template std::vector<double> Fill(const std::vector<double>& a, uint32_t slots);
-template std::vector<int64_t> Fill(const std::vector<int64_t>& a, uint32_t slots);
+template std::vector<std::complex<double>> fill_slots(const std::vector<std::complex<double>>& a, uint32_t slots);
+template std::vector<double> fill_slots(const std::vector<double>& a, uint32_t slots);
+template std::vector<int64_t> fill_slots(const std::vector<int64_t>& a, uint32_t slots);
 
 template <typename VecDType>
-std::vector<VecDType> Fill(std::initializer_list<VecDType> a, uint32_t slots) {
+std::vector<VecDType> fill_slots(std::initializer_list<VecDType> a, uint32_t slots) {
     const uint32_t used_slots = a.size();
     std::vector<VecDType> result;
     result.reserve(slots);
@@ -435,9 +435,9 @@ std::vector<VecDType> Fill(std::initializer_list<VecDType> a, uint32_t slots) {
         result.push_back(*(std::next(it, i % used_slots)));
     return result;
 }
-template std::vector<std::complex<double>> Fill(std::initializer_list<std::complex<double>> a, uint32_t slots);
-template std::vector<double> Fill(std::initializer_list<double> a, uint32_t slots);
-template std::vector<int64_t> Fill(std::initializer_list<int64_t> a, uint32_t slots);
+template std::vector<std::complex<double>> fill_slots(std::initializer_list<std::complex<double>> a, uint32_t slots);
+template std::vector<double> fill_slots(std::initializer_list<double> a, uint32_t slots);
+template std::vector<int64_t> fill_slots(std::initializer_list<int64_t> a, uint32_t slots);
 
 std::vector<std::vector<std::complex<double>>> coeff_encoding_one_level(const std::vector<std::complex<double>>& pows,
                                                                         const std::vector<uint32_t>& rot_group,
@@ -530,7 +530,7 @@ std::vector<std::vector<std::vector<std::complex<double>>>> coeff_encoding_colla
     if (!slots)
         CIPHER_THROW("rotGroup can not be empty");
     if (!level_budget)
-        CIPHER_THROW("levelBudget can not be 0");
+        CIPHER_THROW("level_budget can not be 0");
 
     const uint32_t log2slots = static_cast<uint32_t>(std::log2(slots));
     // Need to compute how many layers are collapsed in each of the level from the budget.
@@ -625,7 +625,7 @@ std::vector<std::vector<std::vector<std::complex<double>>>> coeff_decoding_colla
     if (!slots)
         CIPHER_THROW("rotGroup can not be empty");
     if (!level_budget)
-        CIPHER_THROW("levelBudget can not be 0");
+        CIPHER_THROW("level_budget can not be 0");
 
     const uint32_t log2slots = static_cast<uint32_t>(std::log2(slots));
 
@@ -710,7 +710,7 @@ struct ckks_boot_params get_collapsed_fft_params(uint32_t slots, uint32_t level_
     if (slots == 0)
         CIPHER_THROW("slots can not be 0");
     if (level_budget == 0)
-        CIPHER_THROW("levelBudget can not be 0");
+        CIPHER_THROW("level_budget can not be 0");
 
     // even for the case of (slots = 1) we need one level for rescaling as (std::log2(1) = 0)
     uint32_t log_slots = (slots < 3) ? 1 : std::log2(slots);

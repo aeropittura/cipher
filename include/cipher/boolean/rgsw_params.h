@@ -474,7 +474,7 @@ class RingGswCryptoParams : public Serializable {
     void change_base_g(uint32_t base_g_value) {
         if (base_g_ != base_g_value) {
             if (!base_g_by_index_.empty())
-                CIPHER_THROW("Change_BaseG is not supported with per-dimension gadget bases");
+                CIPHER_THROW("change_base_g is not supported with per-dimension gadget bases");
             check_digits_g(base_g_value, digits_for_base(Q_, base_g_value));
             base_g_ = base_g_value;
             gpower_ = precompute_g_power(base_g_value);

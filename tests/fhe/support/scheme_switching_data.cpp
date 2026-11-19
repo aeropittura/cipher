@@ -119,11 +119,11 @@ void SchemeSwitchingDataSerializer::to_stream() {
     else if (nullptr == public_key)
         CIPHER_THROW("publicKey is nullptr");
     else if (nullptr == bin_fhe_crypto_context)
-        CIPHER_THROW("binFHECryptoContext is nullptr");
+        CIPHER_THROW("bin_fhe_crypto_context is nullptr");
     else if (nullptr == fhew_to_ckks_switch_key)
         CIPHER_THROW("FHEWtoCKKSSwitchKey is nullptr");
     else if (nullptr == raw_ciphertext)
-        CIPHER_THROW("RAWCiphertext is nullptr");
+        CIPHER_THROW("raw_ciphertext is nullptr");
 
     std::string out_file;
     //=============================================================================================================

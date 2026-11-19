@@ -111,7 +111,7 @@ class RnsParams final : public ElementParams<IntType> {
         if (corder == 0)
             return;
         if (bits > MAX_MODULUS_SIZE)
-            CIPHER_THROW("Invalid bits for ILDCRTParams");
+            CIPHER_THROW("Invalid bits for RnsParams");
 
         auto q{last_prime<NativeInteger>(bits, corder)};
         params_.reserve(depth);
@@ -248,7 +248,7 @@ class RnsParams final : public ElementParams<IntType> {
      */
     std::vector<std::shared_ptr<NativePolyParams>> get_param_partition(uint32_t start, uint32_t end) const {
         if (end < start || end >= params_.size())
-            CIPHER_THROW("Incorrect parameters for GetParamPartition - (start: " + std::to_string(start) +
+            CIPHER_THROW("Incorrect parameters for get_param_partition - (start: " + std::to_string(start) +
                          ", end:" + std::to_string(end) + ")");
         return std::vector<std::shared_ptr<NativePolyParams>>(params_.begin() + start, params_.begin() + end + 1);
     }
@@ -373,7 +373,7 @@ class RnsParams final : public ElementParams<IntType> {
 
   protected:
     std::ostream& doprint(std::ostream& out) const override {
-        out << "ILDCRTParams ";
+        out << "RnsParams ";
         ElementParams<IntType>::doprint(out);
         out << std::endl << "  m_params:" << std::endl;
         for (size_t i = 0; i < params_.size(); ++i)

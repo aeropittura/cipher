@@ -9,9 +9,9 @@ The 2-party method is more efficient than the $n$-party method for the case when
 
 ## Examples for the $2$-party interactive bootstrapping
 
-- [interactive-bootstrapping.cpp](interactive_bootstrapping.cpp) shows two examples of $2$-party interactive bootstrapping: interactive bootstrapping without a computation and interactive bootstrapping together with a Chebyshev interpolation
+- [interactive_bootstrapping.cpp](interactive_bootstrapping.cpp) shows two examples of $2$-party interactive bootstrapping: interactive bootstrapping without a computation and interactive bootstrapping together with a Chebyshev interpolation
 
 ## Examples for the $n$-party interactive bootstrapping
 
-- [tckks-interactive-mp-bootstrapping.cpp](tckks_interactive_mp_bootstrapping.cpp): An example of $n$-party interactive bootstrapping by itself
-- [tckks-interactive-mp-bootstrapping-Chebyshev.cpp](tckks_interactive_mp_bootstrapping_Chebyshev.cpp): An example of $n$-party interactive bootstrapping together with Chebyshev interpolation
+- [tckks_interactive_mp_bootstrapping.cpp](tckks_interactive_mp_bootstrapping.cpp): An example of $n$-party interactive bootstrapping by itself
+- [tckks_interactive_mp_bootstrapping_Chebyshev.cpp](tckks_interactive_mp_bootstrapping_Chebyshev.cpp): An example of $n$-party interactive bootstrapping together with Chebyshev interpolation

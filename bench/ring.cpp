@@ -83,55 +83,55 @@ static void generate_polys(std::map<uint32_t, std::shared_ptr<P>>& parm_array,
     }
 }
 
-std::map<uint32_t, std::shared_ptr<NativePolyParams>> nativeparms;
-std::map<uint32_t, std::vector<NativePoly>> nativepolys;
+std::map<uint32_t, std::shared_ptr<NativePolyParams>> native_params;
+std::map<uint32_t, std::vector<NativePoly>> native_polys;
 
 #ifdef CIPHER_WITH_BE2
-std::map<uint32_t, std::shared_ptr<M2Params>> be2parms;
-std::map<uint32_t, std::shared_ptr<M2RnsParams>> be2dcrtparms;
-std::map<uint32_t, std::vector<M2Poly>> be2polys;
-std::map<uint32_t, std::vector<M2RnsPoly>> be2_dcrt_polys;
+std::map<uint32_t, std::shared_ptr<M2Params>> be2_params;
+std::map<uint32_t, std::shared_ptr<M2RnsParams>> be2_rns_params;
+std::map<uint32_t, std::vector<M2Poly>> be2_polys;
+std::map<uint32_t, std::vector<M2RnsPoly>> be2_rns_polys;
 #endif
 
 #ifdef CIPHER_WITH_BE4
-std::map<uint32_t, std::shared_ptr<M4Params>> be4parms;
-std::map<uint32_t, std::shared_ptr<M4RnsParams>> be4dcrtparms;
-std::map<uint32_t, std::vector<M4Poly>> be4polys;
-std::map<uint32_t, std::vector<M4RnsPoly>> be4_dcrt_polys;
+std::map<uint32_t, std::shared_ptr<M4Params>> be4_params;
+std::map<uint32_t, std::shared_ptr<M4RnsParams>> be4_rns_params;
+std::map<uint32_t, std::vector<M4Poly>> be4_polys;
+std::map<uint32_t, std::vector<M4RnsPoly>> be4_rns_polys;
 #endif
 
 #ifdef CIPHER_WITH_NTL
-std::map<uint32_t, std::shared_ptr<M6Params>> BE6parms;
-std::map<uint32_t, std::shared_ptr<M6RnsParams>> BE6dcrtparms;
-std::map<uint32_t, std::vector<M6Poly>> BE6polys;
-std::map<uint32_t, std::vector<M6RnsPoly>> BE6DCRTpolys;
+std::map<uint32_t, std::shared_ptr<M6Params>> be6_params;
+std::map<uint32_t, std::shared_ptr<M6RnsParams>> be6_rns_params;
+std::map<uint32_t, std::vector<M6Poly>> be6_polys;
+std::map<uint32_t, std::vector<M6RnsPoly>> be6_rns_polys;
 #endif
 
 class Setup {
   public:
     Setup() {
-        generate_parms<NativePolyParams>(nativeparms);
-        generate_polys<NativePolyParams, NativePoly>(nativeparms, nativepolys);
+        generate_parms<NativePolyParams>(native_params);
+        generate_polys<NativePolyParams, NativePoly>(native_params, native_polys);
 
 #ifdef CIPHER_WITH_BE2
-        generate_parms<M2Params>(be2parms);
-        generate_dcrt_parms<M2RnsParams>(be2dcrtparms);
-        generate_polys<M2Params, M2Poly>(be2parms, be2polys);
-        generate_polys<M2RnsParams, M2RnsPoly>(be2dcrtparms, be2_dcrt_polys);
+        generate_parms<M2Params>(be2_params);
+        generate_dcrt_parms<M2RnsParams>(be2_rns_params);
+        generate_polys<M2Params, M2Poly>(be2_params, be2_polys);
+        generate_polys<M2RnsParams, M2RnsPoly>(be2_rns_params, be2_rns_polys);
 #endif
 
 #ifdef CIPHER_WITH_BE4
-        generate_parms<M4Params>(be4parms);
-        generate_dcrt_parms<M4RnsParams>(be4dcrtparms);
-        generate_polys<M4Params, M4Poly>(be4parms, be4polys);
-        generate_polys<M4RnsParams, M4RnsPoly>(be4dcrtparms, be4_dcrt_polys);
+        generate_parms<M4Params>(be4_params);
+        generate_dcrt_parms<M4RnsParams>(be4_rns_params);
+        generate_polys<M4Params, M4Poly>(be4_params, be4_polys);
+        generate_polys<M4RnsParams, M4RnsPoly>(be4_rns_params, be4_rns_polys);
 #endif
 
 #ifdef CIPHER_WITH_NTL
-        generate_parms<M6Params>(BE6parms);
-        generate_dcrt_parms<M6RnsParams>(BE6dcrtparms);
-        generate_polys<M6Params, M6Poly>(BE6parms, BE6polys);
-        generate_polys<M6RnsParams, M6RnsPoly>(BE6dcrtparms, BE6DCRTpolys);
+        generate_parms<M6Params>(be6_params);
+        generate_dcrt_parms<M6RnsParams>(be6_rns_params);
+        generate_polys<M6Params, M6Poly>(be6_params, be6_polys);
+        generate_polys<M6RnsParams, M6RnsPoly>(be6_rns_params, be6_rns_polys);
 #endif
     }
 
@@ -144,67 +144,67 @@ class Setup {
 
 template <>
 std::shared_ptr<NativePolyParams> Setup::get_parm(uint32_t o) {
-    return nativeparms[o];
+    return native_params[o];
 }
 template <>
 const NativePoly& Setup::get_poly(uint32_t o, int p) {
-    return nativepolys[o][p];
+    return native_polys[o][p];
 }
 
 #ifdef CIPHER_WITH_BE2
 template <>
 std::shared_ptr<M2Params> Setup::get_parm(uint32_t o) {
-    return be2parms[o];
+    return be2_params[o];
 }
 template <>
 const M2Poly& Setup::get_poly(uint32_t o, int p) {
-    return be2polys[o][p];
+    return be2_polys[o][p];
 }
 template <>
 std::shared_ptr<M2RnsParams> Setup::get_parm(uint32_t o) {
-    return be2dcrtparms[o];
+    return be2_rns_params[o];
 }
 template <>
 const M2RnsPoly& Setup::get_poly(uint32_t o, int p) {
-    return be2_dcrt_polys[o][p];
+    return be2_rns_polys[o][p];
 }
 #endif
 
 #ifdef CIPHER_WITH_BE4
 template <>
 std::shared_ptr<M4Params> Setup::get_parm(uint32_t o) {
-    return be4parms[o];
+    return be4_params[o];
 }
 template <>
 const M4Poly& Setup::get_poly(uint32_t o, int p) {
-    return be4polys[o][p];
+    return be4_polys[o][p];
 }
 template <>
 std::shared_ptr<M4RnsParams> Setup::get_parm(uint32_t o) {
-    return be4dcrtparms[o];
+    return be4_rns_params[o];
 }
 template <>
 const M4RnsPoly& Setup::get_poly(uint32_t o, int p) {
-    return be4_dcrt_polys[o][p];
+    return be4_rns_polys[o][p];
 }
 #endif
 
 #ifdef CIPHER_WITH_NTL
 template <>
 std::shared_ptr<M6Params> Setup::get_parm(uint32_t o) {
-    return BE6parms[o];
+    return be6_params[o];
 }
 template <>
 const M6Poly& Setup::get_poly(uint32_t o, int p) {
-    return BE6polys[o][p];
+    return be6_polys[o][p];
 }
 template <>
 std::shared_ptr<M6RnsParams> Setup::get_parm(uint32_t o) {
-    return BE6dcrtparms[o];
+    return be6_rns_params[o];
 }
 template <>
 const M6RnsPoly& Setup::get_poly(uint32_t o, int p) {
-    return BE6DCRTpolys[o][p];
+    return be6_rns_polys[o][p];
 }
 #endif
 

@@ -226,7 +226,7 @@ BigIntegerFixedT<uint_type, BITLENGTH> BigIntegerFixedT<uint_type, BITLENGTH>::a
     // crashes in this function (perhaps it was never exercised) a safer
     // alternative would be something like what follows (the loops i fixed above
     // could use the same structure; note all variables become unsigned and all
-    // loop indices start from zero): for (uint32_t j = 0; j < n_size_ - CeilIntB
+    // loop indices start from zero): for (uint32_t j = 0; j < n_size_ - ceil_int_b
     // /*&& j < n_size_*/; ++j) {
     //    uint32_t i = n_size_ - 1 -j ;
     //    ...
@@ -574,7 +574,7 @@ BigIntegerFixedT<uint_type, BITLENGTH>& BigIntegerFixedT<uint_type, BITLENGTH>::
 
 // Recursive Exponentiation function
 template <typename uint_type, uint32_t BITLENGTH>
-BigIntegerFixedT<uint_type, BITLENGTH> BigIntegerFixedT<uint_type, BITLENGTH>::Exp(uint32_t p) const {
+BigIntegerFixedT<uint_type, BITLENGTH> BigIntegerFixedT<uint_type, BITLENGTH>::raise_to(uint32_t p) const {
     if (p == 0) {
         return 1;
     }
@@ -582,7 +582,7 @@ BigIntegerFixedT<uint_type, BITLENGTH> BigIntegerFixedT<uint_type, BITLENGTH>::E
     if (p == 1) {
         return x;
     }
-    BigIntegerFixedT tmp = x.Exp(p / 2);
+    BigIntegerFixedT tmp = x.raise_to(p / 2);
     if (p % 2 == 0) {
         return tmp * tmp;
     } else {
@@ -598,7 +598,7 @@ BigIntegerFixedT<uint_type, BITLENGTH>& BigIntegerFixedT<uint_type, BITLENGTH>::
     if (p == 1) {
         return *this;
     }
-    BigIntegerFixedT tmp = this->Exp(p / 2);
+    BigIntegerFixedT tmp = this->raise_to(p / 2);
     if (p % 2 == 0) {
         *this = tmp * tmp;
         return *this;
@@ -1215,7 +1215,7 @@ BigIntegerFixedT<uint_type, BITLENGTH> BigIntegerFixedT<uint_type, BITLENGTH>::m
     BigIntegerFixedT mid = this->mod(modulus);  // mid is intermidiate value that calculates mid^2%q
     BigIntegerFixedT product(1);                // product calculates the running product of mod
                                                 // values
-    BigIntegerFixedT Exp(b);                    // Exp is used for spliting b to bit values/ bit
+    BigIntegerFixedT raise_to(b);               // Exp is used for spliting b to bit values/ bit
                                                 // extraction
 
     BigIntegerFixedT temp(1);
@@ -1224,15 +1224,15 @@ BigIntegerFixedT<uint_type, BITLENGTH> BigIntegerFixedT<uint_type, BITLENGTH>::m
 
     while (true) {
         // product is multiplied only if bitvalue is 1
-        if (Exp.value_[n_size_ - 1] % 2 == 1) {
+        if (exp_bits.value_[n_size_ - 1] % 2 == 1) {
             product = product * mid;
         }
         // running product is calculated
         if (product > modulus) {
             product.mod_eq(modulus, mu);
         }
-        Exp = Exp >> 1;  // divide by 2 and check even to odd to find bit value
-        if (Exp == 0) {
+        exp_bits = exp_bits >> 1;  // divide by 2 and check even to odd to find bit value
+        if (exp_bits == 0) {
             break;
         }
         mid = mid * mid;
@@ -1260,7 +1260,7 @@ BigIntegerFixedT<uint_type, BITLENGTH> BigIntegerFixedT<uint_type, BITLENGTH>::m
     }
 
     if (second == 0) {
-        CIPHER_THROW("Zero does not have a ModInverse");
+        CIPHER_THROW("Zero does not have a mod_inverse");
     }
     if (second == 1) {
         return 1;
@@ -1277,7 +1277,7 @@ BigIntegerFixedT<uint_type, BITLENGTH> BigIntegerFixedT<uint_type, BITLENGTH>::m
     // issue is that the loop counter could would need to be an ubint.
     while (mod_back != 1) {
         if (mod_back == 0) {
-            CIPHER_THROW(this->to_string() + " does not have a ModInverse using " + modulus.to_string());
+            CIPHER_THROW(this->to_string() + " does not have a mod_inverse using " + modulus.to_string());
         }
         first = second;
         second = mod_back;
@@ -1499,7 +1499,7 @@ BigIntegerFixedT<uint_type, BITLENGTH>& BigIntegerFixedT<uint_type, BITLENGTH>::
 // Compares the current object with the BigIntegerFixedT a.
 // Uses MSB comparision to output requisite value.
 template <typename uint_type, uint32_t BITLENGTH>
-int BigIntegerFixedT<uint_type, BITLENGTH>::Compare(const BigIntegerFixedT& a) const {
+int BigIntegerFixedT<uint_type, BITLENGTH>::compare_with(const BigIntegerFixedT& a) const {
     if (this->msb_ < a.msb_) {
         return -1;
     }

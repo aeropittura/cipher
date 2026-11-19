@@ -46,7 +46,7 @@
     #include "cipher/math/distribution_gen.h"
 
 void usage() {
-    std::cerr << "Usage: ./external-prng [absolute path to the external PRNG library]" << std::endl;
+    std::cerr << "Usage: ./external_prng [absolute path to the external PRNG library]" << std::endl;
     std::cerr << "       " << "If no absolute library path is provided, then the built-in Cipher's PRNG is used"
               << std::endl;
 }
@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
 
     std::uniform_int_distribution<> dis(0, 10);
     for (size_t i = 0; i < 5; ++i) {
-        [[maybe_unused]] int randomNum = dis(cipher::PseudoRandomNumberGenerator::get_prng());
+        [[maybe_unused]] int random_num = dis(cipher::PseudoRandomNumberGenerator::get_prng());
     }
 
     return 0;

@@ -44,7 +44,7 @@
 #include "cipher/util/utilities.h"
 
 template <typename TypeT>
-static void BitReverse(TypeT& vals) {
+static void bit_reverse_permute(TypeT& vals) {
     uint32_t size = vals.size();
     for (uint32_t i = 1, j = 0; i < size; ++i) {
         uint32_t bit = size >> 1;
@@ -196,7 +196,7 @@ std::vector<Poly> SchemeletRlweMp::encrypt_coeff(std::vector<int64_t> input, con
         if (gap == 0) {
             bit_reverse_two_halves(input);
         } else {
-            BitReverse(input);
+            bit_reverse_permute(input);
         }
     }
 
@@ -254,7 +254,7 @@ std::vector<int64_t> SchemeletRlweMp::decrypt_coeff(const std::vector<Poly>& inp
         if (num_slots < length) {
             bit_reverse_two_halves(output);
         } else {
-            BitReverse(output);
+            bit_reverse_permute(output);
         }
     }
 

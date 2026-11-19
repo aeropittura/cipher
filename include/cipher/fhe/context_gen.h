@@ -72,8 +72,8 @@
  *       crypto_context->enable(LEVELEDSHE);
  *       ...........................................
  *
- * More examples can be found in src/pke/unittest/UnitTestAutomorphism.cpp or in
- * src/pke/unittest/UnitTestEvalMult.cpp.
+ * More examples can be found in tests/fhe/bfv/automorphism_test.cpp or in
+ * tests/fhe/eval_mult_test.cpp.
  */
 
 #ifndef CIPHER_FHE_CONTEXT_GEN_H_

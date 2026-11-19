@@ -111,7 +111,7 @@
        # Fix broken Sphinx RTD Theme 'Edit on GitHub' links
        # Search for 'Edit on GitHub' on the FAQ:
        #     http://exhale.readthedocs.io/en/latest/faq.html
-       "pageLevelConfigMeta": ":github_url: https://github.com/openfheorg/openfhe-development",
+       "pageLevelConfigMeta": ":github_url: https://github.com/aeropittura/cipher",
        ############################################################################
        # Main library page layout example configuration.                          #
        ############################################################################

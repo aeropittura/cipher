@@ -1,22 +1,22 @@
-# Boolean FHE (BinFHE) documentation
+# Boolean FHE documentation
 
-Refer to our [OpenFHE-Readthedocs](https://openfhe-development.readthedocs.io/en/latest/sphinx_rsts/modules/binfhe.html) for more information. This folder contains implementations of [Ducas-Micciancio (FHEW)](https://eprint.iacr.org/2014/816.pdf), [Chillotti-Gama-Georgieva-Izabachene (TFHE)](https://eprint.iacr.org/2018/421.pdf) and [Lee-Micciancio-Kim-Choi-Deryabin-Eom-Yoo(LMKCDEY)] (https://eprint.iacr.org/2022/198).
+Refer to the [Boolean FHE module documentation](../../../docs/sphinx_rsts/modules/binfhe.rst) for more information. This folder contains implementations of [Ducas-Micciancio (FHEW)](https://eprint.iacr.org/2014/816.pdf), [Chillotti-Gama-Georgieva-Izabachene (TFHE)](https://eprint.iacr.org/2018/421.pdf) and [Lee-Micciancio-Kim-Choi-Deryabin-Eom-Yoo (LMKCDEY)](https://eprint.iacr.org/2022/198).
 
 ## File Listings
 
-[Binary FHE CryptoContext](context.h)
+[Boolean FHE context](context.h)
 
-- CryptoContext for the boolean circuit FHE scheme
-- A CryptoContext is the primary object through which we interact with the various `Cipher` capabilities
+- `BooleanContext`, the context for the boolean circuit FHE scheme
+- The context is the primary object through which we interact with the Boolean FHE capabilities
 
-[Binary FHE CryptoContext Serialization](context_ser.h)
+[Boolean FHE context serialization](context_ser.h)
 
-- Adds serialization support to Bollean Circuit FHE
+- Adds serialization support to Boolean circuit FHE
 
 [DM/CGGI Cryptosystem](base_scheme.h)
 
 - The main cryptosystem implementation used for DM/CGGI schemes
-- The scheme is described in [Bootstrapping in FHEW-like Cryptosystems](https://eprint.iacr.org/2014/816) from Daniele
+- The scheme is described in [Bootstrapping in FHEW-like Cryptosystems](https://eprint.iacr.org/2020/086) from Daniele
   Micciancio and Yuriy Polyakov as published in Cryptology ePrint Archive, Report 2020/086
 - The Ring GSW accumulator implementation with AP, GINX and LMKCDEY methods for bootstrapping
 
@@ -28,11 +28,11 @@ Refer to our [OpenFHE-Readthedocs](https://openfhe-development.readthedocs.io/en
 
 - The parameters for LWE and Ring GSW schemes
 
-[LWE CryptoParameters](lwe_params.h)
+[LWE crypto parameters](lwe_params.h)
 
 - Class for all LWE parameters used for boolean FHE
 
-[Ring GSW CryptoParameters](rlwe_ciphertext.h)
+[Ring GSW crypto parameters](rgsw_params.h)
 
 - Class for all RGSW parameters used for boolean FHE bootstrapping
 
@@ -44,7 +44,7 @@ Refer to our [OpenFHE-Readthedocs](https://openfhe-development.readthedocs.io/en
 
 - Class for LWE ciphertext for boolean FHE
 
-[RLWE Ciphertext](lwe_ciphertext.h)
+[RLWE Ciphertext](rlwe_ciphertext.h)
 
 - Class for RLWE ciphertext for boolean FHE
 
@@ -67,9 +67,9 @@ Refer to our [OpenFHE-Readthedocs](https://openfhe-development.readthedocs.io/en
 [Ring GSW accumulator](rgsw_acc.h)
 
 - The main accumulator class for bootstrapping. The different methods are described in:
-- (rgsw-acc-cggi.h) for CGGI method
-- (rgsw-acc-dm.h) for DM method
-- (rgsw-acc-lmkcdey.h) for LMKCDEY method
+- [rgsw_acc_cggi.h](rgsw_acc_cggi.h) for CGGI method
+- [rgsw_acc_dm.h](rgsw_acc_dm.h) for DM method
+- [rgsw_acc_lmkcdey.h](rgsw_acc_lmkcdey.h) for LMKCDEY method
 
 [Ring GSW accumulator key](rgsw_acc_key.h)
 

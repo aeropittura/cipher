@@ -61,7 +61,7 @@ TEST(UT128, modular_operations) {
 
     result.mod_mul_eq(b, modulus, mu);
 
-    EXPECT_EQ(BigInteger("784483038650039308657432244878529921"), BigInteger(result)) << "Failure in ModMulEq";
+    EXPECT_EQ(BigInteger("784483038650039308657432244878529921"), BigInteger(result)) << "Failure in mod_mul_eq";
 
     result = a.mod_mul(b, modulus, mu);
 
@@ -69,47 +69,49 @@ TEST(UT128, modular_operations) {
 
     result = a.mod_mul_fast(b, modulus, mu);
 
-    EXPECT_EQ(BigInteger("784483038650039308657432244878529921"), BigInteger(result)) << "Failure in ModMulFast";
+    EXPECT_EQ(BigInteger("784483038650039308657432244878529921"), BigInteger(result)) << "Failure in mod_mul_fast";
 
     result = a;
 
     result.mod_mul_fast_eq(b, modulus, mu);
 
-    EXPECT_EQ(BigInteger("784483038650039308657432244878529921"), BigInteger(result)) << "Failure in ModMulFastEq";
+    EXPECT_EQ(BigInteger("784483038650039308657432244878529921"), BigInteger(result)) << "Failure in mod_mul_fast_eq";
 
     native_int::NativeInteger precon = b.prep_mod_mul_const(modulus);
 
     result = a.mod_mul_fast_const(b, modulus, precon);
 
-    EXPECT_EQ(BigInteger("784483038650039308657432244878529921"), BigInteger(result)) << "Failure in ModMulFastConst";
+    EXPECT_EQ(BigInteger("784483038650039308657432244878529921"), BigInteger(result))
+            << "Failure in mod_mul_fast_const";
 
     result = a;
 
     result.mod_mul_fast_const_eq(b, modulus, precon);
 
-    EXPECT_EQ(BigInteger("784483038650039308657432244878529921"), BigInteger(result)) << "Failure in ModMulFastConstEq";
+    EXPECT_EQ(BigInteger("784483038650039308657432244878529921"), BigInteger(result))
+            << "Failure in mod_mul_fast_const_eq";
 
     result = a.mod_exp(b, modulus);
 
-    EXPECT_EQ(BigInteger("420836984722658338771647831749821018"), BigInteger(result)) << "Failure in ModExp";
+    EXPECT_EQ(BigInteger("420836984722658338771647831749821018"), BigInteger(result)) << "Failure in mod_exp";
 
     result = a;
 
     result.mod_exp_eq(b, modulus);
 
-    EXPECT_EQ(BigInteger("420836984722658338771647831749821018"), BigInteger(result)) << "Failure in ModExpEq";
+    EXPECT_EQ(BigInteger("420836984722658338771647831749821018"), BigInteger(result)) << "Failure in mod_exp_eq";
 
     result = a.mod_add_fast(c, modulus);
 
-    EXPECT_EQ(BigInteger("1298074214633706907132623958849475"), BigInteger(result)) << "Failure in ModAddFast";
+    EXPECT_EQ(BigInteger("1298074214633706907132623958849475"), BigInteger(result)) << "Failure in mod_add_fast";
 
     result = a.mod_sub_fast(c, modulus);
 
-    EXPECT_EQ(BigInteger("1298074214633706907132624205763041"), BigInteger(result)) << "Failure in ModSubFast";
+    EXPECT_EQ(BigInteger("1298074214633706907132624205763041"), BigInteger(result)) << "Failure in mod_sub_fast";
 
     result = a.mod_inverse(modulus);
 
-    EXPECT_EQ(BigInteger("859455677183853192994953853474516202"), BigInteger(result)) << "Failure in ModInverse";
+    EXPECT_EQ(BigInteger("859455677183853192994953853474516202"), BigInteger(result)) << "Failure in mod_inverse";
 }
 
 TEST(UT128, NTT_operations) {

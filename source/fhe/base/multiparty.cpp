@@ -96,7 +96,7 @@ KeyPair<Element> BaseMultiparty<Element>::multiparty_key_gen(CryptoContext<Eleme
     const auto element_params = crypto_params->get_element_params();
     const auto params_pk = crypto_params->get_params_pk();
     if (!params_pk)
-        CIPHER_THROW("PrecomputeCRTTables() must be called before using precomputed params.");
+        CIPHER_THROW("precompute_crt_tables() must be called before using precomputed params.");
 
     const DggType& dgg = crypto_params->get_discrete_gaussian_generator();
     TugType tug;

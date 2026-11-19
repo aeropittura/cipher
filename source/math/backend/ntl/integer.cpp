@@ -56,28 +56,28 @@
 namespace NTL {
 
 // constant log2 of limb bitlength
-const uint32_t myZZ::log2_limb_bit_length_ = Log2<NTL_ZZ_NBITS>::value;
+const uint32_t NtlInteger::log2_limb_bit_length_ = Log2<NTL_ZZ_NBITS>::value;
 
 // CONSTRUCTORS
 
-myZZ::myZZ() : ZZ() {
+NtlInteger::NtlInteger() : ZZ() {
     set_msb();
 }
 
-myZZ::myZZ(const NTL::ZZ& val) : ZZ(val) {
+NtlInteger::NtlInteger(const NTL::ZZ& val) : ZZ(val) {
     set_msb();
 }
 
-myZZ::myZZ(NTL::ZZ&& val) : ZZ() {
+NtlInteger::NtlInteger(NTL::ZZ&& val) : ZZ() {
     this->swap(val);
     set_msb();
 }
 
-myZZ::myZZ(const std::string& strval) : ZZ(conv<ZZ>(strval.c_str())) {
+NtlInteger::NtlInteger(const std::string& strval) : ZZ(conv<ZZ>(strval.c_str())) {
     set_msb();
 }
 
-myZZ::myZZ(uint64_t d) : ZZ(0) {
+NtlInteger::NtlInteger(uint64_t d) : ZZ(0) {
     static_assert(NTL_ZZ_NBITS != sizeof(uint64_t), "can't compile gmpint on this architecture");
     if (d == 0) {
         return;
@@ -89,12 +89,12 @@ myZZ::myZZ(uint64_t d) : ZZ(0) {
 
     #if defined(CIPHER_HAVE_INT128)
 // 128-bit native arithmetic is not supported yet
-myZZ::myZZ(uint128_t d) : myZZ((uint64_t)d) {}
+NtlInteger::NtlInteger(uint128_t d) : NtlInteger((uint64_t)d) {}
     #endif
 
 // ASSIGNMENT OPERATIONS
 
-myZZ& myZZ::operator=(const myZZ& val) {
+NtlInteger& NtlInteger::operator=(const NtlInteger& val) {
     if (this != &val) {
         _ntl_gcopy(val.rep, &(this->rep));
         this->msb_ = val.msb_;
@@ -104,83 +104,83 @@ myZZ& myZZ::operator=(const myZZ& val) {
 
 // ACCESSORS
 
-void myZZ::set_value(const std::string& str) {
+void NtlInteger::set_value(const std::string& str) {
     *this = conv<ZZ>(str.c_str());
     set_msb();
 }
 
-void myZZ::set_value(const myZZ& a) {
+void NtlInteger::set_value(const NtlInteger& a) {
     *this = a;
     set_msb();
 }
 
 // ARITHMETIC OPERATIONS
 
-myZZ myZZ::multiply_and_round(const myZZ& p, const myZZ& q) const {
-    myZZ ans(*this);
+NtlInteger NtlInteger::multiply_and_round(const NtlInteger& p, const NtlInteger& q) const {
+    NtlInteger ans(*this);
     ans *= p;
     ans = ans.divide_and_round(q);
     return ans;
 }
 
-myZZ& myZZ::multiply_and_round_eq(const myZZ& p, const myZZ& q) {
+NtlInteger& NtlInteger::multiply_and_round_eq(const NtlInteger& p, const NtlInteger& q) {
     this->mul_eq(p);
     this->divide_and_round_eq(q);
     return *this;
 }
 
-myZZ myZZ::divide_and_round(const myZZ& q) const {
-    if (q == myZZ(0)) {
+NtlInteger NtlInteger::divide_and_round(const NtlInteger& q) const {
+    if (q == NtlInteger(0)) {
         CIPHER_THROW("Divisor is zero");
     }
-    myZZ half_q(q >> 1);
+    NtlInteger half_q(q >> 1);
     if (*this < q) {
         if (*this <= half_q) {
-            return myZZ(0);
+            return NtlInteger(0);
         } else {
-            return myZZ(1);
+            return NtlInteger(1);
         }
     }
-    myZZ ans(0);
-    myZZ rv(0);
+    NtlInteger ans(0);
+    NtlInteger rv(0);
     DivRem(ans, rv, *this, q);
     ans.set_msb();
     rv.set_msb();
     if (!(rv <= half_q)) {
-        ans += myZZ(1);
+        ans += NtlInteger(1);
     }
     return ans;
 }
 
-myZZ& myZZ::divide_and_round_eq(const myZZ& q) {
-    if (q == myZZ(0)) {
+NtlInteger& NtlInteger::divide_and_round_eq(const NtlInteger& q) {
+    if (q == NtlInteger(0)) {
         CIPHER_THROW("Divisor is zero");
     }
-    myZZ half_q(q >> 1);
+    NtlInteger half_q(q >> 1);
     if (*this < q) {
         if (*this <= half_q) {
-            return *this = myZZ(0);
+            return *this = NtlInteger(0);
         } else {
-            return *this = myZZ(1);
+            return *this = NtlInteger(1);
         }
     }
-    myZZ rv(0);
+    NtlInteger rv(0);
     DivRem(*this, rv, *this, q);
     this->set_msb();
     rv.set_msb();
     if (!(rv <= half_q)) {
-        *this += myZZ(1);
+        *this += NtlInteger(1);
     }
     return *this;
 }
 
-double myZZ::convert_to_double() const {
+double NtlInteger::convert_to_double() const {
     return (conv<double>(*this));
 }
 
 // Splits the binary string to equi sized chunks and then populates the internal
 // array values.
-myZZ myZZ::from_binary_string(const std::string& vin) {
+NtlInteger NtlInteger::from_binary_string(const std::string& vin) {
     std::string v = vin;
     // strip off leading spaces from the input string
     v.erase(0, v.find_first_not_of(' '));
@@ -192,29 +192,29 @@ myZZ myZZ::from_binary_string(const std::string& vin) {
         v = "0";  // set to one zero
     }
 
-    myZZ value;
+    NtlInteger value;
     // value.clear(); //clear out all limbs
     clear(value);  // clear out all limbs
 
     uint32_t len = v.length();
     /// new code here
 
-    const unsigned int bitsPerByte = 8;
+    const unsigned int bits_per_byte = 8;
     // parse out string 8 bits at a time into array of bytes
     std::vector<unsigned char> bytes;
     std::reverse(v.begin(), v.end());
-    for (uint32_t i = 0; i < len; i += bitsPerByte) {
-        std::string bits = v.substr(0, bitsPerByte);
+    for (uint32_t i = 0; i < len; i += bits_per_byte) {
+        std::string bits = v.substr(0, bits_per_byte);
         // reverse the bits
         std::reverse(bits.begin(), bits.end());
-        int newlen = v.length() - bitsPerByte;
+        int newlen = v.length() - bits_per_byte;
         size_t nbits;
         unsigned char byte = std::stoi(bits, &nbits, 2);
         bytes.push_back(byte);
         if (newlen < 1) {
             break;
         }
-        v = v.substr(bitsPerByte, newlen);
+        v = v.substr(bits_per_byte, newlen);
     }
     ZZFromBytes(value, bytes.data(), bytes.size());
     return (value);
@@ -222,7 +222,7 @@ myZZ myZZ::from_binary_string(const std::string& vin) {
 
 // OTHER FUNCTIONS
 
-uint32_t myZZ::get_msb() const {
+uint32_t NtlInteger::get_msb() const {
     // note: originally I did not worry about this, and just set the
     // MSB whenever this was called, but then that violated constness in the
     // various libraries that used this heavily
@@ -240,14 +240,14 @@ uint32_t myZZ::get_msb() const {
     MSB = (sz - 1) * NTL_ZZ_NBITS;  // figure out bit location of all but last
                                     // limb
     const ZZ_limb_t* zlp = ZZ_limbs_get(*this);
-    uint32_t tmp = GetMSBLimb_t(zlp[sz - 1]);  // add the value of that last limb.
+    uint32_t tmp = get_msb_limb(zlp[sz - 1]);  // add the value of that last limb.
 
     MSB += tmp;
     msb_ = MSB;
     return (MSB);
 }
 
-void myZZ::set_msb() {
+void NtlInteger::set_msb() {
     size_t sz = this->size();
     if (sz == 0) {  // special case for empty data
         msb_ = 0;
@@ -257,14 +257,14 @@ void myZZ::set_msb() {
         // msb_ = NumBytes(*this)*8;
         const ZZ_limb_t* zlp = ZZ_limbs_get(*this);
 
-        uint32_t tmp = GetMSBLimb_t(zlp[sz - 1]);  // add the value of that last limb.
+        uint32_t tmp = get_msb_limb(zlp[sz - 1]);  // add the value of that last limb.
         msb_ += tmp;
     }
     return;
 }
 
-// inline static uint32_t GetMSBLimb_t(ZZ_limb_t x){
-uint32_t myZZ::GetMSBLimb_t(ZZ_limb_t x) const {
+// inline static uint32_t get_msb_limb(ZZ_limb_t x){
+uint32_t NtlInteger::get_msb_limb(ZZ_limb_t x) const {
     const uint32_t bval[] = {0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4};
 
     uint64_t r = 0;
@@ -289,7 +289,7 @@ uint32_t myZZ::GetMSBLimb_t(ZZ_limb_t x) const {
 
 // utility function introduced in Backend 6 to get a subset of bits from a
 // Bigint
-uint32_t myZZ::GetBitRangeAtIndex(uint32_t ppo, uint32_t length) const {
+uint32_t NtlInteger::get_bit_range_at_index(uint32_t ppo, uint32_t length) const {
     if (ppo == 0 || !this->rep)
         return 0;
 
@@ -318,24 +318,24 @@ uint32_t myZZ::GetBitRangeAtIndex(uint32_t ppo, uint32_t length) const {
     return out;
 }
 
-uint32_t myZZ::get_digit_at_index_for_base(uint32_t index, uint32_t base) const {
+uint32_t NtlInteger::get_digit_at_index_for_base(uint32_t index, uint32_t base) const {
     uint32_t digit_len_value = cipher::get_msb(base - 1);
     uint32_t digit = 0;
     uint32_t new_index = 1 + (index - 1) * digit_len_value;
-    digit = GetBitRangeAtIndex(new_index, digit_len_value);
+    digit = get_bit_range_at_index(new_index, digit_len_value);
     return digit;
 }
 
 // returns the bit at the index into the binary format of the big integer,
 // note that msb is 1 like all other bit indicies in Cipher.
 
-uint8_t myZZ::get_bit_at_index(uint32_t index) const {
-    return (uint8_t)GetBitRangeAtIndex(index, 1);
+uint8_t NtlInteger::get_bit_at_index(uint32_t index) const {
+    return (uint8_t)get_bit_range_at_index(index, 1);
 }
 
 // optimized ceiling function after division by number of bits in the limb data
 // type.
-uint32_t myZZ::ceil_int_by_u_int(const ZZ_limb_t number_value) {
+uint32_t NtlInteger::ceil_int_by_u_int(const ZZ_limb_t number_value) {
     // mask to perform bitwise AND
     static ZZ_limb_t mask = NTL_ZZ_NBITS - 1;
 
@@ -352,13 +352,13 @@ uint32_t myZZ::ceil_int_by_u_int(const ZZ_limb_t number_value) {
 
 // STRINGS & STREAMS
 
-const std::string myZZ::to_string() const {
+const std::string NtlInteger::to_string() const {
     std::stringstream result("");
     result << *this;
     return result.str();
 }
 
-std::ostream& operator<<(std::ostream& os, const myZZ& ptr_obj) {
+std::ostream& operator<<(std::ostream& os, const NtlInteger& ptr_obj) {
     ZZ tmp = ptr_obj;
     os << tmp;
     return os;

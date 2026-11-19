@@ -1,218 +1,85 @@
 # Contributing to Cipher
 
-We are using git for version management and control. We use gitlab for issue and milestone tracking.
+Cipher is developed on GitHub at <https://github.com/aeropittura/cipher>. Bugs, questions and proposals go to the issue
+tracker there; code changes arrive as pull requests against the `main` branch. For a large change (a new scheme, a
+change of the public API, a restructuring of the build) please open an issue first so the approach can be agreed on
+before work starts.
 
-We classify contributions as *Major* or *Minor*.
+## Prerequisites
 
-A Major contribution would be adding a new scheme, or capability to the library. Modifications that would require users
-to change existing Cipher API code are also considered Major and would not be scheduled for inclusion except for a
-Major release (2.0 is the next scheduled major release). We usually require such contributions to be done in their own
-fork of the repository to minimize disruption to the ongoing release schedule.
+Install Python 3 and `pre-commit` (`pip3 install pre-commit`, or `brew install pre-commit` on macOS). That is the only
+tool you need: `clang-format` and `cpplint` are pinned in [`.pre-commit-config.yaml`](../../.pre-commit-config.yaml) and
+downloaded by `pre-commit` on first use, so every contributor formats with the same versions. If your editor formats on
+save, `pip3 install clang-format==23.1.1` gives it the same binary the hook uses.
 
-Minor contributions are less broad in scope, and usually are limited to a few files at a time. These are usually done on
-a branch in the development repository, and are usuall incorporated into the next minor release cycle.
-
-Sometimes a seemingly minor improvement may affect a large number of files. Formatting changes are an example of this.
-Changes to a large number of files can be disruptive if done in the wrong point of a release cycle.
-
-If you discover a problem or identify a useful enhancement, do feel free to create a new issue in github. Major
-enhancements should be discussed with the Cipher team ahead of time before undertaking any work (see below).
-
-# Workflow for Minor Contributions
-
-Our workflow for Minor contributions is that developers work in feature branches they create and then submit merge
-requests. All contributions -- be they bug fixes or enhancements -- must be documented in a gitlab issue, before the
-merge request.
-
-We require that the code work correctly in all environments before it will be accepted for merging. We are working on
-bringing up a CI pipeline environment where branches can be tested on multiple platforms automatically. Unfortunately
-our Windows and MacOS build tests are currently done manually. If you do not have all the required systems to test,
-please coordinate with the team to schedule testing.
-
-## Pre-requisites
-
-Before contributing an improvement, install Python 3 if it is not already installed. Then install `pre-commit`:
-
-- On Linux: `pip3 install pre-commit`
-- On macOS: `brew install pre-commit`
-- On Windows, from ```git bash```: `pip3 install pre-commit`
-
-That is the only tool you need to install. `clang-format` and `cpplint` are pinned to specific versions in
-`.pre-commit-config.yaml`, and `pre-commit` downloads them into its own cache the first time the hooks run. Every
-contributor therefore formats with the same versions, and the `clang-format` already on your system is not used.
-
-Note that `clang-format` output differs between versions, so an editor configured to format on save may disagree with
-the hook. Running `pip3 install clang-format==23.1.1` gives your editor the same binary the hook uses.
-
-## Setup
+Enable the hooks once per clone:
 
 ```bash
 pre-commit install
 ```
 
-Now, `pre-commit` will run automatically on `git commit`.
+They then run on every `git commit`. To check or fix the whole tree, run `pre-commit run --all-files` or
+[`tools/format.sh`](../../tools/format.sh).
 
-The same hooks run in CI on every pull request. If they report a failure there, the log shows the exact changes they
-would make; `pre-commit run_fn --all-files` locally applies them.
+## Workflow
 
-By default, `pre-commit` will only run on changed files. To run on all the files (recommended when adding new hooks),
-call
+1. Fork <https://github.com/aeropittura/cipher> and clone your fork:
+   ```bash
+   git clone https://github.com/<you>/cipher.git && cd cipher
+   git remote add upstream https://github.com/aeropittura/cipher.git
+   git submodule update --init extern/cereal extern/google-test extern/google-benchmark
+   ```
+2. Create a feature branch from an up-to-date `main`:
+   ```bash
+   git fetch upstream
+   git checkout -b my-feature upstream/main
+   ```
+3. Make your changes following the style guidelines below. Add unit tests under `tests/` for new functionality and,
+   where it helps, an example under `examples/`.
+4. Build and run the tests:
+   ```bash
+   cmake -S . -B build -G Ninja
+   cmake --build build
+   ctest --test-dir build --output-on-failure
+   ```
+5. Commit with a descriptive message (a summary line of at most 72 characters, a blank line, then details). If the
+   hooks modify files, review them with `git diff`, `git add` them and commit again.
+6. If `main` has moved on, rebase onto it (`git rebase upstream/main`) rather than merging, then push to your fork.
+   See [rebasing_off_main.rst](../sphinx_rsts/contributing/rebasing_off_main.rst).
+7. Open a pull request against `main` of <https://github.com/aeropittura/cipher> and reference the issue it addresses
+   (`Fixes #123`). The [CI workflows](../../.github/workflows/ci.yml) (build and test matrix) and
+   [lint](../../.github/workflows/lint.yml) (pre-commit hooks) run automatically; resolve any failures they report.
 
-```bash
-pre-commit run_fn --all-files
-```
+Changes to the build system are described in
+[cmake_in_cipher.rst](../sphinx_rsts/intro/installation/cmake_in_cipher.rst).
 
-## Making the code changes and checking in the result
+## Style Guidelines
 
-We request that you conform to the following workflow:
-
-1. Start in main, or whichever branch you want to start from using the following command: ```git checkout main```
-2. Pull down the latest in this branch from the git repo: ```git pull origin main```
-3. Create a new branch with the a unique name: ```git checkout -b <your new branch name>```.
-
-* Note that we recommend naming feature branches by appending your name with an issue number. If your last name is
-  Rohloff and you're fixing a bug documented in issue 233, then one would create a branch named Rohloff_issue233.
-* This command will create the branch and move you into it.
-
-4. Make any changes you want to in the branch.
-5. Commit your changes to the local repo: ```git commit -am "commit message"```
-
-* Note the commit message should be succinct yet meaningful and indicate the issue you're addressing, and discussion of
-  things you weren't able to address.
-* Be sure the `pre-commit` hooks run, to ensure the code meets the style guidelines. As a check, running
-  `pre-commit run_fn --all-files` a second time should report that every hook passed and should not change any files.
-* For a more granular control, you can first add files using `git add` and then run `git commit -m "commit message"`. In
-  this case, the changes made by pre-commit will not automatically be added to the commit. Review the changes
-  using `git diff`. If all looks well, run `git add`, and then retry `git commit -m "commit message"`.
-
-6. Push your local commit to the server in your branch: ```git push origin <your local branch name>```
-
-7. After you finished inserting your new code you wanted to address, make sure the code builds and runs correctly and
-   that you have not introduced any additional bugs.
-8. Make sure all unit tests pass and add additional unit tests as needed for features you've added.
-9. Before creating merge requests, developers should rebase their branch from main and test that their code works
-   properly.  [This page describes a workflow to rebase a branch from a main branch.](https://openfhe-development.readthedocs.io/en/latest/sphinx_rsts/contributing/rebasing_off_main.html)
-10. Submit a merge request so project owners can review your commits here. You should include the text
-     ```Fixes #issue``` in your merge request.
-11. You may get feedback on your merge request, especially if there are problems or issues.
-12. When your merge request is accepted, your changes will be merged into main and your branch will be deleted.
-
-* All additions to the released versions of ~ are subject to approval by the OpenFHE governance team as outlined in
-  the [OpenFHE Governance document.](https://openfhe-development.readthedocs.io/en/latest/sphinx_rsts/misc/governance.html)
-
-# Workflow for Major Contributions
-
-If you plan major modifications of OpenFHE, please consult with the OpenFHE team first by contacting us at
-contact@openfhe.org to plan your modifications so that they can be implemented efficiently and in a way that doesn't
-conflict with any other planned future development. OpenFHE is a work in progress, and major release revisions can
-deprecate large amounts of existing code. This way you can make sure your additions will be consistent with the planned
-release schedule of OpenFHE. It will also ensure that you base your changes on the most recent version of the
-development library.
-
-In addition to the workflow for Minor contributions the following is the requested procedure or a Major change.
-
-* Fork the `openfhe-development` repository on GitLab
-* clone your new repository or add it as a remote to an existing repository
-* Check out the existing `main` branch, then start a new feature branch for your work
-* When making changes, write code that is consistent with the surrounding code
-  (see the [style guidelines](#style-guidelines) below)
-* add tests for any new features that you are implementing to either the GoogleTest-based test suite or the Python test
-  suite.
-* add examples that highlight new capabilities, or update existing examples to make use of new features.
-* As you make changes, commit them to your feature branch
-  * Configure Git with your name and e-mail address before making any commits
-  * Use descriptive commit messages (summary line of no more than 72 characters, followed by a blank line and a more
-    detailed summary, if any)
-  * Make related changes in a single_value commit, and unrelated changes in separate commits
-  * Make sure that your commits do not include any undesired files, e.g., files produced as part of the build process or
-    other temporary files.
-  * Use Git's history-rewriting features (i.e., `git rebase -i`; see
-    https://help.github.com/articles/about-git-rebase/) to organize your commits and squash "fixup" commits and
-    reversions.
-  * Do not merge your branch with `main`. If needed, you should occasionally rebase your branch onto the most
-    recent `HEAD` commit of `main`.
-  * Periodically run_fn the test suite (`make testall`) to make sure that your changes are not causing any test failures.
-* Major additions may require changes to the OpenFHE CMAKE files. Refer to the wiki
-  page [Use-of-CMake-in-OpenFHE](https://openfhe-development.readthedocs.io/en/latest/sphinx_rsts/intro/installation/cmake_in_openfhe.html)
-  for details.
-
-* Submit a Pull Request on GitLab. Check the results of the continuous- integration tests pipelines and resolve any
-  issues that arise.
-* Additional discussion of good Git & GitLab workflow is provided at
-  http://matplotlib.org/devel/gitwash/development_workflow.html and
-  https://docs.scipy.org/doc/numpy-1.15.0/dev/gitwash/development_workflow.html
-* OpenFHE is licensed under a [BSD license](https://github.com/openfheorg/openfhe-development/blob/main/LICENSE)
-  which allows others to freely modify the code, and if your Pull Request is accepted, then that code will be release
-  under this license as well. The copyright for OpenFHE is held collectively by the contributors. If you have made a
-  significant contribution, please add your name to the `AUTHORS.md` file.
-
-* All additions to the released versions of OpenFHE are subject to approval by the OpenFHE governance team as outlined
-  in
-  the [OpenFHE Governance document.](https://openfhe-development.readthedocs.io/en/latest/sphinx_rsts/misc/governance.html)
-
-# Style Guidelines
-
-* Try to follow the style of surrounding code, and use variable names that follow existing patterns. Pay attention to
-  indentation and spacing.
-* Configure your editor to use 4 spaces per indentation level, and **never to use tabs**.
-* Avoid introducing trailing whitespace
-* Limit line lengths to 80 characters when possible
-* Write comments to explain non-obvious operations within the code, both in header or source files.
-* Write Doxygen style comments to define all Classes, Templates, and methods (both public, private and protected. Please
-  document all input and output data characterisitcs (required lengths of vectors, restrictions on combinations of
-  variables) as well as any conditions that generate exceptions.
-
-## C++
-
-* All classes, member variables, and methods should have Doxygen-style comments
-  (e.g., comment lines starting with `//!` or comment blocks starting with `/*!`)
-* Avoid defining non-trivial functions in header files
-* Header files should include an 'include guard' named after the file's path from the repository root, upper-cased,
-  with every non-alphanumeric character replaced by an underscore and a trailing underscore. For
-  `src/pke/include/cryptocontext.h` that is `SRC_PKE_INCLUDE_CRYPTOCONTEXT_H_`. The closing line reads
-  `#endif  // SRC_PKE_INCLUDE_CRYPTOCONTEXT_H_`, and the guard wraps the whole file, including any feature check such
-  as `#ifdef CIPHER_WITH_NTL`.
+* Follow the style of the surrounding code. Formatting is enforced by `clang-format` (4-space indentation, no tabs,
+  120-character lines, see [`.clang-format`](../../.clang-format)).
+* Types use `PascalCase` (`RnsPoly`, `BooleanContext`); functions, methods and variables use `snake_case`
+  (`eval_mult`, `get_ring_dimension`); data members end with an underscore (`params_`). Where the case of a single
+  letter carries mathematical meaning it is kept (`get_N()` vs `get_n()`).
+* Constants, enumerators and macros use `UPPER_CASE_WITH_UNDERSCORES`; macros and build options carry the `CIPHER_`
+  prefix. Everything lives in the `cipher` namespace, whose contents are not indented.
+* Header files have an include guard named after the path below `include/`: `include/cipher/fhe/context.h` uses
+  `CIPHER_FHE_CONTEXT_H_`, closed by `#endif  // CIPHER_FHE_CONTEXT_H_`.
 * Includes are grouped in this order, separated by blank lines: the header this file implements, C system headers,
-  C++ system headers, then everything else. A file includes the headers it uses rather than relying on another header
-  to provide them.
-* Protected and private member variable names are generally prefixed with
-  `m_`. For most classes, member variables should not be public. Data member should generally use `m_camelCase`.
-* Variable names use `camelCase`
-* Class names use `CamelCase`
-* Methods use `CamelCase`
-* Constant names and macros use `UPPER_CASE_WITH_UNDERSCORES` (example: `BIT_LENGTH`)
-* Do not indent the contents of namespaces
+  C++ system headers, then everything else. A file includes the headers it uses.
+* Document classes, methods and members with Doxygen comments, including input requirements and the conditions that
+  throw.
+* Report errors with `CIPHER_THROW` (`cipher::CipherException`, see `include/cipher/util/exception.h`). Library code
+  writes diagnostics through `cipher/util/diagnostic_output.h`, never directly to `std::cout`/`std::cerr`.
+* Code may use C++17. Avoid manual memory management; prefer standard containers and smart pointers.
+* Avoid defining non-trivial functions in header files, and do not add external dependencies to the public interface.
 
-* Code may make use of most C++11 features. The minimum required compiler versions are listed in the main README.md
-  file.
+## License
 
-* Avoid manual memory management (i.e. `new` and `delete`), preferring to use standard library containers, as well
-  as `std::unique_ptr` and
-  `std::shared_ptr` when dynamic allocation is required.
+Cipher is licensed under the BSD 2-Clause license ([LICENSE](../../LICENSE)). By submitting a pull request you agree
+that your contribution is released under the same license. Keep existing copyright notices in the files you modify.
 
-* Portions of Boost which are "header only" may be used. If possible, include
-  Boost header files only within .cpp files rather than other header files to
-  avoid unnecessary increases in compilation time. Boost should not be added
-  to the public interface unless its existence and use is optional. This keeps
-  the number of dependencies low for users of OpenFHE. In these cases,
-  `OpenFHE_API_NO_BOOST` should be used to conditionally remove Boost dependencies
+## Upstream
 
-* While OpenFHE does not specifically follow these rules, the following style guides are useful references for possible
-  style choices and the rationales behind them.
-  * The Google C++ Style Guide: https://google.github.io/styleguide/cppguide.html
-  * http://geosoft.no/development/cppstyle.html
-
-* We have automated syntax checking on commit using ```clang-format```, so many of the above formatting rules will be
-  automatically made.
-
-## Python
-
-* Style generally follows PEP8 (https://www.python.org/dev/peps/pep-0008/)
-* Code in `.py` and `.pyx` files needs to be written to work with Python 3
-* The minimum Python version that OpenFHE supports is Python 3.4, so code should only use features added in Python 3.4
-  or earlier
-* Code in the Python examples should be written for Python 3
-
-# Acknowlegement
-
-We would like to Acknowlege the Cantera Project. We have modeled this document on their examples.
+Cipher is derived from [OpenFHE](https://github.com/openfheorg/openfhe-development); the governance and contribution
+processes of the upstream project are documented by the OpenFHE project itself. This document was originally modeled
+on the contribution guide of the Cantera project.

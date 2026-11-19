@@ -70,61 +70,61 @@ enum TEST_CASE_TYPE : int {
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
-    std::string typeName;
+    std::string type_name_of;
     switch (type) {
         case ADD_PACKED:
-            typeName = "ADD_PACKED";
+            type_name_of = "ADD_PACKED";
             break;
         case MULT_PACKED:
-            typeName = "MULT_PACKED";
+            type_name_of = "MULT_PACKED";
             break;
         case SCALE_FACTOR_ADJUSTMENTS:
-            typeName = "SCALE_FACTOR_ADJUSTMENTS";
+            type_name_of = "SCALE_FACTOR_ADJUSTMENTS";
             break;
         case AUTO_LEVEL_REDUCE:
-            typeName = "AUTO_LEVEL_REDUCE";
+            type_name_of = "AUTO_LEVEL_REDUCE";
             break;
         case COMPRESS:
-            typeName = "COMPRESS";
+            type_name_of = "COMPRESS";
             break;
         case EVAL_FAST_ROTATION:
-            typeName = "EVAL_FAST_ROTATION";
+            type_name_of = "EVAL_FAST_ROTATION";
             break;
         case EVALATINDEX:
-            typeName = "EVALATINDEX";
+            type_name_of = "EVALATINDEX";
             break;
         case EVALMERGE:
-            typeName = "EVALMERGE";
+            type_name_of = "EVALMERGE";
             break;
         case EVAL_LINEAR_WSUM:
-            typeName = "EVAL_LINEAR_WSUM";
+            type_name_of = "EVAL_LINEAR_WSUM";
             break;
         case RE_ENCRYPTION:
-            typeName = "RE_ENCRYPTION";
+            type_name_of = "RE_ENCRYPTION";
             break;
         case EVAL_POLY:
-            typeName = "EVAL_POLY";
+            type_name_of = "EVAL_POLY";
             break;
         case METADATA:
-            typeName = "METADATA";
+            type_name_of = "METADATA";
             break;
         case ADD_PACKED_PRECISION:
-            typeName = "ADD_PACKED_PRECISION";
+            type_name_of = "ADD_PACKED_PRECISION";
             break;
         case MULT_PACKED_PRECISION:
-            typeName = "MULT_PACKED_PRECISION";
+            type_name_of = "MULT_PACKED_PRECISION";
             break;
         case EVALSQUARE:
-            typeName = "EVALSQUARE";
+            type_name_of = "EVALSQUARE";
             break;
         case SMALL_SCALING_MOD_SIZE:
-            typeName = "SMALL_SCALING_MOD_SIZE";
+            type_name_of = "SMALL_SCALING_MOD_SIZE";
             break;
         default:
-            typeName = "UNKNOWN";
+            type_name_of = "UNKNOWN";
             break;
     }
-    return os << typeName;
+    return os << type_name_of;
 }
 //===========================================================================================================
 struct TEST_CASE_UTCKKSRNS_CS {
@@ -154,7 +154,7 @@ struct TEST_CASE_UTCKKSRNS_CS {
 
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
-static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNS_CS>& test) {
+static auto make_test_name = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNS_CS>& test) {
     return test.param.build_test_name();
 };
 
@@ -177,14 +177,14 @@ constexpr uint32_t BATCH = 8;
 constexpr double MIN_PRECISION_DIFF = 1.5;
 // clang-format off
 static std::vector<TEST_CASE_UTCKKSRNS_CS> test_cases = {
-    // TestType,  Descr, Scheme,         RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,               LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, Slots
+    // TestType,  Descr, Scheme,         RDim,     MultDepth, SModSize, DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,               LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, Slots
     { ADD_PACKED, "01", {CKKSRNS_SCHEME, RING_DIM, 7,         60,       DSIZE, BATCH,   UNIFORM_TERNARY, DFLT,          64,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT},   0},
     { ADD_PACKED, "02", {CKKSRNS_SCHEME, RING_DIM, 7,         90,       DSIZE, BATCH,   UNIFORM_TERNARY, DFLT,          96,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT},   0},
     { ADD_PACKED, "03", {CKKSRNS_SCHEME, RING_DIM, 7,         118,      DSIZE, BATCH,   UNIFORM_TERNARY, DFLT,         120,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT},   0},
     { ADD_PACKED, "04", {CKKSRNS_SCHEME, RING_DIM, 7,         52,       DSIZE, BATCH,   UNIFORM_TERNARY, DFLT,          64,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT},   0},
     { ADD_PACKED, "05", {CKKSRNS_SCHEME, RING_DIM, 7,         66,       DSIZE, BATCH,   UNIFORM_TERNARY, DFLT,          96,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT},   0},
     { ADD_PACKED, "06", {CKKSRNS_SCHEME, RING_DIM, 7,         108,      DSIZE, BATCH,   UNIFORM_TERNARY, DFLT,         118,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT},   0},
-    // TestType,  Descr, Scheme,         RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,               LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, Slots
+    // TestType,  Descr, Scheme,         RDim,     MultDepth, SModSize, DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,               LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, Slots
     { ADD_PACKED, "11", {CKKSRNS_SCHEME, RING_DIM, 7,         63,       DSIZE, BATCH,   UNIFORM_TERNARY, DFLT,          64,       HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 27, 3},   0},
     { ADD_PACKED, "12", {CKKSRNS_SCHEME, RING_DIM, 7,         90,       DSIZE, BATCH,   UNIFORM_TERNARY, DFLT,          96,       HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 27, 4},   0},
     { ADD_PACKED, "13", {CKKSRNS_SCHEME, RING_DIM, 7,         118,      DSIZE, BATCH,   UNIFORM_TERNARY, DFLT,         120,       HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 64, 2},   0},
@@ -192,39 +192,39 @@ static std::vector<TEST_CASE_UTCKKSRNS_CS> test_cases = {
     { ADD_PACKED, "15", {CKKSRNS_SCHEME, RING_DIM, 7,         89,       DSIZE, BATCH,   UNIFORM_TERNARY, DFLT,          96,       HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, 4},   0},
     { ADD_PACKED, "16", {CKKSRNS_SCHEME, RING_DIM, 7,         108,      DSIZE, BATCH,   UNIFORM_TERNARY, DFLT,         118,       HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 48, 3},   0},
     // ==========================================
-    // TestType,  Descr, Scheme,         RDim,      MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,              LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, Slots
+    // TestType,  Descr, Scheme,         RDim,      MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,              LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, Slots
     { MULT_PACKED, "01", {CKKSRNS_SCHEME, RING_DIM, 7,          52,      DSIZE, BATCH,   DFLT,       DFLT,          64,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,  DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT},   0},
     { MULT_PACKED, "02", {CKKSRNS_SCHEME, RING_DIM, 7,          63,      DSIZE, BATCH,   DFLT,       DFLT,          64,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,  DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT},   0},
     { MULT_PACKED, "03", {CKKSRNS_SCHEME, RING_DIM, 7,          66,      DSIZE, BATCH,   DFLT,       DFLT,          96,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,  DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT},   0},
     { MULT_PACKED, "04", {CKKSRNS_SCHEME, RING_DIM, 7,          80,      DSIZE, BATCH,   DFLT,       DFLT,          96,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,  DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT},   0},
     { MULT_PACKED, "05", {CKKSRNS_SCHEME, RING_DIM, 7,         118,      DSIZE, BATCH,   DFLT,       DFLT,         120,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,  DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT},   0},
-    // TestType,  Descr, Scheme,         RDim,      MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,               LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, Slots
+    // TestType,  Descr, Scheme,         RDim,      MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,               LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, Slots
     { MULT_PACKED, "31", {CKKSRNS_SCHEME, RING_DIM, 7,          52,      DSIZE, BATCH,   DFLT,       DFLT,          54,       HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 27, 2},   0},
     { MULT_PACKED, "32", {CKKSRNS_SCHEME, RING_DIM, 7,          63,      DSIZE, BATCH,   DFLT,       DFLT,          64,       HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 27, 3},   0},
     { MULT_PACKED, "33", {CKKSRNS_SCHEME, RING_DIM, 7,          89,      DSIZE, BATCH,   DFLT,       DFLT,          96,       HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, 4},   0},
     { MULT_PACKED, "34", {CKKSRNS_SCHEME, RING_DIM, 7,          80,      DSIZE, BATCH,   DFLT,       DFLT,          96,       HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 27, 4},   0},
     { MULT_PACKED, "35", {CKKSRNS_SCHEME, RING_DIM, 7,         118,      DSIZE, BATCH,   DFLT,       DFLT,         120,       HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 48, 3},   0},
     // ==========================================
-    // TestType,  Descr, Scheme,          RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,              LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, Slots
+    // TestType,  Descr, Scheme,          RDim,     MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,              LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, Slots
     { MULT_PACKED, "11", {CKKSRNS_SCHEME, RING_DIM, 7,          52,      DSIZE, BATCH,   DFLT,       DFLT,          62,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,  DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT},   32},
     { MULT_PACKED, "12", {CKKSRNS_SCHEME, RING_DIM, 7,          54,      DSIZE, BATCH,   DFLT,       DFLT,          64,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,  DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT},   32},
     { MULT_PACKED, "13", {CKKSRNS_SCHEME, RING_DIM, 7,          66,      DSIZE, BATCH,   DFLT,       DFLT,          86,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,  DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT},   32},
     { MULT_PACKED, "14", {CKKSRNS_SCHEME, RING_DIM, 7,          80,      DSIZE, BATCH,   DFLT,       DFLT,          96,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,  DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT},   32},
     { MULT_PACKED, "15", {CKKSRNS_SCHEME, RING_DIM, 7,         118,      DSIZE, BATCH,   DFLT,       DFLT,         120,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,  DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT},   32},
     // ==========================================
-    // TestType,  Descr, Scheme,          RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,              LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, Slots
+    // TestType,  Descr, Scheme,          RDim,     MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,              LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, Slots
     { MULT_PACKED, "21", {CKKSRNS_SCHEME, RING_DIM, 7,          52,      DSIZE, BATCH,   DFLT,       DFLT,           62,      HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,  DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT},   RING_DIM_HALF},
     { MULT_PACKED, "22", {CKKSRNS_SCHEME, RING_DIM, 7,          54,      DSIZE, BATCH,   DFLT,       DFLT,           64,      HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,  DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT},   RING_DIM_HALF},
     { MULT_PACKED, "23", {CKKSRNS_SCHEME, RING_DIM, 7,          66,      DSIZE, BATCH,   DFLT,       DFLT,           96,      HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,  DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT},   RING_DIM_HALF},
     { MULT_PACKED, "24", {CKKSRNS_SCHEME, RING_DIM, 7,          80,      DSIZE, BATCH,   DFLT,       DFLT,           96,      HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,  DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT},   RING_DIM_HALF},
     { MULT_PACKED, "25", {CKKSRNS_SCHEME, RING_DIM, 7,         118,      DSIZE, BATCH,   DFLT,       DFLT,          120,      HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,  DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT},   RING_DIM_HALF},
     // ==========================================
-    // TestType,               Descr, Scheme,           RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,              LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
+    // TestType,               Descr, Scheme,           RDim,     MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,              LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
     { SCALE_FACTOR_ADJUSTMENTS, "01", {CKKSRNS_SCHEME, RING_DIM, 7,         52,       DSIZE, BATCH,   DFLT,       DFLT,          62,       HEStd_NotSet, HYBRID,  COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { SCALE_FACTOR_ADJUSTMENTS, "02", {CKKSRNS_SCHEME, RING_DIM, 7,         54,       DSIZE, BATCH,   DFLT,       DFLT,          64,       HEStd_NotSet, HYBRID,  COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { SCALE_FACTOR_ADJUSTMENTS, "03", {CKKSRNS_SCHEME, RING_DIM, 7,         60,       DSIZE, BATCH,   DFLT,       DFLT,          96,       HEStd_NotSet, HYBRID,  COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     // ==========================================
-    // TestType,  Descr, Scheme,                 RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,             LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
+    // TestType,  Descr, Scheme,                 RDim,     MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,             LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
     { AUTO_LEVEL_REDUCE, "01", {CKKSRNS_SCHEME, RING_DIM, 7,         52,       DSIZE, BATCH,   DFLT,       DFLT,           62,      HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { AUTO_LEVEL_REDUCE, "02", {CKKSRNS_SCHEME, RING_DIM, 7,         54,       DSIZE, BATCH,   DFLT,       DFLT,           64,      HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { AUTO_LEVEL_REDUCE, "03", {CKKSRNS_SCHEME, RING_DIM, 7,         66,       DSIZE, BATCH,   DFLT,       DFLT,           76,      HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
@@ -232,7 +232,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_CS> test_cases = {
     { AUTO_LEVEL_REDUCE, "05", {CKKSRNS_SCHEME, RING_DIM, 7,         108,      DSIZE, BATCH,   DFLT,       DFLT,          118,      HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
 
     // ==========================================
-    // TestType, Descr, Scheme,        RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,             LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
+    // TestType, Descr, Scheme,        RDim,     MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,             LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
     { COMPRESS, "01", {CKKSRNS_SCHEME, RING_DIM, 7,         52,       DSIZE, BATCH,   DFLT,       DFLT,           62,      HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { COMPRESS, "02", {CKKSRNS_SCHEME, RING_DIM, 7,         54,       DSIZE, BATCH,   DFLT,       DFLT,           64,      HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { COMPRESS, "03", {CKKSRNS_SCHEME, RING_DIM, 7,         66,       DSIZE, BATCH,   DFLT,       DFLT,           76,      HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
@@ -240,7 +240,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_CS> test_cases = {
     { COMPRESS, "05", {CKKSRNS_SCHEME, RING_DIM, 7,         108,      DSIZE, BATCH,   DFLT,       DFLT,          118,      HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
 
     // ==========================================
-    // TestType,         Descr,  Scheme,         RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,             LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, Slots
+    // TestType,         Descr,  Scheme,         RDim,     MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,             LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, Slots
     { EVAL_FAST_ROTATION, "01", {CKKSRNS_SCHEME, RING_DIM, 7,         52,       DSIZE, BATCH,   DFLT,       DFLT,            62,     HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT}, 0},
     { EVAL_FAST_ROTATION, "02", {CKKSRNS_SCHEME, RING_DIM, 7,         54,       DSIZE, BATCH,   DFLT,       DFLT,            64,     HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT}, 0},
     { EVAL_FAST_ROTATION, "03", {CKKSRNS_SCHEME, RING_DIM, 7,         66,       DSIZE, BATCH,   DFLT,       DFLT,            76,     HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT}, 0},
@@ -278,67 +278,67 @@ static std::vector<TEST_CASE_UTCKKSRNS_CS> test_cases = {
     { EVAL_FAST_ROTATION, "45", {CKKSRNS_SCHEME, RING_DIM, 7,         108,      DSIZE, BATCH,   DFLT,       DFLT,           118,     HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT}, RING_DIM_HALF},
 
     // ==========================================
-    // TestType,  Descr, Scheme,          RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,             LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, Slots
+    // TestType,  Descr, Scheme,          RDim,     MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,             LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, Slots
     { EVALATINDEX, "01", {CKKSRNS_SCHEME, RING_DIM, 7,         52,       DSIZE, BATCH,   DFLT,       DFLT,            62,     HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT}, 0},
     { EVALATINDEX, "02", {CKKSRNS_SCHEME, RING_DIM, 7,         54,       DSIZE, BATCH,   DFLT,       DFLT,            64,     HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT}, 0},
     { EVALATINDEX, "03", {CKKSRNS_SCHEME, RING_DIM, 7,         66,       DSIZE, BATCH,   DFLT,       DFLT,            76,     HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT}, 0},
     { EVALATINDEX, "04", {CKKSRNS_SCHEME, RING_DIM, 7,         80,       DSIZE, BATCH,   DFLT,       DFLT,            90,     HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT}, 0},
     { EVALATINDEX, "05", {CKKSRNS_SCHEME, RING_DIM, 7,         108,      DSIZE, BATCH,   DFLT,       DFLT,           118,     HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT}, 0},
     // ==========================================
-    // TestType,  Descr, Scheme,        RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,             LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
+    // TestType,  Descr, Scheme,        RDim,     MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,             LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
     { EVALMERGE, "01", {CKKSRNS_SCHEME, RING_DIM, 7,         52,       DSIZE, BATCH,   DFLT,       DFLT,            64,     HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { EVALMERGE, "02", {CKKSRNS_SCHEME, RING_DIM, 7,         55,       DSIZE, BATCH,   DFLT,       DFLT,            64,     HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { EVALMERGE, "03", {CKKSRNS_SCHEME, RING_DIM, 7,         66,       DSIZE, BATCH,   DFLT,       DFLT,            96,     HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { EVALMERGE, "04", {CKKSRNS_SCHEME, RING_DIM, 7,         80,       DSIZE, BATCH,   DFLT,       DFLT,            96,     HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { EVALMERGE, "05", {CKKSRNS_SCHEME, RING_DIM, 7,         118,      DSIZE, BATCH,   DFLT,       DFLT,           120,     HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     // ==========================================
-    // TestType,  Descr, Scheme,               RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,             LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
+    // TestType,  Descr, Scheme,               RDim,     MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,             LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
     { EVAL_LINEAR_WSUM, "01", {CKKSRNS_SCHEME, RING_DIM, 7,         52,       DSIZE, BATCH,   DFLT,       DFLT,          64,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { EVAL_LINEAR_WSUM, "02", {CKKSRNS_SCHEME, RING_DIM, 7,         55,       DSIZE, BATCH,   DFLT,       DFLT,          64,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { EVAL_LINEAR_WSUM, "03", {CKKSRNS_SCHEME, RING_DIM, 7,         66,       DSIZE, BATCH,   DFLT,       DFLT,          96,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { EVAL_LINEAR_WSUM, "04", {CKKSRNS_SCHEME, RING_DIM, 7,         80,       DSIZE, BATCH,   DFLT,       DFLT,          96,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { EVAL_LINEAR_WSUM, "05", {CKKSRNS_SCHEME, RING_DIM, 7,         118,      DSIZE, BATCH,   DFLT,       DFLT,          120,      HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
-    // TestType,  Descr, Scheme,               RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,               LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
+    // TestType,  Descr, Scheme,               RDim,     MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,               LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
     { EVAL_LINEAR_WSUM, "11", {CKKSRNS_SCHEME, RING_DIM, 7,         52,       DSIZE, BATCH,   DFLT,       DFLT,          56,       HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 28, 2}, },
     { EVAL_LINEAR_WSUM, "12", {CKKSRNS_SCHEME, RING_DIM, 7,         52,       DSIZE, BATCH,   DFLT,       DFLT,          54,       HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 27, 2}, },
     { EVAL_LINEAR_WSUM, "13", {CKKSRNS_SCHEME, RING_DIM, 7,         86,       DSIZE, BATCH,   DFLT,       DFLT,          96,       HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 48, 2}, },
     { EVAL_LINEAR_WSUM, "14", {CKKSRNS_SCHEME, RING_DIM, 7,         90,       DSIZE, BATCH,   DFLT,       DFLT,          96,       HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 27, 4}, },
     { EVAL_LINEAR_WSUM, "15", {CKKSRNS_SCHEME, RING_DIM, 7,         118,      DSIZE, BATCH,   DFLT,       DFLT,          120,      HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 64, 3}, },
     // ==========================================
-    // TestType,  Descr, Scheme,            RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,             LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
+    // TestType,  Descr, Scheme,            RDim,     MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,             LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
     { RE_ENCRYPTION, "01", {CKKSRNS_SCHEME, RING_DIM, 7,         52,       DSIZE, BATCH,   DFLT,       DFLT,          64,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    INDCPA, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { RE_ENCRYPTION, "02", {CKKSRNS_SCHEME, RING_DIM, 7,         55,       DSIZE, BATCH,   DFLT,       DFLT,          64,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    INDCPA, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { RE_ENCRYPTION, "03", {CKKSRNS_SCHEME, RING_DIM, 7,         66,       DSIZE, BATCH,   DFLT,       DFLT,          96,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    INDCPA, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { RE_ENCRYPTION, "04", {CKKSRNS_SCHEME, RING_DIM, 7,         80,       DSIZE, BATCH,   DFLT,       DFLT,          96,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    INDCPA, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { RE_ENCRYPTION, "05", {CKKSRNS_SCHEME, RING_DIM, 7,         118,      DSIZE, BATCH,   DFLT,       DFLT,          120,      HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    INDCPA, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     // ==========================================
-    // TestType,  Descr, Scheme,        RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,             LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
+    // TestType,  Descr, Scheme,        RDim,     MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,             LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
     { EVAL_POLY, "01", {CKKSRNS_SCHEME, RING_DIM, 5,         52,       DSIZE, BATCH,   DFLT,       DFLT,          64,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { EVAL_POLY, "02", {CKKSRNS_SCHEME, RING_DIM, 5,         55,       DSIZE, BATCH,   DFLT,       DFLT,          64,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { EVAL_POLY, "03", {CKKSRNS_SCHEME, RING_DIM, 5,         66,       DSIZE, BATCH,   DFLT,       DFLT,          96,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { EVAL_POLY, "04", {CKKSRNS_SCHEME, RING_DIM, 5,         80,       DSIZE, BATCH,   DFLT,       DFLT,          96,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { EVAL_POLY, "05", {CKKSRNS_SCHEME, RING_DIM, 5,         117,      DSIZE, BATCH,   DFLT,       DFLT,          120,      HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
-    // TestType,  Descr, Scheme,        RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,               LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
+    // TestType,  Descr, Scheme,        RDim,     MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,               LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
     { EVAL_POLY, "11", {CKKSRNS_SCHEME, RING_DIM, 7,         52,       DSIZE, BATCH,   DFLT,       DFLT,          56,       HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 28, 2}, },
     { EVAL_POLY, "12", {CKKSRNS_SCHEME, RING_DIM, 7,         52,       DSIZE, BATCH,   DFLT,       DFLT,          54,       HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 27, 2}, },
     { EVAL_POLY, "13", {CKKSRNS_SCHEME, RING_DIM, 7,         86,       DSIZE, BATCH,   DFLT,       DFLT,          96,       HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 48, 2}, },
     { EVAL_POLY, "14", {CKKSRNS_SCHEME, RING_DIM, 7,         90,       DSIZE, BATCH,   DFLT,       DFLT,          96,       HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 27, 4}, },
     { EVAL_POLY, "15", {CKKSRNS_SCHEME, RING_DIM, 7,         118,      DSIZE, BATCH,   DFLT,       DFLT,          120,      HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 64, 3}, },
     // ==========================================
-    // TestType,  Descr, Scheme,       RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,             LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
+    // TestType,  Descr, Scheme,       RDim,     MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,             LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
     { METADATA, "01", {CKKSRNS_SCHEME, RING_DIM, 7,         52,       DSIZE, BATCH,   DFLT,       DFLT,            64,     HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { METADATA, "02", {CKKSRNS_SCHEME, RING_DIM, 7,         55,       DSIZE, BATCH,   DFLT,       DFLT,            64,     HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { METADATA, "03", {CKKSRNS_SCHEME, RING_DIM, 7,         66,       DSIZE, BATCH,   DFLT,       DFLT,            96,     HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { METADATA, "04", {CKKSRNS_SCHEME, RING_DIM, 7,         80,       DSIZE, BATCH,   DFLT,       DFLT,            96,     HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { METADATA, "05", {CKKSRNS_SCHEME, RING_DIM, 7,         118,      DSIZE, BATCH,   DFLT,       DFLT,            120,    HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     // ==========================================
-    // TestType,  Descr, Scheme,         RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,             LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
+    // TestType,  Descr, Scheme,         RDim,     MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,             LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
     { EVALSQUARE, "01", {CKKSRNS_SCHEME, RING_DIM, 7,         52,       DSIZE, BATCH,   DFLT,       DFLT,          64,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { EVALSQUARE, "02", {CKKSRNS_SCHEME, RING_DIM, 7,         55,       DSIZE, BATCH,   DFLT,       DFLT,          64,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { EVALSQUARE, "03", {CKKSRNS_SCHEME, RING_DIM, 7,         66,       DSIZE, BATCH,   DFLT,       DFLT,          96,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { EVALSQUARE, "04", {CKKSRNS_SCHEME, RING_DIM, 7,         80,       DSIZE, BATCH,   DFLT,       DFLT,          96,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
     { EVALSQUARE, "05", {CKKSRNS_SCHEME, RING_DIM, 7,         118,      DSIZE, BATCH,   DFLT,       DFLT,         120,       HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, DFLT}, },
-    // TestType,  Descr, Scheme,         RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,               LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
+    // TestType,  Descr, Scheme,         RDim,     MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,               LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree
     { EVALSQUARE, "11", {CKKSRNS_SCHEME, RING_DIM, 7,         52,       DSIZE, BATCH,   DFLT,       DFLT,          56,       HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 28, 2}, },
     { EVALSQUARE, "12", {CKKSRNS_SCHEME, RING_DIM, 7,         52,       DSIZE, BATCH,   DFLT,       DFLT,          54,       HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 27, 2}, },
     { EVALSQUARE, "13", {CKKSRNS_SCHEME, RING_DIM, 7,         86,       DSIZE, BATCH,   DFLT,       DFLT,          96,       HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 48, 2}, },
@@ -435,7 +435,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
     template <typename T>
     double calculate_approximation_error(const std::vector<std::complex<double>>& result,
                                          const std::vector<std::complex<double>>& expected_result) {
-        CIPHER_THROW("CalculateApproximationError() is not implemented for this datatype");
+        CIPHER_THROW("calculate_approximation_error() is not implemented for this datatype");
     }
 
   protected:
@@ -485,7 +485,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_add->get_length());
             check_equality(plaintext_add->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                           failmsg + " EvalAdd fails");
+                           failmsg + " eval_add fails");
             approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext_add->get_ckks_packed_value(),
                                                                                results->get_ckks_packed_value()));
 
@@ -493,7 +493,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, ciphertext1_mutable, &results);
             results->set_length(plaintext_add->get_length());
             check_equality(plaintext_add->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                           failmsg + " EvalAddInPlace fails");
+                           failmsg + " eval_add_in_place fails");
             approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext_add->get_ckks_packed_value(),
                                                                                results->get_ckks_packed_value()));
 
@@ -520,7 +520,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_sub->get_length());
             check_equality(plaintext_sub->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                           failmsg + " EvalSub fails");
+                           failmsg + " eval_sub fails");
             approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext_sub->get_ckks_packed_value(),
                                                                                results->get_ckks_packed_value()));
 
@@ -548,7 +548,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_add->get_length());
             check_equality(plaintext_add->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                           failmsg + " EvalAdd Ct and Pt fails");
+                           failmsg + " eval_add Ct and Pt fails");
             approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext_add->get_ckks_packed_value(),
                                                                                results->get_ckks_packed_value()));
 
@@ -557,7 +557,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_sub->get_length());
             check_equality(plaintext_sub->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                           failmsg + " EvalSub Ct and Pt fails fails");
+                           failmsg + " eval_sub Ct and Pt fails fails");
             approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext_sub->get_ckks_packed_value(),
                                                                                results->get_ckks_packed_value()));
 
@@ -566,7 +566,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext1_add_scalar->get_length());
             check_equality(plaintext1_add_scalar->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                           failmsg + " EvalAdd Ct and double fails");
+                           failmsg + " eval_add Ct and double fails");
             approximation_errors.emplace_back(calculate_approximation_error<T>(
                     plaintext1_add_scalar->get_ckks_packed_value(), results->get_ckks_packed_value()));
 
@@ -575,7 +575,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext1_sub_scalar->get_length());
             check_equality(plaintext1_sub_scalar->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                           failmsg + " EvalSub Ct and double fails");
+                           failmsg + " eval_sub Ct and double fails");
             approximation_errors.emplace_back(calculate_approximation_error<T>(
                     plaintext1_sub_scalar->get_ckks_packed_value(), results->get_ckks_packed_value()));
 
@@ -584,7 +584,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext1_sub_scalar->get_length());
             check_equality(plaintext1_sub_scalar->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                           failmsg + " EvalAdd Ct and negative double fails");
+                           failmsg + " eval_add Ct and negative double fails");
             approximation_errors.emplace_back(calculate_approximation_error<T>(
                     plaintext1_sub_scalar->get_ckks_packed_value(), results->get_ckks_packed_value()));
 
@@ -593,7 +593,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext1_add_scalar->get_length());
             check_equality(plaintext1_add_scalar->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                           failmsg + " EvalSub Ct and negative double fails");
+                           failmsg + " eval_sub Ct and negative double fails");
             approximation_errors.emplace_back(calculate_approximation_error<T>(
                     plaintext1_add_scalar->get_ckks_packed_value(), results->get_ckks_packed_value()));
             if (test_data.params.multiplicative_depth > 0) {
@@ -602,7 +602,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
                 cc->decrypt(kp.secret_key, c_result, &results);
                 results->set_length(plaintext1_add_large_scalar->get_length());
                 check_equality(plaintext1_add_large_scalar->get_ckks_packed_value(), results->get_ckks_packed_value(),
-                               factor * eps, failmsg + " EvalAdd Ct and large double fails");
+                               factor * eps, failmsg + " eval_add Ct and large double fails");
             }
 
             // Testing eval_negate
@@ -610,7 +610,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(negatives1->get_length());
             check_equality(negatives1->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                           failmsg + " EvalNegate fails");
+                           failmsg + " eval_negate fails");
             approximation_errors.emplace_back(calculate_approximation_error<T>(negatives1->get_ckks_packed_value(),
                                                                                results->get_ckks_packed_value()));
 
@@ -752,7 +752,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_mult->get_length());
             check_equality(plaintext_mult->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                           failmsg + " EvalMultNoRelin Ct fails");
+                           failmsg + " eval_mult_no_relin Ct fails");
             approximation_errors.emplace_back(calculate_approximation_error<T>(plaintext_mult->get_ckks_packed_value(),
                                                                                results->get_ckks_packed_value()));
 
@@ -1301,7 +1301,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_left2->get_length());
             check_equality(plaintext_left2->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                           failmsg + " EvalFastRotation(+2) fails");
+                           failmsg + " eval_fast_rotation(+2) fails");
 
             /* Testing EvalFastRotate -2 (right rotate)
              */
@@ -1309,7 +1309,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_right2->get_length());
             check_equality(plaintext_right2->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                           failmsg + " EvalFastRotation(-2) fails");
+                           failmsg + " eval_fast_rotation(-2) fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1379,7 +1379,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_left2->get_length());
             check_equality(plaintext_left2->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                           failmsg + " EvalAtIndex(+2) fails");
+                           failmsg + " eval_at_index(+2) fails");
 
             /* Testing eval_at_index -2
              */
@@ -1387,7 +1387,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_right2->get_length());
             check_equality(plaintext_right2->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                           failmsg + " EvalAtIndex(-2) fails");
+                           failmsg + " eval_at_index(-2) fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1461,7 +1461,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(p_merged->get_length());
             check_equality(p_merged->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                           failmsg + " EvalMerge fails");
+                           failmsg + " eval_merge fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1509,13 +1509,13 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(p_out->get_length());
             check_equality(p_out->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                           failmsg + " EvalLinearWSum fails");
+                           failmsg + " eval_linear_w_sum fails");
 
             auto c_result2 = cc->eval_linear_w_sum_mutable(ciphertexts, weights);
             cc->decrypt(kp.secret_key, c_result2, &results);
             results->set_length(p_out->get_length());
             check_equality(p_out->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                           failmsg + " EvalLinearWSumMutable fails");
+                           failmsg + " eval_linear_w_sum_mutable fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1723,44 +1723,44 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             Ciphertext<Element> c_add_cc = cc->eval_add(ciphertext1, ciphertext2);
             auto add_cc_val_test = MetadataTest::get_metadata<Element>(c_add_cc);
             EXPECT_EQ(val1->get_metadata(), add_cc_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalAdd(ctx,ctx)";
+                    << "Ciphertext metadata mismatch in eval_add(ctx,ctx)";
 
             // Checking if metadata is carried over in eval_add(ctx,ctx)
             Ciphertext<Element> ciphertext1_clone_value = ciphertext1->clone();
             cc->eval_add_in_place(ciphertext1, ciphertext2);
             auto add_cc_in_place_val_test = MetadataTest::get_metadata<Element>(ciphertext1_clone_value);
             EXPECT_EQ(val1->get_metadata(), add_cc_in_place_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalAddInPlace(ctx,ctx)";
+                    << "Ciphertext metadata mismatch in eval_add_in_place(ctx,ctx)";
 
             // Checking if metadata is carried over in eval_add(ctx,ptx)
             Ciphertext<Element> c_add_cp = cc->eval_add(ciphertext1, plaintext1);
             auto add_cp_val_test = MetadataTest::get_metadata<Element>(c_add_cp);
             EXPECT_EQ(val1->get_metadata(), add_cp_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalAdd(ctx,ptx)";
+                    << "Ciphertext metadata mismatch in eval_add(ctx,ptx)";
 
             // Checking if metadata is carried over in eval_add(ctx,double)
             Ciphertext<Element> c_add_cd = cc->eval_add(ciphertext1, 2.0);
             auto add_cd_val_test = MetadataTest::get_metadata<Element>(c_add_cd);
             EXPECT_EQ(val1->get_metadata(), add_cd_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalAdd(ctx,double)";
+                    << "Ciphertext metadata mismatch in eval_add(ctx,double)";
 
             // Checking if metadata is carried over in eval_sub(ctx,ctx)
             Ciphertext<Element> c_sub_cc = cc->eval_sub(ciphertext1, ciphertext2);
             auto sub_cc_val_test = MetadataTest::get_metadata<Element>(c_sub_cc);
             EXPECT_EQ(val1->get_metadata(), sub_cc_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalSub(ctx,ctx)";
+                    << "Ciphertext metadata mismatch in eval_sub(ctx,ctx)";
 
             // Checking if metadata is carried over in eval_sub(ctx,ptx)
             Ciphertext<Element> c_sub_cp = cc->eval_sub(ciphertext1, plaintext1);
             auto sub_cp_val_test = MetadataTest::get_metadata<Element>(c_sub_cp);
             EXPECT_EQ(val1->get_metadata(), sub_cp_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalSub(ctx,ptx)";
+                    << "Ciphertext metadata mismatch in eval_sub(ctx,ptx)";
 
             // Checking if metadata is carried over in eval_sub(ctx,double)
             Ciphertext<Element> c_sub_cd = cc->eval_sub(ciphertext1, 2.0);
             auto sub_cd_val_test = MetadataTest::get_metadata<Element>(c_sub_cd);
             EXPECT_EQ(val1->get_metadata(), sub_cd_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalSub(ctx,double)";
+                    << "Ciphertext metadata mismatch in eval_sub(ctx,double)";
 
             // Checking if metadata is carried over in eval_mult(ctx,ctx)
             Ciphertext<Element> c_mult_cc = cc->eval_mult(ciphertext1, ciphertext2);
@@ -1784,13 +1784,13 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             auto c_at_index2 = cc->eval_at_index(ciphertext1, 2);
             auto at_index2_val_test = MetadataTest::get_metadata<Element>(c_at_index2);
             EXPECT_EQ(val1->get_metadata(), at_index2_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalAtIndex +2";
+                    << "Ciphertext metadata mismatch in eval_at_index +2";
 
             // Checking if metadata is carried over in eval_at_index -2 (right rotate)
             auto c_at_index_minus2 = cc->eval_at_index(ciphertext1, -2);
             auto at_index_minus2_val_test = MetadataTest::get_metadata<Element>(c_at_index_minus2);
             EXPECT_EQ(val1->get_metadata(), at_index_minus2_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalAtIndex -2";
+                    << "Ciphertext metadata mismatch in eval_at_index -2";
 
             uint32_t N = cc->get_ring_dimension();
             uint32_t M = N << 1;
@@ -1818,12 +1818,12 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             auto c_lws = cc->eval_linear_w_sum(ciphertexts, weights);
             auto lws_val_test = MetadataTest::get_metadata<Element>(c_lws);
             EXPECT_EQ(val1->get_metadata(), lws_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalLinearWSum";
+                    << "Ciphertext metadata mismatch in eval_linear_w_sum";
 
             // Checking if metadata is carried over in eval_sum
             auto c_sum = cc->eval_sum(ciphertext1, VECTOR_SIZE);
             auto sum_val_test = MetadataTest::get_metadata<Element>(c_sum);
-            EXPECT_EQ(val1->get_metadata(), sum_val_test->get_metadata()) << "Ciphertext metadata mismatch in EvalSum";
+            EXPECT_EQ(val1->get_metadata(), sum_val_test->get_metadata()) << "Ciphertext metadata mismatch in eval_sum";
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1861,7 +1861,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, ciphertext_sq, &results);
             results->set_length(int_array_expected_square->get_length());
             check_equality(int_array_expected_square->get_ckks_packed_value(), results->get_ckks_packed_value(), eps,
-                           failmsg + " EvalSquare (CKKSPacked) fails");
+                           failmsg + " eval_square (CKKSPacked) fails");
 
             Ciphertext<Element> ciphertext_third = cc->eval_mult(ciphertext_sq, plaintext);
 
@@ -1869,7 +1869,7 @@ class UTCKKSRNSCS : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_CS> {
             cc->decrypt(kp.secret_key, ciphertext_sixth, &results);
             results->set_length(int_array_expected_sixth->get_length());
             check_equality(int_array_expected_sixth->get_ckks_packed_value(), results->get_ckks_packed_value(),
-                           eps_high, failmsg + " EvalSquare Sixth (CKKSPacked) fails");
+                           eps_high, failmsg + " eval_square Sixth (CKKSPacked) fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1977,5 +1977,5 @@ TEST_P(UTCKKSRNSCS, CKKSRNS) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNSCS, ::testing::ValuesIn(test_cases), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNSCS, ::testing::ValuesIn(test_cases), make_test_name);
 #endif

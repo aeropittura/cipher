@@ -84,10 +84,10 @@ Field2n::Field2n(const NativePoly& element) : format(Format::COEFFICIENT) {
 // Constructor from RnsPoly ring element
 Field2n::Field2n(const RnsPoly& dcrt_element) : format(Format::COEFFICIENT) {
     if (dcrt_element.get_format() != Format::COEFFICIENT)
-        CIPHER_THROW("DCRTPoly not in Format::COEFFICIENT representation");
+        CIPHER_THROW("RnsPoly not in Format::COEFFICIENT representation");
     // get_element_at_index() is unchecked, so reject an empty RnsPoly before indexing into it.
     if (dcrt_element.get_num_of_elements() == 0)
-        CIPHER_THROW("DCRTPoly has no towers to convert");
+        CIPHER_THROW("RnsPoly has no towers to convert");
     // Reading only the first tower is exact while every centered coefficient fits inside it, which
     // is what this constructor's callers produce (products of small trapdoor samples). Check that
     // against the remaining towers rather than assuming it, and interpolate when it does not hold.

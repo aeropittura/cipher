@@ -66,40 +66,40 @@ enum TEST_CASE_TYPE : int {
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
-    std::string typeName;
+    std::string type_name_of;
     switch (type) {
         case BOOTSTRAP_FULL:
-            typeName = "BOOTSTRAP_FULL";
+            type_name_of = "BOOTSTRAP_FULL";
             break;
         case BOOTSTRAP_EDGE:
-            typeName = "BOOTSTRAP_EDGE";
+            type_name_of = "BOOTSTRAP_EDGE";
             break;
         case BOOTSTRAP_SPARSE:
-            typeName = "BOOTSTRAP_SPARSE";
+            type_name_of = "BOOTSTRAP_SPARSE";
             break;
         case BOOTSTRAP_KEY_SWITCH:
-            typeName = "BOOTSTRAP_KEY_SWITCH";
+            type_name_of = "BOOTSTRAP_KEY_SWITCH";
             break;
         case BOOTSTRAP_ITERATIVE:
-            typeName = "BOOTSTRAP_ITERATIVE";
+            type_name_of = "BOOTSTRAP_ITERATIVE";
             break;
         case BOOTSTRAP_NUM_TOWERS:
-            typeName = "BOOTSTRAP_NUM_TOWERS";
+            type_name_of = "BOOTSTRAP_NUM_TOWERS";
             break;
         case BOOTSTRAP_SERIALIZE:
-            typeName = "BOOTSTRAP_SERIALIZE";
+            type_name_of = "BOOTSTRAP_SERIALIZE";
             break;
         case BOOTSTRAP_KEY_SERIALIZE:
-            typeName = "BOOTSTRAP_KEY_SERIALIZE";
+            type_name_of = "BOOTSTRAP_KEY_SERIALIZE";
             break;
         case BOOTSTRAP_SPARSE_ENCAPSULATED:
-            typeName = "BOOTSTRAP_SPARSE_ENCAPSULATED";
+            type_name_of = "BOOTSTRAP_SPARSE_ENCAPSULATED";
             break;
         default:
-            typeName = "UNKNOWN";
+            type_name_of = "UNKNOWN";
             break;
     }
-    return os << typeName;
+    return os << type_name_of;
 }
 //===========================================================================================================
 struct TEST_CASE_UTCKKSRNSCS_BOOT {
@@ -129,7 +129,7 @@ struct TEST_CASE_UTCKKSRNSCS_BOOT {
 
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
-static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNSCS_BOOT>& test) {
+static auto make_test_name = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNSCS_BOOT>& test) {
     return test.param.build_test_name();
 };
 
@@ -162,7 +162,7 @@ constexpr uint32_t FMODSIZEMAX32 = 121;
 
 // clang-format off
 static std::vector<TEST_CASE_UTCKKSRNSCS_BOOT> test_cases = {
-    // TestType,      Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,   SecLvl,       KSTech, ScalTech,               LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, multiparty_mode, decryption_noise_mode, execution_mode, noise_estimate, register_word_size, composite_degree, LvLBudget, Dim1,       Slots
+    // TestType,      Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize,   SecLvl,       KSTech, scal_tech,               LDigits,      PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, multiparty_mode, decryption_noise_mode, execution_mode, noise_estimate, register_word_size, composite_degree, LvLBudget, Dim1,       Slots
     { BOOTSTRAP_FULL, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED2, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZED2, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 1, 1 },  { 32, 32 }, RDIM/2 },
     { BOOTSTRAP_FULL, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED3, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZED3, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 1, 1 },  { 32, 32 }, RDIM/2 },
     { BOOTSTRAP_FULL, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED2, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZED2, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 3, 3 },  { 0, 0 },   RDIM/2 },
@@ -170,13 +170,13 @@ static std::vector<TEST_CASE_UTCKKSRNSCS_BOOT> test_cases = {
     { BOOTSTRAP_FULL, "05", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED2, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZED2, HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          30,               2},              { 3, 3 },  { 0, 0 },   RDIM/2 },
     { BOOTSTRAP_FULL, "06", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED3, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZED3, HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          30,               3},              { 3, 3 },  { 0, 0 },   RDIM/2 },
     // ==========================================
-    // TestType,      Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,   SecLvl,       KSTech, ScalTech,               LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, multiparty_mode, decryption_noise_mode, execution_mode, noise_estimate, register_word_size, composite_degree, LvLBudget, Dim1,     Slots
+    // TestType,      Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize,   SecLvl,       KSTech, scal_tech,               LDigits,      PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, multiparty_mode, decryption_noise_mode, execution_mode, noise_estimate, register_word_size, composite_degree, LvLBudget, Dim1,     Slots
     { BOOTSTRAP_EDGE, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED2, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZED2, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 1, 1 },  { 0, 0 },   RDIM/4 },
     { BOOTSTRAP_EDGE, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED3, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZED3, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 1, 1 },  { 0, 0 },   RDIM/4 },
     { BOOTSTRAP_EDGE, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED2, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZED2, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 2, 2 },  { 0, 0 },   RDIM/4 },
     { BOOTSTRAP_EDGE, "04", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED3, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZED3, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 2, 2 },  { 0, 0 },   RDIM/4 },
     // ==========================================
-    // TestType,        Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,   SecLvl,       KSTech, ScalTech,               LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, multiparty_mode, decryption_noise_mode, execution_mode, noise_estimate, register_word_size, composite_degree, LvLBudget, Dim1,     Slots
+    // TestType,        Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize,   SecLvl,       KSTech, scal_tech,               LDigits,      PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, multiparty_mode, decryption_noise_mode, execution_mode, noise_estimate, register_word_size, composite_degree, LvLBudget, Dim1,     Slots
     { BOOTSTRAP_SPARSE, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED2, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZED2, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 1, 1 },  { 8, 8 },   8 },
     { BOOTSTRAP_SPARSE, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED3, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZED3, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 1, 1 },  { 8, 8 },   8 },
     { BOOTSTRAP_SPARSE, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED2, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZED2, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 2, 2 },  { 0, 0 },   8 },
@@ -190,34 +190,34 @@ static std::vector<TEST_CASE_UTCKKSRNSCS_BOOT> test_cases = {
     { BOOTSTRAP_SPARSE, "11", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED2, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZED2, HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          30,               2},              { 1, 1 },  { 0, 0 },   8 },
     { BOOTSTRAP_SPARSE, "12", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED3, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZED3, HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          30,               3},              { 1, 1 },  { 0, 0 },   8 },
     // ==========================================
-    // TestType,            Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,   SecLvl,       KSTech, ScalTech,               LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, multiparty_mode, decryption_noise_mode, execution_mode, noise_estimate, register_word_size, composite_degree, LvLBudget, Dim1
+    // TestType,            Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize,   SecLvl,       KSTech, scal_tech,               LDigits,      PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, multiparty_mode, decryption_noise_mode, execution_mode, noise_estimate, register_word_size, composite_degree, LvLBudget, Dim1
     { BOOTSTRAP_KEY_SWITCH, "01", {CKKSRNS_SCHEME, 2048, MULT_DEPTH, SMODSIZED2, DFLT,  8,       UNIFORM_TERNARY, DFLT,          FMODSIZED2, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 3, 2 },  { 0, 0 } },
     { BOOTSTRAP_KEY_SWITCH, "02", {CKKSRNS_SCHEME, 2048, MULT_DEPTH, SMODSIZED3, DFLT,  8,       UNIFORM_TERNARY, DFLT,          FMODSIZED3, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 3, 2 },  { 0, 0 } },
     // ==========================================
-    // TestType,           Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,   SecLvl,       KSTech, ScalTech,               LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, multiparty_mode, decryption_noise_mode, execution_mode, noise_estimate, register_word_size, composite_degree, LvLBudget, Dim1,     Slots
+    // TestType,           Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize,   SecLvl,       KSTech, scal_tech,               LDigits,      PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, multiparty_mode, decryption_noise_mode, execution_mode, noise_estimate, register_word_size, composite_degree, LvLBudget, Dim1,     Slots
     { BOOTSTRAP_ITERATIVE, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED2, DFLT,  8,       UNIFORM_TERNARY, DFLT,          FMODSIZED2, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 3, 3 },  { 0, 0 },   8 },
     { BOOTSTRAP_ITERATIVE, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED3, DFLT,  8,       UNIFORM_TERNARY, DFLT,          FMODSIZED3, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 3, 3 },  { 0, 0 },   8 },
     { BOOTSTRAP_ITERATIVE, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED2, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZED2, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 3, 3 },  { 0, 0 },   RDIM/2 },
     { BOOTSTRAP_ITERATIVE, "04", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED3, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZED3, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 3, 3 },  { 0, 0 },   RDIM/2 },
     // ==========================================
-    // TestType,           Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,   SecLvl,       KSTech, ScalTech,               LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, multiparty_mode, decryption_noise_mode, execution_mode, noise_estimate, register_word_size, composite_degree, LvLBudget, Dim1,     Slots
+    // TestType,           Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize,   SecLvl,       KSTech, scal_tech,               LDigits,      PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, multiparty_mode, decryption_noise_mode, execution_mode, noise_estimate, register_word_size, composite_degree, LvLBudget, Dim1,     Slots
     { BOOTSTRAP_NUM_TOWERS, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED2, DFLT,  8,       UNIFORM_TERNARY, DFLT,          FMODSIZED2, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 3, 2 },  { 0, 0 },   8 },
     { BOOTSTRAP_NUM_TOWERS, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED3, DFLT,  8,       UNIFORM_TERNARY, DFLT,          FMODSIZED3, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 3, 2 },  { 0, 0 },   8 },
     { BOOTSTRAP_NUM_TOWERS, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED2, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZED2, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 3, 2 },  { 0, 0 },   RDIM/2 },
     { BOOTSTRAP_NUM_TOWERS, "04", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED3, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZED3, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 3, 2 },  { 0, 0 },   RDIM/2 },
     // ==========================================
-    // TestType,           Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,   SecLvl,       KSTech, ScalTech,               LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, multiparty_mode, decryption_noise_mode, execution_mode, noise_estimate, register_word_size, composite_degree, LvLBudget, Dim1,       Slots
+    // TestType,           Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize,   SecLvl,       KSTech, scal_tech,               LDigits,      PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, multiparty_mode, decryption_noise_mode, execution_mode, noise_estimate, register_word_size, composite_degree, LvLBudget, Dim1,       Slots
     { BOOTSTRAP_SERIALIZE, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED2, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZED2, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 1, 1 },  { 32, 32 }, RDIM/2 },
     { BOOTSTRAP_SERIALIZE, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED3, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZED3, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 1, 1 },  { 32, 32 }, RDIM/2 },
     // ==========================================
-    // TestType,               Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,   SecLvl,       KSTech, ScalTech,               LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, multiparty_mode, decryption_noise_mode, execution_mode, noise_estimate, register_word_size, composite_degree, LvLBudget, Dim1,       Slots
+    // TestType,               Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize,   SecLvl,       KSTech, scal_tech,               LDigits,      PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, multiparty_mode, decryption_noise_mode, execution_mode, noise_estimate, register_word_size, composite_degree, LvLBudget, Dim1,       Slots
     { BOOTSTRAP_KEY_SERIALIZE, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED2, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZED2, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 1, 1 },  { 32, 32 }, RDIM/2 },
     { BOOTSTRAP_KEY_SERIALIZE, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED3, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZED3, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 1, 1 },  { 32, 32 }, RDIM/2 },
     // ==========================================
     // SPARSE_ENCAPSULATED with composite scaling: the sparse key switching uses an auxiliary modulus of three ~22-bit
     // primes (register word size 32) for the 60-bit first modulus (d = 2) and of ~127 bits split into 26-bit primes for
     // the 89-bit first modulus (d = 3).
-    // TestType,      Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,          MaxRelinSkDeg, FModSize,   SecLvl,       KSTech, ScalTech,               LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, multiparty_mode, decryption_noise_mode, execution_mode, noise_estimate, register_word_size, composite_degree, LvLBudget, Dim1,       Slots
+    // TestType,      Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist,          MaxRelinSkDeg, FModSize,   SecLvl,       KSTech, scal_tech,               LDigits,      PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, multiparty_mode, decryption_noise_mode, execution_mode, noise_estimate, register_word_size, composite_degree, LvLBudget, Dim1,       Slots
     { BOOTSTRAP_FULL, "07", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED2, DFLT,  DFLT,    SPARSE_ENCAPSULATED, DFLT,          FMODSIZED2, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 1, 1 },  { 32, 32 }, RDIM/2 },
     { BOOTSTRAP_FULL, "08", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED3, DFLT,  DFLT,    SPARSE_ENCAPSULATED, DFLT,          FMODSIZED3, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 1, 1 },  { 32, 32 }, RDIM/2 },
     { BOOTSTRAP_FULL, "09", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZED2, DFLT,  DFLT,    SPARSE_ENCAPSULATED, DFLT,          FMODSIZED2, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 3, 3 },  { 0, 0 },   RDIM/2 },
@@ -231,7 +231,7 @@ static std::vector<TEST_CASE_UTCKKSRNSCS_BOOT> test_cases = {
     // Excluded for CIPHER_MATH_BACKEND 2: the modulus chain (26 levels of 120 bits) together with the key switching extension
     // exceeds the fixed 3500-bit width of its multiprecision integers.
 #if CIPHER_MATH_BACKEND != 2
-    // TestType,      Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,          MaxRelinSkDeg, FModSize,   SecLvl,       KSTech, ScalTech,               LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, multiparty_mode, decryption_noise_mode, execution_mode, noise_estimate, register_word_size, composite_degree, LvLBudget, Dim1,       Slots
+    // TestType,      Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist,          MaxRelinSkDeg, FModSize,   SecLvl,       KSTech, scal_tech,               LDigits,      PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, multiparty_mode, decryption_noise_mode, execution_mode, noise_estimate, register_word_size, composite_degree, LvLBudget, Dim1,       Slots
     { BOOTSTRAP_FULL, "11", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZEMAX64, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZEMAX64, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          64,               DFLT},           { 1, 1 },  { 32, 32 }, RDIM/2 },
     { BOOTSTRAP_FULL, "12", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZEMAX32, DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZEMAX32, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          32,               DFLT},           { 3, 3 },  { 0, 0 }  , RDIM/2 },
     { BOOTSTRAP_FULL, "15", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZEMAX64, DFLT,  DFLT,    SPARSE_ENCAPSULATED, DFLT,          FMODSIZEMAX64, HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,                DFLT,          DFLT,          64,               DFLT},           { 3, 3 },  { 0, 0 }  , RDIM/2 },
@@ -294,9 +294,9 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
 
             std::vector<std::complex<double>> input;
             if (test_data.slots < 8) {
-                input = Fill<std::complex<double>>({0.1415926}, test_data.slots);
+                input = fill_slots<std::complex<double>>({0.1415926}, test_data.slots);
             } else {
-                input = Fill<std::complex<double>>(
+                input = fill_slots<std::complex<double>>(
                         {0.111111, 0.222222, 0.333333, 0.444444, 0.555555, 0.666666, 0.777777, 0.888888},
                         test_data.slots);
             }
@@ -329,7 +329,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             cc->decrypt(key_pair.secret_key, ciphertext6, &result6);
             result6->set_length(encoded_length);
             check_equality(result6->get_ckks_packed_value(), temp6, eps,
-                           failmsg + " EvalAtIndex after Bootstrapping for fully packed ciphertexts fails for " +
+                           failmsg + " eval_at_index after Bootstrapping for fully packed ciphertexts fails for " +
                                    ((st_c_flag) ? "StC-first" : "ModRaise-first") + " version.");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
@@ -369,7 +369,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             cc->decrypt(key_pair.secret_key, ciphertext, &result);
             result->set_length(a.size());
             check_equality(result->get_ckks_packed_value(), comp_a, eps,
-                           failmsg + " Bootstrapping for KeySwitchExt + KeySwitchDown failed");
+                           failmsg + " Bootstrapping for key_switch_ext + key_switch_down failed");
 
             // Test for eval_fast_rotation_ext
             ciphertext = cc->encrypt(key_pair.public_key, plaintext_a);
@@ -380,7 +380,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             cc->decrypt(key_pair.secret_key, ciphertext, &result);
             result->set_length(b.size());
             check_equality(result->get_ckks_packed_value(), comp_b, eps,
-                           failmsg + " Bootstrapping for EvalFastRotationExt failed");
+                           failmsg + " Bootstrapping for eval_fast_rotation_ext failed");
 
             // Test for key_switch_ext + key_switch_down w/o first element
             ciphertext = cc->encrypt(key_pair.public_key, plaintext_a);
@@ -394,7 +394,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             cc->decrypt(key_pair.secret_key, ciphertext, &result);
             result->set_length(a.size());
             check_equality(result->get_ckks_packed_value(), comp_a, eps,
-                           failmsg + " Bootstrapping for KeySwitchExt + KeySwitchDown w/o first element failed");
+                           failmsg + " Bootstrapping for key_switch_ext + key_switch_down w/o first element failed");
 
             // Test for eval_fast_rotation_ext w/o first element
             ciphertext = cc->encrypt(key_pair.public_key, plaintext_a);
@@ -414,7 +414,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             cc->decrypt(key_pair.secret_key, ciphertext, &result);
             result->set_length(b.size());
             check_equality(result->get_ckks_packed_value(), comp_b, eps,
-                           failmsg + " Bootstrapping for EvalFastRotationExt w/o first element failed");
+                           failmsg + " Bootstrapping for eval_fast_rotation_ext w/o first element failed");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -440,7 +440,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
 
             auto crypto_params = std::dynamic_pointer_cast<CkksRnsCryptoParams>(cc->get_crypto_parameters());
 
-            auto input(Fill<std::complex<double>>(
+            auto input(fill_slots<std::complex<double>>(
                     {0.111111, 0.222222, 0.333333, 0.444444, 0.555555, 0.666666, 0.777777, 0.888888}, test_data.slots));
             size_t encoded_length = input.size();
 
@@ -486,7 +486,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             cc->decrypt(key_pair.secret_key, ciphertext6, &result6);
             result6->set_length(encoded_length);
             check_equality(result6->get_ckks_packed_value(), temp6, eps,
-                           failmsg + " EvalAtIndex after Bootstrapping for ciphertexts fails");
+                           failmsg + " eval_at_index after Bootstrapping for ciphertexts fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -511,7 +511,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             cc->eval_at_index_key_gen(key_pair.secret_key, {6});
             cc->eval_mult_key_gen(key_pair.secret_key);
 
-            auto input(Fill<std::complex<double>>(
+            auto input(fill_slots<std::complex<double>>(
                     {0.111111, 0.222222, 0.333333, 0.444444, 0.555555, 0.666666, 0.777777, 0.888888}, test_data.slots));
             size_t encoded_length = input.size();
 
@@ -608,7 +608,7 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             cc->eval_bootstrap_precompute(test_data.slots);
             cc->eval_bootstrap_precompute(test_data.slots / 2);
             //====================================================================================================
-            auto input(Fill<std::complex<double>>(
+            auto input(fill_slots<std::complex<double>>(
                     {0.111111, 0.222222, 0.333333, 0.444444, 0.555555, 0.666666, 0.777777, 0.888888}, test_data.slots));
             size_t encoded_length = input.size();
 
@@ -630,7 +630,8 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
                                    ((st_c_flag) ? "StC-first" : "ModRaise-first") + " version.");
 
             //====================================================================================================
-            auto input2(Fill<std::complex<double>>({0.111111, 0.222222, 0.333333, 0.444444}, test_data.slots / 2));
+            auto input2(
+                    fill_slots<std::complex<double>>({0.111111, 0.222222, 0.333333, 0.444444}, test_data.slots / 2));
             size_t encoded_length2 = input2.size();
 
             Plaintext plaintext2 = cc->make_ckks_packed_plaintext(
@@ -719,19 +720,19 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
             const auto index_list = cc->get_scheme()->eval_bootstrap_key_map_indices(cc, test_data.slots);
             EXPECT_TRUE(CryptoContextImpl<RnsPoly>::deserialize_eval_bootstrap_key(
                     bootstrap_key_stream1, SerType::BINARY, key_tag, index_list))
-                    << failmsg + " DeserializeEvalBootstrapKey(keyTag, indexList) failed";
+                    << failmsg + " deserialize_eval_bootstrap_key(key_tag, index_list) failed";
 
             // (cc, key_tag, slots) overload for test_data.slots / 2
             EXPECT_TRUE(CryptoContextImpl<RnsPoly>::deserialize_eval_bootstrap_key(
                     bootstrap_key_stream2, SerType::BINARY, cc, key_tag, test_data.slots / 2))
-                    << failmsg + " DeserializeEvalBootstrapKey(cc, keyTag, slots) failed";
+                    << failmsg + " deserialize_eval_bootstrap_key(cc, key_tag, slots) failed";
 
             cc->eval_bootstrap_precompute(test_data.slots);
             cc->eval_bootstrap_precompute(test_data.slots / 2);
             //==============================================================
             auto crypto_params = std::dynamic_pointer_cast<CkksRnsCryptoParams>(cc->get_crypto_parameters());
 
-            auto input(Fill<std::complex<double>>(
+            auto input(fill_slots<std::complex<double>>(
                     {0.111111, 0.222222, 0.333333, 0.444444, 0.555555, 0.666666, 0.777777, 0.888888}, test_data.slots));
             size_t encoded_length = input.size();
 
@@ -748,7 +749,8 @@ class UTCKKSRNSCS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNSCS_B
                            failmsg + " Bootstrapping for fully packed ciphertexts fails");
 
             //==============================================================
-            auto input2(Fill<std::complex<double>>({0.111111, 0.222222, 0.333333, 0.444444}, test_data.slots / 2));
+            auto input2(
+                    fill_slots<std::complex<double>>({0.111111, 0.222222, 0.333333, 0.444444}, test_data.slots / 2));
             size_t encoded_length2 = input2.size();
 
             Plaintext plaintext2 = cc->make_ckks_packed_plaintext(
@@ -856,5 +858,5 @@ TEST_P(UTCKKSRNSCS_BOOT, CKKSRNS) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNSCS_BOOT, ::testing::ValuesIn(test_cases), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNSCS_BOOT, ::testing::ValuesIn(test_cases), make_test_name);
 #endif

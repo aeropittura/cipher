@@ -17,7 +17,7 @@ Both are experimental functionalities.
 Example Description
 ====================
 
-The example file for the lookup table evaluation is located at [functional-bootstrapping-ckks.cpp](functional_bootstrapping_ckks.cpp). The file gives
+The example file for the lookup table evaluation is located at [functional_bootstrapping_ckks.cpp](functional_bootstrapping_ckks.cpp). The file gives
 examples on how to run:
 - `arbitrary_lut`, which applies a function specified as an LUT over an input ciphertext, for various values of the input and output bit-sizes;
 - `multi_value_bootstrapping`, which applies different functions specified as LUTs over the same input ciphertext, reusing intermediate
@@ -25,7 +25,7 @@ computations; it also shows how to apply leveled computations after an LUT evalu
 - `multi_precision_sign`, which evaluates the sign of a large value using digit decomposition, for various sizes of the digits.
 
 The example file for the Fourier-extension functional bootstrapping is located at
-[FE-functional-bootstrapping-ckks.cpp](FE_functional_bootstrapping_ckks.cpp). It refreshes one CKKS ciphertext and evaluates
+[FE_functional_bootstrapping_ckks.cpp](FE_functional_bootstrapping_ckks.cpp). It refreshes one CKKS ciphertext and evaluates
 three functions on it (the exponential over [-2, 2], the sigmoid over [-8, 8] and the tanh approximation of GELU over [-8, 8]),
 sharing the function-independent part of the computation among them.
 
@@ -156,7 +156,7 @@ of several smaller primes.
 - The current multiprecision sign evaluation implementation requires that the digit bit size divides the input bit size.
 - In the COMPOSITESCALING* modes, the first modulus has to be at least one bit larger than the scaling factor (whose bit
 length matches the RLWE ciphertext modulus), as required by the parameter generation for composite scaling.
-- The 128-bit build (`NATIVE_SIZE == 128`) is not supported; `eval_fbt_setup` rejects it.
+- The 128-bit build (`CIPHER_NATIVE_SIZE=128`) is not supported; `eval_fbt_setup` rejects it.
 - MULTIPARTY is not supported.
 
 Fourier-Extension Functional Bootstrapping
@@ -234,7 +234,7 @@ All scaling techniques (FIXEDMANUAL, FIXEDAUTO, FLEXIBLEAUTO, FLEXIBLEAUTOEXT, C
 COMPOSITESCALINGMANUAL) are supported, for both full and sparse packing.
 
 **Current limitations**
-- The first modulus has to be exactly one bit larger than the scaling factor (`first_mod_size = ScalingModSize + 1`), since the
+- The first modulus has to be exactly one bit larger than the scaling factor (`first_mod_size = scaling_mod_size + 1`), since the
 message is embedded into half of the period of the series; `eval_fe_func_bootstrap` and `eval_fe_func_bootstrap_precompute`
 throw otherwise.
 - Only HYBRID key switching is supported.
@@ -243,4 +243,4 @@ Fourier coefficients: the user needs to choose it (and the domain [-B, B]) so th
 below the desired precision, for example using the precision reported by the coefficient generator.
 - If the output is decrypted under CKKS, noise flooding should be applied in order to achieve $\textsf{IND}-\textsf{CPA}^{D}$
 security.
-- The 128-bit build (`NATIVE_SIZE == 128`) is not supported; `eval_fe_func_bootstrap_setup` rejects it.
+- The 128-bit build (`CIPHER_NATIVE_SIZE=128`) is not supported; `eval_fe_func_bootstrap_setup` rejects it.

@@ -132,7 +132,7 @@ void switch_ckks_to_fhew() {
     cc->eval_ckks_to_fhew_key_gen(keys, private_key_fhew);
 
     std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
-    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", log_q " << log_q_cc_lwe;
     std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
     // Compute the scaling factor to decrypt correctly in FHEW; under the hood, the LWE mod switch will performed on the ciphertext at the last level
@@ -295,7 +295,7 @@ void switch_fhew_to_ckks() {
     lwesk = cc_lwe->key_gen();
 
     std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
-    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", log_q " << log_q_cc_lwe;
     std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
     // Step 3. Precompute the necessary keys and information for switching from FHEW to CKKS
@@ -404,7 +404,7 @@ void switch_fhew_to_ckks() {
 }
 
 void floor_via_scheme_switching() {
-    std::cout << "\n-----FloorViaSchemeSwitching-----\n" << std::endl;
+    std::cout << "\n-----floor_via_scheme_switching-----\n" << std::endl;
     std::cout << "Output precision is only wrt the operations in CKKS after switching back.\n" << std::endl;
 
     // Step 1: Setup CryptoContext for CKKS
@@ -463,7 +463,7 @@ void floor_via_scheme_switching() {
     cc_lwe->bt_key_gen(private_key_fhew);
 
     std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
-    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", log_q " << log_q_cc_lwe;
     std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
     // Set the scaling factor to be able to decrypt; under the hood, the LWE mod switch will be performed on the ciphertext at the last level
@@ -497,7 +497,7 @@ void floor_via_scheme_switching() {
 
     auto ptxt1_rpv = ptxt1->get_real_packed_value();
     std::cout << "Input x1: " << ptxt1_rpv << std::endl;
-    std::cout << "Expected result for EvalFloor with " << bits << " bits: ";
+    std::cout << "Expected result for eval_floor with " << bits << " bits: ";
     for (uint32_t i = 0; i < slots; ++i) {
         std::cout << (static_cast<int>(ptxt1_rpv[i]) >> bits) << " ";
     }
@@ -523,7 +523,7 @@ void floor_via_scheme_switching() {
 }
 
 void func_via_scheme_switching() {
-    std::cout << "\n-----FuncViaSchemeSwitching-----\n" << std::endl;
+    std::cout << "\n-----func_via_scheme_switching-----\n" << std::endl;
     std::cout << "Output precision is only wrt the operations in CKKS after switching back.\n" << std::endl;
 
     // Step 1: Setup CryptoContext for CKKS
@@ -577,7 +577,7 @@ void func_via_scheme_switching() {
     cc_lwe->bt_key_gen(private_key_fhew);
 
     std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
-    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", log_q " << log_q_cc_lwe;
     std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
     // Set the scaling factor to be able to decrypt; under the hood, the LWE mod switch will be performed on the ciphertext at the last level
@@ -665,7 +665,7 @@ void func_via_scheme_switching() {
 }
 
 void comparison_via_scheme_switching() {
-    std::cout << "\n-----ComparisonViaSchemeSwitching-----\n" << std::endl;
+    std::cout << "\n-----comparison_via_scheme_switching-----\n" << std::endl;
     std::cout << "Output precision is only wrt the operations in CKKS after switching back.\n" << std::endl;
 
     // Step 1: Setup CryptoContext for CKKS
@@ -726,7 +726,7 @@ void comparison_via_scheme_switching() {
     cc->eval_scheme_switching_key_gen(keys, private_key_fhew);
 
     std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
-    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", log_q " << log_q_cc_lwe;
     std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
     // Set the scaling factor to be able to decrypt; the LWE mod switch is performed on the ciphertext at the last level
@@ -883,7 +883,7 @@ void comparison_via_scheme_switching() {
 }
 
 void argmin_via_scheme_switching() {
-    std::cout << "\n-----ArgminViaSchemeSwitching-----\n" << std::endl;
+    std::cout << "\n-----argmin_via_scheme_switching-----\n" << std::endl;
     std::cout << "Output precision is only wrt the operations in CKKS after switching back\n" << std::endl;
 
     // Step 1: Setup CryptoContext for CKKS
@@ -943,7 +943,7 @@ void argmin_via_scheme_switching() {
     cc->eval_scheme_switching_key_gen(keys, private_key_fhew);
 
     std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
-    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", log_q " << log_q_cc_lwe;
     std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
     // Scale the inputs to ensure their difference is correctly represented after switching to FHEW
@@ -1013,7 +1013,7 @@ void argmin_via_scheme_switching() {
 }
 
 void argmin_via_scheme_switching_alt() {
-    std::cout << "\n-----ArgminViaSchemeSwitchingAlt-----\n" << std::endl;
+    std::cout << "\n-----argmin_via_scheme_switching_alt-----\n" << std::endl;
     std::cout << "Output precision is only wrt the operations in CKKS after switching back\n" << std::endl;
 
     // Step 1: Setup CryptoContext for CKKS
@@ -1074,7 +1074,7 @@ void argmin_via_scheme_switching_alt() {
     cc->eval_scheme_switching_key_gen(keys, private_key_fhew);
 
     std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
-    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", log_q " << log_q_cc_lwe;
     std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
     // Scale the inputs to ensure their difference is correctly represented after switching to FHEW
@@ -1145,7 +1145,7 @@ void argmin_via_scheme_switching_alt() {
 }
 
 void argmin_via_scheme_switching_unit() {
-    std::cout << "\n-----ArgminViaSchemeSwitchingUnit-----\n" << std::endl;
+    std::cout << "\n-----argmin_via_scheme_switching_unit-----\n" << std::endl;
     std::cout << "Output precision is only wrt the operations in CKKS after switching back\n" << std::endl;
 
     // Step 1: Setup CryptoContext for CKKS
@@ -1206,7 +1206,7 @@ void argmin_via_scheme_switching_unit() {
     cc->eval_scheme_switching_key_gen(keys, private_key_fhew);
 
     std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
-    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", log_q " << log_q_cc_lwe;
     std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
     // Here we assume the message does not need scaling, as they are in the unit circle.
@@ -1279,7 +1279,7 @@ void argmin_via_scheme_switching_unit() {
 }
 
 void argmin_via_scheme_switching_alt_unit() {
-    std::cout << "\n-----ArgminViaSchemeSwitchingAltUnit-----\n" << std::endl;
+    std::cout << "\n-----argmin_via_scheme_switching_alt_unit-----\n" << std::endl;
     std::cout << "Output precision is only wrt the operations in CKKS after switching back\n" << std::endl;
 
     // Step 1: Setup CryptoContext for CKKS
@@ -1341,7 +1341,7 @@ void argmin_via_scheme_switching_alt_unit() {
     cc->eval_scheme_switching_key_gen(keys, private_key_fhew);
 
     std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
-    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", log_q " << log_q_cc_lwe;
     std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
     // Here we assume the message does not need scaling, as they are in the unit circle.
@@ -1414,7 +1414,7 @@ void argmin_via_scheme_switching_alt_unit() {
 }
 
 void poly_via_scheme_switching() {
-    std::cout << "\n-----PolyViaSchemeSwitching-----\n" << std::endl;
+    std::cout << "\n-----poly_via_scheme_switching-----\n" << std::endl;
 
     // Step 1: Setup CryptoContext for CKKS to be switched into
 
@@ -1472,7 +1472,7 @@ void poly_via_scheme_switching() {
     cc->eval_scheme_switching_key_gen(keys, private_key_fhew);
 
     std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
-    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", log_q " << log_q_cc_lwe;
     std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
     auto p_lwe1 = cc_lwe->get_max_plaintext_space().convert_to_int();  // Small precision

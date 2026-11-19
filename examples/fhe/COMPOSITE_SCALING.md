@@ -44,16 +44,16 @@ CKKS composite scaling is designed to achieve high-precision RNS-CKKS encrypted 
 
 - This current CKKS composite scaling implementation does not yet support scheme switching or interactive bootstrapping.
 
-- By design, when operating on composite scaling mode (i.e., COMPOSITESCALINGAUTO), the target hardware platform is assumed to have a fixed word size smaller than 64 bits. However, it still works when CKKS scaling factors are greater than 64 bits, even on hardware architectures with 64-bit register word sizes. The latter is a more efficient alternative to using NATIVE_SIZE=128 in scenarios when $IND-CPA^D$ security or high precision needs to be achieved.
+- By design, when operating on composite scaling mode (i.e., COMPOSITESCALINGAUTO), the target hardware platform is assumed to have a fixed word size smaller than 64 bits. However, it still works when CKKS scaling factors are greater than 64 bits, even on hardware architectures with 64-bit register word sizes. The latter is a more efficient alternative to using `CIPHER_NATIVE_SIZE=128` in scenarios when $IND-CPA^D$ security or high precision needs to be achieved.
 
-- Regardless of the target architecture word size, the Cipher library needs to be compiled using the NATIVE_SIZE=64 compilation flag. In other words, NATIVE_SIZE=32 is not supported.
+- Regardless of the target architecture word size, the Cipher library needs to be compiled with `CIPHER_NATIVE_SIZE=64` (the default). In other words, `CIPHER_NATIVE_SIZE=32` is not supported.
 
 - COMPOSITESCALING<AUTO/MANUAL> scaling technique mode only works with the CKKS scheme.
 
 ## Examples
 
-- [iterative-ckks-bootstrapping-composite-scaling.cpp](iterative_ckks_bootstrapping_composite_scaling.cpp): Double-precision CKKS bootstrapping in the CKKS composite scaling mode.
-- [polynomial-evaluation-high-precision-composite-scaling.cpp](polynomial_evaluation_high_precision_composite_scaling.cpp): High-precision (80-bit scaling factor) power series evaluation in the CKKS composite scaling mode.
-- [simple-ckks-bootstrapping-composite-scaling.cpp](simple_ckks_bootstrapping_composite_scaling.cpp): Single-precision CKKS bootstrapping in the CKKS composite scaling mode.
-- [simple-composite-scaling-manual.cpp](simple_composite_scaling_manual.cpp): Basic CKKS arithmetic in the COMPOSITESCALINGMANUAL mode, with the register word size and composite degree set explicitly.
-- [simple-real-numbers-composite-scaling.cpp](simple_real_numbers_composite_scaling.cpp): Basic CKKS arithmetic in the CKKS composite scaling mode.
+- [iterative_ckks_bootstrapping_composite_scaling.cpp](iterative_ckks_bootstrapping_composite_scaling.cpp): Double-precision CKKS bootstrapping in the CKKS composite scaling mode.
+- [polynomial_evaluation_high_precision_composite_scaling.cpp](polynomial_evaluation_high_precision_composite_scaling.cpp): High-precision (80-bit scaling factor) power series evaluation in the CKKS composite scaling mode.
+- [simple_ckks_bootstrapping_composite_scaling.cpp](simple_ckks_bootstrapping_composite_scaling.cpp): Single-precision CKKS bootstrapping in the CKKS composite scaling mode.
+- [simple_composite_scaling_manual.cpp](simple_composite_scaling_manual.cpp): Basic CKKS arithmetic in the COMPOSITESCALINGMANUAL mode, with the register word size and composite degree set explicitly.
+- [simple_real_numbers_composite_scaling.cpp](simple_real_numbers_composite_scaling.cpp): Basic CKKS arithmetic in the CKKS composite scaling mode.

@@ -86,7 +86,7 @@ bool CoefPackedEncoding::encode() {
     } else {
         encode_vec(this->encoded_vector, mod_value, low_bound(), high_bound(), this->value, this->get_scheme_id());
 
-        if (this->type_flag == IsDCRTPoly) {
+        if (this->type_flag == IsRnsPoly) {
             this->encoded_vector_dcrt = this->encoded_vector;
             encoded_vector_dcrt = encoded_vector_dcrt.Times(scaling_factor_int);
             this->encoded_vector_dcrt.set_format(Format::EVALUATION);

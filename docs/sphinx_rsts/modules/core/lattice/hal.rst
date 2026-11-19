@@ -16,25 +16,25 @@ Lattice HAL Introduction
   graph BT
       a[RnsPolyInterface] --> |Inherited by|b[RnsPoly - HAL Default];
 
-This hardware abstraction layer allows Cipher to use a variety of hardware-integrated backends while still allowing for high performance. As of March 31st 2022, we have the:
+This hardware abstraction layer allows Cipher to use a variety of hardware-integrated backends while still allowing for high performance. Cipher currently ships only the default (standard) backend in `include/cipher/ring/backend/standard <../../../../../include/cipher/ring/backend/standard>`_.
 
-- default backend
-
-- `Intel Hexl <https://github.com/intel/hexl>`_ backend
-
-.. note:: Follow the convention set by the the `OpenFHE HEXL code <https://github.com/openfheorg/openfhe-hexl>`_ to extend the supported backends.
+.. note:: Upstream OpenFHE also provides an `Intel HEXL backend <https://github.com/openfheorg/openfhe-hexl>`_; it is not part of Cipher.
 
 File Listing
 ---------------
 
-`RnsPolyInterface (dcrtpoly-interface.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/hal/dcrtpoly-interface.h>`_
+`RnsPolyInterface (rns_poly_interface.h) <../../../../../include/cipher/ring/backend/rns_poly_interface.h>`_
 
 -  Base class for ``RnsPoly``
 
-`RnsPoly Interface Aliases (lat-backend-default.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/hal/default/lat-backend-default.h>`_
+`Backend Aliases (backend_select.h) <../../../../../include/cipher/ring/backend/backend_select.h>`_
 
--  Defines aliases for the lattice default backend
+-  Defines the aliases for the default lattice backend (``Poly``, ``NativePoly``, ``RnsPoly``, ``PolyParams``, ...)
 
-`Integer Lattice Double CRT Params (ildcrtparams.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/ildcrtparams.h>`_
+`RNS Polynomial (rns_poly.h) <../../../../../include/cipher/ring/backend/standard/rns_poly.h>`_
 
--  Inherits from ``RnsPolyInterface`` and provides a public-facing interface used downstream by the various schemes.
+-  ``RnsPolyImpl`` inherits from ``RnsPolyInterface`` and provides the public-facing interface used downstream by the various schemes.
+
+`RNS Params (rns_params.h) <../../../../../include/cipher/ring/backend/standard/rns_params.h>`_
+
+-  Parameter class (``RnsParams``) for the double-CRT (RNS) representation.

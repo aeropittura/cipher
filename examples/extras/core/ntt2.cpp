@@ -131,7 +131,7 @@ void test_ntt(const uint32_t level, const uint32_t nloop) {
 
     BigInteger root_of_unity1(root_of_unity<BigInteger>(m, q1));
     std::cout << "q1 = " << q1 << std::endl;
-    std::cout << "rootOfUnity1 = " << root_of_unity1 << std::endl;
+    std::cout << "root_of_unity1 = " << root_of_unity1 << std::endl;
 
     // build parameters for two vectors.
     PolyParams params1(m, q1, root_of_unity1);
@@ -161,7 +161,7 @@ void test_ntt(const uint32_t level, const uint32_t nloop) {
 
     BigInteger root_of_unity2(root_of_unity<BigInteger>(m, q2));
     std::cout << "q2 = " << q2 << std::endl;
-    std::cout << "rootOfUnity2 = " << root_of_unity2 << std::endl;
+    std::cout << "root_of_unity2 = " << root_of_unity2 << std::endl;
 
     PolyParams params2(m, q2, root_of_unity2);
     auto x2p = std::make_shared<PolyParams>(params2);
@@ -190,7 +190,7 @@ void test_ntt(const uint32_t level, const uint32_t nloop) {
             "95033094");
 
     std::cout << "q3 : " << q3.to_string() << std::endl;
-    std::cout << "rootOfUnity3 : " << root_of_unity3.to_string() << std::endl;
+    std::cout << "root_of_unity3 : " << root_of_unity3.to_string() << std::endl;
 
     PolyParams params3(m, q3, root_of_unity3);
     auto x3p = std::make_shared<PolyParams>(params3);

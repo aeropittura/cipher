@@ -69,11 +69,11 @@ struct BaseTestCase {
         return false;
     }
 
-    // const std::shared_ptr<cipher::Params> getCryptoContextParams() const {
+    // const std::shared_ptr<cipher::Params> get_crypto_context_params() const {
     //    return params;
     // }
 
-    // void setCryptoContextParams(std::shared_ptr<cipher::Params> params0) {
+    // void set_crypto_context_params(std::shared_ptr<cipher::Params> params0) {
     //    params = params0;
     // }
 
@@ -87,23 +87,23 @@ struct BaseTestCase {
      * @param vec vector with overrides
      * @return number of all data members of Params or number of vec's elements that can override params
      */
-    // size_t populateCryptoContextParams(const std::vector<std::string>::const_iterator& start) {
+    // size_t populate_crypto_context_params(const std::vector<std::string>::const_iterator& start) {
     //    // get the total number of the parameter override values
     //    size_t num_overrides = cipher::Params::get_all_params_data_members().size();
 
     //    // get the subset of elements with the parameter override values
-    //    std::vector<std::string> overrideValues(start, start + num_overrides);
+    //    std::vector<std::string> override_values(start, start + num_overrides);
 
     //    cipher::SCHEME scheme = cipher::convert_to_scheme(*start);
     //    switch (scheme) {
     //    case cipher::CKKSRNS_SCHEME:
-    //        setCryptoContextParams(std::make_shared<cipher::ContextParams<cipher::CkksRnsContext>>(overrideValues));
+    //        set_crypto_context_params(std::make_shared<cipher::ContextParams<cipher::CkksRnsContext>>(overrideValues));
     //        break;
     //    case cipher::BFVRNS_SCHEME:
-    //        setCryptoContextParams(std::make_shared<cipher::ContextParams<cipher::BfvRnsContext>>(overrideValues));
+    //        set_crypto_context_params(std::make_shared<cipher::ContextParams<cipher::BfvRnsContext>>(overrideValues));
     //        break;
     //    case cipher::BGVRNS_SCHEME:
-    //        setCryptoContextParams(std::make_shared<cipher::ContextParams<cipher::BgvRnsContext>>(overrideValues));
+    //        set_crypto_context_params(std::make_shared<cipher::ContextParams<cipher::BgvRnsContext>>(overrideValues));
     //        break;
     //    default: {
     //        std::string err_msg(std::string("Unknown scheme_id_value ") + std::to_string(scheme));

@@ -115,26 +115,26 @@ void threshold_fhe(enum ScalingTechnique rescale_tech) {
 
     // under the hood it reduces to two towers
     ciphertext1 = cc->int_boot_adjust_scale(ciphertext1);
-    std::cout << "IntBootAdjustScale Succeeded" << std::endl;
+    std::cout << "int_boot_adjust_scale Succeeded" << std::endl;
 
     // masked decryption on the server: c0 = b + a*s0
     auto ciphertext_output1 = cc->int_boot_decrypt(kp1.secret_key, ciphertext1);
-    std::cout << "IntBootDecrypt on Server Succeeded" << std::endl;
+    std::cout << "int_boot_decrypt on Server Succeeded" << std::endl;
 
     auto ciphertext2 = ciphertext1->clone();
     ciphertext2->set_elements({ciphertext2->get_elements()[1]});
 
     // masked decryption on the client: c1 = a*s1
     auto ciphertext_output2 = cc->int_boot_decrypt(kp2.secret_key, ciphertext2);
-    std::cout << "IntBootDecrypt on Client Succeeded" << std::endl;
+    std::cout << "int_boot_decrypt on Client Succeeded" << std::endl;
 
     // Encryption of masked decryption c1 = a*s1
     ciphertext_output2 = cc->int_boot_encrypt(kp2.public_key, ciphertext_output2);
-    std::cout << "IntBootEncrypt on Client Succeeded" << std::endl;
+    std::cout << "int_boot_encrypt on Client Succeeded" << std::endl;
 
     // Compute Enc(c1) + c0
     auto ciphertext_output = cc->int_boot_add(ciphertext_output2, ciphertext_output1);
-    std::cout << "IntBootAdd on Server Succeeded" << std::endl;
+    std::cout << "int_boot_add on Server Succeeded" << std::endl;
 
     // INTERACTIVE BOOTSTRAPPING ENDS
 
@@ -265,26 +265,26 @@ void chebyshev(enum ScalingTechnique rescale_tech) {
     // INTERACTIVE BOOTSTRAPPING STARTS
 
     ciphertext1 = cc->int_boot_adjust_scale(ciphertext1);
-    std::cout << "IntBootAdjustScale Succeeded" << std::endl;
+    std::cout << "int_boot_adjust_scale Succeeded" << std::endl;
 
     // masked decryption on the server: c0 = b + a*s0
     auto ciphertext_output1 = cc->int_boot_decrypt(kp1.secret_key, ciphertext1);
-    std::cout << "IntBootDecrypt on Server Succeeded" << std::endl;
+    std::cout << "int_boot_decrypt on Server Succeeded" << std::endl;
 
     auto ciphertext2 = ciphertext1->clone();
     ciphertext2->set_elements({ciphertext2->get_elements()[1]});
 
     // masked decryption on the client: c1 = a*s1
     auto ciphertext_output2 = cc->int_boot_decrypt(kp2.secret_key, ciphertext2);
-    std::cout << "IntBootDecrypt on Client Succeeded" << std::endl;
+    std::cout << "int_boot_decrypt on Client Succeeded" << std::endl;
 
     // Encryption of masked decryption c1 = a*s1
     ciphertext_output2 = cc->int_boot_encrypt(kp2.public_key, ciphertext_output2);
-    std::cout << "IntBootEncrypt on Client Succeeded" << std::endl;
+    std::cout << "int_boot_encrypt on Client Succeeded" << std::endl;
 
     // Compute Enc(c1) + c0
     auto ciphertext_output = cc->int_boot_add(ciphertext_output2, ciphertext_output1);
-    std::cout << "IntBootAdd on Server Succeeded" << std::endl;
+    std::cout << "int_boot_add on Server Succeeded" << std::endl;
 
     // INTERACTIVE BOOTSTRAPPING ENDS
 

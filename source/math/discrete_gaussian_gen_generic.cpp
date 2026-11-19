@@ -78,7 +78,7 @@ BaseSampler::BaseSampler(double mean, double std, BitGenerator* generator, BaseS
 
     mean = mean - b_mean * 1.0;
     if (b_type == PEIKERT)
-        Initialize(mean);
+        initialize(mean);
     else
         generate_prob_matrix(b_std, mean);
 }
@@ -211,7 +211,7 @@ int64_t BaseSampler::generate_integer_knuth_yao() {
     return (ans - fin + b_mean);
 }
 
-void BaseSampler::Initialize(double mean) {
+void BaseSampler::initialize(double mean) {
     vals_.clear();
     double variance = b_std * b_std;
 
@@ -265,7 +265,7 @@ uint32_t BaseSampler::find_in_vector(const std::vector<double>& S, double search
     if (lower != S.end())
         return lower - S.begin();
 
-    CIPHER_THROW("DGG Inversion Sampling. FindInVector value not found: " + std::to_string(search));
+    CIPHER_THROW("DGG Inversion Sampling. find_in_vector value not found: " + std::to_string(search));
 }
 
 DiscreteGaussianGeneratorGeneric::DiscreteGaussianGeneratorGeneric(BaseSampler** samplers, const double std,

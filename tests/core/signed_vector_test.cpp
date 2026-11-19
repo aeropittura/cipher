@@ -212,6 +212,6 @@ TEST(UTPoly, SignedVectorAssignment) {
     RUN_ALL_POLYS(signed_poly_assignment, "Signed vector assignment");
 }
 
-TEST(UTDCRTPoly, SignedVectorAssignment) {
-    RUN_BIG_DCRTPOLYS(signed_dcrt_assignment, "Signed DCRT vector assignment");
+TEST(UTRnsPoly, SignedVectorAssignment) {
+    RUN_BIG_RNS_POLYS(signed_dcrt_assignment, "Signed DCRT vector assignment");
 }

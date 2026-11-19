@@ -98,7 +98,7 @@ const DiscreteFourierTransform::PrecomputedValues& DiscreteFourierTransform::get
     std::shared_lock<std::shared_mutex> lock(precomp_mutex());
     const auto it = precomputed_values.find(cycl_order);
     if (it == precomputed_values.end()) {
-        std::string err_msg("DiscreteFourierTransform::Initialize() must be called for cyclOrder = ");
+        std::string err_msg("DiscreteFourierTransform::initialize() must be called for cycl_order = ");
         err_msg += std::to_string(cycl_order);
         CIPHER_THROW(err_msg);
     }
@@ -112,7 +112,7 @@ void DiscreteFourierTransform::reset() {
     }
 }
 
-void DiscreteFourierTransform::Initialize(uint32_t m, uint32_t nh) {
+void DiscreteFourierTransform::initialize(uint32_t m, uint32_t nh) {
     // add a PrecomputedValues object to the map of precomputed_values only if it doesn't already exist for the given cyclotomic order
     std::unique_lock<std::shared_mutex> lock(precomp_mutex());
     precomputed_values.try_emplace(m, m, nh);
@@ -133,7 +133,7 @@ std::vector<std::complex<double>> DiscreteFourierTransform::fft_forward_transfor
     std::vector<std::complex<double>> B(A);
     uint32_t l = std::floor(std::log2(m));
 
-    // static uint32_t maxMCached(262144);
+    // static uint32_t max_m_cached(262144);
     static uint32_t LOGM_MAX(18);  // maximum supported is 2^18 = 262144
     static std::vector<uint32_t> cached_m(LOGM_MAX + 1, 0);
     static std::vector<std::vector<double>> cos_table(LOGM_MAX + 1);
@@ -255,7 +255,7 @@ void DiscreteFourierTransform::fft_special_inv(std::vector<std::complex<double>>
             }
         }
     }
-    BitReverse(vals);
+    bit_reverse_permute(vals);
 
     const double inv = 1.0 / static_cast<double>(vals_size);
     for (size_t i = 0; i < vals_size; ++i) {
@@ -266,7 +266,7 @@ void DiscreteFourierTransform::fft_special_inv(std::vector<std::complex<double>>
 void DiscreteFourierTransform::fft_special(std::vector<std::complex<double>>& vals, uint32_t cycl_order) {
     const PrecomputedValues& pv = get_precomp(cycl_order);
 
-    BitReverse(vals);
+    bit_reverse_permute(vals);
     const size_t vals_size = vals.size();
     for (size_t len = 2; len <= vals_size; len <<= 1) {
         const size_t lenh = len >> 1;
@@ -288,7 +288,7 @@ void DiscreteFourierTransform::fft_special(std::vector<std::complex<double>>& va
     }
 }
 
-void DiscreteFourierTransform::BitReverse(std::vector<std::complex<double>>& vals) {
+void DiscreteFourierTransform::bit_reverse_permute(std::vector<std::complex<double>>& vals) {
     uint32_t size = vals.size();
     for (size_t i = 1, j = 0; i < size; ++i) {
         size_t bit = size >> 1;

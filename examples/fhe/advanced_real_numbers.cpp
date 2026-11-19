@@ -410,7 +410,7 @@ void hybrid_key_switching_demo1() {
      *
      */
 
-    std::cout << "\n\n\n ===== HybridKeySwitchingDemo1 ============= " << std::endl;
+    std::cout << "\n\n\n ===== hybrid_key_switching_demo1 ============= " << std::endl;
     /*
      * dnum is the number of large digits in HYBRID decomposition
      *
@@ -559,7 +559,7 @@ void hybrid_key_switching_demo2() {
      *
      */
 
-    std::cout << "\n\n\n ===== HybridKeySwitchingDemo2 ============= " << std::endl;
+    std::cout << "\n\n\n ===== hybrid_key_switching_demo2 ============= " << std::endl;
 
     /*
      * Here we use dnum = 3 digits. Even though 3 digits are
@@ -699,7 +699,7 @@ void fast_rotations_demo1() {
      *
      */
 
-    std::cout << "\n\n\n ===== FastRotationsDemo1 ============= " << std::endl;
+    std::cout << "\n\n\n ===== fast_rotations_demo1 ============= " << std::endl;
 
     uint32_t batch_size = 8;
     ContextParams<CkksRnsContext> parameters;
@@ -789,7 +789,7 @@ void fast_rotations_demo2() {
      *
      */
 
-    std::cout << "\n\n\n ===== FastRotationsDemo2 ============= " << std::endl;
+    std::cout << "\n\n\n ===== fast_rotations_demo2 ============= " << std::endl;
 
     // uint32_t dnum = 0;  -already default
     /*

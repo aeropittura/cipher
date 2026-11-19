@@ -70,14 +70,14 @@ class KeyPair;
 /**
  * @brief Abstract interface for public key encryption schemes
  *
- * SchemeBase is a dispatcher rather than an implementation: it owns one object per family of operations, and
+ * BaseScheme is a dispatcher rather than an implementation: it owns one object per family of operations, and
  * every public operation forwards to the same-named method of the object implementing that family after checking
  * that the family has been enabled. The families and the members holding them are
  *  - params_gen_ (BaseParamGen): parameter generation (params_gen_bfvrns, params_gen_ckksrns,
  *    params_gen_bgvrns);
  *  - pke_ (BasePke): key generation, encryption and decryption, including the encrypt_zero_core and decrypt_core
  *    building blocks;
- *  - key_switch_ (KeySwitchBase): key-switching key generation and key switching, including the core operations
+ *  - key_switch_ (BaseKeySwitch): key-switching key generation and key switching, including the core operations
  *    and the extended-basis (Ext) variants described below;
  *  - pre_ (BasePre): proxy re-encryption (re_key_gen, re_encrypt);
  *  - leveled_she_ (BaseLeveledShe): leveled homomorphic arithmetic: negation, addition, subtraction,
@@ -227,7 +227,7 @@ class SchemeBase {
             case SCHEMESWITCH:
                 return (scheme_switch_ != nullptr);
             default:
-                CIPHER_THROW("Unknown PKESchemeFeature " + std::to_string(feature));
+                CIPHER_THROW("Unknown PkeSchemeFeature " + std::to_string(feature));
         }
     }
 
@@ -781,7 +781,7 @@ class SchemeBase {
 
             return leveled_she_->eval_automorphism(ciphertext, i, eval_key_map);
         }
-        std::string error_msg(std::string("EvalAutomorphism operation has not been enabled") + CALLER_INFO);
+        std::string error_msg(std::string("eval_automorphism operation has not been enabled") + CALLER_INFO);
         CIPHER_THROW(error_msg);
     }
 
@@ -1474,7 +1474,7 @@ class SchemeBase {
     // FHE METHODS
 
     // TODO Andrey: do we need this method?
-    //  const std::shared_ptr<BasePke<Element>> getAlgorithm() const { return pke_; }
+    //  const std::shared_ptr<BasePke<Element>> get_algorithm() const { return pke_; }
 
     void eval_bootstrap_setup(const CryptoContextImpl<Element>& cc, const std::vector<uint32_t>& level_budget = {5, 4},
                               const std::vector<uint32_t>& dim1 = {0, 0}, uint32_t slots = 0,
@@ -1851,7 +1851,7 @@ class SchemeBase {
     inline void verify_advanced_she_enabled(const std::string& function_name) const {
         if (advanced_she_ == nullptr) {
             std::string err_msg = std::string(function_name) +
-                                  " operation has not been enabled. Enable(ADVANCEDSHE) must be called to enable it.";
+                                  " operation has not been enabled. enable(ADVANCEDSHE) must be called to enable it.";
             CIPHER_THROW(err_msg);
         }
     }
@@ -1863,7 +1863,7 @@ class SchemeBase {
     inline void verify_multiparty_enabled(const std::string& function_name) const {
         if (multiparty_ == nullptr) {
             std::string err_msg = std::string(function_name) +
-                                  " operation has not been enabled. Enable(MULTIPARTY) must be called to enable it.";
+                                  " operation has not been enabled. enable(MULTIPARTY) must be called to enable it.";
             CIPHER_THROW(err_msg);
         }
     }
@@ -1875,7 +1875,7 @@ class SchemeBase {
     inline void verify_leveled_she_enabled(const std::string& function_name) const {
         if (leveled_she_ == nullptr) {
             std::string err_msg = std::string(function_name) +
-                                  " operation has not been enabled. Enable(LEVELEDSHE) must be called to enable it.";
+                                  " operation has not been enabled. enable(LEVELEDSHE) must be called to enable it.";
             CIPHER_THROW(err_msg);
         }
     }
@@ -1887,7 +1887,7 @@ class SchemeBase {
     inline void verify_pke_enabled(const std::string& function_name) const {
         if (pke_ == nullptr) {
             std::string err_msg = std::string(function_name) +
-                                  " operation has not been enabled. Enable(PKE) must be called to enable it.";
+                                  " operation has not been enabled. enable(PKE) must be called to enable it.";
             CIPHER_THROW(err_msg);
         }
     }
@@ -1899,7 +1899,7 @@ class SchemeBase {
     inline void verify_pre_enabled(const std::string& function_name) const {
         if (pre_ == nullptr) {
             std::string err_msg = std::string(function_name) +
-                                  " operation has not been enabled. Enable(PRE) must be called to enable it.";
+                                  " operation has not been enabled. enable(PRE) must be called to enable it.";
             CIPHER_THROW(err_msg);
         }
     }
@@ -1911,7 +1911,7 @@ class SchemeBase {
     inline void verify_key_switch_enabled(const std::string& function_name) const {
         if (key_switch_ == nullptr) {
             std::string err_msg = std::string(function_name) +
-                                  " operation has not been enabled. Enable(KEYSWITCH) must be called to enable it.";
+                                  " operation has not been enabled. enable(KEYSWITCH) must be called to enable it.";
             CIPHER_THROW(err_msg);
         }
     }
@@ -1923,7 +1923,7 @@ class SchemeBase {
     inline void verify_fhe_enabled(const std::string& function_name) const {
         if (fhe_ == nullptr) {
             std::string err_msg = std::string(function_name) +
-                                  " operation has not been enabled. Enable(FHE) must be called to enable it.";
+                                  " operation has not been enabled. enable(FHE) must be called to enable it.";
             CIPHER_THROW(err_msg);
         }
     }
@@ -1936,7 +1936,7 @@ class SchemeBase {
     inline void verify_scheme_switch_enabled(const std::string& function_name) const {
         if (scheme_switch_ == nullptr) {
             std::string err_msg = std::string(function_name) +
-                                  " operation has not been enabled. Enable(SCHEMESWITCH) must be called to enable it.";
+                                  " operation has not been enabled. enable(SCHEMESWITCH) must be called to enable it.";
             CIPHER_THROW(err_msg);
         }
     }

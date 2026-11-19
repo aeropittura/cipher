@@ -62,7 +62,7 @@ bool PackedEncoding::encode() {
         return true;
     auto mod_value = this->encoding_params->get_plaintext_modulus();
 
-    if ((this->type_flag == IsNativePoly) || (this->type_flag == IsDCRTPoly)) {
+    if ((this->type_flag == IsNativePoly) || (this->type_flag == IsRnsPoly)) {
         NativeVector temp_vector = NativeVector(this->get_element_ring_dimension(), mod_value);
 
         NativeInteger original_sf = scaling_factor_int;
@@ -196,7 +196,7 @@ static void fill_vec(const T& poly, const PlaintextModulus& mod_value, std::vect
 bool PackedEncoding::decode() {
     auto ptm = this->encoding_params->get_plaintext_modulus();
 
-    if ((this->type_flag == IsNativePoly) || (this->type_flag == IsDCRTPoly)) {
+    if ((this->type_flag == IsNativePoly) || (this->type_flag == IsRnsPoly)) {
         NativeInteger scf_inv = scaling_factor_int.mod_inverse(ptm);
         if (this->type_flag == IsNativePoly) {
             this->unpack(&this->get_element<NativePoly>(), ptm);
@@ -366,7 +366,7 @@ void PackedEncoding::pack_into(P* ring, const PlaintextModulus& modulus) const {
             permuted_slots[i] = slot_values[to_crt_perm_[m][i]];
         }
 
-        CIPHER_DEBUG("permutedSlots " << permuted_slots);
+        CIPHER_DEBUG("permuted_slots " << permuted_slots);
         CIPHER_DEBUG("m_initRoot[modulusM] " << init_root_[modulus_m]);
         CIPHER_DEBUG("m_bigModulus[modulusM] " << big_modulus_[modulus_m]);
         CIPHER_DEBUG("m_bigRoot[modulusM] " << big_root_[modulus_m]);

@@ -65,8 +65,8 @@ TEST(UTmubintvec, ctor_access_eq_neq) {
 
     dynamic_int::xmubintvec n(5, q);  // calling contructor with modulus
 
-    EXPECT_EQ(5U, m.get_length()) << "Failure in GetLength()";
-    EXPECT_EQ(5U, n.get_length()) << "Failure in GetLength()";
+    EXPECT_EQ(5U, m.get_length()) << "Failure in get_length()";
+    EXPECT_EQ(5U, n.get_length()) << "Failure in get_length()";
 
     // Old fashioned soon to be deprecated way of
     // setting value of the value at different index locations
@@ -153,8 +153,8 @@ TEST(UTmubintvec, ctor_access_eq_neq) {
     // test single()
     dynamic_int::xmubintvec s =
             dynamic_int::xmubintvec::single(dynamic_int::xubint("3"), dynamic_int::xubint("5"));  // value 3, mod 5
-    EXPECT_EQ(1U, s.get_length()) << "Failure Single.GetLength()";
-    EXPECT_EQ(dynamic_int::xubint(3), s[0]) << "Failure Single() value";
+    EXPECT_EQ(1U, s.get_length()) << "Failure Single.get_length()";
+    EXPECT_EQ(dynamic_int::xubint(3), s[0]) << "Failure single() value";
 
     // test assignment of single bigintdyn::xubint (puts it in the 0 the
     // position), zeros out the rest
@@ -210,7 +210,7 @@ TEST(UTmubintvec, ctor_access_eq_neq) {
     EXPECT_TRUE(test1) << "Failure [] lhs rhs";
 }
 
-TEST(UTmubintvec, constructorTest) {
+TEST(UTmubintvec, constructor_test) {
     CIPHER_DEBUG_FLAG(false);
     dynamic_int::xmubintvec m(10);
 
@@ -324,7 +324,7 @@ TEST(UTmubintvec, basic_vector_vector_mod_math_1_limb) {
 
     // now Mod operations
     c1 = a1.mod_add(b1);
-    EXPECT_EQ(c1, modadd1) << "Failure 1 limb vector vector ModAdd()";
+    EXPECT_EQ(c1, modadd1) << "Failure 1 limb vector vector mod_add()";
 
     CIPHER_DEBUG("modadd1 modulus" << modadd1.get_modulus());
     CIPHER_DEBUG("c1 modulus" << c1.get_modulus());
@@ -338,7 +338,7 @@ TEST(UTmubintvec, basic_vector_vector_mod_math_1_limb) {
     EXPECT_EQ(d1, modadd1) << "Failure 1 limb vector vector +=";
 
     c1 = a1.mod_sub(b1);
-    EXPECT_EQ(c1, modsub1) << "Failure 1 limb vector vector ModSub()";
+    EXPECT_EQ(c1, modsub1) << "Failure 1 limb vector vector mod_sub()";
 
     c1 = a1 - b1;
     EXPECT_EQ(c1, modsub1) << "Failure 1 limb vector vector -";
@@ -348,7 +348,7 @@ TEST(UTmubintvec, basic_vector_vector_mod_math_1_limb) {
     EXPECT_EQ(d1, modsub1) << "Failure 1 limb vector vector -=";
 
     c1 = a1.mod_mul(b1);
-    EXPECT_EQ(c1, modmul1) << "Failure 1 limb vector vector ModMul()";
+    EXPECT_EQ(c1, modmul1) << "Failure 1 limb vector vector mod_mul()";
     c1 = a1 * b1;
     EXPECT_EQ(c1, modmul1) << "Failure 1 limb vector vector *";
 
@@ -381,21 +381,21 @@ TEST(UTmubintvec, basic_vector_scalar_mod_math_2_limb) {
         a2op1[i] %= q2;
     }
     a2op1test = a2.mod_add(myone);
-    EXPECT_EQ(a2op1, a2op1test) << "Failure vector scalar ModAdd()";
+    EXPECT_EQ(a2op1, a2op1test) << "Failure vector scalar mod_add()";
 
     for (uint32_t i = 0; i < a2.get_length(); i++) {
         a2op1[i] = a2[i] - myone;
         a2op1[i] %= q2;
     }
     a2op1test = a2.mod_sub(myone);
-    EXPECT_EQ(a2op1, a2op1test) << "Failure vector scalar ModSub()";
+    EXPECT_EQ(a2op1, a2op1test) << "Failure vector scalar mod_sub()";
 
     for (uint32_t i = 0; i < a2.get_length(); i++) {
         a2op1[i] = a2[i] * myone;
         a2op1[i] %= q2;
     }
     a2op1test = a2.mod_mul(myone);
-    EXPECT_EQ(a2op1, a2op1test) << "Failure vector scalar ModMul()";
+    EXPECT_EQ(a2op1, a2op1test) << "Failure vector scalar mod_mul()";
 }
 
 TEST(UTmubintvec, basic_vector_vector_mod_math_2_limb) {
@@ -452,7 +452,7 @@ TEST(UTmubintvec, basic_vector_vector_mod_math_2_limb) {
 
     // now Mod operations
     c2 = a2.mod_add(b2);
-    EXPECT_EQ(c2, modadd2) << "Failure 2 limb vector vector ModAdd()";
+    EXPECT_EQ(c2, modadd2) << "Failure 2 limb vector vector mod_add()";
 
     c2 = a2 + b2;
     EXPECT_EQ(c2, modadd2) << "Failure 2 limb vector vector +";
@@ -462,7 +462,7 @@ TEST(UTmubintvec, basic_vector_vector_mod_math_2_limb) {
     EXPECT_EQ(d2, modadd2) << "Failure 2 limb vector vector +=";
 
     c2 = a2.mod_sub(b2);
-    EXPECT_EQ(c2, modsub2) << "Failure 2 limb vector vector ModSub()";
+    EXPECT_EQ(c2, modsub2) << "Failure 2 limb vector vector mod_sub()";
 
     c2 = a2 - b2;
     EXPECT_EQ(c2, modsub2) << "Failure 2 limb vector vector -";
@@ -472,7 +472,7 @@ TEST(UTmubintvec, basic_vector_vector_mod_math_2_limb) {
     EXPECT_EQ(d2, modsub2) << "Failure 2 limb vector vector -=";
 
     c2 = a2.mod_mul(b2);
-    EXPECT_EQ(c2, modmul2) << "Failure 2 limb vector vector ModMul()";
+    EXPECT_EQ(c2, modmul2) << "Failure 2 limb vector vector mod_mul()";
 
     c2 = a2 * b2;
     EXPECT_EQ(c2, modmul2) << "Failure 2 limb vector vector *";
@@ -633,7 +633,7 @@ TEST(UTmubintvec, basic_vector_vector_mod_math_big_numbers) {
     dynamic_int::xmubintvec d3;
     // now Mod operations
     c3 = a3.mod_add(b3);
-    EXPECT_EQ(c3, modadd3) << "Failure big number vector vector ModAdd()";
+    EXPECT_EQ(c3, modadd3) << "Failure big number vector vector mod_add()";
 
     c3 = a3 + b3;
     EXPECT_EQ(c3, modadd3) << "Failure big number vector vector +";
@@ -643,7 +643,7 @@ TEST(UTmubintvec, basic_vector_vector_mod_math_big_numbers) {
     EXPECT_EQ(d3, modadd3) << "Failure big number vector vector +=";
 
     c3 = a3.mod_sub(b3);
-    EXPECT_EQ(c3, modsub3) << "Failure big number vector vector ModSub()";
+    EXPECT_EQ(c3, modsub3) << "Failure big number vector vector mod_sub()";
 
     c3 = a3 - b3;
     EXPECT_EQ(c3, modsub3) << "Failure big number vector vector -";
@@ -653,7 +653,7 @@ TEST(UTmubintvec, basic_vector_vector_mod_math_big_numbers) {
     EXPECT_EQ(d3, modsub3) << "Failure big number vector vector -=";
 
     c3 = a3.mod_mul(b3);
-    EXPECT_EQ(c3, modmul3) << "Failure big number vector vector ModMul()";
+    EXPECT_EQ(c3, modmul3) << "Failure big number vector vector mod_mul()";
 
     c3 = a3 * b3;
     EXPECT_EQ(c3, modmul3) << "Failure big number vector vector *";

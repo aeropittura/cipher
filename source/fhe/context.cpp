@@ -76,7 +76,7 @@ void CryptoContextImpl<Element>::clear_static_maps_and_vectors() {
     dynamic_int::ChineseRemainderTransformFttDyn<M4Vector>().reset();
 #endif
 #ifdef CIPHER_WITH_NTL
-    NTL::ChineseRemainderTransformFTTNtl<M6Vector>().reset();
+    NTL::ChineseRemainderTransformFttNtl<M6Vector>().reset();
 #endif
     alloc_trim();
 }
@@ -86,12 +86,12 @@ void CryptoContextImpl<Element>::set_ks_technique_in_scheme() {
     // check if the scheme is an RNS scheme
     auto scheme_rns_ptr = std::dynamic_pointer_cast<RnsScheme>(scheme_);
     if (!scheme_rns_ptr)
-        CIPHER_THROW("Invalid scheme: expected SchemeRNS");
+        CIPHER_THROW("Invalid scheme: expected RnsScheme");
 
     // check if the parameter object is RNS-based
     auto el_ptr = std::dynamic_pointer_cast<const RnsCryptoParams>(params_);
     if (!el_ptr)
-        CIPHER_THROW("Invalid crypto parameters: expected CryptoParametersRNS");
+        CIPHER_THROW("Invalid crypto parameters: expected RnsCryptoParams");
 
     scheme_rns_ptr->set_key_switching_technique(el_ptr->get_key_switch_technique());
 }
@@ -150,7 +150,7 @@ void CryptoContextImpl<Element>::insert_eval_mult_key(const std::vector<EvalKey<
     if (CryptoContextImpl<Element>::eval_mult_key_map_.find(tag) !=
         CryptoContextImpl<Element>::eval_mult_key_map_.end()) {
         // we do not allow to override the existing key vector if its key_tag is identical to the key_tag of the new keys
-        CIPHER_THROW("Can not save a EvalMultKeys vector as there is a key vector for the given keyTag");
+        CIPHER_THROW("Can not save a eval_mult_keys vector as there is a key vector for the given key_tag");
     }
     CryptoContextImpl<Element>::eval_mult_key_map_[tag] = vector_to_insert;
 }
@@ -209,7 +209,7 @@ template <typename Element>
 const std::vector<EvalKey<Element>>& CryptoContextImpl<Element>::get_eval_mult_key_vector(const std::string& key_tag) {
     auto ekv = CryptoContextImpl<Element>::eval_mult_key_map_.find(key_tag);
     if (ekv == CryptoContextImpl<Element>::eval_mult_key_map_.end()) {
-        std::string err_msg(std::string("Call EvalMultKeyGen() to have EvalMultKey available for ID [") + key_tag +
+        std::string err_msg(std::string("Call eval_mult_key_gen() to have eval_mult_key available for ID [") + key_tag +
                             "].");
         CIPHER_THROW(err_msg);
     }
@@ -227,7 +227,7 @@ std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> CryptoContextImpl<Element>
         const std::string& key_tag) {
     auto ekv = CryptoContextImpl<Element>::eval_automorphism_key_map_.find(key_tag);
     if (ekv == CryptoContextImpl<Element>::eval_automorphism_key_map_.end()) {
-        CIPHER_THROW("EvalAutomorphismKeys are not generated for ID [" + key_tag + "].");
+        CIPHER_THROW("eval_automorphism_keys are not generated for ID [" + key_tag + "].");
     }
     return ekv->second;
 }
@@ -237,7 +237,7 @@ std::shared_ptr<std::map<uint32_t, EvalKey<Element>>>
 CryptoContextImpl<Element>::get_partial_eval_automorphism_key_map_ptr(const std::string& key_tag,
                                                                       const std::vector<uint32_t>& index_list) {
     if (!index_list.size())
-        CIPHER_THROW("indexList is empty");
+        CIPHER_THROW("index_list is empty");
 
     std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> key_map =
             CryptoContextImpl<Element>::get_eval_automorphism_key_map_ptr(key_tag);
@@ -247,7 +247,7 @@ CryptoContextImpl<Element>::get_partial_eval_automorphism_key_map_ptr(const std:
     for (uint32_t indx : index_list) {
         const auto it = key_map->find(indx);
         if (it == key_map->end()) {
-            CIPHER_THROW("Key is not generated for index [" + std::to_string(indx) + "] and keyTag [" + key_tag + "]");
+            CIPHER_THROW("Key is not generated for index [" + std::to_string(indx) + "] and key_tag [" + key_tag + "]");
         }
         ret_map.emplace(indx, it->second);
     }
@@ -266,7 +266,7 @@ void CryptoContextImpl<Element>::clear_eval_sum_keys() {
 }
 
 /**
- * clear_eval_sum_keys - flush EvalSumKey cache for a given id
+ * clear_eval_sum_keys - flush eval_key_sum cache for a given id
  * @param key_tag secret key tag
  */
 template <typename Element>
@@ -275,8 +275,8 @@ void CryptoContextImpl<Element>::clear_eval_sum_keys(const std::string& key_tag)
 }
 
 /**
- * clear_eval_sum_keys - flush EvalSumKey cache for a given context
- * @param cc the context to clear all EvalSumKeys for
+ * clear_eval_sum_keys - flush eval_key_sum cache for a given context
+ * @param cc the context to clear all eval_sum_keys for
  */
 template <typename Element>
 void CryptoContextImpl<Element>::clear_eval_sum_keys(const CryptoContext<Element> cc) {
@@ -314,7 +314,7 @@ void CryptoContextImpl<Element>::clear_eval_automorphism_keys(const std::string&
 /**
  * clear_eval_automorphism_keys - flush EvalAutomorphismKey cache for a given
  * context
- * @param cc the context to clear all EvalAutomorphismKeys for
+ * @param cc the context to clear all eval_automorphism_keys for
  */
 template <typename Element>
 void CryptoContextImpl<Element>::clear_eval_automorphism_keys(const CryptoContext<Element> cc) {
@@ -509,7 +509,7 @@ DecryptResult CryptoContextImpl<Element>::decrypt(ConstCiphertext<Element>& ciph
 
         const auto crypto_params_ckks = std::dynamic_pointer_cast<RnsCryptoParams>(params_);
         if (!crypto_params_ckks)
-            CIPHER_THROW("Invalid crypto parameters: expected CryptoParametersRNS");
+            CIPHER_THROW("Invalid crypto parameters: expected RnsCryptoParams");
 
         decrypted_ckks->decode(ciphertext->get_noise_scale_deg(), ciphertext->get_scaling_factor(),
                                crypto_params_ckks->get_scaling_technique(), crypto_params_ckks->get_execution_mode());
@@ -617,7 +617,7 @@ DecryptResult CryptoContextImpl<RnsPoly>::decrypt(ConstCiphertext<RnsPoly>& ciph
 
         const auto crypto_params_ckks = std::dynamic_pointer_cast<CkksRnsCryptoParams>(params_);
         if (!crypto_params_ckks)
-            CIPHER_THROW("Invalid crypto parameters: expected CryptoParametersCKKSRNS");
+            CIPHER_THROW("Invalid crypto parameters: expected CkksRnsCryptoParams");
 
         decrypted_ckks->decode(ciphertext->get_noise_scale_deg(), ciphertext->get_scaling_factor(),
                                crypto_params_ckks->get_scaling_technique(), crypto_params_ckks->get_execution_mode());
@@ -668,7 +668,7 @@ DecryptResult CryptoContextImpl<RnsPoly>::multiparty_decrypt_fusion(
         decrypted_ckks->set_slots(partial_ciphertext_vec[0]->get_slots());
         const auto crypto_params_ckks = std::dynamic_pointer_cast<CkksRnsCryptoParams>(params_);
         if (!crypto_params_ckks)
-            CIPHER_THROW("Invalid crypto parameters: expected CryptoParametersCKKSRNS");
+            CIPHER_THROW("Invalid crypto parameters: expected CkksRnsCryptoParams");
         decrypted_ckks->decode(partial_ciphertext_vec[0]->get_noise_scale_deg(),
                                partial_ciphertext_vec[0]->get_scaling_factor(),
                                crypto_params_ckks->get_scaling_technique(), crypto_params_ckks->get_execution_mode());
@@ -691,7 +691,7 @@ Ciphertext<Element> CryptoContextImpl<Element>::int_mp_boot_random_element_gen(
         const PublicKey<Element> public_key) const {
     const auto crypto_params_ckks = std::dynamic_pointer_cast<CkksRnsCryptoParams>(params_);
     if (!crypto_params_ckks)
-        CIPHER_THROW("Invalid crypto parameters: expected CryptoParametersCKKSRNS");
+        CIPHER_THROW("Invalid crypto parameters: expected CkksRnsCryptoParams");
 
     return scheme_->int_mp_boot_random_element_gen(crypto_params_ckks, public_key);
 }
@@ -701,7 +701,7 @@ Ciphertext<Element> CryptoContextImpl<Element>::int_mp_boot_random_element_gen(
         ConstCiphertext<Element>& ciphertext) const {
     const auto crypto_params_ckks = std::dynamic_pointer_cast<CkksRnsCryptoParams>(ciphertext->get_crypto_parameters());
     if (!crypto_params_ckks)
-        CIPHER_THROW("Invalid crypto parameters: expected CryptoParametersCKKSRNS");
+        CIPHER_THROW("Invalid crypto parameters: expected CkksRnsCryptoParams");
 
     return scheme_->int_mp_boot_random_element_gen(crypto_params_ckks, ciphertext);
 }
@@ -748,14 +748,14 @@ std::unordered_map<uint32_t, RnsPoly> CryptoContextImpl<RnsPoly>::share_keys(con
     for (size_t i = 0; i < vec_size; ++i) {
         auto modq_k = element_params->get_params()[i]->get_modulus();
         if (N >= modq_k)
-            CIPHER_THROW("Number of parties N needs to be less than DCRTPoly moduli");
+            CIPHER_THROW("Number of parties N needs to be less than RnsPoly moduli");
     }
 
     // secret sharing
     std::unordered_map<uint32_t, RnsPoly> secret_shares;
 
     if (share_type == "additive") {
-        // generate a random share of N-2 elements and create the last share as sk - (sk_1 + ... + sk_N-2)
+        // generate a random share of N-2 elements and create the last share as sk - (sk_1 + ... + sk_n-2)
         typename RnsPoly::DugType dug;
         RnsPoly rsum(dug, element_params, Format::EVALUATION);
 
@@ -846,7 +846,7 @@ void CryptoContextImpl<RnsPoly>::recover_shared_key(PrivateKey<RnsPoly>& sk,
     for (size_t k = 0; k < vec_size; k++) {
         auto modq_k = element_params->get_params()[k]->get_modulus();
         if (N >= modq_k)
-            CIPHER_THROW("Number of parties N needs to be less than DCRTPoly moduli");
+            CIPHER_THROW("Number of parties N needs to be less than RnsPoly moduli");
     }
 
     // vector of indexes of the clients

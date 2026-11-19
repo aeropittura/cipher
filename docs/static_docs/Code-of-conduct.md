@@ -43,29 +43,23 @@ event. Representation of a project may be further defined and clarified by proje
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team
-at [contact@openfhe.org](mailto:contact@openfhe.org). contact@openfhe.org Alternatively, you may report individually to
-one of the members of the Steering Council. Complaints will be reviewed and investigated and will result in a response
-that is deemed necessary and appropriate to the circumstances. The project team is obligated to maintain confidentiality
-with regard to the reporter of an incident. Further details of specific enforcement policies may be posted separately.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the Cipher maintainers by opening
+an issue at <https://github.com/aeropittura/cipher/issues>, or, for matters that should not be public, by contacting a
+maintainer privately through their GitHub profile. Complaints will be reviewed and investigated and will result in a
+response that is deemed necessary and appropriate to the circumstances. The maintainers are obligated to maintain
+confidentiality with regard to the reporter of an incident. Further details of specific enforcement policies may be
+posted separately.
 
 Project maintainers who do not follow or enforce the Code of Conduct in good faith may face temporary or permanent
 repercussions as determined by other members of the project's leadership.
-
-If you feel that your report has not been followed up satisfactorily, then you may contact our sponsor organisation
-NumFOCUS at [info@numfocus.org](mailto:info@numfocus.org) for further redress.
 
 ## Attribution
 
 This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org/), version 1.4,
 available at
 https://www.contributor-covenant.org/version/1/4/code-of-conduct.html, with additional adaptations used by the FEniCS
-project (https://https://bitbucket.org/fenics-project/governance/src/master/README.md).
-
-Adaptations:
-
-* allow reporting to individual Steering Council members.
-* added the option to contact NumFOCUS for further redress.
+project (https://bitbucket.org/fenics-project/governance/src/master/README.md) and by the OpenFHE project, whose code of
+conduct Cipher's is based on.
 
 [homepage]: https://www.contributor-covenant.org
 

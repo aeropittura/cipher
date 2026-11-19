@@ -115,7 +115,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      */
     void set_size(size_t rows, size_t cols) {
         if (this->rows != 0 || this->cols != 0) {
-            CIPHER_THROW("You cannot SetSize on a non-empty matrix");
+            CIPHER_THROW("You cannot set_size on a non-empty matrix");
         }
 
         this->rows = rows;
@@ -162,7 +162,7 @@ class MatrixStrassen {  // TODO : public Serializable {
      *
      * @return the resulting matrix
      */
-    inline MatrixStrassen<Element>& Fill(const Element& val);
+    inline MatrixStrassen<Element>& fill_with(const Element& val);
 
     /**
      * In-place change of the current matrix to Identity matrix
@@ -585,7 +585,7 @@ inline MatrixStrassen<Element> operator*(Element const& e, MatrixStrassen<Elemen
  * @param in_mat the matrix of power-of-2 cyclotomic ring elements to be rotated
  * @return the resulting matrix of big binary integers
  */
-inline MatrixStrassen<BigInteger> Rotate(MatrixStrassen<Poly> const& in_mat);
+inline MatrixStrassen<BigInteger> rotate_matrix(MatrixStrassen<Poly> const& in_mat);
 
 /**
  *  Each element becomes a square matrix with columns of that element's

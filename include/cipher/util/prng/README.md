@@ -1,8 +1,8 @@
 # PRNG Engine(s)
 
-Refer to our [readthedocs - PRNG Engine(s)](https://openfhe-development.readthedocs.io/en/latest/sphinx_rsts/modules/core/utils/prng.html) for more information.
+Refer to the [PRNG documentation](../../../../docs/sphinx_rsts/modules/core/utils/prng.rst) for more information.
 
-Additionally, we refer users to [sampling documentation](https://openfhe-development.readthedocs.io/en/latest/sphinx_rsts/modules/core/math/sampling.html) for
+Additionally, we refer users to [sampling documentation](../../math/SAMPLING_README.md) for
 more information about sampling in Cipher, as well as how to use these samplers.
 
 ## Blake2
@@ -11,4 +11,4 @@ more information about sampling in Cipher, as well as how to use these samplers.
 
 ## Using a custom PRNG Engine
 
-To define new `PRNG` engines, refer to [blake2engine.h](blake2_engine.h).
+To define new `PRNG` engines, refer to [blake2_engine.h](blake2_engine.h).

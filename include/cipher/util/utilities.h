@@ -70,7 +70,7 @@ inline constexpr bool is_power_of_two(T input_value) {
  */
 // auxiliary function to replace a specific character "in" with another
 // character "out"
-std::string replaceChar(std::string str, char in, char out);
+std::string replace_char(std::string str, char in, char out);
 
 // Lazy Reduction functions: 64-bit multiplier and 128-bit Barrett reducer
 // Originally proposed for BFVrnsB
@@ -108,7 +108,7 @@ inline constexpr int64_t max64_bit_value() {
 }
 
 // TODO (dsuponit): the name of this function is64_bit_overflow() is misleading as it checks if double can be
-// converted to int64_t. The name should reflect that. Something like isConvertableToInt64(). The function must be renamed!!!
+// converted to int64_t. The name should reflect that. Something like is_convertable_to_int64(). The function must be renamed!!!
 /**
  * @brief Checks whether a double is too large in magnitude to be converted to int64_t.
  * @param d value to test

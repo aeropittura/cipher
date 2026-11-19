@@ -11,7 +11,7 @@ operations.
 Example Description
 ====================
 
-The example for this code is located in [scheme-switching.cpp](scheme_switching.cpp). The file gives examples on how to run:
+The example for this code is located in [scheme_switching.cpp](scheme_switching.cpp). The file gives examples on how to run:
 - `eval_ckks_to_fhew`, which converts a CKKS ciphertext to FHEW ciphertexts;
 - `eval_fhew_to_ckks`, which converts FHEW ciphertexts to a CKKS ciphertext;
 - how to combine the two with intermediate operations, for example the floor function or a polynomial;
@@ -125,7 +125,7 @@ The user should call `eval_scheme_switching_setup`, then `eval_scheme_switching_
 one-hot encoding or not, as well as if the alternative computation method mentioned above should be used, then `eval_compare_switch_precompute`
 specifying if an additional scaling if desired. As mentioned above, the user can manually scale the inputs to [-0.5, 0.5], (such that
 the difference of values is between [-1, 1]) in which case the precomputation does not need to have any scaling, and this is
-exemplified in `argmin_via_scheme_switching_unit()` and `ArgminViaSchemeSwitchingUnitAlt()`.
+exemplified in `argmin_via_scheme_switching_unit()` and `argmin_via_scheme_switching_alt_unit()`.
 
 Finally, the user should call `eval_min_scheme_switching` or `eval_min_scheme_switching_alt` to obtain the minimum value and the argmin, and
 respectively, `eval_max_scheme_switching` or `eval_max_scheme_switching_alt` to obtain the maximum value and the argmax.
@@ -146,5 +146,5 @@ the same properties as the single key, then the scheme switching results should 
 Additional example demonstrating serialization
 ================================================
 
-The code for this example is located in [scheme-switching-serial.cpp](scheme_switching_serial.cpp). The file provides a simple setup for real number serialization before progressing into the next logical step - serialization and communication between 2 separate entities.
-All generated files containing serialized data are stored in the DATAFOLDER directory, which is defined in [scheme-switching-serial.cpp](scheme_switching_serial.cpp). If you want to rename any of those files, you can do so in [src/pke/unittest/utils/schemeswitching-data-serializer.h](../../tests/fhe/support/scheme_switching_data.h).
+The code for this example is located in [scheme_switching_serial.cpp](scheme_switching_serial.cpp). The file provides a simple setup for real number serialization before progressing into the next logical step - serialization and communication between 2 separate entities.
+All generated files containing serialized data are stored in the DATAFOLDER directory, which is defined in [scheme_switching_serial.cpp](scheme_switching_serial.cpp). If you want to rename any of those files, you can do so in [tests/fhe/support/scheme_switching_data.h](../../tests/fhe/support/scheme_switching_data.h).

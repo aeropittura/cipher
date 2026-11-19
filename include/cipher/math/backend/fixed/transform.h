@@ -396,9 +396,9 @@ class BluesteinFftFxd {
      * @param hi is higher coefficient index.
      * @return output vector s.t output vector = a[lo]...a[hi].
      */
-    VecType Resize(const VecType& a, uint32_t lo, uint32_t hi);
+    VecType resize_range(const VecType& a, uint32_t lo, uint32_t hi);
 
-    // void PreComputeNTTModulus(uint32_t cyclo_order, const std::vector<IntType>
+    // void precompute_ntt_modulus(uint32_t cyclo_order, const std::vector<IntType>
     // &modulii);
 
     /**

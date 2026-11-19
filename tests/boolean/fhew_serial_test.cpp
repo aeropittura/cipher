@@ -201,9 +201,9 @@ void unit_test_fhew_serial_multi_input(const ST& sertype, const std::string& err
 }
 
 TEST(unit_test_fhew_serial_multi_input, BINARY) {
-    unit_test_fhew_serial_multi_input(SerType::BINARY, "UnitTestFHEWSerialMultiInput.BINARY failed:");
+    unit_test_fhew_serial_multi_input(SerType::BINARY, "unit_test_fhew_serial_multi_input.BINARY failed:");
 }
 
 TEST(unit_test_fhew_serial_multi_input, JSON) {
-    unit_test_fhew_serial_multi_input(SerType::JSON, "UnitTestFHEWSerialMultiInput.JSON failed:");
+    unit_test_fhew_serial_multi_input(SerType::JSON, "unit_test_fhew_serial_multi_input.JSON failed:");
 }

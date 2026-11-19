@@ -173,7 +173,7 @@ std::pair<std::vector<NativeInteger>, uint32_t> BgvRnsParamGen::compute_moduli(
         const std::shared_ptr<BaseCryptoParams<RnsPoly>>& crypto_params, uint32_t ring_dimension_value,
         uint32_t eval_add_count, uint32_t key_switch_count, uint32_t aux_towers, uint32_t num_primes_value) const {
     if (num_primes_value < 1) {
-        CIPHER_THROW("numPrimes must be at least 1");
+        CIPHER_THROW("num_primes must be at least 1");
     }
 
     const auto crypto_params_bgvrns = std::dynamic_pointer_cast<BgvRnsCryptoParams>(crypto_params);
@@ -607,13 +607,13 @@ bool BgvRnsParamGen::params_gen_bgvrns_internal(std::shared_ptr<BaseCryptoParams
             a = gcd;
         }
 
-        // if ptm and CyclOrder are not coprime we set batch_size = n by default (for full packing)
+        // if ptm and cycl_order are not coprime we set batch_size = n by default (for full packing)
         uint32_t batch_size;
         if (gcd != 1) {
             batch_size = n;
         } else {
             // set batchsize to the actual batchsize i.e. n/d where d is the
-            // order of ptm mod CyclOrder
+            // order of ptm mod cycl_order
             a = static_cast<uint64_t>(ptm) % cycl_order;
             b = 1;
             while (a != 1) {
@@ -648,7 +648,7 @@ bool BgvRnsParamGen::params_gen_bgvrns_internal(std::shared_ptr<BaseCryptoParams
         uint32_t n_actual = StdLatticeParm::find_ring_dim(dist_type, std_level, log_actual_q);
 
         if (n < n_actual) {
-            std::string err_msg("The ring dimension found using estimated logQ(P) [");
+            std::string err_msg("The ring dimension found using estimated log_q(P) [");
             err_msg += std::to_string(n) + "] does not meet security requirements. ";
             err_msg += "Report this problem to Cipher developers and set the ring dimension manually to ";
             err_msg += std::to_string(n_actual) + ".";

@@ -11,7 +11,7 @@ Visual Studio Code
 - :ref:`editor-vs-general-configuration`
 
   - :ref:`editor-vs-decrease-memory-cpu`
-  - :ref:`editor-vs-openfhe-path`
+  - :ref:`editor-vs-cipher-path`
   - :ref:`editor-vs-markdown`
   - :ref:`editor-vs-code-formatting`
   - :ref:`editor-vs-git`
@@ -35,7 +35,7 @@ Visual Studio Code
 General Configuration
 ^^^^^^^^^^^^^^^^^^^^^
 
-This section includes setting snippets to include in the to work with Cipher in a friendly manor. In addition we have some recommended extensions for developers to use:
+This section includes settings snippets that make working with Cipher more convenient. In addition we have some recommended extensions for developers to use:
 
 - [Clang-Format]
 - [GitLens]
@@ -58,7 +58,7 @@ Code uses inotify to monitor file changes, use the following to tell Code to ign
     },
 
 
-.. _editor-vs-openfhe-path:
+.. _editor-vs-cipher-path:
 
 Setup Cipher Install Path
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -67,15 +67,13 @@ If developing external to the Cipher repository the following are great to add t
 
 ::
 
-    // Include installed OpenFHE for library references
+    // Include installed Cipher for library references
     "C_Cpp.default.includePath": [
-        "/usr/local/include/openfhe/core",
-        "/usr/local/include/openfhe/pke",
-        "/usr/local/include/openfhe/cereal",
-        // "/usr/local/include/openfhe/binfhe", // (optional) only needed if working with circuits
+        "/usr/local/include",               // for #include "cipher/cipher.h"
+        "/usr/local/include/cipher/extern", // bundled cereal headers
     ],
 
-.. warning:: Using this inside OpenFHE-Development repository will create duplicate references
+.. warning:: Using this inside the Cipher repository will create duplicate references
 
 
 .. _editor-vs-markdown:
@@ -142,7 +140,7 @@ To set up the debugger for examples that uses Cipher, the examples need to be co
 
 .. code-block:: bash
 
-    cmake -DCMAKE_BUILD_TYPE=Debug ..
+    cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 
 Then, add configuration to launch.json file in vscode. This file is created in the .vscode folder of the project by using the menu option Run -> Add Configuration. Then choose 'C/C++ (gdb) Launch' from the dropdown. The option '(gdb) Attach' allows to attach the debugger to an already running process. More on the other options are available in the
 `vscode tutorial <https://code.visualstudio.com/docs/editor/debugging/>`_.
@@ -159,7 +157,7 @@ A sample configuration looks as below for a target 'example':
                 "name": "Server",
                 "type": "cppdbg",
                 "request": "launch",
-                "program": "${workspaceFolder}/build/bin/example",
+                "program": "${workspaceFolder}/build/bin/examples/fhe/simple_integers",
                 "args": [],
                 "stopAtEntry": false,
                 "cwd": "${workspaceFolder}",
@@ -251,7 +249,7 @@ To enable rebuilding with cmake options before debugging use the ``task.json``. 
     {
         "label": "buildCmake",
         "type": "shell",
-        "command": "cd build && rm CMakeCache.txt && cmake .. -DCMAKE_BUILD_TYPE=Debug && make"
+        "command": "cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build"
     },
 
 and add it to your launch options in ``launch.json``
@@ -260,7 +258,7 @@ and add it to your launch options in ``launch.json``
 
 .. code-block:: json
 
-            "preLaunchTask": "buildCmake32",
+            "preLaunchTask": "buildCmake",
 
 .. note:: this goes at the same level as ``name``, ``type``, etc.
 
@@ -287,5 +285,5 @@ Eclipse
 CMAKE
 ^^^^^^^^^^^^
 
-Developers that wish to use Eclipse for building Cipher can use the shell script ``configure/setup-eclipse-cmake.sh``.
+Developers that wish to use Eclipse for building Cipher can use the shell script ``tools/setup/eclipse_cmake.sh``.
 This script should be run in the users build tree. All command line arguments are passed to CMake. The shell configures the build tree so that it can be imported into Eclipse, and built directly from Eclipse.

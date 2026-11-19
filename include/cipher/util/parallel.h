@@ -58,8 +58,8 @@ class ParallelControls {
      */
     ParallelControls() {
 #ifdef CIPHER_PARALLEL
-        machine_threads = omp_get_max_threads();
-        threadLimit.store(machine_threads, std::memory_order_relaxed);
+        machine_threads_ = omp_get_max_threads();
+        thread_limit_.store(machine_threads_, std::memory_order_relaxed);
 #endif
     }
 
@@ -67,7 +67,7 @@ class ParallelControls {
      * @brief Enables parallel operation by setting the thread limit to the number of machine threads.
      */
     void enable() {
-        set_num_threads(machine_threads);
+        set_num_threads(machine_threads_);
     }
 
     /**
@@ -82,7 +82,7 @@ class ParallelControls {
      * @return number of machine threads (1 without CIPHER_PARALLEL)
      */
     int get_machine_threads() const {
-        return machine_threads;
+        return machine_threads_;
     }
 
     /**
@@ -103,7 +103,7 @@ class ParallelControls {
      */
     int get_num_threads() const {
 #ifdef CIPHER_PARALLEL
-        return threadLimit.load(std::memory_order_relaxed);
+        return thread_limit_.load(std::memory_order_relaxed);
 #else
         return 1;
 #endif
@@ -130,7 +130,7 @@ class ParallelControls {
      */
     int get_thread_limit(int n) const {
 #ifdef CIPHER_PARALLEL
-        int lim = threadLimit.load(std::memory_order_relaxed);
+        int lim = thread_limit_.load(std::memory_order_relaxed);
         return n > lim ? lim : (n < 1 ? 1 : n);
 #else
         return 1;
@@ -145,9 +145,9 @@ class ParallelControls {
 #ifdef CIPHER_PARALLEL
         if (nthreads < 1)
             nthreads = 1;
-        else if (nthreads > machine_threads)
-            nthreads = machine_threads;
-        threadLimit.store(nthreads, std::memory_order_relaxed);
+        else if (nthreads > machine_threads_)
+            nthreads = machine_threads_;
+        thread_limit_.store(nthreads, std::memory_order_relaxed);
         omp_set_num_threads(nthreads);
 #endif
     }
@@ -158,7 +158,7 @@ class ParallelControls {
      */
     void unit_test_start() {
 #ifdef CIPHER_PARALLEL
-        savedLimit = threadLimit.load(std::memory_order_relaxed);
+        saved_limit_ = thread_limit_.load(std::memory_order_relaxed);
         set_num_threads(get_num_procs() / 2);
 #endif
     }
@@ -168,16 +168,16 @@ class ParallelControls {
      */
     void unit_test_stop() {
 #ifdef CIPHER_PARALLEL
-        set_num_threads(savedLimit);
+        set_num_threads(saved_limit_);
 #endif
     }
 
   private:
 #ifdef CIPHER_PARALLEL
-    std::atomic<int> threadLimit{1};
-    int savedLimit{1};
+    std::atomic<int> thread_limit_{1};
+    int saved_limit_{1};
 #endif
-    int machine_threads{1};
+    int machine_threads_{1};
 };
 
 /** the global instance consulted by all parallel regions in the library */

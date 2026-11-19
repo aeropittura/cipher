@@ -251,7 +251,7 @@ void test_parallel_discrete_uniform_generator(typename V::Integer& modulus, std:
     #pragma omp parallel  // this is executed in parallel
     {
         // private copies of our vector
-        std::vector<typename V::Integer> randBigVectorPvt;
+        std::vector<typename V::Integer> rand_big_vector_pvt;
         auto distr_uni_gen = DiscreteUniformGeneratorImpl<V>();
 
         distr_uni_gen.set_modulus(modulus);
@@ -259,7 +259,7 @@ void test_parallel_discrete_uniform_generator(typename V::Integer& modulus, std:
     #pragma omp for nowait schedule(static)
         for (uint32_t i = 0; i < size; i++) {
             // build private copies in parallel
-            randBigVectorPvt.push_back(distr_uni_gen.generate_integer());
+            rand_big_vector_pvt.push_back(distr_uni_gen.generate_integer());
         }
 
     #pragma omp for schedule(static) ordered
@@ -267,9 +267,9 @@ void test_parallel_discrete_uniform_generator(typename V::Integer& modulus, std:
         for (int i = 0; i < omp_get_num_threads(); i++) {
     #pragma omp ordered
             {
-                CIPHER_DEBUG("thread #" << omp_get_thread_num() << " moving " << (int)randBigVectorPvt.size()
+                CIPHER_DEBUG("thread #" << omp_get_thread_num() << " moving " << (int)rand_big_vector_pvt.size()
                                         << " to starting point " << (int)rand_big_vector.size());
-                rand_big_vector.insert(rand_big_vector.end(), randBigVectorPvt.begin(), randBigVectorPvt.end());
+                rand_big_vector.insert(rand_big_vector.end(), rand_big_vector_pvt.begin(), rand_big_vector_pvt.end());
                 CIPHER_DEBUG("thread #" << omp_get_thread_num() << " moved");
             }
         }
@@ -321,7 +321,7 @@ void test_parallel_discrete_uniform_generator(typename V::Integer& modulus, std:
 //   uint32_t size = 10;
 //   {
 //     DiscreteUniformGenerator distr_uni_gen =
-//     cipher::DiscreteUniformGenerator(modulus, 12345);
+//     cipher::discrete_uniform_generator(modulus, 12345);
 
 //     V randBigVector1 = distr_uni_gen.generate_vector(size);
 
@@ -330,7 +330,7 @@ void test_parallel_discrete_uniform_generator(typename V::Integer& modulus, std:
 //     }
 //   }
 //   DiscreteUniformGenerator distr_uni_gen =
-//   cipher::DiscreteUniformGenerator(modulus, 12345); V randBigVector2 =
+//   cipher::discrete_uniform_generator(modulus, 12345); V randBigVector2 =
 //   distr_uni_gen.generate_vector(size); double sum2=0;
 
 //   for(uint32_t index=0; index<size; index++) {
@@ -385,7 +385,7 @@ void binary_uniform_generator_test(const std::string& msg) {
 }
 
 TEST(UTDistrGen, BinaryUniformGenerator) {
-    RUN_ALL_BACKENDS(binary_uniform_generator_test, "BinaryUniformGeneratorTest")
+    RUN_ALL_BACKENDS(binary_uniform_generator_test, "binary_uniform_generator_test")
 }
 
 // mean test
@@ -416,7 +416,7 @@ void ternary_uniform_generator_test(const std::string& msg) {
 }
 
 TEST(UTDistrGen, TernaryUniformGenerator) {
-    RUN_ALL_BACKENDS(ternary_uniform_generator_test, "TernaryUniformGeneratorTest")
+    RUN_ALL_BACKENDS(ternary_uniform_generator_test, "ternary_uniform_generator_test")
 }
 
 template <typename V>
@@ -445,7 +445,7 @@ void ternary_uniform_generator_integer_test(const std::string& msg) {
 }
 
 TEST(UTDistrGen, TernaryUniformGeneratorInteger) {
-    RUN_ALL_BACKENDS(ternary_uniform_generator_integer_test, "TernaryUniformGeneratorIntegerTest")
+    RUN_ALL_BACKENDS(ternary_uniform_generator_integer_test, "ternary_uniform_generator_integer_test")
 }
 
 // the smallest Hamming weights sit at the boundary of the balance check on the +1 count
@@ -464,7 +464,7 @@ void ternary_uniform_generator_sparse_test(const std::string& msg) {
                 ++weight;
             }
         }
-        EXPECT_EQ(h, weight) << msg << " GenerateVector Hamming weight";
+        EXPECT_EQ(h, weight) << msg << " generate_vector Hamming weight";
 
         auto iv = ternary_uni_gen.generate_int_vector(size, h);
         weight = 0;
@@ -472,12 +472,12 @@ void ternary_uniform_generator_sparse_test(const std::string& msg) {
             EXPECT_LE(std::abs(x), 1) << msg << " h = " << h;
             weight += (x != 0);
         }
-        EXPECT_EQ(h, weight) << msg << " GenerateIntVector Hamming weight";
+        EXPECT_EQ(h, weight) << msg << " generate_int_vector Hamming weight";
     }
 }
 
 TEST(UTDistrGen, TernaryUniformGeneratorSparse) {
-    RUN_ALL_BACKENDS(ternary_uniform_generator_sparse_test, "TernaryUniformGeneratorSparseTest")
+    RUN_ALL_BACKENDS(ternary_uniform_generator_sparse_test, "ternary_uniform_generator_sparse_test")
 }
 
 ////////////////////////////////////////////////
@@ -534,7 +534,7 @@ void discrete_gaussian_generator_test(const std::string& msg) {
 }
 
 TEST(UTDistrGen, DiscreteGaussianGenerator) {
-    RUN_ALL_BACKENDS(discrete_gaussian_generator_test, "DiscreteGaussianGeneratorTest")
+    RUN_ALL_BACKENDS(discrete_gaussian_generator_test, "discrete_gaussian_generator_test")
 }
 
 #ifdef CIPHER_PARALLEL
@@ -553,14 +553,14 @@ void ParallelDiscreteGaussianGenerator_VERY_LONG(const std::string& msg) {
     #pragma omp parallel  // this is executed in parallel
         {
             // private copies of our vector
-            std::vector<int32_t> dggCharVectorPvt;
+            std::vector<int32_t> dgg_char_vector_pvt;
             auto dgg = DiscreteGaussianGeneratorImpl<V>(stdev);
 
             // build the vectors in parallel
     #pragma omp for nowait schedule(static)
             for (uint32_t i = 0; i < size; i++) {
                 // build private copies in parallel
-                dggCharVectorPvt.push_back(dgg.generate_int());
+                dgg_char_vector_pvt.push_back(dgg.generate_int());
             }
 
     #pragma omp for schedule(static) ordered
@@ -568,9 +568,11 @@ void ParallelDiscreteGaussianGenerator_VERY_LONG(const std::string& msg) {
             for (int i = 0; i < omp_get_num_threads(); i++) {
     #pragma omp ordered
                 {
-                    CIPHER_DEBUG("thread #" << omp_get_thread_num() << " " << "moving " << (int)dggCharVectorPvt.size()
-                                            << " to starting point" << (int)dgg_char_vector.size());
-                    dgg_char_vector.insert(dgg_char_vector.end(), dggCharVectorPvt.begin(), dggCharVectorPvt.end());
+                    CIPHER_DEBUG("thread #" << omp_get_thread_num() << " " << "moving "
+                                            << (int)dgg_char_vector_pvt.size() << " to starting point"
+                                            << (int)dgg_char_vector.size());
+                    dgg_char_vector.insert(dgg_char_vector.end(), dgg_char_vector_pvt.begin(),
+                                           dgg_char_vector_pvt.end());
                 }
             }
         }
@@ -596,14 +598,14 @@ void ParallelDiscreteGaussianGenerator_VERY_LONG(const std::string& msg) {
     #pragma omp parallel  // this is executed in parallel
         {
             // private copies of our vector
-            std::vector<typename V::Integer> dggBigVectorPvt;
+            std::vector<typename V::Integer> dgg_big_vector_pvt;
             auto dgg = DiscreteGaussianGeneratorImpl<V>(stdev);
 
             // build the vectors in parallel
     #pragma omp for nowait schedule(static)
             for (uint32_t i = 0; i < size; i++) {
                 // build private copies in parallel
-                dggBigVectorPvt.push_back(dgg.generate_integer(modulus));
+                dgg_big_vector_pvt.push_back(dgg.generate_integer(modulus));
             }
 
     #pragma omp for schedule(static) ordered
@@ -611,9 +613,10 @@ void ParallelDiscreteGaussianGenerator_VERY_LONG(const std::string& msg) {
             for (int i = 0; i < omp_get_num_threads(); i++) {
     #pragma omp ordered
                 {
-                    CIPHER_DEBUG("thread #" << omp_get_thread_num() << " " << "moving " << (int)dggBigVectorPvt.size()
-                                            << " to starting point" << (int)dgg_big_vector.size());
-                    dgg_big_vector.insert(dgg_big_vector.end(), dggBigVectorPvt.begin(), dggBigVectorPvt.end());
+                    CIPHER_DEBUG("thread #" << omp_get_thread_num() << " " << "moving "
+                                            << (int)dgg_big_vector_pvt.size() << " to starting point"
+                                            << (int)dgg_big_vector.size());
+                    dgg_big_vector.insert(dgg_big_vector.end(), dgg_big_vector_pvt.begin(), dgg_big_vector_pvt.end());
                 }
             }
         }
@@ -705,6 +708,6 @@ void ThreadSafetyInGetPRNG(const std::string& msg) {
 }
 
 TEST(UTDistrGen, ThreadSafetyInGetPRNG) {
-    RUN_ALL_BACKENDS(ThreadSafetyInGetPRNG, "Thread safety in getPRNG")
+    RUN_ALL_BACKENDS(ThreadSafetyInGetPRNG, "Thread safety in get_prng")
 }
 #endif

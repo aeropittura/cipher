@@ -567,32 +567,32 @@ class BigIntegerInterface {
      * @return  -1 for strictly less than, 0 for equal to and 1 for strictly
      * greater than conditions.
      */
-    int Compare(const T& a) const;
+    int compare_with(const T& a) const;
 
     //// relational operators, using Compare
     /// equality, using Compare
     friend bool operator==(const T& a, const T& b) {
-        return a.Compare(b) == 0;
+        return a.compare_with(b) == 0;
     }
     /// inequality, using Compare
     friend bool operator!=(const T& a, const T& b) {
-        return a.Compare(b) != 0;
+        return a.compare_with(b) != 0;
     }
     /// strictly greater than, using Compare
     friend bool operator>(const T& a, const T& b) {
-        return a.Compare(b) > 0;
+        return a.compare_with(b) > 0;
     }
     /// greater than or equal to, using Compare
     friend bool operator>=(const T& a, const T& b) {
-        return a.Compare(b) >= 0;
+        return a.compare_with(b) >= 0;
     }
     /// strictly less than, using Compare
     friend bool operator<(const T& a, const T& b) {
-        return a.Compare(b) < 0;
+        return a.compare_with(b) < 0;
     }
     /// less than or equal to, using Compare
     friend bool operator<=(const T& a, const T& b) {
-        return a.Compare(b) <= 0;
+        return a.compare_with(b) <= 0;
     }
 
     /**

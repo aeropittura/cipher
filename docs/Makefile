@@ -16,8 +16,6 @@ help:
 
 clean:
 	rm -rf doxyoutput/ api/
-	# these are specific to the companion site, ignore this rm
-	rm -f conf_extensions.rst conf_theme.rst
 	@$(SPHINXBUILD) -M clean "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 # Catch-all target: route all unknown targets to Sphinx using the new

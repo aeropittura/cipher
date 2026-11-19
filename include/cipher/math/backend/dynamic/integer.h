@@ -327,9 +327,9 @@ class ubint final : public cipher::BigIntegerInterface<ubint<limb_t>> {
      * @param p the exponent.
      * @return is the result of the exponentiation operation.
      */
-    ubint Exp(uint32_t p) const;
+    ubint raise_to(uint32_t p) const;
     ubint& exp_eq(uint32_t p) {
-        return *this = this->ubint::Exp(p);
+        return *this = this->ubint::raise_to(p);
     }
 
     /**
@@ -645,10 +645,10 @@ class ubint final : public cipher::BigIntegerInterface<ubint<limb_t>> {
     }
 
     ubint mod_mul_fast_const(const ubint& b, const ubint& modulus, const ubint& b_inv) const {
-        CIPHER_THROW("ModMulFastConst is not implemented for backend 4");
+        CIPHER_THROW("mod_mul_fast_const is not implemented for backend 4");
     }
     ubint& mod_mul_fast_const_eq(const ubint& b, const ubint& modulus, const ubint& b_inv) {
-        CIPHER_THROW("ModMulFastConstEq is not implemented for backend 4");
+        CIPHER_THROW("mod_mul_fast_const_eq is not implemented for backend 4");
     }
 
     /**
@@ -699,7 +699,7 @@ class ubint final : public cipher::BigIntegerInterface<ubint<limb_t>> {
      * @return  -1 for strictly less than, 0 for equal to and 1 for strictly
      * greater than conditons.
      */
-    int Compare(const ubint& a) const noexcept {
+    int compare_with(const ubint& a) const noexcept {
         if (msb_ < a.msb_)
             return -1;
         if (msb_ > a.msb_)
@@ -767,7 +767,7 @@ class ubint final : public cipher::BigIntegerInterface<ubint<limb_t>> {
      * @return true if the input is a power of 2, false otherwise.
      */
     /*
-    static bool isPowerOfTwo(const ubint& x) {
+    static bool is_power_of_two(const ubint& x) {
         if (x.msb_ == 0)
             return false;
         const size_t limbs{x.value_.size() - 1};

@@ -433,7 +433,7 @@ void simple_bootstrapping_complex() {
     std::vector<std::complex<double>> x = {0.25 + 0.25i, 0.5 - 0.5i, 0.75 + 0.75i, 1.0 - 1.i,
                                            2.0 + 2.i,    3.0 - 3.i,  4.0 + 4.i,    5.0 - 5.i};
     if (x.size() < num_slots)
-        x = Fill<std::complex<double>>(x, num_slots);
+        x = fill_slots<std::complex<double>>(x, num_slots);
     size_t encoded_length = x.size();
 
     // We start with a depleted ciphertext that has used up all of its levels.
@@ -563,7 +563,7 @@ void simple_bootstrapping_st_c_first_complex() {
     std::vector<std::complex<double>> x = {0.25 + 0.25i, 0.5 - 0.5i, 0.75 + 0.75i, 1.0 - 1.i,
                                            2.0 + 2.i,    3.0 - 3.i,  4.0 + 4.i,    5.0 - 5.i};
     if (x.size() < num_slots)
-        x = Fill<std::complex<double>>(x, num_slots);
+        x = fill_slots<std::complex<double>>(x, num_slots);
     size_t encoded_length = x.size();
 
     // We start with a depleted ciphertext that has used up all of its levels.

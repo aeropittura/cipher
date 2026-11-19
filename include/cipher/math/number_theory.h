@@ -171,7 +171,7 @@ inline constexpr uint32_t get_msb(T x) {
         return msb + 1;
 #else
         static_assert(std::numeric_limits<unsigned long long>::digits == 64,  // NOLINT
-                      "GetMSB assumes a 64-bit unsigned long long");
+                      "get_msb assumes a 64-bit unsigned long long");
         return 64 - static_cast<uint32_t>(__builtin_clzll(static_cast<uint64_t>(x)));
 #endif
     }
@@ -182,7 +182,7 @@ inline constexpr uint32_t get_msb(T x) {
     }
 #endif
     else {
-        CIPHER_THROW("Unsupported int type (GetMSB() supports 32-, 64- and 128-bit integers only)");
+        CIPHER_THROW("Unsupported int type (get_msb() supports 32-, 64- and 128-bit integers only)");
         return 0;
     }
 }
@@ -213,7 +213,7 @@ template <typename T,
                   true>
 inline constexpr uint32_t get_digit_count(T x, uint64_t base) {
     if (base < 2)
-        CIPHER_THROW("GetDigitCount() requires a base of at least 2");
+        CIPHER_THROW("get_digit_count() requires a base of at least 2");
     if (x < 2)
         return 0;
     if ((base & (base - 1)) == 0) {

@@ -4,12 +4,11 @@ Installation
 Welcome to the Cipher installation instructions! For OS-specific instructions, follow one of the following links below, or proceed with the high-level platform-independent installation instructions below.
 
 
-.. note:: Note: By default, the library is built without external dependencies.
-   But the user is also provided options to add
+.. note:: By default, the library is built without external dependencies other than the bundled git submodules in
+   ``extern/`` (cereal, google-test, google-benchmark). Optional dependencies can be enabled:
 
-   - ``GMP/NTL``
-   - ``tcmalloc``
-   - and/or ``Intel HEXL`` third-party libraries if desired
+   - ``GMP/NTL`` (``-DCIPHER_WITH_NTL=ON``, installed by the user; see :ref:`gmp_ntl_install`)
+   - ``tcmalloc`` (``-DCIPHER_WITH_TCM=ON``, built from the bundled ``extern/gperftools`` submodule)
 
 .. toctree::
    :maxdepth: 1
@@ -18,50 +17,59 @@ Welcome to the Cipher installation instructions! For OS-specific instructions, f
    linux.rst
    macos.rst
    windows.rst
-   cmake_in_openfhe.rst
+   cmake_in_cipher.rst
    gmp_ntl.rst
    ../building_user_applications.rst
 
 
 Build Instructions
 ##################
-We use CMake to build Cipher. Cipher supports any GNU C++ compiler version 9 or above and clang C++ compiler version 10 or above.
+We use CMake to build Cipher. Cipher requires CMake 3.16 or later and supports any GNU C++ compiler version 9 or above
+and clang C++ compiler version 10 or above. OpenMP is optional (``libomp`` on macOS).
 
 
-1. Install system prerequisites (if not already installed), including a C++ compiler with OMP support, cmake, make.
+1. Install system prerequisites (if not already installed), including a C++ compiler with OpenMP support, CMake, and
+   a build tool (``make`` or ``ninja``).
 
-2. Clone the Cipher repo to your local machine.
+2. Clone the Cipher repository to your local machine and fetch the submodules it needs: ::
 
-3. Create a directory where the binaries will be built. The typical choice is a subfolder "build". In this case, the commands are: ::
+    git submodule update --init extern/cereal extern/google-test extern/google-benchmark
 
-    mkdir build
-    cd build
-    cmake ..
+   (By default, ``CIPHER_GIT_SUBMODULES=ON`` makes CMake initialize and update all submodules at configure time.)
+
+3. Configure a build directory. The typical choice is a subfolder ``build``: ::
+
+    cmake -S . -B build                         # add -DCIPHER_WITH_OPENMP=OFF if OpenMP is unavailable
 
 .. note:: ``CMake`` will check for any system dependencies that are needed for the build process
 
-   - If the ``CMake`` build does not complete successfully, please review the error ``CMake`` shows at the end.
-   - If the error does not go away (even though you installed the dependency), try running ``make clean`` to clear the CMake cache.
+   - If the ``CMake`` configuration does not complete successfully, please review the error ``CMake`` shows at the end.
+   - If the error does not go away (even though you installed the dependency), delete the ``build`` directory (or
+     ``build/CMakeCache.txt``) and configure again.
 
-4. If you want to use any external libraries, such as NTL/GMP or tcmalloc, install these libraries.
+4. If you want to use any external libraries, such as NTL/GMP or tcmalloc, install them and enable the corresponding
+   option (see :ref:`cmake_in_cipher`).
 
-5. Build Cipher by running the following command (this will take few minutes; using the ``-j`` make command-line flag is suggested to speed up the build)
-``make``
+5. Build Cipher (this will take a few minutes; ``-j <threads>`` speeds up the build) ::
 
-- If you want to build only library files or some other subset of Cipher, please review the last paragraph of this page.
+    cmake --build build -j 8
 
-- After the ``make`` completes, you should see the Cipher library files in the lib folder, binaries of examples in ``bin/examples``, binaries of benchmarks in ``bin/benchmark``, and binaries for unit tests in the unittest folder.
+- If you want to build only the library files or some other subset of Cipher, please review :ref:`cmake_in_cipher`.
+
+- After the build completes, the Cipher library files are in ``build/lib``, the examples in ``build/bin/examples``, the
+  benchmarks in ``build/bin/bench``, and the unit-test executables in ``build/tests``.
 
 6. Install Cipher to a system directory (if desired or for production purposes) ::
 
-    make install
+    cmake --install build
 
-You would probably need to run ``sudo make install`` unless you are specifying some other install location. You can change the install location by running
-``cmake -DCMAKE_INSTALL_PREFIX=/your/path ..``.
+You would probably need to run ``sudo cmake --install build`` unless you are specifying some other install location.
+You can change the install location with ``-DCMAKE_INSTALL_PREFIX=/your/path`` when configuring, or with
+``cmake --install build --prefix /your/path``.
 
-- The header files are placed in the ``include/openfhe`` folder of the specified path, and the binaries of the library
+- The header files are placed in the ``include/cipher`` folder of the specified path, and the binaries of the library
   in the ``lib`` folder. For example, if no installation path is provided in Ubuntu (and many other Unix-based OSes), the header and library
-  binary files will be placed in ``/usr/local/include/openfhe`` and ``/usr/local/lib``, respectively.
+  binary files will be placed in ``/usr/local/include/cipher`` and ``/usr/local/lib``, respectively.
   Those two folders can be changed with ``CMAKE_INSTALL_INCLUDEDIR`` and ``CMAKE_INSTALL_LIBDIR``, which is what distribution
   packagers use to install into ``lib64`` or an architecture-specific directory. On Windows the DLLs go to the ``bin`` folder
   (``CMAKE_INSTALL_BINDIR``) and only the import libraries are placed in the library folder.
@@ -69,34 +77,27 @@ You would probably need to run ``sudo make install`` unless you are specifying s
 Testing and cleaning the build
 ##############################
 
+Run the unit tests to make sure all capabilities operate as expected ::
 
-Run unit tests to make sure all capabilities operate as expected ::
+    ctest --test-dir build                      # or: cmake --build build --target check
 
-   make testall
+Each module has one GoogleTest executable, ``build/tests/core_tests``, ``build/tests/fhe_tests`` and
+``build/tests/boolean_tests``, which can also be run directly.
 
 Run sample code to test, e.g., ::
 
-   bin/examples/pke/simple-integers
+    build/bin/examples/fhe/simple_integers
 
-To remove the files built by make, you can execute ::
+To remove the files built by the build tool, you can execute ::
 
-   make clean
+    cmake --build build --target clean
 
 Supported Operating Systems
 ###########################
-Cipher CI continually tests our builds on the following operating systems:
+Cipher's continuous integration (``.github/workflows/ci.yml``) builds and tests on:
 
-* Ubuntu [18.04] [20.04]
-* macOS [Mojave]
-* Centos 7
-* NVIDIA Xavier [Linux for Tegra 4.2.2]
-* MinGW (64-bit) on Windows 10
+* Ubuntu 24.04 with g++ and clang++ (default configuration, math backend 2, 128-bit native integers, static Debug build)
+* macOS 15 with Apple clang (without OpenMP)
 
-Cipher users have reported successful operation on the following systems:
-
-* FreeBSD
-* Ubuntu [16.04] [22.04] [23.04]
-* macOS [Monterey] [Ventura]
-* Arch Linux
-
-Please let us know the results if you have run Cipher any additional systems not listed above.
+Upstream OpenFHE, from which Cipher derives, additionally reported successful operation on other Linux distributions,
+FreeBSD and MinGW (64-bit) on Windows; these platforms are not tested by Cipher's CI.

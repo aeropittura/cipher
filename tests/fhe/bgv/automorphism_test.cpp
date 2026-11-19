@@ -126,14 +126,14 @@ struct TEST_CASE_UTBGVRNS_AUTOMORPHISM : public BaseTestCase {
         std::stringstream ss;
         ss << "[testCase: " << test_case_type << "], [description: " << description
            << "], [params: " << get_crypto_context_param_overrides() << "], [error: " << error
-           << "], [indexList: " << index_list << "] ";
+           << "], [index_list: " << index_list << "] ";
         return ss.str();
     }
 };
 
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
-static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTBGVRNS_AUTOMORPHISM>& test_param_info) {
+static auto make_test_name = [](const testing::TestParamInfo<TEST_CASE_UTBGVRNS_AUTOMORPHISM>& test_param_info) {
     return test_param_info.param.build_test_name();
 };
 
@@ -157,7 +157,7 @@ std::vector<TEST_CASE_UTBGVRNS_AUTOMORPHISM> get_test_data(std::string file_name
         test_case_value.test_case_type = convert_string_to_case_type(*it);
         test_case_value.description = *(++it);
 
-        // size_t num_overrides = test_case_value.populateCryptoContextParams(++it);
+        // size_t num_overrides = test_case_value.populate_crypto_context_params(++it);
         size_t num_overrides = test_case_value.set_crypto_context_params_overrides(++it);
 
         it += num_overrides;
@@ -167,7 +167,7 @@ std::vector<TEST_CASE_UTBGVRNS_AUTOMORPHISM> get_test_data(std::string file_name
             if (++it != vec.end()) {
                 // process list of indices
                 std::string index_list_str(*it);
-                if (!isEmpty(index_list_str)) {
+                if (!is_empty_string(index_list_str)) {
                     std::vector<std::string> indices = tokenize(index_list_str, '|');
                     for (std::string& i : indices) {
                         test_case_value.index_list.push_back(static_cast<uint32_t>(std::stoul(i)));
@@ -415,4 +415,4 @@ TEST_P(UTBGVRNS_AUTOMORPHISM, Automorphism) {
 }
 
 INSTANTIATE_TEST_SUITE_P(UnitTests, UTBGVRNS_AUTOMORPHISM, ::testing::ValuesIn(test_cases_utbgvrns_automorphism),
-                         testName);
+                         make_test_name);

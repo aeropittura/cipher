@@ -241,7 +241,7 @@ class BaseSampler {
      * @param mean Mean of the distribution that the sampler will be using
      *
      */
-    void Initialize(double mean);
+    void initialize(double mean);
 
     /**
      * @brief Generates the probability matrix of given distribution, which is

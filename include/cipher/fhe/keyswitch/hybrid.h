@@ -104,7 +104,7 @@ class KeySwitchHybrid : public RnsKeySwitch {
 
     /**
      * Generates a hybrid key switching key from old_private_key to new_private_key reusing the "a" components of
-     * eval_key (threshold FHE); see KeySwitchBase::key_switch_gen_internal.
+     * eval_key (threshold FHE); see BaseKeySwitch::key_switch_gen_internal.
      *
      * @param old_private_key private key the ciphertexts to be switched are encrypted under
      * @param new_private_key private key the switched ciphertexts should decrypt under
@@ -127,7 +127,7 @@ class KeySwitchHybrid : public RnsKeySwitch {
                                              const PublicKey<RnsPoly> new_public_key) const override;
 
     /**
-     * Key switches a ciphertext in place; see KeySwitchBase::key_switch_in_place.
+     * Key switches a ciphertext in place; see BaseKeySwitch::key_switch_in_place.
      *
      * @param ciphertext ciphertext to be key switched; holds the result
      * @param eval_key key switching key
@@ -136,7 +136,7 @@ class KeySwitchHybrid : public RnsKeySwitch {
 
     /**
      * Raises a ciphertext from basis Ql to the extended basis QlP by multiplying its elements by P; see
-     * KeySwitchBase::key_switch_ext.
+     * BaseKeySwitch::key_switch_ext.
      *
      * @param ciphertext ciphertext in basis Ql
      * @param add_first if true, the first element c0 is raised as well; if false, it is set to zero
@@ -146,7 +146,7 @@ class KeySwitchHybrid : public RnsKeySwitch {
 
     /**
      * Divides a two-element ciphertext in basis QlP by P with rounding, returning it in basis Ql; see
-     * KeySwitchBase::key_switch_down.
+     * BaseKeySwitch::key_switch_down.
      *
      * @param ciphertext ciphertext in basis QlP
      * @return the ciphertext in basis Ql
@@ -203,7 +203,7 @@ class KeySwitchHybrid : public RnsKeySwitch {
     /**
      * Computes the inner products of the digits with the two key vectors modulo QlP and leaves the result in the
      * extended basis; only the limbs of the key that correspond to Ql and P are used. See
-     * KeySwitchBase::eval_fast_key_switch_core_ext for how the result is accumulated and switched down.
+     * BaseKeySwitch::eval_fast_key_switch_core_ext for how the result is accumulated and switched down.
      *
      * @param digits digits of the element computed by eval_key_switch_precompute_core
      * @param eval_key key switching key

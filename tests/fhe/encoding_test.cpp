@@ -119,7 +119,7 @@ TEST_F(UTGENERAL_ENCODING, packed_int_ptxt_encoding_negative) {
     EXPECT_EQ(se.get_packed_value(), vector_of_ints1) << "packed int";
 }
 
-TEST_F(UTGENERAL_ENCODING, packed_int_ptxt_encoding_DCRTPoly_prime_cyclotomics) {
+TEST_F(UTGENERAL_ENCODING, packed_int_ptxt_encoding_RnsPoly_prime_cyclotomics) {
     uint32_t init_size = 3;
     uint32_t dcrt_bits = 24;
     // Bluestein needs big_modulus > m * q^2 (about 2^58.8 for 24-bit towers at m = 1811)
@@ -182,7 +182,7 @@ TEST_F(UTGENERAL_ENCODING, packed_int_ptxt_encoding_DCRTPoly_prime_cyclotomics) 
     EXPECT_EQ(se.get_packed_value(), vector_of_ints1) << "packed int - prime cyclotomics";
 }
 
-TEST_F(UTGENERAL_ENCODING, packed_int_ptxt_encoding_DCRTPoly_prime_cyclotomics_negative) {
+TEST_F(UTGENERAL_ENCODING, packed_int_ptxt_encoding_RnsPoly_prime_cyclotomics_negative) {
     uint32_t init_size = 3;
     uint32_t dcrt_bits = 24;
     // Bluestein needs big_modulus > m * q^2 (about 2^58.8 for 24-bit towers at m = 1811)

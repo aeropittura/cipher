@@ -257,9 +257,9 @@ void CkksRnsParamGen::composite_prime_moduli_gen(std::vector<NativeInteger>& mod
             register_ceiling = top - top.mod(cycl_order) + NativeInteger(1);
         }
 
-        // Nominal scaling factor Delta_L = 2^dcrt_bits. Pinning the per-level prime product to
-        // sf^2/Delta_L (instead of sf) forces the resulting scaling factor sf^2/product back to
-        // Delta_L each level, so the discreteness error does not accumulate across levels.
+        // Nominal scaling factor delta_l = 2^dcrt_bits. Pinning the per-level prime product to
+        // sf^2/delta_l (instead of sf) forces the resulting scaling factor sf^2/product back to
+        // delta_l each level, so the discreteness error does not accumulate across levels.
         const double delta_l = std::pow(2.0, static_cast<double>(dcrt_bits));
         bool flag = true;
         for (uint32_t i = num_primes_value - composite_degree; i >= 2 * composite_degree; i -= composite_degree) {
@@ -269,7 +269,7 @@ void CkksRnsParamGen::composite_prime_moduli_gen(std::vector<NativeInteger>& mod
                 sf /= moduli_q[i + d].convert_to_double();
             }
 
-            // Target product for this level's primes pins the next scaling factor to Delta_L
+            // Target product for this level's primes pins the next scaling factor to delta_l
             double target_product = sf * sf / delta_l;
             auto sf_sqrt = std::pow(target_product, 1.0 / composite_degree);
 

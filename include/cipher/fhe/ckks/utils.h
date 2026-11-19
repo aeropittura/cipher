@@ -152,7 +152,7 @@ inline double to_real(std::complex<double> val) {
  * @return the integer degree of the polynomial.
  */
 template <typename VecDType>
-uint32_t Degree(const std::vector<VecDType>& coefficients, double delta = 0.0) {
+uint32_t effective_degree(const std::vector<VecDType>& coefficients, double delta = 0.0) {
     uint32_t i = coefficients.size();
     if (i == 0)
         CIPHER_THROW("Coefficients vector can not be empty");
@@ -195,7 +195,7 @@ std::vector<uint32_t> compute_degrees_ps(uint32_t n);
 
 /**
  * Gets the multiplicative depth of evaluating a polynomial of the given degree from a table that covers degrees
- * up to 261631 (see src/pke/examples/FUNCTION_EVALUATION.md): degrees below 5 are evaluated with a binary tree
+ * up to 261631 (see examples/fhe/FUNCTION_EVALUATION.md): degrees below 5 are evaluated with a binary tree
  * of powers, higher degrees with the Paterson-Stockmeyer algorithm.
  *
  * @param degree degree of the polynomial
@@ -205,7 +205,7 @@ uint32_t get_depth_by_degree(size_t degree);
 
 /**
  * Get the depth for a given vector of coefficients for the Paterson-Stockmeyer algorithm.
- * The functions is based on the table described in src/pke/examples/FUNCTION_EVALUATION.md
+ * The functions is based on the table described in examples/fhe/FUNCTION_EVALUATION.md
  *
  * @param vec vector of coefficients
  * @param is_normalized true if the vector normalized. false is the default value
@@ -238,7 +238,7 @@ std::vector<std::complex<double>> extract_shifted_diagonal(const std::vector<std
  * @return the rotated vector
  */
 template <typename VecDType>
-std::vector<VecDType> Rotate(const std::vector<VecDType>& a, int32_t index);
+std::vector<VecDType> rotate_slots(const std::vector<VecDType>& a, int32_t index);
 
 /**
  * Rotates each half of a vector separately by an index - left rotation
@@ -260,7 +260,7 @@ std::vector<VecDType> rotate_two_halves(const std::vector<VecDType>& a, int32_t 
  * @return the vector with cloned values
  */
 template <typename VecDType = std::vector<std::complex<double>>>
-std::vector<VecDType> Fill(const std::vector<VecDType>& a, uint32_t slots);
+std::vector<VecDType> fill_slots(const std::vector<VecDType>& a, uint32_t slots);
 
 /**
  * Clones the values of an initializer list up to the size indicated by the 'slots' variable
@@ -271,11 +271,11 @@ std::vector<VecDType> Fill(const std::vector<VecDType>& a, uint32_t slots);
  * @return the vector with cloned values
  */
 template <typename VecDType = std::vector<std::complex<double>>>
-std::vector<VecDType> Fill(std::initializer_list<VecDType> a, uint32_t slots);
+std::vector<VecDType> fill_slots(std::initializer_list<VecDType> a, uint32_t slots);
 
 /*
 template <typename VecDType = std::complex<double>>
-std::vector<VecDType> Fill(const std::vector<VecDType>& a, uint32_t slots);
+std::vector<VecDType> fill_slots(const std::vector<VecDType>& a, uint32_t slots);
 */
 
 /**

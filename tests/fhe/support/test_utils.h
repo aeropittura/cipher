@@ -128,7 +128,7 @@ std::vector<std::complex<double>> to_complex_double_vec(const std::vector<T>& v)
 
 //// typename T can be any integral type
 // template<typename T>
-// std::vector<int64_t> integerVec2int64Vec(const std::vector<T>& v) {
+// std::vector<int64_t> integer_vec_to_int64_vec(const std::vector<T>& v) {
 //    std::vector<int64_t> vec(v.size());
 //    std::transform(v.begin(), v.end(), vec.begin(), [](T elem) { return static_cast<int64_t>(elem); });
 //
@@ -164,7 +164,7 @@ inline std::string random_string(uint64_t out_string_length) {
 }
 //===========================================================================================================
 // check if a string is empty
-inline bool isEmpty(const std::string& str) {
+inline bool is_empty_string(const std::string& str) {
     const std::string whitespace = " \t\n\r\v\f";
     if (str.empty() || str.find_first_not_of(whitespace) == std::string::npos)
         return true;

@@ -19,58 +19,60 @@ to update all packages (you may need to run it twice as it often fails the first
     pacman -S make
     pacman -S git
 
-2. Clone the repo.
-
-3. Create a directory where the binaries will be built. The typical choice is a subfolder ``build``. In this case, the commands are:
+2. Clone the repository and fetch the submodules:
 
 ::
 
-    mkdir build
-    cd build
-    cmake ..
+    git submodule update --init extern/cereal extern/google-test extern/google-benchmark
 
-Note that cmake will check for any system dependencies that are needed for the build process.
+3. Configure a build directory. The typical choice is a subfolder ``build``. In this case, the command is:
 
-4. The Cipher distribution includes some external libraries, such as ``GMP`` and ``NTL``. If you want to use any of these libraries:
+::
 
-    a) install ``autoconf``:
+    cmake -S . -B build
+
+Note that cmake will check for any system dependencies that are needed for the build process. ``PreLoad.cmake`` in the
+repository root selects the "Unix Makefiles" generator automatically when CMake is run from the MinGW shell.
+
+4. NTL/GMP (math backend 6) are optional and must be installed by the user (see :ref:`gmp_ntl_install`). They need ``autoconf``:
 
     ::
 
         pacman -S autoconf
 
-    b) enable them when you run_fn cmake to force them to build (see instructions on cmake options).
+   Then enable them when you run cmake (``-DCIPHER_WITH_NTL=ON``; see :ref:`cmake_in_cipher`).
 
-5. Build Cipher by running the following command (this will take few minutes; using the ``-j <threads>`` make command-line flag is suggested to speed up the build where threads is typically the number of cores or threads on your machine)
+5. Build Cipher by running the following command (this will take a few minutes; using the ``-j <threads>`` flag is suggested to speed up the build where threads is typically the number of cores or threads on your machine)
 
 ::
 
-    make
+    cmake --build build -j <threads>
 
 6. Install Cipher in a system directory (if desired or for production purposes)
 
 ::
 
-    make install
+    cmake --install build
 
 You need to run MinGW64 as an administrator unless you are specifying some other install location. You can change the install location by running
-``cmake -DCMAKE_INSTALL_PREFIX=/your/path ..``
+``cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/your/path``
 
 To run MinGW64 as an administrator, open Task Manager, go to File -> Run New Task, select the location of the executable for MinGW64, and check the box "Create this task with administrative privileges".
 
-8. Add the following paths to the ``PATH`` variable (to find the dlls): ``lib`` (no NTL) or ``lib:third-party/bin`` (with NTL). For example, the following commands can be used
+7. Add the directory holding the Cipher DLLs (``build/lib`` in the build tree, ``bin`` under the install prefix) to the
+   ``PATH`` variable, plus the directory holding the NTL/GMP DLLs if NTL is used. For example:
 
 Without NTL:
 
 ::
 
-    export PATH=$PATH:lib
+    export PATH=$PATH:$PWD/build/lib
 
 With NTL:
 
 ::
 
-    export PATH=$PATH:lib:{PATH_TO_NTL_BINARIES}
+    export PATH=$PATH:$PWD/build/lib:{PATH_TO_NTL_BINARIES}
 
 Alternatively, add the path(s) to ``ORIGINAL_PATH`` variable in ``c:/msys64/etc/profile`` to make this change permanent.
 
@@ -81,16 +83,16 @@ Run unit tests to make sure all capabilities operate as expected
 
 ::
 
-    make testall
+    ctest --test-dir build
 
 Run sample code to test, e.g.,
 
 ::
 
-    bin/examples/pke/simple-integers
+    build/bin/examples/fhe/simple_integers
 
-To remove the files built by make, you can execute
+To remove the files built by the build tool, you can execute
 
 ::
 
-    make clean
+    cmake --build build --target clean

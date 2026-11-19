@@ -1,22 +1,26 @@
 # Benchmarking
 
-OpenFHE uses the [Google microbenchmark support library](https://github.com/google/benchmark#running-benchmarks) to measure performance. Performance testing code can be found in `/benchmark/src`. After building, binaries are written to `/your_build_folder/bin/benchmark`. To build only tests and their dependencies, use the following command in the build folder:
+Cipher uses the [Google microbenchmark support library](https://github.com/google/benchmark#running-benchmarks)
+(bundled as the `extern/google-benchmark` submodule) to measure performance. The benchmark sources are
+in this directory (`bench/`); each source file becomes one executable. Benchmarks are built when
+`CIPHER_BUILD_BENCHMARKS=ON` (the default), and the binaries are written to `<build>/bin/bench`. To build
+only the benchmarks and their dependencies, run:
 
 ```
-make allbenchmark
+cmake --build build --target all_benchmarks
 ```
 
-To run the benchmark `benchmark-to-run_fn` from the build folder for linux or macOS, run:
+To run the benchmark `<name>` (the source file name without `.cpp`, e.g. `library`) on Linux or macOS, run:
 
 ```
-./bin/benchmark/benchmark-to-run_fn
+./build/bin/bench/<name>
 ```
 
-For Windows run:
+On Windows run:
 
- ```
- bin/benchmark/benchmark-to-run_fn.exe
- ```
+```
+build\bin\bench\<name>.exe
+```
 
 By default each benchmark is run once and that single result is reported. However benchmarks are often noisy and a single result may not be representative of the overall behavior. For this reason it's possible to repeatedly rerun the benchmark.
 
@@ -36,11 +40,11 @@ In order to remove the noise related to multithreading, set the number of thread
 export OMP_NUM_THREADS=1
 ```
 
-## lib-benchmark
+## library
 
-[lib-benchmark](library.cpp) is the main Cipher library benchmark that contains performance tests for standard operations in the following schemes: BFVrns, CKKS, BGVrns. It also contains several performance tests for NTT and INTT transformations.
+[library](library.cpp) is the main Cipher library benchmark that contains performance tests for standard operations in the following schemes: BFVrns, CKKS, BGVrns. It also contains several performance tests for NTT and INTT transformations.
 
-An example output after running `lib-benchmark` is as follows:
+An illustrative output (timings and benchmark names may differ in the current build) after running `library` is as follows:
 
 ```
 -------------------------------------------------------------------
@@ -64,20 +68,20 @@ bfv_rns_add_in_place              24.0 us         24.0 us        29269
 bfv_rns_mult_no_relin             7399 us         7398 us           95
 bfv_rns_mult_relin               8593 us         8592 us           82
 bfv_rns_eval_at_index             1035 us         1034 us          674
-CKKS_KeyGen                    2320 us         2320 us          302
-CKKS_MultKeyGen                5931 us         5931 us          117
-CKKS_EvalAtIndexKeyGen         5846 us         5845 us          118
-CKKS_Encryption                2002 us         2002 us          349
-CKKS_Decryption                 922 us          922 us          759
-CKKS_Add                       35.2 us         35.2 us        19807
-CKKS_AddInPlace                23.8 us         23.8 us        29181
-CKKS_MultNoRelin                214 us          214 us         3254
-CKKS_MultRelin                 3160 us         3160 us          222
-CKKS_Relin                     3021 us         3021 us          232
-CKKS_RelinInPlace              2958 us         2958 us          236
-CKKS_Rescale                    546 us          546 us         1287
-CKKS_RescaleInPlace             534 us          534 us         1308
-CKKS_EvalAtIndex               2758 us         2758 us          252
+ckks_rns_key_gen                    2320 us         2320 us          302
+ckks_rns_mult_key_gen                5931 us         5931 us          117
+ckks_rns_eval_at_index_key_gen         5846 us         5845 us          118
+ckks_rns_encryption                2002 us         2002 us          349
+ckks_rns_decryption                 922 us          922 us          759
+ckks_rns_add                       35.2 us         35.2 us        19807
+ckks_rns_add_in_place                23.8 us         23.8 us        29181
+ckks_rns_mult_no_relin                214 us          214 us         3254
+ckks_rns_mult_relin                 3160 us         3160 us          222
+ckks_rns_relin                     3021 us         3021 us          232
+ckks_rns_relin_in_place              2958 us         2958 us          236
+ckks_rns_rescale                    546 us          546 us         1287
+ckks_rns_rescale_in_place             534 us          534 us         1308
+ckks_rns_eval_at_index               2758 us         2758 us          252
 bgv_rns_key_gen                  2329 us         2329 us          300
 bgv_rns_mult_key_gen              5926 us         5925 us          118
 bgv_rns_eval_at_index_key_gen       5987 us         5987 us          117
@@ -94,16 +98,16 @@ bgv_rns_mod_switch_in_place         539 us          539 us         1298
 bgv_rns_eval_at_index             2806 us         2805 us          249
 ```
 
-## poly-benchmark
+## poly_benchmark
 
-[poly-1k](poly_benchmark_1k.cpp), [poly-4k](poly_benchmark_4k.cpp), [poly-16k](poly_benchmark_16k.cpp), [poly-64k](poly_benchmark_64k.cpp)
-contains performance tests for primitive polynomial operations with ring sizes 1k, 4k, 16k, 64k, respectively.
+[poly_benchmark_1k](poly_benchmark_1k.cpp), [poly_benchmark_4k](poly_benchmark_4k.cpp), [poly_benchmark_8k](poly_benchmark_8k.cpp), [poly_benchmark_16k](poly_benchmark_16k.cpp), [poly_benchmark_64k](poly_benchmark_64k.cpp)
+contain performance tests for primitive polynomial operations with ring sizes 1k, 4k, 8k, 16k, 64k, respectively (the shared benchmark definitions are in [poly_bench.h](poly_bench.h)).
 
 The following operations are used to evaluate the performance: addition, Hadamard (component-wise) multiplication, NTT and INTT. These operations (especially NTT and iNTT) are the main bottleneck operations for all lattice cryptographic capabilities.
 
-All operations are performed for NativePoly and DCRTPoly with settings for 1, 2, 4 and 8 towers (`tower` is the number of residues in the RNS representation of each large integer).
+All operations are performed for NativePoly and RnsPoly with settings for 1, 2, 4 and 8 towers (`tower` is the number of residues in the RNS representation of each large integer).
 
-An example output after running `poly-benchmark-xk` is as follows:
+An illustrative output (timings and benchmark names may differ in the current build) after running `poly_benchmark_<x>k` is as follows:
 
 ```
 -------------------------------------------------------------
@@ -134,13 +138,13 @@ DCRT_intt/towers:8       84.9 us         84.9 us         8242
 ## other
 
 There are several other benchmarking tests:
-* [bfv-mult-method-benchmark](bfv_mult_method_benchmark.cpp) - Compares the performance of **BFV** multiplication methods for EvalMultMany
-* [binfhe-ap](binfhe_ap.cpp) - boolean functions performance tests for **FHEW** scheme with **AP** bootstrapping technique. Please see "Bootstrapping in FHEW-like Cryptosystems" for details on both bootstrapping techniques
-* [binfhe-ginx](binfhe_ginx.cpp) - boolean functions performance tests for **FHEW** scheme with **GINX** bootstrapping technique. Please see "Bootstrapping in FHEW-like Cryptosystems" for details on both bootstrapping techniques
-* [compare-bfv-hps-leveled-vs-behz](compare_bfv_hps_leveled_vs_behz.cpp) - performance comparison between **HPSPOVERQLEVELED** and **BEHZ** **BFV** variants for similar parameter sets
-* [compare-bfvrns-vs-bgvrns](compare_bfvrns_vs_bgvrns.cpp) - performance comparison between **BFVrns** and **BGVrns** schemes for similar parameter sets
-* [IntegerMath](integer_math.cpp) - performance tests for the big integer operations
-* [Lattice](ring.cpp) - performance tests for the Lattice operations.
-* [NbTheory](number_theory.cpp) - performance tests of number theory functions
-* [Serialization](serialize_ckks.cpp) - performance tests of **CKKS** serialization
-* [VectorMath](vector_math.cpp) - performance tests for the big vector operations
+* [bfv_mult_method_benchmark](bfv_mult_method_benchmark.cpp) - Compares the performance of **BFV** multiplication methods for `eval_mult_many`
+* [binfhe_ap](binfhe_ap.cpp) - boolean functions performance tests for **FHEW** scheme with **AP** bootstrapping technique. Please see "Bootstrapping in FHEW-like Cryptosystems" for details on both bootstrapping techniques
+* [binfhe_ginx](binfhe_ginx.cpp) - boolean functions performance tests for **FHEW** scheme with **GINX** bootstrapping technique. Please see "Bootstrapping in FHEW-like Cryptosystems" for details on both bootstrapping techniques
+* [compare_bfv_hps_leveled_vs_behz](compare_bfv_hps_leveled_vs_behz.cpp) - performance comparison between **HPSPOVERQLEVELED** and **BEHZ** **BFV** variants for similar parameter sets
+* [compare_bfvrns_vs_bgvrns](compare_bfvrns_vs_bgvrns.cpp) - performance comparison between **BFVrns** and **BGVrns** schemes for similar parameter sets
+* [integer_math](integer_math.cpp) - performance tests for the big integer operations
+* [ring](ring.cpp) - performance tests for the ring (lattice) operations
+* [number_theory](number_theory.cpp) - performance tests of number theory functions
+* [serialize_ckks](serialize_ckks.cpp) - performance tests of **CKKS** serialization
+* [vector_math](vector_math.cpp) - performance tests for the big vector operations

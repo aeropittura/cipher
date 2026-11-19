@@ -403,7 +403,7 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
     NativeIntegerT add_check(const NativeIntegerT& b) const {
         auto r{value_ + b.value_};
         if (r < value_ || r < b.value_)
-            CIPHER_THROW("NativeIntegerT AddCheck: Overflow");
+            CIPHER_THROW("NativeIntegerT add_check: Overflow");
         return {r};
     }
 
@@ -437,7 +437,7 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
     NativeIntegerT& add_eq_check(const NativeIntegerT& b) {
         auto oldv{value_};
         if ((value_ += b.value_) < oldv)
-            CIPHER_THROW("NativeIntegerT AddEqCheck: Overflow");
+            CIPHER_THROW("NativeIntegerT add_eq_check: Overflow");
         return *this;
     }
 
@@ -502,7 +502,7 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
      */
     NativeIntegerT& sub_eq_check(const NativeIntegerT& b) {
         if (value_ < b.value_)
-            CIPHER_THROW("NativeIntegerT SubEqCheck: neg value");
+            CIPHER_THROW("NativeIntegerT sub_eq_check: neg value");
         return *this = value_ - b.value_;
     }
 
@@ -546,7 +546,7 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
     NativeIntegerT mul_check(const NativeIntegerT& b) const {
         auto p{b.value_ * value_};
         if (p < value_ || p < b.value_)
-            CIPHER_THROW("NativeIntegerT MulCheck: Overflow");
+            CIPHER_THROW("NativeIntegerT mul_check: Overflow");
         return {p};
     }
 
@@ -580,7 +580,7 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
     NativeIntegerT& mul_eq_check(const NativeIntegerT& b) {
         auto oldv{value_};
         if ((value_ *= b.value_) < oldv)
-            CIPHER_THROW("NativeIntegerT MulEqCheck: Overflow");
+            CIPHER_THROW("NativeIntegerT mul_eq_check: Overflow");
         return *this;
     }
 
@@ -603,7 +603,7 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
      */
     NativeIntegerT divided_by(const NativeIntegerT& b) const {
         if (b.value_ == 0)
-            CIPHER_THROW("NativeIntegerT DividedBy: zero");
+            CIPHER_THROW("NativeIntegerT divided_by: zero");
         return {value_ / b.value_};
     }
 
@@ -615,7 +615,7 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
      */
     NativeIntegerT& divided_by_eq(const NativeIntegerT& b) {
         if (b.value_ == 0)
-            CIPHER_THROW("NativeIntegerT DividedByEq: zero");
+            CIPHER_THROW("NativeIntegerT divided_by_eq: zero");
         return *this = value_ / b.value_;
     }
 
@@ -625,7 +625,7 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
      * @param p the exponent.
      * @return is the result of the exponentiation operation.
      */
-    NativeIntegerT Exp(uint32_t p) const {
+    NativeIntegerT raise_to(uint32_t p) const {
         NativeInt r{1};
         for (auto x = value_; p > 0; p >>= 1, x *= x)
             r *= (p & 0x1) ? x : 1;
@@ -656,7 +656,7 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
      */
     NativeIntegerT multiply_and_round(const NativeIntegerT& p, const NativeIntegerT& q) const {
         if (q.value_ == 0)
-            CIPHER_THROW("NativeIntegerT MultiplyAndRound: Divide by zero");
+            CIPHER_THROW("NativeIntegerT multiply_and_round: Divide by zero");
         return static_cast<NativeInt>(p.convert_to_double() * (this->convert_to_double() / q.convert_to_double()) +
                                       0.5);
     }
@@ -671,7 +671,7 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
      */
     NativeIntegerT& multiply_and_round_eq(const NativeIntegerT& p, const NativeIntegerT& q) {
         if (q.value_ == 0)
-            CIPHER_THROW("NativeIntegerT MultiplyAndRoundEq: Divide by zero");
+            CIPHER_THROW("NativeIntegerT multiply_and_round_eq: Divide by zero");
         return *this = static_cast<NativeInt>(
                        p.convert_to_double() * (this->convert_to_double() / q.convert_to_double()) + 0.5);
     }
@@ -685,7 +685,7 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
      */
     NativeIntegerT divide_and_round(const NativeIntegerT& q) const {
         if (q.value_ == 0)
-            CIPHER_THROW("NativeIntegerT DivideAndRound: zero");
+            CIPHER_THROW("NativeIntegerT divide_and_round: zero");
         auto ans{value_ / q.value_};
         auto rem{value_ % q.value_};
         auto half_q{q.value_ >> 1};
@@ -703,7 +703,7 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
      */
     NativeIntegerT& divide_and_round_eq(const NativeIntegerT& q) {
         if (q.value_ == 0)
-            CIPHER_THROW("NativeIntegerT DivideAndRoundEq: zero");
+            CIPHER_THROW("NativeIntegerT divide_and_round_eq: zero");
         auto ans{value_ / q.value_};
         auto rem{value_ % q.value_};
         auto half_q{q.value_ >> 1};
@@ -739,7 +739,7 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
      */
     NativeIntegerT compute_mu() const {
         if (value_ == 0)
-            CIPHER_THROW("NativeIntegerT ComputeMu: Divide by zero");
+            CIPHER_THROW("NativeIntegerT compute_mu: Divide by zero");
         constexpr int64_t W{NativeIntegerT::max_bits()};
         int64_t shift{2 * static_cast<int64_t>(cipher::get_msb(value_)) + 3};
         if (shift >= W)
@@ -1329,7 +1329,7 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
         SignedNativeInt modulus(mod_value.value_);
         SignedNativeInt a(value_ % mod_value.value_);
         if (a == 0) {
-            std::string msg = NativeIntegerT::to_string_impl(value_) + " does not have a ModInverse using " +
+            std::string msg = NativeIntegerT::to_string_impl(value_) + " does not have a mod_inverse using " +
                               NativeIntegerT::to_string_impl(mod_value.value_);
             CIPHER_THROW(msg);
         }
@@ -1409,7 +1409,7 @@ class NativeIntegerT final : public cipher::BigIntegerInterface<NativeIntegerT<N
      * @return  -1 for strictly less than, 0 for equal to and 1 for strictly
      * greater than conditions.
      */
-    int Compare(const NativeIntegerT& a) const {
+    int compare_with(const NativeIntegerT& a) const {
         return (value_ < a.value_) ? -1 : (value_ > a.value_) ? 1 : 0;
     }
 

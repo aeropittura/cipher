@@ -44,7 +44,7 @@ Installing Cipher on Linux
         sudo apt-get install libomp-dev
 
 
-    Then run_fn the following two commands to configure clang/clang++ as the default compiler for C and C++ (default paths are used here). For clang 11:
+    Then run the following two commands to configure clang/clang++ as the default compiler for C and C++ (default paths are used here). For clang 11:
 
     ::
 
@@ -60,43 +60,46 @@ Installing Cipher on Linux
         export CXX=/usr/bin/clang++
 
 
-2. Clone the repo.
-
-3. Create a directory where the binaries will be built. The typical choice is a subfolder "build". In this case, the commands are:
+2. Clone the repository and fetch the submodules:
 
     ::
 
-        mkdir build
-        cd build
-        cmake ..
+        git submodule update --init extern/cereal extern/google-test extern/google-benchmark
+
+3. Configure a build directory. The typical choice is a subfolder ``build``:
+
+    ::
+
+        cmake -S . -B build
 
 
 .. note:: Note that cmake will check for any system dependencies that are needed for the build process.
 
 
-4. The Cipher distribution includes some external libraries, such as ``GMP``, ``NTL`` and ``tcmalloc``. If you want to use any of these libraries:
-    a) install ``autoconf``:
+4. Optional dependencies: NTL/GMP (math backend 6) must be installed by the user (see :ref:`gmp_ntl_install`);
+   tcmalloc is built from the bundled ``extern/gperftools`` submodule. Both need ``autoconf``:
 
     ::
 
         sudo apt-get install autoconf
 
-    b) enable them when you run_fn cmake to force them to build (see instructions on cmake options).
+   Then enable them when you run cmake (``-DCIPHER_WITH_NTL=ON``, ``-DCIPHER_WITH_TCM=ON``; see :ref:`cmake_in_cipher`).
+   ``tools/setup/linux_packages.sh`` installs the common prerequisites on Debian/Ubuntu.
 
-5. Build Cipher by running the following command (this will take few minutes; using the ``-j <threads>`` command-line flag is suggested to speed up the build)
+5. Build Cipher by running the following command (this will take a few minutes; using the ``-j <threads>`` flag is suggested to speed up the build)
 
     ::
 
-        make
+        cmake --build build -j <threads>
 
 6. Install Cipher in a system directory (if desired or for production purposes)
 
     ::
 
-        make install
+        cmake --install build
 
-You would probably need to run "sudo make install" unless you are specifying some other install location. You can change the install location by running
-``cmake -DCMAKE_INSTALL_PREFIX=/your/path ..``
+You would probably need to run ``sudo cmake --install build`` unless you are specifying some other install location. You can change the install location by running
+``cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/your/path``
 
 Testing and cleaning the build
 ------------------------------
@@ -105,18 +108,18 @@ Run unit tests to make sure all capabilities operate as expected
 
     ::
 
-        make testall
+        ctest --test-dir build
 
 Run sample code to test, e.g.,
 
     ::
 
-        bin/examples/pke/simple-integers
+        build/bin/examples/fhe/simple_integers
 
-To remove the files built by make, you can execute
+To remove the files built by the build tool, you can execute
 
     ::
 
-        make clean
+        cmake --build build --target clean
 
-To change the compiler, e.g., from g++ to clang++, or completely remove any cmake/make build files, delete the "build" folder and recreate it.
+To change the compiler, e.g., from g++ to clang++, or completely remove any CMake build files, delete the ``build`` folder and configure again.

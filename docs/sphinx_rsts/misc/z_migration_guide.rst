@@ -1,155 +1,102 @@
-How To Migrate A User Project From Palisade To Cipher
-======================================================
+How To Migrate A User Project From OpenFHE To Cipher
+=====================================================
 
-This migration guide describes how to migrate user projects from Palisade to OpenFHE. The guide uses `src/pke/examples/simple-integers.cpp <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/simple-integers.cpp>`_ as an example.
+Cipher is derived from OpenFHE 1.6.1 and keeps its algorithms, parameters and
+serialization format; what changed are the header layout, the namespace, the
+names of types and functions, and the build options. A typical OpenFHE
+application is migrated mechanically with the rules below. The example
+``examples/fhe/simple_integers.cpp`` is the migrated form of OpenFHE's
+``simple-integers.cpp`` and is a useful side-by-side reference.
 
-Before making any changes to `simple-integers.cpp`:
+.. note::
+   The upstream guide for migrating from PALISADE to OpenFHE is part of the
+   OpenFHE documentation; it describes OpenFHE's API, not Cipher's.
 
-- Install OpenFHE (see instructions `here <https://openfhe-development.readthedocs.io/en/latest/sphinx_rsts/intro/installation/installation.html>`_)
+Build system
+------------
 
-- Change the ``CMakeLists.txt`` for your project: replace all instances of **Palisade** and **PALISADE** with **Cipher**
+Replace the OpenFHE package and its variables with the ``Cipher`` CMake
+package and its imported targets:
 
-Code changes (in `src/pke/examples/simple-integers.cpp`):
+.. code-block:: cmake
 
-1. Generate CryptoContext (see instructions `here <https://github.com/openfheorg/openfhe-development/tree/main/src/pke/examples#generating-cryptocontext-using-gencryptocontext>`_).
-You don’t need to set multiple arguments anymore to generate CryptoContext. A separate parameter object is required instead and every parameter in the object has a default value. So, set only those parameters that you want to change.
-For this example, we changed two of them:
+    find_package(Cipher CONFIG REQUIRED)
+    target_link_libraries(my_app PRIVATE Cipher::fhe)   # Cipher::fhe_static for static builds
 
-::
+``Cipher::core`` and ``Cipher::boolean`` (plus their ``_static`` variants)
+replace the core and binfhe libraries. A complete template is in
+``examples/standalone/CMakeLists.txt``. Build options now carry the
+``CIPHER_`` prefix, e.g. ``CIPHER_WITH_OPENMP``, ``CIPHER_MATH_BACKEND``,
+``CIPHER_NATIVE_SIZE``, ``CIPHER_BUILD_TESTS``; all of them are listed in
+``cmake/CipherOptions.cmake``.
 
-    // declare the parameter object
-    ContextParams<BfvRnsContext> parameters;
-    // set the desired parameter values
-    parameters.set_plaintext_modulus(65537);
-    parameters.set_multiplicative_depth(2);
-
-All parameter values can be seen by simply printing the parameter object:
-
-::
-
-    // print all parameters for CryptoContext
-    std::cout << parameters << std::endl;
-
-    And you get something similar to this line:
-    scheme: BFVRNS; pt_modulus: 65537; digit_size: 0; standard_deviation: 3.19; secret_key_dist: UNIFORM_TERNARY; max_relin_sk_deg: 2; ks_tech: BV; scal_tech: NORESCALE; batch_size: 0; first_mod_size_value: 60; num_large_digits: 0; multiplicative_depth:2; scaling_mod_size: 60; security_level: HEStd_128_classic; ring_dim: 0; eval_add_count: 0; key_switch_count: 0; encryption_technique: STANDARD; multiplication_technique: HPSPOVERQLEVELED; multiHopModSize: 0; pre_mode: INDCPA; multiparty_mode: FIXED_NOISE_MULTIPARTY; execution_mode: EXEC_EVALUATION; decryption_noise_mode: FIXED_NOISE_DECRYPT; noise_estimate: 0; desired_precision: 0; statistical_security: 30; num_adversarial_queries: 1
-
-
-The parameter object is created using a template and for BFV it should be
-
-::
-
-    ContextParams<BfvRnsContext> parameters;
-
-2. All other changes are mostly cosmetic as some types and functions were renamed:
-
-- ``KeyPair<RnsPoly>`` instead of ``LPKeyPair<RnsPoly>``
-- ``eval_rotate_key_gen()`` instead of ``eval_at_index_key_gen()``
-- ``eval_rotate()`` instead of ``eval_at_index()``
-- ``get_scheme()`` instead of ``GetEncryptionAlgorithm()``
-- ``get_noise_scale_deg()`` instead of ``GetDepth()``
-
-After you make all the changes mentioned above, you can link and run the example.
-
-Palisade-Cipher type mappings and new parameter types
-----------------------------------------------------------
+Headers and namespace
+---------------------
 
 .. list-table::
    :header-rows: 1
 
-   * - In Palisade
-     - In OpenFHE
-   * - **Arguments to cryptoContext->Enable()**
-     -
-   * - ENCRYPTION
-     - PKE
-   * - PRE
-     - PRE
-   * - SHE
-     - LEVELEDSHE
-   * - ADVANCEDSHE
-     - ADVANCEDSHE
-   * - MULTIPARTY
-     - MULTIPARTY
-   * - FHE
-     - FHE
-   * - **MODE**
-     - **SecretKeyDist**
-   * - RLWE
-     - GAUSSIAN
-   * - OPTIMIZED
-     - UNIFORM_TERNARY
-   * - SPARSE
-     - SPARSE_TERNARY
-   * - **KeySwitchTechnique**
-     - **KeySwitchTechnique**
-   * - HYBRID
-     - HYBRID
-   * - BV
-     - BV
-   * - GHS
-     - No longer supported
-   * - **RescalingTechnique**
-     - **ScalingTechnique**
-   * - APPROXRESCALE
-     - FIXEDMANUAL
-   * - APPROXAUTO
-     - FIXEDAUTO
-   * - EXACTRESCALE
-     - FLEXIBLEAUTO
-   * -
-     - FLEXIBLEAUTOEXT (new)
-   * -
-     - NORESCALE (new)
-   * - **BFV CryptoContext Call**
-     - **MultiplicationTechnique (BFV only)**
-   * - genCryptoContextBFVrnsB
-     - BEHZ
-   * - genCryptoContextBFVrns
-     - HPS
-   * -
-     - HPSPOVERQ (new)
-   * -
-     - HPSPOVERQLEVELED (new)
+   * - OpenFHE
+     - Cipher
+   * - ``#include "openfhe.h"``
+     - ``#include "cipher/cipher.h"``
+   * - ``#include "binfhecontext.h"``
+     - ``#include "cipher/boolean/context.h"``
+   * - ``#include "ciphertext-ser.h"``
+     - ``#include "cipher/fhe/ciphertext_ser.h"``
+   * - ``#include "cryptocontext-ser.h"``
+     - ``#include "cipher/fhe/context_ser.h"``
+   * - ``#include "key/key-ser.h"``
+     - ``#include "cipher/fhe/key/key_ser.h"``
+   * - ``#include "scheme/bfvrns/bfvrns-ser.h"`` (likewise bgvrns, ckksrns)
+     - ``#include "cipher/fhe/bfv/ser.h"`` (likewise ``bgv``, ``ckks``)
+   * - ``using namespace lbcrypto;``
+     - ``using namespace cipher;``
 
+Names
+-----
 
-If your project includes serialization, then the following files should be included in addition to “openfhe.h”:
+Types are ``PascalCase``, functions, methods and variables ``snake_case``, and
+data members end with an underscore. In practice:
 
-1. To serialize ciphertext:
+.. list-table::
+   :header-rows: 1
 
-::
+   * - OpenFHE
+     - Cipher
+   * - ``DCRTPoly``
+     - ``RnsPoly``
+   * - ``CCParams<CryptoContextBFVRNS>`` (likewise BGVRNS, CKKSRNS)
+     - ``ContextParams<BfvRnsContext>`` (likewise ``BgvRnsContext``, ``CkksRnsContext``)
+   * - ``GenCryptoContext(parameters)``
+     - ``make_crypto_context(parameters)``
+   * - ``parameters.SetMultiplicativeDepth(2)``
+     - ``parameters.set_multiplicative_depth(2)``
+   * - ``cc->Enable(PKE)``
+     - ``cc->enable(PKE)``
+   * - ``cc->KeyGen()``, ``cc->EvalMultKeyGen(keys.secretKey)``
+     - ``cc->key_gen()``, ``cc->eval_mult_key_gen(keys.secret_key)``
+   * - ``cc->MakePackedPlaintext(v)``, ``cc->Encrypt(...)``, ``cc->EvalMult(a, b)``
+     - ``cc->make_packed_plaintext(v)``, ``cc->encrypt(...)``, ``cc->eval_mult(a, b)``
+   * - ``plaintext->SetLength(n)``, ``cc->GetRingDimension()``
+     - ``plaintext->set_length(n)``, ``cc->get_ring_dimension()``
+   * - ``Serial::SerializeToFile(...)``, ``Serial::DeserializeFromFile(...)``
+     - ``serialization::serialize_to_file(...)``, ``serialization::deserialize_from_file(...)``
+   * - ``BinFHEContext``, ``cc.GenerateBinFHEContext(STD128)``
+     - ``BooleanContext``, ``cc.generate_boolean_context(STD128)``
+   * - ``cc.BTKeyGen(sk)``, ``cc.EvalBinGate(AND, a, b)``
+     - ``cc.bt_key_gen(sk)``, ``cc.eval_bin_gate(AND, a, b)``
+   * - ``OpenFHEException``, ``OPENFHE_THROW(...)``
+     - ``CipherException``, ``CIPHER_THROW(...)``
 
-    #include "ciphertext-ser.h"
+Enumerations and their values (``PKE``, ``LEVELEDSHE``, ``FLEXIBLEAUTO``,
+``HYBRID``, ``STD128``, ``UNIFORM_TERNARY``, ...) keep their names. When a
+name is not obvious from these rules, search the headers under
+``include/cipher`` for the ``snake_case`` form.
 
-2. To serialize cryptocontext:
+Serialized data
+---------------
 
-::
-
-    #include "cryptocontext-ser.h"
-
-3. To serialize key(s):
-
-::
-
-    #include "key/key-ser.h"
-
-4. … and the scheme-related serialization header file
-
-- for CKKS
-
-::
-
-    #include "scheme/ckksrns/ckksrns-ser.h"
-- for BGV
-
-::
-
-    #include "scheme/bgvrns/bgvrns-ser.h"
-- for BFV
-
-::
-
-    #include "scheme/bfvrns/bfvrns-ser.h"
-
-See the `code difference <https://github.com/openfheorg/migration/compare/dd717a0..a4629a8?diff=split>`_ in ``simple-integers.cpp`` before and after the migration.
-
-**For advanced users:** see the `code difference <https://github.com/openfheorg/migration/compare/b25e60e..6b01291?diff=split>`_ in ``openfhe-genomic-examples`` before and after the migration.
+Serialized contexts, keys and ciphertexts use the same on-disk format and type
+names as OpenFHE 1.6.1, so files written by either library can be read by the
+other (binary and JSON). No data migration is needed.

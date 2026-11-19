@@ -89,7 +89,7 @@ class SchSwchParams {
     void verify_object_data() const {
         if (!set_params_from_ckks_cryptocontext_called_) {
             CIPHER_THROW(
-                    "Objects of class SchSwchParams may be used only after having called SetParamsFromCKKSCryptocontext()");
+                    "Objects of class SchSwchParams may be used only after having called set_params_from_ckks_cryptocontext()");
         }
     }
 

@@ -60,46 +60,46 @@ enum TEST_CASE_TYPE : int {
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
-    std::string typeName;
+    std::string type_name_of;
     switch (type) {
         case ADD_PACKED_UTBGVRNS:
-            typeName = "ADD_PACKED_UTBGVRNS";
+            type_name_of = "ADD_PACKED_UTBGVRNS";
             break;
         case MULT_PACKED_UTBGVRNS:
-            typeName = "MULT_PACKED_UTBGVRNS";
+            type_name_of = "MULT_PACKED_UTBGVRNS";
             break;
         case EVALATINDEX_UTBGVRNS:
-            typeName = "EVALATINDEX_UTBGVRNS";
+            type_name_of = "EVALATINDEX_UTBGVRNS";
             break;
         case EVALMERGE_UTBGVRNS:
-            typeName = "EVALMERGE_UTBGVRNS";
+            type_name_of = "EVALMERGE_UTBGVRNS";
             break;
         case RE_ENCRYPTION_UTBGVRNS:
-            typeName = "RE_ENCRYPTION_UTBGVRNS";
+            type_name_of = "RE_ENCRYPTION_UTBGVRNS";
             break;
         case AUTO_LEVEL_REDUCE_UTBGVRNS:
-            typeName = "AUTO_LEVEL_REDUCE_UTBGVRNS";
+            type_name_of = "AUTO_LEVEL_REDUCE_UTBGVRNS";
             break;
         case COMPRESS_UTBGVRNS:
-            typeName = "COMPRESS_UTBGVRNS";
+            type_name_of = "COMPRESS_UTBGVRNS";
             break;
         case EVAL_FAST_ROTATION_UTBGVRNS:
-            typeName = "EVAL_FAST_ROTATION_UTBGVRNS";
+            type_name_of = "EVAL_FAST_ROTATION_UTBGVRNS";
             break;
         case METADATA_UTBGVRNS:
-            typeName = "METADATA_UTBGVRNS";
+            type_name_of = "METADATA_UTBGVRNS";
             break;
         case CRYPTOPARAMS_VALIDATION_UTBGVRNS:
-            typeName = "CRYPTOPARAMS_VALIDATION_UTBGVRNS";
+            type_name_of = "CRYPTOPARAMS_VALIDATION_UTBGVRNS";
             break;
         case MULT_PLAINTEXT_AT_LEVEL_UTBGVRNS:
-            typeName = "MULT_PLAINTEXT_AT_LEVEL_UTBGVRNS";
+            type_name_of = "MULT_PLAINTEXT_AT_LEVEL_UTBGVRNS";
             break;
         default:
-            typeName = "UNKNOWN_UTBGVRNS";
+            type_name_of = "UNKNOWN_UTBGVRNS";
             break;
     }
-    return os << typeName;
+    return os << type_name_of;
 }
 //===========================================================================================================
 struct TEST_CASE_UTBGVRNS {
@@ -126,7 +126,7 @@ struct TEST_CASE_UTBGVRNS {
 
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
-static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTBGVRNS>& test) {
+static auto make_test_name = [](const testing::TestParamInfo<TEST_CASE_UTBGVRNS>& test) {
     return test.param.build_test_name();
 };
 
@@ -153,7 +153,7 @@ constexpr SecurityLevel SEC_LVL = HEStd_NotSet;
 
 // clang-format off
 static std::vector<TEST_CASE_UTBGVRNS> test_cases_utbgvrns = {
-    // TestType,          Descr,  Scheme,        RDim,     MultDepth,  SModSize,   DSize,    BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, ScalTech,        LDigits, PtMod, std_dev,   EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,          Descr,  Scheme,        RDim,     MultDepth,  SModSize,   DSize,    batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, scal_tech,        LDigits, PtMod, std_dev,   EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { ADD_PACKED_UTBGVRNS, "01", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FLEXIBLEAUTO,    DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { ADD_PACKED_UTBGVRNS, "02", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, FIRST_MOD_SIZE, SEC_LVL, BV,     FIXEDMANUAL,     DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { ADD_PACKED_UTBGVRNS, "03", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FIXEDAUTO,       DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
@@ -166,7 +166,7 @@ static std::vector<TEST_CASE_UTBGVRNS> test_cases_utbgvrns = {
     { ADD_PACKED_UTBGVRNS, "09", {BGVRNS_SCHEME,    32768,          3, DFLT,       DSIZE,    BATCH,   DFLT,       MAX_RELIN_DEG, FIRST_MOD_SIZE, SEC_LVL, HYBRID, FIXEDMANUAL,     DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { ADD_PACKED_UTBGVRNS, "10", {BGVRNS_SCHEME,    32768,          3, DFLT,       DSIZE,    BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, HYBRID, FIXEDAUTO,       DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     // ==========================================
-    // TestType,           Descr,  Scheme,        RDim,     MultDepth,  SModSize,   DSize,    BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,           Descr,  Scheme,        RDim,     MultDepth,  SModSize,   DSize,    batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, scal_tech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { MULT_PACKED_UTBGVRNS, "01", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FLEXIBLEAUTO,    DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { MULT_PACKED_UTBGVRNS, "02", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, FIRST_MOD_SIZE, SEC_LVL, BV,     FIXEDMANUAL,     DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { MULT_PACKED_UTBGVRNS, "03", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FIXEDAUTO,       DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
@@ -176,7 +176,7 @@ static std::vector<TEST_CASE_UTBGVRNS> test_cases_utbgvrns = {
     { MULT_PACKED_UTBGVRNS, "07", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       DSIZE,    BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, HYBRID, FIXEDAUTO,       DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { MULT_PACKED_UTBGVRNS, "08", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       DSIZE,    BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, HYBRID, FLEXIBLEAUTOEXT, DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     // ==========================================
-    // TestType,           Descr,  Scheme,        RDim,     MultDepth,  SModSize,   DSize,    BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,           Descr,  Scheme,        RDim,     MultDepth,  SModSize,   DSize,    batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, scal_tech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { EVALATINDEX_UTBGVRNS, "01", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FLEXIBLEAUTO,    DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { EVALATINDEX_UTBGVRNS, "02", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, FIRST_MOD_SIZE, SEC_LVL, BV,     FIXEDMANUAL,     DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { EVALATINDEX_UTBGVRNS, "03", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FIXEDAUTO,       DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
@@ -186,7 +186,7 @@ static std::vector<TEST_CASE_UTBGVRNS> test_cases_utbgvrns = {
     { EVALATINDEX_UTBGVRNS, "07", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       DSIZE,    BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, HYBRID, FIXEDAUTO,       DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { EVALATINDEX_UTBGVRNS, "08", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       DSIZE,    BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, HYBRID, FLEXIBLEAUTOEXT, DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     // ==========================================
-    // TestType,         Descr,  Scheme,        RDim,     MultDepth,  SModSize,   DSize,    BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,         Descr,  Scheme,        RDim,     MultDepth,  SModSize,   DSize,    batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, scal_tech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { EVALMERGE_UTBGVRNS, "01", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FLEXIBLEAUTO,    DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { EVALMERGE_UTBGVRNS, "02", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, FIRST_MOD_SIZE, SEC_LVL, BV,     FIXEDMANUAL,     DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { EVALMERGE_UTBGVRNS, "03", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FIXEDAUTO,       DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
@@ -196,7 +196,7 @@ static std::vector<TEST_CASE_UTBGVRNS> test_cases_utbgvrns = {
     { EVALMERGE_UTBGVRNS, "07", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       DSIZE,    BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, HYBRID, FIXEDAUTO,       DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { EVALMERGE_UTBGVRNS, "08", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       DSIZE,    BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, HYBRID, FLEXIBLEAUTOEXT, DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     // ==========================================
-    // TestType,             Descr,  Scheme,        RDim,     MultDepth,  SModSize,   DSize,    BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,             Descr,  Scheme,        RDim,     MultDepth,  SModSize,   DSize,    batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, scal_tech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { RE_ENCRYPTION_UTBGVRNS, "01", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FLEXIBLEAUTO,    DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { RE_ENCRYPTION_UTBGVRNS, "02", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, FIRST_MOD_SIZE, SEC_LVL, BV,     FIXEDMANUAL,     DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { RE_ENCRYPTION_UTBGVRNS, "03", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FIXEDAUTO,       DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
@@ -206,7 +206,7 @@ static std::vector<TEST_CASE_UTBGVRNS> test_cases_utbgvrns = {
     { RE_ENCRYPTION_UTBGVRNS, "07", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       DSIZE,    BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, HYBRID, FIXEDAUTO,       DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    INDCPA}, },
     { RE_ENCRYPTION_UTBGVRNS, "08", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       DSIZE,    BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, HYBRID, FLEXIBLEAUTOEXT, DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    INDCPA}, },
     // ==========================================
-    // TestType,                 Descr,  Scheme,        RDim,     MultDepth,  SModSize,   DSize,    BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, ScalTech,        LDigits, PtMod, std_dev,   EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,                 Descr,  Scheme,        RDim,     MultDepth,  SModSize,   DSize,    batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, scal_tech,        LDigits, PtMod, std_dev,   EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { AUTO_LEVEL_REDUCE_UTBGVRNS, "01", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FLEXIBLEAUTO,    DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { AUTO_LEVEL_REDUCE_UTBGVRNS, "02", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, FIRST_MOD_SIZE, SEC_LVL, BV,     FIXEDMANUAL,     DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { AUTO_LEVEL_REDUCE_UTBGVRNS, "03", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FIXEDAUTO,       DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
@@ -216,7 +216,7 @@ static std::vector<TEST_CASE_UTBGVRNS> test_cases_utbgvrns = {
     { AUTO_LEVEL_REDUCE_UTBGVRNS, "07", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       DSIZE,    BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, HYBRID, FIXEDAUTO,       DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { AUTO_LEVEL_REDUCE_UTBGVRNS, "08", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       DSIZE,    BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, HYBRID, FLEXIBLEAUTOEXT, DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     // ==========================================
-    // TestType,        Descr,  Scheme,        RDim,     MultDepth,  SModSize,   DSize,    BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, ScalTech,        LDigits, PtMod, std_dev,   EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,        Descr,  Scheme,        RDim,     MultDepth,  SModSize,   DSize,    batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, scal_tech,        LDigits, PtMod, std_dev,   EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { COMPRESS_UTBGVRNS, "01", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FLEXIBLEAUTO,    DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { COMPRESS_UTBGVRNS, "02", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, FIRST_MOD_SIZE, SEC_LVL, BV,     FIXEDMANUAL,     DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { COMPRESS_UTBGVRNS, "03", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FIXEDAUTO,       DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
@@ -226,7 +226,7 @@ static std::vector<TEST_CASE_UTBGVRNS> test_cases_utbgvrns = {
     { COMPRESS_UTBGVRNS, "07", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       DSIZE,    BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, HYBRID, FIXEDAUTO,       DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { COMPRESS_UTBGVRNS, "08", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       DSIZE,    BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, HYBRID, FLEXIBLEAUTOEXT, DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     // ==========================================
-    // TestType,                  Descr,  Scheme,        RDim,     MultDepth,  SModSize,   DSize,    BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, ScalTech,        LDigits, PtMod, std_dev,   EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,                  Descr,  Scheme,        RDim,     MultDepth,  SModSize,   DSize,    batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, scal_tech,        LDigits, PtMod, std_dev,   EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { EVAL_FAST_ROTATION_UTBGVRNS, "01", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FLEXIBLEAUTO,    DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { EVAL_FAST_ROTATION_UTBGVRNS, "02", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, FIRST_MOD_SIZE, SEC_LVL, BV,     FIXEDMANUAL,     DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { EVAL_FAST_ROTATION_UTBGVRNS, "03", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FIXEDAUTO,       DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
@@ -236,7 +236,7 @@ static std::vector<TEST_CASE_UTBGVRNS> test_cases_utbgvrns = {
     { EVAL_FAST_ROTATION_UTBGVRNS, "07", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       DSIZE,    BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, HYBRID, FIXEDAUTO,       DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { EVAL_FAST_ROTATION_UTBGVRNS, "08", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       DSIZE,    BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, HYBRID, FLEXIBLEAUTOEXT, DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     // ==========================================
-    // TestType,        Descr,  Scheme,        RDim,     MultDepth,  SModSize,   DSize,    BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, ScalTech,        LDigits, PtMod, std_dev,   EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,        Descr,  Scheme,        RDim,     MultDepth,  SModSize,   DSize,    batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, scal_tech,        LDigits, PtMod, std_dev,   EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { METADATA_UTBGVRNS, "01", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FLEXIBLEAUTO,    DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { METADATA_UTBGVRNS, "02", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, FIRST_MOD_SIZE, SEC_LVL, BV,     FIXEDMANUAL,     DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { METADATA_UTBGVRNS, "03", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FIXEDAUTO,       DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
@@ -246,12 +246,12 @@ static std::vector<TEST_CASE_UTBGVRNS> test_cases_utbgvrns = {
     { METADATA_UTBGVRNS, "07", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       DSIZE,    BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, HYBRID, FIXEDAUTO,       DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { METADATA_UTBGVRNS, "08", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       DSIZE,    BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, HYBRID, FLEXIBLEAUTOEXT, DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     // ==========================================
-    // TestType,                       Descr,  Scheme,        RDim,     MultDepth,  SModSize,   DSize,    BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, ScalTech,        LDigits, PtMod, std_dev,   EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,                       Descr,  Scheme,        RDim,     MultDepth,  SModSize,   DSize,    batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, scal_tech,        LDigits, PtMod, std_dev,   EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { CRYPTOPARAMS_VALIDATION_UTBGVRNS, "01", {BGVRNS_SCHEME, 3,        MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FLEXIBLEAUTO,    DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { CRYPTOPARAMS_VALIDATION_UTBGVRNS, "02", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, 60,             SEC_LVL, BV,     FIXEDAUTO,       DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { CRYPTOPARAMS_VALIDATION_UTBGVRNS, "03", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     NORESCALE,       DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     // ==========================================
-    // TestType,                        Descr,  Scheme,        RDim,     MultDepth,  SModSize,   DSize,    BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, ScalTech,        LDigits, PtMod, std_dev,   EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,                        Descr,  Scheme,        RDim,     MultDepth,  SModSize,   DSize,    batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, scal_tech,        LDigits, PtMod, std_dev,   EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { MULT_PLAINTEXT_AT_LEVEL_UTBGVRNS, "01", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FLEXIBLEAUTO,    DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { MULT_PLAINTEXT_AT_LEVEL_UTBGVRNS, "02", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       BV_DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FLEXIBLEAUTOEXT, DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { MULT_PLAINTEXT_AT_LEVEL_UTBGVRNS, "03", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       DSIZE,    BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, HYBRID, FLEXIBLEAUTO,    DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
@@ -326,7 +326,7 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_add->get_length());
             check_equality(plaintext_add->get_packed_value(), results->get_packed_value(), eps,
-                           failmsg + " EvalAdd fails");
+                           failmsg + " eval_add fails");
 
             // Testing eval_add_in_place
             Ciphertext<Element> ciphertext1_clone = ciphertext1->clone();
@@ -334,7 +334,7 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             cc->decrypt(kp.secret_key, ciphertext1_clone, &results);
             results->set_length(plaintext_add->get_length());
             check_equality(plaintext_add->get_packed_value(), results->get_packed_value(), eps,
-                           failmsg + " EvalAddInPlace fails");
+                           failmsg + " eval_add_in_place fails");
 
             // Testing operator+
             c_result = ciphertext1 + ciphertext2;
@@ -356,7 +356,7 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_sub->get_length());
             check_equality(plaintext_sub->get_packed_value(), results->get_packed_value(), eps,
-                           failmsg + " EvalSub fails");
+                           failmsg + " eval_sub fails");
 
             // Testing operator-
             c_result = ciphertext1 - ciphertext2;
@@ -378,21 +378,21 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_add->get_length());
             check_equality(plaintext_add->get_packed_value(), results->get_packed_value(), eps,
-                           failmsg + " EvalAdd Ct and Pt fails");
+                           failmsg + " eval_add Ct and Pt fails");
 
             // Testing eval_sub ciphertext - plaintext
             c_result = cc->eval_sub(ciphertext1, plaintext2);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_sub->get_length());
             check_equality(plaintext_sub->get_packed_value(), results->get_packed_value(), eps,
-                           failmsg + " EvalSub Ct and Pt fails");
+                           failmsg + " eval_sub Ct and Pt fails");
 
             // Testing eval_negate
             c_result = cc->eval_negate(ciphertext1);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(negatives1->get_length());
             check_equality(negatives1->get_packed_value(), results->get_packed_value(), eps,
-                           failmsg + " EvalNegate fails");
+                           failmsg + " eval_negate fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -443,7 +443,7 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
                     Plaintext pt_mutable = cc->make_packed_plaintext(y, 1, pt_level);
                     cc->decrypt(kp.secret_key, cc->eval_mult_mutable(ct_mutable, pt_mutable), &result);
                     result->set_length(VECTOR_SIZE);
-                    check_equality(xy, result->get_packed_value(), eps, msg + ": EvalMultMutable fails");
+                    check_equality(xy, result->get_packed_value(), eps, msg + ": eval_mult_mutable fails");
                 }
             }
         } catch (std::exception& e) {
@@ -519,7 +519,7 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_mult->get_length());
             check_equality(plaintext_mult->get_packed_value(), results->get_packed_value(), eps,
-                           failmsg + " EvalMultNoRelin Ct and Ct fails");
+                           failmsg + " eval_mult_no_relin Ct and Ct fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -577,14 +577,14 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_left2->get_length());
             check_equality(plaintext_left2->get_packed_value(), results->get_packed_value(), eps,
-                           failmsg + " EvalAtIndex(+2) fails");
+                           failmsg + " eval_at_index(+2) fails");
 
             // Testing eval_at_index -2
             c_result = cc->eval_at_index(ciphertext1, -2);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_right2->get_length());
             check_equality(plaintext_right2->get_packed_value(), results->get_packed_value(), eps,
-                           failmsg + " EvalAtIndex(-2) fails");
+                           failmsg + " eval_at_index(-2) fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -651,7 +651,7 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(p_merged->get_length());
             check_equality(p_merged->get_packed_value(), results->get_packed_value(), eps,
-                           failmsg + " EvalMerge fails");
+                           failmsg + " eval_merge fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1024,14 +1024,14 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_left2->get_length());
             check_equality(plaintext_left2->get_packed_value(), results->get_packed_value(), eps,
-                           failmsg + " EvalAtIndex(+2) fails");
+                           failmsg + " eval_at_index(+2) fails");
 
             // Testing eval_at_index -2
             c_result = cc->eval_fast_rotation(ciphertext1, -2, m, decompose);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_right2->get_length());
             check_equality(plaintext_right2->get_packed_value(), results->get_packed_value(), eps,
-                           failmsg + " EvalAtIndex(-2) fails");
+                           failmsg + " eval_at_index(-2) fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1077,32 +1077,32 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             Ciphertext<Element> c_add_cc = cc->eval_add(ciphertext1, ciphertext2);
             auto add_cc_val_test = MetadataTest::get_metadata<Element>(c_add_cc);
             EXPECT_EQ(val1->get_metadata(), add_cc_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalAdd(ctx,ctx)";
+                    << "Ciphertext metadata mismatch in eval_add(ctx,ctx)";
 
             // Checking if metadata is carried over in eval_add_in_place(ctx,ctx)
             Ciphertext<Element> ciphertext1_clone = ciphertext1->clone();
             cc->eval_add_in_place(ciphertext1_clone, ciphertext2);
             auto add_cc_in_place_val_test = MetadataTest::get_metadata<Element>(ciphertext1_clone);
             EXPECT_EQ(val1->get_metadata(), add_cc_in_place_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalAddInPlace(ctx,ctx)";
+                    << "Ciphertext metadata mismatch in eval_add_in_place(ctx,ctx)";
 
             // Checking if metadata is carried over in eval_add(ctx,ptx)
             Ciphertext<Element> c_add_cp = cc->eval_add(ciphertext1, plaintext1);
             auto add_cp_val_test = MetadataTest::get_metadata<Element>(c_add_cp);
             EXPECT_EQ(val1->get_metadata(), add_cp_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalAdd(ctx,ptx)";
+                    << "Ciphertext metadata mismatch in eval_add(ctx,ptx)";
 
             // Checking if metadata is carried over in eval_sub(ctx,ctx)
             Ciphertext<Element> c_sub_cc = cc->eval_sub(ciphertext1, ciphertext2);
             auto sub_cc_val_test = MetadataTest::get_metadata<Element>(c_sub_cc);
             EXPECT_EQ(val1->get_metadata(), sub_cc_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalSub(ctx,ctx)";
+                    << "Ciphertext metadata mismatch in eval_sub(ctx,ctx)";
 
             // Checking if metadata is carried over in eval_sub(ctx,ptx)
             Ciphertext<Element> c_sub_cp = cc->eval_sub(ciphertext1, plaintext1);
             auto sub_cp_val_test = MetadataTest::get_metadata<Element>(c_sub_cp);
             EXPECT_EQ(val1->get_metadata(), sub_cp_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalSub(ctx,ptx)";
+                    << "Ciphertext metadata mismatch in eval_sub(ctx,ptx)";
 
             // Checking if metadata is carried over in eval_mult(ctx,ctx)
             Ciphertext<Element> c_mult_cc = cc->eval_mult(ciphertext1, ciphertext2);
@@ -1120,13 +1120,13 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             auto c_at_index2 = cc->eval_at_index(ciphertext1, 2);
             auto at_index2_val_test = MetadataTest::get_metadata<Element>(c_at_index2);
             EXPECT_EQ(val1->get_metadata(), at_index2_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalAtIndex +2";
+                    << "Ciphertext metadata mismatch in eval_at_index +2";
 
             // Checking if metadata is carried over in eval_at_index -2 (right rotate)
             auto c_at_index_minus2 = cc->eval_at_index(ciphertext1, -2);
             auto at_index_minus2_val_test = MetadataTest::get_metadata<Element>(c_at_index_minus2);
             EXPECT_EQ(val1->get_metadata(), at_index_minus2_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalAtIndex -2";
+                    << "Ciphertext metadata mismatch in eval_at_index -2";
 
             std::vector<double> weights(2);
             for (int i = 0; i < 2; i++)
@@ -1139,7 +1139,7 @@ class UTBGVRNS : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS> {
             // Checking if metadata is carried over in eval_sum
             auto c_sum = cc->eval_sum(ciphertext1, VECTOR_SIZE);
             auto sum_val_test = MetadataTest::get_metadata<Element>(c_sum);
-            EXPECT_EQ(val1->get_metadata(), sum_val_test->get_metadata()) << "Ciphertext metadata mismatch in EvalSum";
+            EXPECT_EQ(val1->get_metadata(), sum_val_test->get_metadata()) << "Ciphertext metadata mismatch in eval_sum";
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1212,4 +1212,4 @@ TEST_P(UTBGVRNS, BGVRNS) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTBGVRNS, ::testing::ValuesIn(test_cases_utbgvrns), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTBGVRNS, ::testing::ValuesIn(test_cases_utbgvrns), make_test_name);

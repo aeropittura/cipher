@@ -1,4 +1,4 @@
-Publications on Lattice Crypto Scheme Implementations in Cipher
+Publications on Lattice Crypto Scheme Implementations in OpenFHE
 =================================================================
 
 Homomorphic Encryption

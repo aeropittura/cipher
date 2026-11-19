@@ -65,7 +65,7 @@ void DiscreteGaussianGeneratorImpl<VecType>::set_std(double std) {
     if (std::log2((std_ = std)) > 59)
         CIPHER_THROW("Standard deviation cannot exceed 59 bits");
     if ((peikert_ = (std_ < KARNEY_THRESHOLD)))
-        this->Initialize();
+        this->initialize();
 }
 
 template <typename VecType>
@@ -74,7 +74,7 @@ double DiscreteGaussianGeneratorImpl<VecType>::get_std() const {
 }
 
 template <typename VecType>
-void DiscreteGaussianGeneratorImpl<VecType>::Initialize() {
+void DiscreteGaussianGeneratorImpl<VecType>::initialize() {
     // usually the bound of std_ * M is used, where M = 12 .. 40
     // we use M = std::sqrt(-2. * std::log(5e-32)) = 12.0061 here,
     // which corresponds to the probability of roughly 2^(-100)
@@ -96,7 +96,7 @@ int64_t DiscreteGaussianGeneratorImpl<VecType>::find_in_vector(const std::vector
     auto lower = std::lower_bound(S.begin(), S.end(), search);
     if (lower != S.end())
         return lower - S.begin() + 1;
-    CIPHER_THROW("DGG Inversion Sampling. FindInVector value not found: " + std::to_string(search));
+    CIPHER_THROW("DGG Inversion Sampling. find_in_vector value not found: " + std::to_string(search));
 }
 
 template <typename VecType>
@@ -185,7 +185,7 @@ int32_t DiscreteGaussianGeneratorImpl<VecType>::generate_integer(double mean, do
         //  check if dice land below pdf
         flag_success = (dice <= unnormalized_gaussian_pdf_optimized(mean, sigma_factor, x));
         if (++count > limit)
-            CIPHER_THROW("GenerateInteger could not find success after repeated attempts");
+            CIPHER_THROW("generate_integer could not find success after repeated attempts");
     }
     return x;
 }

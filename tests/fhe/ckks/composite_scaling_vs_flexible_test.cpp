@@ -244,7 +244,7 @@ class CkksCompositeVsFlexibleTest : public ::testing::Test {
 };
 
 //===========================================================================================================
-// Scenario 1: bootstrapping with HYBRID key switching (NumLargeDigits = 3). Fixed by widening the P/Q
+// Scenario 1: bootstrapping with HYBRID key switching (num_large_digits = 3). Fixed by widening the P/Q
 // margin for composite scaling. Needs ring 2^14 for the digit margin to become tight (verified to not
 // reproduce at 2^12/2^13); sparse 1024-slot packing keeps the test cheap. Pre-fix: CS ~4 bits below FA.
 TEST_F(CkksCompositeVsFlexibleTest, FullPackingBootstrap_HybridKeySwitch) {

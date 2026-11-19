@@ -1,7 +1,7 @@
 PKE Keys documentation
 ====================================
 
-`Github Source <https://github.com/openfheorg/openfhe-development/tree/main/src/pke/include/key>`_:  This folder contains the header files of the various keys that are defined within ``Open-FHE``.
+`include/cipher/fhe/key <../../../../include/cipher/fhe/key>`_: This folder contains the header files of the various keys that are defined within Cipher.
 
 
 .. contents:: Page Contents
@@ -11,9 +11,9 @@ PKE Keys documentation
 File Listings
 -------------
 
-`All Key Top-Level Include (allkey.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/include/key/allkey.h>`_
+`Key Serialization (key_ser.h) <../../../../include/cipher/fhe/key/key_ser.h>`_
 
-- Top-level ``#include`` for access to all capabilities
+- Includes all key types together with their serialization support; ``cipher/cipher.h`` includes it
 
 
 Keys Class Inheritance
@@ -29,25 +29,23 @@ Keys Class Inheritance
 Key Class File Listings
 -----------------------
 
-`Eval Key (evalkey.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/include/key/evalkey.h>`_
+`Eval Key (eval_key.h) <../../../../include/cipher/fhe/key/eval_key.h>`_
 
 - Inherits from the base ``Key`` class.
 
 - Serves as base class for ``Eval Key Relin``
 
-`Eval Key Relin (evalkeyrelin.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/include/key/evalkeyrelin.h>`_
+`Eval Key Relin (relin_key.h) <../../../../include/cipher/fhe/key/relin_key.h>`_
 
 - Get and set relinearization elements
 
 - Inherits from ``Eval Key``
 
-`Key (key.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/include/key/key.h>`_
+`Key (key.h) <../../../../include/cipher/fhe/key/key.h>`_
 
 - Base Key class
 
-`Key Serialization (key-ser.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/include/key/key-ser.h>`_
-
-- Capabilities for serializing the keys using `Cereal <https://github.com/USCiLab/cereal>`__
+- Serialization of the keys uses `Cereal <https://github.com/USCiLab/cereal>`__ (see ``key_ser.h`` above)
 
 Key Pair
 --------
@@ -61,10 +59,10 @@ Key Pair
 Key Pair File Listings
 -----------------------
 
-`Key Pair (keypair.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/include/key/keypair.h>`_
+`Key Pair (key_pair.h) <../../../../include/cipher/fhe/key/key_pair.h>`_
 
 - Container for the ``private key`` and ``public key`` implementations
 
-`Private Key (privatekey.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/include/key/privatekey.h>`_
+`Private Key (private_key.h) <../../../../include/cipher/fhe/key/private_key.h>`_
 
-`Public Key (publickey.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/include/key/publickey.h>`_
+`Public Key (public_key.h) <../../../../include/cipher/fhe/key/public_key.h>`_

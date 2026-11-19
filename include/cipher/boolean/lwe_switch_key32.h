@@ -241,7 +241,7 @@ class LweSwitchingKey32Impl : public Serializable {
         ar(::cereal::make_nvp("d", d_));
         ar(::cereal::make_nvp("top", top_));
         ar(::cereal::make_nvp("n", n_));
-        Size();
+        compute_sizes();
         key_a_.reset(new uint32_t[size_a_]);
         key_b_.reset(new uint32_t[size_b_]);
         archive_bytes(ar, key_a_.get(), size_a_);
@@ -271,7 +271,7 @@ class LweSwitchingKey32Impl : public Serializable {
         }
     }
 
-    void Size() {
+    void compute_sizes() {
         rows_ = static_cast<uint64_t>(d_ - 1) * (m_ - 1) + (top_ - 1);
         size_a_ = static_cast<uint64_t>(N_) * rows_ * n_;
         size_b_ = static_cast<uint64_t>(N_) * rows_;

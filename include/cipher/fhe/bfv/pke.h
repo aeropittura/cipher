@@ -108,7 +108,7 @@ class BfvRnsPke : public RnsPke {
     DecryptResult decrypt(ConstCiphertext<RnsPoly> ciphertext, const PrivateKey<RnsPoly> private_key,
                           Poly* plaintext) const override {
         std::string err_msg =
-                "PKEBFVRNS: Decryption to Poly from DCRTPoly is not supported as it "
+                "BfvRnsPke: Decryption to Poly from RnsPoly is not supported as it "
                 "may "
                 "lead to incorrect results.";
         CIPHER_THROW(err_msg);

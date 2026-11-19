@@ -1670,7 +1670,7 @@ class RnsCryptoParams : public RlweCryptoParams<RnsPoly> {
     // params_ql_hybrid_[l] = params for first (l+1) Q towers; index by size_ql-1 when looking up.
     std::vector<std::shared_ptr<RnsParams<BigInteger>>> params_ql_hybrid_;
 
-    // Stores the partition size {PartQ} = {Q_1,...,Q_l}
+    // Stores the partition size {part_q} = {Q_1,...,Q_l}
     // where each Q_i is the product of q_j
     uint32_t num_part_q_ = 0;
 

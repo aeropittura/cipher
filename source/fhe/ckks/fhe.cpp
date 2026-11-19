@@ -402,7 +402,7 @@ std::shared_ptr<std::map<uint32_t, EvalKey<RnsPoly>>> CkksRnsFhe::eval_bootstrap
 std::vector<uint32_t> CkksRnsFhe::eval_bootstrap_key_map_indices(const CryptoContext<RnsPoly>& cc, uint32_t slots) {
     const auto crypto_params = std::dynamic_pointer_cast<CkksRnsCryptoParams>(cc->get_crypto_parameters());
     if (!crypto_params)
-        CIPHER_THROW("Invalid crypto parameters: expected CryptoParametersCKKSRNS");
+        CIPHER_THROW("Invalid crypto parameters: expected CkksRnsCryptoParams");
 
     auto M = cc->get_cyclotomic_order();
     slots = (slots == 0) ? M / 4 : slots;
@@ -755,9 +755,9 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_bootstrap(ConstCiphertext<RnsPoly>& ciphert
 
 #ifdef BOOTSTRAPTIMING
     TimeVar t;
-    double timeEncode(0.0);
-    double timeModReduce(0.0);
-    double timeDecode(0.0);
+    double time_encode(0.0);
+    double time_mod_reduce(0.0);
+    double time_decode(0.0);
 #endif
 
     auto cc = ciphertext->get_crypto_context();
@@ -930,7 +930,7 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_bootstrap(ConstCiphertext<RnsPoly>& ciphert
                                             eval_coeffs_to_slots(p.u0hat_t_pre_fft_, raised);
 
         auto& eval_key_map = cc->get_eval_automorphism_key_map(ctxt_enc->get_key_tag());
-        auto conj = Conjugate(ctxt_enc, eval_key_map);
+        auto conj = eval_conjugate(ctxt_enc, eval_key_map);
         auto ctxt_enc_i = cc->eval_sub(ctxt_enc, conj);
         cc->eval_add_in_place(ctxt_enc, conj);
         algo->mult_by_monomial_in_place(ctxt_enc_i, 3 * slots);
@@ -948,8 +948,8 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_bootstrap(ConstCiphertext<RnsPoly>& ciphert
         }
 
 #ifdef BOOTSTRAPTIMING
-        timeEncode = TOC(t);
-        CIPHER_DIAGNOSTIC_ERR << "Encoding time: " << timeEncode / 1000.0 << " s\n";
+        time_encode = TOC(t);
+        CIPHER_DIAGNOSTIC_ERR << "Encoding time: " << time_encode / 1000.0 << " s\n";
         // Running Approximate Mod Reduction
         TIC(t);
 #endif
@@ -984,8 +984,8 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_bootstrap(ConstCiphertext<RnsPoly>& ciphert
         algo->mult_by_integer_in_place(ctxt_enc, scalar);
 
 #ifdef BOOTSTRAPTIMING
-        timeModReduce = TOC(t);
-        CIPHER_DIAGNOSTIC_ERR << "Approximate modular reduction time: " << timeModReduce / 1000.0 << " s\n";
+        time_mod_reduce = TOC(t);
+        CIPHER_DIAGNOSTIC_ERR << "Approximate modular reduction time: " << time_mod_reduce / 1000.0 << " s\n";
         // Running SlotToCoeff
         TIC(t);
 #endif
@@ -1027,7 +1027,7 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_bootstrap(ConstCiphertext<RnsPoly>& ciphert
                                             eval_coeffs_to_slots(p.u0hat_t_pre_fft_, raised);
 
         auto& eval_key_map = cc->get_eval_automorphism_key_map(ctxt_enc->get_key_tag());
-        cc->eval_add_in_place(ctxt_enc, Conjugate(ctxt_enc, eval_key_map));
+        cc->eval_add_in_place(ctxt_enc, eval_conjugate(ctxt_enc, eval_key_map));
 
         if (st == FIXEDMANUAL) {
             while (ctxt_enc->get_noise_scale_deg() > 1) {
@@ -1040,8 +1040,8 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_bootstrap(ConstCiphertext<RnsPoly>& ciphert
         }
 
 #ifdef BOOTSTRAPTIMING
-        timeEncode = TOC(t);
-        CIPHER_DIAGNOSTIC_ERR << "Encoding time: " << timeEncode / 1000.0 << " s\n";
+        time_encode = TOC(t);
+        CIPHER_DIAGNOSTIC_ERR << "Encoding time: " << time_encode / 1000.0 << " s\n";
         // Running Approximate Mod Reduction
         TIC(t);
 #endif
@@ -1065,8 +1065,8 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_bootstrap(ConstCiphertext<RnsPoly>& ciphert
         algo->mult_by_integer_in_place(ctxt_enc, scalar);
 
 #ifdef BOOTSTRAPTIMING
-        timeModReduce = TOC(t);
-        CIPHER_DIAGNOSTIC_ERR << "Approximate modular reduction time: " << timeModReduce / 1000.0 << " s\n";
+        time_mod_reduce = TOC(t);
+        CIPHER_DIAGNOSTIC_ERR << "Approximate modular reduction time: " << time_mod_reduce / 1000.0 << " s\n";
         // Running SlotToCoeff
         TIC(t);
 #endif
@@ -1093,8 +1093,8 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_bootstrap(ConstCiphertext<RnsPoly>& ciphert
 #endif
 
 #ifdef BOOTSTRAPTIMING
-    timeDecode = TOC(t);
-    CIPHER_DIAGNOSTIC_ERR << "Decoding time: " << timeDecode / 1000.0 << " s\n";
+    time_decode = TOC(t);
+    CIPHER_DIAGNOSTIC_ERR << "Decoding time: " << time_decode / 1000.0 << " s\n";
 #endif
 
     // If we start with more towers, than we obtain from bootstrapping, return the original ciphertext.
@@ -1121,9 +1121,9 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_bootstrap_st_c_first(ConstCiphertext<RnsPol
 
 #ifdef BOOTSTRAPTIMING
     TimeVar t;
-    double timeEncode(0.0);
-    double timeModReduce(0.0);
-    double timeDecode(0.0);
+    double time_encode(0.0);
+    double time_mod_reduce(0.0);
+    double time_decode(0.0);
 #endif
 
     auto cc = ciphertext->get_crypto_context();
@@ -1323,8 +1323,8 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_bootstrap_st_c_first(ConstCiphertext<RnsPol
     }
 
 #ifdef BOOTSTRAPTIMING
-    timeDecode = TOC(t);
-    CIPHER_DIAGNOSTIC_ERR << "Decoding time: " << timeDecode / 1000.0 << " s\n";
+    time_decode = TOC(t);
+    CIPHER_DIAGNOSTIC_ERR << "Decoding time: " << time_decode / 1000.0 << " s\n";
 #endif
 
     //------------------------------------------------------------------------------
@@ -1377,7 +1377,7 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_bootstrap_st_c_first(ConstCiphertext<RnsPol
                                    eval_coeffs_to_slots(p.u0hat_t_pre_fft_, raised);
 
     auto& eval_key_map = cc->get_eval_automorphism_key_map(ctxt_enc->get_key_tag());
-    auto conj = Conjugate(ctxt_enc, eval_key_map);
+    auto conj = eval_conjugate(ctxt_enc, eval_key_map);
     Ciphertext<RnsPoly> ctxt_enc_i;
     if (cc->get_ckks_data_type() == COMPLEX) {
         ctxt_enc_i = cc->eval_sub(ctxt_enc, conj);
@@ -1400,8 +1400,8 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_bootstrap_st_c_first(ConstCiphertext<RnsPol
     }
 
 #ifdef BOOTSTRAPTIMING
-    timeEncode = TOC(t);
-    CIPHER_DIAGNOSTIC_ERR << "Encoding time: " << timeEncode / 1000.0 << " s\n";
+    time_encode = TOC(t);
+    CIPHER_DIAGNOSTIC_ERR << "Encoding time: " << time_encode / 1000.0 << " s\n";
     // Running Approximate Mod Reduction
     TIC(t);
 #endif
@@ -1440,8 +1440,8 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_bootstrap_st_c_first(ConstCiphertext<RnsPol
     algo->mult_by_integer_in_place(ctxt_enc, scalar);
 
 #ifdef BOOTSTRAPTIMING
-    timeModReduce = TOC(t);
-    CIPHER_DIAGNOSTIC_ERR << "Approximate modular reduction time: " << timeModReduce / 1000.0 << " s\n";
+    time_mod_reduce = TOC(t);
+    CIPHER_DIAGNOSTIC_ERR << "Approximate modular reduction time: " << time_mod_reduce / 1000.0 << " s\n";
 #endif
 
 #if CIPHER_NATIVE_INT != 128
@@ -1621,9 +1621,9 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_fe_func_bootstrap_exp(ConstCiphertext<RnsPo
 
 #ifdef BOOTSTRAPTIMING
     TimeVar t;
-    double timeStC(0.0);
-    double timeCtS(0.0);
-    double timeExp(0.0);
+    double time_stc(0.0);
+    double time_cts(0.0);
+    double time_exp(0.0);
 #endif
 
     auto cc = ciphertext->get_crypto_context();
@@ -1741,8 +1741,8 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_fe_func_bootstrap_exp(ConstCiphertext<RnsPo
     }
 
 #ifdef BOOTSTRAPTIMING
-    timeStC = TOC(t);
-    CIPHER_DIAGNOSTIC_ERR << "\nSlotsToCoeffs time: " << timeStC / 1000.0 << " s\n";
+    time_stc = TOC(t);
+    CIPHER_DIAGNOSTIC_ERR << "\nSlotsToCoeffs time: " << time_stc / 1000.0 << " s\n";
     TIC(t);
 #endif
 
@@ -1783,7 +1783,7 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_fe_func_bootstrap_exp(ConstCiphertext<RnsPo
     // into it (flag_pack is false in eval_fe_func_bootstrap_setup), and for COMPLEX the imaginary half of the
     // message is dropped, the Fourier series result being real-valued either way.
     auto& eval_key_map = cc->get_eval_automorphism_key_map(ctxt_enc->get_key_tag());
-    auto conj = Conjugate(ctxt_enc, eval_key_map);
+    auto conj = eval_conjugate(ctxt_enc, eval_key_map);
     cc->eval_add_in_place(ctxt_enc, conj);
 
     if (st == FIXEDMANUAL) {
@@ -1797,8 +1797,8 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_fe_func_bootstrap_exp(ConstCiphertext<RnsPo
     }
 
 #ifdef BOOTSTRAPTIMING
-    timeCtS = TOC(t);
-    CIPHER_DIAGNOSTIC_ERR << "CoeffsToSlots time: " << timeCtS / 1000.0 << " s\n";
+    time_cts = TOC(t);
+    CIPHER_DIAGNOSTIC_ERR << "CoeffsToSlots time: " << time_cts / 1000.0 << " s\n";
     TIC(t);
 #endif
 
@@ -1814,8 +1814,8 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_fe_func_bootstrap_exp(ConstCiphertext<RnsPo
     }
 
 #ifdef BOOTSTRAPTIMING
-    timeExp = TOC(t);
-    CIPHER_DIAGNOSTIC_ERR << "EvalExp time: " << timeExp / 1000.0 << " s\n";
+    time_exp = TOC(t);
+    CIPHER_DIAGNOSTIC_ERR << "EvalExp time: " << time_exp / 1000.0 << " s\n";
 #endif
 
     return ctxt_exp_value;
@@ -1829,7 +1829,7 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_fe_func_bootstrap_exp(ConstCiphertext<RnsPo
 Ciphertext<RnsPoly> CkksRnsFhe::twice_real_part(const Ciphertext<RnsPoly>& ctxt_series) {
     auto cc = ctxt_series->get_crypto_context();
     return cc->eval_add(ctxt_series,
-                        Conjugate(ctxt_series, cc->get_eval_automorphism_key_map(ctxt_series->get_key_tag())));
+                        eval_conjugate(ctxt_series, cc->get_eval_automorphism_key_map(ctxt_series->get_key_tag())));
 }
 
 Ciphertext<RnsPoly> CkksRnsFhe::eval_fe_func_bootstrap(ConstCiphertext<RnsPoly>& ciphertext,
@@ -1839,15 +1839,15 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_fe_func_bootstrap(ConstCiphertext<RnsPoly>&
 
 #ifdef BOOTSTRAPTIMING
     TimeVar t;
-    double timeSeries(0.0);
+    double time_series(0.0);
     TIC(t);
 #endif
 
     auto result = twice_real_part(algo->eval_poly(ctxt_exp_value, coefficients));
 
 #ifdef BOOTSTRAPTIMING
-    timeSeries = TOC(t);
-    CIPHER_DIAGNOSTIC_ERR << "EvalSeries time: " << timeSeries / 1000.0 << " s\n";
+    time_series = TOC(t);
+    CIPHER_DIAGNOSTIC_ERR << "EvalSeries time: " << time_series / 1000.0 << " s\n";
 #endif
 
     return result;
@@ -1858,25 +1858,25 @@ std::shared_ptr<SeriesPowers<RnsPoly>> CkksRnsFhe::eval_fe_func_bootstrap_precom
     // Below degree 5 eval_powers builds only those powers the given coefficient vector actually needs and
     // leaves the rest of the basis unset, so the result is specific to one function and cannot be shared.
     // Fourier extensions of useful functions are far above this bound.
-    if (Degree(coefficients) < 5)
+    if (effective_degree(coefficients) < 5)
         CIPHER_THROW(
                 "CKKS FE functional bootstrapping needs a series of degree 5 or more to precompute shareable "
-                "complex-exponential powers; use EvalFEFuncBootstrap for a shorter series.");
+                "complex-exponential powers; use eval_fe_func_bootstrap for a shorter series.");
 
     auto ctxt_exp_value = eval_fe_func_bootstrap_exp(ciphertext);
     auto algo = ctxt_exp_value->get_crypto_context()->get_scheme();
 
 #ifdef BOOTSTRAPTIMING
     TimeVar t;
-    double timePowers(0.0);
+    double time_powers(0.0);
     TIC(t);
 #endif
 
     auto powers = algo->eval_powers(ctxt_exp_value, coefficients);
 
 #ifdef BOOTSTRAPTIMING
-    timePowers = TOC(t);
-    CIPHER_DIAGNOSTIC_ERR << "EvalPowers time: " << timePowers / 1000.0 << " s\n";
+    time_powers = TOC(t);
+    CIPHER_DIAGNOSTIC_ERR << "eval_powers time: " << time_powers / 1000.0 << " s\n";
 #endif
 
     return powers;
@@ -1886,11 +1886,11 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_fe_func_bootstrap_with_precomp(
         const std::shared_ptr<SeriesPowers<RnsPoly>>& powers,
         const std::vector<std::complex<double>>& coefficients) const {
     if (powers == nullptr || powers->powers_re.empty() || powers->powers2_re.empty())
-        CIPHER_THROW("The series powers were not produced by EvalFEFuncBootstrapPrecompute.");
+        CIPHER_THROW("The series powers were not produced by eval_fe_func_bootstrap_precompute.");
     if (coefficients.size() < 2)
         CIPHER_THROW("The coefficients vector should contain at least 2 elements");
 
-    const uint32_t degree = Degree(coefficients);
+    const uint32_t degree = effective_degree(coefficients);
     if (degree == 0)
         CIPHER_THROW("The Fourier series has no nonzero coefficient above the constant term.");
     const std::vector<std::complex<double>> trimmed(coefficients.cbegin(), coefficients.cbegin() + degree + 1);
@@ -1914,7 +1914,7 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_fe_func_bootstrap_with_precomp(
 
 #ifdef BOOTSTRAPTIMING
     TimeVar t;
-    double timeSeries(0.0);
+    double time_series(0.0);
     TIC(t);
 #endif
 
@@ -1922,8 +1922,8 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_fe_func_bootstrap_with_precomp(
     auto result = twice_real_part(algo->eval_poly_with_precomp(powers, trimmed));
 
 #ifdef BOOTSTRAPTIMING
-    timeSeries = TOC(t);
-    CIPHER_DIAGNOSTIC_ERR << "EvalSeries time (precomputed powers): " << timeSeries / 1000.0 << " s\n";
+    time_series = TOC(t);
+    CIPHER_DIAGNOSTIC_ERR << "EvalSeries time (precomputed powers): " << time_series / 1000.0 << " s\n";
 #endif
 
     return result;
@@ -2116,8 +2116,8 @@ std::vector<ReadOnlyPlaintext> CkksRnsFhe::eval_linear_transform_precompute(
         auto diag = extract_shifted_diagonal(A, ji);
         for (auto& d : diag)
             d *= scale;
-        result[ji] = make_aux_plaintext(cc, element_params_ptr, Rotate(diag, -step * (ji / step)), 1, towers_to_drop,
-                                        diag.size());
+        result[ji] = make_aux_plaintext(cc, element_params_ptr, rotate_slots(diag, -step * (ji / step)), 1,
+                                        towers_to_drop, diag.size());
     }
     return result;
 }
@@ -2169,7 +2169,7 @@ std::vector<ReadOnlyPlaintext> CkksRnsFhe::eval_linear_transform_precompute(
             vec_a.insert(vec_a.end(), vec_b.begin(), vec_b.end());
             for (auto& v : vec_a)
                 v *= scale;
-            result[ji] = make_aux_plaintext(cc, element_params_ptr, Rotate(vec_a, -step * (ji / step)), 1,
+            result[ji] = make_aux_plaintext(cc, element_params_ptr, rotate_slots(vec_a, -step * (ji / step)), 1,
                                             towers_to_drop, vec_a.size());
         }
     } else {
@@ -2192,8 +2192,8 @@ std::vector<ReadOnlyPlaintext> CkksRnsFhe::eval_linear_transform_precompute(
             auto vec = extract_shifted_diagonal(new_a, ji);
             for (auto& v : vec)
                 v *= scale;
-            result[ji] = make_aux_plaintext(cc, element_params_ptr, Rotate(vec, -step * (ji / step)), 1, towers_to_drop,
-                                            vec.size());
+            result[ji] = make_aux_plaintext(cc, element_params_ptr, rotate_slots(vec, -step * (ji / step)), 1,
+                                            towers_to_drop, vec.size());
         }
     }
 
@@ -2284,7 +2284,7 @@ std::vector<std::vector<ReadOnlyPlaintext>> CkksRnsFhe::eval_coeffs_to_slots_pre
                             c *= scale;
                     }
 
-                    auto rot = Rotate(
+                    auto rot = rotate_slots(
                             coeff[s][ij],
                             reduce_rotation(-rot_scale * (ij / p.g) + offset * shift_scale + running_acc, slots));
 
@@ -2305,9 +2305,10 @@ std::vector<std::vector<ReadOnlyPlaintext>> CkksRnsFhe::eval_coeffs_to_slots_pre
                     for (auto& c : coeff[stop][ij])
                         c *= scale;
 
-                    auto rot = Rotate(coeff[stop][ij], reduce_rotation(-static_cast<int32_t>(p.g_rem) * (ij / p.g_rem) +
-                                                                               offset_rem + running_acc,
-                                                                       slots));
+                    auto rot = rotate_slots(
+                            coeff[stop][ij],
+                            reduce_rotation(-static_cast<int32_t>(p.g_rem) * (ij / p.g_rem) + offset_rem + running_acc,
+                                            slots));
 
                     result[stop][ij] = make_aux_plaintext(cc, params_vector[0], rot, 1, level0, rot.size());
                 }
@@ -2339,7 +2340,7 @@ std::vector<std::vector<ReadOnlyPlaintext>> CkksRnsFhe::eval_coeffs_to_slots_pre
                             c *= scale;
                     }
 
-                    auto rot = Rotate(
+                    auto rot = rotate_slots(
                             clear_tmp,
                             reduce_rotation(-rot_scale * (ij / p.g) + offset * shift_scale + running_acc, 2 * slots));
 
@@ -2364,8 +2365,9 @@ std::vector<std::vector<ReadOnlyPlaintext>> CkksRnsFhe::eval_coeffs_to_slots_pre
                     for (auto& c : clear_tmp)
                         c *= scale;
 
-                    auto rot = Rotate(clear_tmp,
-                                      reduce_rotation(-p.g_rem * (ij / p.g_rem) + offset_rem + running_acc, 2 * slots));
+                    auto rot = rotate_slots(
+                            clear_tmp,
+                            reduce_rotation(-p.g_rem * (ij / p.g_rem) + offset_rem + running_acc, 2 * slots));
 
                     result[stop][ij] = make_aux_plaintext(cc, params_vector[0], rot, 1, level0, rot.size());
                 }
@@ -2451,7 +2453,7 @@ std::vector<std::vector<ReadOnlyPlaintext>> CkksRnsFhe::eval_slots_to_coeffs_pre
                             c *= scale;
                     }
 
-                    auto rot = Rotate(
+                    auto rot = rotate_slots(
                             coeff[s][ij],
                             reduce_rotation(-rot_scale * (ij / p.g) + offset * shift_scale + running_acc, slots));
 
@@ -2474,7 +2476,7 @@ std::vector<std::vector<ReadOnlyPlaintext>> CkksRnsFhe::eval_slots_to_coeffs_pre
                     for (auto& c : coeff[smax][ij])
                         c *= scale;
 
-                    auto rot = Rotate(
+                    auto rot = rotate_slots(
                             coeff[smax][ij],
                             reduce_rotation(-rot_scale * (ij / p.g_rem) + offset_rem * shift_scale_rem + running_acc,
                                             slots));
@@ -2512,7 +2514,7 @@ std::vector<std::vector<ReadOnlyPlaintext>> CkksRnsFhe::eval_slots_to_coeffs_pre
                             c *= scale;
                     }
 
-                    auto rot = Rotate(
+                    auto rot = rotate_slots(
                             clear_tmp,
                             reduce_rotation(-rot_scale * (ij / p.g) + offset * shift_scale + running_acc, 2 * slots));
 
@@ -2539,9 +2541,10 @@ std::vector<std::vector<ReadOnlyPlaintext>> CkksRnsFhe::eval_slots_to_coeffs_pre
                     for (auto& c : clear_tmp)
                         c *= scale;
 
-                    auto rot = Rotate(clear_tmp, reduce_rotation(-rot_scale * (ij / p.g_rem) +
-                                                                         offset_rem * shift_scale_rem + running_acc,
-                                                                 2 * slots));
+                    auto rot = rotate_slots(
+                            clear_tmp,
+                            reduce_rotation(-rot_scale * (ij / p.g_rem) + offset_rem * shift_scale_rem + running_acc,
+                                            2 * slots));
 
                     result[smax][ij] = make_aux_plaintext(cc, params_vector[smax], rot, 1,
                                                           towers_to_drop + composite_degree * smax, rot.size());
@@ -2937,7 +2940,7 @@ void CkksRnsFhe::adjust_ciphertext_fbt(Ciphertext<RnsPoly>& ciphertext, double c
 
     if (crypto_params->get_scaling_technique() == FLEXIBLEAUTO ||
         crypto_params->get_scaling_technique() == FLEXIBLEAUTOEXT)
-        CIPHER_THROW("This version of AdjustCiphertext is supported for FIXEDMANUAL and FIXEDAUTO methods only.");
+        CIPHER_THROW("This version of adjust_ciphertext is supported for FIXEDMANUAL and FIXEDAUTO methods only.");
 #if CIPHER_NATIVE_INT != 128
     // Scaling down the message by a correction factor to emulate using a larger q0.
     // This step is needed so we could use a scaling factor of up to 2^59 with q9 ~= 2^60.
@@ -3353,8 +3356,8 @@ EvalKey<RnsPoly> CkksRnsFhe::conjugate_key_gen(const PrivateKey<RnsPoly> private
     return cc->get_scheme()->key_switch_gen(private_key, pk_permuted);
 }
 
-Ciphertext<RnsPoly> CkksRnsFhe::Conjugate(ConstCiphertext<RnsPoly> ciphertext,
-                                          const std::map<uint32_t, EvalKey<RnsPoly>>& eval_key_map) {
+Ciphertext<RnsPoly> CkksRnsFhe::eval_conjugate(ConstCiphertext<RnsPoly> ciphertext,
+                                               const std::map<uint32_t, EvalKey<RnsPoly>>& eval_key_map) {
     uint32_t N = ciphertext->get_elements()[0].get_ring_dimension();
     auto algo = ciphertext->get_crypto_context()->get_scheme();
     return algo->eval_automorphism(ciphertext, 2 * N - 1, eval_key_map);
@@ -3513,7 +3516,7 @@ void CkksRnsFhe::eval_fbt_setup_internal(const CryptoContextImpl<RnsPoly>& cc,
     // the end of the params vector and the level arithmetic further down wraps around.
     uint32_t out_towers = composite_degree * (1 + lvls_after_boot);
     if (out_towers > params.size())
-        CIPHER_THROW("lvlsAfterBoot (" + std::to_string(lvls_after_boot) +
+        CIPHER_THROW("lvls_after_boot (" + std::to_string(lvls_after_boot) +
                      ") is too large: it must be less than the number of levels (" +
                      std::to_string(params.size() / composite_degree) + ").");
 
@@ -3586,7 +3589,7 @@ void CkksRnsFhe::eval_fbt_setup_internal(const CryptoContextImpl<RnsPoly>& cc,
         CIPHER_THROW("The functional bootstrapping depth (" + std::to_string(depth_bt) +
                      ") exceeds the available number of levels (" + std::to_string(L0 / composite_degree) +
                      "). Increase the multiplicative depth, or reduce the level budget or "
-                     "depthLeveledComputation.");
+                     "depth_leveled_computation.");
 
     // each level consists of composite_degree towers
     uint32_t l_enc = L0 - composite_degree * (level_budget[0] + 1);
@@ -3670,7 +3673,7 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_hom_decoding(ConstCiphertext<RnsPoly>& ciph
             // SlotsToCoeffs consumes one more level anyway.
             uint32_t size_q = crypto_params->get_element_params()->get_params().size();
             if (dst_level > size_q - 2 * composite_degree)
-                CIPHER_THROW("levelToReduce is too large: the level after reduction (" + std::to_string(dst_level) +
+                CIPHER_THROW("level_to_reduce is too large: the level after reduction (" + std::to_string(dst_level) +
                              ") must be at most " + std::to_string(size_q - 2 * composite_degree) + ".");
             cc->eval_mult_in_place(ctxt_enc, crypto_params->get_scaling_factor_real_big(dst_level) /
                                                      crypto_params->get_scaling_factor_real_big(cur_level));
@@ -3869,7 +3872,7 @@ std::shared_ptr<SeriesPowers<RnsPoly>> CkksRnsFhe::eval_mvb_precompute_internal(
         ctxt_enc.emplace_back((is_lt_bootstrap) ? eval_linear_transform(p.u0hat_t_pre_, raised) :
                                                   eval_coeffs_to_slots(p.u0hat_t_pre_fft_, raised));
 
-        auto conj = Conjugate(ctxt_enc[0], cc->get_eval_automorphism_key_map(ctxt_enc[0]->get_key_tag()));
+        auto conj = eval_conjugate(ctxt_enc[0], cc->get_eval_automorphism_key_map(ctxt_enc[0]->get_key_tag()));
 
         ctxt_enc.emplace_back(cc->eval_sub(ctxt_enc[0], conj));
         cc->eval_add_in_place_no_check(ctxt_enc[0], conj);
@@ -3961,7 +3964,7 @@ std::shared_ptr<SeriesPowers<RnsPoly>> CkksRnsFhe::eval_mvb_precompute_internal(
                                                   eval_coeffs_to_slots(p.u0hat_t_pre_fft_, raised));
 
         auto& eval_key_map = cc->get_eval_automorphism_key_map(ctxt_enc[0]->get_key_tag());
-        cc->eval_add_in_place(ctxt_enc[0], Conjugate(ctxt_enc[0], eval_key_map));
+        cc->eval_add_in_place(ctxt_enc[0], eval_conjugate(ctxt_enc[0], eval_key_map));
 
         if (crypto_params->get_scaling_technique() == FIXEDMANUAL) {
             while (ctxt_enc[0]->get_noise_scale_deg() > 1)
@@ -4094,10 +4097,10 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_mvb_no_decoding_internal(const std::shared_
             // Division by 2 was already performed
             ctxt_enc = cc->eval_poly_with_precomp(ctxt_powers_re, coefficients);
             cc->eval_add_in_place(ctxt_enc,
-                                  Conjugate(ctxt_enc, cc->get_eval_automorphism_key_map(ctxt_enc->get_key_tag())));
+                                  eval_conjugate(ctxt_enc, cc->get_eval_automorphism_key_map(ctxt_enc->get_key_tag())));
             ctxt_enc_i = cc->eval_poly_with_precomp(ctxt_powers_im, coefficients);
-            cc->eval_add_in_place(ctxt_enc_i,
-                                  Conjugate(ctxt_enc_i, cc->get_eval_automorphism_key_map(ctxt_enc->get_key_tag())));
+            cc->eval_add_in_place(
+                    ctxt_enc_i, eval_conjugate(ctxt_enc_i, cc->get_eval_automorphism_key_map(ctxt_enc->get_key_tag())));
         }
 
         algo->mult_by_monomial_in_place(ctxt_enc_i, M4);
@@ -4138,7 +4141,7 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_mvb_no_decoding_internal(const std::shared_
             // Take the real part
             // Division by 2 was already performed
             cc->eval_add_in_place_no_check(
-                    ctxt_enc, Conjugate(ctxt_enc, cc->get_eval_automorphism_key_map(ctxt_enc->get_key_tag())));
+                    ctxt_enc, eval_conjugate(ctxt_enc, cc->get_eval_automorphism_key_map(ctxt_enc->get_key_tag())));
         }
 
         // No need to scale the message back up after Chebyshev interpolation
@@ -4232,7 +4235,8 @@ Ciphertext<RnsPoly> CkksRnsFhe::eval_hermite_trig_series_internal(
     auto result = cc->eval_poly(ctxt_exp, coefficients_herm);
     // Take the real part
     // Division by 2 was already performed
-    cc->eval_add_in_place_no_check(result, Conjugate(result, cc->get_eval_automorphism_key_map(result->get_key_tag())));
+    cc->eval_add_in_place_no_check(result,
+                                   eval_conjugate(result, cc->get_eval_automorphism_key_map(result->get_key_tag())));
 
     return result;
 }

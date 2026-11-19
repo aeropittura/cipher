@@ -1,4 +1,8 @@
-# PKE Documentation
+# FHE (public-key schemes) Documentation
+
+Headers of the `Cipher::fhe` module. Scheme-specific code is in [bfv](bfv), [bgv](bgv) and [ckks](ckks); shared
+base classes are in [base](base) and [rns](rns); parameters in [config](config); plaintext encodings in
+[encoding](encoding); keys in [key](key); key switching in [keyswitch](keyswitch).
 
 [ciphertext.h](ciphertext.h)
 
@@ -6,7 +10,7 @@
 
 - provides `CiphertextImpl` which is used to contain encrypted text
 
-[ciphertext-ser.h](ciphertext_ser.h)
+[ciphertext_ser.h](ciphertext_ser.h)
 
 - exposes serialization methods for ciphertexts to [USCiLab - cereal](https://github.com/USCiLab/cereal)
 
@@ -14,7 +18,7 @@
 
 [constants.h](constants.h)
 
-- Contains the various constants used throughout the `PKE` module including:
+- Contains the various constants used throughout the FHE module including:
   - PKE Scheme Feature: Lists all features supported by PKE schemees.
     - PKE (PKE)
     - Keyswitch (KEYSWITCH)
@@ -23,8 +27,9 @@
     - Advanced Somewhat Homomorphic Encryption (ADVANCEDSHE)
     - Threshold FHE (MULTIPARTY)
     - Fully Homomorphic Encryption (FHE)
+    - Scheme switching (SCHEMESWITCH)
 
-  - SecretKeyDistribution
+  - Secret key distribution (`SecretKeyDist`)
     - Ring Learning with Error (GAUSSIAN)
     - Optimized (UNIFORM_TERNARY)
     - Sparse (SPARSE_TERNARY; Hamming weight is 192; discouraged for CKKS bootstrapping because of a high probability of failure)
@@ -34,6 +39,8 @@
     - Fixed Manual (FIXEDMANUAL)
     - Fixed Auto (FIXEDAUTO)
     - Flexible Auto (FLEXIBLEAUTO)
+    - Flexible Auto Extended (FLEXIBLEAUTOEXT)
+    - Composite scaling (COMPOSITESCALINGAUTO, COMPOSITESCALINGMANUAL; CKKS only)
     - No Rescaling (NORESCALE)
 
   - Key Switch Technique
@@ -50,11 +57,11 @@
     - Halevi-Polyakov-Shoup P over Q (HPSPOVERQ)
     - Halevi-Polyakov-Shoup P over Q Leveled Multiplication (HPSPOVERQLEVELED)
 
-[cryptocontextfactory.h](context_factory.h)
+[context_factory.h](context_factory.h)
 
-- Generates new `CryptoContexts` from user parameters
+- `ContextFactory`: generates and caches new `CryptoContext`s from user parameters
 
-[cryptocontext.h](context.h)
+[context.h](context.h)
 
 - defines `CryptoContextImpl`, which is used to access the Cipher library
 
@@ -62,21 +69,21 @@
 Objects can only be used in the context they were created in
 
 
-[cryptocontext-ser.h](context_ser.h)
+[context_ser.h](context_ser.h)
 
 - exposes serialization methods for `CryptoContext` to [USCiLab - cereal](https://github.com/USCiLab/cereal)
 
 - must be included any time we need `CryptoContext` serialization
 
-[cryptoobject.h](crypto_object.h)
+[crypto_object.h](crypto_object.h)
 
 - comprises a `context`, and `keytag`:
   - `context`: `CryptoContext` this object belongs to
   - `keytag`: tag that is used to find the evaluation key needed for various operations
 
-[gen-cryptocontext.h](context_gen.h)
+[context_gen.h](context_gen.h)
 
-- Constructs `CryptoContext` based on the provided set of parameters
+- `make_crypto_context`: constructs a `CryptoContext` from a `ContextParams<BfvRnsContext>`, `ContextParams<BgvRnsContext>` or `ContextParams<CkksRnsContext>`
 
 [globals.h](globals.h)
 
@@ -86,12 +93,12 @@ Objects can only be used in the context they were created in
 
 - metadata container and helper function definition
 
-[metadata-ser.h](metadata_ser.h)
+[metadata_ser.h](metadata_ser.h)
 
 - exposes serialization methods for `Metadata` to [USCiLab - cereal](https://github.com/USCiLab/cereal)
 
 - must be included any time we need `Metadata` serialization
 
-[openfhe.h](../cipher.h)
+[cipher/cipher.h](../cipher.h)
 
-- top level for ease of import
+- top-level header for ease of import

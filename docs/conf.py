@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# NanoGUI documentation build configuration file, created by
+# Cipher documentation build configuration file (adapted from the NanoGUI/Exhale template), created by
 # sphinx-quickstart on Mon Aug 22 20:05:54 2016.
 #
 # This file is execfile()d with the current directory set to its
@@ -109,7 +109,7 @@ exhale_args = {
         # not for yours.
         PREDEFINED += NAMESPACE_BEGIN(arbitrary)="namespace arbitrary {"
         PREDEFINED += NAMESPACE_END(arbitrary)="}"
-        PREDEFINED += WITH_NTL
+        PREDEFINED += CIPHER_WITH_NTL
         # Expand the packed-struct macro of the bundled BLAKE2 code to its body: with the attribute
         # left in place Doxygen emits the struct members without a source location, which Breathe rejects.
         PREDEFINED += BLAKE2_PACKED(x)=x
@@ -121,11 +121,11 @@ exhale_args = {
         EXCLUDE_SYMBOLS += *::@*
         EXCLUDE_SYMBOLS += *@*
         EXCLUDE_SYMBOLS += *::*@*
-        EXCLUDE_SYMBOLS += lbcrypto::@*
-        EXCLUDE_SYMBOLS += lbcrypto::*@*
+        EXCLUDE_SYMBOLS += cipher::@*
+        EXCLUDE_SYMBOLS += cipher::*@*
         EXCLUDE_SYMBOLS += std
         EXCLUDE_SYMBOLS += std::*
-        # WITH_NTL keeps the NTL backend's namespace extensions visible to Doxygen.
+        # CIPHER_WITH_NTL keeps the NTL backend's namespace extensions visible to Doxygen.
 
         WARN_IF_UNDOCUMENTED = NO
         WARNINGS = NO
@@ -139,7 +139,7 @@ exhale_args = {
     # Fix broken Sphinx RTD Theme 'Edit on GitHub' links
     # Search for 'Edit on GitHub' on the FAQ:
     #     http://exhale.readthedocs.io/en/latest/faq.html
-    "pageLevelConfigMeta": ":github_url: https://github.com/openfheorg/openfhe-development",
+    "pageLevelConfigMeta": ":github_url: https://github.com/aeropittura/cipher",
     ############################################################################
     # Main library page layout example configuration.                          #
     ############################################################################
@@ -200,20 +200,14 @@ author = u'Cipher maintainers (derived from OpenFHE)'
 
 
 def read_version_number(pth="../CMakeLists.txt"):
-    version = {"major": -1, "minor": -1, "patch": -1}
+    """Return the X.Y.Z version from the project() call in the top-level CMakeLists.txt."""
+    matcher = re.compile(r"\s*project\(\s*Cipher\s+VERSION\s+(\d+)\.(\d+)\.(\d+)")
     with open(pth, "r") as f:
-        data = f.readlines()
-
-    matcher = re.compile(r"set\(OPENFHE_VERSION_([a-zA-Z]+) (\d+)\)")
-    for ln in data:
-        result = matcher.match(ln)
-
-        if result:
-            mode = result.group(1)  # Major, minor, patch
-            version[mode.lower()] = result.group(2)  # The numeric
-
-    assert -1 not in version.values()
-    return f"{version['major']}.{version['minor']}.{version['patch']}"
+        for ln in f:
+            result = matcher.match(ln)
+            if result:
+                return ".".join(result.groups())
+    raise RuntimeError(f"no 'project(Cipher VERSION x.y.z ...)' line found in {pth}")
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

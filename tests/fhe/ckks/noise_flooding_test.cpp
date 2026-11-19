@@ -48,22 +48,22 @@ using namespace cipher;
 enum TEST_CASE_TYPE : int { NOISE_ESTIMATION, FULL_NOISE_FLOODING, MULTIPARTY_NOISE_FLOODING };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
-    std::string typeName;
+    std::string type_name_of;
     switch (type) {
         case NOISE_ESTIMATION:
-            typeName = "NOISE_ESTIMATION";
+            type_name_of = "NOISE_ESTIMATION";
             break;
         case FULL_NOISE_FLOODING:
-            typeName = "FULL_NOISE_FLOODING";
+            type_name_of = "FULL_NOISE_FLOODING";
             break;
         case MULTIPARTY_NOISE_FLOODING:
-            typeName = "MULTIPARTY_NOISE_FLOODING";
+            type_name_of = "MULTIPARTY_NOISE_FLOODING";
             break;
         default:
-            typeName = "UNKNOWN";
+            type_name_of = "UNKNOWN";
             break;
     }
-    return os << typeName;
+    return os << type_name_of;
 }
 //===========================================================================================================
 struct TEST_CASE_UTCKKSRNS_NOISE_FLOODING {
@@ -87,7 +87,7 @@ struct TEST_CASE_UTCKKSRNS_NOISE_FLOODING {
 
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
-static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNS_NOISE_FLOODING>& test) {
+static auto make_test_name = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNS_NOISE_FLOODING>& test) {
     return test.param.build_test_name();
 };
 
@@ -109,7 +109,7 @@ constexpr double MP_NOISE_ESTIMATE = 3.5;
 
 // clang-format off
 static std::vector<TEST_CASE_UTCKKSRNS_NOISE_FLOODING> test_cases = {
-    // TestType,       Descr, Scheme,          RDim, MultDepth,  SModSize,     DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, ScalTech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, DecryptionNoiseMode,    ExecutionMode,         NoiseEstimate
+    // TestType,       Descr, Scheme,          RDim, MultDepth,  SModSize,     DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, scal_tech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, DecryptionNoiseMode,    ExecutionMode,         NoiseEstimate
     { NOISE_ESTIMATION, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           NOISE_FLOODING_DECRYPT, EXEC_NOISE_ESTIMATION, DFLT}},
     { NOISE_ESTIMATION, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,     DFLT,  DFLT,    SPARSE_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           NOISE_FLOODING_DECRYPT, EXEC_NOISE_ESTIMATION, DFLT}},
     { NOISE_ESTIMATION, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           NOISE_FLOODING_DECRYPT, EXEC_NOISE_ESTIMATION, DFLT}},
@@ -120,7 +120,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_NOISE_FLOODING> test_cases = {
     { NOISE_ESTIMATION, "07", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,     DFLT,  DFLT,    SPARSE_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           NOISE_FLOODING_DECRYPT, EXEC_NOISE_ESTIMATION, DFLT}},
     { NOISE_ESTIMATION, "08", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           NOISE_FLOODING_DECRYPT, EXEC_NOISE_ESTIMATION, DFLT}},
 #endif
-    // TestType,          Descr, Scheme,          RDim, MultDepth,  SModSize,     DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, ScalTech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, DecryptionNoiseMode,    ExecutionMode,   NoiseEstimate
+    // TestType,          Descr, Scheme,          RDim, MultDepth,  SModSize,     DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, scal_tech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, DecryptionNoiseMode,    ExecutionMode,   NoiseEstimate
     { FULL_NOISE_FLOODING, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           NOISE_FLOODING_DECRYPT, EXEC_EVALUATION, NOISE_ESTIMATE}},
     { FULL_NOISE_FLOODING, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,     DFLT,  DFLT,    SPARSE_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           NOISE_FLOODING_DECRYPT, EXEC_EVALUATION, NOISE_ESTIMATE}},
     { FULL_NOISE_FLOODING, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           NOISE_FLOODING_DECRYPT, EXEC_EVALUATION, NOISE_ESTIMATE}},
@@ -131,7 +131,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_NOISE_FLOODING> test_cases = {
     { FULL_NOISE_FLOODING, "07", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,     DFLT,  DFLT,    SPARSE_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           NOISE_FLOODING_DECRYPT, EXEC_EVALUATION, NOISE_ESTIMATE_FLEX_AUTO_EXT}},
     { FULL_NOISE_FLOODING, "08", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           NOISE_FLOODING_DECRYPT, EXEC_EVALUATION, NOISE_ESTIMATE_FLEX_AUTO_EXT}},
 #endif
-    // TestType,                Descr, Scheme,          RDim, MultDepth,  SModSize,     DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, ScalTech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, DecryptionNoiseMode,    ExecutionMode,
+    // TestType,                Descr, Scheme,          RDim, MultDepth,  SModSize,     DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, scal_tech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, DecryptionNoiseMode,    ExecutionMode,
     { MULTIPARTY_NOISE_FLOODING, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           NOISE_FLOODING_DECRYPT, EXEC_EVALUATION, MP_NOISE_ESTIMATE}},
     { MULTIPARTY_NOISE_FLOODING, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,     DFLT,  DFLT,    SPARSE_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           NOISE_FLOODING_DECRYPT, EXEC_EVALUATION, MP_NOISE_ESTIMATE}},
     { MULTIPARTY_NOISE_FLOODING, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           NOISE_FLOODING_DECRYPT, EXEC_EVALUATION, MP_NOISE_ESTIMATE}},
@@ -314,4 +314,4 @@ TEST_P(UTCKKSRNS_NOISE_FLOODING, CKKSRNS) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_NOISE_FLOODING, ::testing::ValuesIn(test_cases), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_NOISE_FLOODING, ::testing::ValuesIn(test_cases), make_test_name);

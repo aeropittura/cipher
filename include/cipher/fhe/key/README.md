@@ -1,6 +1,6 @@
 # Keys
 
-This folder contains the header files of the various keys that are defined within `Open-FHE`. Refer to [OpenFHE PKE Keys](https://openfhe-development.readthedocs.io/en/latest/assets/sphinx_rsts/modules/pke/pke_keys.html)
+This folder contains the header files of the various keys that are defined within Cipher. Refer to the [FHE keys documentation](../../../../docs/sphinx_rsts/modules/pke/pke_keys.rst).
 
 ## Key Class Inheritance
 ```mermaid

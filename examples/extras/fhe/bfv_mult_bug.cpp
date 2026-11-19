@@ -166,6 +166,6 @@ void eval_noise_bfv(PrivateKey<RnsPoly> private_key, ConstCiphertext<RnsPoly> ci
         log_q += logqi;
     }
 
-    std::cout << "logQ: " << log_q << std::endl;
+    std::cout << "log_q: " << log_q << std::endl;
     std::cout << "noise: " << noise << std::endl;
 }

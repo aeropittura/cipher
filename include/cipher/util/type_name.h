@@ -46,29 +46,29 @@ struct is_shared_pointer<std::shared_ptr<T>> : std::true_type {};
 template <typename T>
 struct is_shared_pointer<std::shared_ptr<T const>> : std::true_type {};
 //=============================================================================
-// sharedPtr() returns true if the argument is a shared_ptr or false otherwise
+// is_shared_ptr() returns true if the argument is a shared_ptr or false otherwise
 template <typename T>
-bool sharedPtr(const T& t) {
+bool is_shared_ptr(const T& t) {
     return is_shared_pointer<T>::value;
 }
 //=============================================================================
-// even the code is the same for both versions of typeName() below,
+// even the code is the same for both versions of type_name_of() below,
 // I did decide to have 2 functions (for pointers and for objects) for now
-// typeName() for objects
+// type_name_of() for objects
 template <typename T,
           typename std::enable_if<!std::is_pointer<T>::value && !is_shared_pointer<T>::value, bool>::type = true>
-std::string typeName(const T& obj) {
+std::string type_name_of(const T& obj) {
     return demangle(typeid(obj).name());
 }
 //=============================================================================
-// typeName() for pointers
+// type_name_of() for pointers
 template <typename T,
           typename std::enable_if<std::is_pointer<T>::value || is_shared_pointer<T>::value, bool>::type = true>
-std::string typeName(const T& ptr) {
+std::string type_name_of(const T& ptr) {
     return demangle(typeid(ptr).name());
 }
 //=============================================================================
-// getObjectType() takes either a regular pointer or a shared_ptr as the argument and
+// object_type_name() takes either a regular pointer or a shared_ptr as the argument and
 // returns the actual type of the object ptr points to.
 template <typename T,
           typename std::enable_if<std::is_pointer<T>::value || is_shared_pointer<T>::value, bool>::type = true>

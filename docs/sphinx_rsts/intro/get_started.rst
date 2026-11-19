@@ -15,4 +15,4 @@ Welcome to the Cipher webpage!
    using_the_library.rst
    building_user_applications.rst
    editor_setup.rst
-   exceptions_in_openfhe.rst
+   exceptions_in_cipher.rst

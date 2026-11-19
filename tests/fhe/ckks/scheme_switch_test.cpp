@@ -65,31 +65,31 @@ enum TEST_CASE_TYPE : int {
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
-    std::string typeName;
+    std::string type_name_of;
     switch (type) {
         case SCHEME_SWITCH_CKKS_FHEW:
-            typeName = "SCHEME_SWITCH_CKKS_FHEW";
+            type_name_of = "SCHEME_SWITCH_CKKS_FHEW";
             break;
         case SCHEME_SWITCH_FHEW_CKKS:
-            typeName = "SCHEME_SWITCH_FHEW_CKKS";
+            type_name_of = "SCHEME_SWITCH_FHEW_CKKS";
             break;
         case SCHEME_SWITCH_COMPARISON:
-            typeName = "SCHEME_SWITCH_COMPARISON";
+            type_name_of = "SCHEME_SWITCH_COMPARISON";
             break;
         case SCHEME_SWITCH_ARGMIN:
-            typeName = "SCHEME_SWITCH_ARGMIN";
+            type_name_of = "SCHEME_SWITCH_ARGMIN";
             break;
         case SCHEME_SWITCH_ALT_ARGMIN:
-            typeName = "SCHEME_SWITCH_ALT_ARGMIN";
+            type_name_of = "SCHEME_SWITCH_ALT_ARGMIN";
             break;
         case SCHEME_SWITCH_SERIALIZE:
-            typeName = "SCHEME_SWITCH_SERIALIZE";
+            type_name_of = "SCHEME_SWITCH_SERIALIZE";
             break;
         default:
-            typeName = "UNKNOWN";
+            type_name_of = "UNKNOWN";
             break;
     }
-    return os << typeName;
+    return os << type_name_of;
 }
 //===========================================================================================================
 struct TEST_CASE_UTCKKSRNS_SCHEMESWITCH {
@@ -121,7 +121,7 @@ struct TEST_CASE_UTCKKSRNS_SCHEMESWITCH {
 
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
-static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNS_SCHEMESWITCH>& test) {
+static auto make_test_name = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNS_SCHEMESWITCH>& test) {
     return test.param.build_test_name();
 };
 
@@ -145,7 +145,7 @@ constexpr uint32_t FMODSIZE = 60;
 
 // clang-format off
 static std::vector<TEST_CASE_UTCKKSRNS_SCHEMESWITCH> test_cases = {
-    // TestType,              Descr, Scheme,          RDim, MultDepth,   SModSize,     DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, ScalTech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, Dim1,     LogQ, NumValues, Slots
+    // TestType,              Descr, Scheme,          RDim, MultDepth,   SModSize,     DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, scal_tech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, Dim1,     log_q, num_values, Slots
     { SCHEME_SWITCH_CKKS_FHEW, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8 },
     { SCHEME_SWITCH_CKKS_FHEW, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8 },
     { SCHEME_SWITCH_CKKS_FHEW, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2 },
@@ -166,7 +166,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_SCHEMESWITCH> test_cases = {
 
 #endif
     // ==========================================
-    // TestType,              Descr, Scheme,          RDim, MultDepth,   SModSize,     DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, ScalTech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, Dim1,     LogQ, NumValues, Slots
+    // TestType,              Descr, Scheme,          RDim, MultDepth,   SModSize,     DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, scal_tech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, Dim1,     log_q, num_values, Slots
     { SCHEME_SWITCH_FHEW_CKKS, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 27, 8, 8 },
     { SCHEME_SWITCH_FHEW_CKKS, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 27, 8, 8 },
     { SCHEME_SWITCH_FHEW_CKKS, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 27, 8, RDIM/2 },
@@ -188,7 +188,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_SCHEMESWITCH> test_cases = {
 
 #endif
     // ==========================================
-    // TestType,               Descr, Scheme,          RDim, MultDepth,   SModSize,     DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, ScalTech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, Dim1,     LogQ, NumValues, Slots
+    // TestType,               Descr, Scheme,          RDim, MultDepth,   SModSize,     DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, scal_tech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, Dim1,     log_q, num_values, Slots
     { SCHEME_SWITCH_COMPARISON, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8 },
     { SCHEME_SWITCH_COMPARISON, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8 },
     { SCHEME_SWITCH_COMPARISON, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH1, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2 },
@@ -201,7 +201,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_SCHEMESWITCH> test_cases = {
 #endif
 
     // ==========================================
-    // TestType,     Descr, Scheme,          RDim, MultDepth,  SModSize,     DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, ScalTech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, Dim1, LogQ, NumValues, Slots, OneHot
+    // TestType,     Descr, Scheme,          RDim, MultDepth,  SModSize,     DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, scal_tech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, Dim1, log_q, num_values, Slots, OneHot
     { SCHEME_SWITCH_ARGMIN, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8, true },
     { SCHEME_SWITCH_ARGMIN, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8, true },
     { SCHEME_SWITCH_ARGMIN, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2, true },
@@ -221,7 +221,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_SCHEMESWITCH> test_cases = {
     // { SCHEME_SWITCH_ARGMIN, "16", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2, false },
 #endif
     // ==========================================
-    // TestType,     Descr, Scheme,          RDim, MultDepth,  SModSize,     DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, ScalTech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, Dim1, LogQ, NumValues, Slots, OneHot
+    // TestType,     Descr, Scheme,          RDim, MultDepth,  SModSize,     DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, scal_tech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, Dim1, log_q, num_values, Slots, OneHot
     { SCHEME_SWITCH_ALT_ARGMIN, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8, true },
     { SCHEME_SWITCH_ALT_ARGMIN, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8, true },
     { SCHEME_SWITCH_ALT_ARGMIN, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2, true },
@@ -241,7 +241,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_SCHEMESWITCH> test_cases = {
     // { SCHEME_SWITCH_ALT_ARGMIN, "16", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY,  DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2, false },
 #endif
     // ==========================================
-    // TestType,     Descr, Scheme,          RDim, MultDepth,  SModSize,     DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, ScalTech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, Dim1, LogQ, NumValues, Slots
+    // TestType,     Descr, Scheme,          RDim, MultDepth,  SModSize,     DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize,  SecLvl,       KSTech, scal_tech,        LDigits,      PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, Dim1, log_q, num_values, Slots
     { SCHEME_SWITCH_SERIALIZE, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8},
     { SCHEME_SWITCH_SERIALIZE, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDMANUAL,     NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, 8},
     { SCHEME_SWITCH_SERIALIZE, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH2, SMODSIZE,     DFLT,  DFLT,    UNIFORM_TERNARY, DFLT,          FMODSIZE,  HEStd_NotSet, HYBRID, FIXEDAUTO,       NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   { 16, 16 }, 25, 8, RDIM/2},
@@ -331,8 +331,8 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
             double scale = 1.0 / p_lwe;
             cc->eval_ckks_to_fhew_precompute(scale);
 
-            auto input(
-                    Fill<double>({0, 1, -2, -3, p_lwe / 8.0, p_lwe / 4.0, p_lwe / 2.0, p_lwe / 1.0}, test_data.slots));
+            auto input(fill_slots<double>({0, 1, -2, -3, p_lwe / 8.0, p_lwe / 4.0, p_lwe / 2.0, p_lwe / 1.0},
+                                          test_data.slots));
 
             size_t encoded_length = input.size();
             std::vector<int32_t> input_int(encoded_length);
@@ -540,7 +540,7 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
                 std::vector<std::complex<double>> xargmin_oh(test_data.num_values);
                 xargmin_oh[xargmin] = 1;
                 check_equality(ptxt_min->get_ckks_packed_value(), xargmin_oh, eps1,
-                               failmsg + " EvalMinSchemeSwitching fails.");
+                               failmsg + " eval_min_scheme_switching fails.");
             } else {
                 ptxt_min->set_length(1);
                 check_equality(ptxt_min->get_real_packed_value()[0], static_cast<double>(xargmin), eps1);
@@ -561,7 +561,7 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
             cc->decrypt(key_pair.secret_key, result[1], &ptxt_max);
             if (test_data.one_hot) {
                 ptxt_max->set_length(test_data.num_values);
-                std::vector<std::complex<double>> xargmaxOH(test_data.num_values);
+                std::vector<std::complex<double>> xargmax_oh(test_data.num_values);
                 xargmaxOH[xargmax] = 1;
                 check_equality(ptxt_max->get_ckks_packed_value(), xargmaxOH, eps1,
                               failmsg + "eval_min_scheme_switching fails.");
@@ -633,7 +633,7 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
                 std::vector<std::complex<double>> xargmin_oh(test_data.num_values);
                 xargmin_oh[xargmin] = 1;
                 check_equality(ptxt_min->get_ckks_packed_value(), xargmin_oh, eps1,
-                               failmsg + " EvalMinSchemeSwitching fails.");
+                               failmsg + " eval_min_scheme_switching fails.");
             } else {
                 ptxt_min->set_length(1);
                 check_equality(ptxt_min->get_real_packed_value()[0], static_cast<double>(xargmin), eps1);
@@ -653,7 +653,7 @@ class UTCKKSRNS_SCHEMESWITCH : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
             cc->decrypt(key_pair.secret_key, result[1], &ptxt_max);
             if (test_data.one_hot) {
                 ptxt_max->set_length(test_data.num_values);
-                std::vector<std::complex<double>> xargmaxOH(test_data.num_values);
+                std::vector<std::complex<double>> xargmax_oh(test_data.num_values);
                 xargmaxOH[xargmax] = 1;
                 check_equality(ptxt_max->get_ckks_packed_value(), xargmaxOH, eps1,
                               failmsg + "eval_min_scheme_switching fails.");
@@ -796,4 +796,4 @@ TEST_P(UTCKKSRNS_SCHEMESWITCH, CKKSRNS) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_SCHEMESWITCH, ::testing::ValuesIn(test_cases), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_SCHEMESWITCH, ::testing::ValuesIn(test_cases), make_test_name);

@@ -65,7 +65,7 @@ double get_scale_approx_error(const RnsPoly& poly, uint32_t num_primes_value, ui
     // uint32_t num_primes_value = poly.get_num_of_elements();
     auto q = poly.get_params()->get_params();
 
-    std::cout << "numPrimes=" << num_primes_value << " compositeDegree=" << composite_degree
+    std::cout << "num_primes=" << num_primes_value << " compositeDegree=" << composite_degree
               << " firstModSize=" << first_mod_size_value << " scalingModSize=" << scaling_mod_size << std::endl;
 
     double prod = q[0]->get_modulus().convert_to_double();

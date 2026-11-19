@@ -277,7 +277,7 @@ void add_to_acc_no_monomial(const PP& poly_params, typename P::Integer::Integer 
         if (digits_g2 >= 8 && nthreads >= 4) {
             excess_h_digit_decompose_shared(Q, bp, ct, dct, w0, w1);
         } else {
-#pragma omp single_value
+#pragma omp single
             excess_h_digit_decompose(Q, bp, ct, dct);
         }
 
@@ -497,7 +497,7 @@ inline void add_to_acc_no_monomial(const std::shared_ptr<NativePolyParams32>& po
         if (digits_g2 >= 8 && nthreads >= 4) {
             excess_h_digit_decompose_shared(Q, bp, ct, dct, w0, w1);
         } else {
-    #pragma omp single_value
+    #pragma omp single
             excess_h_digit_decompose(Q, bp, ct, dct);
         }
 

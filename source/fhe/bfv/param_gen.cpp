@@ -319,7 +319,7 @@ bool BfvRnsParamGen::params_gen_bfvrns_internal(std::shared_ptr<BaseCryptoParams
 
     const size_t num_initial_moduli = static_cast<size_t>(std::ceil(std::ceil(logq) / dcrt_bits));
     if (num_initial_moduli < 1)
-        CIPHER_THROW("numInitialModuli must be greater than 0.");
+        CIPHER_THROW("num_initial_moduli must be greater than 0.");
     const size_t size_q = multiparty_mode == NOISE_FLOODING_MULTIPARTY ?
                                   num_initial_moduli + NoiseFlooding::NUM_MODULI_MULTIPARTY :
                                   num_initial_moduli;
@@ -395,7 +395,7 @@ bool BfvRnsParamGen::params_gen_bfvrns_internal(std::shared_ptr<BaseCryptoParams
 
         uint32_t n_actual = StdLatticeParm::find_ring_dim(dist_type, std_level, log_actual_q);
         if (n < n_actual) {
-            std::string err_msg("The ring dimension found using estimated logQ(P) [");
+            std::string err_msg("The ring dimension found using estimated log_q(P) [");
             err_msg += std::to_string(n) + "] does not meet security requirements. ";
             err_msg += "Report this problem to Cipher developers and set the ring dimension manually to ";
             err_msg += std::to_string(n_actual) + ".";

@@ -215,7 +215,7 @@ TEST_F(CkksCacheClearTest, FullBootstrapClear) {
     ContextFactory<RnsPoly>::release_all_contexts();
     size_t final = heap_in_use_bytes();
 
-    std::string failmsg{"ClearBootstrapPrecom() may not clean all allocated memory"};
+    std::string failmsg{"clear_bootstrap_precom() may not clean all allocated memory"};
     EXPECT_TRUE(final <= before) << failmsg;
 
     // std::cerr << "FullBootstrapClear(): before: " << before << "; after: " << after
@@ -241,7 +241,7 @@ TEST_F(CkksCacheClearTest, SchemeSwitchPrecomClear) {
     ContextFactory<RnsPoly>::release_all_contexts();
     size_t final = heap_in_use_bytes();
 
-    std::string failmsg{"ClearSchemeSwitchPrecom() may not clean all allocated memory"};
+    std::string failmsg{"clear_scheme_switch_precom() may not clean all allocated memory"};
     EXPECT_TRUE(final <= before) << failmsg;
 
     // std::cerr << "SchemeSwitchPrecomClear(): before: " << before << "; after: " << after

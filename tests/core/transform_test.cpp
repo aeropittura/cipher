@@ -216,7 +216,7 @@ void crt_polynomial_mult_big_ring_prime_cyclotomics(const std::string& msg) {
 
     c_check = poly_mod(c_check, cyclo_poly, modulus);
     CIPHER_DEBUG("c " << c);
-    CIPHER_DEBUG("cCheck " << c_check);
+    CIPHER_DEBUG("c_check " << c_check);
     EXPECT_EQ(c_check, c) << msg;
 }
 
@@ -341,7 +341,7 @@ void crt_check_very_big_ring_precomputed(const std::string& msg) {
     typename V::Integer modulus("619578785044668429129510602549015713");
     typename V::Integer square_root_of_root("204851043665385327685783246012876507");
     uint32_t n = get_totient(m);
-    CIPHER_DEBUG("UT GetTotient(" << m << ")= " << n);
+    CIPHER_DEBUG("UT get_totient(" << m << ")= " << n);
 
     auto cyclo_poly = get_cyclotomic_polynomial<V>(m, modulus);
     typename V::Integer nttmodulus(

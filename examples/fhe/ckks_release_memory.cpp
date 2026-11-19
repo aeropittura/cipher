@@ -105,8 +105,8 @@ int main() {
     size_t after = heap_in_use_bytes();
     cc->clear_bootstrap_precom();
     size_t after_cleanup = heap_in_use_bytes();
-    std::cerr << "EvalBootstrapSetup(): before: " << before << "; after: " << after
-              << "; after ClearBootstrapPrecom(): " << after_cleanup << std::endl;
+    std::cerr << "eval_bootstrap_setup(): before: " << before << "; after: " << after
+              << "; after clear_bootstrap_precom(): " << after_cleanup << std::endl;
 
     before = heap_in_use_bytes();
     cc->eval_bootstrap_setup({4, 4}, {0, 0}, num_slots);
@@ -115,8 +115,8 @@ int main() {
     after_cleanup = heap_in_use_bytes();
     ContextFactory<RnsPoly>::release_all_contexts();
     size_t final = heap_in_use_bytes();
-    std::cerr << "EvalBootstrapSetup(): before: " << before << "; after: " << after
-              << "; after ClearBootstrapPrecom(): " << after_cleanup << "; after ReleaseAllContexts(): " << final
+    std::cerr << "eval_bootstrap_setup(): before: " << before << "; after: " << after
+              << "; after clear_bootstrap_precom(): " << after_cleanup << "; after release_all_contexts(): " << final
               << std::endl;
 
     return 0;

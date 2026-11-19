@@ -40,7 +40,7 @@
 namespace cipher {
 
 // auxiliary function to replace a specific character "in" with another character "out"
-std::string replaceChar(std::string str, char in, char out) {
+std::string replace_char(std::string str, char in, char out) {
     size_t found = str.find_first_of(in);
     while (found != std::string::npos) {
         str[found] = out;

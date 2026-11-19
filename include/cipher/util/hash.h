@@ -61,7 +61,7 @@ class HashUtil {
      * @param algo hash algorithm; only SHA_256 is implemented, any other value throws
      * @param digest receives the 32 digest bytes, one per entry, appended to the existing contents
      */
-    static void Hash(std::string message, HashAlgorithm algo, std::vector<int64_t>& digest) {
+    static void compute_hash(std::string message, HashAlgorithm algo, std::vector<int64_t>& digest) {
         switch (algo) {
             case SHA_256:
                 SHA256(message, digest);

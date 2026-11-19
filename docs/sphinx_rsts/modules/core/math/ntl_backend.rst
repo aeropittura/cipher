@@ -18,12 +18,12 @@ Namespace
 Integer and Vector Types
 ------------------------
 
-.. doxygenclass:: NTL::myZZ
+.. doxygenclass:: NTL::NtlInteger
    :members:
    :protected-members:
    :undoc-members:
 
-.. doxygenclass:: NTL::myVecP
+.. doxygenclass:: NTL::NtlModVector
    :members:
    :protected-members:
    :undoc-members:

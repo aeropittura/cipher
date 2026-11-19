@@ -171,7 +171,7 @@ class CKKSPackedEncoding : public PlaintextImpl {
      * @return never returns
      */
     bool decode() override {
-        CIPHER_THROW("CKKSPackedEncoding::Decode() is not implemented. Use CKKSPackedEncoding::Decode(...) instead.");
+        CIPHER_THROW("CKKSPackedEncoding::decode() is not implemented. Use CKKSPackedEncoding::decode(...) instead.");
     }
 
     /**
@@ -293,7 +293,7 @@ class CKKSPackedEncoding : public PlaintextImpl {
      */
     double get_log_precision() const override {
         if (ckks_data_type == COMPLEX)
-            CIPHER_THROW("GetLogPrecision for complex numbers is not implemented.");
+            CIPHER_THROW("get_log_precision for complex numbers is not implemented.");
         return encoding_params->get_plaintext_modulus() - log_error_;
     }
 

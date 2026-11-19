@@ -97,7 +97,7 @@ class KeySwitchBv : public RnsKeySwitch {
 
     /**
      * Generates a BV key switching key from old_private_key to new_private_key reusing the "a" components of eval_key
-     * (threshold FHE); see KeySwitchBase::key_switch_gen_internal.
+     * (threshold FHE); see BaseKeySwitch::key_switch_gen_internal.
      *
      * @param old_private_key private key the ciphertexts to be switched are encrypted under
      * @param new_private_key private key the switched ciphertexts should decrypt under
@@ -120,7 +120,7 @@ class KeySwitchBv : public RnsKeySwitch {
                                              const PublicKey<RnsPoly> new_public_key) const override;
 
     /**
-     * Key switches a ciphertext in place; see KeySwitchBase::key_switch_in_place.
+     * Key switches a ciphertext in place; see BaseKeySwitch::key_switch_in_place.
      *
      * @param ciphertext ciphertext to be key switched; holds the result
      * @param eval_key key switching key

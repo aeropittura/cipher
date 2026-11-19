@@ -476,7 +476,7 @@ static const std::shared_ptr<std::vector<RnsPoly>>& dcrt_polys_coef(uint32_t tow
     const auto& towers = (*polys)[0].get_params()->get_params();
     const size_t last = towers.size() - 1;
     if (last == 0) {
-        state.SkipWithError("DropLastElementAndScale needs at least two towers");
+        state.SkipWithError("drop_last_element_and_scale needs at least two towers");
         return;
     }
     const NativeInteger ql{towers[last]->get_modulus()};

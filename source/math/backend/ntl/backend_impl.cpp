@@ -55,8 +55,8 @@
     #include "cipher/math/ternary_uniform_gen_impl.h"
 
 template class NTL::NumberTheoreticTransformNtl<NTL::BigVector>;
-template class NTL::ChineseRemainderTransformFTTNtl<NTL::BigVector>;
-template class NTL::BluesteinFFTNtl<NTL::BigVector>;
+template class NTL::ChineseRemainderTransformFttNtl<NTL::BigVector>;
+template class NTL::BluesteinFftNtl<NTL::BigVector>;
 template class NTL::ChineseRemainderTransformArbNtl<NTL::BigVector>;
 
 namespace cipher {

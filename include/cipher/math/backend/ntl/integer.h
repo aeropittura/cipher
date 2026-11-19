@@ -78,10 +78,10 @@
 namespace NTL {
 
 // forward declaration for aliases
-class myZZ;
+class NtlInteger;
 
 // Create default type for the CIPHER_MATH_BACKEND 6 integer
-using BigInteger = myZZ;
+using BigInteger = NtlInteger;
 
 // log2 constants
 /**
@@ -105,48 +105,48 @@ struct Log2<2> {
     static const uint32_t value = 1;
 };
 
-class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
+class NtlInteger : public NTL::ZZ, public cipher::BigIntegerInterface<NtlInteger> {
   public:
     // CONSTRUCTORS
 
     /**
      * Default constructor.
      */
-    myZZ();
+    NtlInteger();
 
     /**
      * Copy constructor.
      *
      * @param val is the ZZ to be copied.
      */
-    myZZ(const NTL::ZZ& val);  // NOLINT
+    NtlInteger(const NTL::ZZ& val);  // NOLINT
 
     /**
      * Move constructor.
      *
      * @param val is the ZZ to be moved.
      */
-    myZZ(NTL::ZZ&& val);  // NOLINT
+    NtlInteger(NTL::ZZ&& val);  // NOLINT
 
     // TODO: figure out how to do && for wrapper
-    // myZZ(NTL::myZZ_p &&a);
+    // NtlInteger(NTL::myZZ_p &&a);
 
     /**
      * Constructor from a string.
      *
      * @param strval is the initial integer represented as a string.
      */
-    explicit myZZ(const std::string& strval);
-    explicit myZZ(const char* strval) : myZZ(std::string(strval)) {}
+    explicit NtlInteger(const std::string& strval);
+    explicit NtlInteger(const char* strval) : NtlInteger(std::string(strval)) {}
 
     /**
      * Constructor from an unsigned integer.
      *
      * @param val is the initial integer represented as a uint64_t.
      */
-    myZZ(uint64_t val);  // NOLINT
+    NtlInteger(uint64_t val);  // NOLINT
     #if defined(CIPHER_HAVE_INT128)
-    myZZ(uint128_t val);  // NOLINT
+    NtlInteger(uint128_t val);  // NOLINT
     #endif
 
     /**
@@ -154,10 +154,10 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      *
      * @param val is the initial integer represented as a basic integer type.
      */
-    myZZ(int val) : myZZ(uint64_t(val)) {}        // NOLINT
-    myZZ(uint32_t val) : myZZ(uint64_t(val)) {}   // NOLINT
-    myZZ(long val) : myZZ(uint64_t(val)) {}       // NOLINT
-    myZZ(long long val) : myZZ(uint64_t(val)) {}  // NOLINT
+    NtlInteger(int val) : NtlInteger(uint64_t(val)) {}        // NOLINT
+    NtlInteger(uint32_t val) : NtlInteger(uint64_t(val)) {}   // NOLINT
+    NtlInteger(long val) : NtlInteger(uint64_t(val)) {}       // NOLINT
+    NtlInteger(long long val) : NtlInteger(uint64_t(val)) {}  // NOLINT
 
     /**
      * Constructor from a NativeInteger
@@ -171,26 +171,26 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
                               !std::is_same<T, long long>::value &&                                  // NOLINT
                               !std::is_same<T, const std::string>::value &&                          // NOLINT
                               !std::is_same<T, const char*>::value && !std::is_same<T, const char>::value &&
-                              !std::is_same<T, myZZ>::value && !std::is_same<T, double>::value,
+                              !std::is_same<T, NtlInteger>::value && !std::is_same<T, double>::value,
                       bool>::type = true>
-    myZZ(const T& val) : myZZ(val.convert_to_int()) {}  // NOLINT
+    NtlInteger(const T& val) : NtlInteger(val.convert_to_int()) {}  // NOLINT
 
     /**
      * Constructor from double is not permitted
      *
      * @param val
      */
-    myZZ(double val) __attribute__((deprecated("Cannot construct from a double")));  // NOLINT
+    NtlInteger(double val) __attribute__((deprecated("Cannot construct from a double")));  // NOLINT
 
     // ASSIGNMENT OPERATORS
 
     /**
      * Copy assignment operator
      *
-     * @param val is the myZZ to be assigned from.
-     * @return assigned myZZ ref.
+     * @param val is the NtlInteger to be assigned from.
+     * @return assigned NtlInteger ref.
      */
-    myZZ& operator=(const myZZ& val);
+    NtlInteger& operator=(const NtlInteger& val);
 
     // TODO move assignment operator?
 
@@ -198,10 +198,10 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * Assignment operator from string
      *
      * @param strval is the string to be assigned from
-     * @return the assigned myZZ ref.
+     * @return the assigned NtlInteger ref.
      */
-    inline const myZZ& operator=(std::string strval) {
-        *this = myZZ(strval);
+    inline const NtlInteger& operator=(std::string strval) {
+        *this = NtlInteger(strval);
         return *this;
     }
 
@@ -209,28 +209,28 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * Assignment operator from unsigned integer
      *
      * @param val is the unsigned integer to be assigned from.
-     * @return the assigned myZZ ref.
+     * @return the assigned NtlInteger ref.
      */
-    myZZ& operator=(uint64_t val) {
-        *this = myZZ(val);
+    NtlInteger& operator=(uint64_t val) {
+        *this = NtlInteger(val);
         return *this;
     }
 
     // ACCESSORS
 
     /**
-     * Basic set method for setting the value of a myZZ
+     * Basic set method for setting the value of a NtlInteger
      *
-     * @param strval is the string representation of the myZZ to be copied.
+     * @param strval is the string representation of the NtlInteger to be copied.
      */
     void set_value(const std::string& strval);
 
     /**
-     * Basic set method for setting the value of a myZZ
+     * Basic set method for setting the value of a NtlInteger
      *
-     * @param val is the myZZ whose value is to be assigned.
+     * @param val is the NtlInteger whose value is to be assigned.
      */
-    void set_value(const myZZ& val);
+    void set_value(const NtlInteger& val);
 
     void set_identity() {
         *this = 1;
@@ -244,7 +244,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param b is the value to add.
      * @return result of the addition operation.
      */
-    myZZ add(const myZZ& b) const {
+    NtlInteger add(const NtlInteger& b) const {
         return *static_cast<const ZZ*>(this) + static_cast<const ZZ&>(b);
     }
 
@@ -254,7 +254,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param b is the value to add.
      * @return result of the addition operation.
      */
-    myZZ& add_eq(const myZZ& b) {
+    NtlInteger& add_eq(const NtlInteger& b) {
         *static_cast<ZZ*>(this) += static_cast<const ZZ&>(b);
         return *this;
     }
@@ -266,7 +266,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param b is the value to subtract.
      * @return is the result of the subtraction operation.
      */
-    myZZ sub(const myZZ& b) const {
+    NtlInteger sub(const NtlInteger& b) const {
         return (*this < b) ? ZZ(0) : (*static_cast<const ZZ*>(this) - static_cast<const ZZ&>(b));
     }
 
@@ -277,7 +277,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param b is the value to subtract.
      * @return is the result of the subtraction operation.
      */
-    myZZ& sub_eq(const myZZ& b) {
+    NtlInteger& sub_eq(const NtlInteger& b) {
         if (*this < b) {
             *this = ZZ(0);
         } else {
@@ -292,7 +292,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param b is the value to multiply with.
      * @return is the result of the multiplication operation.
      */
-    myZZ mul(const myZZ& b) const {
+    NtlInteger mul(const NtlInteger& b) const {
         return *static_cast<const ZZ*>(this) * static_cast<const ZZ&>(b);
     }
 
@@ -302,7 +302,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param b is the value to multiply with.
      * @return is the result of the multiplication operation.
      */
-    myZZ& mul_eq(const myZZ& b) {
+    NtlInteger& mul_eq(const NtlInteger& b) {
         *static_cast<ZZ*>(this) *= static_cast<const ZZ&>(b);
         return *this;
     }
@@ -313,7 +313,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param b is the value to divide by.
      * @return is the result of the division operation.
      */
-    myZZ divided_by(const myZZ& b) const {
+    NtlInteger divided_by(const NtlInteger& b) const {
         return *static_cast<const ZZ*>(this) / static_cast<const ZZ&>(b);
     }
 
@@ -323,7 +323,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param b is the value to divide by.
      * @return is the result of the division operation.
      */
-    myZZ& divided_by_eq(const myZZ& b) {
+    NtlInteger& divided_by_eq(const NtlInteger& b) {
         *static_cast<ZZ*>(this) /= static_cast<const ZZ&>(b);
         return *this;
     }
@@ -334,7 +334,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param p the exponent.
      * @return is the result of the exponentiation operation.
      */
-    myZZ Exp(const uint32_t p) const {
+    NtlInteger raise_to(const uint32_t p) const {
         return power(*this, p);
     }
 
@@ -344,7 +344,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param p the exponent.
      * @return is the result of the exponentiation operation.
      */
-    myZZ& exp_eq(const uint32_t p) {
+    NtlInteger& exp_eq(const uint32_t p) {
         *this = power(*this, p);
         return *this;
     }
@@ -357,7 +357,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param q is the denominator to be divided.
      * @return is the result of multiply and round operation.
      */
-    myZZ multiply_and_round(const myZZ& p, const myZZ& q) const;
+    NtlInteger multiply_and_round(const NtlInteger& p, const NtlInteger& q) const;
 
     /**
      * Multiply and Rounding operation. Returns [x*p/q] where [] is the rounding
@@ -367,7 +367,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param q is the denominator to be divided.
      * @return is the result of multiply and round operation.
      */
-    myZZ& multiply_and_round_eq(const myZZ& p, const myZZ& q);
+    NtlInteger& multiply_and_round_eq(const NtlInteger& p, const NtlInteger& q);
 
     /**
      * Divide and Rounding operation. Returns [x/q] where [] is the rounding
@@ -376,7 +376,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param q is the denominator to be divided.
      * @return is the result of divide and round operation.
      */
-    myZZ divide_and_round(const myZZ& q) const;
+    NtlInteger divide_and_round(const NtlInteger& q) const;
 
     /**
      * Divide and Rounding operation. Returns [x/q] where [] is the rounding
@@ -385,7 +385,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param q is the denominator to be divided.
      * @return is the result of divide and round operation.
      */
-    myZZ& divide_and_round_eq(const myZZ& q);
+    NtlInteger& divide_and_round_eq(const NtlInteger& q);
 
     // MODULAR ARITHMETIC OPERATIONS
 
@@ -395,7 +395,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param modulus is the modulus to perform.
      * @return is the result of the modulus operation.
      */
-    myZZ mod(const myZZ& modulus) const {
+    NtlInteger mod(const NtlInteger& modulus) const {
         return *static_cast<const ZZ*>(this) % static_cast<const ZZ&>(modulus);
     }
 
@@ -405,7 +405,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param modulus is the modulus to perform.
      * @return is the result of the modulus operation.
      */
-    myZZ& mod_eq(const myZZ& modulus) {
+    NtlInteger& mod_eq(const NtlInteger& modulus) {
         *static_cast<ZZ*>(this) %= static_cast<const ZZ&>(modulus);
         return *this;
     }
@@ -415,8 +415,8 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      *
      * @return the value of mu
      */
-    myZZ compute_mu() const {
-        myZZ temp(1);
+    NtlInteger compute_mu() const {
+        NtlInteger temp(1);
         temp <<= (2 * this->get_msb() + 3);
         return temp.divided_by(*this);
     }
@@ -430,7 +430,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param mu is the Barrett value.
      * @return is the result of the modulus operation.
      */
-    myZZ mod(const myZZ& modulus, const myZZ& mu) const {
+    NtlInteger mod(const NtlInteger& modulus, const NtlInteger& mu) const {
         return *static_cast<const ZZ*>(this) % static_cast<const ZZ&>(modulus);
     }
 
@@ -443,7 +443,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param mu is the Barrett value.
      * @return is the result of the modulus operation.
      */
-    myZZ& mod_eq(const myZZ& modulus, const myZZ& mu) {
+    NtlInteger& mod_eq(const NtlInteger& modulus, const NtlInteger& mu) {
         *static_cast<ZZ*>(this) %= static_cast<const ZZ&>(modulus);
         return *this;
     }
@@ -455,7 +455,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus addition operation.
      */
-    myZZ mod_add(const myZZ& b, const myZZ& modulus) const {
+    NtlInteger mod_add(const NtlInteger& b, const NtlInteger& modulus) const {
         return AddMod(this->mod(modulus), b.mod(modulus), modulus);
     }
 
@@ -466,7 +466,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus addition operation.
      */
-    myZZ& mod_add_eq(const myZZ& b, const myZZ& modulus) {
+    NtlInteger& mod_add_eq(const NtlInteger& b, const NtlInteger& modulus) {
         AddMod(*this, this->mod(modulus), b.mod(modulus), modulus);
         return *this;
     }
@@ -478,7 +478,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus addition operation.
      */
-    myZZ mod_add_fast(const myZZ& b, const myZZ& modulus) const {
+    NtlInteger mod_add_fast(const NtlInteger& b, const NtlInteger& modulus) const {
         return AddMod(*this, b, modulus);
     }
 
@@ -489,7 +489,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus addition operation.
      */
-    myZZ& mod_add_fast_eq(const myZZ& b, const myZZ& modulus) {
+    NtlInteger& mod_add_fast_eq(const NtlInteger& b, const NtlInteger& modulus) {
         *this = AddMod(*this, b, modulus);
         return *this;
     }
@@ -502,7 +502,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param mu is the Barrett value.
      * @return is the result of the modulus addition operation.
      */
-    myZZ mod_add(const myZZ& b, const myZZ& modulus, const myZZ& mu) const {
+    NtlInteger mod_add(const NtlInteger& b, const NtlInteger& modulus, const NtlInteger& mu) const {
         return AddMod(*this, b, modulus);
     }
 
@@ -514,7 +514,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param mu is the Barrett value.
      * @return is the result of the modulus addition operation.
      */
-    myZZ& mod_add_eq(const myZZ& b, const myZZ& modulus, const myZZ& mu) {
+    NtlInteger& mod_add_eq(const NtlInteger& b, const NtlInteger& modulus, const NtlInteger& mu) {
         *this = AddMod(*this, b, modulus);
         return *this;
     }
@@ -528,14 +528,14 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus subtraction operation.
      */
-    myZZ mod_sub(const myZZ& b, const myZZ& modulus) const {
-        myZZ newthis(*this % modulus);
-        myZZ newb(b % modulus);
+    NtlInteger mod_sub(const NtlInteger& b, const NtlInteger& modulus) const {
+        NtlInteger newthis(*this % modulus);
+        NtlInteger newb(b % modulus);
         if (newthis >= newb) {
-            myZZ tmp(SubMod(newthis, newb, modulus));  // normal mod sub
+            NtlInteger tmp(SubMod(newthis, newb, modulus));  // normal mod sub
             return tmp;
         } else {
-            myZZ tmp(newthis + modulus - newb);  // signed mod
+            NtlInteger tmp(newthis + modulus - newb);  // signed mod
             return tmp;
         }
     }
@@ -549,9 +549,9 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus subtraction operation.
      */
-    myZZ& mod_sub_eq(const myZZ& b, const myZZ& modulus) {
+    NtlInteger& mod_sub_eq(const NtlInteger& b, const NtlInteger& modulus) {
         this->mod_eq(modulus);
-        myZZ newb(b % modulus);
+        NtlInteger newb(b % modulus);
         if (*this >= newb) {
             SubMod(*this, *this, newb, modulus);  // normal mod sub
             return *this;
@@ -569,7 +569,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus subtraction operation.
      */
-    myZZ mod_sub_fast(const myZZ& b, const myZZ& modulus) const {
+    NtlInteger mod_sub_fast(const NtlInteger& b, const NtlInteger& modulus) const {
         if (*this >= b) {
             return SubMod(*this, b, modulus);  // normal mod sub
         } else {
@@ -584,7 +584,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus subtraction operation.
      */
-    myZZ& mod_sub_fast_eq(const myZZ& b, const myZZ& modulus) {
+    NtlInteger& mod_sub_fast_eq(const NtlInteger& b, const NtlInteger& modulus) {
         if (*this >= b) {
             return *this = SubMod(*this, b, modulus);  // normal mod sub
         } else {
@@ -600,14 +600,14 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param mu is the Barrett value.
      * @return is the result of the modulus subtraction operation.
      */
-    myZZ mod_sub(const myZZ& b, const myZZ& modulus, const myZZ& mu) const {
-        myZZ newthis(*this % modulus);
-        myZZ newb(b % modulus);
+    NtlInteger mod_sub(const NtlInteger& b, const NtlInteger& modulus, const NtlInteger& mu) const {
+        NtlInteger newthis(*this % modulus);
+        NtlInteger newb(b % modulus);
         if (newthis >= newb) {
-            myZZ tmp(SubMod(newthis, newb, modulus));  // normal mod sub
+            NtlInteger tmp(SubMod(newthis, newb, modulus));  // normal mod sub
             return tmp;
         } else {
-            myZZ tmp(newthis + modulus - newb);  // signed mod
+            NtlInteger tmp(newthis + modulus - newb);  // signed mod
             return tmp;
         }
     }
@@ -620,9 +620,9 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param mu is the Barrett value.
      * @return is the result of the modulus subtraction operation.
      */
-    myZZ& mod_sub_eq(const myZZ& b, const myZZ& modulus, const myZZ& mu) {
+    NtlInteger& mod_sub_eq(const NtlInteger& b, const NtlInteger& modulus, const NtlInteger& mu) {
         this->mod_eq(modulus);
-        myZZ newb(b % modulus);
+        NtlInteger newb(b % modulus);
         if (*this >= newb) {
             SubMod(*this, *this, newb, modulus);  // normal mod sub
             return *this;
@@ -640,7 +640,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus multiplication operation.
      */
-    myZZ mod_mul(const myZZ& b, const myZZ& modulus) const {
+    NtlInteger mod_mul(const NtlInteger& b, const NtlInteger& modulus) const {
         return MulMod(this->mod(modulus), b.mod(modulus), modulus);
     }
 
@@ -651,7 +651,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus multiplication operation.
      */
-    myZZ& mod_mul_eq(const myZZ& b, const myZZ& modulus) {
+    NtlInteger& mod_mul_eq(const NtlInteger& b, const NtlInteger& modulus) {
         MulMod(*this, this->mod(modulus), b.mod(modulus), modulus);
         return *this;
     }
@@ -664,7 +664,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param mu is the Barrett value.
      * @return is the result of the modulus multiplication operation.
      */
-    myZZ mod_mul(const myZZ& b, const myZZ& modulus, const myZZ& mu) const {
+    NtlInteger mod_mul(const NtlInteger& b, const NtlInteger& modulus, const NtlInteger& mu) const {
         return MulMod(this->mod(modulus), b.mod(modulus), modulus);
     }
 
@@ -676,7 +676,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param mu is the Barrett value.
      * @return is the result of the modulus multiplication operation.
      */
-    myZZ& mod_mul_eq(const myZZ& b, const myZZ& modulus, const myZZ& mu) {
+    NtlInteger& mod_mul_eq(const NtlInteger& b, const NtlInteger& modulus, const NtlInteger& mu) {
         MulMod(*this, this->mod(modulus), b.mod(modulus), modulus);
         return *this;
     }
@@ -688,7 +688,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus multiplication operation.
      */
-    inline myZZ mod_mul_fast(const myZZ& b, const myZZ& modulus) const {
+    inline NtlInteger mod_mul_fast(const NtlInteger& b, const NtlInteger& modulus) const {
         return MulMod(*this, b, modulus);
     }
 
@@ -700,7 +700,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus multiplication operation.
      */
-    myZZ& mod_mul_fast_eq(const myZZ& b, const myZZ& modulus) {
+    NtlInteger& mod_mul_fast_eq(const NtlInteger& b, const NtlInteger& modulus) {
         *this = MulMod(*this, b, modulus);
         return *this;
     }
@@ -713,7 +713,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param mu is the Barrett value.
      * @return is the result of the modulus multiplication operation.
      */
-    inline myZZ mod_mul_fast(const myZZ& b, const myZZ& modulus, const myZZ& mu) const {
+    inline NtlInteger mod_mul_fast(const NtlInteger& b, const NtlInteger& modulus, const NtlInteger& mu) const {
         return MulMod(*this, b, modulus);
     }
 
@@ -726,17 +726,17 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param mu is the Barrett value.
      * @return is the result of the modulus multiplication operation.
      */
-    myZZ& mod_mul_fast_eq(const myZZ& b, const myZZ& modulus, const myZZ& mu) {
+    NtlInteger& mod_mul_fast_eq(const NtlInteger& b, const NtlInteger& modulus, const NtlInteger& mu) {
         *this = MulMod(*this, b, modulus);
         return *this;
     }
 
-    myZZ mod_mul_fast_const(const myZZ& b, const myZZ& modulus, const myZZ& b_inv) const {
-        CIPHER_THROW("ModMulFastConst is not implemented for backend 6");
+    NtlInteger mod_mul_fast_const(const NtlInteger& b, const NtlInteger& modulus, const NtlInteger& b_inv) const {
+        CIPHER_THROW("mod_mul_fast_const is not implemented for backend 6");
     }
 
-    myZZ& mod_mul_fast_const_eq(const myZZ& b, const myZZ& modulus, const myZZ& b_inv) {
-        CIPHER_THROW("ModMulFastConstEq is not implemented for backend 6");
+    NtlInteger& mod_mul_fast_const_eq(const NtlInteger& b, const NtlInteger& modulus, const NtlInteger& b_inv) {
+        CIPHER_THROW("mod_mul_fast_const_eq is not implemented for backend 6");
     }
 
     /**
@@ -746,8 +746,8 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus exponentiation operation.
      */
-    inline myZZ mod_exp(const myZZ& b, const myZZ& modulus) const {
-        myZZ res;
+    inline NtlInteger mod_exp(const NtlInteger& b, const NtlInteger& modulus) const {
+        NtlInteger res;
         PowerMod(res, *this, b, modulus);
         return res;
     }
@@ -759,7 +759,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param modulus is the modulus to perform operations with.
      * @return is the result of the modulus exponentiation operation.
      */
-    myZZ& mod_exp_eq(const myZZ& b, const myZZ& modulus) {
+    NtlInteger& mod_exp_eq(const NtlInteger& b, const NtlInteger& modulus) {
         PowerMod(*this, *this, b, modulus);
         return *this;
     }
@@ -770,17 +770,17 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param modulus is the modulus to perform.
      * @return is the result of the modulus inverse operation.
      */
-    myZZ mod_inverse(const myZZ& modulus) const {
-        if (modulus == myZZ(0)) {
+    NtlInteger mod_inverse(const NtlInteger& modulus) const {
+        if (modulus == NtlInteger(0)) {
             CIPHER_THROW("zero has no inverse");
         }
-        myZZ tmp(0);
+        NtlInteger tmp(0);
         try {
             tmp = InvMod(*this % modulus, modulus);
         } catch (InvModErrorObject& e) {  // note this code requires NTL Excptions coto be turned
                                           // on. TODO: provide alternative when that is off.
             std::stringstream errmsg;
-            errmsg << "ModInverse exception " << " this: " << *this << " modulus: " << modulus << "GCD(" << e.get_a()
+            errmsg << "mod_inverse exception " << " this: " << *this << " modulus: " << modulus << "GCD(" << e.get_a()
                    << "," << e.get_n() << "!=1" << std::endl;
             CIPHER_THROW(errmsg.str());
         }
@@ -793,8 +793,8 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param modulus is the modulus to perform.
      * @return is the result of the modulus inverse operation.
      */
-    myZZ& mod_inverse_eq(const myZZ& modulus) {
-        if (modulus == myZZ(0)) {
+    NtlInteger& mod_inverse_eq(const NtlInteger& modulus) {
+        if (modulus == NtlInteger(0)) {
             CIPHER_THROW("zero has no inverse");
         }
         try {
@@ -802,7 +802,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
         } catch (InvModErrorObject& e) {  // note this code requires NTL Excptions coto be turned
                                           // on. TODO: provide alternative when that is off.
             std::stringstream errmsg;
-            errmsg << "ModInverse exception " << " this: " << *this << " modulus: " << modulus << "GCD(" << e.get_a()
+            errmsg << "mod_inverse exception " << " this: " << *this << " modulus: " << modulus << "GCD(" << e.get_a()
                    << "," << e.get_n() << "!=1" << std::endl;
             CIPHER_THROW(errmsg.str());
         }
@@ -815,7 +815,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param shift # of bits.
      * @return result of the shift operation.
      */
-    myZZ l_shift(uint16_t shift) const {
+    NtlInteger l_shift(uint16_t shift) const {
         return *static_cast<const ZZ*>(this) << shift;
     }
 
@@ -825,7 +825,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param shift # of bits.
      * @return result of the shift operation.
      */
-    myZZ& l_shift_eq(uint16_t shift) {
+    NtlInteger& l_shift_eq(uint16_t shift) {
         *static_cast<ZZ*>(this) <<= shift;
         return *this;
     }
@@ -836,7 +836,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param shift # of bits.
      * @return result of the shift operation.
      */
-    myZZ r_shift(uint16_t shift) const {
+    NtlInteger r_shift(uint16_t shift) const {
         return *static_cast<const ZZ*>(this) >> shift;
     }
 
@@ -846,7 +846,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param shift # of bits.
      * @return result of the shift operation.
      */
-    myZZ& r_shift_eq(uint16_t shift) {
+    NtlInteger& r_shift_eq(uint16_t shift) {
         *static_cast<ZZ*>(this) >>= shift;
         return *this;
     }
@@ -854,7 +854,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
     // COMPARE
 
     // comparison method inline for speed
-    int Compare(const myZZ& a) const {
+    int compare_with(const NtlInteger& a) const {
         return compare(*this, a);
     }
 
@@ -866,7 +866,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
     #if defined(CIPHER_HAVE_INT128)
         if constexpr (std::is_same_v<T, uint128_t>) {
             uint128_t tmp2 = (*this >> 64).convert_to_int<uint64_t>();
-            return (tmp2 << 64) | (*this % myZZ(1).l_shift_eq(64)).convert_to_int<uint64_t>();
+            return (tmp2 << 64) | (*this % NtlInteger(1).l_shift_eq(64)).convert_to_int<uint64_t>();
         } else
     #endif
         {
@@ -876,30 +876,30 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
             s >> result;
 
             if ((this->get_msb() > (sizeof(T) * 8)) || (this->get_msb() > NTL_ZZ_NBITS)) {
-                CIPHER_DIAGNOSTIC_ERR << "Warning myZZ::ConvertToInt() Loss of precision. " << std::endl;
+                CIPHER_DIAGNOSTIC_ERR << "Warning NtlInteger::convert_to_int() Loss of precision. " << std::endl;
                 CIPHER_DIAGNOSTIC_ERR << "input  " << *this << std::endl;
                 CIPHER_DIAGNOSTIC_ERR << "result  " << result << std::endl;
             }
             return result;
         }
     }
-    uint64_t ConvertToUint64() const;
+    uint64_t convert_to_uint64() const;
     double convert_to_double() const;
 
     /**
-     * Convert a string representation of a binary number to a myZZ.
+     * Convert a string representation of a binary number to a NtlInteger.
      * Note: needs renaming to a generic form since the variable type name is
      * embedded in the function name. Suggest from_binary_string()
      * @param bit_string the binary num in string.
-     * @return the number represented as a myZZ.
+     * @return the number represented as a NtlInteger.
      */
-    static myZZ from_binary_string(const std::string& bit_string);
+    static NtlInteger from_binary_string(const std::string& bit_string);
 
     // OTHER FUNCTIONS
 
     // adapter kit that wraps ZZ with BACKEND 2 functionality
 
-    static const myZZ& zero();
+    static const NtlInteger& zero();
 
     uint32_t get_msb() const;
 
@@ -942,7 +942,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
      * @param length of the set of bits to get. LSB=1
      * @return resulting unsigned in formed by set of bits.
      */
-    uint32_t GetBitRangeAtIndex(uint32_t index, uint32_t length) const;
+    uint32_t get_bit_range_at_index(uint32_t index, uint32_t length) const;
 
     /**
      * Gets the bit at the specified index.
@@ -954,9 +954,9 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
 
     /**
      * A zero allocator that is called by the Matrix class. It is used to
-     * initialize a Matrix of myZZ objects.
+     * initialize a Matrix of NtlInteger objects.
      */
-    static myZZ allocator() {
+    static NtlInteger allocator() {
         return 0;
     }
 
@@ -970,7 +970,7 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
     }
 
     // big integer stream output
-    friend std::ostream& operator<<(std::ostream& os, const myZZ& ptr_obj);
+    friend std::ostream& operator<<(std::ostream& os, const NtlInteger& ptr_obj);
 
     /**
      * Gets a copy of the internal limb storage
@@ -1068,11 +1068,11 @@ class myZZ : public NTL::ZZ, public cipher::BigIntegerInterface<myZZ> {
     static uint32_t ceil_int_by_u_int(const ZZ_limb_t number_value);
 
     mutable ::cereal::size_type msb_;
-    uint32_t GetMSBLimb_t(ZZ_limb_t x) const;
+    uint32_t get_msb_limb(ZZ_limb_t x) const;
 };
 // class ends
 
-NTL_DECLARE_RELOCATABLE((myZZ*))
+NTL_DECLARE_RELOCATABLE((NtlInteger*))
 }  // namespace NTL
 
 #endif  // CIPHER_WITH_NTL

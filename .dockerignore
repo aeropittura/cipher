@@ -1,0 +1,4 @@
+build/
+build-*/
+install/
+.git/modules/extern/gperftools

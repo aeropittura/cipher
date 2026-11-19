@@ -92,8 +92,8 @@ int main(int argc, char* argv[]) {
         foo[i] = 0;
     }
 
-    TimeVar t_total;   // define timer variable for TIC() TOC() timing functions.
-    double timeTotal;  // holds the resulting time
+    TimeVar t_total;    // define timer variable for TIC() TOC() timing functions.
+    double time_total;  // holds the resulting time
 
     std::cout << "Parallel computation demo using " << omp_get_num_procs() << " processors." << std::endl;
     std::cout << "and maximum of " << omp_get_max_threads() << " threads." << std::endl << std::endl;
@@ -121,7 +121,7 @@ int main(int argc, char* argv[]) {
     }
 
     // demonstrate debug functions (only active when dbg_flag = true)
-    std::cout << "demonstrating OPENFHE_DEBUG()" << std::endl;
+    std::cout << "demonstrating CIPHER_DEBUG()" << std::endl;
     CIPHER_DEBUG("array_size = " << array_size);
     CIPHER_DEBUGEXP(array_size);
     CIPHER_DEBUGWHERE(array_size);
@@ -151,8 +151,8 @@ int main(int argc, char* argv[]) {
     // read the timer to get the computation time in miliseconds
     // look at debug.h to find other timers you can use
 
-    timeTotal = TOC_MS(t_total);
-    PROFILELOG("Total time with internal delay: " << "\t" << timeTotal << " ms");
+    time_total = TOC_MS(t_total);
+    PROFILELOG("Total time with internal delay: " << "\t" << time_total << " ms");
     verify(foo, array_size);
     std::cout << std::endl;
 
@@ -172,8 +172,8 @@ int main(int argc, char* argv[]) {
     }
 
     // read the timer to get the computation time in micro seconds
-    timeTotal = TOC_US(t_total);
-    PROFILELOG("Total time without internal delay: " << "\t" << timeTotal << " us");
+    time_total = TOC_US(t_total);
+    PROFILELOG("Total time without internal delay: " << "\t" << time_total << " us");
     verify(foo, array_size);
 
     return 0;

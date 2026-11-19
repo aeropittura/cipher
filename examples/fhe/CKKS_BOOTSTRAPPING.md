@@ -66,14 +66,14 @@ The user needs to specify `num_iterations=2` in `eval_bootstrap`. The user shoul
 The CKKS bootstrapping procedure is an involved procedure, and the users are encouraged to check out the provided examples in order to familiarize themselves with the functionality and the effect of the various parameters.
 
 Examples
-- [simple-ckks-bootstrapping.cpp](simple_ckks_bootstrapping.cpp) shows how to perform CKKS bootstrapping for fully packed real inputs, both variants.
-- [advanced-ckks-bootstrapping.cpp](advanced_ckks_bootstrapping.cpp) shows the effect of the number of slots on the CKKS bootstrapping performance (by default runs ModRaise-first variant).
-- [iterative-ckks-bootstrapping.cpp](iterative_ckks_bootstrapping.cpp) shows the precision improvement that can be achieved using two iterations of bootstrapping for both variants, and discusses the effect of the correction factor.
-- [simple-complex-numbers.cpp](simple_complex_numbers.cpp) shows CKKS bootstrapping for complex inputs.
-- [ckks-bootstrap-keys-serial.cpp](ckks_bootstrap_keys_serial.cpp) shows how to serialize the bootstrapping keys and bootstrap on a crypto context that is deserialized from files.
-- [ckks-release-memory.cpp](ckks_release_memory.cpp) shows how to release the memory held by the bootstrapping precomputations.
+- [simple_ckks_bootstrapping.cpp](simple_ckks_bootstrapping.cpp) shows how to perform CKKS bootstrapping for fully packed real inputs, both variants.
+- [advanced_ckks_bootstrapping.cpp](advanced_ckks_bootstrapping.cpp) shows the effect of the number of slots on the CKKS bootstrapping performance (by default runs ModRaise-first variant).
+- [iterative_ckks_bootstrapping.cpp](iterative_ckks_bootstrapping.cpp) shows the precision improvement that can be achieved using two iterations of bootstrapping for both variants, and discusses the effect of the correction factor.
+- [simple_complex_numbers.cpp](simple_complex_numbers.cpp) shows CKKS bootstrapping for complex inputs.
+- [ckks_bootstrap_keys_serial.cpp](ckks_bootstrap_keys_serial.cpp) shows how to serialize the bootstrapping keys and bootstrap on a crypto context that is deserialized from files.
+- [ckks_release_memory.cpp](ckks_release_memory.cpp) shows how to release the memory held by the bootstrapping precomputations.
 - The composite scaling versions of the single- and double-iteration bootstrapping examples are listed in [COMPOSITE_SCALING.md](COMPOSITE_SCALING.md), and the functional bootstrapping examples in [CKKS_FUNCTIONAL_BOOTSTRAPING.md](CKKS_FUNCTIONAL_BOOTSTRAPING.md).
 
-Extras
-- [ckks-bootstrap.cpp](../extras/fhe/ckks_bootstrap.cpp) shows how to perform the precomputations and key generation for multiple values of the number of CKKS slots (by default runs ModRaise-first variant).
-- [ckks-bootstrapping-precision.cpp](../extras/fhe/ckks_bootstrapping_precision.cpp) shows the effect of the correction factor for both single- and double-iteration CKKS bootstrapping, for both variants.
+Extras (built with `-DCIPHER_BUILD_EXTRAS=ON`, written to `<build>/bin/extras/fhe/`)
+- [extras/fhe/ckks_bootstrap.cpp](../extras/fhe/ckks_bootstrap.cpp) shows how to perform the precomputations and key generation for multiple values of the number of CKKS slots (by default runs ModRaise-first variant).
+- [extras/fhe/ckks_bootstrapping_precision.cpp](../extras/fhe/ckks_bootstrapping_precision.cpp) shows the effect of the correction factor for both single- and double-iteration CKKS bootstrapping, for both variants.

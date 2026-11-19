@@ -72,9 +72,9 @@ void BooleanContext::generate_boolean_context(BINFHE_PARAMSET s, bool arb_func, 
     if (s != STD128 && s != TOY)
         CIPHER_THROW("STD128 and TOY are the only supported sets");
     if (log_q > 29)
-        CIPHER_THROW("logQ > 29 is not supported");
+        CIPHER_THROW("log_q > 29 is not supported");
     if (log_q < 11)
-        CIPHER_THROW("logQ < 11 is not supported");
+        CIPHER_THROW("log_q < 11 is not supported");
 
     is_method_compatible(method, s);
 
@@ -437,9 +437,9 @@ LweCiphertext BooleanContext::eval_floor(ConstLweCiphertext& ct, uint32_t roundb
     //    auto q = params_->get_lwe_params()->get_q().convert_to_int();
     //    if (roundbits != 0) {
     //        NativeInteger newp = this->get_max_plaintext_space();
-    //        SetQ(q / newp * (1 << roundbits));
+    //        set_q(q / newp * (1 << roundbits));
     //    }
-    //    SetQ(q);
+    //    set_q(q);
     //    return res;
     if (ct == nullptr)
         CIPHER_THROW("Ciphertext is empty");

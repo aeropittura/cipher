@@ -123,7 +123,7 @@ int main() {
         double center = k / static_cast<double>(CENTER_COUNT);
         for (size_t i = 0; i < count; i++) {
             dgg3.generate_integer(center, std);
-            // dgg3.GenerateIntegerKnuthYaoAlt(0);
+            // dgg3.generate_integer_knuth_yao_alt(0);
         }
     }
     finish = current_date_time();

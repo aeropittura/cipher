@@ -53,25 +53,25 @@ enum TEST_CASE_TYPE : int {
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
-    std::string typeName;
+    std::string type_name_of;
     switch (type) {
         case EVAL_AT_INDX_PACKED_ARRAY:
-            typeName = "EVAL_AT_INDX_PACKED_ARRAY";
+            type_name_of = "EVAL_AT_INDX_PACKED_ARRAY";
             break;
         case EVAL_SUM_PACKED_ARRAY:
-            typeName = "EVAL_SUM_PACKED_ARRAY";
+            type_name_of = "EVAL_SUM_PACKED_ARRAY";
             break;
         case EVAL_SUM_ROWS:
-            typeName = "EVAL_SUM_ROWS";
+            type_name_of = "EVAL_SUM_ROWS";
             break;
         case EVAL_SUM_COLS:
-            typeName = "EVAL_SUM_COLS";
+            type_name_of = "EVAL_SUM_COLS";
             break;
         default:
-            typeName = "UNKNOWN_UTCKKSRNS_AUTOMORPHISM";
+            type_name_of = "UNKNOWN_UTCKKSRNS_AUTOMORPHISM";
             break;
     }
-    return os << typeName;
+    return os << type_name_of;
 }
 
 enum TEST_CASE_ERROR {
@@ -111,7 +111,7 @@ struct TEST_CASE_UTCKKSRNS_AUTOMORPHISM {
 
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
-static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNS_AUTOMORPHISM>& test) {
+static auto make_test_name = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNS_AUTOMORPHISM>& test) {
     return test.param.build_test_name();
 };
 
@@ -129,7 +129,7 @@ static const std::vector<int32_t> corner_case_index_list{0};
 
 // clang-format off
 static std::vector<TEST_CASE_UTCKKSRNS_AUTOMORPHISM> test_cases_utckksrns_automorphism = {
-    // TestType,                Descr,  Scheme,         RDim,     MultDepth,  SModSize, DSize,BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, Error,               index_list
+    // TestType,                Descr,  Scheme,         RDim,     MultDepth,  SModSize, DSize,batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, scal_tech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, Error,               index_list
     { EVAL_AT_INDX_PACKED_ARRAY, "01", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   SUCCESS,             init_index_list },
     { EVAL_AT_INDX_PACKED_ARRAY, "02", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   CORNER_CASES,        corner_case_index_list },
     { EVAL_AT_INDX_PACKED_ARRAY, "03", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_INPUT_DATA,  init_index_list },
@@ -164,7 +164,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_AUTOMORPHISM> test_cases_utckksrns_automo
     { EVAL_AT_INDX_PACKED_ARRAY, "37", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_INDEX,       init_index_list },
 #endif
     // ==========================================
-    // TestType,            Descr,  Scheme,         RDim,     MultDepth,  SModSize, DSize,BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, Error,               index_list
+    // TestType,            Descr,  Scheme,         RDim,     MultDepth,  SModSize, DSize,batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, scal_tech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, Error,               index_list
     { EVAL_SUM_PACKED_ARRAY, "01", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   SUCCESS },
     { EVAL_SUM_PACKED_ARRAY, "02", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PRIVATE_KEY },
     { EVAL_SUM_PACKED_ARRAY, "03", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   INVALID_PUBLIC_KEY },
@@ -190,10 +190,10 @@ static std::vector<TEST_CASE_UTCKKSRNS_AUTOMORPHISM> test_cases_utckksrns_automo
     { EVAL_SUM_PACKED_ARRAY, "35", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SMODSIZE, DFLT, BATCH,   DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   NO_KEY_GEN_CALL },
 #endif
     // ==========================================
-    // TestType,    Descr,  Scheme,         RDim,     MultDepth,  SModSize, DSize,BatchSz,    SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, ScalTech, LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, Error,               index_list
+    // TestType,    Descr,  Scheme,         RDim,     MultDepth,  SModSize, DSize,batch_sz,    SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, scal_tech, LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, Error,               index_list
     { EVAL_SUM_ROWS, "01", {CKKSRNS_SCHEME, RING_DIM, DFLT,       DFLT,     DFLT, RING_DIM/2, DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   DFLT,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   SUCCESS },
     // ==========================================
-    // TestType,    Descr,  Scheme,         RDim,     MultDepth,  SModSize, DSize,BatchSz,    SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, ScalTech, LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, Error,               index_list
+    // TestType,    Descr,  Scheme,         RDim,     MultDepth,  SModSize, DSize,batch_sz,    SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, scal_tech, LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, Error,               index_list
     { EVAL_SUM_COLS, "01", {CKKSRNS_SCHEME, RING_DIM, DFLT,       DFLT,     DFLT, RING_DIM/2, DFLT,       DFLT,          DFLT,     SEC_LVL, DFLT,   DFLT,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},   SUCCESS },
 };
 // clang-format on
@@ -387,7 +387,7 @@ class UTCKKSRNS_AUTOMORPHISM : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
             result->set_length(batch_size);
             // std::cout << "sum Rows: " << result;
             check_equality(result->get_ckks_packed_value(), output_sum_rows, eps,
-                           failmsg + " EvalSumRowsKeyGen()/EvalSumRows fails - result is incorrect");
+                           failmsg + " eval_sum_rows_key_gen()/EvalSumRows fails - result is incorrect");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -427,7 +427,7 @@ class UTCKKSRNS_AUTOMORPHISM : public ::testing::TestWithParam<TEST_CASE_UTCKKSR
             result->set_length(batch_size);
             // std::cout << "sum Cols: " << result;
             check_equality(result->get_ckks_packed_value(), output_sum_cols, eps,
-                           failmsg + " EvalSumColsKeyGen()/EvalSumCols fails - result is incorrect");
+                           failmsg + " eval_sum_cols_key_gen()/EvalSumCols fails - result is incorrect");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -461,4 +461,4 @@ TEST_P(UTCKKSRNS_AUTOMORPHISM, Automorphism) {
 }
 
 INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_AUTOMORPHISM, ::testing::ValuesIn(test_cases_utckksrns_automorphism),
-                         testName);
+                         make_test_name);

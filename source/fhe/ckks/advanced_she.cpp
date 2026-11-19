@@ -305,17 +305,17 @@ std::shared_ptr<SeriesPowers<RnsPoly>> internal_eval_powers_ps(ConstCiphertext<R
 
 std::shared_ptr<SeriesPowers<RnsPoly>> CkksRnsAdvancedShe::eval_powers(ConstCiphertext<RnsPoly>& x,
                                                                        const std::vector<int64_t>& coefficients) const {
-    uint32_t d = Degree(coefficients);
+    uint32_t d = effective_degree(coefficients);
     return (d < 5) ? internal_eval_powers_linear(x, coefficients) : internal_eval_powers_ps(x, d);
 }
 std::shared_ptr<SeriesPowers<RnsPoly>> CkksRnsAdvancedShe::eval_powers(ConstCiphertext<RnsPoly>& x,
                                                                        const std::vector<double>& coefficients) const {
-    uint32_t d = Degree(coefficients);
+    uint32_t d = effective_degree(coefficients);
     return (d < 5) ? internal_eval_powers_linear(x, coefficients) : internal_eval_powers_ps(x, d);
 }
 std::shared_ptr<SeriesPowers<RnsPoly>> CkksRnsAdvancedShe::eval_powers(
         ConstCiphertext<RnsPoly>& x, const std::vector<std::complex<double>>& coefficients) const {
-    uint32_t d = Degree(coefficients);
+    uint32_t d = effective_degree(coefficients);
     return (d < 5) ? internal_eval_powers_linear(x, coefficients) : internal_eval_powers_ps(x, d);
 }
 
@@ -367,7 +367,7 @@ Ciphertext<RnsPoly> inner_eval_poly_ps(ConstCiphertext<RnsPoly>& x, const std::v
 
     // Subtract x^{k(2^{m-1} - 1)} from r
     auto& r2 = divqr->r;
-    if (auto n = Degree(r2); static_cast<int32_t>(k2m2k - n) <= 0) {
+    if (auto n = effective_degree(r2); static_cast<int32_t>(k2m2k - n) <= 0) {
         r2.resize(n + 1);
         r2[k2m2k] -= 1;
     } else {
@@ -385,12 +385,12 @@ Ciphertext<RnsPoly> inner_eval_poly_ps(ConstCiphertext<RnsPoly>& x, const std::v
         // Evaluate q and s2 at u.
         // If their degrees are larger than k, then recursively apply the Paterson-Stockmeyer algorithm.
 
-        if (Degree(divqr->q) > k) {
+        if (effective_degree(divqr->q) > k) {
             qu = inner_eval_poly_ps(x, divqr->q, k, m - 1, powers, powers2);
         } else {
             qu = cc->eval_add(powers[k - 1], divqr->q.front());
             divqr->q.resize(k);
-            if (uint32_t n = Degree(divqr->q); n > 0)
+            if (uint32_t n = effective_degree(divqr->q); n > 0)
                 cc->eval_add_in_place(qu, eval_partial_linear_w_sum(powers, divqr->q, n));
         }
     }
@@ -402,17 +402,17 @@ Ciphertext<RnsPoly> inner_eval_poly_ps(ConstCiphertext<RnsPoly>& x, const std::v
         s2.resize(k2m2k + 1);
         s2.back() = 1;
 
-        if (Degree(s2) > k) {
+        if (effective_degree(s2) > k) {
             su = inner_eval_poly_ps(x, s2, k, m - 1, powers, powers2);
         } else {
             su = cc->eval_add(powers[k - 1], s2.front());
             s2.resize(k);
-            if (uint32_t n = Degree(s2); n > 0)
+            if (uint32_t n = effective_degree(s2); n > 0)
                 cc->eval_add_in_place(su, eval_partial_linear_w_sum(powers, s2, n));
         }
     }
 
-    if (uint32_t n = Degree(divcs->q); n == 0) {
+    if (uint32_t n = effective_degree(divcs->q); n == 0) {
         cu = cc->eval_add(powers2[m - 1], divcs->q.front());
     } else if (n == 1) {
         if (is_not_equal_one(divcs->q[1])) {
@@ -450,7 +450,7 @@ Ciphertext<RnsPoly> internal_eval_poly_ps_with_precomp(const std::shared_ptr<Ser
 
     // Add T^{k(2^m - 1)}(y) to the polynomial that has to be evaluated
     auto f2 = coefficients;
-    f2.resize(Degree(f2) + 1);
+    f2.resize(effective_degree(f2) + 1);
     f2.resize(2 * k2m2k + k + 1);
     f2.back() = 1;
 
@@ -462,7 +462,7 @@ Ciphertext<RnsPoly> internal_eval_poly_ps_with_precomp(const std::shared_ptr<Ser
     Ciphertext<RnsPoly> result;
 #pragma omp parallel num_threads(cipher_parallel_controls.get_thread_limit(6 * m + 2))
     {
-#pragma omp single_value
+#pragma omp single
         result = powers[0]->get_crypto_context()->eval_sub(inner_eval_poly_ps(powers[0], f2, k, m, powers, powers2),
                                                            power2km1);
     }
@@ -471,31 +471,31 @@ Ciphertext<RnsPoly> internal_eval_poly_ps_with_precomp(const std::shared_ptr<Ser
 
 Ciphertext<RnsPoly> CkksRnsAdvancedShe::eval_poly(ConstCiphertext<RnsPoly>& x,
                                                   const std::vector<int64_t>& coeffs) const {
-    return (Degree(coeffs) < 5) ? eval_poly_linear(x, coeffs) : eval_poly_ps(x, coeffs);
+    return (effective_degree(coeffs) < 5) ? eval_poly_linear(x, coeffs) : eval_poly_ps(x, coeffs);
 }
 Ciphertext<RnsPoly> CkksRnsAdvancedShe::eval_poly(ConstCiphertext<RnsPoly>& x,
                                                   const std::vector<double>& coeffs) const {
-    return (Degree(coeffs) < 5) ? eval_poly_linear(x, coeffs) : eval_poly_ps(x, coeffs);
+    return (effective_degree(coeffs) < 5) ? eval_poly_linear(x, coeffs) : eval_poly_ps(x, coeffs);
 }
 Ciphertext<RnsPoly> CkksRnsAdvancedShe::eval_poly(ConstCiphertext<RnsPoly>& x,
                                                   const std::vector<std::complex<double>>& coeffs) const {
-    return (Degree(coeffs) < 5) ? eval_poly_linear(x, coeffs) : eval_poly_ps(x, coeffs);
+    return (effective_degree(coeffs) < 5) ? eval_poly_linear(x, coeffs) : eval_poly_ps(x, coeffs);
 }
 
 Ciphertext<RnsPoly> CkksRnsAdvancedShe::eval_poly_with_precomp(std::shared_ptr<SeriesPowers<RnsPoly>> ctxt_powers,
                                                                const std::vector<int64_t>& coeffs) const {
-    return (Degree(coeffs) < 5) ? internal_eval_poly_linear_with_precomp(ctxt_powers->powers_re, coeffs) :
-                                  internal_eval_poly_ps_with_precomp(ctxt_powers, coeffs);
+    return (effective_degree(coeffs) < 5) ? internal_eval_poly_linear_with_precomp(ctxt_powers->powers_re, coeffs) :
+                                            internal_eval_poly_ps_with_precomp(ctxt_powers, coeffs);
 }
 Ciphertext<RnsPoly> CkksRnsAdvancedShe::eval_poly_with_precomp(std::shared_ptr<SeriesPowers<RnsPoly>> ctxt_powers,
                                                                const std::vector<double>& coeffs) const {
-    return (Degree(coeffs) < 5) ? internal_eval_poly_linear_with_precomp(ctxt_powers->powers_re, coeffs) :
-                                  internal_eval_poly_ps_with_precomp(ctxt_powers, coeffs);
+    return (effective_degree(coeffs) < 5) ? internal_eval_poly_linear_with_precomp(ctxt_powers->powers_re, coeffs) :
+                                            internal_eval_poly_ps_with_precomp(ctxt_powers, coeffs);
 }
 Ciphertext<RnsPoly> CkksRnsAdvancedShe::eval_poly_with_precomp(std::shared_ptr<SeriesPowers<RnsPoly>> ctxt_powers,
                                                                const std::vector<std::complex<double>>& coeffs) const {
-    return (Degree(coeffs) < 5) ? internal_eval_poly_linear_with_precomp(ctxt_powers->powers_re, coeffs) :
-                                  internal_eval_poly_ps_with_precomp(ctxt_powers, coeffs);
+    return (effective_degree(coeffs) < 5) ? internal_eval_poly_linear_with_precomp(ctxt_powers->powers_re, coeffs) :
+                                            internal_eval_poly_ps_with_precomp(ctxt_powers, coeffs);
 }
 
 Ciphertext<RnsPoly> CkksRnsAdvancedShe::eval_poly_linear(ConstCiphertext<RnsPoly>& x,
@@ -513,15 +513,15 @@ Ciphertext<RnsPoly> CkksRnsAdvancedShe::eval_poly_linear(ConstCiphertext<RnsPoly
 
 Ciphertext<RnsPoly> CkksRnsAdvancedShe::eval_poly_ps(ConstCiphertext<RnsPoly>& x,
                                                      const std::vector<int64_t>& coeffs) const {
-    return internal_eval_poly_ps_with_precomp(internal_eval_powers_ps(x, Degree(coeffs)), coeffs);
+    return internal_eval_poly_ps_with_precomp(internal_eval_powers_ps(x, effective_degree(coeffs)), coeffs);
 }
 Ciphertext<RnsPoly> CkksRnsAdvancedShe::eval_poly_ps(ConstCiphertext<RnsPoly>& x,
                                                      const std::vector<double>& coeffs) const {
-    return internal_eval_poly_ps_with_precomp(internal_eval_powers_ps(x, Degree(coeffs)), coeffs);
+    return internal_eval_poly_ps_with_precomp(internal_eval_powers_ps(x, effective_degree(coeffs)), coeffs);
 }
 Ciphertext<RnsPoly> CkksRnsAdvancedShe::eval_poly_ps(ConstCiphertext<RnsPoly>& x,
                                                      const std::vector<std::complex<double>>& coeffs) const {
-    return internal_eval_poly_ps_with_precomp(internal_eval_powers_ps(x, Degree(coeffs)), coeffs);
+    return internal_eval_poly_ps_with_precomp(internal_eval_powers_ps(x, effective_degree(coeffs)), coeffs);
 }
 
 //------------------------------------------------------------------------------
@@ -622,7 +622,7 @@ Ciphertext<RnsPoly> inner_eval_chebyshev_ps(ConstCiphertext<RnsPoly>& x,
 
     // Subtract x^{k(2^{m-1} - 1)} from r
     auto& r2 = divqr->r;
-    if (uint32_t n = Degree(r2); static_cast<int32_t>(k2m2k - n) <= 0) {
+    if (uint32_t n = effective_degree(r2); static_cast<int32_t>(k2m2k - n) <= 0) {
         r2.resize(n + 1);
         r2[k2m2k] -= 1;
     } else {
@@ -639,7 +639,7 @@ Ciphertext<RnsPoly> inner_eval_chebyshev_ps(ConstCiphertext<RnsPoly>& x,
     {
         // Evaluate q and s2 at u.
         // If their degrees are larger than k, then recursively apply the Paterson-Stockmeyer algorithm.
-        if (Degree(divqr->q) > k) {
+        if (effective_degree(divqr->q) > k) {
             qu = inner_eval_chebyshev_ps(x, divqr->q, k, m - 1, T, T2);
         } else {
             // dq = k from construction
@@ -658,7 +658,7 @@ Ciphertext<RnsPoly> inner_eval_chebyshev_ps(ConstCiphertext<RnsPoly>& x,
             // Will only get here when m = 2, so the number of levels of qu and T2[m-1] will be the same.
 
             divqr->q.resize(k);
-            if (uint32_t n = Degree(divqr->q); n > 0)
+            if (uint32_t n = effective_degree(divqr->q); n > 0)
                 cc->eval_add_in_place(qu, eval_partial_linear_w_sum(T, divqr->q, n));
         }
     }
@@ -670,7 +670,7 @@ Ciphertext<RnsPoly> inner_eval_chebyshev_ps(ConstCiphertext<RnsPoly>& x,
         s2.resize(k2m2k + 1);
         s2.back() = 1;
 
-        if (Degree(s2) > k) {
+        if (effective_degree(s2) > k) {
             su = inner_eval_chebyshev_ps(x, s2, k, m - 1, T, T2);
         } else {
             // the highest order coefficient will always be 1 because s2 is monic.
@@ -679,7 +679,7 @@ Ciphertext<RnsPoly> inner_eval_chebyshev_ps(ConstCiphertext<RnsPoly>& x,
             // ds = k from construction
             // perform scalar multiplication for all other terms and sum them up if there are non-zero coefficients
             s2.resize(k);
-            if (uint32_t n = Degree(s2); n > 0)
+            if (uint32_t n = effective_degree(s2); n > 0)
                 cc->eval_add_in_place(su, eval_partial_linear_w_sum(T, s2, n));
 
             // adds the free term (at x^0)
@@ -690,7 +690,7 @@ Ciphertext<RnsPoly> inner_eval_chebyshev_ps(ConstCiphertext<RnsPoly>& x,
         }
     }
 
-    if (uint32_t n = Degree(divcs->q); n >= 1) {
+    if (uint32_t n = effective_degree(divcs->q); n >= 1) {
         if (n == 1) {
             if (is_not_equal_one(divcs->q[1])) {
                 cu = cc->eval_mult(T.front(), divcs->q[1]);
@@ -807,7 +807,7 @@ Ciphertext<RnsPoly> internal_eval_chebyshev_series_ps_with_precomp(
 
     // Add T^{k(2^m - 1)}(y) to the polynomial that has to be evaluated
     auto f2 = coefficients;
-    f2.resize(Degree(f2) + 1);
+    f2.resize(effective_degree(f2) + 1);
     f2.resize(2 * k2m2k + k + 1);
     f2.back() = 1;
 
@@ -818,7 +818,7 @@ Ciphertext<RnsPoly> internal_eval_chebyshev_series_ps_with_precomp(
     Ciphertext<RnsPoly> result;
 #pragma omp parallel num_threads(cipher_parallel_controls.get_thread_limit(6 * m + 2))
     {
-#pragma omp single_value
+#pragma omp single
         result = T[0]->get_crypto_context()->eval_sub(inner_eval_chebyshev_ps(T[0], f2, k, m, T, T2), t2km1);
     }
     return result;
@@ -827,54 +827,57 @@ Ciphertext<RnsPoly> internal_eval_chebyshev_series_ps_with_precomp(
 std::shared_ptr<SeriesPowers<RnsPoly>> CkksRnsAdvancedShe::eval_cheby_polys(ConstCiphertext<RnsPoly>& x,
                                                                             const std::vector<int64_t>& coefficients,
                                                                             double a, double b) const {
-    uint32_t d = Degree(coefficients);
+    uint32_t d = effective_degree(coefficients);
     return (d < 5) ? internal_eval_cheby_polys_linear(x, coefficients, a, b) : internal_eval_cheby_polys_ps(x, d, a, b);
 }
 std::shared_ptr<SeriesPowers<RnsPoly>> CkksRnsAdvancedShe::eval_cheby_polys(ConstCiphertext<RnsPoly>& x,
                                                                             const std::vector<double>& coefficients,
                                                                             double a, double b) const {
-    uint32_t d = Degree(coefficients);
+    uint32_t d = effective_degree(coefficients);
     return (d < 5) ? internal_eval_cheby_polys_linear(x, coefficients, a, b) : internal_eval_cheby_polys_ps(x, d, a, b);
 }
 std::shared_ptr<SeriesPowers<RnsPoly>> CkksRnsAdvancedShe::eval_cheby_polys(
         ConstCiphertext<RnsPoly>& x, const std::vector<std::complex<double>>& coefficients, double a, double b) const {
-    uint32_t d = Degree(coefficients);
+    uint32_t d = effective_degree(coefficients);
     return (d < 5) ? internal_eval_cheby_polys_linear(x, coefficients, a, b) : internal_eval_cheby_polys_ps(x, d, a, b);
 }
 
 Ciphertext<RnsPoly> CkksRnsAdvancedShe::eval_chebyshev_series(ConstCiphertext<RnsPoly>& x,
                                                               const std::vector<int64_t>& coeffs, double a,
                                                               double b) const {
-    return (Degree(coeffs) < 5) ? eval_chebyshev_series_linear(x, coeffs, a, b) :
-                                  eval_chebyshev_series_ps(x, coeffs, a, b);
+    return (effective_degree(coeffs) < 5) ? eval_chebyshev_series_linear(x, coeffs, a, b) :
+                                            eval_chebyshev_series_ps(x, coeffs, a, b);
 }
 Ciphertext<RnsPoly> CkksRnsAdvancedShe::eval_chebyshev_series(ConstCiphertext<RnsPoly>& x,
                                                               const std::vector<double>& coeffs, double a,
                                                               double b) const {
-    return (Degree(coeffs) < 5) ? eval_chebyshev_series_linear(x, coeffs, a, b) :
-                                  eval_chebyshev_series_ps(x, coeffs, a, b);
+    return (effective_degree(coeffs) < 5) ? eval_chebyshev_series_linear(x, coeffs, a, b) :
+                                            eval_chebyshev_series_ps(x, coeffs, a, b);
 }
 Ciphertext<RnsPoly> CkksRnsAdvancedShe::eval_chebyshev_series(ConstCiphertext<RnsPoly>& x,
                                                               const std::vector<std::complex<double>>& coeffs, double a,
                                                               double b) const {
-    return (Degree(coeffs) < 5) ? eval_chebyshev_series_linear(x, coeffs, a, b) :
-                                  eval_chebyshev_series_ps(x, coeffs, a, b);
+    return (effective_degree(coeffs) < 5) ? eval_chebyshev_series_linear(x, coeffs, a, b) :
+                                            eval_chebyshev_series_ps(x, coeffs, a, b);
 }
 
 Ciphertext<RnsPoly> CkksRnsAdvancedShe::eval_chebyshev_series_with_precomp(
         std::shared_ptr<SeriesPowers<RnsPoly>> ctxt_powers, const std::vector<int64_t>& coeffs) const {
-    return (Degree(coeffs) < 5) ? internal_eval_chebyshev_series_linear_with_precomp(ctxt_powers->powers_re, coeffs) :
-                                  internal_eval_chebyshev_series_ps_with_precomp(ctxt_powers, coeffs);
+    return (effective_degree(coeffs) < 5) ?
+                   internal_eval_chebyshev_series_linear_with_precomp(ctxt_powers->powers_re, coeffs) :
+                   internal_eval_chebyshev_series_ps_with_precomp(ctxt_powers, coeffs);
 }
 Ciphertext<RnsPoly> CkksRnsAdvancedShe::eval_chebyshev_series_with_precomp(
         std::shared_ptr<SeriesPowers<RnsPoly>> ctxt_powers, const std::vector<double>& coeffs) const {
-    return (Degree(coeffs) < 5) ? internal_eval_chebyshev_series_linear_with_precomp(ctxt_powers->powers_re, coeffs) :
-                                  internal_eval_chebyshev_series_ps_with_precomp(ctxt_powers, coeffs);
+    return (effective_degree(coeffs) < 5) ?
+                   internal_eval_chebyshev_series_linear_with_precomp(ctxt_powers->powers_re, coeffs) :
+                   internal_eval_chebyshev_series_ps_with_precomp(ctxt_powers, coeffs);
 }
 Ciphertext<RnsPoly> CkksRnsAdvancedShe::eval_chebyshev_series_with_precomp(
         std::shared_ptr<SeriesPowers<RnsPoly>> ctxt_powers, const std::vector<std::complex<double>>& coeffs) const {
-    return (Degree(coeffs) < 5) ? internal_eval_chebyshev_series_linear_with_precomp(ctxt_powers->powers_re, coeffs) :
-                                  internal_eval_chebyshev_series_ps_with_precomp(ctxt_powers, coeffs);
+    return (effective_degree(coeffs) < 5) ?
+                   internal_eval_chebyshev_series_linear_with_precomp(ctxt_powers->powers_re, coeffs) :
+                   internal_eval_chebyshev_series_ps_with_precomp(ctxt_powers, coeffs);
 }
 
 Ciphertext<RnsPoly> CkksRnsAdvancedShe::eval_chebyshev_series_linear(ConstCiphertext<RnsPoly>& x,
@@ -899,20 +902,20 @@ Ciphertext<RnsPoly> CkksRnsAdvancedShe::eval_chebyshev_series_linear(ConstCipher
 Ciphertext<RnsPoly> CkksRnsAdvancedShe::eval_chebyshev_series_ps(ConstCiphertext<RnsPoly>& x,
                                                                  const std::vector<int64_t>& coeffs, double a,
                                                                  double b) const {
-    return internal_eval_chebyshev_series_ps_with_precomp(internal_eval_cheby_polys_ps(x, Degree(coeffs), a, b),
-                                                          coeffs);
+    return internal_eval_chebyshev_series_ps_with_precomp(
+            internal_eval_cheby_polys_ps(x, effective_degree(coeffs), a, b), coeffs);
 }
 Ciphertext<RnsPoly> CkksRnsAdvancedShe::eval_chebyshev_series_ps(ConstCiphertext<RnsPoly>& x,
                                                                  const std::vector<double>& coeffs, double a,
                                                                  double b) const {
-    return internal_eval_chebyshev_series_ps_with_precomp(internal_eval_cheby_polys_ps(x, Degree(coeffs), a, b),
-                                                          coeffs);
+    return internal_eval_chebyshev_series_ps_with_precomp(
+            internal_eval_cheby_polys_ps(x, effective_degree(coeffs), a, b), coeffs);
 }
 Ciphertext<RnsPoly> CkksRnsAdvancedShe::eval_chebyshev_series_ps(ConstCiphertext<RnsPoly>& x,
                                                                  const std::vector<std::complex<double>>& coeffs,
                                                                  double a, double b) const {
-    return internal_eval_chebyshev_series_ps_with_precomp(internal_eval_cheby_polys_ps(x, Degree(coeffs), a, b),
-                                                          coeffs);
+    return internal_eval_chebyshev_series_ps_with_precomp(
+            internal_eval_cheby_polys_ps(x, effective_degree(coeffs), a, b), coeffs);
 }
 
 }  // namespace cipher

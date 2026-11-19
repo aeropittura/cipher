@@ -5,17 +5,22 @@ Cipher
 --------
 
 Fully Homomorphic Encryption (FHE) is a powerful cryptographic primitive that enables performing computations over encrypted data without having access to the secret key.
-Cipher is an open-source FHE library that includes efficient implementations of all common FHE schemes:
+Cipher is an open-source C++17 FHE library derived from `OpenFHE <https://github.com/openfheorg/openfhe-development>`_ (version 1.6.1).
+It keeps OpenFHE's algorithms and serialization format; the source tree, build system and API naming were reorganized.
+It includes efficient implementations of all common FHE schemes:
+
   - Brakerski/Fan-Vercauteren (BFV) scheme for integer arithmetic
   - Brakerski-Gentry-Vaikuntanathan (BGV) scheme for integer arithmetic
   - Cheon-Kim-Kim-Song (CKKS) scheme for real-number arithmetic (includes approximate bootstrapping)
   - Ducas-Micciancio (DM/FHEW), Chillotti-Gama-Georgieva-Izabachene (CGGI/TFHE), and Lee-Micciancio-Kim-Choi-Deryabin-Eom-Yoo (LMKCDEY) schemes for evaluating Boolean circuits and arbitrary functions over larger plaintext spaces using lookup tables
 
 Cipher also supports hybrid vectorized schemes, with the goal of enabling the FHEW/TFHE-like functional bootstrapping capability for schemes such as CKKS and BFV. In particular, Cipher supports
+
   - Switching between CKKS and FHEW/TFHE to evaluate non-smooth functions, e.g., comparison, using (scalar) FHEW/TFHE functional bootstrapping
   - Switching between RLWE (a scheme equivalent to the coefficient-encoded additive BFV scheme) and CKKS to evaluate arbitrary lookup tables over vectors of integers, e.g., modular reduction, comparison or S-box, using vectorized functional bootstrapping implemented in CKKS
 
 Cipher also includes the following multiparty extensions of FHE:
+
   - Threshold FHE for BGV, BFV, and CKKS schemes
   - Interactive bootstrapping for Threshold CKKS
   - Proxy Re-Encryption for BGV, BFV, and CKKS schemes
@@ -75,10 +80,11 @@ The library is based on modular architecture with the following layers:
 * Crypto layer containing efficient implementations of FHE schemes.
 * Encoding layer supporting multiple plaintext encodings for cryptographic schemes.
 
-Cipher Extensions
--------------------
+Hardware Acceleration
+---------------------
 
-- `Intel HEXL Acceleration <https://github.com/openfheorg/openfhe-hexl>`_
+Upstream OpenFHE offers an Intel HEXL backend (`openfhe-hexl <https://github.com/openfheorg/openfhe-hexl>`_). It is not
+integrated with Cipher.
 
 License
 -----------
@@ -88,7 +94,8 @@ Cipher is available under the BSD 2-clause license (see LICENSE and NOTICE.md).
 Additional Resources
 ----------------------
 
-`Cipher/PALISADE Webinars <https://www.youtube.com/channel/UC1qByOsQina1rpZ8AGl5TZw>`_
+- Design paper of the underlying library (OpenFHE): `OpenFHE: Open-Source Fully Homomorphic Encryption Library <https://eprint.iacr.org/2022/915>`_
+- Talks, webinars and the discussion forum of the upstream OpenFHE community are listed at `openfhe.org <https://www.openfhe.org>`_
 
 .. toctree::
    :caption: Appendix

@@ -79,7 +79,7 @@ void RnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, ScalingT
     }
 
     // Pre-compute CRT::FFT values for Q
-    DiscreteFourierTransform::Initialize(n * 2, n / 2);
+    DiscreteFourierTransform::initialize(n * 2, n / 2);
     ChineseRemainderTransformFtt<NativeVector>().pre_compute(roots_q, 2 * n, moduli_q);
     if (ks_technique_ == HYBRID) {
         // num_part_q can not be zero as there is a division by num_part_q
@@ -97,7 +97,7 @@ void RnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, ScalingT
 
         num_per_part_q_ = a;
 
-        // Compute the composite digits PartQ = Q_j
+        // Compute the composite digits part_q = Q_j
         std::vector<BigInteger> moduli_part_q(num_part_q_, 1);
         for (uint32_t j = 0; j < num_part_q_; j++) {
             for (uint32_t i = a * j; i < (j + 1) * a; i++) {
@@ -156,8 +156,8 @@ void RnsCryptoParams::precompute_crt_tables(KeySwitchTechnique ks_tech, ScalingT
         // validate the estimated size_p value
         if (size_p_estimate_global > 0) {
             if (size_p > size_p_estimate_global) {
-                auto str = "EstimateLogP() failure: expected sizeP [" + std::to_string(size_p_estimate_global) +
-                           "], but got sizeP [" + std::to_string(size_p) + "]";
+                auto str = "estimate_log_p() failure: expected size_p [" + std::to_string(size_p_estimate_global) +
+                           "], but got size_p [" + std::to_string(size_p) + "]";
                 CIPHER_THROW(str);
             }
             // reset size_p_estimate_global before the next use

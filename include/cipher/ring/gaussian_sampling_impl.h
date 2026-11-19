@@ -274,7 +274,7 @@ void LatticeGaussSampUtility<Element>::z_sample_sigma2x2(const Field2n& a, const
                                                          const Matrix<Field2n>& c, const typename Element::DggType& dgg,
                                                          std::shared_ptr<Matrix<int64_t>> q) {
     // size of the the lattice
-    size_t n = a.Size();
+    size_t n = a.element_count();
 
     Field2n d_coeff = d;
     d_coeff.set_format(Format::COEFFICIENT);
@@ -321,7 +321,7 @@ void LatticeGaussSampUtility<Element>::sample_mat(const Matrix<Field2n>& A, cons
         return;
     }
 
-    size_t n = D(0, 0).Size();
+    size_t n = D(0, 0).element_count();
 
     size_t dim_a = A.get_rows();
     size_t dim_d = D.get_rows();
@@ -339,7 +339,7 @@ void LatticeGaussSampUtility<Element>::sample_mat(const Matrix<Field2n>& A, cons
         c1(0, 0) = C(d - 1, 0);
         c0 = C.extract_rows(0, d - 2);
 
-        q1 = z_sample_f(d_eval, c1(0, 0), dgg, d_eval.Size());
+        q1 = z_sample_f(d_eval, c1(0, 0), dgg, d_eval.element_count());
 
         dinverse(0, 0) = D(0, 0).inverse();
 
@@ -443,7 +443,7 @@ template <class Element>
 std::shared_ptr<Matrix<int64_t>> LatticeGaussSampUtility<Element>::z_sample_f(const Field2n& f, const Field2n& c,
                                                                               const typename Element::DggType& dgg,
                                                                               size_t n) {
-    if (f.Size() == 1) {
+    if (f.element_count() == 1) {
         auto p = std::make_shared<Matrix<int64_t>>([]() { return 0; }, 1, 1);
         (*p)(0, 0) = dgg.generate_integer_karney(c[0].real(), std::sqrt(f[0].real()));
         return p;
@@ -455,7 +455,7 @@ std::shared_ptr<Matrix<int64_t>> LatticeGaussSampUtility<Element>::z_sample_f(co
     f0.set_format(Format::EVALUATION);
     f1.set_format(Format::EVALUATION);
 
-    uint32_t f0_size = f0.Size();
+    uint32_t f0_size = f0.element_count();
 
     auto q_z_vector = std::make_shared<Matrix<int64_t>>([]() { return 0; }, f0_size * 2, 1);
 

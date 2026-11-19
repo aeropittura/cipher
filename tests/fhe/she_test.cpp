@@ -69,52 +69,52 @@ enum TEST_CASE_TYPE : int {
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
-    std::string typeName;
+    std::string type_name_of;
     switch (type) {
         case ADD_PACKED:
-            typeName = "ADD_PACKED";
+            type_name_of = "ADD_PACKED";
             break;
         case MULT_COEF_PACKED:
-            typeName = "MULT_COEF_PACKED";
+            type_name_of = "MULT_COEF_PACKED";
             break;
         case MULT_PACKED:
-            typeName = "MULT_PACKED";
+            type_name_of = "MULT_PACKED";
             break;
         case EVALATINDEX:
-            typeName = "EVALATINDEX";
+            type_name_of = "EVALATINDEX";
             break;
         case EVALMERGE:
-            typeName = "EVALMERGE";
+            type_name_of = "EVALMERGE";
             break;
         case EVALSUM:
-            typeName = "EVALSUM";
+            type_name_of = "EVALSUM";
             break;
         case METADATA:
-            typeName = "METADATA";
+            type_name_of = "METADATA";
             break;
         case EVALSUM_ALL:
-            typeName = "EVALSUM_ALL";
+            type_name_of = "EVALSUM_ALL";
             break;
         case KS_SINGLE_CRT:
-            typeName = "KS_SINGLE_CRT";
+            type_name_of = "KS_SINGLE_CRT";
             break;
         case KS_MOD_REDUCE_DCRT:
-            typeName = "KS_MOD_REDUCE_DCRT";
+            type_name_of = "KS_MOD_REDUCE_DCRT";
             break;
         case EVALSQUARE:
-            typeName = "EVALSQUARE";
+            type_name_of = "EVALSQUARE";
             break;
         case RING_DIM_ERROR_HANDLING:
-            typeName = "RING_DIM_ERROR_HANDLING";
+            type_name_of = "RING_DIM_ERROR_HANDLING";
             break;
         case EVAL_MUTABLE:
-            typeName = "EVAL_MUTABLE";
+            type_name_of = "EVAL_MUTABLE";
             break;
         default:
-            typeName = "UNKNOWN";
+            type_name_of = "UNKNOWN";
             break;
     }
-    return os << typeName;
+    return os << type_name_of;
 }
 //===========================================================================================================
 struct TEST_CASE_UTGENERAL_SHE {
@@ -141,7 +141,7 @@ struct TEST_CASE_UTGENERAL_SHE {
 
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
-static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTGENERAL_SHE>& test) {
+static auto make_test_name = [](const testing::TestParamInfo<TEST_CASE_UTGENERAL_SHE>& test) {
     return test.param.build_test_name();
 };
 
@@ -159,7 +159,7 @@ constexpr uint64_t PTM_XTR_LRG = 35184372744193;
 constexpr uint32_t BV_DSIZE = 4;
 // clang-format off
 static std::vector<TEST_CASE_UTGENERAL_SHE> test_cases = {
-    // TestType,  Descr, Scheme,        RDim, MultDepth, SModSize, DSize,    BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech,         EncTech,   pre_mode
+    // TestType,  Descr, Scheme,        RDim, MultDepth, SModSize, DSize,    batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech,         enc_tech,   pre_mode
     { ADD_PACKED, "01", {BGVRNS_SCHEME, 16,   2,         DFLT,     BV_DSIZE, BATCH,   UNIFORM_TERNARY, 1,             60,       HEStd_NotSet, BV,     FIXEDMANUAL,     DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,             STANDARD,  DFLT}, },
     { ADD_PACKED, "02", {BGVRNS_SCHEME, 16,   2,         DFLT,     BV_DSIZE, BATCH,   UNIFORM_TERNARY, 1,             DFLT,     HEStd_NotSet, BV,     FIXEDAUTO,       DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,             STANDARD,  DFLT}, },
     { ADD_PACKED, "03", {BGVRNS_SCHEME, 16,   2,         DFLT,     BV_DSIZE, BATCH,   UNIFORM_TERNARY, 1,             DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTO,    DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,             STANDARD,  DFLT}, },
@@ -201,7 +201,7 @@ static std::vector<TEST_CASE_UTGENERAL_SHE> test_cases = {
     { ADD_PACKED, "39", {BFVRNS_SCHEME, DFLT, 0,         DFLT,     20,       BATCH,   UNIFORM_TERNARY, DFLT,          DFLT,     DFLT,         HYBRID, DFLT,            DFLT,    PTM,   DFLT,      1,      DFLT, HPSPOVERQLEVELED, EXTENDED,  DFLT}, },
     { ADD_PACKED, "40", {BFVRNS_SCHEME, DFLT, 0,         DFLT,     20,       BATCH,   GAUSSIAN,        DFLT,          DFLT,     DFLT,         HYBRID, DFLT,            DFLT,    PTM,   DFLT,      1,      DFLT, HPSPOVERQLEVELED, EXTENDED,  DFLT}, },
     // ==========================================
-    // TestType,        Descr, Scheme,        RDim, MultDepth, SModSize, DSize,    BatchSz, SecKeyDist,       MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech,         EncTech,   pre_mode
+    // TestType,        Descr, Scheme,        RDim, MultDepth, SModSize, DSize,    batch_sz, SecKeyDist,       MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech,         enc_tech,   pre_mode
     { MULT_COEF_PACKED, "01", {BGVRNS_SCHEME, 16,   2,         DFLT,     BV_DSIZE, BATCH,   UNIFORM_TERNARY,  1,             60,       HEStd_NotSet, BV,     FIXEDMANUAL,     DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,             STANDARD,  DFLT}, },
     { MULT_COEF_PACKED, "02", {BGVRNS_SCHEME, 16,   2,         DFLT,     BV_DSIZE, BATCH,   UNIFORM_TERNARY,  1,             DFLT,     HEStd_NotSet, BV,     FIXEDAUTO,       DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,             STANDARD,  DFLT}, },
     { MULT_COEF_PACKED, "03", {BGVRNS_SCHEME, 16,   2,         DFLT,     BV_DSIZE, BATCH,   UNIFORM_TERNARY,  1,             DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTO,    DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,             STANDARD,  DFLT}, },
@@ -243,7 +243,7 @@ static std::vector<TEST_CASE_UTGENERAL_SHE> test_cases = {
     { MULT_COEF_PACKED, "39", {BFVRNS_SCHEME, DFLT, DFLT,      DFLT,     20,       BATCH,   UNIFORM_TERNARY,  DFLT,          DFLT,     DFLT,         HYBRID, DFLT,            DFLT,    PTM,   DFLT,   DFLT,      DFLT, HPSPOVERQLEVELED, EXTENDED,  DFLT}, },
     { MULT_COEF_PACKED, "40", {BFVRNS_SCHEME, DFLT, DFLT,      DFLT,     20,       BATCH,   GAUSSIAN,         DFLT,          DFLT,     DFLT,         HYBRID, DFLT,            DFLT,    PTM,   DFLT,   DFLT,      DFLT, HPSPOVERQLEVELED, EXTENDED,  DFLT}, },
     // ==========================================
-    // TestType,   Descr, Scheme,        RDim, MultDepth, SModSize, DSize,    BatchSz, SecKeyDist,       MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod,   std_dev, EvalAddCt, KSCt, MultTech,         EncTech,   pre_mode
+    // TestType,   Descr, Scheme,        RDim, MultDepth, SModSize, DSize,    batch_sz, SecKeyDist,       MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits, PtMod,   std_dev, EvalAddCt, KSCt, mult_tech,         enc_tech,   pre_mode
     { MULT_PACKED, "01", {BGVRNS_SCHEME, 256,  2,         DFLT,     BV_DSIZE, BATCH,   UNIFORM_TERNARY,  1,             60,       HEStd_NotSet, BV,     FIXEDMANUAL,     DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, DFLT,             STANDARD,  DFLT}, },
     { MULT_PACKED, "02", {BGVRNS_SCHEME, 256,  2,         DFLT,     BV_DSIZE, BATCH,   UNIFORM_TERNARY,  1,             DFLT,     HEStd_NotSet, BV,     FIXEDAUTO,       DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, DFLT,             STANDARD,  DFLT}, },
     { MULT_PACKED, "03", {BGVRNS_SCHEME, 256,  2,         DFLT,     BV_DSIZE, BATCH,   UNIFORM_TERNARY,  1,             DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTO,    DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, DFLT,             STANDARD,  DFLT}, },
@@ -309,7 +309,7 @@ static std::vector<TEST_CASE_UTGENERAL_SHE> test_cases = {
     { MULT_PACKED, "63", {BFVRNS_SCHEME, DFLT, DFLT,      DFLT,     20,       BATCH,   UNIFORM_TERNARY,  DFLT,          DFLT,     DFLT,         HYBRID, DFLT,            DFLT,    PTM_XTR_LRG, DFLT,   DFLT,      DFLT, HPSPOVERQLEVELED, STANDARD,  DFLT}, },
     { MULT_PACKED, "64", {BFVRNS_SCHEME, DFLT, DFLT,      DFLT,     20,       BATCH,   GAUSSIAN,         DFLT,          DFLT,     DFLT,         HYBRID, DFLT,            DFLT,    PTM_XTR_LRG, DFLT,   DFLT,      DFLT, HPSPOVERQLEVELED, STANDARD,  DFLT}, },
     // ==========================================
-    // TestType,   Descr, Scheme,        RDim, MultDepth, SModSize, DSize,    BatchSz, SecKeyDist,       MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod,   std_dev, EvalAddCt, KSCt, MultTech,         EncTech,   pre_mode
+    // TestType,   Descr, Scheme,        RDim, MultDepth, SModSize, DSize,    batch_sz, SecKeyDist,       MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits, PtMod,   std_dev, EvalAddCt, KSCt, mult_tech,         enc_tech,   pre_mode
     { EVALATINDEX, "01", {BGVRNS_SCHEME, 256,  2,         DFLT,     BV_DSIZE, BATCH,   UNIFORM_TERNARY,  1,             60,       HEStd_NotSet, BV,     FIXEDMANUAL,     DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, DFLT,             STANDARD,  DFLT}, },
     { EVALATINDEX, "02", {BGVRNS_SCHEME, 256,  2,         DFLT,     BV_DSIZE, BATCH,   UNIFORM_TERNARY,  1,             DFLT,     HEStd_NotSet, BV,     FIXEDAUTO,       DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, DFLT,             STANDARD,  DFLT}, },
     { EVALATINDEX, "03", {BGVRNS_SCHEME, 256,  2,         DFLT,     BV_DSIZE, BATCH,   UNIFORM_TERNARY,  1,             DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTO,    DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, DFLT,             STANDARD,  DFLT}, },
@@ -375,7 +375,7 @@ static std::vector<TEST_CASE_UTGENERAL_SHE> test_cases = {
     { EVALATINDEX, "63", {BFVRNS_SCHEME, DFLT, 0,         DFLT,     20,       BATCH,   UNIFORM_TERNARY,  DFLT,          DFLT,     DFLT,         HYBRID, DFLT,            DFLT,    PTM_XTR_LRG, DFLT,   DFLT,      1,    HPSPOVERQLEVELED, EXTENDED,  DFLT}, },
     { EVALATINDEX, "64", {BFVRNS_SCHEME, DFLT, 0,         DFLT,     20,       BATCH,   GAUSSIAN,         DFLT,          DFLT,     DFLT,         HYBRID, DFLT,            DFLT,    PTM_XTR_LRG, DFLT,   DFLT,      1,    HPSPOVERQLEVELED, EXTENDED,  DFLT}, },
     // ==========================================
-    // TestType,   Descr, Scheme,       RDim, MultDepth, SModSize, DSize,    BatchSz, SecKeyDist,       MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod,   std_dev, EvalAddCt, KSCt, MultTech          EncTech,   pre_mode
+    // TestType,   Descr, Scheme,       RDim, MultDepth, SModSize, DSize,    batch_sz, SecKeyDist,       MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits, PtMod,   std_dev, EvalAddCt, KSCt, mult_tech          enc_tech,   pre_mode
     { EVALMERGE,  "01", {BGVRNS_SCHEME, 256,  2,         DFLT,     BV_DSIZE, BATCH,   UNIFORM_TERNARY,  1,             60,       HEStd_NotSet, BV,     FIXEDMANUAL,     DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, DFLT,             STANDARD,  DFLT}, },
     { EVALMERGE,  "02", {BGVRNS_SCHEME, 256,  2,         DFLT,     BV_DSIZE, BATCH,   UNIFORM_TERNARY,  1,             DFLT,     HEStd_NotSet, BV,     FIXEDAUTO,       DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, DFLT,             STANDARD,  DFLT}, },
     { EVALMERGE,  "03", {BGVRNS_SCHEME, 256,  2,         DFLT,     BV_DSIZE, BATCH,   UNIFORM_TERNARY,  1,             DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTO,    DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, DFLT,             STANDARD,  DFLT}, },
@@ -401,7 +401,7 @@ static std::vector<TEST_CASE_UTGENERAL_SHE> test_cases = {
     { EVALMERGE,  "23", {BFVRNS_SCHEME, DFLT, DFLT,      DFLT,     20,       BATCH,   UNIFORM_TERNARY,  DFLT,          DFLT,     DFLT,         DFLT,   FIXEDMANUAL,     DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, HPSPOVERQLEVELED, EXTENDED,  DFLT}, },
     { EVALMERGE,  "24", {BFVRNS_SCHEME, DFLT, DFLT,      DFLT,     20,       BATCH,   GAUSSIAN,         DFLT,          DFLT,     DFLT,         DFLT,   FIXEDMANUAL,     DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, HPSPOVERQLEVELED, EXTENDED,  DFLT}, },
     // ==========================================
-    // TestType,   Descr, Scheme,       RDim, MultDepth, SModSize, DSize,    BatchSz, SecKeyDist,       MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod,   std_dev, EvalAddCt, KSCt, MultTech,         EncTech,   pre_mode
+    // TestType,   Descr, Scheme,       RDim, MultDepth, SModSize, DSize,    batch_sz, SecKeyDist,       MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits, PtMod,   std_dev, EvalAddCt, KSCt, mult_tech,         enc_tech,   pre_mode
     { EVALSUM,    "01", {BFVRNS_SCHEME, DFLT, DFLT,      DFLT,     20,       BATCH,   UNIFORM_TERNARY,  DFLT,          DFLT,     DFLT,         DFLT,   FIXEDMANUAL,     DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, HPS,              STANDARD,  DFLT}, },
     { EVALSUM,    "02", {BFVRNS_SCHEME, DFLT, DFLT,      DFLT,     20,       BATCH,   GAUSSIAN,         DFLT,          DFLT,     DFLT,         DFLT,   FIXEDMANUAL,     DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, HPS,              STANDARD,  DFLT}, },
     { EVALSUM,    "03", {BFVRNS_SCHEME, DFLT, DFLT,      DFLT,     20,       BATCH,   UNIFORM_TERNARY,  DFLT,          DFLT,     DFLT,         DFLT,   FIXEDMANUAL,     DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, BEHZ,             STANDARD,  DFLT}, },
@@ -419,7 +419,7 @@ static std::vector<TEST_CASE_UTGENERAL_SHE> test_cases = {
     { EVALSUM,    "15", {BFVRNS_SCHEME, DFLT, DFLT,      DFLT,     20,       BATCH,   UNIFORM_TERNARY,  DFLT,          DFLT,     DFLT,         DFLT,   FIXEDMANUAL,     DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, HPSPOVERQLEVELED, EXTENDED,  DFLT}, },
     { EVALSUM,    "16", {BFVRNS_SCHEME, DFLT, DFLT,      DFLT,     20,       BATCH,   GAUSSIAN,         DFLT,          DFLT,     DFLT,         DFLT,   FIXEDMANUAL,     DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, HPSPOVERQLEVELED, EXTENDED,  DFLT}, },
     // ==========================================
-    // TestType,   Descr, Scheme,       RDim, MultDepth, SModSize, DSize,    BatchSz, SecKeyDist,       MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod,   std_dev, EvalAddCt, KSCt, MultTech,         EncTech,   pre_mode
+    // TestType,   Descr, Scheme,       RDim, MultDepth, SModSize, DSize,    batch_sz, SecKeyDist,       MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits, PtMod,   std_dev, EvalAddCt, KSCt, mult_tech,         enc_tech,   pre_mode
     { METADATA,   "01", {BGVRNS_SCHEME, 256,  2,         DFLT,     BV_DSIZE, BATCH,   UNIFORM_TERNARY,  1,             60,       HEStd_NotSet, BV,     FIXEDMANUAL,     DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, DFLT,             STANDARD,  DFLT}, },
     { METADATA,   "02", {BGVRNS_SCHEME, 256,  2,         DFLT,     BV_DSIZE, BATCH,   UNIFORM_TERNARY,  1,             DFLT,     HEStd_NotSet, BV,     FIXEDAUTO,       DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, DFLT,             STANDARD,  DFLT}, },
     { METADATA,   "03", {BGVRNS_SCHEME, 256,  2,         DFLT,     BV_DSIZE, BATCH,   UNIFORM_TERNARY,  1,             DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTO,    DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, DFLT,             STANDARD,  DFLT}, },
@@ -445,22 +445,22 @@ static std::vector<TEST_CASE_UTGENERAL_SHE> test_cases = {
     { METADATA,   "23", {BFVRNS_SCHEME, DFLT, DFLT,      DFLT,     20,       BATCH,   UNIFORM_TERNARY,  DFLT,          DFLT,     DFLT,         DFLT,   FIXEDMANUAL,     DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, HPSPOVERQLEVELED, EXTENDED,  DFLT}, },
     { METADATA,   "24", {BFVRNS_SCHEME, DFLT, DFLT,      DFLT,     20,       BATCH,   GAUSSIAN,         DFLT,          DFLT,     DFLT,         DFLT,   FIXEDMANUAL,     DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, HPSPOVERQLEVELED, EXTENDED,  DFLT}, },
     // ==========================================
-    // TestType,    Descr, Scheme,       RDim,      MultDepth, SModSize, DSize, BatchSz,   SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, ScalTech,        LDigits, PtMod,   std_dev, EvalAddCt, KSCt, MultTech, EncTech,   pre_mode
+    // TestType,    Descr, Scheme,       RDim,      MultDepth, SModSize, DSize, batch_sz,   SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, scal_tech,        LDigits, PtMod,   std_dev, EvalAddCt, KSCt, mult_tech, enc_tech,   pre_mode
     { EVALSUM_ALL, "01", {BFVRNS_SCHEME, BATCH_LRG, 0,         DFLT,     20,    BATCH_LRG, DFLT,       DFLT,          DFLT,     DFLT,    DFLT,   FIXEDMANUAL,     DFLT,    PTM_LRG, DFLT,   DFLT,      12,   DFLT,     STANDARD,  DFLT}, },
     { EVALSUM_ALL, "02", {BFVRNS_SCHEME, BATCH_LRG, 0,         DFLT,     20,    BATCH_LRG, DFLT,       DFLT,          DFLT,     DFLT,    DFLT,   FIXEDMANUAL,     DFLT,    PTM_LRG, DFLT,   DFLT,      12,   DFLT,     EXTENDED,  DFLT}, },
     // ==========================================
-    // TestType,      Descr, Scheme,       RDim,      MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, ScalTech,        LDigits, PtMod,   std_dev, EvalAddCt, KSCt, MultTech, EncTech,   pre_mode
+    // TestType,      Descr, Scheme,       RDim,      MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, scal_tech,        LDigits, PtMod,   std_dev, EvalAddCt, KSCt, mult_tech, enc_tech,   pre_mode
     { KS_SINGLE_CRT, "01", {BGVRNS_SCHEME, 1<<13,     1,         DFLT,     1,     DFLT,    DFLT,       DFLT,          DFLT,     DFLT,    DFLT,   FIXEDMANUAL,     DFLT,    256,     4,      DFLT,      DFLT, DFLT,     STANDARD,  DFLT}, },
     { KS_SINGLE_CRT, "02", {BGVRNS_SCHEME, 1<<13,     1,         DFLT,     1,     DFLT,    DFLT,       DFLT,          DFLT,     DFLT,    DFLT,   FIXEDAUTO,       DFLT,    256,     4,      DFLT,      DFLT, DFLT,     STANDARD,  DFLT}, },
     { KS_SINGLE_CRT, "03", {BGVRNS_SCHEME, 1<<13,     1,         DFLT,     1,     DFLT,    DFLT,       DFLT,          DFLT,     DFLT,    DFLT,   FLEXIBLEAUTO,    DFLT,    256,     4,      DFLT,      DFLT, DFLT,     STANDARD,  DFLT}, },
     { KS_SINGLE_CRT, "04", {BGVRNS_SCHEME, 1<<13,     1,         DFLT,     1,     DFLT,    DFLT,       DFLT,          DFLT,     DFLT,    DFLT,   FLEXIBLEAUTOEXT, DFLT,    256,     4,      DFLT,      DFLT, DFLT,     STANDARD,  DFLT}, },
     // ==========================================
-    // TestType,           Descr, Scheme,       RDim,      MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, ScalTech,        LDigits, PtMod,   std_dev, EvalAddCt, KSCt, MultTech, EncTech,   pre_mode
+    // TestType,           Descr, Scheme,       RDim,      MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, scal_tech,        LDigits, PtMod,   std_dev, EvalAddCt, KSCt, mult_tech, enc_tech,   pre_mode
     { KS_MOD_REDUCE_DCRT, "01", {BGVRNS_SCHEME, 1<<13,     1,         DFLT,     1,     DFLT,    DFLT,       DFLT,          DFLT,     DFLT,    DFLT,   FIXEDMANUAL,     DFLT,    256,     4,      DFLT,      DFLT, DFLT,     STANDARD,  DFLT}, },
     // Calling mod_reduce in the AUTO modes doesn't do anything because we automatically mod reduce before multiplication,
     // so we don't need unit tests for KS_MOD_REDUCE_DCRT in the AUTO modes.
     // ==========================================
-    // TestType,   Descr, Scheme,        RDim, MultDepth, SModSize, DSize,    BatchSz, SecKeyDist,       MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod,   std_dev, EvalAddCt, KSCt, MultTech,         EncTech,   pre_mode
+    // TestType,   Descr, Scheme,        RDim, MultDepth, SModSize, DSize,    batch_sz, SecKeyDist,       MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits, PtMod,   std_dev, EvalAddCt, KSCt, mult_tech,         enc_tech,   pre_mode
     { EVALSQUARE,  "01", {BGVRNS_SCHEME, DFLT, 3,         DFLT,     20,       BATCH,   UNIFORM_TERNARY,  DFLT,          DFLT,     DFLT,         DFLT,   FIXEDMANUAL,     DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, HPS,              STANDARD,  DFLT}, },
     { EVALSQUARE,  "02", {BGVRNS_SCHEME, 256,  3,         DFLT,     BV_DSIZE, BATCH,   UNIFORM_TERNARY,  1,             DFLT,     HEStd_NotSet, BV,     FIXEDAUTO,       DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, DFLT,             STANDARD,  DFLT}, },
     { EVALSQUARE,  "03", {BGVRNS_SCHEME, 256,  3,         DFLT,     BV_DSIZE, BATCH,   UNIFORM_TERNARY,  1,             DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTO,    DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, DFLT,             STANDARD,  DFLT}, },
@@ -486,10 +486,10 @@ static std::vector<TEST_CASE_UTGENERAL_SHE> test_cases = {
     { EVALSQUARE,  "23", {BFVRNS_SCHEME, DFLT, 3,         DFLT,     20,       BATCH,   UNIFORM_TERNARY,  DFLT,          DFLT,     DFLT,         DFLT,   FIXEDMANUAL,     DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, HPSPOVERQLEVELED, EXTENDED,  DFLT}, },
     { EVALSQUARE,  "24", {BFVRNS_SCHEME, DFLT, 3,         DFLT,     20,       BATCH,   GAUSSIAN,         DFLT,          DFLT,     DFLT,         DFLT,   FIXEDMANUAL,     DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, HPSPOVERQLEVELED, EXTENDED,  DFLT}, },
 // ==========================================
-    // TestType,               Descr, Scheme,        RDim,  MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl, KSTech, ScalTech, LDigits, PtMod,      std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,               Descr, Scheme,        RDim,  MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl, KSTech, scal_tech, LDigits, PtMod,      std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { RING_DIM_ERROR_HANDLING, "01", {BFVRNS_SCHEME, 1<<13, 3,         DFLT,     DFLT,  DFLT,    DFLT,       DFLT,          DFLT,     DFLT,   DFLT,   DFLT,     DFLT,    4293918721, DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     // ==========================================
-    // TestType,    Descr, Scheme,         RDim, MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,            KSTech, ScalTech,     LDigits, PtMod,   std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,    Descr, Scheme,         RDim, MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,            KSTech, scal_tech,     LDigits, PtMod,   std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { EVAL_MUTABLE, "01", {BGVRNS_SCHEME,  DFLT, 2,         DFLT,     DFLT,  DFLT,    DFLT,       DFLT,          DFLT,     HEStd_128_classic, DFLT,   DFLT,         DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { EVAL_MUTABLE, "02", {CKKSRNS_SCHEME, DFLT, 2,         DFLT,     DFLT,  DFLT,    DFLT,       DFLT,          DFLT,     HEStd_128_classic, DFLT,   DFLT,         DFLT,    DFLT,    DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { EVAL_MUTABLE, "03", {BGVRNS_SCHEME,  DFLT, 2,         DFLT,     DFLT,  DFLT,    DFLT,       DFLT,          DFLT,     HEStd_128_classic, DFLT,   FIXEDAUTO,    DFLT,    PTM_LRG, DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
@@ -542,14 +542,14 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_add->get_length());
             EXPECT_EQ(plaintext_add->get_coef_packed_value(), results->get_coef_packed_value())
-                    << failmsg << " EvalAdd fails";
+                    << failmsg << " eval_add fails";
 
             auto ct1_clone = ciphertext1->clone();
             cc->eval_add_in_place(ct1_clone, ciphertext2);
             cc->decrypt(kp.secret_key, ct1_clone, &results);
             results->set_length(plaintext_add->get_length());
             EXPECT_EQ(plaintext_add->get_coef_packed_value(), results->get_coef_packed_value())
-                    << failmsg << " EvalAddInPlace fails";
+                    << failmsg << " eval_add_in_place fails";
 
             c_result = ciphertext1 + ciphertext2;
             cc->decrypt(kp.secret_key, c_result, &results);
@@ -568,7 +568,7 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_sub->get_length());
             EXPECT_EQ(plaintext_sub->get_coef_packed_value(), results->get_coef_packed_value())
-                    << failmsg << " EvalSub fails";
+                    << failmsg << " eval_sub fails";
 
             c_result = ciphertext1 - ciphertext2;
             cc->decrypt(kp.secret_key, c_result, &results);
@@ -587,13 +587,13 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_add->get_length());
             EXPECT_EQ(plaintext_add->get_coef_packed_value(), results->get_coef_packed_value())
-                    << failmsg << " EvalAdd Ct and Pt fails";
+                    << failmsg << " eval_add Ct and Pt fails";
 
             c_result = cc->eval_sub(ciphertext1, plaintext2);
             cc->decrypt(kp.secret_key, c_result, &results);
             results->set_length(plaintext_sub->get_length());
             EXPECT_EQ(plaintext_sub->get_coef_packed_value(), results->get_coef_packed_value())
-                    << failmsg << " EvalSub Ct and Pt fails";
+                    << failmsg << " eval_sub Ct and Pt fails";
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -803,11 +803,11 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
 
             results1->set_length(int_array_plus3->get_length());
             EXPECT_EQ(int_array_plus3->get_packed_value(), results1->get_packed_value())
-                    << failmsg << " EvalAtIndex(3) fails";
+                    << failmsg << " eval_at_index(3) fails";
 
             results2->set_length(int_array_minus3->get_length());
             EXPECT_EQ(int_array_minus3->get_packed_value(), results2->get_packed_value())
-                    << failmsg << " EvalAtIndex(-3) fails";
+                    << failmsg << " eval_at_index(-3) fails";
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -862,7 +862,7 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
 
             results1->set_length(int_array_merged->get_length());
             EXPECT_EQ(int_array_merged->get_packed_value(), results1->get_packed_value())
-                    << failmsg << " EvalMerge fails";
+                    << failmsg << " eval_merge fails";
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -924,11 +924,11 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
             results3->set_length(dim);
 
             EXPECT_EQ(int_array1->get_packed_value(), results1->get_packed_value())
-                    << failmsg << " EvalSum for batch size = 1 failed";
+                    << failmsg << " eval_sum for batch size = 1 failed";
             EXPECT_EQ(int_array2->get_packed_value(), results2->get_packed_value())
-                    << failmsg << " EvalSum for batch size = 2 failed";
+                    << failmsg << " eval_sum for batch size = 2 failed";
             EXPECT_EQ(int_array_all->get_packed_value(), results3->get_packed_value())
-                    << failmsg << " EvalSum for batch size = 8 failed";
+                    << failmsg << " eval_sum for batch size = 8 failed";
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -973,32 +973,32 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
             Ciphertext<Element> c_add_cc = cc->eval_add(ciphertext1, ciphertext2);
             auto add_cc_val_test = MetadataTest::get_metadata<Element>(c_add_cc);
             EXPECT_EQ(val1->get_metadata(), add_cc_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalAdd(ctx,ctx)";
+                    << "Ciphertext metadata mismatch in eval_add(ctx,ctx)";
 
             // Checking if metadata is carried over in eval_add_in_place(ctx,ctx)
             Ciphertext<Element> ciphertext1_clone = ciphertext1->clone();
             cc->eval_add_in_place(ciphertext1_clone, ciphertext2);
             auto add_cc_in_place_val_test = MetadataTest::get_metadata<Element>(ciphertext1_clone);
             EXPECT_EQ(val1->get_metadata(), add_cc_in_place_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalAddInPlace(ctx,ctx)";
+                    << "Ciphertext metadata mismatch in eval_add_in_place(ctx,ctx)";
 
             // Checking if metadata is carried over in eval_add(ctx,ptx)
             Ciphertext<Element> c_add_cp = cc->eval_add(ciphertext1, plaintext1);
             auto add_cp_val_test = MetadataTest::get_metadata<Element>(c_add_cp);
             EXPECT_EQ(val1->get_metadata(), add_cp_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalAdd(ctx,ptx)";
+                    << "Ciphertext metadata mismatch in eval_add(ctx,ptx)";
 
             // Checking if metadata is carried over in eval_sub(ctx,ctx)
             Ciphertext<Element> c_sub_cc = cc->eval_sub(ciphertext1, ciphertext2);
             auto sub_cc_val_test = MetadataTest::get_metadata<Element>(c_sub_cc);
             EXPECT_EQ(val1->get_metadata(), sub_cc_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalSub(ctx,ctx)";
+                    << "Ciphertext metadata mismatch in eval_sub(ctx,ctx)";
 
             // Checking if metadata is carried over in eval_sub(ctx,ptx)
             Ciphertext<Element> c_sub_cp = cc->eval_sub(ciphertext1, plaintext1);
             auto sub_cp_val_test = MetadataTest::get_metadata<Element>(c_sub_cp);
             EXPECT_EQ(val1->get_metadata(), sub_cp_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalSub(ctx,ptx)";
+                    << "Ciphertext metadata mismatch in eval_sub(ctx,ptx)";
 
             // Checking if metadata is carried over in eval_mult(ctx,ctx)
             Ciphertext<Element> c_mult_cc = cc->eval_mult(ciphertext1, ciphertext2);
@@ -1016,13 +1016,13 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
             auto c_at_index2 = cc->eval_at_index(ciphertext1, 2);
             auto at_index2_val_test = MetadataTest::get_metadata<Element>(c_at_index2);
             EXPECT_EQ(val1->get_metadata(), at_index2_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalAtIndex +2";
+                    << "Ciphertext metadata mismatch in eval_at_index +2";
 
             // Checking if metadata is carried over in eval_at_index -2 (right rotate)
             auto c_at_index_minus2 = cc->eval_at_index(ciphertext1, -2);
             auto at_index_minus2_val_test = MetadataTest::get_metadata<Element>(c_at_index_minus2);
             EXPECT_EQ(val1->get_metadata(), at_index_minus2_val_test->get_metadata())
-                    << "Ciphertext metadata mismatch in EvalAtIndex -2";
+                    << "Ciphertext metadata mismatch in eval_at_index -2";
 
             std::vector<double> weights(2);
             for (uint32_t i = 0; i < 2; i++)
@@ -1076,7 +1076,7 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
             results1->set_length(dim);
 
             EXPECT_EQ(int_array_all->get_packed_value(), results1->get_packed_value())
-                    << " BFVrns EvalSum for batch size = All failed";
+                    << " BFVrns eval_sum for batch size = All failed";
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1193,7 +1193,7 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
             cc->decrypt(kp.secret_key, ciphertext_sq1, &results);
             results->set_length(int_array_expected_square1->get_length());
             EXPECT_EQ(int_array_expected_square1->get_packed_value(), results->get_packed_value())
-                    << failmsg << " EvalSquare (Packed) fails";
+                    << failmsg << " eval_square (Packed) fails";
 
             Ciphertext<Element> ciphertext_third1 = cc->eval_mult(ciphertext_sq1, plaintext1);
             cc->decrypt(kp.secret_key, ciphertext_third1, &results);
@@ -1202,13 +1202,13 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
             cc->decrypt(kp.secret_key, ciphertext_sixth1, &results);
             results->set_length(int_array_expected_sixth1->get_length());
             EXPECT_EQ(int_array_expected_sixth1->get_packed_value(), results->get_packed_value())
-                    << failmsg << " EvalSquare Sixth (Packed) fails";
+                    << failmsg << " eval_square Sixth (Packed) fails";
 
             Ciphertext<Element> ciphertext_sq2 = cc->eval_square(ciphertext2);
             cc->decrypt(kp.secret_key, ciphertext_sq2, &results);
             results->set_length(int_array_expected_square2->get_length());
             EXPECT_EQ(int_array_expected_square2->get_coef_packed_value(), results->get_coef_packed_value())
-                    << failmsg << " EvalSquare (CoefPacked) fails";
+                    << failmsg << " eval_square (CoefPacked) fails";
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -1301,24 +1301,24 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
 
         auto ct = ciphertext->clone();
         auto ct_square = crypto_context->eval_mult_mutable(ct, ct);
-        check(ct_square, plaintext_square, " EvalMultMutable(ct, ct) result");
-        check(ct, plaintext_in, " EvalMultMutable(ct, ct) operand");
-        EXPECT_EQ(ct_square->get_level(), square_level) << err_msg << " EvalMultMutable(ct, ct) level";
+        check(ct_square, plaintext_square, " eval_mult_mutable(ct, ct) result");
+        check(ct, plaintext_in, " eval_mult_mutable(ct, ct) operand");
+        EXPECT_EQ(ct_square->get_level(), square_level) << err_msg << " eval_mult_mutable(ct, ct) level";
 
         ct = ciphertext->clone();
         crypto_context->eval_mult_mutable_in_place(ct, ct);
-        check(ct, plaintext_square, " EvalMultMutableInPlace(ct, ct) result");
-        EXPECT_EQ(ct->get_level(), square_level) << err_msg << " EvalMultMutableInPlace(ct, ct) level";
+        check(ct, plaintext_square, " eval_mult_mutable_in_place(ct, ct) result");
+        EXPECT_EQ(ct->get_level(), square_level) << err_msg << " eval_mult_mutable_in_place(ct, ct) level";
 
         ct = ciphertext->clone();
         auto ct1 = ciphertext->clone();
         auto ct2 = ciphertext->clone();
         crypto_context->get_scheme()->adjust_levels_and_depth_to_one_in_place(ct, ct);
         crypto_context->get_scheme()->adjust_levels_and_depth_to_one_in_place(ct1, ct2);
-        check(ct, plaintext_in, " AdjustLevelsAndDepthToOneInPlace(ct, ct) operand");
-        EXPECT_EQ(ct->get_level(), ct1->get_level()) << err_msg << " AdjustLevelsAndDepthToOneInPlace(ct, ct) level";
+        check(ct, plaintext_in, " adjust_levels_and_depth_to_one_in_place(ct, ct) operand");
+        EXPECT_EQ(ct->get_level(), ct1->get_level()) << err_msg << " adjust_levels_and_depth_to_one_in_place(ct, ct) level";
         EXPECT_EQ(ct->get_noise_scale_deg(), ct1->get_noise_scale_deg())
-                << err_msg << " AdjustLevelsAndDepthToOneInPlace(ct, ct) noise scale degree";
+                << err_msg << " adjust_levels_and_depth_to_one_in_place(ct, ct) noise scale degree";
     }
 
     void unit_test_eval_mutable(const TEST_CASE_UTGENERAL_SHE& test_data, const std::string& failmsg = std::string()) {
@@ -1413,7 +1413,7 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
                                   plaintext_mult_result1,
                                   plaintext_mult_result2,
                                   tolerance,
-                                  failmsg + " EvalMultMutable() failed");
+                                  failmsg + " eval_mult_mutable() failed");
 
             eval_mutable_operations(crypto_context,
                                   key_pair,
@@ -1425,7 +1425,7 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
                                   plaintext_add_result1,
                                   plaintext_add_result2,
                                   tolerance,
-                                  failmsg + " EvalAddMutable() failed");
+                                  failmsg + " eval_add_mutable() failed");
 
             eval_mutable_operations(crypto_context,
                                   key_pair,
@@ -1437,7 +1437,7 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
                                   plaintext_sub_result1,
                                   plaintext_sub_result2,
                                   tolerance,
-                                  failmsg + " EvalSubMutable() failed");
+                                  failmsg + " eval_sub_mutable() failed");
 
             // the same ciphertext object as both arguments, both fresh and after a multiplication (noise scale
             // degree 2), so that every automatic scaling technique rescales it before multiplying
@@ -1510,7 +1510,7 @@ TEST_P(UTGENERAL_SHE, SHE) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTGENERAL_SHE, ::testing::ValuesIn(test_cases), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTGENERAL_SHE, ::testing::ValuesIn(test_cases), make_test_name);
 
 TEST(UnitTestSHE, EvalKeyRelinPreservesKeyTag) {
     constexpr auto tag = "evaluation-key-tag";

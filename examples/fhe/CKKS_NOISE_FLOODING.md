@@ -64,8 +64,7 @@ standard deviation $\sigma = \sqrt{12\tau}2^{s/2}\mathsf{ct}.t$.
 We call this mode $\mathsf{EXEC}\textunderscore\mathsf{EVALUATION}$.
 
 The code for this procedure is in
-  src/examples/pke/ckks-noise-flooding.cpp
-in Cipher.
+[ckks_noise_flooding.cpp](ckks_noise_flooding.cpp).
 For leveled computations, the code allows for the user to run the
 static estimation using 64-bit CKKS and the actual computation in 128-bit CKKS.
 

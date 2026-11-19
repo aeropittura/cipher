@@ -67,7 +67,7 @@ class PlaintextImpl {
     /**
      * @brief Type of the polynomial the plaintext is encoded into.
      */
-    enum PtxtPolyType { IsPoly, IsDCRTPoly, IsNativePoly };
+    enum PtxtPolyType { IsPoly, IsRnsPoly, IsNativePoly };
 
     bool is_encoded_{false};         ///< whether the values have been encoded into the polynomial
     PtxtPolyType type_flag;          ///< which of the three polynomial members is in use
@@ -146,7 +146,7 @@ class PlaintextImpl {
     // TODO: eliminate use of encoded_vector in coefpackedencoding to remove encoded_vector init here
     PlaintextImpl(const std::shared_ptr<RnsPoly::Params>& vp, EncodingParams ep, PlaintextEncodings encoding,
                   SCHEME scheme_tag = SCHEME::INVALID_SCHEME)
-        : type_flag(IsDCRTPoly),
+        : type_flag(IsRnsPoly),
           encoding_params(std::move(ep)),
           encoded_vector(vp, Format::COEFFICIENT),
           encoded_vector_dcrt(vp, Format::COEFFICIENT),
@@ -589,7 +589,7 @@ inline NativePoly& PlaintextImpl::get_element<NativePoly>() {
 
 /**
  * get_element
- * @return the DCRTPolynomial that the element was encoded into
+ * @return the RNS polynomial that the element was encoded into
  */
 template <>
 inline const RnsPoly& PlaintextImpl::get_element<RnsPoly>() const {
@@ -598,7 +598,7 @@ inline const RnsPoly& PlaintextImpl::get_element<RnsPoly>() const {
 
 /**
  * get_element
- * @return the DCRTPolynomial that the element was encoded into
+ * @return the RNS polynomial that the element was encoded into
  */
 template <>
 inline RnsPoly& PlaintextImpl::get_element<RnsPoly>() {

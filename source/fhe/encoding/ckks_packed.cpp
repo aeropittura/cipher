@@ -52,7 +52,7 @@
 
 namespace cipher {
 
-std::vector<std::complex<double>> Conjugate(const std::vector<std::complex<double>>& vec) {
+std::vector<std::complex<double>> conjugate_values(const std::vector<std::complex<double>>& vec) {
     uint32_t n = vec.size();
     std::vector<std::complex<double>> result(n);
     for (uint32_t i = 1; i < n; ++i) {
@@ -119,8 +119,8 @@ bool CKKSPackedEncoding::encode() {
     if (is_encoded_)
         return true;
 
-    if (type_flag != IsDCRTPoly)
-        CIPHER_THROW("Only DCRTPoly is supported for CKKS.");
+    if (type_flag != IsRnsPoly)
+        CIPHER_THROW("Only RnsPoly is supported for CKKS.");
 
     if (slots < value.size()) {
         std::string err_msg = std::string("The number of slots [") + std::to_string(slots) +
@@ -398,7 +398,7 @@ bool CKKSPackedEncoding::decode(size_t noise_scale_deg, double scaling_factor, S
     // we set M to 1.
 
     // compute m(1/X) corresponding to Conj(z), where z is the decoded vector
-    auto conjugate = Conjugate(cur_values);
+    auto conjugate = conjugate_values(cur_values);
 
     // Estimate standard deviation from 1/2 (m(X) - m(1/x)),
     // which corresponds to Im(z)

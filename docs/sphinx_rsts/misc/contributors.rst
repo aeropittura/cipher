@@ -1,7 +1,7 @@
 Contributors
 ============
 
-We gratefully acknowledge intellectual and software contributions to the library from numerous individuals. The following individuals have contributed code, algorithms, or ideas to the Cipher project:
+We gratefully acknowledge intellectual and software contributions to the library from numerous individuals. The following individuals have contributed code, algorithms, or ideas to the OpenFHE project:
 
 * Ahmad Al Badawi (Duality Technologies & National University of Singapore)
 

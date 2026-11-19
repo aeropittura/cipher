@@ -1,4 +1,4 @@
-# Core Library Implementation
+# Cipher Public Headers
 
 ```mermaid
 flowchart BT
@@ -6,9 +6,12 @@ flowchart BT
     B[Lattice <br> - Represent polynomial rings </br> - support operations over polynomial rings. </br> - calls math layer for lower-level math ops] --> C[Core Layer];
 ```
 
-Contains the underlying primitives that are used in both `pke` and `binfhe`.
+The `math`, `ring` and `util` directories form the core library (`Cipher::core`, umbrella header `cipher/core.h`):
+the underlying primitives that are used by both the [FHE schemes](fhe) (`Cipher::fhe`, `cipher/cipher.h`) and
+[Boolean FHE](boolean) (`Cipher::boolean`, `cipher/boolean/context.h`). The implementation lives in `source/`,
+mirroring this directory.
 
-## [Lattice](ring)
+## [Ring](ring)
 
 - Contains files that support lattice/polynomial-layer operations in Cipher. This layer is used to represent polynomial rings and support operations over those rings.
 
@@ -19,10 +22,10 @@ Contains the underlying primitives that are used in both `pke` and `binfhe`.
 
 Contains various files describing the mathematical functionality supported in Cipher. For example:
 
-- modular arithmeric
+- modular arithmetic
 - sampling functions
 
-In addition, the hardware abstraction layer (HAL) is defined here.
+In addition, the big-integer backends (the math hardware abstraction layer) are defined here, in [math/backend](math/backend).
 
 
 ## [Utils](util)

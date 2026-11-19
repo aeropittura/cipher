@@ -12,8 +12,9 @@ Design
 
 **Currently**: **Compile-time** choice of which backend to use
 
-.. note:: All implementations for Big/Native Integer/Vector are based on
-   ``integer.h (integer.h)``
+.. note:: All implementations for Big/Native Integer/Vector are based on the
+   interfaces in ``include/cipher/math/backend/integer.h`` and
+   ``include/cipher/math/backend/vector.h``
 
 -  By selecting a particular ``CIPHER_MATH_BACKEND``, we are choosing a default
    implementation for:
@@ -31,19 +32,21 @@ Choosing a Backend
 
 You can either:
 
--  Add a flag during the ``CMAKE`` process: ``cmake -DMATHBACKEND=4 ..``
+-  Add a flag during the ``CMake`` configure step: ``cmake -S . -B build -DCIPHER_MATH_BACKEND=4``
 
--  Uncomment the appropriate line in
-   ``src/core/math/hal/bigintbackend.h`` (and comment out the rest)
+-  Additional backends can be compiled alongside the default one with
+   ``CIPHER_WITH_BE2=ON``, ``CIPHER_WITH_BE4=ON`` or ``CIPHER_WITH_NTL=ON``; the
+   selection logic is in ``include/cipher/math/backend/big_int_backend.h``
 
 Math Backend Descriptions
 -------------------------
 
-MATHBACKEND 2
-~~~~~~~~~~~~~
+CIPHER_MATH_BACKEND 2
+~~~~~~~~~~~~~~~~~~~~~
 
--  Max size of ``BigInteger`` will be ``BitIntegerBitLength`` (defined
-   in ```backend.h``) which has a default of 3000 bits.
+-  Max size of ``BigInteger`` will be ``BigIntegerBitLength`` (defined
+   in ``include/cipher/math/backend/fixed/integer.h``) which has a default of
+   3500 bits (8000 bits when ``CIPHER_NATIVE_SIZE=128``).
 
 -  It is advisable to select a value for ``BigIntegerBitLength`` larger
    than double the ``bitwidth`` of the largest (ciphertext) modulus.
@@ -59,24 +62,20 @@ MATHBACKEND 2
       an open work item
 
 CIPHER_MATH_BACKEND 4
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 -  No Explicit max size of ``BigInteger``
 -  Size grows dynamically and is only constrained by memory
--  The implementation requires that ``UBINT_32`` is defined as is in
-   ``ubintdyn.h``
+-  The implementation is in ``include/cipher/math/backend/dynamic/``; the limb
+   type is selected in ``include/cipher/math/backend/dynamic/integer.h``
 
-.. note:: Setting ``UBINT_64`` is not supported. It is however a open
-             work item.
+CIPHER_MATH_BACKEND 6
+~~~~~~~~~~~~~~~~~~~~~
 
-MATHBACKEND 6
-~~~~~~~~~~~~~
-
--  Integration of ``NTL`` library with ``OpenFHE``
--  Only available when ``NTL`` or ``GMP`` is enabled using ``CMAKE``
-
-This is an integration of the NTL library with OpenFHE, and is only
-available when NTL/GMP is enabled using CMAKE.
+-  Integration of the ``NTL`` library with Cipher (``NtlInteger`` and ``NtlModVector``
+   in ``include/cipher/math/backend/ntl/``)
+-  Only available when Cipher is configured with ``-DCIPHER_WITH_NTL=ON``,
+   which requires NTL and GMP to be installed (see :doc:`ntl_backend`)
 
 Supported Math Operations
 ---------------------------
@@ -115,14 +114,14 @@ We use the following naming conventions:
 Other Modular Operations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-+----------+-----------------+---------------------+---------------------+-------------------------+------------------------------------+
-| Variant  | Naive           | Barrett             | Fast Naive          | Fast Barrett            | Fast Const                         |
-+==========+=================+=====================+=====================+=========================+====================================+
-| mod      | mod(mod_value)        | mod(mod_value, mu)        | -                   | -                       | -                                  |
-+----------+-----------------+---------------------+---------------------+-------------------------+------------------------------------+
-| mod_add   | mod_add(b, mod_value)  | mod_add(b, mod_value, mu)  | mod_add_fast(b, mod_value)  | -                       | -                                  |
-+----------+-----------------+---------------------+---------------------+-------------------------+------------------------------------+
-| mod_sub   | mod_sub(b, mod_value)  | mod_sub(b, mod_value, mu)  | mod_sub_fast(b, mod_value)  | -                       | -                                  |
-+----------+-----------------+---------------------+---------------------+-------------------------+------------------------------------+
-| mod_mul   | mod_mul(b, mod_value)  | mod_mul(b, mod_value, mu)  | mod_mul_fast(b, mod_value)  | mod_mul_fast(b, mod_value, mu)  | mod_mul_fast_const(b, mod_value, bPrecomp)  |
-+----------+-----------------+---------------------+---------------------+-------------------------+------------------------------------+
++---------+------------------------+----------------------------+----------------------------+--------------------------------+---------------------------------------------+
+| Variant | Naive                  | Barrett                    | Fast Naive                 | Fast Barrett                   | Fast Const                                  |
++=========+========================+============================+============================+================================+=============================================+
+| mod     | mod(mod_value)         | mod(mod_value, mu)         | \-                         | \-                             | \-                                          |
++---------+------------------------+----------------------------+----------------------------+--------------------------------+---------------------------------------------+
+| mod_add | mod_add(b, mod_value)  | mod_add(b, mod_value, mu)  | mod_add_fast(b, mod_value) | \-                             | \-                                          |
++---------+------------------------+----------------------------+----------------------------+--------------------------------+---------------------------------------------+
+| mod_sub | mod_sub(b, mod_value)  | mod_sub(b, mod_value, mu)  | mod_sub_fast(b, mod_value) | \-                             | \-                                          |
++---------+------------------------+----------------------------+----------------------------+--------------------------------+---------------------------------------------+
+| mod_mul | mod_mul(b, mod_value)  | mod_mul(b, mod_value, mu)  | mod_mul_fast(b, mod_value) | mod_mul_fast(b, mod_value, mu) | mod_mul_fast_const(b, mod_value, bPrecomp)  |
++---------+------------------------+----------------------------+----------------------------+--------------------------------+---------------------------------------------+

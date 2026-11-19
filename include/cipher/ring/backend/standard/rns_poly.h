@@ -405,7 +405,7 @@ class RnsPolyImpl final : public RnsPolyInterface<RnsPolyImpl<VecType>, VecType,
         if (params_->get_ring_dimension() != rhs.params_->get_ring_dimension())
             CIPHER_THROW("RingDimension mismatch");
         if (format_ != Format::EVALUATION || rhs.format_ != Format::EVALUATION)
-            CIPHER_THROW("operator* for DCRTPolyImpl supported only in Format::EVALUATION");
+            CIPHER_THROW("operator* for RnsPolyImpl supported only in Format::EVALUATION");
         size_t size{vectors_.size()};
         if (size != rhs.vectors_.size())
             CIPHER_THROW("tower size mismatch; cannot multiply");
@@ -430,7 +430,7 @@ class RnsPolyImpl final : public RnsPolyInterface<RnsPolyImpl<VecType>, VecType,
         if (a.params_->get_ring_dimension() != b.params_->get_ring_dimension())
             CIPHER_THROW("RingDimension mismatch");
         if (a.format_ != Format::EVALUATION || b.format_ != Format::EVALUATION)
-            CIPHER_THROW("operator* for DCRTPolyImpl supported only in Format::EVALUATION");
+            CIPHER_THROW("operator* for RnsPolyImpl supported only in Format::EVALUATION");
         size_t size{a.vectors_.size()};
         if (size != b.vectors_.size())
             CIPHER_THROW("tower size mismatch; cannot multiply");

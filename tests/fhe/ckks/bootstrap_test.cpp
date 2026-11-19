@@ -68,37 +68,37 @@ enum TEST_CASE_TYPE : int {
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
-    std::string typeName;
+    std::string type_name_of;
     switch (type) {
         case BOOTSTRAP_FULL:
-            typeName = "BOOTSTRAP_FULL";
+            type_name_of = "BOOTSTRAP_FULL";
             break;
         case BOOTSTRAP_EDGE:
-            typeName = "BOOTSTRAP_EDGE";
+            type_name_of = "BOOTSTRAP_EDGE";
             break;
         case BOOTSTRAP_SPARSE:
-            typeName = "BOOTSTRAP_SPARSE";
+            type_name_of = "BOOTSTRAP_SPARSE";
             break;
         case BOOTSTRAP_KEY_SWITCH:
-            typeName = "BOOTSTRAP_KEY_SWITCH";
+            type_name_of = "BOOTSTRAP_KEY_SWITCH";
             break;
         case BOOTSTRAP_ITERATIVE:
-            typeName = "BOOTSTRAP_ITERATIVE";
+            type_name_of = "BOOTSTRAP_ITERATIVE";
             break;
         case BOOTSTRAP_NUM_TOWERS:
-            typeName = "BOOTSTRAP_NUM_TOWERS";
+            type_name_of = "BOOTSTRAP_NUM_TOWERS";
             break;
         case BOOTSTRAP_SERIALIZE:
-            typeName = "BOOTSTRAP_SERIALIZE";
+            type_name_of = "BOOTSTRAP_SERIALIZE";
             break;
         case BOOTSTRAP_SPARSE_ENCAPSULATED:
-            typeName = "BOOTSTRAP_SPARSE_ENCAPSULATED";
+            type_name_of = "BOOTSTRAP_SPARSE_ENCAPSULATED";
             break;
         default:
-            typeName = "UNKNOWN";
+            type_name_of = "UNKNOWN";
             break;
     }
-    return os << typeName;
+    return os << type_name_of;
 }
 
 //===========================================================================================================
@@ -129,7 +129,7 @@ struct TEST_CASE_UTCKKSRNS_BOOT {
 
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
-static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNS_BOOT>& test) {
+static auto make_test_name = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNS_BOOT>& test) {
     return test.param.build_test_name();
 };
 
@@ -152,7 +152,7 @@ constexpr uint32_t FMODSIZE = 60;
 
 // clang-format off
 static std::vector<TEST_CASE_UTCKKSRNS_BOOT> test_cases = {
-    // TestType,     Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        ScalTech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
+    // TestType,     Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        scal_tech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
     { BOOTSTRAP_FULL, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 1, 1 },  { 32, 32 }, RDIM/2 },
     { BOOTSTRAP_FULL, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 1, 1 },  { 32, 32 }, RDIM/2 },
     { BOOTSTRAP_FULL, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,     FIXEDMANUAL, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 1, 1 },  { 32, 32 }, RDIM/2 },
@@ -170,7 +170,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_BOOT> test_cases = {
     { BOOTSTRAP_FULL, "14", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT, SPARSE_ENCAPSULATED, DFLT, FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 1, 1 },  { 32, 32 }, RDIM/2 },
 #endif
     // ==========================================
-    // TestType,     Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        ScalTech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
+    // TestType,     Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        scal_tech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
     { BOOTSTRAP_FULL, "15", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 3 },  { 0, 0 }, RDIM/2 },
     { BOOTSTRAP_FULL, "16", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 3 },  { 0, 0 }, RDIM/2 },
     { BOOTSTRAP_FULL, "17", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,     FIXEDMANUAL, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 3 },  { 0, 0 }, RDIM/2 },
@@ -188,7 +188,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_BOOT> test_cases = {
     { BOOTSTRAP_FULL, "28", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT, SPARSE_ENCAPSULATED, DFLT, FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 3 },  { 0, 0 }, RDIM/2 },
 #endif
     // ==========================================
-    // TestType,     Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        ScalTech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
+    // TestType,     Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        scal_tech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
     { BOOTSTRAP_EDGE, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 1, 1 },  { 0, 0 }, RDIM/4 },
     { BOOTSTRAP_EDGE, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 1, 1 },  { 0, 0 }, RDIM/4 },
     { BOOTSTRAP_EDGE, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,     FIXEDMANUAL, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 1, 1 },  { 0, 0 }, RDIM/4 },
@@ -202,7 +202,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_BOOT> test_cases = {
     { BOOTSTRAP_EDGE, "10", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,    FLEXIBLEAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, COMPLEX},   { 1, 1 },  { 0, 0 }, RDIM/4 },
 #endif
     // ==========================================
-    // TestType,     Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        ScalTech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
+    // TestType,     Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        scal_tech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
     { BOOTSTRAP_EDGE, "11", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 2, 2 },  { 0, 0 }, RDIM/4 },
     { BOOTSTRAP_EDGE, "12", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 2, 2 },  { 0, 0 }, RDIM/4 },
     { BOOTSTRAP_EDGE, "13", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,     FIXEDMANUAL, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 2, 2 },  { 0, 0 }, RDIM/4 },
@@ -220,7 +220,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_BOOT> test_cases = {
     { BOOTSTRAP_EDGE, "23", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT, SPARSE_ENCAPSULATED, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 1, 1 },  { 0, 0 }, RDIM/4 },
     { BOOTSTRAP_EDGE, "24", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT, SPARSE_ENCAPSULATED, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 2, 2 },  { 0, 0 }, RDIM/4 },
     // ==========================================
-    // TestType,       Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        ScalTech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
+    // TestType,       Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        scal_tech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
     { BOOTSTRAP_SPARSE, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 1, 1 },  { 8, 8 }, 8 },
     { BOOTSTRAP_SPARSE, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 1, 1 },  { 8, 8 }, 8 },
     { BOOTSTRAP_SPARSE, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,     FIXEDMANUAL, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 1, 1 },  { 8, 8 }, 8 },
@@ -234,7 +234,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_BOOT> test_cases = {
     { BOOTSTRAP_SPARSE, "10", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, COMPLEX},   { 1, 1 },  { 8, 8 }, 8 },
 #endif
     // ==========================================
-    // TestType,       Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        ScalTech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
+    // TestType,       Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        scal_tech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
     { BOOTSTRAP_SPARSE, "11", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 2, 2 },  { 0, 0 }, 8 },
     { BOOTSTRAP_SPARSE, "12", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 2, 2 },  { 0, 0 }, 8 },
     { BOOTSTRAP_SPARSE, "13", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,     FIXEDMANUAL, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 2, 2 },  { 0, 0 }, 8 },
@@ -248,7 +248,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_BOOT> test_cases = {
     { BOOTSTRAP_SPARSE, "20", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,    FLEXIBLEAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, COMPLEX},   { 2, 2 },  { 0, 0 }, 8 },
 #endif
     // ==========================================
-    // TestType,       Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        ScalTech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
+    // TestType,       Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        scal_tech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
     { BOOTSTRAP_SPARSE, "21", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 1, 1 },  { 0, 0 }, 8 },
     { BOOTSTRAP_SPARSE, "22", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 1, 1 },  { 0, 0 }, 8 },
     { BOOTSTRAP_SPARSE, "23", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,     FIXEDMANUAL, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 1, 1 },  { 0, 0 }, 8 },
@@ -262,7 +262,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_BOOT> test_cases = {
     { BOOTSTRAP_SPARSE, "30", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,    FLEXIBLEAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, COMPLEX},   { 1, 1 },  { 0, 0 }, 8 },
 #endif
     // ==========================================
-    // TestType,       Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        ScalTech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
+    // TestType,       Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        scal_tech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
     { BOOTSTRAP_SPARSE, "31", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 }, 8 },
     { BOOTSTRAP_SPARSE, "32", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 }, 8 },
     { BOOTSTRAP_SPARSE, "33", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,     FIXEDMANUAL, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 }, 8 },
@@ -276,7 +276,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_BOOT> test_cases = {
     { BOOTSTRAP_SPARSE, "40", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, COMPLEX},   { 3, 2 },  { 0, 0 }, 8 },
 #endif
     // ==========================================
-    // TestType,       Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        ScalTech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
+    // TestType,       Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        scal_tech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
     { BOOTSTRAP_SPARSE, "41", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 1, 1 },  { 0, 0 }, 1 },
     { BOOTSTRAP_SPARSE, "42", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 1, 1 },  { 0, 0 }, 1 },
     { BOOTSTRAP_SPARSE, "43", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,     FIXEDMANUAL, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 1, 1 },  { 0, 0 }, 1 },
@@ -302,7 +302,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_BOOT> test_cases = {
     { BOOTSTRAP_SPARSE, "56", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH,       50,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT,       60, HEStd_NotSet, HYBRID,    FLEXIBLEAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 3 },  { 0, 0 }, 8 },
 #endif
     // ==========================================
-    // TestType,           Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        ScalTech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
+    // TestType,           Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        scal_tech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
     { BOOTSTRAP_KEY_SWITCH, "01", {CKKSRNS_SCHEME, 2048, MULT_DEPTH, SMODSIZE,  DFLT,     8,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 } },
     { BOOTSTRAP_KEY_SWITCH, "02", {CKKSRNS_SCHEME, 2048, MULT_DEPTH, SMODSIZE,  DFLT,     8,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 } },
     { BOOTSTRAP_KEY_SWITCH, "03", {CKKSRNS_SCHEME, 2048, MULT_DEPTH, SMODSIZE,  DFLT,     8,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,     FIXEDMANUAL, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 } },
@@ -316,7 +316,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_BOOT> test_cases = {
     { BOOTSTRAP_KEY_SWITCH, "09", {CKKSRNS_SCHEME, 2048, MULT_DEPTH, SMODSIZE,  DFLT,     8, SPARSE_ENCAPSULATED, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 } },
     { BOOTSTRAP_KEY_SWITCH, "10", {CKKSRNS_SCHEME, 2048, MULT_DEPTH, SMODSIZE,  DFLT,     8, SPARSE_ENCAPSULATED, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,     FIXEDMANUAL, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 } },
     // ==========================================
-    // TestType,          Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        ScalTech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
+    // TestType,          Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        scal_tech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
     { BOOTSTRAP_ITERATIVE, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,     8,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 }, 8},
     { BOOTSTRAP_ITERATIVE, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,     8,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 }, 8},
     { BOOTSTRAP_ITERATIVE, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,     8,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,     FIXEDMANUAL, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 }, 8},
@@ -330,7 +330,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_BOOT> test_cases = {
     { BOOTSTRAP_ITERATIVE, "10", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,     8,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,    FLEXIBLEAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, COMPLEX},   { 3, 2 },  { 0, 0 }, 8},
 #endif
     // ==========================================
-    // TestType,          Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        ScalTech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
+    // TestType,          Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        scal_tech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
     { BOOTSTRAP_ITERATIVE, "11", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 }, RDIM/2},
     { BOOTSTRAP_ITERATIVE, "12", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 }, RDIM/2},
     { BOOTSTRAP_ITERATIVE, "13", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,     FIXEDMANUAL, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 }, RDIM/2},
@@ -348,7 +348,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_BOOT> test_cases = {
     { BOOTSTRAP_ITERATIVE, "23", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT, SPARSE_ENCAPSULATED, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 }, RDIM/2},
     { BOOTSTRAP_ITERATIVE, "24", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT, SPARSE_ENCAPSULATED, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, COMPLEX},   { 3, 2 },  { 0, 0 }, RDIM/2},
     // ==========================================
-    // TestType,           Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        ScalTech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
+    // TestType,           Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        scal_tech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
     { BOOTSTRAP_NUM_TOWERS, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,     8,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 }, 8},
     { BOOTSTRAP_NUM_TOWERS, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,     8,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 }, 8},
     { BOOTSTRAP_NUM_TOWERS, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,     8,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,     FIXEDMANUAL, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 }, 8},
@@ -360,7 +360,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_BOOT> test_cases = {
     { BOOTSTRAP_NUM_TOWERS, "08", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,     8,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 }, 8},
 #endif
     // ==========================================
-    // TestType,           Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        ScalTech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
+    // TestType,           Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        scal_tech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
     { BOOTSTRAP_NUM_TOWERS, "09", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 }, RDIM/2},
     { BOOTSTRAP_NUM_TOWERS, "10", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 }, RDIM/2},
     { BOOTSTRAP_NUM_TOWERS, "11", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,     FIXEDMANUAL, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 }, RDIM/2},
@@ -374,7 +374,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_BOOT> test_cases = {
     { BOOTSTRAP_NUM_TOWERS, "17", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,     8, SPARSE_ENCAPSULATED, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 }, 8},
     { BOOTSTRAP_NUM_TOWERS, "18", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT, SPARSE_ENCAPSULATED, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 3, 2 },  { 0, 0 }, RDIM/2},
     // ==========================================
-    // TestType,          Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        ScalTech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
+    // TestType,          Descr,          Scheme, RDim,  MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,        scal_tech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
     { BOOTSTRAP_SERIALIZE, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 1, 1 },  { 32, 32 }, RDIM/2 },
     { BOOTSTRAP_SERIALIZE, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 1, 1 },  { 32, 32 }, RDIM/2 },
     { BOOTSTRAP_SERIALIZE, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,     UNIFORM_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 2, 2 },  { 0, 0 },   RDIM/2 },
@@ -388,7 +388,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_BOOT> test_cases = {
     // previously selected differently
     { BOOTSTRAP_SERIALIZE, "09", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,  DFLT,  DFLT,      SPARSE_TERNARY, DFLT, FMODSIZE, HEStd_NotSet, HYBRID,       FIXEDAUTO, NUM_LRG_DIGS, DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,   DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, COMPLEX},   { 1, 1 },  { 32, 32 }, RDIM/2 },
     // ==========================================
-    // TestType,                    Descr,          Scheme,    RDim, MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,    ScalTech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
+    // TestType,                    Descr,          Scheme,    RDim, MultDepth, SModSize, DSize, BSize, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl, KSTech,    scal_tech,      LDigits, PtMod,std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode, decryption_noise_mode, ExecutionMode, NoiseEstimate, RegisterWordSize, CompositeDegree, CkksDataType, LvlBudget, Dim1,       Slots
     { BOOTSTRAP_SPARSE_ENCAPSULATED, "01", {CKKSRNS_SCHEME, 1 << 12,        18,       50,  DFLT,  DFLT, SPARSE_ENCAPSULATED, DFLT,       60, HEStd_NotSet, HYBRID,   FIXEDAUTO, NUM_LRG_DIGS,  DFLT,  DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 4, 4 },  { 8, 8 }, 8 },
     { BOOTSTRAP_SPARSE_ENCAPSULATED, "02", {CKKSRNS_SCHEME, 1 << 12,        18,       50,  DFLT,  DFLT, SPARSE_ENCAPSULATED, DFLT,       60, HEStd_NotSet, HYBRID, FIXEDMANUAL, NUM_LRG_DIGS,  DFLT,  DFLT,      DFLT, DFLT,     DFLT,    DFLT,    DFLT,           DFLT,  DFLT,   DFLT,      DFLT, DFLT, DFLT, REAL},   { 4, 4 },  { 8, 8 }, 8 },
 };
@@ -444,11 +444,12 @@ class UTCKKSRNS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_BOOT>
             std::vector<std::complex<double>> input;
             // If CkksDataType is set to REAL, the imaginary parts are ignored.
             if (test_data.slots < 8) {
-                input = Fill({0.1415926 + 0.1415926i}, test_data.slots);
+                input = fill_slots({0.1415926 + 0.1415926i}, test_data.slots);
             } else {
-                input = Fill({0.111111 + 0.999999i, 0.222222 - 0.888888i, 0.333333 + 0.777777i, 0.444444 - 0.666666i,
-                              0.555555 + 0.555555i, 0.666666 - 0.444444i, 0.777777 + 0.333333i, 0.888888 - 0.222222i},
-                             test_data.slots);
+                input = fill_slots(
+                        {0.111111 + 0.999999i, 0.222222 - 0.888888i, 0.333333 + 0.777777i, 0.444444 - 0.666666i,
+                         0.555555 + 0.555555i, 0.666666 - 0.444444i, 0.777777 + 0.333333i, 0.888888 - 0.222222i},
+                        test_data.slots);
             }
 
             size_t encoded_length = input.size();
@@ -479,7 +480,7 @@ class UTCKKSRNS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_BOOT>
             cc->decrypt(key_pair.secret_key, ciphertext6, &result6);
             result6->set_length(encoded_length);
             check_equality(result6->get_ckks_packed_value(), temp6, eps,
-                           failmsg + " EvalAtIndex after Bootstrapping for fully packed ciphertexts fails for " +
+                           failmsg + " eval_at_index after Bootstrapping for fully packed ciphertexts fails for " +
                                    ((st_c_flag) ? "StC-first" : "ModRaise-first") + " version.");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
@@ -519,7 +520,7 @@ class UTCKKSRNS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_BOOT>
             cc->decrypt(key_pair.secret_key, ciphertext, &result);
             result->set_length(a.size());
             check_equality(result->get_ckks_packed_value(), comp_a, eps,
-                           failmsg + " Bootstrapping for KeySwitchExt + KeySwitchDown failed");
+                           failmsg + " Bootstrapping for key_switch_ext + key_switch_down failed");
 
             // Test for eval_fast_rotation_ext
             ciphertext = cc->encrypt(key_pair.public_key, plaintext_a);
@@ -530,7 +531,7 @@ class UTCKKSRNS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_BOOT>
             cc->decrypt(key_pair.secret_key, ciphertext, &result);
             result->set_length(b.size());
             check_equality(result->get_ckks_packed_value(), comp_b, eps,
-                           failmsg + " Bootstrapping for EvalFastRotationExt failed");
+                           failmsg + " Bootstrapping for eval_fast_rotation_ext failed");
 
             // Test for key_switch_ext + key_switch_down w/o first element
             ciphertext = cc->encrypt(key_pair.public_key, plaintext_a);
@@ -544,7 +545,7 @@ class UTCKKSRNS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_BOOT>
             cc->decrypt(key_pair.secret_key, ciphertext, &result);
             result->set_length(a.size());
             check_equality(result->get_ckks_packed_value(), comp_a, eps,
-                           failmsg + " Bootstrapping for KeySwitchExt + KeySwitchDown w/o first element failed");
+                           failmsg + " Bootstrapping for key_switch_ext + key_switch_down w/o first element failed");
 
             // Test for eval_fast_rotation_ext w/o first element
             ciphertext = cc->encrypt(key_pair.public_key, plaintext_a);
@@ -564,7 +565,7 @@ class UTCKKSRNS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_BOOT>
             cc->decrypt(key_pair.secret_key, ciphertext, &result);
             result->set_length(b.size());
             check_equality(result->get_ckks_packed_value(), comp_b, eps,
-                           failmsg + " Bootstrapping for EvalFastRotationExt w/o first element failed");
+                           failmsg + " Bootstrapping for eval_fast_rotation_ext w/o first element failed");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -589,9 +590,10 @@ class UTCKKSRNS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_BOOT>
             cc->eval_mult_key_gen(key_pair.secret_key);
 
             // If CkksDataType is set to REAL, the imaginary parts are ignored.
-            auto input(Fill({0.111111 + 0.999999i, 0.222222 - 0.888888i, 0.333333 + 0.777777i, 0.444444 - 0.666666i,
-                             0.555555 + 0.555555i, 0.666666 - 0.444444i, 0.777777 + 0.333333i, 0.888888 - 0.222222i},
-                            test_data.slots));
+            auto input(
+                    fill_slots({0.111111 + 0.999999i, 0.222222 - 0.888888i, 0.333333 + 0.777777i, 0.444444 - 0.666666i,
+                                0.555555 + 0.555555i, 0.666666 - 0.444444i, 0.777777 + 0.333333i, 0.888888 - 0.222222i},
+                               test_data.slots));
 
             size_t encoded_length = input.size();
 
@@ -644,7 +646,7 @@ class UTCKKSRNS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_BOOT>
             cc->decrypt(key_pair.secret_key, ciphertext6, &result6);
             result6->set_length(encoded_length);
             check_equality(result6->get_ckks_packed_value(), temp6, eps,
-                           failmsg + " EvalAtIndex after Bootstrapping for ciphertexts fails for " +
+                           failmsg + " eval_at_index after Bootstrapping for ciphertexts fails for " +
                                    ((st_c_flag) ? "StC-first" : "ModRaise-first") + " version.");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
@@ -670,8 +672,8 @@ class UTCKKSRNS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_BOOT>
             cc->eval_at_index_key_gen(key_pair.secret_key, {6});
             cc->eval_mult_key_gen(key_pair.secret_key);
 
-            auto input(Fill({0.111111, 0.222222, 0.333333, 0.444444, 0.555555, 0.666666, 0.777777, 0.888888},
-                            test_data.slots));
+            auto input(fill_slots({0.111111, 0.222222, 0.333333, 0.444444, 0.555555, 0.666666, 0.777777, 0.888888},
+                                  test_data.slots));
             size_t encoded_length = input.size();
 
             // We start with a ciphertext with 0 levels consumed.
@@ -768,9 +770,10 @@ class UTCKKSRNS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_BOOT>
             cc->eval_bootstrap_precompute(test_data.slots / 2);
             //====================================================================================================
             // If CkksDataType is set to REAL, the imaginary parts are ignored.
-            auto input(Fill({0.111111 + 0.999999i, 0.222222 - 0.888888i, 0.333333 + 0.777777i, 0.444444 - 0.666666i,
-                             0.555555 + 0.555555i, 0.666666 - 0.444444i, 0.777777 + 0.333333i, 0.888888 - 0.222222i},
-                            test_data.slots));
+            auto input(
+                    fill_slots({0.111111 + 0.999999i, 0.222222 - 0.888888i, 0.333333 + 0.777777i, 0.444444 - 0.666666i,
+                                0.555555 + 0.555555i, 0.666666 - 0.444444i, 0.777777 + 0.333333i, 0.888888 - 0.222222i},
+                               test_data.slots));
             size_t encoded_length = input.size();
 
             Plaintext plaintext1 = cc->make_ckks_packed_plaintext(
@@ -787,8 +790,9 @@ class UTCKKSRNS_BOOT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_BOOT>
                                    ((st_c_flag) ? "StC-first" : "ModRaise-first") + " version.");
 
             //====================================================================================================
-            auto input2(Fill({0.111111 + 0.999999i, 0.222222 - 0.888888i, 0.333333 + 0.777777i, 0.444444 - 0.666666i},
-                             test_data.slots / 2));
+            auto input2(
+                    fill_slots({0.111111 + 0.999999i, 0.222222 - 0.888888i, 0.333333 + 0.777777i, 0.444444 - 0.666666i},
+                               test_data.slots / 2));
             size_t encoded_length2 = input2.size();
 
             Plaintext plaintext2 = cc->make_ckks_packed_plaintext(
@@ -894,4 +898,4 @@ TEST_P(UTCKKSRNS_BOOT, CKKSRNS) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_BOOT, ::testing::ValuesIn(test_cases), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_BOOT, ::testing::ValuesIn(test_cases), make_test_name);

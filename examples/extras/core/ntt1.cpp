@@ -302,7 +302,7 @@ void test_ntt() {
     std::cout << "q3 : " << q3.to_string() << std::endl;
 
     BigInteger root_of_unity3(root_of_unity<BigInteger>(m, q3));
-    std::cout << "rootOfUnity3 : " << root_of_unity3.to_string() << std::endl;
+    std::cout << "root_of_unity3 : " << root_of_unity3.to_string() << std::endl;
     PolyParams params3(m, q3, root_of_unity3);
     auto x3p = std::make_shared<PolyParams>(params3);
 

@@ -60,14 +60,14 @@ TEST(Utilities, HashUtil) {
     EXPECT_EQ(abc, HashUtil::hash_string("abc"));
 
     std::vector<int64_t> digest;
-    HashUtil::Hash("abc", SHA_256, digest);
+    HashUtil::compute_hash("abc", SHA_256, digest);
     ASSERT_EQ(32u, digest.size());
     for (size_t i = 0; i < digest.size(); ++i)
         EXPECT_EQ(std::stoll(abc.substr(2 * i, 2), nullptr, 16), digest[i]) << "byte " << i;
 
     // a message byte above 0x7f must not be sign-extended into the message schedule
     std::vector<int64_t> digest_high;
-    HashUtil::Hash("\xff", SHA_256, digest_high);
+    HashUtil::compute_hash("\xff", SHA_256, digest_high);
     const std::string ff = "a8100ae6aa1940d0b663bb31cd466142ebbdbd5187131b92d93818987832eb89";
     ASSERT_EQ(32u, digest_high.size());
     for (size_t i = 0; i < digest_high.size(); ++i)
@@ -76,5 +76,5 @@ TEST(Utilities, HashUtil) {
 
     // an unimplemented algorithm must not silently return another algorithm's digest
     std::vector<int64_t> digest512;
-    EXPECT_THROW(HashUtil::Hash("abc", SHA_512, digest512), CipherException);
+    EXPECT_THROW(HashUtil::compute_hash("abc", SHA_512, digest512), CipherException);
 }

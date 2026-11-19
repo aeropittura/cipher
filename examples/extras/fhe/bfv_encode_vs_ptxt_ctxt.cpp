@@ -121,7 +121,7 @@ int main() {
 
     // Output results
     std::cout << "\nResults of homomorphic computations" << std::endl;
-    std::cout << "plaintextMult: " << plaintext_mult << std::endl;
+    std::cout << "plaintext_mult: " << plaintext_mult << std::endl;
 
     return 0;
 }

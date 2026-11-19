@@ -1,9 +1,9 @@
 # Cipher Core Math
 
 We provide a brief description below, but encourage readers to refer
-to [Read The Docs - Core Math](https://openfhe-development.readthedocs.io/en/latest/assets/sphinx_rsts/modules/core/math/core_math.html) for more information about the code.
+to the [Core Math documentation](../../../docs/sphinx_rsts/modules/core/math/core_math.rst) for more information about the code.
 
-Additionally, we encourage readers to refer to [Read The Docs - Core Math Backends](https://openfhe-development.readthedocs.io/en/latest/assets/sphinx_rsts/modules/core/math/core_math_backends.html)
+Additionally, we encourage readers to refer to the [Core Math Backends documentation](../../../docs/sphinx_rsts/modules/core/math/math_backends.rst).
 
 # Math Backends
 
@@ -53,9 +53,9 @@ flowchart BT
 
 - Base class for distribution generators
 
-[Hardware Abstraction Layer (HAL)](backend.h)
+[Math backend selection](backend.h)
 
-- Code to switch between math backends
+- Code to switch between math backends; the backends themselves are in [backend](backend) (`fixed`, `dynamic`, `native`, `ntl`)
 
 [Matrix](matrix.h)
 
@@ -77,4 +77,4 @@ flowchart BT
 
 [Ternary Uniform Generator](ternary_uniform_gen.h)
 
-- Provides generation of uniform distribution of binary values
+- Provides generation of uniform distribution of ternary values

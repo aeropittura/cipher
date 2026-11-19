@@ -191,9 +191,9 @@ IntType root_of_unity(uint32_t m, const IntType& modulo) {
     IntType M(m);
     if ((modulo - IntType(1)).mod(M) != IntType(0)) {
         std::string err_msg =
-                "Please provide a primeModulus(q) and a cyclotomic number(m) "
+                "Please provide a prime_modulus(q) and a cyclotomic number(m) "
                 "satisfying the condition: (q-1)/m is an integer. The values of "
-                "primeModulus = " +
+                "prime_modulus = " +
                 modulo.to_string() + " and m = " + std::to_string(m) + " do not satisfy this condition";
         CIPHER_THROW(err_msg);
     }

@@ -52,21 +52,21 @@ void ckks_eval_rotate2n();
 void bfv_rns_eval_merge2n();
 
 int main() {
-    std::cout << "\nThis code shows how the EvalRotate and EvalMerge operations work "
+    std::cout << "\nThis code shows how the eval_rotate and eval_merge operations work "
                  "for different cyclotomic rings (both power-of-two and cyclic).\n"
               << std::endl;
 
-    std::cout << "\n========== BFVrns.EvalRotate - Power-of-Two Cyclotomics "
+    std::cout << "\n========== BFVrns.eval_rotate - Power-of-Two Cyclotomics "
                  "==========="
               << std::endl;
 
     bfv_rns_eval_rotate2n();
 
-    std::cout << "\n========== CKKS.EvalRotate - Power-of-Two Cyclotomics ===========" << std::endl;
+    std::cout << "\n========== CKKS.eval_rotate - Power-of-Two Cyclotomics ===========" << std::endl;
 
     ckks_eval_rotate2n();
 
-    std::cout << "\n========== BFVrns.EvalMerge - Power-of-Two Cyclotomics ===========" << std::endl;
+    std::cout << "\n========== BFVrns.eval_merge - Power-of-Two Cyclotomics ===========" << std::endl;
 
     bfv_rns_eval_merge2n();
 

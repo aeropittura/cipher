@@ -494,7 +494,7 @@ class BluesteinFftNat {
      * @param hi is higher coefficient index.
      * @return output vector s.t output vector = a[lo]...a[hi].
      */
-    VecType Resize(const VecType& a, uint32_t lo, uint32_t hi);
+    VecType resize_range(const VecType& a, uint32_t lo, uint32_t hi);
 
     /**
      * @brief Precomputes the modulus needed for NTT operation in forward

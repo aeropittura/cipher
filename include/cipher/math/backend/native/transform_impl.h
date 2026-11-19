@@ -932,7 +932,7 @@ VecType BluesteinFftNat<VecType>::forward_transform(const VecType& element, cons
     VecType rc(ntt_dim);
     NumberTheoreticTransformNat<VecType>().inverse_transform_iterative(RC, root_table_inverse, precon_table_inverse,
                                                                        &rc);
-    auto resize_rc = Resize(rc, cyclo_order - 1, 2 * (cyclo_order - 1));
+    auto resize_rc = resize_range(rc, cyclo_order - 1, 2 * (cyclo_order - 1));
     resize_rc.set_modulus(modulus);
     resize_rc.mod_reduce_eq();
     auto result = resize_rc.mod_mul(powers);
@@ -952,7 +952,7 @@ VecType BluesteinFftNat<VecType>::pad_zeros(const VecType& a, const uint32_t fin
 }
 
 template <typename VecType>
-VecType BluesteinFftNat<VecType>::Resize(const VecType& a, uint32_t lo, uint32_t hi) {
+VecType BluesteinFftNat<VecType>::resize_range(const VecType& a, uint32_t lo, uint32_t hi) {
     VecType result(hi - lo + 1, a.get_modulus());
     for (size_t i = lo, j = 0; i <= hi; i++, j++)
         result[j] = a[i];
@@ -1001,7 +1001,7 @@ void ChineseRemainderTransformArbNat<VecType>::set_pre_computed_ntt_division_mod
     CIPHER_DEBUG_FLAG(false);
 
     uint32_t n = get_totient(cycloto_order);
-    CIPHER_DEBUG("GetTotient(" << cycloto_order << ")= " << n);
+    CIPHER_DEBUG("get_totient(" << cycloto_order << ")= " << n);
 
     uint32_t power = cycloto_order - n;
     ntt_division_dim_[cycloto_order] = 2u << get_msb(power - 1);

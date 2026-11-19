@@ -234,7 +234,7 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Completed\n";
 
-    std::cout << "\nTotal time of multiplying 7 ciphertexts using EvalMultMany: " << processing_time << "ms"
+    std::cout << "\nTotal time of multiplying 7 ciphertexts using eval_mult_many: " << processing_time << "ms"
               << std::endl;
 
     Plaintext plaintext_dec_mult7;

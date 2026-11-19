@@ -80,7 +80,7 @@ class LweCryptoParams : public Serializable {
         if (base_ks_ == 0)
             CIPHER_THROW("m_baseKS (the base used for key switching) can not be zero");
         if (Q_.get_msb() > MAX_MODULUS_SIZE)
-            CIPHER_THROW("Q.GetMSB() > MAX_MODULUS_SIZE");
+            CIPHER_THROW("Q.get_msb() > MAX_MODULUS_SIZE");
         dgg_.set_std(std);
         ks_dgg_.set_std(std);
     }

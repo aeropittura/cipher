@@ -51,22 +51,22 @@ enum TEST_CASE_TYPE : int {
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
-    std::string typeName;
+    std::string type_name_of;
     switch (type) {
         case EVAL_MULT_ERROR_HANDLING:
-            typeName = "EVAL_MULT_ERROR_HANDLING";
+            type_name_of = "EVAL_MULT_ERROR_HANDLING";
             break;
         case EVAL_MULT_MANY_ERROR_HANDLING:
-            typeName = "EVAL_MULT_MANY_ERROR_HANDLING";
+            type_name_of = "EVAL_MULT_MANY_ERROR_HANDLING";
             break;
         case RELIN_TEST:
-            typeName = "RELIN_TEST";
+            type_name_of = "RELIN_TEST";
             break;
         default:
-            typeName = "UNKNOWN";
+            type_name_of = "UNKNOWN";
             break;
     }
-    return os << typeName;
+    return os << type_name_of;
 }
 
 enum TEST_CASE_ERROR {
@@ -109,7 +109,7 @@ struct TEST_CASE_UTGENERAL_EVALMULT {
 
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
-static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTGENERAL_EVALMULT>& test) {
+static auto make_test_name = [](const testing::TestParamInfo<TEST_CASE_UTGENERAL_EVALMULT>& test) {
     return test.param.build_test_name();
 };
 
@@ -130,7 +130,7 @@ constexpr uint32_t PTM = 65537;
 
 // clang-format off
 static std::vector<TEST_CASE_UTGENERAL_EVALMULT> test_cases_utgeneral_evalmult = {
-//    TestType,               Descr,   Scheme,         RDim,     MultDepth,  SModSize, DSize,BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode,  Error
+//    TestType,               Descr,   Scheme,         RDim,     MultDepth,  SModSize, DSize,batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, scal_tech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode,  Error
     { EVAL_MULT_ERROR_HANDLING, "01", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SCALE,    DFLT, BATCH,   DFLT,       3,             DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},    SUCCESS },
     { EVAL_MULT_ERROR_HANDLING, "02", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SCALE,    DFLT, BATCH,   DFLT,       3,             DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},    INVALID_PRIVATE_KEY },
     { EVAL_MULT_ERROR_HANDLING, "03", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SCALE,    DFLT, BATCH,   DFLT,       3,             DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},    INVALID_PUBLIC_KEY },
@@ -176,7 +176,7 @@ static std::vector<TEST_CASE_UTGENERAL_EVALMULT> test_cases_utgeneral_evalmult =
     { EVAL_MULT_ERROR_HANDLING, "40", {CKKSRNS_SCHEME, RING_DIM, MULT_DEPTH, SCALE,    DFLT, BATCH,   DFLT,       3,             DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},    INVALID_PRIVATE_KEY_DECRYPT },
 #endif
     // ==========================================
-    // TestType,               Descr,  Scheme,        RDim,     MultDepth,  SModSize, DSize,BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode,  Error
+    // TestType,               Descr,  Scheme,        RDim,     MultDepth,  SModSize, DSize,batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, scal_tech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode,  Error
     { EVAL_MULT_ERROR_HANDLING, "41", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,     DFLT, BATCH,   DFLT,       4,             DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},    SUCCESS },
     { EVAL_MULT_ERROR_HANDLING, "42", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,     DFLT, BATCH,   DFLT,       4,             DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},    INVALID_PRIVATE_KEY },
     { EVAL_MULT_ERROR_HANDLING, "43", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,     DFLT, BATCH,   DFLT,       4,             DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},    INVALID_PUBLIC_KEY },
@@ -221,7 +221,7 @@ static std::vector<TEST_CASE_UTGENERAL_EVALMULT> test_cases_utgeneral_evalmult =
     { EVAL_MULT_ERROR_HANDLING, "79", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,     DFLT, BATCH,   DFLT,       4,             DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},    INVALID_PLAINTEXT_DECRYPT },
     { EVAL_MULT_ERROR_HANDLING, "80", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,     DFLT, BATCH,   DFLT,       4,             DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTOEXT, DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT},    INVALID_PRIVATE_KEY_DECRYPT },
     // ==========================================
-    // TestType,                    Descr,  Scheme,        RDim,     MultDepth,  SModSize, DSize,BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, ScalTech, LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech,     pre_mode,  Error
+    // TestType,                    Descr,  Scheme,        RDim,     MultDepth,  SModSize, DSize,batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, scal_tech, LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech,     pre_mode,  Error
     { EVAL_MULT_MANY_ERROR_HANDLING, "01", {BFVRNS_SCHEME, DFLT,     DFLT,       60,       DFLT, DFLT,    DFLT,       4,             DFLT,     SEC_LVL, DFLT,   DFLT,     DFLT,    256,   4,      DFLT,      DFLT, DFLT,     STANDARD,    DFLT},    SUCCESS },
     { EVAL_MULT_MANY_ERROR_HANDLING, "02", {BFVRNS_SCHEME, DFLT,     DFLT,       60,       DFLT, DFLT,    DFLT,       3,             DFLT,     SEC_LVL, DFLT,   DFLT,     DFLT,    256,   4,      DFLT,      DFLT, DFLT,     STANDARD,    DFLT},    INVALID_MAX_DEPTH },
     { EVAL_MULT_MANY_ERROR_HANDLING, "03", {BFVRNS_SCHEME, DFLT,     DFLT,       60,       DFLT, DFLT,    DFLT,       4,             DFLT,     SEC_LVL, DFLT,   DFLT,     DFLT,    256,   4,      DFLT,      DFLT, DFLT,     STANDARD,    DFLT},    INVALID_PRIVATE_KEY },
@@ -249,7 +249,7 @@ static std::vector<TEST_CASE_UTGENERAL_EVALMULT> test_cases_utgeneral_evalmult =
     { EVAL_MULT_MANY_ERROR_HANDLING, "25", {BFVRNS_SCHEME, DFLT,     DFLT,       60,       DFLT, DFLT,    DFLT,       4,             DFLT,     SEC_LVL, DFLT,   DFLT,     DFLT,    256,   4,      DFLT,      DFLT, DFLT,     EXTENDED,    DFLT},    INVALID_PRIVATE_KEY_DECRYPT },
     { EVAL_MULT_MANY_ERROR_HANDLING, "26", {BFVRNS_SCHEME, DFLT,     DFLT,       60,       DFLT, DFLT,    DFLT,       4,             DFLT,     SEC_LVL, DFLT,   DFLT,     DFLT,    256,   4,      DFLT,      DFLT, DFLT,     EXTENDED,    DFLT},    INVALID_CIPHER_TEXT_LIST_MANY },
     // ==========================================
-    // TestType, Descr,  Scheme,         RDim,     MultDepth,  SModSize, DSize,BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType, Descr,  Scheme,         RDim,     MultDepth,  SModSize, DSize,batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,  KSTech, scal_tech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { RELIN_TEST, "01", {BGVRNS_SCHEME,  RING_DIM, MULT_DEPTH, DFLT,     DFLT, DFLT,    DFLT,       4,             DFLT,     SEC_LVL, DFLT,   FIXEDMANUAL,     DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { RELIN_TEST, "02", {BGVRNS_SCHEME,  RING_DIM, MULT_DEPTH, DFLT,     DFLT, DFLT,    DFLT,       4,             DFLT,     SEC_LVL, DFLT,   FIXEDAUTO,       DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { RELIN_TEST, "03", {BGVRNS_SCHEME,  RING_DIM, MULT_DEPTH, DFLT,     DFLT, DFLT,    DFLT,       4,             DFLT,     SEC_LVL, DFLT,   FLEXIBLEAUTO,    DFLT,    PTM,   DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
@@ -391,15 +391,15 @@ class UTGENERAL_EVALMULT : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_E
             check_equality(plaintext_mul1->get_coef_packed_value(), plaintext_result1->get_coef_packed_value(), eps,
                            err_msg);
 
-            err_msg = "EvalMultAndRelinearize gives incorrect results";
+            err_msg = "eval_mult_and_relinearize gives incorrect results";
             check_equality(plaintext_mul2->get_coef_packed_value(), plaintext_result2->get_coef_packed_value(), eps,
                            err_msg);
 
-            err_msg = "EvalMultAndRelinearize gives incorrect results";
+            err_msg = "eval_mult_and_relinearize gives incorrect results";
             check_equality(plaintext_mul3->get_coef_packed_value(), plaintext_result3->get_coef_packed_value(), eps,
                            err_msg);
 
-            err_msg = "EvalMultAndRelinearize gives incorrect results";
+            err_msg = "eval_mult_and_relinearize gives incorrect results";
             check_equality(plaintext_mul_many->get_coef_packed_value(), plaintext_result3->get_coef_packed_value(), eps,
                            err_msg);
 
@@ -677,4 +677,5 @@ TEST_P(UTGENERAL_EVALMULT, EvalMult) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTGENERAL_EVALMULT, ::testing::ValuesIn(test_cases_utgeneral_evalmult), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTGENERAL_EVALMULT, ::testing::ValuesIn(test_cases_utgeneral_evalmult),
+                         make_test_name);

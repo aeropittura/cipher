@@ -140,7 +140,7 @@ class CryptoContextImpl : public Serializable {
                              uint32_t level) const {
         const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(params_);
         if (!crypto_params)
-            CIPHER_THROW("Invalid crypto parameters: expected CryptoParametersRNS");
+            CIPHER_THROW("Invalid crypto parameters: expected RnsCryptoParams");
 
         if (level > 0) {
             size_t num_moduli = crypto_params->get_element_params()->get_params().size();
@@ -370,10 +370,10 @@ class CryptoContextImpl : public Serializable {
     void validate_pre_mode(CALLER_INFO_ARGS_HDR) const {
         const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(params_);
         if (crypto_params == nullptr)
-            CIPHER_THROW("Invalid crypto parameters: expected CryptoParametersRNS");
+            CIPHER_THROW("Invalid crypto parameters: expected RnsCryptoParams");
         if (crypto_params->get_key_switch_technique() == HYBRID && crypto_params->get_pre_mode() == NOT_SET)
             CIPHER_THROW(
-                    "PRE is disabled (default = NOT_SET). Enable with SetPREMode() before generating cryptocontext.");
+                    "PRE is disabled (default = NOT_SET). Enable with set_pre_mode() before generating cryptocontext.");
     }
 
     /**
@@ -387,7 +387,7 @@ class CryptoContextImpl : public Serializable {
             CIPHER_THROW(error_msg);
         }
         if (powers->powers_re.size() == 0) {
-            std::string error_msg(std::string("The powersRe member is empty") + CALLER_INFO);
+            std::string error_msg(std::string("The powers_re member is empty") + CALLER_INFO);
             CIPHER_THROW(error_msg);
         }
         if (mismatched(powers->powers_re[0]->get_crypto_context())) {
@@ -416,7 +416,7 @@ class CryptoContextImpl : public Serializable {
         verify_ckks_scheme(__func__);
         const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(params_);
         if (!crypto_params)
-            CIPHER_THROW("Invalid crypto parameters: expected CryptoParametersRNS");
+            CIPHER_THROW("Invalid crypto parameters: expected RnsCryptoParams");
         if (level > 0) {
             // validation of level: We need to compare it to multiplicative_depth, but multiplicative_depth is not
             // readily available. so, what we get is num_moduli and use it for calculations
@@ -502,44 +502,44 @@ class CryptoContextImpl : public Serializable {
     uint32_t get_composite_degree_from_ctxt() const {
         const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(params_);
         if (!crypto_params)
-            CIPHER_THROW("Invalid crypto parameters: expected CryptoParametersRNS");
+            CIPHER_THROW("Invalid crypto parameters: expected RnsCryptoParams");
 
         return crypto_params->get_composite_degree();
     }
 
 #ifdef DEBUG_KEY
-    PrivateKey<Element> m_privateKey;
+    PrivateKey<Element> private_key_;
 #endif
 
   public:
 #ifdef DEBUG_KEY
     /**
-     * SetPrivateKey() stores the private key in the crypto context.
-     * GetPrivateKey() gets the private key from the crypto context.
+     * set_private_key() stores the private key in the crypto context.
+     * get_private_key() gets the private key from the crypto context.
      *
      * Thees functions are only intended for debugging and should not be used in production systems.
-     * Please define DEBUG_KEY in openfhe.h to enable them.
+     * Define DEBUG_KEY before including cipher/cipher.h to enable them.
      *
      * If used, one can create a key pair and store the secret key in the crypto context like this:
      *
      * auto keys = cc->key_gen();
-     * cc->SetPrivateKey(keys.secret_key);
+     * cc->set_private_key(keys.secret_key);
      *
      * After that, anyone in the code can access the secret key by getting the crypto context and doing the following:
      *
-     * auto sk = cc->GetPrivateKey();
+     * auto sk = cc->get_private_key();
      *
      * The key can be used for decrypting any intermediate ciphertexts for debugging purposes.
      */
-    void SetPrivateKey(const PrivateKey<Element> private_key) {
-        CIPHER_DIAGNOSTIC_ERR << "Warning - SetPrivateKey is only intended to be used for debugging "
+    void set_private_key(const PrivateKey<Element> private_key) {
+        CIPHER_DIAGNOSTIC_ERR << "Warning - set_private_key is only intended to be used for debugging "
                                  "purposes - not for production systems."
                               << std::endl;
-        m_privateKey = private_key;
+        private_key_ = private_key;
     }
 
-    const PrivateKey<Element>& GetPrivateKey() const {
-        return m_privateKey;
+    const PrivateKey<Element>& get_private_key() const {
+        return private_key_;
     }
 #endif
 
@@ -776,19 +776,19 @@ class CryptoContextImpl : public Serializable {
     }
 
     /**
-     * @brief Clears the entire EvalMultKey cache
+     * @brief Clears the entire eval_mult_key cache
      */
     static void clear_eval_mult_keys();
 
     /**
-     * @brief Clears the EvalMultKey cache for the given key_tag or the entire EvalMultKey cache if key_tag is empty
+     * @brief Clears the eval_mult_key cache for the given key_tag or the entire eval_mult_key cache if key_tag is empty
      * @param key_tag secret key tag
      */
     static void clear_eval_mult_keys(const std::string& key_tag);
 
     /**
-     * @brief Clears EvalMultKey cache for the given context
-     * @param cc the context to clear all EvalMultKey for
+     * @brief Clears eval_mult_key cache for the given context
+     * @param cc the context to clear all eval_mult_key for
      */
     static void clear_eval_mult_keys(const CryptoContext<Element>& cc);
 
@@ -842,19 +842,19 @@ class CryptoContextImpl : public Serializable {
     }
 
     /**
-     * @brief Clears the entire EvalSumKey cache
+     * @brief Clears the entire eval_key_sum cache
      */
     static void clear_eval_sum_keys();
 
     /**
-     * @brief Clears the EvalSumKey cache for the given key_tag or the entire EvalSumKey cache if key_tag is empty
+     * @brief Clears the eval_key_sum cache for the given key_tag or the entire eval_key_sum cache if key_tag is empty
      * @param key_tag secret key tag
      */
     static void clear_eval_sum_keys(const std::string& key_tag);
 
     /**
-     * @brief Clears EvalSumKey cache for the given context
-     * @param cc the context to clear all EvalSumKey for
+     * @brief Clears eval_key_sum cache for the given context
+     * @param cc the context to clear all eval_key_sum for
      */
     static void clear_eval_sum_keys(const CryptoContext<Element> cc);
 
@@ -950,9 +950,9 @@ class CryptoContextImpl : public Serializable {
     static bool deserialize_eval_automorphism_key(std::istream& ser, const ST& sertype, const std::string& key_tag,
                                                   const std::vector<uint32_t>& index_list) {
         if (index_list.empty())
-            CIPHER_THROW("indexList may not be empty");
+            CIPHER_THROW("index_list may not be empty");
         if (key_tag.empty())
-            CIPHER_THROW("keyTag may not be empty");
+            CIPHER_THROW("key_tag may not be empty");
 
         std::map<std::string, std::shared_ptr<std::map<uint32_t, EvalKey<Element>>>> all_deser_keys;
         serialization::from_stream(all_deser_keys, ser, sertype);
@@ -967,7 +967,7 @@ class CryptoContextImpl : public Serializable {
         for (const uint32_t indx : index_list) {
             const auto& key = key_map_it->second->find(indx);
             if (key == key_map_it->second->end()) {
-                CIPHER_THROW("No automorphism key generated for index [" + std::to_string(indx) + "] within keyTag [" +
+                CIPHER_THROW("No automorphism key generated for index [" + std::to_string(indx) + "] within key_tag [" +
                              key_tag + "].");
             }
             new_map[indx] = key->second;
@@ -1067,7 +1067,7 @@ class CryptoContextImpl : public Serializable {
 
     /**
      * @brief Clears EvalAutomorphismKey cache for the given context
-     * @param cc the context to clear all EvalAutomorphismKeys for
+     * @param cc the context to clear all eval_automorphism_keys for
      */
     static void clear_eval_automorphism_keys(const CryptoContext<Element> cc);
 
@@ -1191,7 +1191,7 @@ class CryptoContextImpl : public Serializable {
     CkksDataType get_ckks_data_type() const {
         const auto crypto_params = std::dynamic_pointer_cast<RnsCryptoParams>(params_);
         if (!crypto_params)
-            CIPHER_THROW("Invalid crypto parameters: expected CryptoParametersRNS");
+            CIPHER_THROW("Invalid crypto parameters: expected RnsCryptoParams");
 
         return crypto_params->get_ckks_data_type();
     }
@@ -1202,20 +1202,20 @@ class CryptoContextImpl : public Serializable {
 
     /**
      * @brief Gets a map of all relinearization/evaluation multiplication keys
-     * @return std::map where the map key/data pair is "key_tag"/"EvalMultKeys vector"
+     * @return std::map where the map key/data pair is "key_tag"/"eval_mult_keys vector"
      */
     static std::map<std::string, std::vector<EvalKey<Element>>>& get_all_eval_mult_keys();
 
     /**
      * @brief Gets a vector of relinearization/evaluation multiplication keys for the given key_tag
      * @param key_tag secret key tag
-     * @return vector of EvalMultKeys
+     * @return vector of eval_mult_keys
      */
     static const std::vector<EvalKey<Element>>& get_eval_mult_key_vector(const std::string& key_tag);
 
     /**
      * @brief Gets a map of all eval_automorphism keys
-     * @return std::map where the map key/data pair is "key_tag"/"shared_ptr to EvalMultKey map"
+     * @return std::map where the map key/data pair is "key_tag"/"shared_ptr to eval_mult_key map"
      */
     static std::map<std::string, std::shared_ptr<std::map<uint32_t, EvalKey<Element>>>>&
     get_all_eval_automorphism_keys();
@@ -1239,14 +1239,14 @@ class CryptoContextImpl : public Serializable {
 
     /**
      * @brief Gets a map of all summation keys
-     * @return std::map where the map key/data pair is "key_tag"/"shared_ptr to EvalSumKey map"
+     * @return std::map where the map key/data pair is "key_tag"/"shared_ptr to eval_key_sum map"
      */
     static std::map<std::string, std::shared_ptr<std::map<uint32_t, EvalKey<Element>>>>& get_all_eval_sum_keys();
 
     /**
      * @brief Gets a map of eval_sum keys for the given key_tag
      * @param key_tag secret key tag
-     * @return EvalSumKey map
+     * @return eval_key_sum map
      */
     static const std::map<uint32_t, EvalKey<Element>>& get_eval_sum_key_map(const std::string& key_tag);
 
@@ -2034,7 +2034,7 @@ class CryptoContextImpl : public Serializable {
 
         const auto& eval_key_vec = CryptoContextImpl<Element>::get_eval_mult_key_vector(ciphertext1->get_key_tag());
         if (eval_key_vec.empty())
-            CIPHER_THROW("Evaluation key has not been generated for EvalMultMutable");
+            CIPHER_THROW("Evaluation key has not been generated for eval_mult_mutable");
 
         return scheme_->eval_mult_mutable(ciphertext1, ciphertext2, eval_key_vec[0]);
     }
@@ -2050,7 +2050,7 @@ class CryptoContextImpl : public Serializable {
 
         const auto& eval_key_vec = CryptoContextImpl<Element>::get_eval_mult_key_vector(ciphertext1->get_key_tag());
         if (eval_key_vec.empty())
-            CIPHER_THROW("Evaluation key has not been generated for EvalMultMutableInPlace");
+            CIPHER_THROW("Evaluation key has not been generated for eval_mult_mutable_in_place");
 
         scheme_->eval_mult_mutable_in_place(ciphertext1, ciphertext2, eval_key_vec[0]);
     }
@@ -2066,7 +2066,7 @@ class CryptoContextImpl : public Serializable {
 
         const auto& eval_key_vec = CryptoContextImpl<Element>::get_eval_mult_key_vector(ciphertext->get_key_tag());
         if (eval_key_vec.empty())
-            CIPHER_THROW("Evaluation key has not been generated for EvalSquare");
+            CIPHER_THROW("Evaluation key has not been generated for eval_square");
 
         return scheme_->eval_square(ciphertext, eval_key_vec[0]);
     }
@@ -2082,7 +2082,7 @@ class CryptoContextImpl : public Serializable {
 
         const auto& eval_key_vec = CryptoContextImpl<Element>::get_eval_mult_key_vector(ciphertext->get_key_tag());
         if (eval_key_vec.empty())
-            CIPHER_THROW("Evaluation key has not been generated for EvalSquareMutable");
+            CIPHER_THROW("Evaluation key has not been generated for eval_square_mutable");
 
         return scheme_->eval_square_mutable(ciphertext, eval_key_vec[0]);
     }
@@ -2097,7 +2097,7 @@ class CryptoContextImpl : public Serializable {
 
         const auto& eval_key_vec = CryptoContextImpl<Element>::get_eval_mult_key_vector(ciphertext->get_key_tag());
         if (eval_key_vec.empty())
-            CIPHER_THROW("Evaluation key has not been generated for EvalSquareInPlace");
+            CIPHER_THROW("Evaluation key has not been generated for eval_square_in_place");
 
         scheme_->eval_square_in_place(ciphertext, eval_key_vec[0]);
     }
@@ -2196,7 +2196,7 @@ class CryptoContextImpl : public Serializable {
 
         const auto& eval_key_vec = CryptoContextImpl<Element>::get_eval_mult_key_vector(ciphertext->get_key_tag());
         if (eval_key_vec.size() < (ciphertext->number_ciphertext_elements() - 2))
-            CIPHER_THROW("Insufficient value was used for maxRelinSkDeg to generate keys for RelinearizeInPlace");
+            CIPHER_THROW("Insufficient value was used for maxRelinSkDeg to generate keys for relinearize_in_place");
 
         scheme_->relinearize_in_place(ciphertext, eval_key_vec);
     }
@@ -2217,7 +2217,8 @@ class CryptoContextImpl : public Serializable {
 
         if (eval_key_vec.size() <
             (ciphertext1->number_ciphertext_elements() + ciphertext2->number_ciphertext_elements() - 3)) {
-            CIPHER_THROW("Insufficient value was used for maxRelinSkDeg to generate keys for EvalMultAndRelinearize");
+            CIPHER_THROW(
+                    "Insufficient value was used for maxRelinSkDeg to generate keys for eval_mult_and_relinearize");
         }
 
         return scheme_->eval_mult_and_relinearize(ciphertext1, ciphertext2, eval_key_vec);
@@ -2747,7 +2748,7 @@ class CryptoContextImpl : public Serializable {
         if (ciphertext == nullptr)
             CIPHER_THROW("input ciphertext is invalid (has no data)");
         if (towers_left < noise_scale_deg) {
-            std::string error_msg{"Input towersLeft["};
+            std::string error_msg{"Input towers_left["};
             error_msg += std::to_string(towers_left) + "] may not be less than noiseScaleDeg[";
             error_msg += std::to_string(noise_scale_deg) + "]";
             CIPHER_THROW(error_msg);
@@ -2868,7 +2869,7 @@ class CryptoContextImpl : public Serializable {
 
     /**
      * @brief Computes the powers of a ciphertext to be used when evaluating a polynomial (CKKS only).
-     *        Uses EvalPowersLinear() for low polynomial degrees (degree < 5), or EvalPowersPS() for higher degrees.
+     *        Uses internal_eval_powers_linear() for low polynomial degrees (degree < 5), or internal_eval_powers_ps() for higher degrees.
      *
      * @param ciphertext    Input ciphertext.
      * @param coefficients  Polynomial coefficients (vector's size = (degree + 1)).
@@ -4184,7 +4185,7 @@ class CryptoContextImpl : public Serializable {
     void set_params_from_ckks_cryptocontext(SchSwchParams& params) {
         const auto crypto_params = std::dynamic_pointer_cast<CkksRnsCryptoParams>(params_);
         if (!crypto_params)
-            CIPHER_THROW("Invalid crypto parameters: expected CryptoParametersCKKSRNS");
+            CIPHER_THROW("Invalid crypto parameters: expected CkksRnsCryptoParams");
         params.set_initial_ckks_modulus(crypto_params->get_element_params()->get_params()[0]->get_modulus());
         params.set_ring_dimension(get_ring_dimension());
         // TODO (dsuponit): is this correct - PlaintextModulus used as scaling_mod_size?

@@ -1,16 +1,22 @@
 Tutorials on Cryptographic Capabilities
-====================================
+=======================================
 
--  `Description of the CryptoContext parameters for BGV, BFV, and CKKS <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples#description-of-the-cryptocontext-parameters-and-their-restrictions>`_
+The tutorials are Markdown documents in the repository, next to the examples they describe.
 
--  `CKKS Noise Flooding <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/CKKS_NOISE_FLOODING.md>`_
+-  `Description of the CryptoContext parameters for BGV, BFV, and CKKS <../../../examples/fhe/README.md#description-of-the-cryptocontext-parameters-and-their-restrictions>`_ (``examples/fhe/README.md``)
 
--  `Smooth Arbitrary Function Evaluation in CKKS <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/FUNCTION_EVALUATION.md>`_
+-  `CKKS Noise Flooding <../../../examples/fhe/CKKS_NOISE_FLOODING.md>`_ (``examples/fhe/CKKS_NOISE_FLOODING.md``)
 
--  `Scheme Switching between CKKS and FHEW/TFHE <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/SCHEME_SWITCHING_CAPABILITY.md>`_
+-  `Smooth Arbitrary Function Evaluation in CKKS <../../../examples/fhe/FUNCTION_EVALUATION.md>`_ (``examples/fhe/FUNCTION_EVALUATION.md``)
 
--  `Threshold FHE for BGV, BFV, and CKKS <https://github.com/openfheorg/openfhe-development/tree/main/docs/static_docs/Threshold_FHE.md>`_
+-  `Scheme Switching between CKKS and FHEW/TFHE <../../../examples/fhe/SCHEME_SWITCHING_CAPABILITY.md>`_ (``examples/fhe/SCHEME_SWITCHING_CAPABILITY.md``)
 
--  `Interactive CKKS Bootstrapping <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/INTERACTIVE_BOOTSTRAPPING.md>`_
+-  `Threshold FHE for BGV, BFV, and CKKS <../../static_docs/Threshold_FHE.md>`_ (``docs/static_docs/Threshold_FHE.md``)
 
--  `CKKS Composite Scaling <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/COMPOSITE_SCALING.md>`_
+-  `Interactive CKKS Bootstrapping <../../../examples/fhe/INTERACTIVE_BOOTSTRAPPING.md>`_ (``examples/fhe/INTERACTIVE_BOOTSTRAPPING.md``)
+
+-  `CKKS Composite Scaling <../../../examples/fhe/COMPOSITE_SCALING.md>`_ (``examples/fhe/COMPOSITE_SCALING.md``)
+
+-  `CKKS Bootstrapping <../../../examples/fhe/CKKS_BOOTSTRAPPING.md>`_ (``examples/fhe/CKKS_BOOTSTRAPPING.md``)
+
+-  `CKKS Functional Bootstrapping <../../../examples/fhe/CKKS_FUNCTIONAL_BOOTSTRAPING.md>`_ (``examples/fhe/CKKS_FUNCTIONAL_BOOTSTRAPING.md``)

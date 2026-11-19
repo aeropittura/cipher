@@ -130,7 +130,7 @@ class Matrix : public Serializable {
 
     void set_size(size_t rows, size_t cols) {
         if (this->rows != 0 || this->cols != 0) {
-            CIPHER_THROW("You cannot SetSize on a non-empty matrix");
+            CIPHER_THROW("You cannot set_size on a non-empty matrix");
         }
 
         this->rows = rows;
@@ -210,7 +210,7 @@ class Matrix : public Serializable {
      *
      * @return the resulting matrix
      */
-    Matrix<Element>& Fill(const Element& val);
+    Matrix<Element>& fill_with(const Element& val);
 
     /**
      * In-place change of the current matrix to Identity matrix
@@ -763,7 +763,7 @@ Matrix<Element> operator*(Element const& e, Matrix<Element> const& M) {
  * @return the resulting matrix of big binary integers
  */
 template <typename Element>
-Matrix<typename Element::Integer> Rotate(Matrix<Element> const& in_mat);
+Matrix<typename Element::Integer> rotate_matrix(Matrix<Element> const& in_mat);
 
 /**
  *  Each element becomes a square matrix with columns of that element's

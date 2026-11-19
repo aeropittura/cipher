@@ -120,5 +120,5 @@ void switch_format_simple_double_crt(const std::string& msg) {
 }
 
 TEST(UTNTT, switch_format_simple_double_crt) {
-    RUN_BIG_DCRTPOLYS(switch_format_simple_double_crt, "switch_format_simple_double_crt")
+    RUN_BIG_RNS_POLYS(switch_format_simple_double_crt, "switch_format_simple_double_crt")
 }

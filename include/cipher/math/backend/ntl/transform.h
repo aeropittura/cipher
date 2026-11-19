@@ -234,7 +234,7 @@ class NumberTheoreticTransformNtl {
  * @brief Golden Chinese Remainder Transform FFT implementation.
  */
 template <typename VecType>
-class ChineseRemainderTransformFTTNtl : public cipher::ChineseRemainderTransformFttInterface<VecType> {
+class ChineseRemainderTransformFttNtl : public cipher::ChineseRemainderTransformFttInterface<VecType> {
     using IntType = typename VecType::Integer;
 
   public:
@@ -366,7 +366,7 @@ using ModulusRootPair = std::pair<ModulusRoot<IntType>, ModulusRoot<IntType>>;
  * @brief Bluestein Fast Fourier Transform implementation
  */
 template <typename VecType>
-class BluesteinFFTNtl {
+class BluesteinFftNtl {
     using IntType = typename VecType::Integer;
 
   public:
@@ -398,9 +398,9 @@ class BluesteinFFTNtl {
      * @param hi is higher coefficient index.
      * @return output vector s.t output vector = a[lo]...a[hi].
      */
-    VecType Resize(const VecType& a, uint32_t lo, uint32_t hi);
+    VecType resize_range(const VecType& a, uint32_t lo, uint32_t hi);
 
-    // void PreComputeNTTModulus(uint32_t cyclo_order, const std::vector<IntType>
+    // void precompute_ntt_modulus(uint32_t cyclo_order, const std::vector<IntType>
     // &modulii);
 
     /**
@@ -612,8 +612,8 @@ class ChineseRemainderTransformArbNtl : public cipher::ChineseRemainderTransform
 // Compiled once in be6-math-impl.cpp; these declarations suppress implicit instantiation in every
 // other TU so all users link the library's copy (same pattern as transformnat.h).
 extern template class NTL::NumberTheoreticTransformNtl<NTL::BigVector>;
-extern template class NTL::ChineseRemainderTransformFTTNtl<NTL::BigVector>;
-extern template class NTL::BluesteinFFTNtl<NTL::BigVector>;
+extern template class NTL::ChineseRemainderTransformFttNtl<NTL::BigVector>;
+extern template class NTL::BluesteinFftNtl<NTL::BigVector>;
 extern template class NTL::ChineseRemainderTransformArbNtl<NTL::BigVector>;
 
 #endif  // CIPHER_WITH_NTL

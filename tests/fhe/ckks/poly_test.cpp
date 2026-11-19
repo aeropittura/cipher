@@ -60,46 +60,46 @@ enum TEST_CASE_TYPE : int {
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
-    std::string typeName;
+    std::string type_name_of;
     switch (type) {
         case EVAL_POLY:
-            typeName = "EVAL_POLY";
+            type_name_of = "EVAL_POLY";
             break;
         case EVAL_CHEB_DIVISION:
-            typeName = "EVAL_CHEB_DIVISION";
+            type_name_of = "EVAL_CHEB_DIVISION";
             break;
         case EVAL_CHEB_LOGIT:
-            typeName = "EVAL_CHEB_LOGIT";
+            type_name_of = "EVAL_CHEB_LOGIT";
             break;
         case EVAL_CHEB_LOGIT_NOLIN:
-            typeName = "EVAL_CHEB_LOGIT_NOLIN";
+            type_name_of = "EVAL_CHEB_LOGIT_NOLIN";
             break;
         case EVAL_CHEB_SINE:
-            typeName = "EVAL_CHEB_SINE";
+            type_name_of = "EVAL_CHEB_SINE";
             break;
         case EVAL_CHEB_POLY:
-            typeName = "EVAL_CHEB_POLY";
+            type_name_of = "EVAL_CHEB_POLY";
             break;
         case EVAL_DIVIDE:
-            typeName = "EVAL_DIVIDE";
+            type_name_of = "EVAL_DIVIDE";
             break;
         case EVAL_LOGISTIC:
-            typeName = "EVAL_LOGISTIC";
+            type_name_of = "EVAL_LOGISTIC";
             break;
         case EVAL_SIN:
-            typeName = "EVAL_SIN";
+            type_name_of = "EVAL_SIN";
             break;
         case EVAL_COS:
-            typeName = "EVAL_COS";
+            type_name_of = "EVAL_COS";
             break;
         case EVAL_PRECOMP_REUSE:
-            typeName = "EVAL_PRECOMP_REUSE";
+            type_name_of = "EVAL_PRECOMP_REUSE";
             break;
         default:
-            typeName = "UNKNOWN";
+            type_name_of = "UNKNOWN";
             break;
     }
-    return os << typeName;
+    return os << type_name_of;
 }
 //===========================================================================================================
 struct TEST_CASE_UTCKKSRNS_EVAL_POLY {
@@ -126,7 +126,7 @@ struct TEST_CASE_UTCKKSRNS_EVAL_POLY {
 
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
-static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNS_EVAL_POLY>& test) {
+static auto make_test_name = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNS_EVAL_POLY>& test) {
     return test.param.build_test_name();
 };
 
@@ -149,7 +149,7 @@ constexpr uint32_t FMODSIZE = 60;
 
 // clang-format off
 static std::vector<TEST_CASE_UTCKKSRNS_EVAL_POLY> test_cases = {
-    // TestType, Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType, Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { EVAL_POLY, "01", {CKKSRNS_SCHEME, RDIM, 5,          SMODSIZE,   20,    BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_POLY, "02", {CKKSRNS_SCHEME, RDIM, 5,          SMODSIZE,   20,    BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_POLY, "03", {CKKSRNS_SCHEME, RDIM, 5,          SMODSIZE,   20,    BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, BV,     FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
@@ -161,7 +161,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_EVAL_POLY> test_cases = {
     { EVAL_POLY, "08", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, BV,     FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
 #endif
     // ==========================================
-    // TestType,          Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,          Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { EVAL_CHEB_DIVISION, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_DIVISION, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_DIVISION, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
@@ -173,7 +173,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_EVAL_POLY> test_cases = {
     { EVAL_CHEB_DIVISION, "08", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
 #endif
     // ==========================================
-    // TestType,       Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,       Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { EVAL_CHEB_LOGIT, "01", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_LOGIT, "02", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_LOGIT, "03", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
@@ -185,7 +185,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_EVAL_POLY> test_cases = {
     { EVAL_CHEB_LOGIT, "08", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
 #endif
     // ==========================================
-    // TestType,             Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,             Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { EVAL_CHEB_LOGIT_NOLIN, "01", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_LOGIT_NOLIN, "02", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_LOGIT_NOLIN, "03", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
@@ -197,7 +197,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_EVAL_POLY> test_cases = {
     { EVAL_CHEB_LOGIT_NOLIN, "08", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
 #endif
     // ==========================================
-    // TestType,      Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,      Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { EVAL_CHEB_SINE, "01", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_SINE, "02", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_SINE, "03", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
@@ -209,7 +209,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_EVAL_POLY> test_cases = {
     { EVAL_CHEB_SINE, "08", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
 #endif
     // ==========================================
-    // TestType,      Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,      Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { EVAL_CHEB_POLY, "01", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_POLY, "02", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_CHEB_POLY, "03", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
@@ -221,7 +221,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_EVAL_POLY> test_cases = {
     { EVAL_CHEB_POLY, "08", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
 #endif
     // ==========================================
-    // TestType,   Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,   Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { EVAL_DIVIDE, "01", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_DIVIDE, "02", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_DIVIDE, "03", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
@@ -233,7 +233,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_EVAL_POLY> test_cases = {
     { EVAL_DIVIDE, "08", {CKKSRNS_SCHEME, RDIM, MULT_DEPTH, SMODSIZE,   DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
 #endif
     // ==========================================
-    // TestType,     Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,     Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { EVAL_LOGISTIC, "01", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_LOGISTIC, "02", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_LOGISTIC, "03", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
@@ -245,7 +245,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_EVAL_POLY> test_cases = {
     { EVAL_LOGISTIC, "08", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
 #endif
     // ==========================================
-    // TestType Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { EVAL_SIN, "01", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_SIN, "02", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_SIN, "03", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
@@ -257,7 +257,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_EVAL_POLY> test_cases = {
     { EVAL_SIN, "08", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
 #endif
     // ==========================================
-    // TestType Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { EVAL_COS, "01", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_COS, "02", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_COS, "03", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
@@ -269,7 +269,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_EVAL_POLY> test_cases = {
     { EVAL_COS, "08", {CKKSRNS_SCHEME, RDIM_LRG, MULT_DEPTH, SMODSIZE,   DFLT,  16,      UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
 #endif
     // ==========================================
-    // TestType,          Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,          Descr, Scheme,         RDim, MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits,    PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { EVAL_PRECOMP_REUSE, "01", {CKKSRNS_SCHEME, RDIM, 5,          SMODSIZE,   20,    BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
     { EVAL_PRECOMP_REUSE, "02", {CKKSRNS_SCHEME, RDIM, 5,          SMODSIZE,   20,    BATCH,   UNIFORM_TERNARY, DFLT,          FMODSIZE, HEStd_NotSet, HYBRID, FIXEDAUTO,       DFLT,       DFLT,  DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT} },
 #if CIPHER_NATIVE_INT != 128
@@ -439,7 +439,7 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
             std::vector<std::complex<double>> final_result = plaintext_dec->get_ckks_packed_value();
             final_result.resize(encoded_length);
             check_equality(plaintext_result1->get_ckks_packed_value(), final_result, eps,
-                           failmsg + " EvalChebyshevSeries approximation for division fails");
+                           failmsg + " eval_chebyshev_series approximation for division fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -481,7 +481,7 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
             final_result.resize(encoded_length);
 
             check_equality(plaintext_result1->get_ckks_packed_value(), final_result, eps,
-                           failmsg + " EvalChebyshevSeries approximation for logistic function fails");
+                           failmsg + " eval_chebyshev_series approximation for logistic function fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -525,7 +525,7 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
             final_result.resize(encoded_length);
 
             check_equality(plaintext_result1->get_ckks_packed_value(), final_result, eps,
-                           failmsg + " EvalChebyshevSeries approximation for logistic function fails");
+                           failmsg + " eval_chebyshev_series approximation for logistic function fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -579,7 +579,7 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
             final_result.resize(encoded_length);
 
             check_equality(plaintext_result1->get_ckks_packed_value(), final_result, eps,
-                           failmsg + " EvalChebyshevSeries approximation for sine fails");
+                           failmsg + " eval_chebyshev_series approximation for sine fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -619,7 +619,7 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
             final_result.resize(encoded_length);
 
             check_equality(plaintext_result1->get_ckks_packed_value(), final_result, eps,
-                           failmsg + " EvalChebyshevSeries approximation for sine fails");
+                           failmsg + " eval_chebyshev_series approximation for sine fails");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -794,7 +794,7 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
                 auto check = [&](const std::vector<double>& coefficients, const std::string& label) {
                     auto result = cc->eval_poly_with_precomp(powers, coefficients);
                     check_equality(eval_plain(coefficients), decrypt_fn(result, input.size()), eps,
-                                   failmsg + " EvalPolyWithPrecomp on the reused powers fails for the " + label);
+                                   failmsg + " eval_poly_with_precomp on the reused powers fails for the " + label);
                 };
                 check(coefficients_a, "first polynomial");
                 check(coefficients_b, "second polynomial");
@@ -832,10 +832,10 @@ class UTCKKSRNS_EVAL_POLY : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_
 
                 auto check = [&](const std::vector<double>& coefficients, const std::string& label) {
                     auto result = cc->eval_chebyshev_series_with_precomp(polys, coefficients);
-                    check_equality(eval_plain(coefficients), decrypt_fn(result, input.size()), eps,
-                                   failmsg +
-                                           " EvalChebyshevSeriesWithPrecomp on the reused polynomials fails for the " +
-                                           label);
+                    check_equality(
+                            eval_plain(coefficients), decrypt_fn(result, input.size()), eps,
+                            failmsg + " eval_chebyshev_series_with_precomp on the reused polynomials fails for the " +
+                                    label);
                 };
                 check(coefficients_a, "first series");
                 check(coefficients_b, "second series");
@@ -895,4 +895,4 @@ TEST_P(UTCKKSRNS_EVAL_POLY, CKKSRNS) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_EVAL_POLY, ::testing::ValuesIn(test_cases), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_EVAL_POLY, ::testing::ValuesIn(test_cases), make_test_name);

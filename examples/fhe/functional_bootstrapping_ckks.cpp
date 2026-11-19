@@ -61,7 +61,7 @@ void multi_precision_sign(BigInteger qbfv_init, BigInteger p_input, BigInteger p
                           uint32_t ring_dim);
 
 int main() {
-    std::cerr << "\n*1.* Compute the function (x % PInput - POutput / 2) % POutput." << std::endl << std::endl;
+    std::cerr << "\n*1.* Compute the function (x % p_input - p_output / 2) % p_output." << std::endl << std::endl;
     // Boolean LUT
     std::cerr << "=====Boolean LUT order 1 sparsely packed=====" << std::endl << std::endl;
     arbitrary_lut(QBFVINIT, BigInteger(2), BigInteger(2), (BigInteger(1) << 33), (BigInteger(1) << 33), 1, 1, 8, 4096,
@@ -120,7 +120,7 @@ void arbitrary_lut(BigInteger qbfv_init, BigInteger p_input, BigInteger p_output
     std::cerr << "First 8 elements of the input (repeated) up to size " << num_slots << ":" << std::endl;
     std::cerr << x << std::endl;
     if (x.size() < num_slots)
-        x = Fill<int64_t>(x, num_slots);
+        x = fill_slots<int64_t>(x, num_slots);
 
     /* 3. The case of Boolean LUTs using the first order Trigonometric Hermite Interpolation
      * supports an optimized implementation.
@@ -238,7 +238,7 @@ void arbitrary_lut(BigInteger qbfv_init, BigInteger p_input, BigInteger p_output
     auto computed =
             SchemeletRlweMp::decrypt_coeff(polys, Q, p_output, key_pair.secret_key, ep, num_slots_ckks, num_slots);
 
-    std::cerr << "First 8 elements of the obtained output % POutput: [";
+    std::cerr << "First 8 elements of the obtained output % p_output: [";
     std::copy_n(computed.begin(), 8, std::ostream_iterator<int64_t>(std::cerr, " "));
     std::cerr << "]" << std::endl;
 
@@ -282,7 +282,7 @@ void multi_value_bootstrapping(BigInteger qbfv_init, BigInteger p_input, BigInte
     std::cerr << "First 8 elements of the input (repeated) up to size " << num_slots << ":" << std::endl;
     std::cerr << x << std::endl;
     if (x.size() < num_slots)
-        x = Fill<int64_t>(x, num_slots);
+        x = fill_slots<int64_t>(x, num_slots);
 
     /* 4. The case of Boolean LUTs using the first order Trigonometric Hermite Interpolation
      * supports an optimized implementation.
@@ -373,14 +373,14 @@ void multi_value_bootstrapping(BigInteger qbfv_init, BigInteger p_input, BigInte
     cc->eval_mult_key_gen(key_pair.secret_key);
     cc->eval_at_index_key_gen(key_pair.secret_key, std::vector<int32_t>({-2}));
 
-    auto mask_real = Fill<double>({1, 1, 1, 1, 0, 0, 0, 0}, num_slots);
+    auto mask_real = fill_slots<double>({1, 1, 1, 1, 0, 0, 0, 0}, num_slots);
 
     // The mask level is counted on the full modulus chain, which has an extra modulus for FLEXIBLEAUTOEXT
     const uint32_t ext_off = (scal_tech == FLEXIBLEAUTOEXT) ? 1 : 0;
 
     // Note that the corresponding plaintext mask for full packing can be just real, as real times complex multiplies both real and imaginary parts
     Plaintext ptxt_mask = cc->make_ckks_packed_plaintext(
-            Fill<double>({1, 1, 1, 1, 0, 0, 0, 0}, num_slots_ckks), 1,
+            fill_slots<double>({1, 1, 1, 1, 0, 0, 0, 0}, num_slots_ckks), 1,
             depth + ext_off - lvlb[1] - levels_available_after_bootstrap - levels_computation, nullptr, num_slots_ckks);
 
     /* 7. When leveled computations (multiplications, rotations) are desired to be performed while in
@@ -437,7 +437,7 @@ void multi_value_bootstrapping(BigInteger qbfv_init, BigInteger p_input, BigInte
 
         // Apply a rotation
         ctxt_after_fbt2 = cc->eval_rotate(ctxt_after_fbt2, -2);
-        exact2 = flag_sp ? Rotate(exact2, -2) : rotate_two_halves(exact2, -2);
+        exact2 = flag_sp ? rotate_slots(exact2, -2) : rotate_two_halves(exact2, -2);
 
         // Apply a multiplicative mask
         ctxt_after_fbt2 = cc->eval_mult(ctxt_after_fbt2, ptxt_mask);
@@ -458,7 +458,7 @@ void multi_value_bootstrapping(BigInteger qbfv_init, BigInteger p_input, BigInte
 
         // Apply a rotation
         ctxt_after_fbt2 = cc->eval_rotate(ctxt_after_fbt2, -2);
-        exact2 = flag_sp ? Rotate(exact2, -2) : rotate_two_halves(exact2, -2);
+        exact2 = flag_sp ? rotate_slots(exact2, -2) : rotate_two_halves(exact2, -2);
 
         // Apply a multiplicative mask
         ctxt_after_fbt2 = cc->eval_mult(ctxt_after_fbt2, ptxt_mask);
@@ -478,7 +478,7 @@ void multi_value_bootstrapping(BigInteger qbfv_init, BigInteger p_input, BigInte
     auto computed = SchemeletRlweMp::decrypt_coeff(polys, Q, p_output, key_pair.secret_key, ep, num_slots_ckks,
                                                    num_slots, flag_br);
 
-    std::cerr << "First 8 elements of the obtained output = (input % PInput - POutput / 2) % POutput: [";
+    std::cerr << "First 8 elements of the obtained output = (input % p_input - p_output / 2) % p_output: [";
     std::copy_n(computed.begin(), 8, std::ostream_iterator<int64_t>(std::cerr, " "));
     std::cerr << "]" << std::endl;
 
@@ -493,7 +493,7 @@ void multi_value_bootstrapping(BigInteger qbfv_init, BigInteger p_input, BigInte
     computed = SchemeletRlweMp::decrypt_coeff(polys, Q, p_output, key_pair.secret_key, ep, num_slots_ckks, num_slots,
                                               flag_br);
 
-    std::cerr << "First 8 elements of the obtained output = (input % PInput) % POutput, rotated by -2 and masked: [";
+    std::cerr << "First 8 elements of the obtained output = (input % p_input) % p_output, rotated by -2 and masked: [";
     std::copy_n(computed.begin(), 8, std::ostream_iterator<int64_t>(std::cerr, " "));
     std::cerr << "]" << std::endl;
 
@@ -537,7 +537,7 @@ void multi_precision_sign(BigInteger qbfv_init, BigInteger p_input, BigInteger p
     std::cerr << "First 8 elements of the input (repeated) up to size " << num_slots << ":" << std::endl;
     std::cerr << x << std::endl;
     if (x.size() < num_slots)
-        x = Fill<int64_t>(x, num_slots);
+        x = fill_slots<int64_t>(x, num_slots);
 
     auto exact(x);
     std::transform(x.begin(), x.end(), exact.begin(),

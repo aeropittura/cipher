@@ -74,61 +74,61 @@ enum TEST_CASE_TYPE {
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
-    std::string typeName;
+    std::string type_name_of;
     switch (type) {
         case FHEW_AND:
-            typeName = "FHEW_AND";
+            type_name_of = "FHEW_AND";
             break;
         case FHEW_OR:
-            typeName = "FHEW_OR";
+            type_name_of = "FHEW_OR";
             break;
         case FHEW_NAND:
-            typeName = "FHEW_NAND";
+            type_name_of = "FHEW_NAND";
             break;
         case FHEW_NOR:
-            typeName = "FHEW_NOR";
+            type_name_of = "FHEW_NOR";
             break;
         case FHEW_XOR:
-            typeName = "FHEW_XOR";
+            type_name_of = "FHEW_XOR";
             break;
         case FHEW_XNOR:
-            typeName = "FHEW_XNOR";
+            type_name_of = "FHEW_XNOR";
             break;
         case FHEW_SIGNED_MODE:
-            typeName = "FHEW_SIGNED_MODE";
+            type_name_of = "FHEW_SIGNED_MODE";
             break;
         case FHEW_KEY_SWITCH:
-            typeName = "FHEW_KEY_SWITCH";
+            type_name_of = "FHEW_KEY_SWITCH";
             break;
         case FHEW_MOD_SWITCH:
-            typeName = "FHEW_MOD_SWITCH";
+            type_name_of = "FHEW_MOD_SWITCH";
             break;
         case FHEW_NOT:
-            typeName = "FHEW_NOT";
+            type_name_of = "FHEW_NOT";
             break;
         case FHEW_AND3:
-            typeName = "FHEW_AND3";
+            type_name_of = "FHEW_AND3";
             break;
         case FHEW_OR3:
-            typeName = "FHEW_OR3";
+            type_name_of = "FHEW_OR3";
             break;
         case FHEW_AND4:
-            typeName = "FHEW_AND4";
+            type_name_of = "FHEW_AND4";
             break;
         case FHEW_OR4:
-            typeName = "FHEW_OR4";
+            type_name_of = "FHEW_OR4";
             break;
         case FHEW_MAJORITY:
-            typeName = "FHEW_MAJORITY";
+            type_name_of = "FHEW_MAJORITY";
             break;
         case FHEW_CMUX:
-            typeName = "FHEW_CMUX";
+            type_name_of = "FHEW_CMUX";
             break;
         default:
-            typeName = "UNKNOWN_TESTTYPE";
+            type_name_of = "UNKNOWN_TESTTYPE";
             break;
     }
-    return os << typeName;
+    return os << type_name_of;
 }
 //===========================================================================================================
 struct TEST_CASE_UTGENERAL_FHEW {
@@ -163,7 +163,7 @@ struct TEST_CASE_UTGENERAL_FHEW {
 
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
-static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTGENERAL_FHEW>& test) {
+static auto make_test_name = [](const testing::TestParamInfo<TEST_CASE_UTGENERAL_FHEW>& test) {
     return test.param.build_test_name();
 };
 
@@ -578,4 +578,4 @@ TEST_P(UTGENERAL_FHEW, BINFHE) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTGENERAL_FHEW, ::testing::ValuesIn(test_cases_utgeneral_fhew), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTGENERAL_FHEW, ::testing::ValuesIn(test_cases_utgeneral_fhew), make_test_name);

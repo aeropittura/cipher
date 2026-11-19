@@ -77,8 +77,8 @@ std::string cipher_one_location = "/ciphertext1.txt";
 std::string cipher_two_location = "/ciphertext2.txt";
 
 // Save-load locations for evaluated ciphertexts
-std::string cipher_mult_location = "/ciphertextMult.txt";
-std::string cipher_add_location = "/ciphertextAdd.txt";
+std::string cipher_mult_location = "/ciphertext_mult.txt";
+std::string cipher_add_location = "/ciphertext_add.txt";
 std::string cipher_rot_location = "/ciphertextRot.txt";
 std::string cipher_rot_neg_location = "/ciphertextRotNegLocation.txt";
 std::string client_vector_location = "/ciphertextVectorFromClient.txt";

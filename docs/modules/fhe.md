@@ -1,20 +1,20 @@
-# Directory Structure
+# SIMD FHE (`Cipher::fhe`)
 
-## Examples:
+## Examples
 
-We provide the following examples:
+The examples are in [examples/fhe](../../examples/fhe). They cover:
 
 - various operations across the various schemes including CKKS, BGV, BFV.
 
-- serialization of ciphertexts, and cryptocontexts (Cryptocontexts are the main object we use to interact with the
+- serialization of ciphertexts, and crypto contexts (crypto contexts are the main object we use to interact with the
   various crypto objects)
 
 - threshold FHE
 
-## include
+## Headers
 
-- Header files
+- [include/cipher/fhe](../../include/cipher/fhe)
 
-## lib
+## Implementation
 
-- implementation of the header files
+- [source/fhe](../../source/fhe)

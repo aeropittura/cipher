@@ -135,7 +135,7 @@ int main(int argc, char* argv[]) {
                     break;
             }
             argc_count += 1;
-            std::cout << "argcCount: " << argc_count << std::endl;
+            std::cout << "argc_count: " << argc_count << std::endl;
         }
         std::cout << "Complete !" << std::endl;
     } else {

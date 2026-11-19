@@ -49,16 +49,16 @@ enum TEST_CASE_TYPE : int {
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
-    std::string typeName;
+    std::string type_name_of;
     switch (type) {
         case RE_ENCRYPT:
-            typeName = "RE_ENCRYPT";
+            type_name_of = "RE_ENCRYPT";
             break;
         default:
-            typeName = "UNKNOWN";
+            type_name_of = "UNKNOWN";
             break;
     }
-    return os << typeName;
+    return os << type_name_of;
 }
 //===========================================================================================================
 struct TEST_CASE_UTGENERAL_REENCRYPT {
@@ -85,7 +85,7 @@ struct TEST_CASE_UTGENERAL_REENCRYPT {
 
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
-static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTGENERAL_REENCRYPT>& test) {
+static auto make_test_name = [](const testing::TestParamInfo<TEST_CASE_UTGENERAL_REENCRYPT>& test) {
     return test.param.build_test_name();
 };
 
@@ -99,7 +99,7 @@ const uint32_t SCALE = 60;
 const uint32_t DSIZ = 20;
 // clang-format off
 static std::vector<TEST_CASE_UTGENERAL_REENCRYPT> test_cases = {
-    // TestType,  Descr, Scheme,        RDim, MultDepth, SModSize, DSize,BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl, KSTech, ScalTech, LDigits, PtMod, std_dev,  EvalAddCt, KSCt, MultTech,         EncTech,  pre_mode
+    // TestType,  Descr, Scheme,        RDim, MultDepth, SModSize, DSize,batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl, KSTech, scal_tech, LDigits, PtMod, std_dev,  EvalAddCt, KSCt, mult_tech,         enc_tech,  pre_mode
     { RE_ENCRYPT, "01", {BFVRNS_SCHEME, DFLT, DFLT,      SCALE,    DSIZ, BATCH,   UNIFORM_TERNARY, DFLT,          DFLT,     DFLT,   DFLT,   DFLT,     DFLT,    PTMOD, DFLT,    DFLT,      DFLT, HPS,              STANDARD, DFLT}, },
     { RE_ENCRYPT, "02", {BFVRNS_SCHEME, DFLT, DFLT,      SCALE,    DSIZ, BATCH,   GAUSSIAN,        DFLT,          DFLT,     DFLT,   DFLT,   DFLT,     DFLT,    PTMOD, DFLT,    DFLT,      DFLT, HPS,              STANDARD, DFLT}, },
     { RE_ENCRYPT, "03", {BFVRNS_SCHEME, DFLT, DFLT,      SCALE,    DSIZ, BATCH,   UNIFORM_TERNARY, DFLT,          DFLT,     DFLT,   DFLT,   DFLT,     DFLT,    PTMOD, DFLT,    DFLT,      DFLT, BEHZ,             STANDARD, DFLT}, },
@@ -232,4 +232,4 @@ TEST_P(UTGENERAL_REENCRYPT, PRE) {
         re_encryption(test, test.build_test_name());
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTGENERAL_REENCRYPT, ::testing::ValuesIn(test_cases), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTGENERAL_REENCRYPT, ::testing::ValuesIn(test_cases), make_test_name);

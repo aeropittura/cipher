@@ -1,7 +1,7 @@
 Core Utils Documentation
 ====================================
 
-Documentation for `core/include/utils/ <https://github.com/openfheorg/openfhe-development/tree/main/src/core/include/utils/>`_
+Documentation for `include/cipher/util/ <../../../../../include/cipher/util>`_ (implementation in `source/util/ <../../../../../source/util>`_)
 
 .. toctree::
    :maxdepth: 3

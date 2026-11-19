@@ -10,7 +10,7 @@ flowchart BT
     B(Encoded Plaintext) --> |"4) set_length"| D(Homomorphically Transformed Plaintext);
 ```
 
-We provide a brief overview of the files below. However, we recommend referring to our [ReadTheDocs - PKE/Encoding Headers](https://openfhe-development.readthedocs.io/en/latest/assets/sphinx_rsts/modules/pke/pke_encoding.html) for more in-depth information.
+We provide a brief overview of the files below. However, we recommend referring to the [FHE encoding documentation](../../../../docs/sphinx_rsts/modules/pke/pke_encoding.rst) for more in-depth information.
 
 [CKKS Packed Encoding](ckks_packed.h)
 - Describes the CKKS packing. Accepts a `std::vector<double>` unlike the other schemes.

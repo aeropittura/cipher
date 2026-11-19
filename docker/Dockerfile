@@ -1,34 +1,34 @@
-FROM ubuntu:20.04
+# Builds, tests and installs Cipher from the checked-out source tree.
+#
+#   docker build -f docker/Dockerfile -t cipher .
+#   docker run --rm -it cipher
+#
+# Build arguments:
+#   JOBS          parallel build jobs (default 4)
+#   CMAKE_ARGS    extra CMake options, e.g. "-DCIPHER_MATH_BACKEND=2"
+#   RUN_TESTS     set to 0 to skip the unit tests during the image build
 
-ARG repository="openfhe-development"
-ARG branch=main
-ARG tag=v0.9.1
-ARG CC_param=/usr/bin/gcc-10
-ARG CXX_param=/usr/bin/g++-10
-ARG no_threads=1
+FROM ubuntu:24.04
+
+ARG JOBS=4
+ARG CMAKE_ARGS=""
+ARG RUN_TESTS=1
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV CC $CC_param
-ENV CXX $CXX_param
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends build-essential cmake ninja-build git libomp-dev ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
 
-#install pre-requisites for OpenFHE
-RUN apt update && apt install -y git \
-                                 build-essential \
-                                 gcc-10 \
-                                 g++-10 \
-                                 cmake \
-                                 autoconf \
-                                 clang-10 \
-                                 libomp5 \
-                                 libomp-dev \
-                                 doxygen \
-                                 graphviz \
-                                 libboost-all-dev=1.71.0.0ubuntu2
+WORKDIR /src/cipher
+COPY . .
+RUN git submodule update --init --depth 1 extern/cereal extern/google-test extern/google-benchmark 2>/dev/null \
+    || test -f extern/cereal/include/cereal/cereal.hpp
 
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN cmake -S . -B build -G Ninja -DCIPHER_GIT_SUBMODULES=OFF ${CMAKE_ARGS} \
+ && cmake --build build -j ${JOBS} \
+ && if [ "${RUN_TESTS}" = 1 ]; then ctest --test-dir build --output-on-failure; fi \
+ && cmake --install build \
+ && ldconfig
 
-#git clone the openfhe-development repository and its submodules (this always clones the most latest commit)
-RUN git clone https://github.com/openfheorg/$repository.git && cd $repository && git checkout $branch && git checkout $tag && git submodule sync --recursive && git submodule update --init  --recursive
-
-#installing OpenFHE and running tests
-RUN mkdir /$repository/build && cd /$repository/build && cmake .. && make -j $no_threads && make install && make testall
+WORKDIR /src/cipher/build
+CMD ["/bin/bash"]

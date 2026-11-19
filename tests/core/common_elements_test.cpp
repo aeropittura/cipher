@@ -115,8 +115,8 @@ static void common_basic_ops(const std::string& msg) {
 TEST(UTPoly,  // NOLINTNEXTLINE
      common_basic_ops){RUN_ALL_POLYS(common_basic_ops, "Poly basic_ops")}
 
-TEST(UTDCRTPoly, common_basic_ops) {
-    RUN_BIG_DCRTPOLYS(common_basic_ops, "DCRT basic_ops")
+TEST(UTRnsPoly, common_basic_ops) {
+    RUN_BIG_RNS_POLYS(common_basic_ops, "DCRT basic_ops")
 }
 
 // template for common_set_format()
@@ -144,10 +144,10 @@ void common_set_format(const std::string& msg) {
         Element ilv(ilvector2n);
 
         ilv.set_format(Format::COEFFICIENT);
-        EXPECT_EQ(ilvector2n, ilv) << msg << " Failure: SetFormat() to Format::COEFFICIENT";
+        EXPECT_EQ(ilvector2n, ilv) << msg << " Failure: set_format() to Format::COEFFICIENT";
 
         ilv.set_format(Format::EVALUATION);
-        EXPECT_EQ(ilvector2n_in_eval, ilv) << msg << " Failure: SetFormat() to Format::EVALUATION";
+        EXPECT_EQ(ilvector2n_in_eval, ilv) << msg << " Failure: set_format() to Format::EVALUATION";
     }
 }
 
@@ -157,8 +157,8 @@ TEST(UTPoly, common_set_format) {
 }
 
 // TODO RnsPoly needs a common_set_format()
-TEST(UTDCRTPoly, common_set_format) {
-    RUN_BIG_DCRTPOLYS(common_set_format, "DCRT common_set_format");
+TEST(UTRnsPoly, common_set_format) {
+    RUN_BIG_RNS_POLYS(common_set_format, "DCRT common_set_format");
 }
 
 // template for common_setters_getters()
@@ -186,11 +186,12 @@ void common_setters_getters(const std::string& msg) {
         // test for bug where length was 0
         EXPECT_EQ(ilvector2n.get_length(), m / 2) << msg << " Failure: ={init list string}";
 
-        EXPECT_EQ(ilparams->get_modulus(), ilvector2n.get_modulus()) << msg << "Failure: GetModulus()";
-        EXPECT_EQ(m, ilvector2n.get_cyclotomic_order()) << msg << "Failure: GetCyclotomicOrder()";
-        EXPECT_EQ(ilparams->get_root_of_unity(), ilvector2n.get_root_of_unity()) << msg << "Failure: GetRootOfUnity()";
-        EXPECT_EQ(Format::EVALUATION, ilvector2n.get_format()) << msg << "Failure: GetFormat()";
-        EXPECT_EQ(m / 2, ilvector2n.get_length()) << msg << "Failure: GetLength()";
+        EXPECT_EQ(ilparams->get_modulus(), ilvector2n.get_modulus()) << msg << "Failure: get_modulus()";
+        EXPECT_EQ(m, ilvector2n.get_cyclotomic_order()) << msg << "Failure: get_cyclotomic_order()";
+        EXPECT_EQ(ilparams->get_root_of_unity(), ilvector2n.get_root_of_unity())
+                << msg << "Failure: get_root_of_unity()";
+        EXPECT_EQ(Format::EVALUATION, ilvector2n.get_format()) << msg << "Failure: get_format()";
+        EXPECT_EQ(m / 2, ilvector2n.get_length()) << msg << "Failure: get_length()";
     }
 }
 
@@ -199,8 +200,8 @@ TEST(UTPoly, common_setters_getters) {
     RUN_ALL_POLYS(common_setters_getters, "common_setters_getters");
 }
 
-TEST(UTDCRTPoly, common_setters_getters) {
-    RUN_BIG_DCRTPOLYS(common_setters_getters, "common_setters_getters");
+TEST(UTRnsPoly, common_setters_getters) {
+    RUN_BIG_RNS_POLYS(common_setters_getters, "common_setters_getters");
 }
 
 // template for common_binary_ops()
@@ -243,7 +244,7 @@ void common_binary_ops(const std::string& msg) {
         CIPHER_DEBUGEXP(ilv2);
         Element expected(ilparams, Format::EVALUATION);
         expected = {"3", "1", "2", "2"};
-        EXPECT_EQ(expected, ilv2) << msg << " Failure: Plus()";
+        EXPECT_EQ(expected, ilv2) << msg << " Failure: plus()";
     }
     {  // test Minus
         Element ilv1(ilvector2n1);
@@ -251,7 +252,7 @@ void common_binary_ops(const std::string& msg) {
         Element ilv2 = ilv1.minus_impl(ilvector2n2);
         Element expected(ilparams, Format::EVALUATION);
         expected = {"1", "1", "0", "0"};
-        EXPECT_EQ(expected, ilv2) << msg << " Failure: Minus()";
+        EXPECT_EQ(expected, ilv2) << msg << " Failure: minus()";
     }
 
     {  // test times
@@ -280,7 +281,7 @@ void common_binary_ops(const std::string& msg) {
         std::stringstream tmpstr;
         tmpstr << (ilv4.get_modulus() - IntType(1));
         expected = {"0", tmpstr.str(), "2", "4"};
-        EXPECT_EQ(expected, ilv4) << msg << " Failure: Times() using SwitchFormat()";
+        EXPECT_EQ(expected, ilv4) << msg << " Failure: Times() using switch_format()";
     }
 }
 
@@ -289,8 +290,8 @@ TEST(UTPoly, common_binary_ops) {
     RUN_ALL_POLYS(common_binary_ops, "Poly common_binary_ops");
 }
 
-TEST(UTDCRTPoly, common_binary_ops) {
-    RUN_BIG_DCRTPOLYS(common_binary_ops, "DCRT common_binary_ops");
+TEST(UTRnsPoly, common_binary_ops) {
+    RUN_BIG_RNS_POLYS(common_binary_ops, "DCRT common_binary_ops");
 }
 
 // templet for common_clone_ops
@@ -315,11 +316,11 @@ void common_clone_ops(const std::string& msg) {
         Element ilv_clone = ilv.clone_parameters_only();
 
         EXPECT_EQ(ilv.get_cyclotomic_order(), ilv_clone.get_cyclotomic_order())
-                << msg << " Failure: CloneParametersOnly GetCyclotomicOrder()";
-        EXPECT_EQ(ilv.get_modulus(), ilv_clone.get_modulus()) << msg << " Failure: CloneParametersOnly GetModulus()";
+                << msg << " Failure: clone_parameters_only get_cyclotomic_order()";
+        EXPECT_EQ(ilv.get_modulus(), ilv_clone.get_modulus()) << msg << " Failure: clone_parameters_only get_modulus()";
         EXPECT_EQ(ilv.get_root_of_unity(), ilv_clone.get_root_of_unity())
-                << msg << " Failure: CloneParametersOnly GetRootOfUnity()";
-        EXPECT_EQ(ilv.get_format(), ilv_clone.get_format()) << msg << " Failure: CloneParametersOnly GetFormat()";
+                << msg << " Failure: clone_parameters_only get_root_of_unity()";
+        EXPECT_EQ(ilv.get_format(), ilv_clone.get_format()) << msg << " Failure: clone_parameters_only get_format()";
     }
     {
         float std_dev_value = 4;
@@ -327,11 +328,11 @@ void common_clone_ops(const std::string& msg) {
         Element ilv_clone = ilv.clone_with_noise(dgg, ilv.get_format());
 
         EXPECT_EQ(ilv.get_cyclotomic_order(), ilv_clone.get_cyclotomic_order())
-                << msg << " Failure: CloneWithNoise GetCyclotomicOrder()";
-        EXPECT_EQ(ilv.get_modulus(), ilv_clone.get_modulus()) << msg << " Failure: CloneWithNoise GetModulus()";
+                << msg << " Failure: clone_with_noise get_cyclotomic_order()";
+        EXPECT_EQ(ilv.get_modulus(), ilv_clone.get_modulus()) << msg << " Failure: clone_with_noise get_modulus()";
         EXPECT_EQ(ilv.get_root_of_unity(), ilv_clone.get_root_of_unity())
-                << msg << " Failure: CloneWithNoise GetRootOfUnity()";
-        EXPECT_EQ(ilv.get_format(), ilv_clone.get_format()) << msg << " Failure: CloneWithNoise GetFormat()";
+                << msg << " Failure: clone_with_noise get_root_of_unity()";
+        EXPECT_EQ(ilv.get_format(), ilv_clone.get_format()) << msg << " Failure: clone_with_noise get_format()";
     }
 }
 // Instantiations of common_clone_ops()
@@ -339,8 +340,8 @@ TEST(UTPoly, common_clone_ops) {
     RUN_ALL_POLYS(common_clone_ops, "common_clone_ops");
 }
 
-TEST(UTDCRTPoly, common_clone_ops) {
-    RUN_BIG_DCRTPOLYS(common_clone_ops, "common_clone_ops");
+TEST(UTRnsPoly, common_clone_ops) {
+    RUN_BIG_RNS_POLYS(common_clone_ops, "common_clone_ops");
 }
 
 // template for common_arithmetic_ops_element()
@@ -371,13 +372,13 @@ void common_arithmetic_ops_element(const std::string& msg) {
 
         Element expected(ilparams, Format::COEFFICIENT);
         expected = {"2", "3", "4", "1"};
-        EXPECT_EQ(expected, ilvector2n) << msg << " Failure: Plus()";
+        EXPECT_EQ(expected, ilvector2n) << msg << " Failure: plus()";
     }
     {
         Element ilvector2n = ilv.minus_impl(element);
         Element expected(ilparams);
         expected = {"1", "0", "3", "0"};
-        EXPECT_EQ(expected, ilvector2n) << msg << " Failure: Minus()";
+        EXPECT_EQ(expected, ilvector2n) << msg << " Failure: minus()";
     }
     {
         typename VecType::Integer ele("2");
@@ -399,7 +400,7 @@ void common_arithmetic_ops_element(const std::string& msg) {
         Element ilvector2n = ilv.minus_impl(element);
         Element expected(ilparams);
         expected = {"1", "0", "3", "0"};
-        EXPECT_EQ(expected, ilvector2n) << msg << " Failure: Minus()";
+        EXPECT_EQ(expected, ilvector2n) << msg << " Failure: minus()";
     }
     {
         Element ilvector2n(ilv);
@@ -415,8 +416,8 @@ TEST(UTPoly, common_arithmetic_ops_element) {
     RUN_ALL_POLYS(common_arithmetic_ops_element, "Poly common_arithmetic_ops_element");
 }
 
-TEST(UTDCRTPoly, common_arithmetic_ops_element) {
-    RUN_BIG_DCRTPOLYS(common_arithmetic_ops_element, "DCRT common_arithmetic_ops_element");
+TEST(UTRnsPoly, common_arithmetic_ops_element) {
+    RUN_BIG_RNS_POLYS(common_arithmetic_ops_element, "DCRT common_arithmetic_ops_element");
 }
 
 // template fore common_other_methods()
@@ -437,41 +438,41 @@ void common_other_methods(const std::string& msg) {
     // test for bug where length was 0
     EXPECT_EQ(ilvector2n.get_length(), m / 2) << msg << " Failure: ={init list string}";
 
-    CIPHER_DEBUG("AddILElementOne");
+    CIPHER_DEBUG("add_il_element_one");
     {
         Element ilv(ilvector2n);
 
         ilv.add_il_element_one();
         Element expected(ilparams);
         expected = {"3", "2", "4", "3"};
-        EXPECT_EQ(expected, ilv) << msg << " Failure: AddILElementOne()";
+        EXPECT_EQ(expected, ilv) << msg << " Failure: add_il_element_one()";
     }
 
-    CIPHER_DEBUG("ModByTwo");
+    CIPHER_DEBUG("mod_by_two");
     {
         Element ilv(ilvector2n);
         ilv = ilv.mod_by_two();
         Element expected(ilparams);
         expected = {"0", "1", "1", "0"};
-        EXPECT_EQ(expected, ilv) << msg << " Failure: ModByTwo()";
+        EXPECT_EQ(expected, ilv) << msg << " Failure: mod_by_two()";
     }
 
-    CIPHER_DEBUG("MakeSparse(2)");
+    CIPHER_DEBUG("make_sparse(2)");
     {
         Element ilv(ilvector2n);
         ilv.make_sparse(2);
         Element expected(ilparams);
         expected = {"2", "0", "3", "0"};
-        EXPECT_EQ(expected, ilv) << msg << " Failure: MakeSparse(2)";
+        EXPECT_EQ(expected, ilv) << msg << " Failure: make_sparse(2)";
 
         Element ilv1(ilvector2n);
         ilv1.make_sparse(3);
         expected = {"2", "0", "0", "2"};
 
-        EXPECT_EQ(expected, ilv1) << msg << " Failure: MakeSparse(3)";
+        EXPECT_EQ(expected, ilv1) << msg << " Failure: make_sparse(3)";
     }
 
-    CIPHER_DEBUG("InverseExists");
+    CIPHER_DEBUG("inverse_exists");
     {
         Element ilv(ilparams, Format::COEFFICIENT);
         ilv = {"2", "4", "3", "2"};
@@ -482,9 +483,9 @@ void common_other_methods(const std::string& msg) {
         Element ilv2(ilparams, Format::COEFFICIENT);
         ilv2 = {"2", "1", "3", "2"};
 
-        EXPECT_EQ(true, ilv.inverse_exists()) << msg << " Failure: ilv.InverseExists()";
-        EXPECT_EQ(false, ilv1.inverse_exists()) << msg << " Failure: ilv1.InverseExists()";
-        EXPECT_EQ(true, ilv2.inverse_exists()) << msg << " Failure: ilv2.InverseExists()";
+        EXPECT_EQ(true, ilv.inverse_exists()) << msg << " Failure: ilv.inverse_exists()";
+        EXPECT_EQ(false, ilv1.inverse_exists()) << msg << " Failure: ilv1.inverse_exists()";
+        EXPECT_EQ(true, ilv2.inverse_exists()) << msg << " Failure: ilv2.inverse_exists()";
     }
 }
 
@@ -503,7 +504,7 @@ void common_cyclotomic_order(const std::string& msg) {
             std::make_shared<ParmType>(m, typename VecType::Integer("1234"), typename VecType::Integer("5678"));
     Element ilv0(ilparams0);
     EXPECT_EQ(ilparams0->get_cyclotomic_order(), ilv0.get_cyclotomic_order())
-            << msg << " Failure: GetCyclotomicOrder()";
+            << msg << " Failure: get_cyclotomic_order()";
 }
 
 // Instantiations of cyclotomic_order()
@@ -511,6 +512,6 @@ TEST(UTPoly, common_cyclotomicOrder) {
     RUN_ALL_POLYS(common_cyclotomic_order, "Poly common_cyclotomicOrder");
 }
 
-TEST(UTDCRTPoly, common_cyclotomicOrder) {
-    RUN_BIG_DCRTPOLYS(common_cyclotomic_order, "DCRT common_cyclotomicOrder");
+TEST(UTRnsPoly, common_cyclotomicOrder) {
+    RUN_BIG_RNS_POLYS(common_cyclotomic_order, "DCRT common_cyclotomicOrder");
 }

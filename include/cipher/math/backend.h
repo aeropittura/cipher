@@ -109,7 +109,7 @@ struct FttTypedef<M4Vector> {
 template <>
 struct FttTypedef<M6Vector> {
     /// the transform class for this vector type
-    typedef NTL::ChineseRemainderTransformFTTNtl<M6Vector> type;
+    typedef NTL::ChineseRemainderTransformFttNtl<M6Vector> type;
 };
 #endif
 

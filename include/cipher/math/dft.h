@@ -90,7 +90,7 @@ class DiscreteFourierTransform {
      * see Algorithm 1 in https://eprint.iacr.org/2018/1043.pdf.
      *
      * @param vals is a vector of complex numbers.
-     * @param cycl_order is the cyclotomic order for which Initialize() precomputed the tables.
+     * @param cycl_order is the cyclotomic order for which initialize() precomputed the tables.
      */
     static void fft_special_inv(std::vector<std::complex<double>>& vals, uint32_t cycl_order);
 
@@ -99,7 +99,7 @@ class DiscreteFourierTransform {
      * see Algorithm 1 in https://eprint.iacr.org/2018/1043.pdf.
      *
      * @param vals is a vector of complex numbers.
-     * @param cycl_order is the cyclotomic order for which Initialize() precomputed the tables.
+     * @param cycl_order is the cyclotomic order for which initialize() precomputed the tables.
      */
     static void fft_special(std::vector<std::complex<double>>& vals, uint32_t cycl_order);
 
@@ -126,12 +126,12 @@ class DiscreteFourierTransform {
      * @param nh is the number of slots (half the ring dimension), the length of the vectors
      * passed to fft_special() and fft_special_inv().
      */
-    static void Initialize(uint32_t m, uint32_t nh);
+    static void initialize(uint32_t m, uint32_t nh);
 
   private:
     static std::complex<double>* root_of_unity_table;
 
-    // structure to keep values precomputed by Initialize() for every cyclotomic order value
+    // structure to keep values precomputed by initialize() for every cyclotomic order value
     struct PrecomputedValues {
         // cyclotomic order
         uint32_t M_;
@@ -155,7 +155,7 @@ class DiscreteFourierTransform {
     static std::shared_mutex& precomp_mutex();
     static const PrecomputedValues& get_precomp(uint32_t cycl_order);
 
-    static void BitReverse(std::vector<std::complex<double>>& vals);
+    static void bit_reverse_permute(std::vector<std::complex<double>>& vals);
 };
 
 }  // namespace cipher

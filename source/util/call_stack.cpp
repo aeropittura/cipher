@@ -48,7 +48,7 @@ namespace {
 enum { MAX_BACKTRACE_ADDRESSES = 512 };
 }
 
-static bool stringEmpty(const std::string& str) noexcept {
+static bool string_empty(const std::string& str) noexcept {
     if (!str.length())
         return true;
 
@@ -72,28 +72,28 @@ std::vector<std::string> get_call_stack() noexcept {
         return std::vector<std::string>();
     }
 
-    const size_t numSymbols = static_cast<size_t>(n);
-    std::vector<std::string> retVec(numSymbols);
-    for (size_t i = 0; i < numSymbols; ++i) {
+    const size_t num_symbols = static_cast<size_t>(n);
+    std::vector<std::string> ret_vec(num_symbols);
+    for (size_t i = 0; i < num_symbols; ++i) {
         std::string symbol(symbols[i]);
         // we need to get rid of anything that doesn't belong to the name
         // Mangled symbol examples:
-        // ./lib/libOPENFHEcore.so.1(_Z14get_call_stackB5cxx11v+0x35) [0x7f1b5cdb91d5]
-        // ./unittest/pke_tests(_ZN8lbcrypto10FirstPrimeIN6intnat14NativeIntegerTImEEEET_mm+0x111) [0x5626d875c1d1]
-        //  /lib/libOPENFHEpke.so.1(_ZNK8lbcrypto25ParameterGenerationBGVRNS15ParamsGenBGVRNSESt10shared_ptrINS_20CryptoParametersBaseINS_12DCRTPolyImplIN9bigintdyn9mubintvecINS4_5ubintImEEEEEEEEEjjjjjjjj+0x44a) [0x7f1b5cf6a09a]
+        // ./lib/libcipher_core.so.1(_Z14get_call_stackB5cxx11v+0x35) [0x7f1b5cdb91d5]
+        // ./tests/fhe_tests(_ZN6cipher10FirstPrimeIN6intnat14NativeIntegerTImEEEET_mm+0x111) [0x5626d875c1d1]
+        //  /lib/libcipher_fhe.so.1(_ZNK6cipher25ParameterGenerationBGVRNS15ParamsGenBGVRNSESt10shared_ptrINS_20CryptoParametersBaseINS_12DCRTPolyImplIN9bigintdyn9mubintvecINS4_5ubintImEEEEEEEEEjjjjjjjj+0x44a) [0x7f1b5cf6a09a]
         // 1. we may have "+", so we search to find the last one to trim "symbol" from the right
         size_t pos = symbol.find_last_of("+");
         symbol = symbol.substr(0, pos);
         // 2. find the last "(" which indicates the beginning of the actual mangled symbol enclosed in to "()"
         pos = symbol.find_last_of("(");
-        size_t newLen = symbol.length() - pos;
-        std::string mangledName(symbol.substr(pos + 1, newLen));
+        size_t new_len = symbol.length() - pos;
+        std::string mangled_name(symbol.substr(pos + 1, new_len));
 
-        retVec[i] = (stringEmpty(mangledName)) ? symbols[i] : demangle(mangledName.c_str());
+        ret_vec[i] = (string_empty(mangled_name)) ? symbols[i] : demangle(mangled_name.c_str());
     }
 
     free(symbols);
-    return retVec;
+    return ret_vec;
 }
 #else
 std::vector<std::string> get_call_stack() noexcept {

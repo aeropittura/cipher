@@ -79,37 +79,37 @@ enum TEST_CASE_TYPE : int {
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
-    std::string typeName;
+    std::string type_name_of;
     switch (type) {
         case FBT_ARBLUT:
-            typeName = "FBT_ARBLUT";
+            type_name_of = "FBT_ARBLUT";
             break;
         case FBT_SIGNDIGIT:
-            typeName = "FBT_SIGNDIGIT";
+            type_name_of = "FBT_SIGNDIGIT";
             break;
         case FBT_CONSECLEV:
-            typeName = "FBT_CONSECLEV";
+            type_name_of = "FBT_CONSECLEV";
             break;
         case FBT_MVB:
-            typeName = "FBT_MVB";
+            type_name_of = "FBT_MVB";
             break;
         case FBT_NOISE:
-            typeName = "FBT_NOISE";
+            type_name_of = "FBT_NOISE";
             break;
         case FBT_NOISE_VS_FLEXIBLE:
-            typeName = "FBT_NOISE_VS_FLEXIBLE";
+            type_name_of = "FBT_NOISE_VS_FLEXIBLE";
             break;
         case FBT_MVB_REUSE:
-            typeName = "FBT_MVB_REUSE";
+            type_name_of = "FBT_MVB_REUSE";
             break;
         case FBT_INVALID:
-            typeName = "FBT_INVALID";
+            type_name_of = "FBT_INVALID";
             break;
         default:
-            typeName = "UNKNOWN";
+            type_name_of = "UNKNOWN";
             break;
     }
-    return os << typeName;
+    return os << type_name_of;
 }
 
 static std::string scal_tech_name(ScalingTechnique st) {
@@ -194,7 +194,7 @@ struct TEST_CASE_FBT {
 
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
-static auto testName = [](const testing::TestParamInfo<TEST_CASE_FBT>& test) {
+static auto make_test_name = [](const testing::TestParamInfo<TEST_CASE_FBT>& test) {
     return test.param.build_test_name();
 };
 
@@ -633,7 +633,7 @@ class UTCKKSRNS_FBT : public ::testing::TestWithParam<TEST_CASE_FBT> {
                                       64,
                                       (t.p_input.convert_to_int<int64_t>() - 1)};
             if (x.size() < t.num_slots)
-                x = Fill<int64_t>(x, t.num_slots);
+                x = fill_slots<int64_t>(x, t.num_slots);
 
             std::vector<int64_t> coeffint;
             std::vector<std::complex<double>> coeffcomp;
@@ -703,7 +703,7 @@ class UTCKKSRNS_FBT : public ::testing::TestWithParam<TEST_CASE_FBT> {
 
 #ifdef BENCH
             stop = std::chrono::high_resolution_clock::now();
-            std::cerr << "FuncBootstrapping KeyGen: " << std::chrono::duration<double>(stop - start).count() << " s\n";
+            std::cerr << "FuncBootstrapping key_gen: " << std::chrono::duration<double>(stop - start).count() << " s\n";
             start = std::chrono::high_resolution_clock::now();
 #endif
 
@@ -800,7 +800,7 @@ class UTCKKSRNS_FBT : public ::testing::TestWithParam<TEST_CASE_FBT> {
                                       64,
                                       t.p_input.convert_to_int<int64_t>() - 1};
             if (x.size() < t.num_slots)
-                x = Fill<int64_t>(x, t.num_slots);
+                x = fill_slots<int64_t>(x, t.num_slots);
 
             auto exact(x);
             std::transform(x.begin(), x.end(), exact.begin(),
@@ -881,7 +881,7 @@ class UTCKKSRNS_FBT : public ::testing::TestWithParam<TEST_CASE_FBT> {
 
 #ifdef BENCH
             stop = std::chrono::high_resolution_clock::now();
-            std::cerr << "FuncBootstrapping KeyGen: " << std::chrono::duration<double>(stop - start).count() << " s\n";
+            std::cerr << "FuncBootstrapping key_gen: " << std::chrono::duration<double>(stop - start).count() << " s\n";
             start = std::chrono::high_resolution_clock::now();
 #endif
 
@@ -1041,7 +1041,7 @@ class UTCKKSRNS_FBT : public ::testing::TestWithParam<TEST_CASE_FBT> {
                                       64,
                                       t.p_input.convert_to_int<int64_t>() - 1};
             if (x.size() < t.num_slots)
-                x = Fill<int64_t>(x, t.num_slots);
+                x = fill_slots<int64_t>(x, t.num_slots);
 
             std::vector<int64_t> coeffint;
             std::vector<std::complex<double>> coeffcomp;
@@ -1112,11 +1112,11 @@ class UTCKKSRNS_FBT : public ::testing::TestWithParam<TEST_CASE_FBT> {
 
 #ifdef BENCH
             stop = std::chrono::high_resolution_clock::now();
-            std::cerr << "FuncBootstrapping KeyGen: " << std::chrono::duration<double>(stop - start).count() << " s\n";
+            std::cerr << "FuncBootstrapping key_gen: " << std::chrono::duration<double>(stop - start).count() << " s\n";
             start = std::chrono::high_resolution_clock::now();
 #endif
 
-            auto mask_real = Fill<double>({1, 1, 1, 1, 0, 0, 0, 0}, t.num_slots);
+            auto mask_real = fill_slots<double>({1, 1, 1, 1, 0, 0, 0, 0}, t.num_slots);
 
             // The mask level is counted in towers on the full modulus chain, which has an extra modulus for
             // FLEXIBLEAUTOEXT and composite_degree towers per level for composite scaling
@@ -1126,7 +1126,7 @@ class UTCKKSRNS_FBT : public ::testing::TestWithParam<TEST_CASE_FBT> {
 
             // Note that the corresponding plaintext mask for full packing can be just real, as real times complex multiplies both real and imaginary parts
             Plaintext ptxt_mask = cc->make_ckks_packed_plaintext(
-                    Fill<double>({1, 1, 1, 1, 0, 0, 0, 0}, num_slots_ckks), 1,
+                    fill_slots<double>({1, 1, 1, 1, 0, 0, 0, 0}, num_slots_ckks), 1,
                     cd * (depth - t.lvlb[1] - t.levels_available_after_bootstrap - t.levels_computation) + ext_off,
                     nullptr, num_slots_ckks);
 
@@ -1207,7 +1207,7 @@ class UTCKKSRNS_FBT : public ::testing::TestWithParam<TEST_CASE_FBT> {
             });
 
             // Apply a rotation
-            std::vector<int64_t> exact2 = flag_sp ? Rotate(exact, -2) : rotate_two_halves(exact, -2);
+            std::vector<int64_t> exact2 = flag_sp ? rotate_slots(exact, -2) : rotate_two_halves(exact, -2);
 
             std::transform(exact2.begin(), exact2.end(), mask_real.begin(), exact2.begin(), std::multiplies<double>());
 
@@ -1272,7 +1272,7 @@ class UTCKKSRNS_FBT : public ::testing::TestWithParam<TEST_CASE_FBT> {
                                       64,
                                       t.p_input.convert_to_int<int64_t>() - 1};
             if (x.size() < t.num_slots)
-                x = Fill<int64_t>(x, t.num_slots);
+                x = fill_slots<int64_t>(x, t.num_slots);
 
             std::vector<int64_t> coeffint1;
             std::vector<int64_t> coeffint2;
@@ -1347,7 +1347,7 @@ class UTCKKSRNS_FBT : public ::testing::TestWithParam<TEST_CASE_FBT> {
 
 #ifdef BENCH
             stop = std::chrono::high_resolution_clock::now();
-            std::cerr << "FuncBootstrapping KeyGen: " << std::chrono::duration<double>(stop - start).count() << " s\n";
+            std::cerr << "FuncBootstrapping key_gen: " << std::chrono::duration<double>(stop - start).count() << " s\n";
             start = std::chrono::high_resolution_clock::now();
 #endif
 
@@ -1477,7 +1477,7 @@ class UTCKKSRNS_FBT : public ::testing::TestWithParam<TEST_CASE_FBT> {
                                           64,
                                           (t.p_input.convert_to_int<int64_t>() - 1)};
                 if (x.size() < t.num_slots)
-                    x = Fill<int64_t>(x, t.num_slots);
+                    x = fill_slots<int64_t>(x, t.num_slots);
 
                 std::vector<int64_t> coeffint;
                 std::vector<std::complex<double>> coeffcomp;
@@ -1767,14 +1767,14 @@ class UTCKKSRNS_FBT : public ::testing::TestWithParam<TEST_CASE_FBT> {
                 EXPECT_THROW(cc->eval_fbt_setup(coeffint, num_slots_ckks, t.p_input, t.p_output, t.bigq,
                                                 key_pair.public_key, dim1, t.lvlb, depth + 1, 0, t.order),
                              CipherException)
-                        << failmsg << " oversized lvlsAfterBoot not rejected";
+                        << failmsg << " oversized lvls_after_boot not rejected";
 
                 cc->eval_fbt_setup(coeffint, num_slots_ckks, t.p_input, t.p_output, t.bigq, key_pair.public_key, {0, 0},
                                    t.lvlb, t.levels_available_after_bootstrap, 0, t.order);
                 std::vector<double> y(num_slots_ckks, 0.5);
                 auto ctxt = cc->encrypt(key_pair.public_key, cc->make_ckks_packed_plaintext(y));
                 EXPECT_THROW(cc->eval_hom_decoding(ctxt, 1, depth), CipherException)
-                        << failmsg << " oversized levelToReduce not rejected";
+                        << failmsg << " oversized level_to_reduce not rejected";
                 cc->clear_static_maps_and_vectors();
             }
 
@@ -1839,4 +1839,4 @@ TEST_P(UTCKKSRNS_FBT, CKKSRNS) {
 }
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(UTCKKSRNS_FBT);  // test_cases.size() == 0 if CIPHER_NATIVE_INT == 128
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_FBT, ::testing::ValuesIn(test_cases), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_FBT, ::testing::ValuesIn(test_cases), make_test_name);

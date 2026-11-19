@@ -430,7 +430,7 @@ TEST_F(UTBFVRNS_CRT, BFVrns_SwitchCRTBasis) {
     if (B0 > (params_r->get_modulus() >> 1))
         B0 = params_r->get_modulus() - B0;
 
-    EXPECT_EQ(A0, B0) << "SwitchCRTBasis produced incorrect results";
+    EXPECT_EQ(A0, B0) << "switch_crt_basis produced incorrect results";
 }
 
 // TESTING POLYNOMIAL MULTIPLICATION - ONE TERM IS CONSTANT POLYNOMIAL

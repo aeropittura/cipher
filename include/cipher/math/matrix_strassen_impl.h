@@ -82,7 +82,7 @@ MatrixStrassen<Element>& MatrixStrassen<Element>::ones() {
 }
 
 template <class Element>
-MatrixStrassen<Element>& MatrixStrassen<Element>::Fill(const Element& val) {
+MatrixStrassen<Element>& MatrixStrassen<Element>::fill_with(const Element& val) {
     for (size_t row = 0; row < rows; ++row) {
         for (size_t col = 0; col < cols; ++col) {
             *data[row][col] = val;
@@ -298,7 +298,7 @@ MatrixStrassen<Element> MatrixStrassen<Element>::cofactor_matrix_strassen() cons
 template <class Element>
 MatrixStrassen<Element>& MatrixStrassen<Element>::v_stack(MatrixStrassen<Element> const& other) {
     if (cols != other.cols) {
-        CIPHER_THROW("VStack rows not equal size");
+        CIPHER_THROW("v_stack rows not equal size");
     }
     for (size_t row = 0; row < other.rows; ++row) {
         std::vector<std::unique_ptr<Element>> row_elems;
@@ -315,7 +315,7 @@ MatrixStrassen<Element>& MatrixStrassen<Element>::v_stack(MatrixStrassen<Element
 template <class Element>
 inline MatrixStrassen<Element>& MatrixStrassen<Element>::h_stack(MatrixStrassen<Element> const& other) {
     if (rows != other.rows) {
-        CIPHER_THROW("HStack cols not equal size");
+        CIPHER_THROW("h_stack cols not equal size");
     }
     for (size_t row = 0; row < rows; ++row) {
         std::vector<std::unique_ptr<Element>> row_elems;
@@ -400,7 +400,7 @@ void MatrixStrassen<Element>::deep_copy_data(data_t const& src) {
     }
 }
 
-inline MatrixStrassen<BigInteger> Rotate(MatrixStrassen<Poly> const& in_mat) {
+inline MatrixStrassen<BigInteger> rotate_matrix(MatrixStrassen<Poly> const& in_mat) {
     MatrixStrassen<Poly> mat(in_mat);
     mat.set_format(Format::COEFFICIENT);
     size_t n = mat(0, 0).get_length();
@@ -862,7 +862,7 @@ void MatrixStrassen<Element>::add_sub_matrices_caps(int num_entries, it_linearda
 
         smart_subtraction_caps(T2 + i, S21 + i, S22 + i);
     }
-    // COUNTERS stopTimer(TIMER_ADD);
+    // COUNTERS stop_timer(TIMER_ADD);
 }
 
 template <class Element>
@@ -1038,7 +1038,7 @@ template <class Element>
 void MatrixStrassen<Element>::distribute_from1_proc_rec_caps(MatDescriptor desc, it_lineardata_t O, it_lineardata_t I,
                                                              int ldi) const {
     if (desc.nrec == 0) {  // base case; put the matrix block-cyclic layout
-        // MPI_Comm comm = getComm();
+        // MPI_Comm comm = get_comm();
         int rank = get_rank();
         int bs = desc.bs;
         int num_blocks = desc.lda / bs;
@@ -1093,7 +1093,7 @@ template <class Element>
 void MatrixStrassen<Element>::collect_to1_proc_rec_caps(MatDescriptor desc, it_lineardata_t O, it_lineardata_t I,
                                                         int ldo) const {
     if (desc.nrec == 0) {  // base case; put the matrix block-cyclic layout
-        // MPI_Comm comm = getComm();
+        // MPI_Comm comm = get_comm();
         int rank = get_rank();
         int bs = desc.bs;
         int num_blocks = desc.lda / bs;

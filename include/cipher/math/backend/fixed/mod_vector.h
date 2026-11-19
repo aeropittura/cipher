@@ -241,10 +241,10 @@ class BigVectorFixedT final : public cipher::BigVectorInterface<BigVectorFixedT<
     void lazy_switch_modulus(const IntegerType& value);
 
     BigVectorFixedT& mult_acc_eq_no_check(const BigVectorFixedT& a, const BigVectorFixedT& b) {
-        CIPHER_THROW("MultAccEqNoCheck() not implemented for mubintvecfxd");
+        CIPHER_THROW("mult_acc_eq_no_check() not implemented for mubintvecfxd");
     }
     BigVectorFixedT& mult_acc_eq_no_check(const BigVectorFixedT& v, const IntegerType& i) {
-        CIPHER_THROW("MultAccEqNoCheck() not implemented for mubintvecfxd");
+        CIPHER_THROW("mult_acc_eq_no_check() not implemented for mubintvecfxd");
     }
 
     /**

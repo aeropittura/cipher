@@ -57,19 +57,19 @@ enum TEST_CASE_TYPE : int {
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
-    std::string typeName;
+    std::string type_name_of;
     switch (type) {
         case CONTEXT:
-            typeName = "CONTEXT";
+            type_name_of = "CONTEXT";
             break;
         case KEYS_AND_CIPHERTEXTS:
-            typeName = "KEYS_AND_CIPHERTEXTS";
+            type_name_of = "KEYS_AND_CIPHERTEXTS";
             break;
         default:
-            typeName = "UNKNOWN";
+            type_name_of = "UNKNOWN";
             break;
     }
-    return os << typeName;
+    return os << type_name_of;
 }
 //===========================================================================================================
 struct TEST_CASE_UTBGVRNS_SER {
@@ -96,7 +96,7 @@ struct TEST_CASE_UTBGVRNS_SER {
 
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
-static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTBGVRNS_SER>& test) {
+static auto make_test_name = [](const testing::TestParamInfo<TEST_CASE_UTBGVRNS_SER>& test) {
     return test.param.build_test_name();
 };
 
@@ -125,7 +125,7 @@ constexpr SecurityLevel SEC_LVL = HEStd_NotSet;
 
 // clang-format off
 static std::vector<TEST_CASE_UTBGVRNS_SER> test_cases = {
-    // TestType, Descr, Scheme,      RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, ScalTech,        LDigits, PtMod, std_dev,   EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType, Descr, Scheme,      RDim,     MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, scal_tech,        LDigits, PtMod, std_dev,   EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { CONTEXT, "01", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FLEXIBLEAUTO,    DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { CONTEXT, "02", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, FIRST_MOD_SIZE, SEC_LVL, BV,     FIXEDMANUAL,     DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { CONTEXT, "03", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, BV,     FIXEDAUTO,       DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
@@ -135,7 +135,7 @@ static std::vector<TEST_CASE_UTBGVRNS_SER> test_cases = {
     { CONTEXT, "07", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, HYBRID, FIXEDAUTO,       DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { CONTEXT, "08", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       DSIZE, BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, HYBRID, FLEXIBLEAUTOEXT, DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     // ==========================================
-    // TestType,           Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, ScalTech,        LDigits, PtMod, std_dev,   EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,           Descr, Scheme,         RDim,     MultDepth,  SModSize,   DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize,       SecLvl,  KSTech, scal_tech,        LDigits, PtMod, std_dev,   EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { KEYS_AND_CIPHERTEXTS, "01", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       0,     BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, HYBRID, FLEXIBLEAUTO,    DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { KEYS_AND_CIPHERTEXTS, "02", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       0,     BATCH,   DFLT,       MAX_RELIN_DEG, FIRST_MOD_SIZE, SEC_LVL, HYBRID, FIXEDMANUAL,     DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { KEYS_AND_CIPHERTEXTS, "03", {BGVRNS_SCHEME, RING_DIM, MULT_DEPTH, DFLT,       0,     BATCH,   DFLT,       MAX_RELIN_DEG, DFLT,           SEC_LVL, HYBRID, FIXEDAUTO,       DFLT,    PTM,   DFLT,     DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
@@ -381,4 +381,4 @@ TEST_P(UTBGVRNS_SER, BGVSer) {
         unit_test_keys_and_ciphertexts(test, test.build_test_name());
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTBGVRNS_SER, ::testing::ValuesIn(test_cases), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTBGVRNS_SER, ::testing::ValuesIn(test_cases), make_test_name);

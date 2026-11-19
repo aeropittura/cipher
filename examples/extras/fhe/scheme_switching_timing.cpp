@@ -137,7 +137,7 @@ void switch_ckks_to_fhew(uint32_t depth, uint32_t slots, uint32_t num_values) {
               << " min" << std::endl;
 
     std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
-    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", log_q " << log_q_cc_lwe;
     std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
     std::cout << num_values << " slots are being switched." << std::endl << std::endl;
@@ -261,7 +261,7 @@ void switch_fhew_to_ckks(uint32_t depth, uint32_t slots, uint32_t num_values) {
     cc_lwe->BooleanContext::generate_boolean_context(STD128, false, log_q_cc_lwe, 0, GINX, false);
 
     std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
-    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", log_q " << log_q_cc_lwe;
     std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
     std::cout << num_values << " slots are being switched." << std::endl << std::endl;
@@ -331,7 +331,7 @@ void comparison_via_scheme_switching(uint32_t depth, uint32_t slots, uint32_t nu
     /*
   Example of comparing two CKKS ciphertexts via scheme switching.
  */
-    std::cout << "\n-----ComparisonViaSchemeSwitching-----\n" << std::endl;
+    std::cout << "\n-----comparison_via_scheme_switching-----\n" << std::endl;
     std::cout << "Output precision is only wrt the operations in CKKS after switching back.\n" << std::endl;
 
     TimeVar t, t_total_value;
@@ -391,7 +391,7 @@ void comparison_via_scheme_switching(uint32_t depth, uint32_t slots, uint32_t nu
               << std::endl;
 
     std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
-    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", log_q " << log_q_cc_lwe;
     std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
     std::cout << num_values << " slots are being switched." << std::endl;
@@ -475,11 +475,11 @@ void argmin_via_scheme_switching(uint32_t depth, uint32_t slots, uint32_t num_va
     /*
   Example of computing the min and argmin of the vector packed in a CKKS ciphertext.
  */
-    std::cout << "\n-----ArgminViaSchemeSwitching-----\n" << std::endl;
+    std::cout << "\n-----argmin_via_scheme_switching-----\n" << std::endl;
     std::cout << "Output precision is only wrt the operations in CKKS after switching back\n" << std::endl;
 
     TimeVar t, t_total_value;
-    double time_key_gen(0.0), time_setup(0.0), time_precomp(0.0), time_eval_min(0.0);  // timeEvalMax(0.0);
+    double time_key_gen(0.0), time_setup(0.0), time_precomp(0.0), time_eval_min(0.0);  // time_eval_max(0.0);
 
     TIC(t_total_value);
 
@@ -536,7 +536,7 @@ void argmin_via_scheme_switching(uint32_t depth, uint32_t slots, uint32_t num_va
     std::cout << "Time to compute the scheme switching key generation: " << time_key_gen / 60000 << " min" << std::endl;
 
     std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
-    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", log_q " << log_q_cc_lwe;
     std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
     std::cout << num_values << " slots are being switched." << std::endl << std::endl;
@@ -625,11 +625,11 @@ void argmin_via_scheme_switching_alt(uint32_t depth, uint32_t slots, uint32_t nu
     /*
   Example of computing the min and argmin of the vector packed in a CKKS ciphertext.
  */
-    std::cout << "\n-----ArgminViaSchemeSwitchingAlt-----\n" << std::endl;
+    std::cout << "\n-----argmin_via_scheme_switching_alt-----\n" << std::endl;
     std::cout << "Output precision is only wrt the operations in CKKS after switching back\n" << std::endl;
 
     TimeVar t, t_total_value;
-    double time_key_gen(0.0), time_setup(0.0), time_precomp(0.0), time_eval_min(0.0);  // timeEvalMax(0.0);
+    double time_key_gen(0.0), time_setup(0.0), time_precomp(0.0), time_eval_min(0.0);  // time_eval_max(0.0);
 
     TIC(t_total_value);
 
@@ -687,7 +687,7 @@ void argmin_via_scheme_switching_alt(uint32_t depth, uint32_t slots, uint32_t nu
     std::cout << "Time to compute the scheme switching key generation: " << time_key_gen / 60000 << " min" << std::endl;
 
     std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
-    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", log_q " << log_q_cc_lwe;
     std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
     std::cout << num_values << " slots are being switched." << std::endl << std::endl;
@@ -777,11 +777,11 @@ void argmin(uint32_t depth, uint32_t slots, uint32_t num_values, uint32_t ring_d
     /*
   Example of computing the min and argmin of the vector packed in a CKKS ciphertext.
  */
-    std::cout << "\n-----ArgminViaSchemeSwitching-----\n" << std::endl;
+    std::cout << "\n-----argmin_via_scheme_switching-----\n" << std::endl;
     std::cout << "Output precision is only wrt the operations in CKKS after switching back\n" << std::endl;
 
     TimeVar t, t_total_value;
-    double time_key_gen(0.0), time_setup(0.0), time_precomp(0.0), time_eval_min(0.0);  // timeEvalMax(0.0);
+    double time_key_gen(0.0), time_setup(0.0), time_precomp(0.0), time_eval_min(0.0);  // time_eval_max(0.0);
 
     TIC(t_total_value);
 
@@ -840,7 +840,7 @@ void argmin(uint32_t depth, uint32_t slots, uint32_t num_values, uint32_t ring_d
     std::cout << "Time to compute the scheme switching key generation: " << time_key_gen / 60000 << " min" << std::endl;
 
     std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
-    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", log_q " << log_q_cc_lwe;
     std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
     std::cout << num_values << " slots are being switched." << std::endl << std::endl;
@@ -929,11 +929,11 @@ void argmin_alt(uint32_t depth, uint32_t slots, uint32_t num_values, uint32_t ri
     /*
   Example of computing the min and argmin of the vector packed in a CKKS ciphertext.
  */
-    std::cout << "\n-----ArgminViaSchemeSwitchingAlt-----\n" << std::endl;
+    std::cout << "\n-----argmin_via_scheme_switching_alt-----\n" << std::endl;
     std::cout << "Output precision is only wrt the operations in CKKS after switching back\n" << std::endl;
 
     TimeVar t, t_total_value;
-    double time_key_gen(0.0), time_setup(0.0), time_precomp(0.0), time_eval_min(0.0);  // timeEvalMax(0.0);
+    double time_key_gen(0.0), time_setup(0.0), time_precomp(0.0), time_eval_min(0.0);  // time_eval_max(0.0);
 
     TIC(t_total_value);
 
@@ -993,7 +993,7 @@ void argmin_alt(uint32_t depth, uint32_t slots, uint32_t num_values, uint32_t ri
     std::cout << "Time to compute the scheme switching key generation: " << time_key_gen / 60000 << " min" << std::endl;
 
     std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
-    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", log_q " << log_q_cc_lwe;
     std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
     std::cout << num_values << " slots are being switched." << std::endl << std::endl;
@@ -1087,7 +1087,7 @@ void Comparison(uint32_t depth, uint32_t slots, uint32_t num_values, uint32_t ri
     /*
   Example of comparing two CKKS ciphertexts via scheme switching.
  */
-    std::cout << "\n-----ComparisonViaSchemeSwitching-----\n" << std::endl;
+    std::cout << "\n-----comparison_via_scheme_switching-----\n" << std::endl;
     std::cout << "Output precision is only wrt the operations in CKKS after switching back.\n" << std::endl;
 
     TimeVar t, t_total_value;
@@ -1149,7 +1149,7 @@ void Comparison(uint32_t depth, uint32_t slots, uint32_t num_values, uint32_t ri
               << std::endl;
 
     std::cout << "FHEW scheme is using lattice parameter " << cc_lwe->get_params()->get_lwe_params()->get_n();
-    std::cout << ", logQ " << log_q_cc_lwe;
+    std::cout << ", log_q " << log_q_cc_lwe;
     std::cout << ", and modulus q " << cc_lwe->get_params()->get_lwe_params()->get_q() << std::endl << std::endl;
 
     std::cout << num_values << " slots are being switched." << std::endl;

@@ -10,7 +10,7 @@
 
 1) run `pip install restview`
 
-2) run `restivew X.rst` which will render that file.
+2) run `restview X.rst` which will render that file.
 
 
 ## Remote Builds

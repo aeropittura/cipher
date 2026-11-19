@@ -1,7 +1,7 @@
 Core Lattice Documentation
 ====================================
 
-Documentation for `core/include/lattice/ <https://github.com/openfheorg/openfhe-development/tree/main/src/core/include/lattice>`_
+Documentation for `include/cipher/ring/ <../../../../../include/cipher/ring>`_ (implementation in `source/ring/ <../../../../../source/ring>`_)
 
 .. contents:: Page Contents
    :local:
@@ -14,7 +14,7 @@ Hardware Abstraction Layer
 The Lattice Layer
 -----------------
 
-The files in this directory are to support lattice-layer operations in Cipher. The layer is used to represent polynomial rings andsupport operations over those polynomial rings.
+The files in this directory are to support lattice-layer operations in Cipher. The layer is used to represent polynomial rings and support operations over those polynomial rings.
 
 - A polynomial ring is defined as :math:`R_q = \frac{Z_q[X]}{f(X)}`, with f(X) a mononic irreducable polynomial of degree n, and q an integer modulus.
 
@@ -33,11 +33,11 @@ The three main data classes in this layer are ``Poly``, ``NativePoly`` and ``Rns
 
 -  A ``NativePoly`` is a single-CRT representation using NativeInteger types, which limites the size of the coefficients and the modulus q to 64 bits.
 
--  A ``RnsPoly`` is a double-CRT representation. In practice, this means that Poly uses a single large modulus q, while DCRTPoly uses multiple smaller moduli. Hence, Poly runs slower than DCRTPoly because DCRTPoly operations can be easier to fit into the native bitwidths of commodity processors.
+-  A ``RnsPoly`` is a double-CRT representation. In practice, this means that Poly uses a single large modulus q, while RnsPoly uses multiple smaller moduli. Hence, Poly runs slower than RnsPoly because RnsPoly operations can be easier to fit into the native bitwidths of commodity processors.
 
 - ``Poly``, ``NativePoly`` and ``RnsPoly`` all implement the interface ``RingElement``. Any new ring polynomial classes should be built to conform to this interface.
 
-The classes ``PolyParams`` and ``RnsParams`` contain parameters for the ring element representations. The following parameters are available for:
+The classes ``PolyParams`` (an alias of ``PolyParamsImpl<BigInteger>``) and ``RnsParams`` contain parameters for the ring element representations. The following parameters are available for:
 
 - ``Poly`` and ``NativePoly``:
 
@@ -91,24 +91,19 @@ The interactions can be summarized as:
        B[PolyParamsImpl <br> - Ideal Lattice Params </br>] --> C[RnsParams <br> - Ideal Lattice Double-CRT Params</br>]
 
 
-`Lattice Element Parameters (elemparams.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/elemparams.h>`_
+`Lattice Element Parameters (element_params.h) <../../../../../include/cipher/ring/backend/element_params.h>`_
 
--  a simple class to contain ring element parameters.
-- ``elemparamfactory`` is a factory that creates ``elemparams`` objects
+-  ``ElementParams``, a simple base class to contain ring element parameters.
 
-`Integer Lattice Parameters (ilparams.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/ilparams.h>`_
+`Polynomial Parameters (poly_params.h) <../../../../../include/cipher/ring/backend/standard/poly_params.h>`_
 
--  parameter class for basic single-CRT lattice parameters.
--  Inherits from ``elemparams.h``
+-  ``PolyParamsImpl``, the parameter class for basic single-CRT lattice parameters.
+-  Inherits from ``ElementParams``
 
-`Integer Lattice Double CRT Params (ildcrtparams.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/ildcrtparams.h>`_
+`RNS (Double-CRT) Parameters (rns_params.h) <../../../../../include/cipher/ring/backend/standard/rns_params.h>`_
 
--  parameter class for double-CRT lattice parameters.
--  Inherits from ``ilparams.h``
-
-`Element Parameter Factory (elemparamfactory.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/elemparamfactory.h>`_
-
-- Creates `ElementParams``
+-  ``RnsParams``, the parameter class for double-CRT lattice parameters.
+-  Inherits from ``ElementParams``
 
 Element Classes
 ^^^^^^^^^^^^^^^^^^
@@ -116,29 +111,29 @@ Element Classes
 .. mermaid::
 
    flowchart BT
-       A[RingElement<br> - Ideal Lattice Elements </br>] --> B[PolyImpl <br> - elements from ideal lattices using a single_value-CRT representation </br>];
+       A[RingElement<br> - Ideal Lattice Elements </br>] --> B[PolyImpl <br> - elements from ideal lattices using a single-CRT representation </br>];
        A[RingElement<br> - Ideal Lattice Elements </br>] --> C[RnsPolyImpl <br> - elements from ideal lattices using a double-CRT representation</br>]
 
-`Integer Lattice Elements (ilelement.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/ilelement.h>`_
+`Ring Elements (element.h) <../../../../../include/cipher/ring/element.h>`_
 
--  This file presents a basic interface class for elements from ideal lattices.
+-  ``RingElement``, the basic interface class for elements from ideal lattices.
 
-`Ideal Lattice using Vector Representation (poly.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/poly.h>`_
+`Ideal Lattice using Vector Representation (poly.h) <../../../../../include/cipher/ring/backend/standard/poly.h>`_
 
 -  These files present a basic class for ``Poly``, elements from ideal lattices using a single-CRT representation.
--  This class inherits from the class in ``ilelement.h``.
--  This file also defines a ``NativePoly``, which is simply a ``Poly`` using ``NativeInteger`` coefficients. A ``NativePoly`` is an important part of a DCRTPoly.
+-  This class (``PolyImpl``) implements ``PolyInterface``, which derives from ``RingElement``.
+-  This file also defines a ``NativePoly``, which is simply a ``Poly`` using ``NativeInteger`` coefficients. A ``NativePoly`` is an important part of an ``RnsPoly``.
 
 Trapdoors
 ^^^^^^^^^^
 
-`Trapdoor (trapdoor.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/trapdoor.h>`_
+`Trapdoor (trapdoor.h) <../../../../../include/cipher/ring/trapdoor.h>`_
 
 -  Provides the utility for sampling trapdoor lattices as described in `Implementing Conjunction Obfuscation under Entropic Ring LWE <https://eprint.iacr.org/2017/844.pdf>`__, `Building an Efficient Lattice Gadget Toolkit: Subgaussian Sampling and More <https://eprint.iacr.org/2018/946>`__, and `Implementing Token-Based Obfuscation under (Ring) LWE <https://eprint.iacr.org/2018/1222.pdf>`__
 
-.. note:: Uses `Discrete Gaussian Sampling (dgsampling.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/dgsampling.h>`_ to implement the algorithms in the aforementioned papers
+.. note:: Uses `Discrete Gaussian Sampling (gaussian_sampling.h) <../../../../../include/cipher/ring/gaussian_sampling.h>`_ to implement the algorithms in the aforementioned papers
 
-`Trapdoor Parameters (trapdoorparameters.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/trapdoorparameters.h>`_
+`Trapdoor Parameters (trapdoor_params.h) <../../../../../include/cipher/ring/trapdoor_params.h>`_
 
 -  Parameter definitions for trapdoor-related schemes (GPV signature, IBE, ABE)
 -  Uses ``trapdoor.h``
@@ -146,7 +141,7 @@ Trapdoors
 Misc.
 ^^^^^
 
-`Discrete Gaussian Sampling (dgsampling.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/dgsampling.h>`_
+`Discrete Gaussian Sampling (gaussian_sampling.h) <../../../../../include/cipher/ring/gaussian_sampling.h>`_
 
 -  Provides detailed algorithms for G-sampling and perturbation sampling
    as described in `Implementing Conjunction Obfuscation under Entropic
@@ -159,17 +154,17 @@ Misc.
 .. note:: Sampling:
    - Refer to :ref:`our sampling documentation for more information<sampling>`
 
-`Power-of-2 fields (field2n.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/field2n.h>`_
+`Power-of-2 fields (field2n.h) <../../../../../include/cipher/ring/field2n.h>`_
 
 -  Represents and defines power-of-2 fields
 
-`Standard Values for Lattice Params (stdlatticeparms.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/stdlatticeparms.h>`_
+`Standard Values for Lattice Params (standard_params.h) <../../../../../include/cipher/ring/standard_params.h>`_
 
--  Header for the standard values for Lattice Parms, as determined by `Homomorphic Encryption Org <homomorphicencryption.org>`__
+-  Header for the standard values for Lattice Parms, as determined by `Homomorphic Encryption Org <https://homomorphicencryption.org>`__
 
 -  Given (distribution type, security level), we can get a ``max_q`` for a given ring dimension, or get a ring dimension given some ``max_q``
 
-`Hal Lattice Backend Switcher (lat-hal.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/lattice/lat-hal.h>`_
+`Lattice Backend Switcher (backend.h) <../../../../../include/cipher/ring/backend.h>`_
 
 - contains functionality to switch between lattice backends
 

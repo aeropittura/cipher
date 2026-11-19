@@ -933,7 +933,7 @@ VecType BluesteinFftFxd<VecType>::forward_transform(const VecType& element, cons
     auto RC = RA.mod_mul(RB);
     VecType rc(ntt_dim);
     NumberTheoreticTransformFxd<VecType>().inverse_transform_iterative(RC, root_table_inverse, &rc);
-    auto resize_rc = Resize(rc, cyclo_order - 1, 2 * (cyclo_order - 1));
+    auto resize_rc = resize_range(rc, cyclo_order - 1, 2 * (cyclo_order - 1));
     resize_rc.set_modulus(modulus);
     resize_rc.mod_eq(modulus);
     auto result = resize_rc.mod_mul(powers);
@@ -958,7 +958,7 @@ VecType BluesteinFftFxd<VecType>::pad_zeros(const VecType& a, const uint32_t fin
 }
 
 template <typename VecType>
-VecType BluesteinFftFxd<VecType>::Resize(const VecType& a, uint32_t lo, uint32_t hi) {
+VecType BluesteinFftFxd<VecType>::resize_range(const VecType& a, uint32_t lo, uint32_t hi) {
     VecType result(hi - lo + 1, a.get_modulus());
 
     for (uint32_t i = lo, j = 0; i <= hi; i++, j++) {

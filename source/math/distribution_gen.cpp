@@ -68,21 +68,21 @@ void PseudoRandomNumberGenerator::init_prng_engine(const std::string& lib_path) 
     } else {
 #if (defined(__linux__) || defined(__unix__)) && !defined(__APPLE__) && defined(__GNUC__) && !defined(__clang__)
         // enable this code for g++ on Linux only
-        // do not close libraryHandle, your application will crash if you do
-        void* libraryHandle = dlopen(lib_path.c_str(), RTLD_LAZY);
-        if (!libraryHandle) {
+        // do not close library_handle, your application will crash if you do
+        void* library_handle = dlopen(lib_path.c_str(), RTLD_LAZY);
+        if (!library_handle) {
             std::string err_msg{std::string("Cannot open ") + lib_path + ": "};
             const char* dlsym_error = dlerror();
             err_msg += dlsym_error;
             CIPHER_THROW(err_msg);
         }
-        gen_prng_engine = (GenPrngEngineFuncPtr)dlsym(libraryHandle, "createEngineInstance");
+        gen_prng_engine = (GenPrngEngineFuncPtr)dlsym(library_handle, "createEngineInstance");
         if (!gen_prng_engine) {
             std::string err_msg{std::string("Cannot load symbol createEngineInstance() from ") + lib_path};
             const char* dlsym_error = dlerror();
             err_msg += ": ";
             err_msg += dlsym_error;
-            dlclose(libraryHandle);
+            dlclose(library_handle);
             CIPHER_THROW(err_msg);
         }
         CIPHER_DIAGNOSTIC_ERR << __FUNCTION__ << ": using external PRNG" << std::endl;

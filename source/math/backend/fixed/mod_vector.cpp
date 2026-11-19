@@ -274,7 +274,7 @@ BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::mod_add_at_index(uint
 template <class IntegerType>
 BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::mod_add_at_index_eq(uint32_t i, const IntegerType& b) {
     if (i > length_ - 1) {
-        CIPHER_THROW("mubintvecfxd::ModAddAtIndex. Index is out of range. i = " + std::to_string(i));
+        CIPHER_THROW("mubintvecfxd::mod_add_at_index. Index is out of range. i = " + std::to_string(i));
     }
     this->data_[i].mod_add_eq(b, this->modulus_);
     return *this;
@@ -290,7 +290,7 @@ BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::mod_add(const BigVect
 template <class IntegerType>
 BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::mod_add_eq(const BigVectorFixedT& b) {
     if ((this->length_ != b.length_) || this->modulus_ != b.modulus_) {
-        CIPHER_THROW("ModAddEq called on BigVectorFixedT's with different parameters.");
+        CIPHER_THROW("mod_add_eq called on BigVectorFixedT's with different parameters.");
     }
     for (uint32_t i = 0; i < this->length_; i++) {
         this->data_[i].mod_add_fast_eq(b.data_[i], this->modulus_);
@@ -331,7 +331,7 @@ BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::mod_sub(const BigVect
 template <class IntegerType>
 BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::mod_sub_eq(const BigVectorFixedT& b) {
     if ((this->length_ != b.length_) || this->modulus_ != b.modulus_) {
-        CIPHER_THROW("ModSubEq called on BigVectorFixedT's with different parameters.");
+        CIPHER_THROW("mod_sub_eq called on BigVectorFixedT's with different parameters.");
     }
     for (uint32_t i = 0; i < this->length_; i++) {
         this->data_[i].mod_sub_fast_eq(b.data_[i], this->modulus_);
@@ -412,7 +412,7 @@ BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::mod_mul(const BigVect
 template <class IntegerType>
 BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::mod_mul_eq(const BigVectorFixedT& b) {
     if ((this->length_ != b.length_) || this->modulus_ != b.modulus_) {
-        CIPHER_THROW("ModMulEq called on BigVectorFixedT's with different parameters.");
+        CIPHER_THROW("mod_mul_eq called on BigVectorFixedT's with different parameters.");
     }
     IntegerType mu = this->modulus_.compute_mu();
     // Precompute the Barrett mu parameter
@@ -499,7 +499,7 @@ BigVectorFixedT<IntegerType> BigVectorFixedT<IntegerType>::mult_with_out_mod(con
 template <class IntegerType>
 BigVectorFixedT<IntegerType>& BigVectorFixedT<IntegerType>::mult_with_out_mod_eq(const BigVectorFixedT& b) {
     if ((this->length_ != b.length_) || this->modulus_ != b.modulus_) {
-        CIPHER_THROW("MultWithOutMod called on BigVectorFixedT's with different parameters.");
+        CIPHER_THROW("mult_with_out_mod called on BigVectorFixedT's with different parameters.");
     }
     for (uint32_t i = 0; i < this->length_; i++) {
         this->data_[i].mul_eq(b.data_[i]);

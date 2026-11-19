@@ -57,7 +57,7 @@ using ModulusM = std::pair<NativeInteger, uint64_t>;
 
 /**
  * @class PackedEncoding
- * @brief Type used for representing IntArray types.
+ * @brief Type used for representing int_array types.
  * Provides conversion functions to encode and decode plaintext data as type
  * vector<int64_t>. This class uses bit packing techniques to enable efficient
  * computing on vectors of integers. It is NOT supported for RnsPoly
@@ -189,7 +189,7 @@ class PackedEncoding : public PlaintextImpl {
      * @param modulus is the plaintext modulus
      */
     static void set_params(uint32_t m, const PlaintextModulus& modulus)
-            __attribute__((deprecated("use SetParams(uint32_t m, EncodingParams p)")));
+            __attribute__((deprecated("use set_params(uint32_t m, EncodingParams p)")));
 
     /**
      * set_length of the plaintext to the given size

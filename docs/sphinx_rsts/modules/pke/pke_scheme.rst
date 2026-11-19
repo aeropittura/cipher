@@ -1,20 +1,20 @@
 PKE Scheme documentation
 ====================================
 
-This is comprised of 3 folders:
+This is comprised of the following folders under `include/cipher/fhe <../../../../include/cipher/fhe>`_ (implementations in `source/fhe <../../../../source/fhe>`_):
 
-- `scheme <https://github.com/openfheorg/openfhe-development/tree/main/src/pke/include/scheme/>`_, which contains the specifications of the different RNS implementations
+- `bfv <../../../../include/cipher/fhe/bfv>`_, `bgv <../../../../include/cipher/fhe/bgv>`_ and `ckks <../../../../include/cipher/fhe/ckks>`_, which contain the specifications of the different RNS implementations
 
-- `schemebase <https://github.com/openfheorg/openfhe-development/tree/main/src/pke/include/schemebase/>`_, which contains the base implementations of various functionalities
+- `base <../../../../include/cipher/fhe/base>`_, which contains the base implementations of various functionalities
 
-- `schemerns <https://github.com/openfheorg/openfhe-development/tree/main/src/pke/include/schemerns/>`_, which contains the base RNS scheme implementation.
+- `rns <../../../../include/cipher/fhe/rns>`_, which contains the base RNS scheme implementation.
 
 At a high level, this can be thought of as:
 
 .. mermaid::
 
   graph BT
-      A[Scheme Base] --> |Inherited by|B[Scheme RNS];
-      B[Scheme RNS] --> |Inherited by|D[Scheme: CKKS-RNS];
-      B[Scheme RNS] --> |Inherited by|E[Scheme: BGV-RNS];
-      B[Scheme RNS] --> |Inherited by|F[Scheme: BFV-RNS];
+      A[SchemeBase] --> |Inherited by|B[RnsScheme];
+      B[RnsScheme] --> |Inherited by|D[CkksRnsScheme];
+      B[RnsScheme] --> |Inherited by|E[BgvRnsScheme];
+      B[RnsScheme] --> |Inherited by|F[BfvRnsScheme];

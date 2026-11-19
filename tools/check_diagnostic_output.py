@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Reject direct stdout/stderr writes in OpenFHE library code.
+"""Reject direct stdout/stderr writes in Cipher library code.
 
 Library diagnostics must go through the pluggable channel in
-cipher/util/diagnostic_output.h (OPENFHE_DIAGNOSTIC_ERR / OPENFHE_DIAGNOSTIC_OUT), so
+cipher/util/diagnostic_output.h (CIPHER_DIAGNOSTIC_ERR / CIPHER_DIAGNOSTIC_OUT), so
 that an embedder can redirect them and so that building with
 -DCIPHER_WITH_DEFAULT_DIAGNOSTIC_SINK=OFF leaves the library with no reference to
 std::cerr / std::cout at all. That matters for embedders which may not ship
@@ -44,9 +44,9 @@ FORBIDDEN = re.compile(
 )
 
 SUGGESTION = {
-    "std::cout": "OPENFHE_DIAGNOSTIC_OUT",
-    "std::cerr": "OPENFHE_DIAGNOSTIC_ERR",
-    "std::clog": "OPENFHE_DIAGNOSTIC_ERR",
+    "std::cout": "CIPHER_DIAGNOSTIC_OUT",
+    "std::cerr": "CIPHER_DIAGNOSTIC_ERR",
+    "std::clog": "CIPHER_DIAGNOSTIC_ERR",
 }
 
 
@@ -121,7 +121,7 @@ def main(argv):
     if not findings:
         return 0
 
-    print("Direct stdout/stderr writes are not allowed in OpenFHE library code.\n")
+    print("Direct stdout/stderr writes are not allowed in Cipher library code.\n")
     for rel, lineno, token, src in findings:
         hint = SUGGESTION.get(token)
         print(f"  {rel}:{lineno}: {token}")

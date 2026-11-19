@@ -7,12 +7,12 @@ Understanding the various Modules
 .. mermaid::
 
   graph BT
-      A[CORE<br/>- math implementation<br/>- lattice implementation<br/>- serialization] --> B[PKE<br/> -generalized FHE];
-      A --> C[BINFHE<br/>- boolean FHE];
+      A[Cipher::core<br/>- math implementation<br/>- lattice implementation<br/>- serialization] --> B[Cipher::fhe<br/> -generalized FHE];
+      A --> C[Cipher::boolean<br/>- boolean FHE];
       B --> D[Application<br/>- encrypted data analysis<br/>- privacy-compliant data sharing];
       C --> D;
 
-Boolean FHE
+Boolean FHE (cipher/boolean)
 ----------------------------
 .. toctree::
    :maxdepth: 2
@@ -20,8 +20,8 @@ Boolean FHE
    binfhe.rst
 
 
-Core
-----------------------------
+Core (cipher/math, cipher/ring, cipher/util)
+--------------------------------------------
 .. toctree::
    :maxdepth: 2
 
@@ -32,8 +32,8 @@ Core
    core/utils/core_utils.rst
 
 
-Public-Key Encryption (PKE)
-----------------------------
+Public-Key Encryption and FHE (cipher/fhe)
+------------------------------------------
 .. toctree::
    :maxdepth: 2
 

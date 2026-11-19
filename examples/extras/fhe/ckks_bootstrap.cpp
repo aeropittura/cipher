@@ -118,27 +118,6 @@ void bootstrap_example(SecretKeyDist secret_key_dist, uint32_t n, uint32_t slots
 
     CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
 
-#if 0
-    CryptoContext<RnsPoly> cc =
-        ContextFactory<RnsPoly>::genCryptoContextCKKS(
-               depth,
-               dcrt_bits,
-               slots,
-               HEStd_NotSet,
-               n, /*ring_dimension_value*/
-               rescale_tech,
-               HYBRID,
-               3, /*num_large_digits*/
-               2, /*max_relin_sk_deg*/
-    #if CIPHER_NATIVE_INT == 128
-               89, /*first_mod*/
-    #else
-               60, /*first_mod*/
-    #endif
-               0,
-               mode);
-#endif
-
     // Turn on features
     cc->enable(PKE);
     cc->enable(KEYSWITCH);
@@ -176,14 +155,14 @@ void bootstrap_example(SecretKeyDist secret_key_dist, uint32_t n, uint32_t slots
     cc->eval_bootstrap_setup(level_budget5, dim1, slotsvec[4]);
     cc->eval_bootstrap_setup(level_budget6, dim1, slotsvec[5]);
 
-    // std::cout << "gEnc = " << cc->GetGiantStepEnc() << std::endl;
-    // std::cout << "# rot Enc = " << cc->GetNumRotationsEnc() << std::endl;
-    // std::cout << "gEncRem = " << cc->GetGiantStepRemEnc() << std::endl;
-    // std::cout << "W rot EncRem = " << cc->GetNumRotationsRemEnc() << std::endl;
-    // std::cout << "gDec = " << cc->GetGiantStepDec() << std::endl;
-    // std::cout << "# rot Dec = " << cc->GetNumRotationsDec() << std::endl;
-    // std::cout << "gDecRem = " << cc->GetGiantStepRemDec() << std::endl;
-    // std::cout << "W rot DecRem = " << cc->GetNumRotationsRemDec() << std::endl;
+    // std::cout << "gEnc = " << cc->get_giant_step_enc() << std::endl;
+    // std::cout << "# rot Enc = " << cc->get_num_rotations_enc() << std::endl;
+    // std::cout << "gEncRem = " << cc->get_giant_step_rem_enc() << std::endl;
+    // std::cout << "W rot EncRem = " << cc->get_num_rotations_rem_enc() << std::endl;
+    // std::cout << "gDec = " << cc->get_giant_step_dec() << std::endl;
+    // std::cout << "# rot Dec = " << cc->get_num_rotations_dec() << std::endl;
+    // std::cout << "gDecRem = " << cc->get_giant_step_rem_dec() << std::endl;
+    // std::cout << "W rot DecRem = " << cc->get_num_rotations_rem_dec() << std::endl;
 
     time_precomp = TOC(t);
 
@@ -204,7 +183,7 @@ void bootstrap_example(SecretKeyDist secret_key_dist, uint32_t n, uint32_t slots
 
         size_t encoded_length = a.size();
 
-        auto input(Fill(a, slotsvec[i]));
+        auto input(fill_slots(a, slotsvec[i]));
         Plaintext plaintext = cc->make_ckks_packed_plaintext(input, 1, depth - 1, nullptr, slotsvec[i]);
         auto ciphertext = cc->encrypt(key_pair.public_key, plaintext);
 
@@ -226,11 +205,11 @@ void bootstrap_example(SecretKeyDist secret_key_dist, uint32_t n, uint32_t slots
                   << std::endl;
 
         Plaintext result;
-        std::cerr << "ciphertextAfter level        : " << ciphertext_after->get_level() << std::endl;
-        std::cerr << "ciphertextAfter noiseScaleDeg: " << ciphertext_after->get_noise_scale_deg() << std::endl;
-        std::cerr << "ciphertextAfter    sf        : " << ciphertext_after->get_scaling_factor() << std::endl;
+        std::cerr << "ciphertext_after level        : " << ciphertext_after->get_level() << std::endl;
+        std::cerr << "ciphertext_after noiseScaleDeg: " << ciphertext_after->get_noise_scale_deg() << std::endl;
+        std::cerr << "ciphertext_after    sf        : " << ciphertext_after->get_scaling_factor() << std::endl;
         cc->decrypt(key_pair.secret_key, ciphertext_after, &result);
-        std::cerr << "encodedLength: " << encoded_length << std::endl;
+        std::cerr << "encoded_length: " << encoded_length << std::endl;
 
         result->set_length(encoded_length);
         plaintext->set_length(encoded_length);
@@ -287,27 +266,6 @@ void bootstrap_example_clean(SecretKeyDist secret_key_dist, uint32_t n, uint32_t
 
     CryptoContext<RnsPoly> cc = make_crypto_context(parameters);
 
-#if 0
-    CryptoContext<RnsPoly> cc =
-        ContextFactory<RnsPoly>::genCryptoContextCKKS(
-               depth,
-               dcrt_bits,
-               slots,
-               HEStd_NotSet,
-               n, /*ring_dimension_value*/
-               rescale_tech,
-               HYBRID,
-               3, /*num_large_digits*/
-               2, /*max_relin_sk_deg*/
-    #if CIPHER_NATIVE_INT == 128
-               89, /*first_mod*/
-    #else
-               60, /*first_mod*/
-    #endif
-               0,
-               mode);
-#endif
-
     // Turn on features
     cc->enable(PKE);
     cc->enable(KEYSWITCH);
@@ -331,7 +289,7 @@ void bootstrap_example_clean(SecretKeyDist secret_key_dist, uint32_t n, uint32_t
 
     size_t encoded_length = a.size();
 
-    auto input(Fill(a, slots));
+    auto input(fill_slots(a, slots));
 
     Plaintext plaintext1 = cc->make_ckks_packed_plaintext(input, 1, depth - 1, nullptr, slots);
 

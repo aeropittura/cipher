@@ -11,7 +11,7 @@ General Style Guidelines
 -  Configure your editor to use 4 spaces per indentation level, and
    **never to use tabs**.
 -  Avoid introducing trailing whitespace
--  Limit line lengths to 80 characters when possible
+-  Lines are limited to 120 characters (``ColumnLimit`` in ``.clang-format``)
 -  Give meaningful variable names to all variables.
 -  Every reused discrete block of code has its own method
 -  Every discrete line of code, or discrete group of code lines for each task has its own comment.
@@ -41,9 +41,9 @@ We explicitly note:
 -  Header files should include an ‘include guard’ named after the file's path
    from the repository root, upper-cased, with every non-alphanumeric character
    replaced by an underscore and a trailing underscore. For
-   ``src/pke/include/cryptocontext.h`` that is
-   ``SRC_PKE_INCLUDE_CRYPTOCONTEXT_H_``. The closing line reads
-   ``#endif  // SRC_PKE_INCLUDE_CRYPTOCONTEXT_H_``, and the guard wraps the
+   ``include/cipher/fhe/context.h`` that is
+   ``CIPHER_FHE_CONTEXT_H_`` (the path below ``include/``). The closing line reads
+   ``#endif  // CIPHER_FHE_CONTEXT_H_``, and the guard wraps the
    whole file, including any feature check such as ``#ifdef CIPHER_WITH_NTL``.
 
 -  Includes are grouped in this order, separated by blank lines: the header this
@@ -59,43 +59,39 @@ Design Principles
 
 - ``cout`` should never be used for exception handling and should never be used in committed code in the core Cipher library.
 
-- ``std::logic_error`` is the standard exception for all exceptions not caught by the Cipher exception handling subsystem (which has not yet been universally implemented in the library at this time).
+- Errors are reported by throwing ``cipher::CipherException`` with the ``CIPHER_THROW`` macro from ``cipher/util/exception.h``. Diagnostic output goes through ``cipher/util/diagnostic_output.h`` (``CIPHER_DIAGNOSTIC_OUT``/``CIPHER_DIAGNOSTIC_ERR``), never directly to ``std::cout``/``std::cerr``; a pre-commit hook enforces this.
 
-- Code may make use of most C++11 features. The minimum required compiler versions are listed in the main README.md file.
+- Code may use C++17 features. The minimum required compiler versions are listed in the main README.md file.
 
 - Avoid manual memory management (i.e. ``new`` and ``delete``),
   preferring to use standard library containers, as well as
   ``std::unique_ptr`` and ``std::shared_ptr`` when dynamic allocation
   is required.
 
-- Portions of Boost which are "header only" may be used. If possible, include Boost
-  header files only within ``.cpp`` files rather than other header files to
-  avoid unnecessary increases in compilation time. Boost should not be added
-  to the public interface unless its existence and use is optional. This keeps
-  the number of dependencies low for users of Cipher. In these cases,
-  ``OpenFHE_API_NO_BOOST`` should be used to conditionally remove Boost dependencies
+- Do not add new external dependencies to the public interface. Bundled
+  third-party code lives in ``extern/`` as git submodules.
 
 Naming Conventions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
--  Protected and private member variable names are generally prefixed
-   with ``m_``. For most classes, member variables should not be public.
-   Data member should generally use ``m_camelCase``.
+-  Class, struct, type alias and enum type names use ``PascalCase``
+   (``RnsPoly``, ``CkksRnsScheme``, ``BooleanContext``).
 
--  Variable names use ``camelCase``
+-  Functions, methods and variables use ``snake_case``
+   (``eval_mult``, ``get_ring_dimension``, ``key_gen``).
 
--  Class, struct, typedef, and enum names use ``CamelCase``
+-  Data members end with an underscore (``params_``). For most classes,
+   member variables should not be public.
 
--  Class Methods use ``CamelCase``
+-  Where the case of a single letter carries mathematical meaning it is kept
+   (``get_N()`` is the ring dimension, ``get_n()`` the LWE dimension).
 
--  Global variable names: ``g_camelCase``
+-  Constants, enumerators and macros use ``UPPER_CASE_WITH_UNDERSCORES``;
+   macros and build options carry the ``CIPHER_`` prefix (``CIPHER_THROW``,
+   ``CIPHER_WITH_OPENMP``).
 
--  Class accessor names: ``GetProperty()`` and ``SetProperty()``
-
--  Constant names and macros use ``UPPER_CASE_WITH_UNDERSCORES``
-   (example: ``BIT_LENGTH``)
-
--  Do not indent the contents of namespaces
+-  Everything lives in the ``cipher`` namespace. Do not indent the contents of
+   namespaces.
 
 Additional Resources
 ^^^^^^^^^^^^^^^^^^^^^
@@ -113,9 +109,5 @@ Additional Resources
 Python
 ------
 
--  Style generally follows `PEP8 <https://www.python.org/dev/peps/pep-0008/>`_
--  Code in ``.py`` and ``.pyx`` files needs to be written to work with
-   Python 3
--  The minimum Python version that Cipher supports is Python 3.4, so
-   code should only use features added in Python 3.4 or earlier
--  Code in the Python examples should be written for Python 3
+-  Maintenance scripts (``tools/``, ``docs/conf.py``) are written for Python 3
+   and generally follow `PEP8 <https://www.python.org/dev/peps/pep-0008/>`_.

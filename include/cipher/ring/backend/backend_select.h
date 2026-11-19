@@ -39,12 +39,12 @@
 #define ILPARAMS_IMPLEMENTATION     "cipher/ring/backend/standard/poly_params.h"
 #define ILDCRTPARAMS_IMPLEMENTATION "cipher/ring/backend/standard/rns_params.h"
 #define POLY_IMPLEMENTATION         "cipher/ring/backend/standard/poly_impl.h"
-#define DCRTPOLY_IMPLEMENTATION     "cipher/ring/backend/standard/rns_poly_impl.h"
+#define RNS_POLY_IMPLEMENTATION     "cipher/ring/backend/standard/rns_poly_impl.h"
 
 #define MAKE_ILPARAMS_TYPE(T)     template class PolyParamsImpl<T>;
 #define MAKE_ILDCRTPARAMS_TYPE(T) template class RnsParams<T>;
 #define MAKE_POLY_TYPE(T)         template class PolyImpl<T>;
-#define MAKE_DCRTPOLY_TYPE(T)     template class RnsPolyImpl<T>;
+#define MAKE_RNS_POLY_TYPE(T)     template class RnsPolyImpl<T>;
 
 #include "cipher/ring/backend/standard/rns_poly.h"
 #include "cipher/ring/backend/standard/rns_params.h"

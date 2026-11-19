@@ -108,7 +108,7 @@ class DiscreteGaussianGeneratorImpl {
     /**
      * @brief Initializes the generator.
      */
-    void Initialize();
+    void initialize();
 
     /**
      * @brief  Returns the standard deviation of the generator.

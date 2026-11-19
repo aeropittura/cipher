@@ -375,7 +375,7 @@ RnsPolyImpl<VecType> RnsPolyImpl<VecType>::multiplicative_inverse() const {
         }
     }
     if (fail)
-        CIPHER_THROW("MultiplicativeInverse: a tower has a non-invertible element");
+        CIPHER_THROW("multiplicative_inverse: a tower has a non-invertible element");
     return tmp;
 }
 
@@ -673,7 +673,7 @@ void RnsPolyImpl<VecType>::set_values_mod_switch(const RnsPolyImpl& element, con
     if (N != element.get_ring_dimension())
         CIPHER_THROW("Ring dimension mismatch.");
     if (element.vectors_.size() != 1 || vectors_.size() != 1)
-        CIPHER_THROW("Only implemented for DCRTPoly with one tower.");
+        CIPHER_THROW("Only implemented for RnsPoly with one tower.");
 
     auto input{element.vectors_[0]};
     input.set_format(Format::COEFFICIENT);
@@ -711,7 +711,7 @@ void RnsPolyImpl<VecType>::drop_last_element() {
     if (vectors_.size() == 0)
         CIPHER_THROW("Input has no elements to drop.");
     if (vectors_.size() == 1)
-        CIPHER_THROW("Removing last element of DCRTPoly renders it invalid.");
+        CIPHER_THROW("Removing last element of RnsPoly renders it invalid.");
     vectors_.resize(vectors_.size() - 1);
     RnsPolyImpl::Params* new_p = new RnsPolyImpl::Params(*params_);
     new_p->pop_last_param();
@@ -1552,7 +1552,7 @@ RnsPolyImpl<VecType> RnsPolyImpl<VecType>::scale_and_round(
         const std::vector<double>& t_os_hat_inv_mods_divs_frac,
         const std::vector<DoubleNativeInt>& modo_barret_mu) const {
     if constexpr (CIPHER_NATIVE_INT == 32)
-        CIPHER_THROW("Use of ScaleAndRound with NATIVEINT == 32 may lead to overflow");
+        CIPHER_THROW("Use of scale_and_round with NATIVEINT == 32 may lead to overflow");
 
     RnsPolyImpl<VecType> ans(params_output, format_, true);
     uint32_t ring_dim = params_->get_ring_dimension();
@@ -1728,8 +1728,8 @@ void RnsPolyImpl<VecType>::scale_and_round_p_over_q(const std::shared_ptr<Params
     vectors_.resize(size_q);
 }
 
-// Input: dcrtpoly in basis Q
-// Output: dcrtpoly in base QBsk = {B U msk}
+// Input: RNS polynomial in basis Q
+// Output: RNS polynomial in base QBsk = {B U msk}
 template <typename VecType>
 void RnsPolyImpl<VecType>::fast_base_convq_to_bsk_montgomery(
         const std::shared_ptr<Params>& params_q_bsk, const std::vector<NativeInteger>& moduli_q,

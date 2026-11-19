@@ -79,114 +79,116 @@ namespace NTL {
 
 // Forward declare this class for aliases
 template <typename IntegerType>
-class myVecP;
+class NtlModVector;
 
 // Create default type for the CIPHER_MATH_BACKEND 6 Vector
-using BigVector = myVecP<BigInteger>;
+using BigVector = NtlModVector<BigInteger>;
 
 /**
  * @brief The class for representing vectors of ubint with associated modulo
  * math
  */
 
-template <typename myT>
-class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<myT>, myT>, public cipher::Serializable {
+template <typename ElemT>
+class NtlModVector : public NTL::Vec<ElemT>,
+                     public cipher::BigVectorInterface<NtlModVector<ElemT>, ElemT>,
+                     public cipher::Serializable {
   public:
     // CONSTRUCTORS
 
-    myVecP() : Vec<myT>() {
+    NtlModVector() : Vec<ElemT>() {
         modulus_state_ = GARBAGE;
     }
 
-    static inline myVecP single(const myT& val, const myT& modulus) {
-        myVecP vec(1);
+    static inline NtlModVector single(const ElemT& val, const ElemT& modulus) {
+        NtlModVector vec(1);
         vec.set_modulus(modulus);
         vec[0] = val;
         return vec;
     }
 
-    explicit myVecP(const size_t length) : Vec<myT>(INIT_SIZE, length) {
+    explicit NtlModVector(const size_t length) : Vec<ElemT>(INIT_SIZE, length) {
         modulus_state_ = GARBAGE;
     }
 
-    myVecP(INIT_SIZE_TYPE, const long length) : Vec<myT>(INIT_SIZE, length) {  // NOLINT
+    NtlModVector(INIT_SIZE_TYPE, const long length) : Vec<ElemT>(INIT_SIZE, length) {  // NOLINT
         modulus_state_ = GARBAGE;
     }
 
-    explicit myVecP(const myVecP<myT>& a);
+    explicit NtlModVector(const NtlModVector<ElemT>& a);
 
-    myVecP(myVecP<myT>&& a);
+    NtlModVector(NtlModVector<ElemT>&& a);
 
-    myVecP(const long n, const myT& q);  // NOLINT
-    myVecP(uint32_t n, const myT& q, const myT& v) : Vec<myT>(INIT_SIZE, n) {
+    NtlModVector(const long n, const ElemT& q);  // NOLINT
+    NtlModVector(uint32_t n, const ElemT& q, const ElemT& v) : Vec<ElemT>(INIT_SIZE, n) {
         this->set_modulus(q);
         for (uint32_t i{0}; i < n; ++i)
             (*this)[i] = v;
     }
 
-    myVecP(const long n, const myT& q, std::initializer_list<std::string> rhs);  // NOLINT
-    myVecP(const long n, const myT& q, std::initializer_list<uint64_t> rhs);     // NOLINT
+    NtlModVector(const long n, const ElemT& q, std::initializer_list<std::string> rhs);  // NOLINT
+    NtlModVector(const long n, const ElemT& q, std::initializer_list<uint64_t> rhs);     // NOLINT
 
-    myVecP(const myVecP<myT>& a, const myT& q);
+    NtlModVector(const NtlModVector<ElemT>& a, const ElemT& q);
 
-    myVecP(size_t n, const std::string& sq);
+    NtlModVector(size_t n, const std::string& sq);
 
-    myVecP(const myVecP<myT>& a, const std::string& sq);
+    NtlModVector(const NtlModVector<ElemT>& a, const std::string& sq);
 
-    myVecP(size_t n, uint64_t q);
+    NtlModVector(size_t n, uint64_t q);
 
-    myVecP(const myVecP<myT>& a, const uint64_t q);
+    NtlModVector(const NtlModVector<ElemT>& a, const uint64_t q);
 
-    explicit myVecP(std::vector<std::string>& s);           // without modulus
-    myVecP(std::vector<std::string>& s, const myT& q);      // with modulus
-    myVecP(std::vector<std::string>& s, const char* sq);    // with modulus
-    myVecP(std::vector<std::string>& s, const uint64_t q);  // with modulusu
+    explicit NtlModVector(std::vector<std::string>& s);           // without modulus
+    NtlModVector(std::vector<std::string>& s, const ElemT& q);    // with modulus
+    NtlModVector(std::vector<std::string>& s, const char* sq);    // with modulus
+    NtlModVector(std::vector<std::string>& s, const uint64_t q);  // with modulusu
 
-    void clear(myVecP& x);  // why isn't this inhereted?
+    void clear(NtlModVector& x);  // why isn't this inhereted?
 
-    ~myVecP() {}
+    ~NtlModVector() {}
 
     // ASSIGNMENT OPERATORS
 
-    myVecP& operator=(const myVecP& a);
-    myVecP& operator=(myVecP&& a);
+    NtlModVector& operator=(const NtlModVector& a);
+    NtlModVector& operator=(NtlModVector&& a);
 
-    myVecP& operator=(std::initializer_list<uint64_t> rhs);
-    myVecP& operator=(std::initializer_list<int32_t> rhs);
-    myVecP& operator=(std::initializer_list<std::string> rhs);
-    myVecP& operator=(uint64_t rhs);
+    NtlModVector& operator=(std::initializer_list<uint64_t> rhs);
+    NtlModVector& operator=(std::initializer_list<int32_t> rhs);
+    NtlModVector& operator=(std::initializer_list<std::string> rhs);
+    NtlModVector& operator=(uint64_t rhs);
 
     // ACCESSORS
 
     // NOTE the underlying Vec does not have a no-bounds-checking operator[]
-    myT& at(size_t i) {
-        return this->NTL::Vec<myT>::at(i);
+    ElemT& at(size_t i) {
+        return this->NTL::Vec<ElemT>::at(i);
     }
 
-    const myT& at(size_t i) const {
-        return this->NTL::Vec<myT>::at(i);
+    const ElemT& at(size_t i) const {
+        return this->NTL::Vec<ElemT>::at(i);
     }
 
-    myT& operator[](size_t idx) {
+    ElemT& operator[](size_t idx) {
         return this->at(idx);
     }
 
-    const myT& operator[](size_t idx) const {
+    const ElemT& operator[](size_t idx) const {
         return this->at(idx);
     }
 
-    inline void push_back(const myT& a) {
+    inline void push_back(const ElemT& a) {
         this->append(a);
     }
 
-    void switch_modulus(const myT& new_modulus);
-    void lazy_switch_modulus(const myT& new_modulus);
+    void switch_modulus(const ElemT& new_modulus);
+    void lazy_switch_modulus(const ElemT& new_modulus);
 
-    myVecP& mult_acc_eq_no_check(const myVecP& a, const myVecP& b) {
-        CIPHER_THROW("MultAccEqNoCheck() not implemented for mubintvecntl");
+    NtlModVector& mult_acc_eq_no_check(const NtlModVector& a, const NtlModVector& b) {
+        CIPHER_THROW("mult_acc_eq_no_check() not implemented for mubintvecntl");
     }
-    myT& mult_acc_eq_no_check(const myVecP& v, const myT& i) {
-        CIPHER_THROW("MultAccEqNoCheck() not implemented for mubintvecntl");
+    ElemT& mult_acc_eq_no_check(const NtlModVector& v, const ElemT& i) {
+        CIPHER_THROW("mult_acc_eq_no_check() not implemented for mubintvecntl");
     }
 
     // public modulus accessors
@@ -194,24 +196,24 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
         return (this->modulus_state_ == INITIALIZED);
     }
 
-    // return true if both myVecP have same modulus
-    inline bool SameModulus(const myVecP& a) const {
+    // return true if both NtlModVector have same modulus
+    inline bool same_modulus(const NtlModVector& a) const {
         return ((this->modulus_state_ == a.modulus_state_) && (this->modulus_ == a.modulus_));
     }
 
     // sets modulus and the NTL init function uint64_t argument
     inline void set_modulus(uint64_t value) {
         if (value == 0) {
-            CIPHER_THROW("SetModulus(uint64_t) cannot be zero");
+            CIPHER_THROW("set_modulus(uint64_t) cannot be zero");
         }
-        this->modulus_ = myT(value);
+        this->modulus_ = ElemT(value);
         this->modulus_state_ = INITIALIZED;
     }
 
-    // sets modulus and the NTL init function myT argument
-    void set_modulus(const myT& value) {
-        if (value == myT(0)) {
-            CIPHER_THROW("SetModulus(myT) cannot be zero");
+    // sets modulus and the NTL init function ElemT argument
+    void set_modulus(const ElemT& value) {
+        if (value == ElemT(0)) {
+            CIPHER_THROW("set_modulus(ElemT) cannot be zero");
         }
         this->modulus_ = value;
         this->modulus_state_ = INITIALIZED;
@@ -219,23 +221,23 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
 
     // sets modulus and the NTL init function string argument
     inline void set_modulus(const std::string& value) {
-        this->modulus_ = myT(value);
-        if (this->modulus_ == myT(0)) {
-            CIPHER_THROW("SetModulus(string) cannot be zero");
+        this->modulus_ = ElemT(value);
+        if (this->modulus_ == ElemT(0)) {
+            CIPHER_THROW("set_modulus(string) cannot be zero");
         }
         this->modulus_state_ = INITIALIZED;
     }
 
     // sets modulus and the NTL init function uses same modulus
-    inline void set_modulus(const myVecP& value) {
+    inline void set_modulus(const NtlModVector& value) {
         this->modulus_ = value.get_modulus();
-        if (this->modulus_ == myT(0)) {
-            CIPHER_THROW("SetModulus(myVecP) cannot be zero");
+        if (this->modulus_ == ElemT(0)) {
+            CIPHER_THROW("set_modulus(NtlModVector) cannot be zero");
         }
         this->modulus_state_ = INITIALIZED;
     }
 
-    const myT& get_modulus() const {
+    const ElemT& get_modulus() const {
         if (this->is_modulus_set()) {
             return (this->modulus_);
         } else {
@@ -243,7 +245,7 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
         }
     }
 
-    inline int CopyModulus(const myVecP& rhs) {
+    inline int copy_modulus(const NtlModVector& rhs) {
         this->modulus_ = rhs.modulus_;
         this->modulus_state_ = rhs.modulus_state_;
         if (is_modulus_set()) {
@@ -276,7 +278,7 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @param b is the modulus to perform on the current vector entries.
      * @return is the result of the modulus operation on current vector.
      */
-    myVecP mod(const myT& b) const;
+    NtlModVector mod(const ElemT& b) const;
 
     /**
      * Vector modulus operator. In-place variant.
@@ -284,7 +286,7 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @param b is the modulus to perform on the current vector entries.
      * @return is the result of the modulus operation on current vector.
      */
-    myVecP& mod_eq(const myT& b);
+    NtlModVector& mod_eq(const ElemT& b);
 
     /**
      * Scalar-to-vector modulus addition operation.
@@ -292,9 +294,9 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus addition operation.
      */
-    myVecP mod_add(const myT& b) const {
-        ModulusCheck("Warning: myVecP::ModAdd");
-        myVecP ans(*this);
+    NtlModVector mod_add(const ElemT& b) const {
+        modulus_check("Warning: NtlModVector::ModAdd");
+        NtlModVector ans(*this);
         ans.mod_add_eq(b);
         return ans;
     }
@@ -305,8 +307,8 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus addition operation.
      */
-    myVecP& mod_add_eq(const myT& b) {
-        ModulusCheck("Warning: myVecP::ModAdd");
+    NtlModVector& mod_add_eq(const ElemT& b) {
+        modulus_check("Warning: NtlModVector::ModAdd");
         for (uint32_t i = 0; i < this->get_length(); i++) {
             this->operator[](i).mod_add_eq(b, this->modulus_);
         }
@@ -320,7 +322,7 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @param b is the scalar to add.
      * @return is the result of the modulus addition operation.
      */
-    myVecP mod_add_at_index(size_t i, const myT& b) const;
+    NtlModVector mod_add_at_index(size_t i, const ElemT& b) const;
 
     /**
      * Scalar modulus addition at a particular index. In-place variant.
@@ -329,7 +331,7 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @param b is the scalar to add.
      * @return is the result of the modulus addition operation.
      */
-    myVecP& mod_add_at_index_eq(size_t i, const myT& b);
+    NtlModVector& mod_add_at_index_eq(size_t i, const ElemT& b);
 
     /**
      * Vector component wise modulus addition.
@@ -337,9 +339,9 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @param b is the vector to perform operation with.
      * @return is the result of the component wise modulus addition operation.
      */
-    myVecP mod_add(const myVecP& b) const {
-        ArgCheckVector(b, "myVecP ModAdd()");
-        myVecP ans(*this);
+    NtlModVector mod_add(const NtlModVector& b) const {
+        arg_check_vector(b, "NtlModVector mod_add()");
+        NtlModVector ans(*this);
         ans.mod_add_eq(b);
         return ans;
     }
@@ -350,15 +352,15 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @param b is the vector to perform operation with.
      * @return is the result of the component wise modulus addition operation.
      */
-    myVecP& mod_add_eq(const myVecP& b) {
-        ArgCheckVector(b, "myVecP ModAddEq()");
+    NtlModVector& mod_add_eq(const NtlModVector& b) {
+        arg_check_vector(b, "NtlModVector mod_add_eq()");
         for (uint32_t i = 0; i < this->get_length(); i++) {
             this->operator[](i).mod_add_eq(b[i], this->modulus_);
         }
         return *this;
     }
 
-    myVecP& mod_add_no_check_eq(const myVecP& b) {
+    NtlModVector& mod_add_no_check_eq(const NtlModVector& b) {
         for (uint32_t i = 0; i < this->get_length(); i++)
             this->operator[](i).mod_add_eq(b[i], this->modulus_);
         return *this;
@@ -366,7 +368,7 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
 
     /// procedural version for the vector component wise modulus addition
     /// operation.
-    void modadd_p(myVecP& x, const myVecP& a, const myVecP& b) const;
+    void modadd_p(NtlModVector& x, const NtlModVector& a, const NtlModVector& b) const;
 
     /**
      * Scalar-from-vector modulus subtraction operation.
@@ -374,9 +376,9 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus subtraction operation.
      */
-    myVecP mod_sub(const myT& b) const {
-        ModulusCheck("Warning: myVecP::ModSub");
-        myVecP ans(*this);
+    NtlModVector mod_sub(const ElemT& b) const {
+        modulus_check("Warning: NtlModVector::ModSub");
+        NtlModVector ans(*this);
         ans.mod_sub_eq(b);
         return ans;
     }
@@ -387,8 +389,8 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus subtraction operation.
      */
-    myVecP& mod_sub_eq(const myT& b) {
-        ModulusCheck("Warning: myVecP::ModSubEq");
+    NtlModVector& mod_sub_eq(const ElemT& b) {
+        modulus_check("Warning: NtlModVector::mod_sub_eq");
         for (uint32_t i = 0; i < this->get_length(); i++) {
             this->operator[](i).mod_sub_eq(b, this->modulus_);
         }
@@ -401,9 +403,9 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @param b is the vector to perform operation with.
      * @return is the result of the component wise modulus subtraction operation.
      */
-    myVecP mod_sub(const myVecP& b) const {
-        ArgCheckVector(b, "myVecP ModSub()");
-        myVecP ans(*this);
+    NtlModVector mod_sub(const NtlModVector& b) const {
+        arg_check_vector(b, "NtlModVector mod_sub()");
+        NtlModVector ans(*this);
         ans.mod_sub_eq(b);
         return ans;
     }
@@ -414,8 +416,8 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @param b is the vector to perform operation with.
      * @return is the result of the component wise modulus subtraction operation.
      */
-    myVecP& mod_sub_eq(const myVecP& b) {
-        ArgCheckVector(b, "myVecP ModSubEq()");
+    NtlModVector& mod_sub_eq(const NtlModVector& b) {
+        arg_check_vector(b, "NtlModVector mod_sub_eq()");
         for (uint32_t i = 0; i < this->get_length(); i++) {
             this->operator[](i).mod_sub_eq(b[i], this->modulus_);
         }
@@ -424,7 +426,7 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
 
     /// procedural version for the vector component wise modulus subtraction
     /// operation.
-    void modsub_p(myVecP& x, const myVecP& a, const myVecP& b) const;
+    void modsub_p(NtlModVector& x, const NtlModVector& a, const NtlModVector& b) const;
 
     /**
      * Scalar-to-vector modulus multiplication operation.
@@ -432,9 +434,9 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus multiplication operation.
      */
-    myVecP mod_mul(const myT& b) const {
-        ModulusCheck("Warning: myVecP::ModMul");
-        myVecP ans(*this);
+    NtlModVector mod_mul(const ElemT& b) const {
+        modulus_check("Warning: NtlModVector::ModMul");
+        NtlModVector ans(*this);
         ans.mod_mul_eq(b);
         return ans;
     }
@@ -445,8 +447,8 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus multiplication operation.
      */
-    myVecP& mod_mul_eq(const myT& b) {
-        ModulusCheck("Warning: myVecP::ModMul");
+    NtlModVector& mod_mul_eq(const ElemT& b) {
+        modulus_check("Warning: NtlModVector::ModMul");
         for (uint32_t i = 0; i < this->get_length(); i++) {
             this->operator[](i).mod_mul_eq(b, this->modulus_);
         }
@@ -460,9 +462,9 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @return is the result of the component wise modulus multiplication
      * operation.
      */
-    myVecP mod_mul(const myVecP& b) const {
-        ArgCheckVector(b, "myVecP Mul()");
-        myVecP ans(*this);
+    NtlModVector mod_mul(const NtlModVector& b) const {
+        arg_check_vector(b, "NtlModVector mul()");
+        NtlModVector ans(*this);
         ans.mod_mul_eq(b);
         return ans;
     }
@@ -474,15 +476,15 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @return is the result of the component wise modulus multiplication
      * operation.
      */
-    myVecP& mod_mul_eq(const myVecP& b) {
-        ArgCheckVector(b, "myVecP Mul()");
+    NtlModVector& mod_mul_eq(const NtlModVector& b) {
+        arg_check_vector(b, "NtlModVector mul()");
         for (uint32_t i = 0; i < this->get_length(); i++) {
             this->operator[](i).mod_mul_eq(b[i], this->modulus_);
         }
         return (*this);
     }
 
-    myVecP& mod_mul_no_check_eq(const myVecP& b) {
+    NtlModVector& mod_mul_no_check_eq(const NtlModVector& b) {
         for (uint32_t i = 0; i < this->get_length(); i++)
             this->operator[](i).mod_mul_eq(b[i], this->modulus_);
         return (*this);
@@ -490,7 +492,7 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
 
     /// procedural version for the vector component wise modulus multiplication
     /// operation.
-    void modmul_p(myVecP& x, const myVecP& a, const myVecP& b) const;
+    void modmul_p(NtlModVector& x, const NtlModVector& a, const NtlModVector& b) const;
 
     /**
      * Scalar modulus exponentiation operation.
@@ -498,7 +500,7 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus exponentiation operation.
      */
-    myVecP mod_exp(const myT& b) const;
+    NtlModVector mod_exp(const ElemT& b) const;
 
     /**
      * Scalar modulus exponentiation operation. In-place variant.
@@ -506,21 +508,21 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @param b is the scalar to perform operation with.
      * @return is the result of the modulus exponentiation operation.
      */
-    myVecP& mod_exp_eq(const myT& b);
+    NtlModVector& mod_exp_eq(const ElemT& b);
 
     /**
      * Modulus inverse operation.
      *
      * @return is the result of the component wise modulus inverse operation.
      */
-    myVecP mod_inverse() const;
+    NtlModVector mod_inverse() const;
 
     /**
      * Modulus inverse operation. In-place variant.
      *
      * @return is the result of the component wise modulus inverse operation.
      */
-    myVecP& mod_inverse_eq();
+    NtlModVector& mod_inverse_eq();
 
     /**
      * Modulus 2 operation, also a least significant bit.
@@ -528,7 +530,7 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @return is the result of the component wise modulus 2 operation, also a
      * least significant bit.
      */
-    myVecP mod_by_two() const;
+    NtlModVector mod_by_two() const;
 
     /**
      * Modulus 2 operation, also a least significant bit. In-place variant.
@@ -536,7 +538,7 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @return is the result of the component wise modulus 2 operation, also a
      * least significant bit.
      */
-    myVecP& mod_by_two_eq();
+    NtlModVector& mod_by_two_eq();
 
     /**
      * Multiply and Rounding operation. Returns [x*p/q] where [] is the rounding
@@ -546,7 +548,7 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @param q is the denominator to be divided.
      * @return is the result of multiply and round operation.
      */
-    myVecP multiply_and_round(const myT& p, const myT& q) const;
+    NtlModVector multiply_and_round(const ElemT& p, const ElemT& q) const;
 
     /**
      * Multiply and Rounding operation. Returns [x*p/q] where [] is the rounding
@@ -556,7 +558,7 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @param q is the denominator to be divided.
      * @return is the result of multiply and round operation.
      */
-    myVecP& multiply_and_round_eq(const myT& p, const myT& q);
+    NtlModVector& multiply_and_round_eq(const ElemT& p, const ElemT& q);
 
     /**
      * Divide and Rounding operation. Returns [x/q] where [] is the rounding
@@ -565,7 +567,7 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @param q is the denominator to be divided.
      * @return is the result of divide and round operation.
      */
-    myVecP divide_and_round(const myT& q) const;
+    NtlModVector divide_and_round(const ElemT& q) const;
 
     /**
      * Divide and Rounding operation. Returns [x/q] where [] is the rounding
@@ -574,7 +576,7 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @param q is the denominator to be divided.
      * @return is the result of divide and round operation.
      */
-    myVecP& divide_and_round_eq(const myT& q);
+    NtlModVector& divide_and_round_eq(const ElemT& q);
 
     // OTHER FUNCTIONS
 
@@ -595,7 +597,7 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * @return is the digit at a specific index for all entries for a given number
      * base
      */
-    myVecP get_digit_at_index_for_base(size_t index, uint32_t base) const;
+    NtlModVector get_digit_at_index_for_base(size_t index, uint32_t base) const;
 
     // STRINGS & STREAMS
 
@@ -603,10 +605,10 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
      * ostream operator to output vector values to console
      *
      * @param os is the std ostream object.
-     * @param ptr_obj is the myVecP object to be printed.
+     * @param ptr_obj is the NtlModVector object to be printed.
      * @return std ostream object which captures the vector values.
      */
-    friend std::ostream& operator<<(std::ostream& os, const myVecP<myT>& ptr_obj) {
+    friend std::ostream& operator<<(std::ostream& os, const NtlModVector<ElemT>& ptr_obj) {
         auto len = ptr_obj.get_length();
         os << "[";
         for (size_t i = 0; i < len; i++) {
@@ -710,16 +712,16 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
 
   private:
     // utility function to warn if modulus is no good
-    // use when argument to function is myT
-    void ModulusCheck(std::string msg) const {
+    // use when argument to function is ElemT
+    void modulus_check(std::string msg) const {
         if (!is_modulus_set()) {
             CIPHER_THROW(msg + " uninitialized this->modulus");
         }
     }
 
     // utility function to check argument consistency for vector vector fns
-    // use when argument to function is myVecP
-    void ArgCheckVector(const myVecP& b, std::string fname) const {
+    // use when argument to function is NtlModVector
+    void arg_check_vector(const NtlModVector& b, std::string fname) const {
         if (this->modulus_ != b.modulus_) {
             CIPHER_THROW(fname + " modulus vector modulus vector op of different moduli");
         } else if (!is_modulus_set()) {
@@ -730,13 +732,13 @@ class myVecP : public NTL::Vec<myT>, public cipher::BigVectorInterface<myVecP<my
     }
 
     // used to make sure all entries in this are <=current modulus
-    void Renormalize(void) {
+    void renormalize(void) {
         for (size_t i = 0; i < this->get_length(); ++i) {
             (*this)[i] %= modulus_;
         }
     }
 
-    myT modulus_;
+    ElemT modulus_;
     // TODO: BE 2 has gotten rid of this, we may too.
     enum ModulusState {
         GARBAGE,

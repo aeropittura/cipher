@@ -81,7 +81,7 @@ void rounding_ops(const std::string& msg) {
     ilvector2n2 = {"21", "11", "35", "32"};
     CIPHER_DEBUGEXP(ilvector2n2);
 
-    CIPHER_DEBUG("unit test for MultiplyAndRound");
+    CIPHER_DEBUG("unit test for multiply_and_round");
     Element rounding_correct1(ilparams, Format::COEFFICIENT);
     rounding_correct1 = {"3", "2", "2", "4"};
 
@@ -91,7 +91,7 @@ void rounding_ops(const std::string& msg) {
 
     EXPECT_EQ(rounding_correct1, rounding1) << msg << " Failure: Rounding p*polynomial/q";
 
-    CIPHER_DEBUG("unit test for MultiplyAndRound after a polynomial");
+    CIPHER_DEBUG("unit test for multiply_and_round after a polynomial");
     CIPHER_DEBUG("multiplication using the larger modulus");
 
     Element rounding_correct2(ilparams2, Format::COEFFICIENT);
@@ -134,9 +134,9 @@ TEST(UTPoly, rounding_ops) {
 }
 
 // TODO RnsPoly needs an assignment op/ctor
-TEST(UTDCRTPoly, rounding_ops) {
+TEST(UTRnsPoly, rounding_ops) {
     // std::cerr<<"*** skipping DCRT rounding_ops till multiply_and_round is
-    // coded"<<std::endl; RUN_BIG_DCRTPOLYS(rounding_ops, "DCRT rounding_ops");
+    // coded"<<std::endl; RUN_BIG_RNS_POLYS(rounding_ops, "DCRT rounding_ops");
 }
 
 // template for set_get_values()
@@ -167,12 +167,12 @@ void set_get_values(const std::string& msg) {
         ilvector2n2.set_values(bbv2, Format::COEFFICIENT);
 
         // test set_values()
-        EXPECT_NE(ilvector2n, ilvector2n2) << msg << " Failure: SetValues NE";
+        EXPECT_NE(ilvector2n, ilvector2n2) << msg << " Failure: set_values NE";
         bbv2 = bbv;
         ilvector2n2.set_values(bbv2, Format::COEFFICIENT);
-        EXPECT_EQ(ilvector2n, ilvector2n2) << msg << " Failure: SetValues EQ";
+        EXPECT_EQ(ilvector2n, ilvector2n2) << msg << " Failure: set_values EQ";
     }
-    {  // test GetValue() and at()
+    {  // test get_value() and at()
         Element ilvector2n(ilparams);
         ilvector2n = {"1", "2", "0", "1"};
         Element bbv(ilparams);
@@ -180,7 +180,7 @@ void set_get_values(const std::string& msg) {
         CIPHER_DEBUGEXP(ilvector2n);
         CIPHER_DEBUGEXP(bbv);
 
-        EXPECT_EQ(bbv.get_values(), ilvector2n.get_values()) << msg << "Failure: GetValues()";
+        EXPECT_EQ(bbv.get_values(), ilvector2n.get_values()) << msg << "Failure: get_values()";
 
         uint32_t index = 3;
         bbv[index] = 11;
@@ -200,9 +200,9 @@ TEST(UTPoly, set_get_values) {
 }
 
 // TODO RnsPoly needs a set_get_values()
-TEST(UTDCRTPoly, set_get_values) {
+TEST(UTRnsPoly, set_get_values) {
     // std::cerr<<"*** skipping DCRT set_get_values till coded"<<std::endl;
-    // RUN_BIG_DCRTPOLYS(set_get_values, "DCRT set_values");
+    // RUN_BIG_RNS_POLYS(set_get_values, "DCRT set_values");
 }
 
 // template for at()
@@ -251,9 +251,9 @@ TEST(UTPoly, at) {
 }
 
 // TODO RnsPoly needs a at() and []
-TEST(UTDCRTPoly, at) {
+TEST(UTRnsPoly, at) {
     // std::cerr<<"*** skipping DCRT at till coded"<<std::endl;
-    // RUN_BIG_DCRTPOLYS(at, "DCRT at");
+    // RUN_BIG_RNS_POLYS(at, "DCRT at");
 }
 
 // template for switch_modulus_impl
@@ -270,7 +270,7 @@ void switch_modulus_impl(const std::string& msg) {
     typename VecType::Integer primitive_root_of_unity("22");
 
     auto ilparams = std::make_shared<ParmType>(m, prime_modulus, primitive_root_of_unity);
-    CIPHER_DEBUG("SwitchModulus");
+    CIPHER_DEBUG("switch_modulus");
     {
         Element ilv(ilparams, Format::COEFFICIENT);
         ilv = {"56", "1", "37", "2"};
@@ -285,7 +285,7 @@ void switch_modulus_impl(const std::string& msg) {
         auto ilparams2 = std::make_shared<ParmType>(m, modulus, root_of_unity_value);
         Element expected(ilparams2, Format::COEFFICIENT);
         expected = {"0", "1", "15", "2"};
-        EXPECT_EQ(expected, ilv) << msg << " Failure: SwitchModulus()";
+        EXPECT_EQ(expected, ilv) << msg << " Failure: switch_modulus()";
 
         Element ilv1(ilparams, Format::COEFFICIENT);
         ilv1 = {"56", "43", "35", "28"};
@@ -296,7 +296,7 @@ void switch_modulus_impl(const std::string& msg) {
         auto ilparams3 = std::make_shared<ParmType>(m, modulus1, root_of_unity1);
         Element expected2(ilparams3, Format::COEFFICIENT);
         expected2 = {"176", "163", "35", "28"};
-        EXPECT_EQ(expected2, ilv1) << msg << " Failure: SwitchModulus()";
+        EXPECT_EQ(expected2, ilv1) << msg << " Failure: switch_modulus()";
     }
 }
 // instantiations for switch_modulus_impl()
@@ -304,9 +304,9 @@ TEST(UTPoly, switch_modulus) {
     RUN_ALL_POLYS(switch_modulus_impl, "Poly switch_modulus");
 }
 
-TEST(UTDCRTPoly, switch_modulus) {
+TEST(UTRnsPoly, switch_modulus) {
     // std::cerr<<"*** skipping DCRT switch_modulus_impl till coded"<<std::endl;
-    // //RUN_BIG_DCRTPOLYS(switch_modulus_impl, "Poly switch_modulus_impl");
+    // //RUN_BIG_RNS_POLYS(switch_modulus_impl, "Poly switch_modulus_impl");
 }
 
 // template fore rn_generators()
@@ -341,12 +341,12 @@ void rn_generators(const std::string& msg) {
         Element ilvector2n5(bug, ilparams);
         Element ilvector2n6(dug, ilparams);
 
-        EXPECT_EQ(true, ilvector2n1.is_empty()) << msg << " Failure: DestroyPreComputedSamples() 2n1";
-        EXPECT_EQ(true, ilvector2n2.is_empty()) << msg << " Failure: DestroyPreComputedSamples() 2n2";
-        EXPECT_EQ(false, ilvector2n3.is_empty()) << msg << " Failure: DestroyPreComputedSamples() 2n3";
-        EXPECT_EQ(false, ilvector2n4.is_empty()) << msg << " Failure: DestroyPreComputedSamples() 2n4";
-        EXPECT_EQ(false, ilvector2n5.is_empty()) << msg << " Failure: DestroyPreComputedSamples() 2n5";
-        EXPECT_EQ(false, ilvector2n6.is_empty()) << msg << " Failure: DestroyPreComputedSamples() 2n6";
+        EXPECT_EQ(true, ilvector2n1.is_empty()) << msg << " Failure: destroy_pre_computed_samples() 2n1";
+        EXPECT_EQ(true, ilvector2n2.is_empty()) << msg << " Failure: destroy_pre_computed_samples() 2n2";
+        EXPECT_EQ(false, ilvector2n3.is_empty()) << msg << " Failure: destroy_pre_computed_samples() 2n3";
+        EXPECT_EQ(false, ilvector2n4.is_empty()) << msg << " Failure: destroy_pre_computed_samples() 2n4";
+        EXPECT_EQ(false, ilvector2n5.is_empty()) << msg << " Failure: destroy_pre_computed_samples() 2n5";
+        EXPECT_EQ(false, ilvector2n6.is_empty()) << msg << " Failure: destroy_pre_computed_samples() 2n6";
     }
 }
 
@@ -355,9 +355,9 @@ TEST(UTPoly, rn_generators) {
     RUN_ALL_POLYS(rn_generators, "Poly rn_generators");
 }
 
-TEST(UTDCRTPoly, rn_generators) {
+TEST(UTRnsPoly, rn_generators) {
     // std::cerr<<"*** skipping DCRT rn_generators till coded"<<std::endl;
-    // RUN_BIG_DCRTPOLYS(rn_generators, "DCRT rn_generators");
+    // RUN_BIG_RNS_POLYS(rn_generators, "DCRT rn_generators");
 }
 
 // template fore poly_other_methods()
@@ -378,36 +378,36 @@ void poly_other_methods(const std::string& msg) {
     // test for bug where length was 0
     EXPECT_EQ(ilvector2n.get_length(), m / 2) << msg << " Failure: ={init list string}";
 
-    CIPHER_DEBUG("SwitchFormat");
+    CIPHER_DEBUG("switch_format");
     {
         Element ilv(ilparams, Format::COEFFICIENT);
         ilv = {"2", "1", "3", "2"};
 
         ilv.switch_format();
 
-        EXPECT_EQ(prime_modulus, ilv.get_modulus()) << msg << " Failure: SwitchFormat() ilv modulus";
+        EXPECT_EQ(prime_modulus, ilv.get_modulus()) << msg << " Failure: switch_format() ilv modulus";
         EXPECT_EQ(primitive_root_of_unity, ilv.get_root_of_unity())
-                << msg << " Failure: SwitchFormat() ilv rootOfUnity";
-        EXPECT_EQ(Format::EVALUATION, ilv.get_format()) << msg << " Failure: SwitchFormat() ilv format";
+                << msg << " Failure: switch_format() ilv rootOfUnity";
+        EXPECT_EQ(Format::EVALUATION, ilv.get_format()) << msg << " Failure: switch_format() ilv format";
         Element expected(ilparams);
         expected = {"69", "65", "44", "49"};
-        EXPECT_EQ(expected, ilv) << msg << " Failure: ivl.SwitchFormat() values";
+        EXPECT_EQ(expected, ilv) << msg << " Failure: ivl.switch_format() values";
 
         Element ilv1(ilparams, Format::EVALUATION);
         ilv1 = {"2", "3", "1", "2"};
 
         ilv1.switch_format();
 
-        EXPECT_EQ(prime_modulus, ilv1.get_modulus()) << msg << " Failure: SwitchFormat() ilv1 modulus";
+        EXPECT_EQ(prime_modulus, ilv1.get_modulus()) << msg << " Failure: switch_format() ilv1 modulus";
         EXPECT_EQ(primitive_root_of_unity, ilv1.get_root_of_unity())
-                << msg << " Failure: SwitchFormat() ilv1 rootOfUnity";
-        EXPECT_EQ(Format::COEFFICIENT, ilv1.get_format()) << msg << " Failure: SwitchFormat() ilv1 format";
+                << msg << " Failure: switch_format() ilv1 rootOfUnity";
+        EXPECT_EQ(Format::COEFFICIENT, ilv1.get_format()) << msg << " Failure: switch_format() ilv1 format";
         Element expected2(ilparams, Format::COEFFICIENT);
         expected2 = {"2", "3", "50", "3"};
-        EXPECT_EQ(expected2, ilv1) << msg << " Failure: ivl1.SwitchFormat() values";
+        EXPECT_EQ(expected2, ilv1) << msg << " Failure: ivl1.switch_format() values";
     }
 
-    CIPHER_DEBUG("MultiplicativeInverse");
+    CIPHER_DEBUG("multiplicative_inverse");
     {
         Element ilv1(ilparams, Format::EVALUATION);
         ilv1 = {"2", "4", "3", "2"};
@@ -417,7 +417,7 @@ void poly_other_methods(const std::string& msg) {
 
         for (uint32_t i = 0; i < m / 2; ++i) {
             EXPECT_EQ(ilv_product1[i], typename Element::Integer(1))
-                    << msg << " Failure: ilvProduct1.MultiplicativeInverse() @ index " << i;
+                    << msg << " Failure: ilv_product1.multiplicative_inverse() @ index " << i;
         }
     }
 
@@ -425,7 +425,7 @@ void poly_other_methods(const std::string& msg) {
     {
         Element ilv(ilparams, Format::COEFFICIENT);
         ilv = {"56", "1", "37", "1"};
-        EXPECT_EQ(36, ilv.norm()) << msg << " Failure: Norm()";
+        EXPECT_EQ(36, ilv.norm()) << msg << " Failure: norm()";
     }
 }
 
@@ -435,10 +435,10 @@ TEST(UTPoly, poly_other_methods) {
 }
 
 // TODO
-TEST(UTDCRTPoly, poly_other_methods) {
+TEST(UTRnsPoly, poly_other_methods) {
     // std::cerr<<"*** skipping DCRT poly_other_methods till these functions are
     // coded"<<std::endl;
-    //   RUN_BIG_DCRTPOLYS(poly_other_methods, "DCRT poly_other_methods");
+    //   RUN_BIG_RNS_POLYS(poly_other_methods, "DCRT poly_other_methods");
 }
 
 // Signed mod must handle the modulo operation for both positive and negative
@@ -465,7 +465,7 @@ void signed_mod(const std::string& msg) {
         ilv1 = ilvector2n1.mod(2);
         Element expected(ilparams, Format::COEFFICIENT);
         expected = {"1", "1", "0", "0"};
-        EXPECT_EQ(expected, ilv1) << msg << " Failure: ilv1.Mod(TWO)";
+        EXPECT_EQ(expected, ilv1) << msg << " Failure: ilv1.mod(TWO)";
     }
 
     {
@@ -473,7 +473,7 @@ void signed_mod(const std::string& msg) {
         ilv1 = ilvector2n1.mod(5);
         Element expected(ilparams, Format::COEFFICIENT);
         expected = {"4", "2", "2", "3"};
-        EXPECT_EQ(expected, ilv1) << msg << " Failure: ilv1.Mod(FIVE)";
+        EXPECT_EQ(expected, ilv1) << msg << " Failure: ilv1.mod(FIVE)";
     }
 }
 // Instantiations of signed_mod()
@@ -482,9 +482,9 @@ TEST(UTPoly, signed_mod) {
 }
 
 // TODO
-TEST(UTDCRTPoly, signed_mod) {
+TEST(UTRnsPoly, signed_mod) {
     // std::cerr<<"*** skipping DCRT signed_mod till coded"<<std::endl;
-    //  RUN_BIG_DCRTPOLYS(signed_mod, "signed_mod");
+    //  RUN_BIG_RNS_POLYS(signed_mod, "signed_mod");
 }
 
 // template fore automorphism_transform_impl()
@@ -505,7 +505,7 @@ void automorphism_transform_impl(const std::string& msg) {
     // test for bug where length was 0
     EXPECT_EQ(ilvector2n.get_length(), m / 2) << msg << " Failure: ={init list string}";
 
-    CIPHER_DEBUG("AutomorphismTransform");
+    CIPHER_DEBUG("automorphism_transform");
     {
         Element ilv(ilparams, Format::COEFFICIENT);
         ilv = {"56", "1", "37", "2"};
@@ -514,18 +514,18 @@ void automorphism_transform_impl(const std::string& msg) {
         Element ilv_auto(ilv.automorphism_transform(index));
         Element expected(ilparams, Format::COEFFICIENT);
         expected = {"56", "2", "36", "1"};
-        EXPECT_EQ(expected, ilv_auto) << msg << " Failure: AutomorphismTransform()";
+        EXPECT_EQ(expected, ilv_auto) << msg << " Failure: automorphism_transform()";
     }
 }
 // Instantiations of automorphism_transform_impl()
-TEST(UTPoly, automorphismTransform) {
-    RUN_ALL_POLYS(automorphism_transform_impl, "Poly automorphismTransform");
+TEST(UTPoly, automorphism_transform) {
+    RUN_ALL_POLYS(automorphism_transform_impl, "Poly automorphism_transform");
 }
 
 // TODO
-TEST(UTDCRTPoly, automorphismTransform) {
+TEST(UTRnsPoly, automorphism_transform) {
     // std::cerr<<"*** skipping DCRT automorphism_transform_impl till coded"<<std::endl;
-    //  RUN_BIG_DCRTPOLYS(automorphism_transform_impl, "DCRT automorphism_transform_impl");
+    //  RUN_BIG_RNS_POLYS(automorphism_transform_impl, "DCRT automorphism_transform_impl");
 }
 
 template <typename Element>
@@ -571,9 +571,9 @@ TEST(UTPoly, transposition) {
 }
 
 // TODO
-TEST(UTDCRTPoly, transposition) {
+TEST(UTRnsPoly, transposition) {
     // std::cerr<<"*** skipping DCRT transposition till coded"<<std::endl;
-    //  RUN_BIG_DCRTPOLYS(transposition, "transposition");
+    //  RUN_BIG_RNS_POLYS(transposition, "transposition");
 }
 
 template <typename Element>

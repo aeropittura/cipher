@@ -17,16 +17,16 @@
 
 ## Choosing a Backend
 
-You can do either:
-
-- Add a flag during the `CMAKE` process:` cmake -DMATHBACKEND=4 ..`
-- Uncomment the appropriate line in `src/core/math/hal/bigintbackend.h` (and comment out the rest)
+- Set the CMake option at configure time: `cmake -S . -B build -DCIPHER_MATH_BACKEND=4`
+  (2, 4 or 6; the default is 4). The selection is implemented in [backend/big_int_backend.h](backend/big_int_backend.h).
+- Backends other than the default can additionally be compiled in with `CIPHER_WITH_BE2=ON`, `CIPHER_WITH_BE4=ON`
+  or `CIPHER_WITH_NTL=ON` (backend 6).
 
 ## Math Backend Descriptions
 
-### MATHBACKEND 2
+### CIPHER_MATH_BACKEND=2 (fixed-width, [backend/fixed](backend/fixed))
 
-- Max size of `BigInteger` will be `BitIntegerBitLength` (defined in `backend.h) which has a default of 3000 bits.
+- Max size of `BigInteger` will be `BigIntegerBitLength` (defined in [backend/fixed/integer.h](backend/fixed/integer.h)), which has a default of 3500 bits (8000 bits for `CIPHER_NATIVE_SIZE=128`).
 - It is advisable to select a value for `BigIntegerBitLength` larger than double the `bitwidth` of the largest (
   ciphertext) modulus.
 - This parameter can be decreased for runtime/space optimization when the largest modulus is under 1500 bits.
@@ -35,19 +35,17 @@ You can do either:
     - Native integer used is defined by the `typedef` using `integral_dtype` and MUST be `uint32_t`; using other types
       is an open work item
 
-### MATHBACKEND 4
+### CIPHER_MATH_BACKEND=4 (dynamic, [backend/dynamic](backend/dynamic))
 
 - No Explicit max size of `BigInteger`
 - Size grows dynamically and is only constrained by memory
-- The implementation requires that `UBINT_32` is defined as is in `ubintdyn.h`
-- **Note**: Setting `UBINT_64` is not supported. It is however a open work item.
+- The implementation (`ubint<limb_t>` in [backend/dynamic/integer.h](backend/dynamic/integer.h)) uses 32-bit limbs
+- **Note**: 64-bit limbs are not supported. It is however an open work item.
 
-### MATHBACKEND 6
+### CIPHER_MATH_BACKEND=6 (NTL, [backend/ntl](backend/ntl))
 
-- Integration of `NTL` library with `Cipher`
-- Only available when `NTL` or `GMP` is enabled using `CMAKE`
-
-This is an integration of the NTL library with Cipher, and is only available when NTL/GMP is enabled using CMAKE.
+- Integration of the `NTL` library with Cipher (`NtlInteger`, `NtlModVector`)
+- Only available when Cipher is configured with `-DCIPHER_WITH_NTL=ON`, which requires NTL and GMP to be installed
 
 # Supported Math Operations
 
@@ -78,7 +76,7 @@ We use the following naming conventions:
 
 | Variant | Naive          | Barrett            | Fast Naive         | Fast Barrett           | Fast Const                        |
 |---------|----------------|--------------------|--------------------|------------------------|-----------------------------------|
-| Mod     | Mod(mod)       | Mod(mod, mu)       | -                  | -                      | -                                 |
-| ModAdd  | ModAdd(b, mod) | ModAdd(b, mod, mu) | ModAddFast(b, mod) | -                      | -                                 |
-| ModSub  | ModSub(b, mod) | ModSub(b, mod, mu) | ModSubFast(b, mod) | -                      | -                                 |
-| ModMul  | ModMul(b, mod) | ModMul(b, mod, mu) | ModMulFast(b, mod) | ModMulFast(b, mod, mu) | ModMulFastConst(b, mod, bPrecomp) |
+| mod     | mod(m)          | mod(m, mu)          | -                    | -                        | -                                       |
+| mod_add | mod_add(b, m)   | mod_add(b, m, mu)   | mod_add_fast(b, m)   | -                        | -                                       |
+| mod_sub | mod_sub(b, m)   | mod_sub(b, m, mu)   | mod_sub_fast(b, m)   | -                        | -                                       |
+| mod_mul | mod_mul(b, m)   | mod_mul(b, m, mu)   | mod_mul_fast(b, m)   | mod_mul_fast(b, m, mu)   | mod_mul_fast_const(b, m, b_precomp)     |

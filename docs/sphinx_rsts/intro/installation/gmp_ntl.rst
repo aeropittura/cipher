@@ -3,27 +3,19 @@
 Instructions for installing GMP and NTL
 =======================================
 
-This section describes how to install GMP and NTL onto your system, and how to use them in Cipher. Install ``autoconf`` if it is not already present:
-.. topic:: on Linux
+This section describes how to install GMP and NTL onto your system, and how to use them in Cipher. Cipher does not bundle
+GMP or NTL; once they are installed, configure Cipher with ``-DCIPHER_WITH_NTL=ON`` (and ``-DCIPHER_MATH_BACKEND=6`` to
+make NTL the default big-integer backend). If they are installed in a non-default location, point CMake at them with
+``-DNTL_INCLUDE_DIR=... -DNTL_LIBRARIES=... -DGMP_INCLUDE_DIR=... -DGMP_LIBRARIES=...``.
 
-::
+Install ``autoconf`` if it is not already present:
 
-    sudo apt-get install autoconf
-
-.. topic:: on MacOS
-
-::
-
-    brew install autoconf
-
-.. topic:: on Windows
-
-::
-
-    pacman -S autoconf
+- on Linux: ``sudo apt-get install autoconf``
+- on macOS: ``brew install autoconf``
+- on Windows (MSYS2): ``pacman -S autoconf``
 
 
-.. note:: scroll to the bottom for an all-in-one install script
+.. note:: scroll to the bottom for an all-in-one install script; the same steps are in ``tools/setup/install_ntl_gmp.sh``
 
 The standard binary install using tools like ``apt-get`` will not work, and manual installation of GMP and NTL from the source code is needed. The steps are detailed below.
 

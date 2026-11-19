@@ -1,8 +1,8 @@
 # Key Switching
 
-This folder contains the header files of the various key-switchung capabilities that are defined within `Open-FHE`.
+This folder contains the header files of the various key-switching capabilities that are defined within Cipher.
 Refer
-to [OpenFHE PKE Keys](https://openfhe-development.readthedocs.io/en/latest/assets/sphinx_rsts/modules/pke/pke_keyswitch.html)
+to the [FHE key switching documentation](../../../../docs/sphinx_rsts/modules/pke/pke_keyswitch.rst).
 
 The documentation here is based off
 of [Revisiting Homomorphic Encryption Schemes for Finite Fields](https://eprint.iacr.org/2021/204.pdf)

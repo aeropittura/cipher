@@ -56,28 +56,28 @@ enum TEST_CASE_TYPE : int {
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
-    std::string typeName;
+    std::string type_name_of;
     switch (type) {
         case CKKSRNS_TEST:
-            typeName = "CKKSRNS_TEST";
+            type_name_of = "CKKSRNS_TEST";
             break;
         case BFVRNS_TEST:
-            typeName = "BFVRNS_TEST";
+            type_name_of = "BFVRNS_TEST";
             break;
         case BGVRNS_TEST:
-            typeName = "BGVRNS_TEST";
+            type_name_of = "BGVRNS_TEST";
             break;
         case BFVRNS_TEST_EXTRA:
-            typeName = "BFVRNS_TEST_EXTRA";
+            type_name_of = "BFVRNS_TEST_EXTRA";
             break;
         case TEST_ABORTS:
-            typeName = "TEST_ABORTS";
+            type_name_of = "TEST_ABORTS";
             break;
         default:
-            typeName = "UNKNOWN";
+            type_name_of = "UNKNOWN";
             break;
     }
-    return os << typeName;
+    return os << type_name_of;
 }
 //===========================================================================================================
 struct TEST_CASE_UTGENERAL_MULTIPARTY {
@@ -108,7 +108,7 @@ struct TEST_CASE_UTGENERAL_MULTIPARTY {
 
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
-static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTGENERAL_MULTIPARTY>& test) {
+static auto make_test_name = [](const testing::TestParamInfo<TEST_CASE_UTGENERAL_MULTIPARTY>& test) {
     return test.param.build_test_name();
 };
 
@@ -119,7 +119,7 @@ static std::ostream& operator<<(std::ostream& os, const TEST_CASE_UTGENERAL_MULT
 constexpr uint32_t BATCH = 16;
 // clang-format off
 static std::vector<TEST_CASE_UTGENERAL_MULTIPARTY> test_cases = {
-    // TestType,   Descr, Scheme,          RDim, MultDepth, SModSize, DSize,BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode,  Star, Slots, sharing_scheme
+    // TestType,   Descr, Scheme,          RDim, MultDepth, SModSize, DSize,batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode,  Star, Slots, sharing_scheme
     { CKKSRNS_TEST, "01", {CKKSRNS_SCHEME, 2048, 2,         50,       3,    BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},    false,    0, "NA"},
     { CKKSRNS_TEST, "02", {CKKSRNS_SCHEME, 2048, 2,         50,       3,    BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FIXEDAUTO,       DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},    false,    0, "NA"},
     { CKKSRNS_TEST, "03", {CKKSRNS_SCHEME, 2048, 2,         50,       3,    BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},    false,    0, "NA"},
@@ -138,7 +138,7 @@ static std::vector<TEST_CASE_UTGENERAL_MULTIPARTY> test_cases = {
     { CKKSRNS_TEST, "15", {CKKSRNS_SCHEME, 2048, 2,         50,       3,    BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},    true,     0, "NA"},
     { CKKSRNS_TEST, "16", {CKKSRNS_SCHEME, 2048, 2,         50,       3,    BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},    true,     0, "NA"},
 #endif
-    // TestType,   Descr, Scheme,          RDim, MultDepth, SModSize, DSize,BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode,  Star, Slots, sharing_scheme
+    // TestType,   Descr, Scheme,          RDim, MultDepth, SModSize, DSize,batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode,  Star, Slots, sharing_scheme
     { CKKSRNS_TEST, "21", {CKKSRNS_SCHEME, 2048, 2,         50,       3,    BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},    false,   16, "NA"},
     { CKKSRNS_TEST, "22", {CKKSRNS_SCHEME, 2048, 2,         50,       3,    BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FIXEDAUTO,       DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},    false,   16, "NA"},
     { CKKSRNS_TEST, "23", {CKKSRNS_SCHEME, 2048, 2,         50,       3,    BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},    false,   16, "NA"},
@@ -157,7 +157,7 @@ static std::vector<TEST_CASE_UTGENERAL_MULTIPARTY> test_cases = {
     { CKKSRNS_TEST, "35", {CKKSRNS_SCHEME, 2048, 2,         50,       3,    BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},    true,    16, "NA"},
     { CKKSRNS_TEST, "36", {CKKSRNS_SCHEME, 2048, 2,         50,       3,    BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},    true,    16, "NA"},
 #endif
-    // TestType,   Descr, Scheme,          RDim, MultDepth, SModSize, DSize,BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode,  Star, Slots, sharing_scheme
+    // TestType,   Descr, Scheme,          RDim, MultDepth, SModSize, DSize,batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode,  Star, Slots, sharing_scheme
     { CKKSRNS_TEST, "41", {CKKSRNS_SCHEME, 2048, 2,         50,       3,    BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},    false,   32, "NA"},
     { CKKSRNS_TEST, "42", {CKKSRNS_SCHEME, 2048, 2,         50,       3,    BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FIXEDAUTO,       DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},    false,   32, "NA"},
     { CKKSRNS_TEST, "43", {CKKSRNS_SCHEME, 2048, 2,         50,       3,    BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},    false,   32, "NA"},
@@ -176,7 +176,7 @@ static std::vector<TEST_CASE_UTGENERAL_MULTIPARTY> test_cases = {
     { CKKSRNS_TEST, "55", {CKKSRNS_SCHEME, 2048, 2,         50,       3,    BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},    true,    32, "NA"},
     { CKKSRNS_TEST, "56", {CKKSRNS_SCHEME, 2048, 2,         50,       3,    BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},    true,    32, "NA"},
 #endif
-    // TestType,   Descr, Scheme,          RDim, MultDepth, SModSize, DSize,BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode,  Star, Slots, sharing_scheme
+    // TestType,   Descr, Scheme,          RDim, MultDepth, SModSize, DSize,batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode,  Star, Slots, sharing_scheme
     { CKKSRNS_TEST, "61", {CKKSRNS_SCHEME, 2048, 2,         50,       3,    BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},    false, 1024, "NA"},
     { CKKSRNS_TEST, "62", {CKKSRNS_SCHEME, 2048, 2,         50,       3,    BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FIXEDAUTO,       DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},    false, 1024, "NA"},
     { CKKSRNS_TEST, "63", {CKKSRNS_SCHEME, 2048, 2,         50,       3,    BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},    false, 1024, "NA"},
@@ -194,7 +194,7 @@ static std::vector<TEST_CASE_UTGENERAL_MULTIPARTY> test_cases = {
     { CKKSRNS_TEST, "74", {CKKSRNS_SCHEME, 2048, 2,         50,       3,    BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FLEXIBLEAUTO,    DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},    true,  1024, "NA"},
     { CKKSRNS_TEST, "75", {CKKSRNS_SCHEME, 2048, 2,         50,       3,    BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},    true,  1024, "NA"},
     { CKKSRNS_TEST, "76", {CKKSRNS_SCHEME, 2048, 2,         50,       3,    BATCH,   DFLT,       DFLT,          DFLT,     HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},    true,  1024, "NA"},
-    // TestType,   Descr, Scheme,          RDim, MultDepth, SModSize, DSize,BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,               LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode,  Star, Slots, sharing_scheme
+    // TestType,   Descr, Scheme,          RDim, MultDepth, SModSize, DSize,batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,               LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode,  Star, Slots, sharing_scheme
     { CKKSRNS_TEST, "77", {CKKSRNS_SCHEME, 2048, 2,        118,       3,    BATCH,   DFLT,       DFLT,           120,     HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},    false, 1024, "NA"},
     { CKKSRNS_TEST, "78", {CKKSRNS_SCHEME, 2048, 2,        118,       3,    BATCH,   DFLT,       DFLT,           120,     HEStd_NotSet, HYBRID, COMPOSITESCALINGAUTO,   DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT},     true, 1024, "NA"},
     { CKKSRNS_TEST, "79", {CKKSRNS_SCHEME, 2048, 2,        118,       3,    BATCH,   DFLT,       DFLT,           120,     HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 64, 2},    false, 1024, "NA"},
@@ -207,7 +207,7 @@ static std::vector<TEST_CASE_UTGENERAL_MULTIPARTY> test_cases = {
     { CKKSRNS_TEST, "86", {CKKSRNS_SCHEME, 2048, 2,        118,       3,    BATCH,   DFLT,       DFLT,           120,     HEStd_NotSet, HYBRID, COMPOSITESCALINGMANUAL, DFLT,    DFLT,  DFLT,   0,         0,    DFLT,     DFLT,    DFLT, DFLT, DFLT, DFLT, DFLT, 32, 4},     true, 512, "NA"},
 #endif
     // ==========================================
-    // TestType,   Descr, Scheme,          RDim, MultDepth, SModSize, DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,     LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech,         EncTech,  pre_mode, MultipartyMode,             Star, Slots, sharing_scheme
+    // TestType,   Descr, Scheme,          RDim, MultDepth, SModSize, DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,     LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech,         enc_tech,  pre_mode, MultipartyMode,             Star, Slots, sharing_scheme
     { BFVRNS_TEST, "01", {BFVRNS_SCHEME,   1024, DFLT,      60,       20,    DFLT,    UNIFORM_TERNARY, DFLT,          DFLT, HEStd_NotSet,         DFLT,   DFLT,         DFLT,    65537, DFLT,   DFLT,      DFLT, HPS,              STANDARD, DFLT,    FIXED_NOISE_MULTIPARTY},    false,    0, "NA"},
     { BFVRNS_TEST, "02", {BFVRNS_SCHEME,   1024, DFLT,      60,       20,    DFLT,    GAUSSIAN,        DFLT,          DFLT, HEStd_NotSet,         DFLT,   DFLT,         DFLT,    65537, DFLT,   DFLT,      DFLT, HPS,              STANDARD, DFLT,    FIXED_NOISE_MULTIPARTY},    false,    0, "NA"},
     { BFVRNS_TEST, "03", {BFVRNS_SCHEME,   1024, DFLT,      60,       20,    DFLT,    UNIFORM_TERNARY, DFLT,          DFLT, HEStd_NotSet,         DFLT,   DFLT,         DFLT,    65537, DFLT,   DFLT,      DFLT, BEHZ,             STANDARD, DFLT,    FIXED_NOISE_MULTIPARTY},    false,    0, "NA"},
@@ -273,7 +273,7 @@ static std::vector<TEST_CASE_UTGENERAL_MULTIPARTY> test_cases = {
     { BFVRNS_TEST, "63", {BFVRNS_SCHEME,   1024, DFLT,      60,       20,    DFLT,    UNIFORM_TERNARY, DFLT,          DFLT, HEStd_NotSet,         DFLT,   DFLT,         DFLT,    65537, DFLT,   DFLT,      DFLT, HPSPOVERQLEVELED, EXTENDED, DFLT,    NOISE_FLOODING_MULTIPARTY}, true,     0, "NA"},
     { BFVRNS_TEST, "64", {BFVRNS_SCHEME,   1024, DFLT,      60,       20,    DFLT,    GAUSSIAN,        DFLT,          DFLT, HEStd_NotSet,         DFLT,   DFLT,         DFLT,    65537, DFLT,   DFLT,      DFLT, HPSPOVERQLEVELED, EXTENDED, DFLT,    NOISE_FLOODING_MULTIPARTY}, true,     0, "NA"},
     // ==========================================
-    // TestType,   Descr, Scheme,          RDim, MultDepth, SModSize, DSize,BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech, EncTech, pre_mode, MultipartyMode,             Star, Slots, sharing_scheme
+    // TestType,   Descr, Scheme,          RDim, MultDepth, SModSize, DSize,batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode, MultipartyMode,             Star, Slots, sharing_scheme
     { BGVRNS_TEST, "01", {BGVRNS_SCHEME,   256,  2,         DFLT,     3,    BATCH,   UNIFORM_TERNARY, 1,             60,       HEStd_NotSet, BV,     FIXEDMANUAL,     DFLT,    65537, DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    FIXED_NOISE_MULTIPARTY},    false,    0, "NA"},
     { BGVRNS_TEST, "02", {BGVRNS_SCHEME,   256,  2,         DFLT,     3,    BATCH,   GAUSSIAN,        DFLT,          60,       HEStd_NotSet, BV,     FIXEDMANUAL,     DFLT,    65537, DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    FIXED_NOISE_MULTIPARTY},    false,    0, "NA"},
     { BGVRNS_TEST, "03", {BGVRNS_SCHEME,   256,  2,         DFLT,     3,    BATCH,   UNIFORM_TERNARY, 1,             60,       HEStd_NotSet, HYBRID, FIXEDMANUAL,     DFLT,    65537, DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    FIXED_NOISE_MULTIPARTY},    false,    0, "NA"},
@@ -339,7 +339,7 @@ static std::vector<TEST_CASE_UTGENERAL_MULTIPARTY> test_cases = {
     { BGVRNS_TEST, "63", {BGVRNS_SCHEME,   256,  2,         DFLT,     3,    BATCH,   UNIFORM_TERNARY, 1,             DFLT,     HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,    65537, DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    NOISE_FLOODING_MULTIPARTY}, true,     0, "NA"},
     { BGVRNS_TEST, "64", {BGVRNS_SCHEME,   256,  2,         DFLT,     3,    BATCH,   GAUSSIAN,        DFLT,          DFLT,     HEStd_NotSet, HYBRID, FLEXIBLEAUTOEXT, DFLT,    65537, DFLT,   DFLT,      DFLT, DFLT,     DFLT,    DFLT,    NOISE_FLOODING_MULTIPARTY}, true,     0, "NA"},
     // ==========================================
-    // TestType,         Descr, Scheme,        RDim, MultDepth, SModSize, DSize,BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,     LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech,         EncTech,  pre_mode, Star, Slots, sharing_scheme
+    // TestType,         Descr, Scheme,        RDim, MultDepth, SModSize, DSize,batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,     LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech,         enc_tech,  pre_mode, Star, Slots, sharing_scheme
     { BFVRNS_TEST_EXTRA, "01", {BFVRNS_SCHEME, DFLT, DFLT,  60,       20,   DFLT,    GAUSSIAN,        DFLT,          DFLT,     DFLT,         DFLT,   DFLT,         DFLT,    4,     DFLT,   DFLT,      DFLT, HPS,              STANDARD, DFLT},   false,    0, "NA"},
     { BFVRNS_TEST_EXTRA, "02", {BFVRNS_SCHEME, DFLT, DFLT,  60,       20,   DFLT,    UNIFORM_TERNARY, DFLT,          DFLT,     DFLT,         DFLT,   DFLT,         DFLT,    16,    DFLT,   DFLT,      DFLT, HPS,              STANDARD, DFLT},   false,    0, "NA"},
     { BFVRNS_TEST_EXTRA, "03", {BFVRNS_SCHEME, DFLT, DFLT,  60,       20,   DFLT,    GAUSSIAN,        DFLT,          DFLT,     DFLT,         DFLT,   DFLT,         DFLT,    4,     DFLT,   DFLT,      DFLT, BEHZ,             STANDARD, DFLT},   false,    0, "NA"},
@@ -357,7 +357,7 @@ static std::vector<TEST_CASE_UTGENERAL_MULTIPARTY> test_cases = {
     { BFVRNS_TEST_EXTRA, "15", {BFVRNS_SCHEME, DFLT, DFLT,  60,       20,   DFLT,    GAUSSIAN,        DFLT,          DFLT,     DFLT,         DFLT,   DFLT,         DFLT,    4,     DFLT,   DFLT,      DFLT, HPSPOVERQLEVELED, EXTENDED, DFLT},   false,    0, "NA"},
     { BFVRNS_TEST_EXTRA, "16", {BFVRNS_SCHEME, DFLT, DFLT,  60,       20,   DFLT,    UNIFORM_TERNARY, DFLT,          DFLT,     DFLT,         DFLT,   DFLT,         DFLT,    16,    DFLT,   DFLT,      DFLT, HPSPOVERQLEVELED, EXTENDED, DFLT},   false,    0, "NA"},
      // ==========================================
-    // TestType,   Descr, Scheme,         RDim, MultDepth, SModSize, DSize, BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,     LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech,        EncTech,  pre_mode, MultipartyMode, Star, Slots, sharing_scheme
+    // TestType,   Descr, Scheme,         RDim, MultDepth, SModSize, DSize, batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,     LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech,        enc_tech,  pre_mode, MultipartyMode, Star, Slots, sharing_scheme
     { TEST_ABORTS, "01", {BFVRNS_SCHEME,  1024, 2,         DFLT,     DFLT,  BATCH,   GAUSSIAN,        DFLT,          DFLT,     HEStd_NotSet, DFLT,   DFLT,         DFLT,    65537, DFLT,   DFLT,      DFLT, DFLT,            DFLT,     DFLT,     DFLT},        false,    0, "shamir"},
     { TEST_ABORTS, "02", {BFVRNS_SCHEME,  1024, 2,         DFLT,     DFLT,  BATCH,   UNIFORM_TERNARY, DFLT,          DFLT,     HEStd_NotSet, DFLT,   DFLT,         DFLT,    65537, DFLT,   DFLT,      DFLT, DFLT,            DFLT,     DFLT,     DFLT},        false,    0, "shamir"},
     { TEST_ABORTS, "03", {BFVRNS_SCHEME,  1024, 2,         DFLT,     DFLT,  BATCH,   GAUSSIAN,        DFLT,          DFLT,     HEStd_NotSet, DFLT,   DFLT,         DFLT,    65537, DFLT,   DFLT,      DFLT, DFLT,            DFLT,     DFLT,     DFLT},        false,    0, "additive"},
@@ -703,7 +703,7 @@ class UTGENERAL_MULTIPARTY : public ::testing::TestWithParam<TEST_CASE_UTGENERAL
             std::vector<PrivateKey<Element>> secret_keys{kp1.secret_key, kp2.secret_key, kp3.secret_key};
             // This is the same core key generation operation.
             KeyPair<Element> kp_multiparty = cc->multiparty_key_gen(secret_keys);
-            ASSERT_TRUE(kp_multiparty.good()) << "kpMultiparty generation failed!";
+            ASSERT_TRUE(kp_multiparty.good()) << "kp_multiparty generation failed!";
 
             ////////////////////////////////////////////////////////////
             // Perform the proxy re-encryption key generation operation.
@@ -1037,4 +1037,4 @@ TEST_P(UTGENERAL_MULTIPARTY, Multiparty) {
         unit_test_multi_party(test, test.build_test_name());
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTGENERAL_MULTIPARTY, ::testing::ValuesIn(test_cases), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTGENERAL_MULTIPARTY, ::testing::ValuesIn(test_cases), make_test_name);

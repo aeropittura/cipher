@@ -277,7 +277,7 @@ void tckks_collective_boot(enum ScalingTechnique scale_tech) {
     }
 
     // Checking the results
-    std::cout << "MultipartyDecryptFusion ...\n";
+    std::cout << "multiparty_decrypt_fusion ...\n";
     Plaintext plaintext_multiparty;
     crypto_context->multiparty_decrypt_fusion(partial_ciphertext_vec, &plaintext_multiparty);
     plaintext_multiparty->set_length(msg1.size());

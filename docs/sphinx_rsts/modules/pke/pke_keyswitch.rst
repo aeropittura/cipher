@@ -1,7 +1,7 @@
 PKE Key-Switching documentation
 ====================================
 
-`Github Source <https://github.com/openfheorg/openfhe-development/tree/main/src/pke/include/keyswitch>`_:  This folder contains the header files of the key-switching methods present in ``Open-FHE``.
+`include/cipher/fhe/keyswitch <../../../../include/cipher/fhe/keyswitch>`_: This folder contains the header files of the key-switching methods present in Cipher.
 
 The documentation is based on `Revisiting Homomorphic Encryption Schemes for Finite Fields <https://eprint.iacr.org/2021/204.pdf>`_
 
@@ -34,22 +34,22 @@ Key-Switching Class Inheritance
 File Listings
 -----------------------
 
-`Key-Switch Base (keyswitch-base.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/include/keyswitch/keyswitch-base.h>`_
+`Key-Switch Base (base.h) <../../../../include/cipher/fhe/keyswitch/base.h>`_
 
-- Base class for key switching algorithms.
+- ``KeySwitchBase``, the base class for key switching algorithms.
 
-`Key-Switch RNS (keyswitch-rns.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/include/keyswitch/keyswitch-rns.h>`_
+`Key-Switch RNS (rns.h) <../../../../include/cipher/fhe/keyswitch/rns.h>`_
 
-- Abstract interface class for key switching algorithms in RNS
+- ``RnsKeySwitch``, the abstract interface class for key switching algorithms in RNS
 
-`Key-Switch BV (keyswitch-bv.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/include/keyswitch/keyswitch-bv.h>`_
+`Key-Switch BV (bv.h) <../../../../include/cipher/fhe/keyswitch/bv.h>`_
 
-- Implements BV scheme from `Fully Homomorphic Encryption from Ring-LWE and Security for Key Dependent Messages (BV Scheme) <https://www.wisdom.weizmann.ac.il/~zvikab/localpapers/IdealHom.pdf>`_
+- ``KeySwitchBv`` implements the BV scheme from `Fully Homomorphic Encryption from Ring-LWE and Security for Key Dependent Messages (BV Scheme) <https://www.wisdom.weizmann.ac.il/~zvikab/localpapers/IdealHom.pdf>`_
 - Requires the computation of a quadratic number of NTTs.
 - See the Appendix of https://eprint.iacr.org/2021/204 for more detailed description of the RNS variant.
 
-`Key-switch Hybrid (keyswitch-hybrid.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/include/keyswitch/keyswitch-hybrid.h>`_
+`Key-switch Hybrid (hybrid.h) <../../../../include/cipher/fhe/keyswitch/hybrid.h>`_
 
- - Hybrid key switching method first introduced in https://eprint.iacr.org/2012/099.pdf
+ - ``KeySwitchHybrid``: hybrid key switching method first introduced in https://eprint.iacr.org/2012/099.pdf
  - RNS version was introduced in https://eprint.iacr.org/2019/688.
  - See the Appendix of https://eprint.iacr.org/2021/204 for more detailed description.

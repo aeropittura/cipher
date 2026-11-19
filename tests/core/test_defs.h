@@ -68,14 +68,14 @@ extern bool test_native;
     #define RUN_BIG_POLYS2(FUNCTION, MESSAGE) \
         if (test_b2)                          \
             FUNCTION<M2Poly>("BE2Poly " MESSAGE);
-    #define RUN_BIG_DCRTPOLYS2(FUNCTION, MESSAGE) \
+    #define RUN_BIG_RNS_POLYS2(FUNCTION, MESSAGE) \
         if (test_b2)                              \
-            FUNCTION<M2RnsPoly>("BE2DCRTPoly " MESSAGE);
+            FUNCTION<M2RnsPoly>("BE2RnsPoly " MESSAGE);
 #else
     #define RUN_BIG_BACKENDS_INT2(FUNCTION, MESSAGE)
     #define RUN_BIG_BACKENDS2(FUNCTION, MESSAGE)
     #define RUN_BIG_POLYS2(FUNCTION, MESSAGE)
-    #define RUN_BIG_DCRTPOLYS2(FUNCTION, MESSAGE)
+    #define RUN_BIG_RNS_POLYS2(FUNCTION, MESSAGE)
 #endif
 
 #ifdef CIPHER_WITH_BE4
@@ -88,14 +88,14 @@ extern bool test_native;
     #define RUN_BIG_POLYS4(FUNCTION, MESSAGE) \
         if (test_b4)                          \
             FUNCTION<M4Poly>("BE4Poly " MESSAGE);
-    #define RUN_BIG_DCRTPOLYS4(FUNCTION, MESSAGE) \
+    #define RUN_BIG_RNS_POLYS4(FUNCTION, MESSAGE) \
         if (test_b4)                              \
-            FUNCTION<M4RnsPoly>("BE4DCRTPoly " MESSAGE);
+            FUNCTION<M4RnsPoly>("BE4RnsPoly " MESSAGE);
 #else
     #define RUN_BIG_BACKENDS_INT4(FUNCTION, MESSAGE)
     #define RUN_BIG_BACKENDS4(FUNCTION, MESSAGE)
     #define RUN_BIG_POLYS4(FUNCTION, MESSAGE)
-    #define RUN_BIG_DCRTPOLYS4(FUNCTION, MESSAGE)
+    #define RUN_BIG_RNS_POLYS4(FUNCTION, MESSAGE)
 #endif
 
 #ifdef CIPHER_WITH_NTL
@@ -108,14 +108,14 @@ extern bool test_native;
     #define RUN_BIG_POLYS6(FUNCTION, MESSAGE) \
         if (test_b6)                          \
             FUNCTION<M6Poly>("BE6Poly " MESSAGE);
-    #define RUN_BIG_DCRTPOLYS6(FUNCTION, MESSAGE) \
+    #define RUN_BIG_RNS_POLYS6(FUNCTION, MESSAGE) \
         if (test_b6)                              \
-            FUNCTION<M6RnsPoly>("BE6DCRTPoly " MESSAGE);
+            FUNCTION<M6RnsPoly>("BE6RnsPoly " MESSAGE);
 #else
     #define RUN_BIG_BACKENDS_INT6(FUNCTION, MESSAGE)
     #define RUN_BIG_BACKENDS6(FUNCTION, MESSAGE)
     #define RUN_BIG_POLYS6(FUNCTION, MESSAGE)
-    #define RUN_BIG_DCRTPOLYS6(FUNCTION, MESSAGE)
+    #define RUN_BIG_RNS_POLYS6(FUNCTION, MESSAGE)
 #endif
 
 #define RUN_BIG_BACKENDS_INT(FUNCTION, MESSAGE)                                        \
@@ -125,8 +125,8 @@ extern bool test_native;
     {RUN_BIG_BACKENDS2(FUNCTION, MESSAGE) RUN_BIG_BACKENDS4(FUNCTION, MESSAGE) RUN_BIG_BACKENDS6(FUNCTION, MESSAGE)}
 #define RUN_BIG_POLYS(FUNCTION, MESSAGE) \
     {RUN_BIG_POLYS2(FUNCTION, MESSAGE) RUN_BIG_POLYS4(FUNCTION, MESSAGE) RUN_BIG_POLYS6(FUNCTION, MESSAGE)}
-#define RUN_BIG_DCRTPOLYS(FUNCTION, MESSAGE) \
-    {RUN_BIG_DCRTPOLYS2(FUNCTION, MESSAGE) RUN_BIG_DCRTPOLYS4(FUNCTION, MESSAGE) RUN_BIG_DCRTPOLYS6(FUNCTION, MESSAGE)}
+#define RUN_BIG_RNS_POLYS(FUNCTION, MESSAGE) \
+    {RUN_BIG_RNS_POLYS2(FUNCTION, MESSAGE) RUN_BIG_RNS_POLYS4(FUNCTION, MESSAGE) RUN_BIG_RNS_POLYS6(FUNCTION, MESSAGE)}
 
 #define RUN_ALL_BACKENDS_INT(FUNCTION, MESSAGE) \
     {RUN_BIG_BACKENDS_INT(FUNCTION, MESSAGE) RUN_NATIVE_BACKENDS_INT(FUNCTION, MESSAGE)}

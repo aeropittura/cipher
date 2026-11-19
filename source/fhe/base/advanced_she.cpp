@@ -329,9 +329,9 @@ Ciphertext<Element> BaseAdvancedShe<Element>::eval_sum_cols(
     if (!ciphertext)
         CIPHER_THROW("Input ciphertext is nullptr");
     if (!eval_sum_key_map.size())
-        CIPHER_THROW("Input evalKeys map is empty");
+        CIPHER_THROW("Input eval_keys map is empty");
     if (!eval_sum_cols_key_map.size())
-        CIPHER_THROW("Input rightEvalKeys map is empty");
+        CIPHER_THROW("Input right_eval_keys map is empty");
     if (ciphertext->get_encoding_type() != CKKS_PACKED_ENCODING)
         CIPHER_THROW("Matrix summation of column-vectors is only supported for CKKS packed encoding.");
 

@@ -53,19 +53,19 @@ enum TEST_CASE_TYPE : int {
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
-    std::string typeName;
+    std::string type_name_of;
     switch (type) {
         case STRING_TEST:
-            typeName = "STRING_TEST";
+            type_name_of = "STRING_TEST";
             break;
         case COEF_PACKED_TEST:
-            typeName = "COEF_PACKED_TEST";
+            type_name_of = "COEF_PACKED_TEST";
             break;
         default:
-            typeName = "UNKNOWN";
+            type_name_of = "UNKNOWN";
             break;
     }
-    return os << typeName;
+    return os << type_name_of;
 }
 //===========================================================================================================
 struct TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT {
@@ -91,7 +91,7 @@ struct TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT {
 
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
-static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT>& test) {
+static auto make_test_name = [](const testing::TestParamInfo<TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT>& test) {
     return test.param.build_test_name();
 };
 
@@ -103,7 +103,7 @@ constexpr uint32_t BATCH = 16;
 constexpr uint32_t BV_DSIZE = 4;
 // clang-format off
 static std::vector<TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT> test_cases = {
-    // TestType,  Descr, Scheme,         RDim, MultDepth, SModSize, DSize,    BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech,         EncTech,  pre_mode
+    // TestType,  Descr, Scheme,         RDim, MultDepth, SModSize, DSize,    batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech,         enc_tech,  pre_mode
     { STRING_TEST, "01", {BGVRNS_SCHEME, 256,  2,         DFLT,     BV_DSIZE, BATCH,   GAUSSIAN,        1,             60,       HEStd_NotSet, BV,     FIXEDMANUAL,     DFLT,    256,   DFLT,   DFLT,      DFLT, DFLT,             STANDARD, DFLT} },
     { STRING_TEST, "02", {BGVRNS_SCHEME, 256,  2,         DFLT,     BV_DSIZE, BATCH,   GAUSSIAN,        1,             DFLT,     HEStd_NotSet, BV,     FIXEDAUTO,       DFLT,    256,   DFLT,   DFLT,      DFLT, DFLT,             STANDARD, DFLT} },
     { STRING_TEST, "03", {BGVRNS_SCHEME, 256,  2,         DFLT,     BV_DSIZE, BATCH,   GAUSSIAN,        1,             DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTO,    DFLT,    256,   DFLT,   DFLT,      DFLT, DFLT,             STANDARD, DFLT} },
@@ -121,7 +121,7 @@ static std::vector<TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT> test_cases = {
     { STRING_TEST, "15", {BFVRNS_SCHEME, DFLT, DFLT,      DFLT,     20,       BATCH,   GAUSSIAN,        DFLT,          DFLT,     DFLT,         BV,     FIXEDMANUAL,     DFLT,    256,   DFLT,   DFLT,      DFLT, HPSPOVERQ,        EXTENDED, DFLT} },
     { STRING_TEST, "16", {BFVRNS_SCHEME, DFLT, DFLT,      DFLT,     20,       BATCH,   GAUSSIAN,        DFLT,          DFLT,     DFLT,         BV,     FIXEDMANUAL,     DFLT,    256,   DFLT,   DFLT,      DFLT, HPSPOVERQLEVELED, EXTENDED, DFLT} },
     // ==========================================
-    // TestType,       Descr, Scheme,         RDim, MultDepth, SModSize, DSize,    BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech,         EncTech,  pre_mode
+    // TestType,       Descr, Scheme,         RDim, MultDepth, SModSize, DSize,    batch_sz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, scal_tech,        LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech,         enc_tech,  pre_mode
     { COEF_PACKED_TEST, "01", {BGVRNS_SCHEME, 64,   2,         DFLT,     BV_DSIZE, BATCH,   GAUSSIAN,        1,             60,       HEStd_NotSet, BV,     FIXEDMANUAL,     DFLT,    512,   DFLT,   DFLT,      DFLT, DFLT,             STANDARD, DFLT} },
     { COEF_PACKED_TEST, "02", {BGVRNS_SCHEME, 64,   2,         DFLT,     BV_DSIZE, BATCH,   GAUSSIAN,        1,             DFLT,     HEStd_NotSet, BV,     FIXEDAUTO,       DFLT,    512,   DFLT,   DFLT,      DFLT, DFLT,             STANDARD, DFLT} },
     { COEF_PACKED_TEST, "03", {BGVRNS_SCHEME, 64,   2,         DFLT,     BV_DSIZE, BATCH,   GAUSSIAN,        1,             DFLT,     HEStd_NotSet, BV,     FLEXIBLEAUTO,    DFLT,    512,   DFLT,   DFLT,      DFLT, DFLT,             STANDARD, DFLT} },
@@ -234,7 +234,7 @@ TEST_P(UTGENERAL_ENCRYPT_DECRYPT, ENCRYPT) {
         encryption_coef_packed(test, test.build_test_name());
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTGENERAL_ENCRYPT_DECRYPT, ::testing::ValuesIn(test_cases), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTGENERAL_ENCRYPT_DECRYPT, ::testing::ValuesIn(test_cases), make_test_name);
 
 // Default-initializes T in storage pre-filled with 0xFF bytes, so a member without an initializer
 // keeps a non-zero garbage value instead of passing the check by chance.

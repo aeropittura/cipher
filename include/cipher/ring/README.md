@@ -1,8 +1,8 @@
-# Cipher Lattice Cryptography Library
+# Cipher Ring (Lattice) Layer
 
 We provide a brief description of the lattice layer, the various classes of polynomial representations that we support,
 and a brief overview of the files present. However, we recommend referring to
-our [ReadTheDocs - core/lattice](https://openfhe-development.readthedocs.io/en/latest/assets/sphinx_rsts/modules/core/core_lattice.html)
+the [core lattice documentation](../../../docs/sphinx_rsts/modules/core/lattice/core_lattice.rst)
 for more in-depth information.
 
 ## The Lattice Layer
@@ -20,11 +20,11 @@ The three main data classes in this layer are `Poly`, `NativePoly` and `RnsPoly`
 
 - A `Poly` is a single-CRT representation using BigInteger types as coefficients, and supporting a large modulus q.
 
-- A `NativePoly` is a single-CRT representation using NativeInteger types, which limites the size of the coefficients and
+- A `NativePoly` is a single-CRT representation using NativeInteger types, which limits the size of the coefficients and
   the modulus q to 64 bits.
 
 - A `RnsPoly` is a double-CRT representation. In practice, this means that Poly uses a single large modulus q, while
-  DCRTPoly uses multiple smaller moduli. Hence, Poly runs slower than DCRTPoly because DCRTPoly operations can be easier
+  RnsPoly uses multiple smaller moduli. Hence, Poly runs slower than RnsPoly because RnsPoly operations can be easier
   to fit into the native bitwidths of commodity processors.
 
 ## File Listing
@@ -41,45 +41,45 @@ flowchart BT
 
 ```
 
-[elemparams.h](backend/element_params.h):
+[element_params.h](backend/element_params.h):
 
 - a simple class to contain ring element parameters.
 
-[ilparams.h](backend/standard/poly_params.h)
+[poly_params.h](backend/standard/poly_params.h)
 
 - parameter class for basic single-CRT lattice parameters.
-- Inherits from [elemparams.h](backend/element_params.h)
+- Inherits from [element_params.h](backend/element_params.h)
 
-[ildcrtparams.h](backend/standard/rns_params.h):
+[rns_params.h](backend/standard/rns_params.h):
 
 - parameter class for double-CRT lattice parameters.
-- Inherits from [ilparams.h](backend/standard/poly_params.h)
+- Inherits from [poly_params.h](backend/standard/poly_params.h)
 
 ### Element Classes
 
 ```mermaid
 flowchart BT
-    A[RingElement<br> - Ideal Lattice Elements </br>] --> B[PolyImpl <br> - elements from ideal lattices using a single_value-CRT representation </br>];
+    A[RingElement<br> - Ideal Lattice Elements </br>] --> B[PolyImpl <br> - elements from ideal lattices using a single-CRT representation </br>];
     A[RingElement<br> - Ideal Lattice Elements </br>] --> C[RnsPolyImpl <br> - elements from ideal lattices using a double-CRT representation</br>]
 ```
 
-[ilelement.h](element.h):
+[element.h](element.h):
 
 - This file presents a basic interface class for elements from ideal lattices.
 
 [poly.h](backend/standard/poly.h)
 
 - These files present a basic class for `Poly`, elements from ideal lattices using a single-CRT representation.
-- This class inherits from the class in [ilelement.h](element.h).
+- This class inherits from the class in [element.h](element.h).
 - This file also defines a `NativePoly`, which is simply a `Poly` using `NativeInteger` coefficients. A `NativePoly` is an
-  important part of a DCRTPoly.
+  important part of an RnsPoly.
 
-[dcrtpoly.h](backend)
+[rns_poly.h](backend/standard/rns_poly.h)
 
 - This file presents a basic class for `RnsPoly`(elements from ideal lattices using a double-CRT representation).
-- This class inherits from the class in [ilelement.h](element.h).
-- NOTE: this is backend-dependent. To view more information open the `hal` folder.
-- NOTE: [lat-hal](backend.h) provides functionality to swap between our different lattice backends.
+- This class inherits from the class in [element.h](element.h).
+- NOTE: this is backend-dependent. To view more information open the [backend](backend) folder.
+- NOTE: [backend.h](backend.h) provides functionality to swap between our different lattice backends.
 
 ### Trapdoors
 
@@ -89,16 +89,16 @@ flowchart BT
   in [Implementing Conjunction Obfuscation under Entropic Ring LWE](https://eprint.iacr.org/2017/844.pdf),
   [Building an Efficient Lattice Gadget Toolkit: Subgaussian Sampling and More](https://eprint.iacr.org/2018/946),
   and [Implementing Token-Based Obfuscation under (Ring) LWE](https://eprint.iacr.org/2018/1222.pdf)
-- NOTE: Uses [dgsampling](gaussian_sampling.h) to implement the algorithms in the aforementioned papers
+- NOTE: Uses [gaussian_sampling.h](gaussian_sampling.h) to implement the algorithms in the aforementioned papers
 
-[trapdoorparameters.h](trapdoor_params.h)
+[trapdoor_params.h](trapdoor_params.h)
 
 - Parameter definitions for trapdoor-related schemes (GPV signature, IBE, ABE)
 - Uses [trapdoor.h](trapdoor.h)
 
 ### Misc.
 
-[dgsampling.h](gaussian_sampling.h)
+[gaussian_sampling.h](gaussian_sampling.h)
 
 - Provides detailed algorithms for G-sampling and perturbation sampling as described
   in [Implementing Conjunction Obfuscation under Entropic Ring LWE](https://eprint.iacr.org/2017/844.pdf),
@@ -109,7 +109,7 @@ flowchart BT
 
 - Represents and defines power-of-2 fields
 
-[stdlatticeparms.h](standard_params.h)
+[standard_params.h](standard_params.h)
 
 - Header for the standard values for Lattice Parms, as determined
   by [Homomorphic Encryption Org](https://homomorphicencryption.org)

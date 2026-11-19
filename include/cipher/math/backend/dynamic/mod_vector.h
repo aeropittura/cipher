@@ -320,10 +320,10 @@ class mubintvec final : public cipher::BigVectorInterface<mubintvec<ubint_el_t>,
     void lazy_switch_modulus(const ubint_el_t& value);
 
     mubintvec& mult_acc_eq_no_check(const mubintvec& a, const mubintvec& b) {
-        CIPHER_THROW("MultAccEqNoCheck() not implemented for mubintvecdyn");
+        CIPHER_THROW("mult_acc_eq_no_check() not implemented for mubintvecdyn");
     }
     mubintvec& mult_acc_eq_no_check(const mubintvec& v, const ubint_el_t& i) {
-        CIPHER_THROW("MultAccEqNoCheck() not implemented for mubintvecdyn");
+        CIPHER_THROW("mult_acc_eq_no_check() not implemented for mubintvecdyn");
     }
 
     /**
@@ -333,7 +333,7 @@ class mubintvec final : public cipher::BigVectorInterface<mubintvec<ubint_el_t>,
      */
     const ubint_el_t& get_modulus() const {
         if (modulus_state_ != State::INITIALIZED)
-            CIPHER_THROW("GetModulus() on uninitialized mubintvec");
+            CIPHER_THROW("get_modulus() on uninitialized mubintvec");
         return modulus_;
     }
 

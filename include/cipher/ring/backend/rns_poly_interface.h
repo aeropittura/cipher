@@ -84,7 +84,7 @@ namespace cipher {
 template <typename DerivedType, typename BigVecType, typename LilVecType,
           template <typename LVT> typename RnsContainerType>
 class RnsPolyInterface : public RingElement<DerivedType, BigVecType> {
-    constexpr static std::string_view NOT_IMPLEMENTED_ERROR = "This function is not implemented for DCRTPoly";
+    constexpr static std::string_view NOT_IMPLEMENTED_ERROR = "This function is not implemented for RnsPoly";
 
   public:
     using BigIntType = typename BigVecType::Integer;

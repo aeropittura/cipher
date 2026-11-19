@@ -223,12 +223,12 @@ ubint<limb_t>& ubint<limb_t>::divided_by_eq(const ubint& b) {
 }
 
 template <typename limb_t>
-ubint<limb_t> ubint<limb_t>::Exp(uint32_t p) const {
+ubint<limb_t> ubint<limb_t>::raise_to(uint32_t p) const {
     if (p == 0)
         return ubint(1);
     if (p == 1)
         return *this;
-    ubint tmp{ubint<limb_t>::Exp(p >> 1)};
+    ubint tmp{ubint<limb_t>::raise_to(p >> 1)};
     tmp = tmp.mul(tmp);
     if (p & 0x1)
         return tmp.mul(*this);
@@ -238,7 +238,7 @@ ubint<limb_t> ubint<limb_t>::Exp(uint32_t p) const {
 template <typename limb_t>
 ubint<limb_t> ubint<limb_t>::multiply_and_round(const ubint& p, const ubint& q) const {
     if (q.msb_ == 0)
-        CIPHER_THROW("MultiplyAndRound() Divisor is zero");
+        CIPHER_THROW("multiply_and_round() Divisor is zero");
     auto t{ubint<limb_t>::mul(p)};
     ubint half_q(q >> 1);
     if (t <= half_q)
@@ -255,7 +255,7 @@ ubint<limb_t> ubint<limb_t>::multiply_and_round(const ubint& p, const ubint& q) 
 template <typename limb_t>
 ubint<limb_t> ubint<limb_t>::divide_and_round(const ubint& q) const {
     if (q.msb_ == 0)
-        CIPHER_THROW("DivideAndRound() Divisor is zero");
+        CIPHER_THROW("divide_and_round() Divisor is zero");
     ubint half_q(q >> 1);
     if (*this <= half_q)
         return ubint();
@@ -271,7 +271,7 @@ ubint<limb_t> ubint<limb_t>::divide_and_round(const ubint& q) const {
 template <typename limb_t>
 ubint<limb_t> ubint<limb_t>::mod(const ubint& modulus) const {
     if (modulus.msb_ == 0)
-        CIPHER_THROW("Mod() using zero modulus");
+        CIPHER_THROW("mod() using zero modulus");
     if (*this < modulus)
         return *this;
     if (modulus.msb_ == 2 && modulus.value_[0] == 2)
@@ -284,7 +284,7 @@ ubint<limb_t> ubint<limb_t>::mod(const ubint& modulus) const {
 template <typename limb_t>
 ubint<limb_t>& ubint<limb_t>::mod_eq(const ubint& modulus) {
     if (modulus.msb_ == 0)
-        CIPHER_THROW("Mod() using zero modulus");
+        CIPHER_THROW("mod() using zero modulus");
     if (*this < modulus)
         return *this;
     if (modulus.msb_ == 2 && modulus.value_[0] == 2) {
@@ -436,7 +436,7 @@ ubint<limb_t> ubint<limb_t>::mod_inverse(const ubint& modulus) const {
     quotient.emplace_back(std::move(q));
 
     if (mod_back.msb_ == 0) {
-        std::string msg = ubint<limb_t>::to_string() + " does not have a ModInverse using " + modulus.to_string();
+        std::string msg = ubint<limb_t>::to_string() + " does not have a mod_inverse using " + modulus.to_string();
         CIPHER_THROW(msg);
     }
 
@@ -600,7 +600,7 @@ float ubint<limb_t>::convert_to_float() const {
     try {
         ans = std::stof(ubint<limb_t>::to_string());
     } catch (const std::exception& e) {
-        CIPHER_THROW("ConvertToFloat() parse error converting to float");
+        CIPHER_THROW("convert_to_float() parse error converting to float");
     }
     return ans;
 }
@@ -618,7 +618,7 @@ double ubint<limb_t>::convert_to_double() const {
         for (uint32_t i = 0; i < ceil_int; ++i, power *= factor)
             ans += power * value_[i];
     } catch (const std::exception& e) {
-        CIPHER_THROW("ConvertToDouble() parse error converting to double");
+        CIPHER_THROW("convert_to_double() parse error converting to double");
     }
     return ans;
 }

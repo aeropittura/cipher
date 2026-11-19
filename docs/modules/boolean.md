@@ -1,13 +1,13 @@
-# Directory Structure
+# Boolean FHE (`Cipher::boolean`)
 
-## Examples:
+## Examples
 
-We provide the following classes of examples for symmetric encryption and public-key encryption:
+The examples are in [examples/boolean](../../examples/boolean); the `pke` subdirectory holds the public-key variants.
 
 ### Simple Boolean
 
 - evaluation of binary gates and multi-input gates
-- bootstrapping for `AP` (DM) and `GINX` (CGGI) and `LMKCDEY`
+- bootstrapping for `AP` (DM), `GINX` (CGGI) and `LMKCDEY`
 - serialization to binary and json formats
 
 ### Evaluation of functions
@@ -20,10 +20,10 @@ in [Large-Precision Homomorphic Sign Evaluation using FHEW/TFHE Bootstrapping](h
 - arbitrary function(lookup table) _f: Z<sub>p</sub> -> Z<sub>p</sub>_ on the input ciphertext
 - sign function to get the MSB of an input
 
-## include
+## Headers
 
-- Header files
+- [include/cipher/boolean](../../include/cipher/boolean)
 
-## lib
+## Implementation
 
-- implementation of the header files
+- [source/boolean](../../source/boolean)

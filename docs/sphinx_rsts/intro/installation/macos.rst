@@ -1,6 +1,6 @@
 Installing Cipher on MacOS
 ====================================
-These instructions were tested in macOS Mojave but should also work for other recent releases. It is assumed that the clang compiler that comes with Xcode is used for building Cipher.
+These instructions are exercised by Cipher's CI on macOS 15 and should also work for other recent releases. It is assumed that the clang compiler that comes with Xcode is used for building Cipher.
 
 1. Install the Mac terminal command line functions if needed (type ``git`` at the command line to trigger the install). Then install home-brew if not already present:
 
@@ -15,53 +15,52 @@ These instructions were tested in macOS Mojave but should also work for other re
     brew install cmake
     brew install libomp
 
-3. Clone the repo.
-
-4. Create a directory where the binaries will be built. The typical choice is a subfolder ``build``.
+3. Clone the repository and fetch the submodules:
 
 ::
 
-    mkdir build
-    cd build
+    git submodule update --init extern/cereal extern/google-test extern/google-benchmark
 
-Cmake will check for any system dependencies that are needed for the build process. Note there are issues with some versions of clang/OMP and regular expressions that may cause cmake to fail.  The general fix is to run cmake twice. There are two distinct cases.
+4. Configure a build directory. The typical choice is a subfolder ``build``. CMake will check for any system
+   dependencies that are needed for the build process.
 
 ::
 
-    cmake ..
+    cmake -S . -B build
+
+If CMake cannot find OpenMP (for example, because ``libomp`` is not installed), configure with
+``-DCIPHER_WITH_OPENMP=OFF``. If ``libomp`` comes from MacPorts rather than Homebrew, add ``-DCIPHER_USE_MACPORTS=ON``.
 
 .. note:: If you get an error about a missing regular expression backend, run the following commands
 
     ::
 
-        cmake -DCMAKE_CROSSCOMPILING=1 -DRUN_HAVE_STD_REGEX=0 -DRUN_HAVE_POSIX_REGEX=0 ..
-        cmake ..
+        cmake -S . -B build -DCMAKE_CROSSCOMPILING=1 -DRUN_HAVE_STD_REGEX=0 -DRUN_HAVE_POSIX_REGEX=0
+        cmake -S . -B build
 
-  If you get an error about OMP asking to rerun cmake, just run "cmake .." once more.
-
-5. The Cipher distribution includes some external libraries, such as ``GMP``, ``NTL`` and ``tcmalloc``. If you want to use any of these libraries:
-    a) install ``autoconf`` using Homebrew:
+5. Optional dependencies: NTL/GMP (math backend 6) must be installed by the user (see :ref:`gmp_ntl_install`);
+   tcmalloc is built from the bundled ``extern/gperftools`` submodule. Both need ``autoconf``:
 
     ::
 
         brew install autoconf
 
-    b) enable them when you run_fn cmake to force them to build (see instructions on cmake options)
+   Then enable them when you run cmake (``-DCIPHER_WITH_NTL=ON``, ``-DCIPHER_WITH_TCM=ON``; see :ref:`cmake_in_cipher`).
 
-6. Build Cipher by running the following command (this will take few minutes; using the ``-j #`` make command-line flag is suggested to speed up the build, where # is the number of cores on your machine).
+6. Build Cipher by running the following command (this will take a few minutes; using the ``-j #`` flag is suggested to speed up the build, where # is the number of cores on your machine).
 
 ::
 
-    make
+    cmake --build build -j #
 
 7. Install Cipher in a system directory (if desired or for production purposes)
 
 ::
 
-    make install
+    cmake --install build
 
-You would probably need to run ``sudo make install`` unless you are specifying some other install location. You can change the install location by running
-``cmake -DCMAKE_INSTALL_PREFIX=/your/path ..``
+You would probably need to run ``sudo cmake --install build`` unless you are specifying some other install location. You can change the install location by running
+``cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/your/path``
 
 Testing and cleaning the build
 ------------------------------
@@ -70,16 +69,16 @@ Run unit tests to make sure all capabilities operate as expected
 
 ::
 
-    make testall
+    ctest --test-dir build
 
 Run sample code to test, e.g.,
 
 ::
 
-    bin/examples/pke/simple-integers
+    build/bin/examples/fhe/simple_integers
 
-To remove the files built by make, you can execute
+To remove the files built by the build tool, you can execute
 
 ::
 
-    make clean
+    cmake --build build --target clean

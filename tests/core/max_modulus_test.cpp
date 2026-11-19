@@ -74,19 +74,20 @@ TEST(UTMaxModulus, mod_mul_family_at_max_modulus_size) {
             NativeInteger expect{from_ref((Ref(a) * Ref(b)).mod(q_ref))};
 
             EXPECT_EQ(a.mod_mul(b, q), expect) << "ModMul bits=" << bits;
-            EXPECT_EQ(a.mod_mul(b, q, mu), expect) << "ModMul(mu) bits=" << bits;
-            EXPECT_EQ(a.mod_mul_fast(b, q), expect) << "ModMulFast bits=" << bits;
-            EXPECT_EQ(a.mod_mul_fast(b, q, mu), expect) << "ModMulFast(mu) bits=" << bits;
+            EXPECT_EQ(a.mod_mul(b, q, mu), expect) << "mod_mul(mu) bits=" << bits;
+            EXPECT_EQ(a.mod_mul_fast(b, q), expect) << "mod_mul_fast bits=" << bits;
+            EXPECT_EQ(a.mod_mul_fast(b, q, mu), expect) << "mod_mul_fast(mu) bits=" << bits;
             NativeInteger c{a};
             c.mod_mul_fast_eq(b, q, mu);
-            EXPECT_EQ(c, expect) << "ModMulFastEq(mu) bits=" << bits;
-            EXPECT_EQ(a.mod_mul_fast_const(b, q, b.prep_mod_mul_const(q)), expect) << "ModMulFastConst bits=" << bits;
+            EXPECT_EQ(c, expect) << "mod_mul_fast_eq(mu) bits=" << bits;
+            EXPECT_EQ(a.mod_mul_fast_const(b, q, b.prep_mod_mul_const(q)), expect)
+                    << "mod_mul_fast_const bits=" << bits;
 
             // unreduced input through the Barrett normalization path (value in [q, 2q))
             NativeInteger u{a.add(q)};
-            EXPECT_EQ(u.mod(q, mu), a) << "Mod(mu) unreduced bits=" << bits;
-            EXPECT_EQ(u.mod_add(b, q, mu), a.mod_add(b, q)) << "ModAdd(mu) unreduced bits=" << bits;
-            EXPECT_EQ(u.mod_sub(b, q, mu), a.mod_sub(b, q)) << "ModSub(mu) unreduced bits=" << bits;
+            EXPECT_EQ(u.mod(q, mu), a) << "mod(mu) unreduced bits=" << bits;
+            EXPECT_EQ(u.mod_add(b, q, mu), a.mod_add(b, q)) << "mod_add(mu) unreduced bits=" << bits;
+            EXPECT_EQ(u.mod_sub(b, q, mu), a.mod_sub(b, q)) << "mod_sub(mu) unreduced bits=" << bits;
         }
 
         // vector-level multiply (hoisted-Barrett loop)
@@ -96,12 +97,12 @@ TEST(UTMaxModulus, mod_mul_family_at_max_modulus_size) {
         }
 
         // Fermat: 3^(q-1) = 1 mod q for prime q
-        EXPECT_EQ(NativeInteger(3).mod_exp(q - 1, q), NativeInteger(1)) << "ModExp bits=" << bits;
+        EXPECT_EQ(NativeInteger(3).mod_exp(q - 1, q), NativeInteger(1)) << "mod_exp bits=" << bits;
     }
 
     // first_prime scans candidates (and returns a prime) one bit ABOVE the cap, so
     // Miller-Rabin's mod_exp/mod_mul must be exact at MAX_MODULUS_SIZE + 1 bits
     NativeInteger p1{first_prime<NativeInteger>(MAX_MODULUS_SIZE, 65536)};
     EXPECT_EQ(p1.get_msb(), uint32_t(MAX_MODULUS_SIZE) + 1);
-    EXPECT_EQ(NativeInteger(3).mod_exp(p1 - 1, p1), NativeInteger(1)) << "ModExp above cap";
+    EXPECT_EQ(NativeInteger(3).mod_exp(p1 - 1, p1), NativeInteger(1)) << "mod_exp above cap";
 }

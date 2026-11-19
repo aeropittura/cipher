@@ -58,7 +58,7 @@ Ciphertext<RnsPoly> RnsMultiparty::multiparty_decrypt_lead(ConstCiphertext<RnsPo
     RnsPoly noise;
     if (crypto_params->get_multiparty_mode() == NOISE_FLOODING_MULTIPARTY) {
         if (size_ql < 3) {
-            CIPHER_THROW("sizeQl " + std::to_string(size_ql) +
+            CIPHER_THROW("size_ql " + std::to_string(size_ql) +
                          " must be at least 3 in NOISE_FLOODING_MULTIPARTY mode.");
         }
         DugType dug;
@@ -120,7 +120,7 @@ Ciphertext<RnsPoly> RnsMultiparty::multiparty_decrypt_main(ConstCiphertext<RnsPo
     RnsPoly noise;
     if (crypto_params->get_multiparty_mode() == NOISE_FLOODING_MULTIPARTY) {
         if (size_ql < 3) {
-            CIPHER_THROW("sizeQl " + std::to_string(size_ql) +
+            CIPHER_THROW("size_ql " + std::to_string(size_ql) +
                          " must be at least 3 in NOISE_FLOODING_MULTIPARTY mode.");
         }
         DugType dug;
@@ -231,8 +231,8 @@ EvalKey<RnsPoly> RnsMultiparty::multi_mult_eval_key(PrivateKey<RnsPoly> private_
 // If |coefficient| > q/4, then add q/2 to it
 // The guarantees that rounded c_0 + c_1 < q/2,
 // it prevents an overflow during interactive bootstrapping
-void polynomial_round(RnsPoly& dcrtpoly) {
-    const uint32_t NUM_TOWERS = dcrtpoly.get_num_of_elements();
+void polynomial_round(RnsPoly& rns_poly) {
+    const uint32_t NUM_TOWERS = rns_poly.get_num_of_elements();
     if (2 != NUM_TOWERS) {
         CIPHER_THROW("The input polynomial has " + std::to_string(NUM_TOWERS) + " instead of 2 RNS limbs");
     }
@@ -240,7 +240,7 @@ void polynomial_round(RnsPoly& dcrtpoly) {
     std::vector<NativeInteger> q(NUM_TOWERS);
     std::vector<NativePoly> poly(NUM_TOWERS);
     for (size_t i = 0; i < NUM_TOWERS; i++) {
-        poly[i] = dcrtpoly.get_element_at_index(i);
+        poly[i] = rns_poly.get_element_at_index(i);
         q[i] = poly[i].get_modulus();
     }
 
@@ -264,7 +264,7 @@ void polynomial_round(RnsPoly& dcrtpoly) {
                        static_cast<NativeInteger::DNativeInt>(q[1].convert_to_int());
         const auto q1quart = Q / 4;
         const auto q3quart = 3 * Q / 4;
-        for (size_t k = 0; k < dcrtpoly.get_ring_dimension(); k++) {
+        for (size_t k = 0; k < rns_poly.get_ring_dimension(); k++) {
             NativeInteger::DNativeInt x128 =
                     static_cast<NativeInteger::DNativeInt>(
                             (poly[0][k].mod_mul_fast_const(q_inv[0], q[0], precon[0])).convert_to_int()) *
@@ -284,7 +284,7 @@ void polynomial_round(RnsPoly& dcrtpoly) {
         const BigInteger q3quart{(BigInteger(3) * qbig) / BigInteger(4)};
         const BigInteger q0big{q[0].convert_to_int()};
         const BigInteger q1big{q[1].convert_to_int()};
-        for (size_t k = 0; k < dcrtpoly.get_ring_dimension(); k++) {
+        for (size_t k = 0; k < rns_poly.get_ring_dimension(); k++) {
             BigInteger x{BigInteger((poly[0][k].mod_mul_fast_const(q_inv[0], q[0], precon[0])).convert_to_int()) *
                          q1big};
             x += BigInteger((poly[1][k].mod_mul_fast_const(q_inv[1], q[1], precon[1])).convert_to_int()) * q0big;
@@ -297,20 +297,20 @@ void polynomial_round(RnsPoly& dcrtpoly) {
         }
     }
 
-    dcrtpoly.set_element_at_index(0, poly[0]);
-    dcrtpoly.set_element_at_index(1, poly[1]);
+    rns_poly.set_element_at_index(0, poly[0]);
+    rns_poly.set_element_at_index(1, poly[1]);
 }
 
 // Used as a subroutine in interactive bootstrapping.
 // Extends a RnsPoly with 2 RNS limbs (from q) to the full
 // RNS basis (to Q). The exact basis extension RNS procedure from
 // https://eprint.iacr.org/2018/117 is used.
-void extend_basis(RnsPoly& dcrtpoly, const std::shared_ptr<RnsPoly::Params> params_qp) {
-    if (dcrtpoly.get_num_of_elements() != 2) {
+void extend_basis(RnsPoly& rns_poly, const std::shared_ptr<RnsPoly::Params> params_qp) {
+    if (rns_poly.get_num_of_elements() != 2) {
         CIPHER_THROW(" The input polynomial should have 2 RNS limbs");
     }
 
-    const auto params_q = dcrtpoly.get_params();
+    const auto params_q = rns_poly.get_params();
     uint32_t size_qp = params_qp->get_params().size();
     uint32_t size_q = params_q->get_params().size();
     uint32_t size_p = size_qp - size_q;
@@ -338,7 +338,7 @@ void extend_basis(RnsPoly& dcrtpoly, const std::shared_ptr<RnsPoly::Params> para
     for (auto& v : q_hat_modp)
         v.reserve(size_q);
 
-    const BigInteger modulus_q{dcrtpoly.get_modulus()};
+    const BigInteger modulus_q{rns_poly.get_modulus()};
 
     for (uint32_t i = 0; i < size_q; i++) {
         const BigInteger q_hati{modulus_q / BigInteger(moduli_q[i])};
@@ -379,7 +379,7 @@ void extend_basis(RnsPoly& dcrtpoly, const std::shared_ptr<RnsPoly::Params> para
     }
 
     // Calls the exact RNS basis extension procedure
-    dcrtpoly.expand_crt_basis(params_qp, params_p, q_hat_inv_modq, q_hat_inv_modq_precon, q_hat_modp, alpha_q_modp,
+    rns_poly.expand_crt_basis(params_qp, params_p, q_hat_inv_modq, q_hat_inv_modq_precon, q_hat_modp, alpha_q_modp,
                               modp_barrett_mu, q_inv, Format::COEFFICIENT);
 }
 

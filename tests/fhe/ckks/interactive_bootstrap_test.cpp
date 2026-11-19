@@ -113,7 +113,7 @@ struct TEST_CASE_UTCKKSRNS_INTERACTIVE_BOOT : public BaseTestCase {
 
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
-static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNS_INTERACTIVE_BOOT>& test_param_info) {
+static auto make_test_name = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNS_INTERACTIVE_BOOT>& test_param_info) {
     return test_param_info.param.build_test_name();
 };
 
@@ -137,7 +137,7 @@ static std::vector<TEST_CASE_UTCKKSRNS_INTERACTIVE_BOOT> get_test_data(std::stri
         test_case_value.test_case_type = convert_string_to_case_type(*it);
         test_case_value.description = *(++it);
 
-        // size_t num_overrides = test_case_value.populateCryptoContextParams(++it);
+        // size_t num_overrides = test_case_value.populate_crypto_context_params(++it);
         size_t num_overrides = test_case_value.set_crypto_context_params_overrides(++it);
 
         it += num_overrides;
@@ -680,4 +680,4 @@ TEST_P(UTCKKSRNS_INTERACTIVE_BOOT, InteractiveBoot) {
 }
 
 INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_INTERACTIVE_BOOT,
-                         ::testing::ValuesIn(test_cases_utckksrns_interactive_boot), testName);
+                         ::testing::ValuesIn(test_cases_utckksrns_interactive_boot), make_test_name);

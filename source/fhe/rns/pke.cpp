@@ -103,8 +103,8 @@ DecryptResult RnsPke::decrypt(ConstCiphertext<RnsPoly> ciphertext, const Private
     const size_t size_ql = b.get_params()->get_params().size();
     if (size_ql != 1) {
         CIPHER_THROW(
-                "sizeQl " + std::to_string(size_ql) +
-                "!= 1. If sizeQl = 0, consider increasing the depth. If sizeQl > 1, check parameters (this is unsupported for NativePoly).");
+                "size_ql " + std::to_string(size_ql) +
+                "!= 1. If size_ql = 0, consider increasing the depth. If size_ql > 1, check parameters (this is unsupported for NativePoly).");
     }
 
     *plaintext = b.get_element_at_index(0);

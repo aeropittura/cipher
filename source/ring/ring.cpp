@@ -47,7 +47,7 @@
 #include ILPARAMS_IMPLEMENTATION
 #include ILDCRTPARAMS_IMPLEMENTATION
 #include POLY_IMPLEMENTATION
-#include DCRTPOLY_IMPLEMENTATION
+#include RNS_POLY_IMPLEMENTATION
 
 //---------------------------------------------------------------------------------------------
 namespace cipher {
@@ -68,7 +68,7 @@ SPLIT64_FOR_TYPE(NativePoly)
 SPLIT64ALT_FOR_TYPE(NativePoly)
 SPLIT32ALT_FOR_TYPE(NativePoly)
 template Matrix<NativeVector> rotate_vec_result(Matrix<NativePoly> const& in_mat);
-template Matrix<NativeInteger> Rotate(Matrix<NativePoly> const& in_mat);
+template Matrix<NativeInteger> rotate_matrix(Matrix<NativePoly> const& in_mat);
 
 template class Matrix<Field2n>;
 
@@ -88,21 +88,21 @@ template class ElementParams<M2Integer>;
 MAKE_ILPARAMS_TYPE(M2Integer)
 MAKE_ILDCRTPARAMS_TYPE(M2Integer)
 MAKE_POLY_TYPE(M2Vector)
-MAKE_DCRTPOLY_TYPE(M2Vector)
+MAKE_RNS_POLY_TYPE(M2Vector)
 
 template class Matrix<M2Poly>;
 SPLIT64_FOR_TYPE(M2Poly)
 SPLIT64ALT_FOR_TYPE(M2Poly)
 SPLIT32ALT_FOR_TYPE(M2Poly)
 template Matrix<M2Vector> rotate_vec_result(Matrix<M2Poly> const& in_mat);
-template Matrix<M2Integer> Rotate(Matrix<M2Poly> const& in_mat);
+template Matrix<M2Integer> rotate_matrix(Matrix<M2Poly> const& in_mat);
 
 template class Matrix<M2RnsPoly>;
 SPLIT64_FOR_TYPE(M2RnsPoly)
 SPLIT64ALT_FOR_TYPE(M2RnsPoly)
 SPLIT32ALT_FOR_TYPE(M2RnsPoly)
 template Matrix<M2Vector> rotate_vec_result(Matrix<M2RnsPoly> const& in_mat);
-template Matrix<M2Integer> Rotate(Matrix<M2RnsPoly> const& in_mat);
+template Matrix<M2Integer> rotate_matrix(Matrix<M2RnsPoly> const& in_mat);
 
 }  // namespace cipher
 
@@ -122,21 +122,21 @@ template class ElementParams<M4Integer>;
 MAKE_ILPARAMS_TYPE(M4Integer)
 MAKE_ILDCRTPARAMS_TYPE(M4Integer)
 MAKE_POLY_TYPE(M4Vector)
-MAKE_DCRTPOLY_TYPE(M4Vector)
+MAKE_RNS_POLY_TYPE(M4Vector)
 
 template class Matrix<M4Poly>;
 SPLIT64_FOR_TYPE(M4Poly)
 SPLIT64ALT_FOR_TYPE(M4Poly)
 SPLIT32ALT_FOR_TYPE(M4Poly)
 template Matrix<M4Vector> rotate_vec_result(Matrix<M4Poly> const& in_mat);
-template Matrix<M4Integer> Rotate(Matrix<M4Poly> const& in_mat);
+template Matrix<M4Integer> rotate_matrix(Matrix<M4Poly> const& in_mat);
 
 template class Matrix<M4RnsPoly>;
 SPLIT64_FOR_TYPE(M4RnsPoly)
 SPLIT64ALT_FOR_TYPE(M4RnsPoly)
 SPLIT32ALT_FOR_TYPE(M4RnsPoly)
 template Matrix<M4Vector> rotate_vec_result(Matrix<M4RnsPoly> const& in_mat);
-template Matrix<M4Integer> Rotate(Matrix<M4RnsPoly> const& in_mat);
+template Matrix<M4Integer> rotate_matrix(Matrix<M4RnsPoly> const& in_mat);
 
 }  // namespace cipher
 
@@ -156,21 +156,21 @@ template class ElementParams<M6Integer>;
 MAKE_ILPARAMS_TYPE(M6Integer)
 MAKE_ILDCRTPARAMS_TYPE(M6Integer)
 MAKE_POLY_TYPE(M6Vector)
-MAKE_DCRTPOLY_TYPE(M6Vector)
+MAKE_RNS_POLY_TYPE(M6Vector)
 
 template class Matrix<M6Poly>;
 SPLIT64_FOR_TYPE(M6Poly)
 SPLIT64ALT_FOR_TYPE(M6Poly)
 SPLIT32ALT_FOR_TYPE(M6Poly)
 template Matrix<M6Vector> rotate_vec_result(Matrix<M6Poly> const& in_mat);
-template Matrix<M6Integer> Rotate(Matrix<M6Poly> const& in_mat);
+template Matrix<M6Integer> rotate_matrix(Matrix<M6Poly> const& in_mat);
 
 template class Matrix<M6RnsPoly>;
 SPLIT64_FOR_TYPE(M6RnsPoly)
 SPLIT64ALT_FOR_TYPE(M6RnsPoly)
 SPLIT32ALT_FOR_TYPE(M6RnsPoly)
 template Matrix<M6Vector> rotate_vec_result(Matrix<M6RnsPoly> const& in_mat);
-template Matrix<M6Integer> Rotate(Matrix<M6RnsPoly> const& in_mat);
+template Matrix<M6Integer> rotate_matrix(Matrix<M6RnsPoly> const& in_mat);
 
 }  // namespace cipher
 

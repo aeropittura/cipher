@@ -51,19 +51,19 @@ enum TEST_CASE_TYPE : int {
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
-    std::string typeName;
+    std::string type_name_of;
     switch (type) {
         case EVAL_MULT_SINGLE:
-            typeName = "EVAL_MULT_SINGLE";
+            type_name_of = "EVAL_MULT_SINGLE";
             break;
         case EVAL_ADD_SINGLE:
-            typeName = "EVAL_ADD_SINGLE";
+            type_name_of = "EVAL_ADD_SINGLE";
             break;
         default:
-            typeName = "UNKNOWN";
+            type_name_of = "UNKNOWN";
             break;
     }
-    return os << typeName;
+    return os << type_name_of;
 }
 //===========================================================================================================
 struct TEST_CASE_UTBGVRNS_SHEADVANCED {
@@ -90,7 +90,7 @@ struct TEST_CASE_UTBGVRNS_SHEADVANCED {
 
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
-static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTBGVRNS_SHEADVANCED>& test) {
+static auto make_test_name = [](const testing::TestParamInfo<TEST_CASE_UTBGVRNS_SHEADVANCED>& test) {
     return test.param.build_test_name();
 };
 
@@ -105,13 +105,13 @@ constexpr double STD_DEV = 3.19;
 
 // clang-format off
 static std::vector<TEST_CASE_UTBGVRNS_SHEADVANCED> test_cases_utbgvrns_sheadvanced = {
-    // TestType,       Descr,  Scheme,        RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl, KSTech, ScalTech,        LDigits, PtMod, std_dev,  EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,       Descr,  Scheme,        RDim,     MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl, KSTech, scal_tech,        LDigits, PtMod, std_dev,  EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { EVAL_MULT_SINGLE, "01", {BGVRNS_SCHEME, RING_DIM, DFLT,      DFLT,     DSIZE, DFLT,    DFLT,       DFLT,          DFLT,     DFLT,   DFLT,   FLEXIBLEAUTO,    DFLT,    PTM,   STD_DEV, DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { EVAL_MULT_SINGLE, "02", {BGVRNS_SCHEME, RING_DIM, DFLT,      DFLT,     DSIZE, DFLT,    DFLT,       DFLT,          DFLT,     DFLT,   DFLT,   FIXEDMANUAL,     DFLT,    PTM,   STD_DEV, DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { EVAL_MULT_SINGLE, "03", {BGVRNS_SCHEME, RING_DIM, DFLT,      DFLT,     DSIZE, DFLT,    DFLT,       DFLT,          DFLT,     DFLT,   DFLT,   FIXEDAUTO,       DFLT,    PTM,   STD_DEV, DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { EVAL_MULT_SINGLE, "04", {BGVRNS_SCHEME, RING_DIM, DFLT,      DFLT,     DSIZE, DFLT,    DFLT,       DFLT,          DFLT,     DFLT,   DFLT,   FLEXIBLEAUTOEXT, DFLT,    PTM,   STD_DEV, DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     // ==========================================
-    // TestType,      Descr,  Scheme,        RDim,     MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg,  FModSize, SecLvl, KSTech, ScalTech,        LDigits, PtMod, std_dev,  EvalAddCt, KSCt, MultTech, EncTech, pre_mode
+    // TestType,      Descr,  Scheme,        RDim,     MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg,  FModSize, SecLvl, KSTech, scal_tech,        LDigits, PtMod, std_dev,  EvalAddCt, KSCt, mult_tech, enc_tech, pre_mode
     { EVAL_ADD_SINGLE, "01", {BGVRNS_SCHEME, RING_DIM, DFLT,      DFLT,     DSIZE, DFLT,    DFLT,       DFLT,           DFLT,     DFLT,   DFLT,   FLEXIBLEAUTO,    DFLT,    PTM,   STD_DEV, DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { EVAL_ADD_SINGLE, "02", {BGVRNS_SCHEME, RING_DIM, DFLT,      DFLT,     DSIZE, DFLT,    DFLT,       DFLT,           DFLT,     DFLT,   DFLT,   FIXEDMANUAL,     DFLT,    PTM,   STD_DEV, DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
     { EVAL_ADD_SINGLE, "03", {BGVRNS_SCHEME, RING_DIM, DFLT,      DFLT,     DSIZE, DFLT,    DFLT,       DFLT,           DFLT,     DFLT,   DFLT,   FIXEDAUTO,       DFLT,    PTM,   STD_DEV, DFLT,      DFLT, DFLT,     DFLT,    DFLT}, },
@@ -221,6 +221,6 @@ TEST_P(UTBGVRNS_SHEADVANCED, SHEADVANCED) {
 }
 
 INSTANTIATE_TEST_SUITE_P(UnitTests, UTBGVRNS_SHEADVANCED, ::testing::ValuesIn(test_cases_utbgvrns_sheadvanced),
-                         testName);
+                         make_test_name);
 
 #endif

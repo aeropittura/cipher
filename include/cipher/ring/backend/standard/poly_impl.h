@@ -227,7 +227,7 @@ void PolyImpl<VecType>::set_values(const VecType& values, Format format) {
     if (params_->get_root_of_unity() == Integer(0))
         CIPHER_THROW("Polynomial has a 0 root of unity");
     if (params_->get_ring_dimension() != values.get_length() || params_->get_modulus() != values.get_modulus())
-        CIPHER_THROW("Parameter mismatch on SetValues for Polynomial");
+        CIPHER_THROW("Parameter mismatch on set_values for Polynomial");
     format_ = format;
     values_ = std::make_unique<VecType>(values);
 }
@@ -237,7 +237,7 @@ void PolyImpl<VecType>::set_values(VecType&& values, Format format) {
     if (params_->get_root_of_unity() == Integer(0))
         CIPHER_THROW("Polynomial has a 0 root of unity");
     if (params_->get_ring_dimension() != values.get_length() || params_->get_modulus() != values.get_modulus())
-        CIPHER_THROW("Parameter mismatch on SetValues for Polynomial");
+        CIPHER_THROW("Parameter mismatch on set_values for Polynomial");
     format_ = format;
     values_ = std::make_unique<VecType>(std::move(values));
 }

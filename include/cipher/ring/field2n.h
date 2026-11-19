@@ -236,7 +236,7 @@ class Field2n : public std::vector<std::complex<double>>, public Serializable {
      *
      * @return the size of the element
      */
-    size_t Size() const {
+    size_t element_count() const {
         return this->std::vector<std::complex<double>>::size();
     }
 

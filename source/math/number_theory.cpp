@@ -51,20 +51,20 @@ namespace cipher {
 
 #ifdef CIPHER_WITH_NTL
 // native NTL version
-NTL::myZZ RNG(const NTL::myZZ& modulus) {
+NTL::NtlInteger RNG(const NTL::NtlInteger& modulus) {
     return RandomBnd(modulus);
 }
 
 // define an NTL native implementation
-NTL::myZZ greatest_common_divisor(const NTL::myZZ& a, const NTL::myZZ& b) {
+NTL::NtlInteger greatest_common_divisor(const NTL::NtlInteger& a, const NTL::NtlInteger& b) {
     return GCD(a, b);
 }
 
 // NTL native version
-bool miller_rabin_primality_test(const NTL::myZZ& p, const uint32_t niter) {
-    if (p < NTL::myZZ(2) || ((p != NTL::myZZ(2)) && (p.mod(NTL::myZZ(2)) == NTL::myZZ(0))))
+bool miller_rabin_primality_test(const NTL::NtlInteger& p, const uint32_t niter) {
+    if (p < NTL::NtlInteger(2) || ((p != NTL::NtlInteger(2)) && (p.mod(NTL::NtlInteger(2)) == NTL::NtlInteger(0))))
         return false;
-    if (p == NTL::myZZ(2) || p == NTL::myZZ(3) || p == NTL::myZZ(5))
+    if (p == NTL::NtlInteger(2) || p == NTL::NtlInteger(3) || p == NTL::NtlInteger(5))
         return true;
     return static_cast<bool>(ProbPrime(p, niter));  // TODO: check to see if niter >maxint
 }

@@ -89,11 +89,11 @@ static void run_eval_mult_many_test(CryptoContext<Element> crypto_context, std::
     ////////////////////////////////////////////////////////////
     // Perform the key generation operation.
     ////////////////////////////////////////////////////////////
-    CIPHER_DEBUG("In RunEvalMultManyTest " << msg);
+    CIPHER_DEBUG("In run_eval_mult_many_test " << msg);
     auto key_pair = crypto_context->key_gen();
     CIPHER_DEBUG("keygen");
     ASSERT_TRUE(key_pair.good()) << "Key generation failed!";
-    CIPHER_DEBUG("EvalMultKeysGen");
+    CIPHER_DEBUG("eval_mult_keys_gen");
     // Create evaluation key vector to be used in keyswitching
 
     crypto_context->eval_mult_keys_gen(key_pair.secret_key);
@@ -111,7 +111,7 @@ static void run_eval_mult_many_test(CryptoContext<Element> crypto_context, std::
     std::vector<int64_t> vector_of_ints6 = {30, 24, 18, 12, 6, 0, 30, 24, 18, 12, 6, 0};
     std::vector<int64_t> vector_of_ints7 = {120, 96, 72, 48, 24, 0, 120, 96, 72, 48, 24, 0};
 
-    CIPHER_DEBUG("MakeCoefPackedPlaintext");
+    CIPHER_DEBUG("make_coef_packed_plaintext");
     Plaintext plaintext1 = crypto_context->make_coef_packed_plaintext(vector_of_ints1);
     Plaintext plaintext2 = crypto_context->make_coef_packed_plaintext(vector_of_ints2);
     Plaintext plaintext3 = crypto_context->make_coef_packed_plaintext(vector_of_ints3);
@@ -182,6 +182,6 @@ static void run_eval_mult_many_test(CryptoContext<Element> crypto_context, std::
 
     EXPECT_EQ(*plaintext_mul1, *plaintext_result1) << msg << ".EvalMult gives incorrect results.\n";
     EXPECT_EQ(*plaintext_mul2, *plaintext_result2) << msg << ".EvalMult gives incorrect results.\n";
-    EXPECT_EQ(*plaintext_mul3, *plaintext_result3) << msg << ".EvalMultAndRelinearize gives incorrect results.\n";
-    EXPECT_EQ(*plaintext_mul_many, *plaintext_result3) << msg << ".EvalMultMany gives incorrect results.\n";
+    EXPECT_EQ(*plaintext_mul3, *plaintext_result3) << msg << ".eval_mult_and_relinearize gives incorrect results.\n";
+    EXPECT_EQ(*plaintext_mul_many, *plaintext_result3) << msg << ".eval_mult_many gives incorrect results.\n";
 }

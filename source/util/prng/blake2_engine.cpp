@@ -90,18 +90,18 @@ static void Blake2SeedGenerator(Blake2Engine::blake2_seed_array_t& seed) {
     // location of a heap variable. This seed is relevant only if the
     // implementation of random_device is deterministic (as in older
     // versions of GCC in MinGW)
-    Blake2Engine::blake2_seed_array_t initKey{};
+    Blake2Engine::blake2_seed_array_t init_key{};
     // high-resolution clock typically has a nanosecond tick period
     // Arguably this may give up to 32 bits of entropy as the clock gets
     // recycled every 4.3 seconds
-    initKey[0] = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    init_key[0] = std::chrono::high_resolution_clock::now().time_since_epoch().count();
     // A thread id is often close to being random (on most systems)
-    initKey[1] = std::hash<std::thread::id>{}(std::this_thread::get_id());
+    init_key[1] = std::hash<std::thread::id>{}(std::this_thread::get_id());
     // On a 64-bit machine, the thread id is 64 bits long
     // skip on 32-bit arm architectures
     #if !defined(__arm__) && !defined(__EMSCRIPTEN__)
     if constexpr (sizeof(size_t) == 8)
-        initKey[2] = (std::hash<std::thread::id>{}(std::this_thread::get_id()) >> 32);
+        init_key[2] = (std::hash<std::thread::id>{}(std::this_thread::get_id()) >> 32);
     #endif
     // heap variable; we are going to use up to 64 bits of its memory location as the counter.
     // This will increase the entropy of the PRNG sample
@@ -110,31 +110,31 @@ static void Blake2SeedGenerator(Blake2Engine::blake2_seed_array_t& seed) {
     free(mem);
 
     std::uniform_int_distribution<uint32_t> distribution(0);
-    Blake2Engine gen(initKey, counter);
+    Blake2Engine gen(init_key, counter);
     for (auto& s : seed)
         s = distribution(gen);
 
     Blake2Engine::blake2_seed_array_t rdseed{};
     size_t attempts = 3;
-    bool rdGenPassed = false;
-    for (size_t i = 0; i < attempts && !rdGenPassed; ++i) {
+    bool rd_gen_passed = false;
+    for (size_t i = 0; i < attempts && !rd_gen_passed; ++i) {
         try {
-            std::random_device genR;
+            std::random_device gen_r;
             for (auto& rds : rdseed) {
                 // we use the fact that there is no overflow for unsigned integers
                 // (from C++ standard) i.e., arithmetic mod 2^32 is performed. For
                 // the seed to be random, it is sufficient for one of the two
                 // samples below to be random. In almost all practical cases,
-                // distribution(genR) is random. We add distribution(gen) just in
+                // distribution(gen_r) is random. We add distribution(gen) just in
                 // case there is an implementation issue with random_device (as in
                 // older MinGW systems).
-                rds = distribution(genR);
+                rds = distribution(gen_r);
             }
-            rdGenPassed = true;
+            rd_gen_passed = true;
         } catch (std::exception& e) {
         }
     }
-    if (!rdGenPassed)
+    if (!rd_gen_passed)
         CIPHER_THROW("std::random_device failed");
 
     for (uint32_t i = 0; i < Blake2Engine::MAX_SEED_GENS; ++i)

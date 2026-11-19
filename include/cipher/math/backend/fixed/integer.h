@@ -495,7 +495,7 @@ class BigIntegerFixedT : public cipher::BigIntegerInterface<BigIntegerFixedT<uin
      * @param p the exponent.
      * @return is the result of the exponentiation operation.
      */
-    BigIntegerFixedT Exp(uint32_t p) const;
+    BigIntegerFixedT raise_to(uint32_t p) const;
 
     /**
      * Exponentiation operation. Returns x^p. In-place variant.
@@ -790,12 +790,12 @@ class BigIntegerFixedT : public cipher::BigIntegerInterface<BigIntegerFixedT<uin
 
     BigIntegerFixedT mod_mul_fast_const(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
                                         const BigIntegerFixedT& b_inv) const {
-        CIPHER_THROW("ModMulFastConst is not implemented for backend 2");
+        CIPHER_THROW("mod_mul_fast_const is not implemented for backend 2");
     }
 
     BigIntegerFixedT& mod_mul_fast_const_eq(const BigIntegerFixedT& b, const BigIntegerFixedT& modulus,
                                             const BigIntegerFixedT& b_inv) {
-        CIPHER_THROW("ModMulFastConstEq is not implemented for backend 2");
+        CIPHER_THROW("mod_mul_fast_const_eq is not implemented for backend 2");
     }
 
     /**
@@ -876,7 +876,7 @@ class BigIntegerFixedT : public cipher::BigIntegerInterface<BigIntegerFixedT<uin
      * @return  -1 for strictly less than, 0 for equal to and 1 for strictly
      * greater than conditons.
      */
-    int Compare(const BigIntegerFixedT& a) const;
+    int compare_with(const BigIntegerFixedT& a) const;
 
     // CONVERTERS
 

@@ -189,7 +189,7 @@ static void bm_big_int_divided_by_eq(benchmark::State& state) {
 
 template <typename I>
 static void exp_big_int(const I& a, uint32_t b) {
-    __attribute__((unused)) I c1 = a.Exp(b);
+    __attribute__((unused)) I c1 = a.raise_to(b);
 }
 
 template <typename I>

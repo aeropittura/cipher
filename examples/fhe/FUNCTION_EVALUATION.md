@@ -11,7 +11,7 @@ Note that Chebyshev evaluation only works with real inputs (or complex inputs wi
 Example Description
 ==========================
 
-The example for this code is located in [function-evaluation.cpp](function_evaluation.cpp). The file gives examples on how to run `eval_logistic`, the logistic function $\frac{1}{1 + e^{-x}},$ and an arbitrary function using `eval_chebyshev_function`. We use the square root function in our example for `eval_chebyshev_function`.
+The example for this code is located in [function_evaluation.cpp](function_evaluation.cpp). The file gives examples on how to run `eval_logistic`, the logistic function $\frac{1}{1 + e^{-x}},$ and an arbitrary function using `eval_chebyshev_function`. We use the square root function in our example for `eval_chebyshev_function`.
 
 Input Parameters
 ==========================
@@ -22,7 +22,7 @@ Input Parameters
 
 How to Choose Multiplicative Depth
 ====================================
-Each run of EvalChebyshevFunction requires a certain number of multiplications which depends on the input polynomial degree. We give a table below to map polynomial degrees to multiplicative depths.
+Each run of `eval_chebyshev_function` requires a certain number of multiplications which depends on the input polynomial degree. We give a table below to map polynomial degrees to multiplicative depths.
 
 | Degree        | Multiplicative Depth |
 | ------------- |:--------------------:|

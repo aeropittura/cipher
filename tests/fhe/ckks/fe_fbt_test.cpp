@@ -67,31 +67,31 @@ enum TEST_CASE_TYPE : int {
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
-    std::string typeName;
+    std::string type_name_of;
     switch (type) {
         case FEFBT_ACCURACY:
-            typeName = "FEFBT_ACCURACY";
+            type_name_of = "FEFBT_ACCURACY";
             break;
         case FEFBT_POST_ROTATION:
-            typeName = "FEFBT_POST_ROTATION";
+            type_name_of = "FEFBT_POST_ROTATION";
             break;
         case FEFBT_CS_VS_FA:
-            typeName = "FEFBT_CS_VS_FA";
+            type_name_of = "FEFBT_CS_VS_FA";
             break;
         case FEFBT_COMPLEX_INPUT:
-            typeName = "FEFBT_COMPLEX_INPUT";
+            type_name_of = "FEFBT_COMPLEX_INPUT";
             break;
         case FEFBT_MULTI_VALUE:
-            typeName = "FEFBT_MULTI_VALUE";
+            type_name_of = "FEFBT_MULTI_VALUE";
             break;
         case FEFBT_VARIANT_MIX:
-            typeName = "FEFBT_VARIANT_MIX";
+            type_name_of = "FEFBT_VARIANT_MIX";
             break;
         default:
-            typeName = "UNKNOWN";
+            type_name_of = "UNKNOWN";
             break;
     }
-    return os << typeName;
+    return os << type_name_of;
 }
 
 enum FEFBT_FUNCTION : int {
@@ -101,22 +101,22 @@ enum FEFBT_FUNCTION : int {
 };
 
 static std::ostream& operator<<(std::ostream& os, const FEFBT_FUNCTION& type) {
-    std::string typeName;
+    std::string type_name_of;
     switch (type) {
         case FEFBT_EXP:
-            typeName = "FEFBT_EXP";
+            type_name_of = "FEFBT_EXP";
             break;
         case FEFBT_SIGMOID:
-            typeName = "FEFBT_SIGMOID";
+            type_name_of = "FEFBT_SIGMOID";
             break;
         case FEFBT_GELU_TANH:
-            typeName = "FEFBT_GELU_TANH";
+            type_name_of = "FEFBT_GELU_TANH";
             break;
         default:
-            typeName = "UNKNOWN";
+            type_name_of = "UNKNOWN";
             break;
     }
-    return os << typeName;
+    return os << type_name_of;
 }
 
 struct TEST_CASE_UTCKKSRNS_FEFBT {
@@ -138,13 +138,13 @@ struct TEST_CASE_UTCKKSRNS_FEFBT {
 
     std::string to_string_impl() const {
         std::stringstream ss;
-        ss << "testCaseType [" << test_case_type << "], functionType [" << function_type << "], "
+        ss << "testCaseType [" << test_case_type << "], function_type [" << function_type << "], "
            << params.to_string_impl() << ", slots [" << slots << "]";
         return ss.str();
     }
 };
 
-static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNS_FEFBT>& test) {
+static auto make_test_name = [](const testing::TestParamInfo<TEST_CASE_UTCKKSRNS_FEFBT>& test) {
     return test.param.build_test_name();
 };
 
@@ -643,7 +643,7 @@ class UTCKKSRNS_FEFBT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_FEFB
             result->set_length(expected.size());
 
             check_equality(result->get_real_packed_value(), expected, eps,
-                           failmsg + " EvalAtIndex after FE functional bootstrapping failed for " +
+                           failmsg + " eval_at_index after FE functional bootstrapping failed for " +
                                    get_function_name(test_data.function_type) + ".");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
@@ -823,12 +823,12 @@ class UTCKKSRNS_FEFBT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_FEFB
             auto ciphertext = cc->encrypt(key_pair.public_key, plaintext);
 
             EXPECT_THROW(cc->eval_bootstrap(ciphertext), CipherException)
-                    << failmsg << " EvalBootstrap on an EvalFEFuncBootstrapSetup precomputation did not throw.";
+                    << failmsg << " eval_bootstrap on an eval_fe_func_bootstrap_setup precomputation did not throw.";
 
             // the recompute path must not convert the FE precomputation into a regular-bootstrapping one
             EXPECT_THROW(cc->eval_bootstrap_precompute(test_data.slots), CipherException)
                     << failmsg
-                    << " EvalBootstrapPrecompute on an EvalFEFuncBootstrapSetup precomputation did not throw.";
+                    << " eval_bootstrap_precompute on an eval_fe_func_bootstrap_setup precomputation did not throw.";
 
             // the FE functional bootstrapping precomputation itself must remain usable
             auto result_ct = cc->eval_fe_func_bootstrap(ciphertext, get_coefficients(test_data.function_type));
@@ -837,7 +837,7 @@ class UTCKKSRNS_FEFBT : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_FEFB
             cc->decrypt(key_pair.secret_key, result_ct, &result);
             result->set_length(expected.size());
             check_equality(result->get_real_packed_value(), expected, eps,
-                           failmsg + " FE functional bootstrapping failed after the rejected EvalBootstrap call.");
+                           failmsg + " FE functional bootstrapping failed after the rejected eval_bootstrap call.");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             EXPECT_TRUE(0 == 1) << failmsg;
@@ -876,6 +876,6 @@ TEST_P(UTCKKSRNS_FEFBT, CKKSRNS) {
 }
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(UTCKKSRNS_FEFBT);
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_FEFBT, ::testing::ValuesIn(test_cases), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTCKKSRNS_FEFBT, ::testing::ValuesIn(test_cases), make_test_name);
 
 }  // namespace

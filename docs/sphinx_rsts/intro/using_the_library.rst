@@ -3,19 +3,19 @@ Using The Library
 
 Cipher consists of a number of library objects that can be linked into lattice cryptography applications.
 
-The source files in the demo directories, particularly those in src/examples/pke, illustrate the use of the library.
+The example programs, particularly those in ``examples/fhe``, illustrate the use of the library.
 
 To use Cipher, you must
 
 * select a scheme to use
 
-  * ``BFVrns``
+  * BFV (``ContextParams<BfvRnsContext>``)
 
-  * ``BGVrns``
+  * BGV (``ContextParams<BgvRnsContext>``)
 
-  * ``CKKSrns``
+  * CKKS (``ContextParams<CkksRnsContext>``)
 
-* create a CryptoContext for the scheme. This requires that you:
+* create a ``CryptoContext`` for the scheme with ``make_crypto_context(params)``. This requires that you:
 
  * run a parameter generation function or, alternatively,
 
@@ -27,19 +27,27 @@ To use Cipher, you must
 
  * enable the algorithms that you want to use, e.g.,
 
-   * Enable(ENCRYPTION) - allows for key generation and encrypt/decrypt
+   * ``enable(PKE)`` - allows for key generation and encrypt/decrypt
 
-   * Enable(PRE) - allows for the use of proxy re-encryption
+   * ``enable(KEYSWITCH)`` - enables key switching (needed for relinearization and rotations)
 
-   * Enable(SHE) - enables SHE operations such as EvalAdd and EvalMult
+   * ``enable(LEVELEDSHE)`` - enables leveled SHE operations such as ``eval_add`` and ``eval_mult``
 
-   * Enable(MULTIPARTY) - enables threshold FHE operations
+   * ``enable(ADVANCEDSHE)`` - enables advanced operations such as ``eval_sum`` and polynomial evaluation
 
-In order to make this easier for the user, there are several CryptoContextFactory methods for the various schemes.
+   * ``enable(PRE)`` - allows for the use of proxy re-encryption
+
+   * ``enable(MULTIPARTY)`` - enables threshold FHE operations
+
+   * ``enable(FHE)`` - enables bootstrapping
+
+   * ``enable(SCHEMESWITCH)`` - enables CKKS to FHEW scheme switching
+
+In order to make this easier for the user, ``make_crypto_context`` generates the remaining parameters from the few that are set on ``ContextParams``.
 
 Streamlining and improving the process of parameter selection and CryptoContext generation is an area that is being actively worked.
 
-Anything done in Cipher is done through the CryptoContext. All operations are CryptoContext methods. The code only allows operations between objects that were created in the same context, and will generate an error if it finds that this is not the case.
+Anything done in Cipher is done through the ``CryptoContext``. All operations are ``CryptoContext`` methods. The code only allows operations between objects that were created in the same context, and will generate an error if it finds that this is not the case.
 
 Saving to string or disk file
 -----------------------------
@@ -47,19 +55,20 @@ Saving to string or disk file
 Serialization and Deserialization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-An object created by a CryptoContext usually has a ``to_stream`` method that converts the object into a cereal object that can be saved to a string or to a disk file:
+Objects created by a ``CryptoContext`` (and the context itself) can be serialized with cereal, in binary
+(``SerType::BINARY``) or JSON (``SerType::JSON``) format, using the functions in ``cipher/util/serial.h``:
 
-* Serial::Serialize()
+* ``serialization::to_stream()``
 
-* Serial::SerializeToFile()
+* ``serialization::serialize_to_file()``
 
-A serialized object can be ``Deserialized`` using the following functions, respectively:
+A serialized object can be deserialized using the following functions, respectively:
 
-* Serial::Deserialize()
+* ``serialization::from_stream()``
 
-* Serial::DeserializeFromFile()
+* ``serialization::deserialize_from_file()``
 
-The Deserialize process will ensure that the serialized object's parameters match the CryptoContext. If they do, then
+The deserialization process will ensure that the serialized object's parameters match the CryptoContext. If they do, then
 the new object "belongs to" the CryptoContext and can be used with other objects from the same CryptoContext.
 
 .. note:: A mismatch of parameters will cause the deserialization to fail.

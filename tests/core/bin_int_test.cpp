@@ -493,7 +493,7 @@ void basic_compare_test(const std::string& msg) {
         T a("112504");
         T b("46968");
 
-        c = a.Compare(b);
+        c = a.compare_with(b);
         expected_result = 1;
 
         EXPECT_EQ(expected_result, (int)c) << msg << " Failure testing compare_a_greater_than_b";
@@ -503,7 +503,7 @@ void basic_compare_test(const std::string& msg) {
         T a("12504");
         T b("46968");
 
-        c = a.Compare(b);
+        c = a.compare_with(b);
         expected_result = -1;
 
         EXPECT_EQ(expected_result, (int)c) << msg << " Failure testing compare_a_less_than_b";
@@ -513,7 +513,7 @@ void basic_compare_test(const std::string& msg) {
         T a("34512504");
         T b("34512504");
 
-        c = a.Compare(b);
+        c = a.compare_with(b);
         expected_result = 0;
 
         EXPECT_EQ(expected_result, (int)c) << msg << " Failure testing compare_a_equals_b";
@@ -668,7 +668,7 @@ void mod_inverse_impl(const std::string& msg) {
 
         modresult = first.mod(second);
 
-        EXPECT_EQ(modcorrect, modresult.to_string()) << msg << " Failure ModInverse() Mod regression test";
+        EXPECT_EQ(modcorrect, modresult.to_string()) << msg << " Failure mod_inverse() Mod regression test";
 
         T input("405107564542978792");
         T modulus("1152921504606847009");
@@ -682,8 +682,8 @@ void mod_inverse_impl(const std::string& msg) {
             thrown = true;
         }
 
-        EXPECT_FALSE(thrown) << msg << " Failure testing ModInverse() non co-prime arguments";
-        EXPECT_EQ(mod_icorrect, mod_iresult.to_string()) << msg << " Failure ModInverse() regression test";
+        EXPECT_FALSE(thrown) << msg << " Failure testing mod_inverse() non co-prime arguments";
+        EXPECT_EQ(mod_icorrect, mod_iresult.to_string()) << msg << " Failure mod_inverse() regression test";
     }
 
 #ifdef OUT
@@ -696,7 +696,7 @@ void mod_inverse_impl(const std::string& msg) {
 
         modresult = first.mod(second);
 
-        EXPECT_EQ(modcorrect, modresult.to_string()) << msg << " Failure ModInverse() Mod(0)";
+        EXPECT_EQ(modcorrect, modresult.to_string()) << msg << " Failure mod_inverse() mod(0)";
     }
 #endif
 }
@@ -981,7 +981,7 @@ void power_2_modexp(const std::string& msg) {
     T calculated_result = m.mod_exp(n, q);
     T expected_result(0);
 
-    EXPECT_EQ(expected_result, calculated_result) << msg << " Failure testing TWO.ModExp(50,16)";
+    EXPECT_EQ(expected_result, calculated_result) << msg << " Failure testing TWO.mod_exp(50,16)";
 }
 
 TEST_F(BinIntTest, power_2_modexp) {
@@ -1160,24 +1160,24 @@ void bin_string(const std::string& msg) {
     T b = T::from_binary_string(binary_string);
 
     T expected_result("100633769475");
-    EXPECT_EQ(expected_result, b) << msg << " Failure testing FromBinaryString";
+    EXPECT_EQ(expected_result, b) << msg << " Failure testing from_binary_string";
 }
 
-TEST_F(BinIntTest, binString) {
-    RUN_ALL_BACKENDS_INT(bin_string, "binString")
+TEST_F(BinIntTest, bin_string) {
+    RUN_ALL_BACKENDS_INT(bin_string, "bin_string")
 }
 
 template <typename T>
 void exp_no_mod(const std::string& msg) {
     T x("56");
-    T result = x.Exp(10);
+    T result = x.raise_to(10);
 
     T expected_result("303305489096114176");
     EXPECT_EQ(expected_result, result) << msg << " Failure testing exp";
 }
 
-TEST_F(BinIntTest, expNoMod) {
-    RUN_ALL_BACKENDS_INT(exp_no_mod, "expNoMod")
+TEST_F(BinIntTest, exp_no_mod) {
+    RUN_ALL_BACKENDS_INT(exp_no_mod, "exp_no_mod")
 }
 
 template <typename T>
@@ -1188,8 +1188,8 @@ void conv_to_double(const std::string& msg) {
     EXPECT_EQ(x_in_double, x.convert_to_double()) << msg;
 }
 
-TEST_F(BinIntTest, convToDouble) {
-    RUN_ALL_BACKENDS_INT(conv_to_double, "convToDouble")
+TEST_F(BinIntTest, conv_to_double) {
+    RUN_ALL_BACKENDS_INT(conv_to_double, "conv_to_double")
 }
 
 template <typename T>
@@ -1202,8 +1202,8 @@ void get_digit_at_index(const std::string& msg) {
     EXPECT_EQ(x.get_digit_at_index_for_base(4, 2), 1ULL) << msg;
 }
 
-TEST_F(BinIntTest, getDigitAtIndex) {
-    RUN_ALL_BACKENDS_INT(get_digit_at_index, "getDigitAtIndex")
+TEST_F(BinIntTest, get_digit_at_index) {
+    RUN_ALL_BACKENDS_INT(get_digit_at_index, "get_digit_at_index")
 }
 
 template <typename T>

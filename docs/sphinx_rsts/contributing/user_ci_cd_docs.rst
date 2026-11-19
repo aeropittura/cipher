@@ -4,140 +4,72 @@ Cipher CI/CD Users Guide
 Introduction
 ------------
 
-This documentation describes Cipher workflows on GitHub.
-
-Repository: https://github.com/openfheorg/openfhe-development
+Cipher uses GitHub Actions at https://github.com/aeropittura/cipher. Two
+workflows live in the repository:
 
 ::
 
    ├── .github
-   │   ├── workflows                     <-- GitHub workflows(pipelines)
-   │       ├── main.yml                  <-- Runs when a branch is merged to main, uses generic_workflow
-   │       ├── manual.yml                <-- Runs on-demand with parameters, uses generic_workflow
-   │       ├── pull-request.yml          <-- Runs when a pull-request to main is created, uses generic_workflow
+   │   └── workflows
+   │       ├── ci.yml      <-- build, unit tests and install check on Linux and macOS
+   │       └── lint.yml    <-- pre-commit hooks (clang-format, cpplint, ...) over the whole tree
 
-Cipher Workflows
------------------
+Both run on GitHub-hosted runners; there are no self-hosted runners.
 
-A workflow is a configurable automated process made up of one or more jobs. Workflow files use YAML syntax,
-and must have either a .yml or .yaml file extension.
-
-Actions are individual tasks that we can combine to create jobs and customize our workflow. We created a custom action
-that wraps up all the common functionality on our jobs.
-
-Features
-~~~~~~~~
-
--  Custom Github Actions (generic_workflow_builder)
--  Workflows are separated into three YAML files (main.yml manual.yml pull-request.yml)
--  Manual pipeline that can be run_fn with custom parameters
--  Build and deploy docs to Github pages only on main branch
--  Jobs can run_fn in parallel
--  The benchmark outputs are exported as artifacts
--  Runs on a self-hosted runners
--  All jobs build unittests, benchmarks and extras
--  All jobs run_fn unittests
--  If the job name includes _tcm, _debug, _ntl, etc., then the job runs with that option (those options)
-
-
-.. warning: We need to add multiple runners to support concurrent jobs (one self-hosted runner can only run_fn one job at a time)
-
-Pull request Workflow
----------------------
-
-This workflow will run_fn whenever a pull request is created against the main branch. The pull request will run_fn
-the default job as well as all build jobs.
-
-The test configurations for all job are shown in the table below:
-
-+-------------------+---------+---------------+-----------+
-| Build name        | Backend | NativeInteger | Compiler  |
-|                   |         | size(s)       | type(s)   |
-+=========+=========+=========+===============+===========+
-| default           | Not Set | 64            | GCC       |
-+-------------------+---------+---------------+-----------+
-| mb2               | 2       | 64            | GCC       |
-+-------------------+---------+---------------+-----------+
-| mb2_tcm           | 2       | 64            | GCC       |
-+-------------------+---------+---------------+-----------+
-| mb2_debug         | 2       | 64            | GCC       |
-+-------------------+---------+---------------+-----------+
-| mb4               | 4       | 64            | GCC       |
-+-------------------+---------+---------------+-----------+
-| mb4_tcm           | 4       | 64            | GCC       |
-+-------------------+---------+---------------+-----------+
-| mb4_debug         | 4       | 64            | GCC       |
-+-------------------+---------+---------------+-----------+
-| mb6_ntl           | 6       | 64            | GCC       |
-+-------------------+---------+---------------+-----------+
-| mb6_ntl_tcm       | 6       | 64            | GCC       |
-+-------------------+---------+---------------+-----------+
-| mb6_ntl_debug_tcm | 6       | 64            | GCC       |
-+-------------------+---------+---------------+-----------+
-
-Main User Workflow
-------------------
-
-The main workflow runs whenever a pull-request is merged to the main branch. The build is very similar to
-the pull-request build. It runs more tests and also runs the Pages job which builds and publishes
-the doxygen apidocs in GitHub pages.
-
-The test configurations for all job are shown in the table below:
-
-+-------------------+---------+---------------+-----------+
-| Build name        | Backend | NativeInteger | Compiler  |
-|                   |         | size(s)       | type(s)   |
-+=========+=========+=========+===============+===========+
-| default           | Not Set | 32/64/128     | GCC/CLANG |
-+-------------------+---------+---------------+-----------+
-| mb2               | 2       | 32/64/128     | GCC/CLANG |
-+-------------------+---------+---------------+-----------+
-| mb2_tcm           | 2       | 32/64/128     | GCC/CLANG |
-+-------------------+---------+---------------+-----------+
-| mb2_debug         | 2       | 32/64/128     | GCC/CLANG |
-+-------------------+---------+---------------+-----------+
-| mb4               | 4       | 32/64/128     | GCC/CLANG |
-+-------------------+---------+---------------+-----------+
-| mb4_tcm           | 4       | 32/64/128     | GCC/CLANG |
-+-------------------+---------+---------------+-----------+
-| mb4_debug         | 4       | 32/64/128     | GCC/CLANG |
-+-------------------+---------+---------------+-----------+
-| mb6_ntl           | 6       | 32/64/128     | GCC/CLANG |
-+-------------------+---------+---------------+-----------+
-| mb6_ntl_tcm       | 6       | 32/64/128     | GCC/CLANG |
-+-------------------+---------+---------------+-----------+
-| mb6_ntl_debug_tcm | 6       | 32/64/128     | GCC/CLANG |
-+-------------------+---------+---------------+-----------+
-
-Manual User Workflow
+CI workflow (ci.yml)
 --------------------
 
-The manual pipeline is a workflow that can be run_fn with custom parameters and allows to select jobs to run_fn.
-To run_fn manual workflow:
+Runs on every pull request, on every push to ``main``, and on demand
+(``workflow_dispatch``). A newer run on the same branch cancels an older one
+that is still in progress.
 
-1. Go to the openfhe-development repository at this URL:
-   https://github.com/openfheorg/openfhe-development
+Every job fetches the ``cereal``, ``google-test`` and ``google-benchmark``
+submodules, configures with Ninja and ``-DCIPHER_GIT_SUBMODULES=OFF
+-DCIPHER_BUILD_EXTRAS=ON`` plus the job's extra options, builds, runs
+``ctest --test-dir build --output-on-failure``, installs the library and
+builds a small program against the install with the template in
+``examples/standalone/CMakeLists.txt``.
 
-2. Click on the Actions tab on the center of the upper menu.
++--------------+--------------+----------+------------------------------------------------------------------------+
+| Runner       | Compiler     | Config   | Extra CMake options                                                    |
++==============+==============+==========+========================================================================+
+| ubuntu-24.04 | gcc          | default  |                                                                        |
++--------------+--------------+----------+------------------------------------------------------------------------+
+| ubuntu-24.04 | clang        | default  |                                                                        |
++--------------+--------------+----------+------------------------------------------------------------------------+
+| ubuntu-24.04 | gcc          | backend2 | ``-DCIPHER_MATH_BACKEND=2 -DCIPHER_WITH_BE4=ON``                       |
++--------------+--------------+----------+------------------------------------------------------------------------+
+| ubuntu-24.04 | gcc          | native128| ``-DCIPHER_NATIVE_SIZE=128``                                           |
++--------------+--------------+----------+------------------------------------------------------------------------+
+| ubuntu-24.04 | gcc          | static-  | ``-DCIPHER_BUILD_STATIC=ON -DCIPHER_BUILD_SHARED=OFF                   |
+|              |              | debug    | -DCMAKE_BUILD_TYPE=Debug``                                             |
++--------------+--------------+----------+------------------------------------------------------------------------+
+| macos-15     | clang        | default  | ``-DCIPHER_WITH_OPENMP=OFF``                                           |
++--------------+--------------+----------+------------------------------------------------------------------------+
 
-.. figure:: ci_cd_assets/run_manual_workflow_step2.png
-   :alt: run_manual_workflow_step2
+Lint workflow (lint.yml)
+------------------------
 
+Runs on pull requests and pushes to ``main`` (and ``dev``). It installs
+``pre-commit`` and runs ``pre-commit run --all-files --show-diff-on-failure``,
+i.e. the same hooks as ``.pre-commit-config.yaml`` installs locally. When it
+fails, the log shows the exact changes the hooks would make; running
+``pre-commit run --all-files`` (or ``tools/format.sh``) locally applies them.
 
-3. You will see three Github Workflows on the left side
+Running a workflow manually
+---------------------------
 
-.. figure:: ci_cd_assets/run_manual_workflow_step3.png
-   :alt: run_manual_workflow_step3
+The CI workflow can be started for any branch from the GitHub web interface:
+open the repository's **Actions** tab, select **CI** on the left, click
+**Run workflow**, pick the branch and confirm. With the GitHub CLI the same is
+``gh workflow run ci.yml --ref <branch>``.
 
+Reproducing a CI job locally
+----------------------------
 
-4. Click on the run Manually workflow
+.. code:: bash
 
-5. When the run Manually workflow is selected, you will see a run
-   Workflow button on the right side of the screen. When you click on
-   the run Workflow button, a dialog window with inputs will be opened.
-
-.. figure:: ci_cd_assets/run_manual_workflow_step5.png
-   :alt: run_manual_workflow_step5
-
-6. Select or check the relevant options and click run workflow green
-   button on the lower section of the dialog
+   git submodule update --init extern/cereal extern/google-test extern/google-benchmark
+   cmake -S . -B build -G Ninja -DCIPHER_GIT_SUBMODULES=OFF -DCIPHER_BUILD_EXTRAS=ON <extra options from the table>
+   cmake --build build
+   ctest --test-dir build --output-on-failure

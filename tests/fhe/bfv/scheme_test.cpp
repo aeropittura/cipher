@@ -50,19 +50,19 @@ enum TEST_CASE_TYPE : int {
 };
 
 static std::ostream& operator<<(std::ostream& os, const TEST_CASE_TYPE& type) {
-    std::string typeName;
+    std::string type_name_of;
     switch (type) {
         case EVAL_FAST_ROTATION:
-            typeName = "EVAL_FAST_ROTATION";
+            type_name_of = "EVAL_FAST_ROTATION";
             break;
         case COMPRESSED_BFV:
-            typeName = "COMPRESSED_BFV";
+            type_name_of = "COMPRESSED_BFV";
             break;
         default:
-            typeName = "UNKNOWN";
+            type_name_of = "UNKNOWN";
             break;
     }
-    return os << typeName;
+    return os << type_name_of;
 }
 //===========================================================================================================
 struct TEST_CASE_UTBFVRNS {
@@ -89,7 +89,7 @@ struct TEST_CASE_UTBFVRNS {
 
 // this lambda provides a name to be printed for every test run by INSTANTIATE_TEST_SUITE_P.
 // the name MUST be constructed from digits, letters and '_' only
-static auto testName = [](const testing::TestParamInfo<TEST_CASE_UTBFVRNS>& test) {
+static auto make_test_name = [](const testing::TestParamInfo<TEST_CASE_UTBFVRNS>& test) {
     return test.param.build_test_name();
 };
 
@@ -101,7 +101,7 @@ constexpr uint32_t MULDEPTH = 7;
 constexpr uint32_t PTM = 65537;
 // clang-format off
 static std::vector<TEST_CASE_UTBFVRNS> test_cases = {
-    // TestType,         Descr,  Scheme,        RDim, MultDepth, SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl, KSTech, ScalTech, LDigits, PtMod, std_dev, EvalAddCt, KSCt, MultTech,         EncTech, pre_mode
+    // TestType,         Descr,  Scheme,        RDim, MultDepth, SModSize, DSize, batch_sz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl, KSTech, scal_tech, LDigits, PtMod, std_dev, EvalAddCt, KSCt, mult_tech,         enc_tech, pre_mode
     { EVAL_FAST_ROTATION, "01", {BFVRNS_SCHEME, DFLT, MULDEPTH,  DFLT,     DFLT,  DFLT,    DFLT,       DFLT,          DFLT,     DFLT,   BV,     DFLT,     DFLT,    PTM,   DFLT,   DFLT,      DFLT, HPSPOVERQLEVELED, DFLT,    DFLT}},
     { EVAL_FAST_ROTATION, "02", {BFVRNS_SCHEME, DFLT, MULDEPTH,  DFLT,     DFLT,  DFLT,    DFLT,       DFLT,          DFLT,     DFLT,   HYBRID, DFLT,     DFLT,    PTM,   DFLT,   DFLT,      DFLT, HPSPOVERQLEVELED, DFLT,    DFLT}},
     { EVAL_FAST_ROTATION, "03", {BFVRNS_SCHEME, DFLT, MULDEPTH,  DFLT,     DFLT,  DFLT,    DFLT,       DFLT,          DFLT,     DFLT,   BV,     DFLT,     DFLT,    PTM,   DFLT,   DFLT,      DFLT, HPSPOVERQ, DFLT,    DFLT}},
@@ -180,7 +180,7 @@ class UTBFVRNS : public ::testing::TestWithParam<TEST_CASE_UTBFVRNS> {
             cc->decrypt(key_pair.secret_key, ciphertext_rot1, &plaintext_rot1);
             plaintext_rot1->set_length(vector_of_ints1.size());
             auto results1 = plaintext_rot1->get_packed_value();
-            check_equality(results1, expected_results1, eps, failmsg + " EvalFastRotation(+1) failed");
+            check_equality(results1, expected_results1, eps, failmsg + " eval_fast_rotation(+1) failed");
 
             // EvalFastRotate -1 (right rotation)
             std::vector<int64_t> expected_results2 = {0, 3, 4, 3, 16, 25, 36, 49, 64, 81, 100, 121};
@@ -188,7 +188,7 @@ class UTBFVRNS : public ::testing::TestWithParam<TEST_CASE_UTBFVRNS> {
             cc->decrypt(key_pair.secret_key, ciphertext_rot2, &plaintext_rot2);
             plaintext_rot2->set_length(vector_of_ints1.size());
             auto results2 = plaintext_rot2->get_packed_value();
-            check_equality(results2, expected_results2, eps, failmsg + " EvalFastRotation(-1) failed");
+            check_equality(results2, expected_results2, eps, failmsg + " eval_fast_rotation(-1) failed");
 
             // EvalFastRotate +2 (left rotation)
             std::vector<int64_t> expected_results3 = {-14912, -16,   15300, -29119, 3875, 16,
@@ -197,7 +197,7 @@ class UTBFVRNS : public ::testing::TestWithParam<TEST_CASE_UTBFVRNS> {
             cc->decrypt(key_pair.secret_key, ciphertext_rot3, &plaintext_rot3);
             plaintext_rot3->set_length(vector_of_ints1.size());
             auto results3 = plaintext_rot3->get_packed_value();
-            check_equality(results3, expected_results3, eps, failmsg + " EvalFastRotation(+2) failed");
+            check_equality(results3, expected_results3, eps, failmsg + " eval_fast_rotation(+2) failed");
 
             // EvalFastRotate -2 (right rotation)
             std::vector<int64_t> expected_results4 = {0,     0,      81,   4096, -14912, -16,
@@ -206,7 +206,7 @@ class UTBFVRNS : public ::testing::TestWithParam<TEST_CASE_UTBFVRNS> {
             cc->decrypt(key_pair.secret_key, ciphertext_rot4, &plaintext_rot4);
             plaintext_rot4->set_length(vector_of_ints1.size());
             auto results4 = plaintext_rot4->get_packed_value();
-            check_equality(results4, expected_results4, eps, failmsg + " EvalFastRotation(-2) failed");
+            check_equality(results4, expected_results4, eps, failmsg + " eval_fast_rotation(-2) failed");
         } catch (std::exception& e) {
             std::cerr << "Exception thrown from " << __func__ << "(): " << e.what() << std::endl;
             // make it fail
@@ -271,7 +271,7 @@ class UTBFVRNS : public ::testing::TestWithParam<TEST_CASE_UTBFVRNS> {
             cc->decrypt(key_pair.secret_key, ciphertext_square_result, &plaintext_square);
             plaintext_square->set_length(vector_of_ints1.size());
             results1 = plaintext_square->get_packed_value();
-            check_equality(results1, expected_results1, eps, failmsg + " EvalSquare failed");
+            check_equality(results1, expected_results1, eps, failmsg + " eval_square failed");
 
             // Fast Rotation
             expected_results1 = {4, 3, 16, 25, 36, 49, 64, 81, 110, 121, 144, 0};
@@ -287,7 +287,7 @@ class UTBFVRNS : public ::testing::TestWithParam<TEST_CASE_UTBFVRNS> {
             cc->decrypt(key_pair.secret_key, ciphertext_rot2, &plaintext_rot2);
             plaintext_rot2->set_length(vector_of_ints1.size());
             results1 = plaintext_rot2->get_packed_value();
-            check_equality(results1, expected_results1, eps, failmsg + " EvalRotate failed");
+            check_equality(results1, expected_results1, eps, failmsg + " eval_rotate failed");
 
             // Multiplication by plaintext
             expected_results1 = {3, 4, 3, 16, 25, 36, 49, 64, 81, 110, 121, 144};
@@ -303,7 +303,7 @@ class UTBFVRNS : public ::testing::TestWithParam<TEST_CASE_UTBFVRNS> {
             cc->decrypt(key_pair.secret_key, ciphertext_ptxt_add, &plaintext_ptxt_add);
             plaintext_ptxt_add->set_length(vector_of_ints1.size());
             results1 = plaintext_ptxt_add->get_packed_value();
-            check_equality(results1, expected_results1, eps, failmsg + " EvalAdd with plaintext failed");
+            check_equality(results1, expected_results1, eps, failmsg + " eval_add with plaintext failed");
 
             // Multiplication - compressed to 1
             expected_results1 = {3, 8, 15, 32, 125, 216, 343, 512, 729, 990, 1331, 1728};
@@ -346,4 +346,4 @@ TEST_P(UTBFVRNS, BFVRNS) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(UnitTests, UTBFVRNS, ::testing::ValuesIn(test_cases), testName);
+INSTANTIATE_TEST_SUITE_P(UnitTests, UTBFVRNS, ::testing::ValuesIn(test_cases), make_test_name);

@@ -190,7 +190,7 @@ void ildcrtparams_test(const std::string& msg) {
 }
 
 TEST(UTSer, ildcrtparams_test) {
-    RUN_BIG_DCRTPOLYS(ildcrtparams_test, "ildcrtparams_test")
+    RUN_BIG_RNS_POLYS(ildcrtparams_test, "ildcrtparams_test")
 }
 
 template <typename Element>
@@ -221,7 +221,7 @@ TEST(UTSer, ilvector_test) {
 }
 
 template <typename Element>
-void ildcrtpoly_test(const std::string& msg) {
+void rns_poly_test(const std::string& msg) {
     auto p = std::make_shared<RnsParams<typename Element::Integer>>(1024, 5, 30);
     typename Element::DugType dug;
     Element vec(dug, p);
@@ -243,8 +243,8 @@ void ildcrtpoly_test(const std::string& msg) {
     sfunc(vec);
 }
 
-TEST(UTSer, ildcrtpoly_test) {
-    RUN_BIG_DCRTPOLYS(ildcrtpoly_test, "ildcrtpoly_test")
+TEST(UTSer, rns_poly_test) {
+    RUN_BIG_RNS_POLYS(rns_poly_test, "rns_poly_test")
 }
 
 ////////////////////////////////////////////////////////////

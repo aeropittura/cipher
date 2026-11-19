@@ -198,8 +198,8 @@ void CkksRnsLeveledShe::mod_reduce_internal_in_place(Ciphertext<RnsPoly>& cipher
     ciphertext->set_level(ciphertext->get_level() + levels);
 
     for (size_t i = 0; i < levels; ++i) {
-        for (auto& dcrtpoly : cv)
-            dcrtpoly.drop_last_element_and_scale(crypto_params->get_ql_inv_modq(diff_ql + i));
+        for (auto& rns_poly : cv)
+            rns_poly.drop_last_element_and_scale(crypto_params->get_ql_inv_modq(diff_ql + i));
         double mod_reduce_factor = crypto_params->get_mod_reduce_factor(size_ql - 1 - i);
         ciphertext->set_scaling_factor(ciphertext->get_scaling_factor() / mod_reduce_factor);
     }

@@ -14,11 +14,11 @@ library for various purposes.
 Boolean FHE
 ----------------------------
 
-`Boolean Fully Homomorphic Encryption Examples <https://github.com/openfheorg/openfhe-development/tree/main/src/binfhe/examples>`_
+`Boolean Fully Homomorphic Encryption Examples <../../../examples/boolean>`_
 
 At a high level:
 
--  `boolean.cpp: GINX (CGGI) Bootstrapping <https://github.com/openfheorg/openfhe-development/tree/main/src/binfhe/examples/boolean.cpp>`__:
+-  `boolean.cpp: GINX (CGGI) Bootstrapping <../../../examples/boolean/boolean.cpp>`__:
 
    -  bootstrapping as described in `TFHE: Fast Fully Homomorphic
       Encryption over the Torus <https://eprint.iacr.org/2018/421>`__
@@ -26,7 +26,7 @@ At a high level:
       Cryptosystems <https://eprint.iacr.org/2020/086.pdf>`__
 
 
--  `boolean-ap.cpp: AP (DM) Bootstrapping <https://github.com/openfheorg/openfhe-development/tree/main/src/binfhe/examples/boolean-ap.cpp>`__:
+-  `boolean_ap.cpp: AP (DM) Bootstrapping <../../../examples/boolean/boolean_ap.cpp>`__:
 
    -  bootstrapping as described in `FHEW: Bootstrapping Homomorphic
       Encryption in less than a
@@ -34,42 +34,42 @@ At a high level:
       `Bootstrapping in FHEW-like
       Cryptosystems <https://eprint.iacr.org/2020/086.pdf>`__
 
--  `boolean-lmkcdey.cpp: LMKCDEY Bootstrapping <https://github.com/openfheorg/openfhe-development/tree/main/src/binfhe/examples/boolean-lmkcdey.cpp>`__:
+-  `boolean_lmkcdey.cpp: LMKCDEY Bootstrapping <../../../examples/boolean/boolean_lmkcdey.cpp>`__:
 
    -  bootstrapping as described in `Efficient FHEW Bootstrapping with Small Evaluation Keys, and
       Applications to Threshold Homomorphic Encryption <https://eprint.iacr.org/2022/198.pdf>`__
 
--  `boolean-serial-binary.cpp: Boolean Serialization <https://github.com/openfheorg/openfhe-development/tree/main/src/binfhe/examples/boolean-serial-binary.cpp>`_:
+-  `boolean_serial_binary.cpp: Boolean Serialization <../../../examples/boolean/boolean_serial_binary.cpp>`_:
 
    - serializing ``CryptoContext``, various keys, and ciphertext to a file in binary format
 
 
--  `boolean-serial-json.cpp: Boolean Serialization - json <https://github.com/openfheorg/openfhe-development/tree/main/src/binfhe/examples/boolean-serial-json.cpp>`_:
+-  `boolean_serial_json.cpp: Boolean Serialization - json <../../../examples/boolean/boolean_serial_json.cpp>`_:
 
    - serializing ``CryptoContext``, various keys, and ciphertext to a file in json format
 
 
--  `boolean-truth-tables.cpp: Boolean Truth Tables <https://github.com/openfheorg/openfhe-development/tree/main/src/binfhe/examples/boolean-truth-tables.cpp>`_:
+-  `boolean_truth_tables.cpp: Boolean Truth Tables <../../../examples/boolean/boolean_truth_tables.cpp>`_:
 
    -  prints out the truth tables for all supported binary gates
 
 
--  `eval-decomp.cpp: Eval Decomposition <https://github.com/openfheorg/openfhe-development/tree/main/src/binfhe/examples/eval-decomp.cpp>`_:
+-  `eval_decomp.cpp: Eval Decomposition <../../../examples/boolean/eval_decomp.cpp>`_:
 
    -  runs a homomorphic digit decomposition process on the input ciphertext
 
 
--  `eval-flooring.cpp: Eval Flooring <https://github.com/openfheorg/openfhe-development/tree/main/src/binfhe/examples/eval-flooring.cpp>`_:
+-  `eval_flooring.cpp: Eval Flooring <../../../examples/boolean/eval_flooring.cpp>`_:
 
    -  rounds down the input ciphertext by certain number of bits
 
 
--  `eval-function.cpp: Eval Function <https://github.com/openfheorg/openfhe-development/tree/main/src/binfhe/examples/eval-function.cpp>`_:
+-  `eval_function.cpp: Eval Function <../../../examples/boolean/eval_function.cpp>`_:
 
    -  evaluates a function *f: Z_p -> Z_p* on the input ciphertext
 
 
--  `eval-sign.cpp: Eval Sign <https://github.com/openfheorg/openfhe-development/tree/main/src/binfhe/examples/eval-sign.cpp>`_:
+-  `eval_sign.cpp: Eval Sign <../../../examples/boolean/eval_sign.cpp>`_:
 
    -  evaluates the most-significant bit of the input ciphertext
 
@@ -77,33 +77,33 @@ At a high level:
 Core
 ----------------------------
 
-`Core OpenFHE Examples <https://github.com/openfheorg/openfhe-development/tree/main/src/core/examples>`_:
+`Core Examples <../../../examples/core>`_:
 
-- `parallel.cpp <https://github.com/openfheorg/openfhe-development/blob/main/src/core/examples/parallel.cpp>`_:
+- `parallel.cpp <../../../examples/core/parallel.cpp>`_:
 
   - provides an example of parallelization in ``Cipher`` with `OpenMP <https://www.openmp.org/>`_
 
 
-- `sampling <https://github.com/openfheorg/openfhe-development/blob/main/src/core/examples/sampling.cpp>`_:
+- `sampling.cpp <../../../examples/core/sampling.cpp>`_:
 
-  - provides an example of doing integer Gaussian sampling using `OpenFHE samplers <https://github.com/openfheorg/openfhe-development/tree/main/src/core/include/math>`_.
+  - provides an example of doing integer Gaussian sampling using the `Cipher samplers <../../../include/cipher/math>`_.
 
-  - For more information on sampling, read :ref:`sampling documentation <sampling>`
+  - For more information on sampling, read :doc:`sampling documentation <../modules/core/math/sampling>`
 
 
-PKE - SIMD FHE
+FHE - SIMD FHE
 ----------------------------
 
-`SIMD Fully Homomorphic Encryption Examples <https://github.com/openfheorg/openfhe-development/tree/main/src/pke/examples>`_:
+`SIMD Fully Homomorphic Encryption Examples <../../../examples/fhe>`_:
 
 Basic Homomorphic Encryption
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Demonstrates basic homomorphic encryption using the various schemes:
 
-- `BFVrns (depth-bfvrns.cpp) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/depth-bfvrns.cpp>`_
+- `BFVrns (depth_bfvrns.cpp) <../../../examples/fhe/depth_bfvrns.cpp>`_
 
-- `BGVrns depth-bgvrns.cpp <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/depth-bgvrns.cpp>`_
+- `BGVrns (depth_bgvrns.cpp) <../../../examples/fhe/depth_bgvrns.cpp>`_
 
 
 Simple Mathematical Operations and Serialization
@@ -119,24 +119,24 @@ Additionally, we include the variants detailing how to do serialization-deserial
 
 **Schemes**:
 
-- `Standard BGV-rns (simple-integers-bgvrns.cpp) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/simple-integers-bgvrns.cpp>`_
+- `Standard BGV-rns (simple_integers_bgvrns.cpp) <../../../examples/fhe/simple_integers_bgvrns.cpp>`_
 
-- `BGV-rns with Serialization/Deserialization (simple-integers-serial-bgvrns.cpp) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/simple-integers-serial-bgvrns.cpp>`_
-
-
-- `Standard BFV-rns (simple-integers.cpp) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/simple-integers.cpp>`_
-
-- `BFV-rns with Serialization/Deserialization (simple-integers-serial.cpp) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/simple-integers-serial.cpp>`_
+- `BGV-rns with Serialization/Deserialization (simple_integers_serial_bgvrns.cpp) <../../../examples/fhe/simple_integers_serial_bgvrns.cpp>`_
 
 
-- `Standard CKKS-rns (simple-real-numbers.cpp) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/simple-real-numbers.cpp>`__:
+- `Standard BFV-rns (simple_integers.cpp) <../../../examples/fhe/simple_integers.cpp>`_
 
-- `CKKS-rns with Serialization/Deserialization (simple-real-numbers-serial.cpp) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/simple-real-numbers-serial.cpp>`_
+- `BFV-rns with Serialization/Deserialization (simple_integers_serial.cpp) <../../../examples/fhe/simple_integers_serial.cpp>`_
+
+
+- `Standard CKKS-rns (simple_real_numbers.cpp) <../../../examples/fhe/simple_real_numbers.cpp>`__:
+
+- `CKKS-rns with Serialization/Deserialization (simple_real_numbers_serial.cpp) <../../../examples/fhe/simple_real_numbers_serial.cpp>`_
 
 Advanced CKKS Usage
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-Demonstates advanced operations on real-number vectors using ``CKKS``:
+Demonstrates advanced operations on real-number vectors using ``CKKS``:
 
 - High-precision CKKS
 - Rescaling (automatic and manual)
@@ -145,40 +145,40 @@ Demonstates advanced operations on real-number vectors using ``CKKS``:
 
 **Formats**
 
--  `Standard-precision Advanced CKKS Examples (advanced-real-numbers.cpp) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/advanced-real-numbers.cpp>`__:
+-  `Standard-precision Advanced CKKS Examples (advanced_real_numbers.cpp) <../../../examples/fhe/advanced_real_numbers.cpp>`__:
 
--  `High-precision Advanced CKKS Examples (advanced-real-numbers.cpp) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/advanced-real-numbers-128.cpp>`__:
+-  `High-precision Advanced CKKS Examples (advanced_real_numbers_128.cpp) <../../../examples/fhe/advanced_real_numbers_128.cpp>`__:
 
--  `CKKS Bootstrapping with Full Packing (simple-ckks-bootstrapping.cpp) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/simple-ckks-bootstrapping.cpp>`__:
+-  `CKKS Bootstrapping with Full Packing (simple_ckks_bootstrapping.cpp) <../../../examples/fhe/simple_ckks_bootstrapping.cpp>`__:
 
--  `CKKS Bootstrapping with Sparse Packing (advanced-ckks-bootstrapping.cpp) <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/advanced-ckks-bootstrapping.cpp>`__:
+-  `CKKS Bootstrapping with Sparse Packing (advanced_ckks_bootstrapping.cpp) <../../../examples/fhe/advanced_ckks_bootstrapping.cpp>`__:
 
 Misc. Operations across Schemes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
--  `rotation.cpp <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/rotation.cpp>`__:
+-  `rotation.cpp <../../../examples/fhe/rotation.cpp>`__:
 
-   - demonstrates use of ``eval_rotate automorphism_value`` for different schemes
+   - demonstrates the use of ``eval_rotate`` and ``eval_merge`` for different schemes
 
 
-- `linearsum-evaluation <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/linearwsum-evaluation.cpp>`_:
+- `linearwsum_evaluation.cpp <../../../examples/fhe/linearwsum_evaluation.cpp>`_:
 
   - demonstrates the process of taking the linear weighted sum of a vector of ciphertexts against a vector of plaintext data in the `CKKS` scheme
 
 
--  `polynomial-evaluation.cpp <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/polynomial-evaluation.cpp>`__:
+-  `polynomial_evaluation.cpp <../../../examples/fhe/polynomial_evaluation.cpp>`__:
 
    - demonstrates an evaluation of a polynomial (power series) using ``CKKS``
 
--  `pre-buffer.cpp <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/pre-buffer.cpp>`__:
+-  `pre_buffer.cpp <../../../examples/fhe/pre_buffer.cpp>`__:
 
    - demonstrates use of Cipher for encryption, re-encryption and decryption of packed vector of binary data
 
 
--  `threshold-fhe.cpp <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/threshold-fhe.cpp>`__:
+-  `threshold_fhe.cpp <../../../examples/fhe/threshold_fhe.cpp>`__:
 
    - shows several examples of threshold FHE in ``BGVrns``, ``BFVrns``, and ``CKKSrns``
 
--  `threshold-fhe-5p.cpp <https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/threshold-fhe-5p.cpp>`__:
+-  `threshold_fhe_5p.cpp <../../../examples/fhe/threshold_fhe_5p.cpp>`__:
 
    - shows example of threshold FHE with 5 parties in ``BFVrns``

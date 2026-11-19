@@ -15,7 +15,7 @@ parameters.set_multiparty_mode(NOISE_FLOODING_MULTIPARTY);
 ```
 
 The modes are implemented to provide security against the type of attacks in [Li and Micciancio](https://link.springer.com/chapter/10.1007/978-3-030-77870-5_23) and [Kluczniak and Santato](https://eprint.iacr.org/2023/301).
-More on the attack and the solution with noise flooding for CKKS decryption in provided in [CKKS_NOISE_FLOODING.MD](https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/CKKS_NOISE_FLOODING.md).
+More on the attack and the solution with noise flooding for CKKS decryption in provided in [CKKS_NOISE_FLOODING.md](../../examples/fhe/CKKS_NOISE_FLOODING.md).
 The same kind of attacks also apply in the threshold scenario for all three schemes since the approximate decryption shares from each party are shared before they can be aggregated to decrypt the final result.
 The decryption share of a ciphertext $c = (c_0, c_1)$ for party $i$ is $\mathsf{d_i} = c_0 + c_1s_i$.
 Similar to the CKKS decryption attack, the noise in the decryption share $d_i$ leaks information about the secret $s_i$.
@@ -41,7 +41,7 @@ For an input ciphertext $c mod QP$, the decryption shares by each party $i$ are 
 
 3. CKKS:
 
-IND-CPA^D mode can be used to instantiate threshold FHE for the mode similar to NOISE_FLOODING_MULTIPARTY. Please look at [the CKKS noise flooding example](https://github.com/openfheorg/openfhe-development/blob/main/src/pke/examples/ckks-noise-flooding.cpp) for more details.
+IND-CPA^D mode can be used to instantiate threshold FHE for the mode similar to NOISE_FLOODING_MULTIPARTY. Please look at [the CKKS noise flooding example](../../examples/fhe/ckks_noise_flooding.cpp) for more details.
 
 # Threshold decryption with Aborts:
 
@@ -51,4 +51,4 @@ In addition to the multiparty modes that can be set in the parameters for Thresh
 
 2. Shamir sharing: We use this option to allow for multiple parties (minority) to drop out from the decryption and still be able to decrypt with $t$-out-of-N where $t > N/2$.
 
-The unittest [UnitTestMultiparty](https://github.com/openfheorg/openfhe-development/blob/main/src/pke/unittest/UnitTestMultiparty.cpp) has a small example that uses these functions for threshold computation with 3 parties.
+The unit test [multiparty_test.cpp](../../tests/fhe/multiparty_test.cpp) has a small example that uses these functions for threshold computation with 3 parties.

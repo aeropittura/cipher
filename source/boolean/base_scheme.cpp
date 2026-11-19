@@ -44,7 +44,7 @@ namespace cipher {
 RingGswBtKey BooleanScheme::key_gen(const std::shared_ptr<BooleanCryptoParams>& params, ConstLwePrivateKey& LWE_sk,
                                     KEYGEN_MODE keygen_mode, bool internal32) const {
     if (params == nullptr)
-        CIPHER_THROW("BinFHECryptoParams is empty");
+        CIPHER_THROW("BooleanCryptoParams is empty");
     if (LWE_sk == nullptr)
         CIPHER_THROW("PrivateKey is empty");
 
@@ -59,7 +59,7 @@ RingGswBtKey BooleanScheme::key_gen(const std::shared_ptr<BooleanCryptoParams>& 
         sk_n = kp_n->secret_key;
         ek.pkey = kp_n->public_key;
     } else {
-        CIPHER_THROW("Invalid KeyGen mode");
+        CIPHER_THROW("Invalid key_gen mode");
     }
 
 #if CIPHER_NATIVE_INT != 32
@@ -116,7 +116,7 @@ LweCiphertext BooleanScheme::eval_bin_gate(const std::shared_ptr<BooleanCryptoPa
                                            const RingGswBtKey& EK, ConstLweCiphertext& ct1, ConstLweCiphertext& ct2,
                                            bool extended) const {
     if (params == nullptr)
-        CIPHER_THROW("BinFHECryptoParams is empty");
+        CIPHER_THROW("BooleanCryptoParams is empty");
     if (ct1 == nullptr)
         CIPHER_THROW("Ciphertext1 is empty");
     if (ct2 == nullptr)
@@ -170,7 +170,7 @@ LweCiphertext BooleanScheme::eval_bin_gate(const std::shared_ptr<BooleanCryptoPa
                                            const RingGswBtKey& EK, const std::vector<LweCiphertext>& ctvector,
                                            bool extended) const {
     if (params == nullptr)
-        CIPHER_THROW("BinFHECryptoParams is empty");
+        CIPHER_THROW("BooleanCryptoParams is empty");
 
     uint32_t expected_size = 0;
     switch (gate) {
@@ -248,7 +248,7 @@ LweCiphertext BooleanScheme::eval_bin_gate(const std::shared_ptr<BooleanCryptoPa
 LweCiphertext BooleanScheme::bootstrap(const std::shared_ptr<BooleanCryptoParams>& params, const RingGswBtKey& EK,
                                        ConstLweCiphertext& ct, bool extended) const {
     if (params == nullptr)
-        CIPHER_THROW("BinFHECryptoParams is empty");
+        CIPHER_THROW("BooleanCryptoParams is empty");
     if (ct == nullptr)
         CIPHER_THROW("Ciphertext is empty");
 
@@ -282,7 +282,7 @@ LweCiphertext BooleanScheme::bootstrap(const std::shared_ptr<BooleanCryptoParams
 LweCiphertext BooleanScheme::eval_not(const std::shared_ptr<BooleanCryptoParams>& params,
                                       ConstLweCiphertext& ct) const {
     if (params == nullptr)
-        CIPHER_THROW("BinFHECryptoParams is empty");
+        CIPHER_THROW("BooleanCryptoParams is empty");
     if (ct == nullptr)
         CIPHER_THROW("Ciphertext is empty");
 
@@ -302,7 +302,7 @@ LweCiphertext BooleanScheme::eval_func(const std::shared_ptr<BooleanCryptoParams
                                        ConstLweCiphertext& ct, const std::vector<NativeInteger>& LUT,
                                        NativeInteger beta) const {
     if (params == nullptr)
-        CIPHER_THROW("BinFHECryptoParams is empty");
+        CIPHER_THROW("BooleanCryptoParams is empty");
     if (ct == nullptr)
         CIPHER_THROW("Ciphertext is empty");
 
@@ -392,7 +392,7 @@ LweCiphertext BooleanScheme::eval_func(const std::shared_ptr<BooleanCryptoParams
 LweCiphertext BooleanScheme::eval_floor(const std::shared_ptr<BooleanCryptoParams>& params, const RingGswBtKey& EK,
                                         ConstLweCiphertext& ct, NativeInteger beta, uint32_t roundbits) const {
     if (params == nullptr)
-        CIPHER_THROW("BinFHECryptoParams is empty");
+        CIPHER_THROW("BooleanCryptoParams is empty");
     if (ct == nullptr)
         CIPHER_THROW("Ciphertext is empty");
 
@@ -438,7 +438,7 @@ LweCiphertext BooleanScheme::eval_sign(const std::shared_ptr<BooleanCryptoParams
                                        const std::map<uint32_t, RingGswBtKey>& e_ks, ConstLweCiphertext& ct,
                                        NativeInteger beta, bool scheme_switch) const {
     if (params == nullptr)
-        CIPHER_THROW("BinFHECryptoParams is empty");
+        CIPHER_THROW("BooleanCryptoParams is empty");
     if (ct == nullptr)
         CIPHER_THROW("Ciphertext is empty");
 
@@ -506,7 +506,7 @@ std::vector<LweCiphertext> BooleanScheme::eval_decomp(const std::shared_ptr<Bool
                                                       const std::map<uint32_t, RingGswBtKey>& e_ks,
                                                       ConstLweCiphertext& ct, NativeInteger beta) const {
     if (params == nullptr)
-        CIPHER_THROW("BinFHECryptoParams is empty");
+        CIPHER_THROW("BooleanCryptoParams is empty");
     if (ct == nullptr)
         CIPHER_THROW("Ciphertext is empty");
 
@@ -565,11 +565,12 @@ std::vector<LweCiphertext> BooleanScheme::eval_decomp(const std::shared_ptr<Bool
 RlweCiphertext BooleanScheme::bootstrap_gate_core(const std::shared_ptr<BooleanCryptoParams>& params, BINGATE gate,
                                                   const RingGswBtKey& EK, ConstLweCiphertext& ct) const {
     if (params == nullptr)
-        CIPHER_THROW("BinFHECryptoParams is empty");
+        CIPHER_THROW("BooleanCryptoParams is empty");
     if (ct == nullptr)
         CIPHER_THROW("Ciphertext is empty");
     if (!EK.has_refresh_key())
-        CIPHER_THROW("Bootstrapping keys have not been generated. Please call BTKeyGen before calling bootstrapping.");
+        CIPHER_THROW(
+                "Bootstrapping keys have not been generated. Please call bt_key_gen before calling bootstrapping.");
 
     // Specifies the range [lb, ub) that will be used for mapping
     NativeInteger q = ct->get_modulus();
@@ -643,7 +644,7 @@ RlweCiphertext BooleanScheme::bootstrap_func_core(const std::shared_ptr<BooleanC
                                                   const RingGswBtKey& EK, ConstLweCiphertext& ct, const Func f,
                                                   NativeInteger fmod) const {
     if (!EK.has_refresh_key())
-        CIPHER_THROW("Bootstrapping keys not generated. Please call BTKeyGen before bootstrapping.");
+        CIPHER_THROW("Bootstrapping keys not generated. Please call bt_key_gen before bootstrapping.");
 
     auto& LWE_params = params->get_lwe_params();
     auto& RGSW_params = params->get_ring_gsw_params();

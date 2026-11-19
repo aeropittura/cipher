@@ -73,7 +73,7 @@ namespace {
 // the pages on the next operation. Keeping large allocations on the heap (M_MMAP_MAX=0) and
 // never trimming it back to the OS (M_TRIM_THRESHOLD=-1) lets the buffers be reused,
 // eliminating the churn.
-[[maybe_unused]] const bool ofheGlibcMallocTuned = []() noexcept {
+[[maybe_unused]] const bool glibc_malloc_tuned = []() noexcept {
     mallopt(M_MMAP_MAX, 0);
     mallopt(M_TRIM_THRESHOLD, -1);
     return true;
@@ -108,8 +108,11 @@ constexpr int CIPHER_MPOL_INTERLEAVE = 3;
 constexpr int CIPHER_MPOL_F_MEMS_ALLOWED = 4;
 constexpr MemPolicyWord CIPHER_MAXNODE = 1024;
 
-[[maybe_unused]] const bool ofheNumaInterleaved = []() noexcept {
-    const char* opt = std::getenv("OPENFHE_NUMA_INTERLEAVE");
+[[maybe_unused]] const bool numa_interleaved = []() noexcept {
+    // CIPHER_NUMA_INTERLEAVE=0 disables the policy; the OpenFHE spelling is still honored
+    const char* opt = std::getenv("CIPHER_NUMA_INTERLEAVE");
+    if (opt == nullptr)
+        opt = std::getenv("OPENFHE_NUMA_INTERLEAVE");
     if (opt != nullptr && std::strcmp(opt, "0") == 0)
         return false;
 

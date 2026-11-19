@@ -158,7 +158,7 @@ void add_to_acc_cggi32(const std::shared_ptr<NativePolyParams32>& poly_params, u
             ct[i].set_format(Format::COEFFICIENT);
 
     #pragma omp barrier
-    #pragma omp single_value
+    #pragma omp single
         excess_h_digit_decompose(Q, bp, ct, dct);
 
     #pragma omp for schedule(static)
@@ -294,7 +294,7 @@ void RingGswAccumulatorCggi::add_to_acc_cggi(const std::shared_ptr<RingGswCrypto
             ct[i].set_format(Format::COEFFICIENT);
 
 #pragma omp barrier
-#pragma omp single_value
+#pragma omp single
         signed_digit_decompose_impl(params, ct, dct, bp);
 
 #pragma omp for schedule(static)

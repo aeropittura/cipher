@@ -66,7 +66,7 @@ Matrix<Element>& Matrix<Element>::operator=(const Matrix<Element>& other) {
 }
 
 template <class Element>
-Matrix<Element>& Matrix<Element>::Fill(const Element& val) {
+Matrix<Element>& Matrix<Element>::fill_with(const Element& val) {
     for (size_t row = 0; row < rows; ++row) {
         for (size_t col = 0; col < cols; ++col) {
             data[row][col] = val;
@@ -256,7 +256,7 @@ Matrix<Element> Matrix<Element>::cofactor_matrix() const {
 template <class Element>
 Matrix<Element>& Matrix<Element>::v_stack(Matrix<Element> const& other) {
     if (cols != other.cols) {
-        CIPHER_THROW("VStack rows not equal size");
+        CIPHER_THROW("v_stack rows not equal size");
     }
     data.reserve(rows + other.rows);
     for (size_t row = 0; row < other.rows; ++row)
@@ -269,7 +269,7 @@ Matrix<Element>& Matrix<Element>::v_stack(Matrix<Element> const& other) {
 template <class Element>
 inline Matrix<Element>& Matrix<Element>::h_stack(Matrix<Element> const& other) {
     if (rows != other.rows) {
-        CIPHER_THROW("HStack cols not equal size");
+        CIPHER_THROW("h_stack cols not equal size");
     }
     for (size_t row = 0; row < rows; ++row) {
         data_row_t row_elems(other.data[row]);

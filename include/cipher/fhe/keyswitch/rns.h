@@ -49,7 +49,7 @@ namespace cipher {
 /**
  * @brief Abstract base of the RNS (RnsPoly) key switching methods.
  *
- * Adds serialization to KeySwitchBase<RnsPoly>; the key switching operations themselves are implemented by the
+ * Adds serialization to BaseKeySwitch<RnsPoly>; the key switching operations themselves are implemented by the
  * derived classes KeySwitchBv and KeySwitchHybrid.
  */
 class RnsKeySwitch : public KeySwitchBase<RnsPoly> {

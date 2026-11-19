@@ -380,7 +380,7 @@ void mod_exp_large_exponent_test(const std::string& msg) {
     V calculated_result = m.mod_exp(n);
 
     for (uint32_t i = 0; i < 5; i++) {
-        EXPECT_EQ(m[i].mod_exp(n, q), calculated_result[i]) << msg << " vector ModExp disagrees with scalar ModExp";
+        EXPECT_EQ(m[i].mod_exp(n, q), calculated_result[i]) << msg << " vector mod_exp disagrees with scalar mod_exp";
     }
     EXPECT_EQ(typename V::Integer(4), calculated_result[0]) << msg << " 2^(q+1) mod q";
     EXPECT_EQ(typename V::Integer(9), calculated_result[1]) << msg << " 3^(q+1) mod q";
@@ -390,7 +390,7 @@ void mod_exp_large_exponent_test(const std::string& msg) {
     V in_place_result(m);
     in_place_result.mod_exp_eq(n);
     for (uint32_t i = 0; i < 5; i++) {
-        EXPECT_EQ(calculated_result[i], in_place_result[i]) << msg << " ModExpEq disagrees with ModExp";
+        EXPECT_EQ(calculated_result[i], in_place_result[i]) << msg << " mod_exp_eq disagrees with mod_exp";
     }
 
     // an exponent aliasing a vector element must be read at its pre-call value
@@ -398,7 +398,7 @@ void mod_exp_large_exponent_test(const std::string& msg) {
     V expected_aliased = m.mod_exp(m[2]);
     aliased_result.mod_exp_eq(aliased_result[2]);
     for (uint32_t i = 0; i < 5; i++) {
-        EXPECT_EQ(expected_aliased[i], aliased_result[i]) << msg << " ModExpEq with aliased exponent";
+        EXPECT_EQ(expected_aliased[i], aliased_result[i]) << msg << " mod_exp_eq with aliased exponent";
     }
 }
 

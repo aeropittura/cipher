@@ -305,7 +305,7 @@ void method_primitive_root_of_unity_very_long(const std::string& msg) {
 
             // fout << "The primitive_root_of_unity is " << primitive_root_of_unity << endl;
 
-            // std::set<T> roots_of_unity_value = testRootsOfUnity(m, prime_modulus);
+            // std::set<T> roots_of_unity_value = test_roots_of_unity(m, prime_modulus);
 
             // fout << "Roots of unity for prime modulus " << prime_modulus << " are: "
             // << endl; for(auto it = roots_of_unity_value.begin(); it != roots_of_unity_value.end();

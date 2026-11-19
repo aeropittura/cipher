@@ -16,7 +16,7 @@ Core Math Documentation
 Math Backends
 ---------------
 
-Cipher supports a number of mathematical backends for various usecases.
+Cipher (headers in `include/cipher/math <../../../../../include/cipher/math>`_, implementation in `source/math <../../../../../source/math>`_) supports a number of mathematical backends for various usecases.
 For more information refer to :doc:`math_backends`
 
 Inheritance Diagram
@@ -36,23 +36,23 @@ Let Gen. = Generator
 File Listings
 ----------------
 
-`Binary Uniform Generator (binaryuniformgenerator.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/math/binaryuniformgenerator.h>`_
+`Binary Uniform Generator (binary_uniform_gen.h) <../../../../../include/cipher/math/binary_uniform_gen.h>`_
 
 -  Generate ``Uniform`` distribution of binary values (mod 2)
 -  Relies on built-in C++ generator for 32-bit unsigned integers defined
    in ``<random>``
 
-`DFT Transform (dftransform.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/math/dftransform.h>`_
+`DFT Transform (dft.h) <../../../../../include/cipher/math/dft.h>`_
 
 -  Discrete Fourier Transform (FFT) code
 
-`Discrete Gaussian Generator (discretegaussiangenerator.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/math/discretegaussiangenerator.h>`_
+`Discrete Gaussian Generator (discrete_gaussian_gen.h) <../../../../../include/cipher/math/discrete_gaussian_gen.h>`_
 
 -  Generate ``Gaussian`` distribution of discrete values.
 -  Relies on built-in C++ generator for 32-bit unsigned integers defined
    in ``<random>``
 
-`Discrete Gaussian Generator Generic (discretegaussiangeneratorgeneric.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/math/discretegaussiangeneratorgeneric.h>`_
+`Discrete Gaussian Generator Generic (discrete_gaussian_gen_generic.h) <../../../../../include/cipher/math/discrete_gaussian_gen_generic.h>`_
 
 -  Implements the generic sampler by UCSD discussed in `Gaussian
    Sampling over the Integers: Efficient, Generic,
@@ -69,33 +69,33 @@ File Listings
    -  combines an array of aforementioned base samplers centered around
       0 to :math:`\frac{2^{b} - 1}{2^b}` through convolution
 
-`Discrete Uniform Generator (discreteuniformgenerator.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/math/discreteuniformgenerator.h>`_
+`Discrete Uniform Generator (discrete_uniform_gen.h) <../../../../../include/cipher/math/discrete_uniform_gen.h>`_
 
 -  Generate ``Uniform`` distribution of discrete values.
 -  Relies on built-in C++ generator for 32-bit unsigned integers defined
    in ``<random>``
 
-`Distr Gen (distrgen.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/math/distrgen.h>`_
+`Distributions (distributions.h) <../../../../../include/cipher/math/distributions.h>`_
 
--  Basic noise generation functionality
+-  Basic noise generation functionality (includes all the generators)
 
-`Distribution Generator (distributiongenerator.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/math/distributiongenerator.h>`_
+`Distribution Generator (distribution_gen.h) <../../../../../include/cipher/math/distribution_gen.h>`_
 
 -  Base class for distribution generators
 
-`Hardware Abstraction Layer (HAL) (hal.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/math/hal.h>`_
+`Hardware Abstraction Layer (HAL) (backend.h) <../../../../../include/cipher/math/backend.h>`_
 
 -  Code to switch between math backends
 
-`Matrix (matrix.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/math/matrix.h>`_
+`Matrix (matrix.h) <../../../../../include/cipher/math/matrix.h>`_
 
 -  Templated matrix implementation for SIMD-compatible matrix code
 
-`Matrix Strassen (matrixstrassen.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/math/matrixstrassen.h>`_
+`Matrix Strassen (matrix_strassen.h) <../../../../../include/cipher/math/matrix_strassen.h>`_
 
 -  Matrix Strassen Operations
 
-`number_value Theory Functions (nbtheory.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/math/nbtheory.h>`_
+`Number Theory Functions (number_theory.h) <../../../../../include/cipher/math/number_theory.h>`_
 
 -  Number theory utilities
 -  Check if two numbers are coprime
@@ -105,6 +105,6 @@ File Listings
 -  Eulers Totient function phin(n)
 -  Generator Algorithm
 
-`Ternary Uniform Generator (ternaryuniformgenerator.h) <https://github.com/openfheorg/openfhe-development/blob/main/src/core/include/math/ternaryuniformgenerator.h>`_
+`Ternary Uniform Generator (ternary_uniform_gen.h) <../../../../../include/cipher/math/ternary_uniform_gen.h>`_
 
 -  Provides generation of uniform distribution of binary values

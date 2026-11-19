@@ -84,7 +84,7 @@ class PlaintextFactory {
             case CKKS_PACKED_ENCODING:
                 return std::make_shared<CKKSPackedEncoding>(vp, ep, cdt);
             default:
-                CIPHER_THROW("Unknown plaintext encoding type in MakePlaintext");
+                CIPHER_THROW("Unknown plaintext encoding type in make_plaintext");
         }
     }
 
